@@ -178,7 +178,8 @@ body.desktop-mode #socialsBtn:active{background:#1a1a1a;border-color:#6699ff;col
 .seq-arr-ph-cell{flex:1;border-radius:2px;background:#1a1a2a;transition:background .05s;}
 .seq-arr-ph-cell.lit{background:#a0a8ff;box-shadow:0 0 6px #a0a8ff;}
 /* Arrangement grid */
-.seq-arr-grid{display:flex;gap:2px;flex-wrap:wrap;}
+.seq-arr-grid{display:flex;gap:2px;flex-wrap:wrap;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+body.desktop-mode .seq-arr-grid{max-height:28vh;}
 .seq-arr-bar{flex:1;min-width:calc(25% - 2px);max-width:calc(25% - 2px);aspect-ratio:1.6;border-radius:5px;border:1px solid #1a1a2a;background:#0d0d1c;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;touch-action:manipulation;transition:all .12s;overflow:hidden;position:relative;}
 .seq-arr-bar:hover{border-color:#2a2a4a;}
 .seq-arr-bar.playing{box-shadow:0 0 8px var(--bc,#a0a8ff);border-color:var(--bc,#a0a8ff);}
@@ -290,6 +291,13 @@ body.desktop-mode .pad-area{padding-bottom:1rem;max-width:480px;width:100%;margi
 body.desktop-mode .pad{aspect-ratio:4/3;}
 body.desktop-mode .pad-grid[data-pads="1"]{grid-template-columns:1fr;max-width:160px;margin:0 auto;}
 body.desktop-mode .pad-grid[data-pads="2"]{max-width:326px;margin:0 auto;}
+/* Compact pad layout when arrangement view is active */
+body.desktop-mode.arr-mode .pad-area{max-width:100%;}
+body.desktop-mode.arr-mode .pad{aspect-ratio:5/2;}
+body.desktop-mode.arr-mode .pad-grid{grid-template-columns:repeat(4,1fr)!important;grid-template-rows:unset!important;}
+body.desktop-mode.arr-mode .pad-grid[data-pads="1"]{grid-template-columns:1fr!important;max-width:140px;}
+body.desktop-mode.arr-mode .pad-grid[data-pads="2"]{grid-template-columns:1fr 1fr!important;max-width:unset;}
+body.desktop-mode.arr-mode .pad-grid[data-pads="3"]{grid-template-columns:1fr 1fr 1fr!important;}
 .pad-count-selector{display:flex;gap:4px;justify-content:center;margin-bottom:6px;flex-wrap:wrap;}
 .pad-count-btn{font-family:'Bebas Neue',sans-serif;font-size:.72rem;letter-spacing:.1em;width:28px;height:28px;border-radius:6px;border:1px solid #2a2a2a;background:#111;color:#555;cursor:pointer;touch-action:manipulation;transition:all .15s;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .pad-count-btn.active{border-color:#a0a8ff;color:#a0a8ff;background:#0a0a1a;}
@@ -1034,7 +1042,7 @@ body.desktop-mode .store-zoom-hint{display:none;}
         </div>
 
         <!-- ARRANGE VIEW -->
-        <div id="seqArrangeView" style="display:none;">
+        <div id="seqArrangeView" style="display:none;flex-direction:column;">
           <div class="seq-arrange-header">
             <div class="seq-area-label" id="seqArrangeLabel">arrangement · 4 bars</div>
             <div class="seq-bpm-wrap">
@@ -2678,6 +2686,7 @@ function setSeqMode(mode){
   seqModeSongBtn&&seqModeSongBtn.classList.toggle('active',mode==='song');
   if(seqPatternView)seqPatternView.style.display=mode==='pattern'?'':'none';
   if(seqArrangeView)seqArrangeView.style.display=mode==='arrange'?'':'none';
+  document.body.classList.toggle('arr-mode',mode==='arrange');
   if(seqSongView)seqSongView.style.display=mode==='song'?'':'none';
   if(seqPlaying){stopSeq();startSeq();}
 }
@@ -5386,7 +5395,7 @@ function applyParticleSetting(){
 function checkContextualHints(){
   if(activeSlot<0)return;
   // Only show one at a time; check in priority order
-  if(score>=2000000&&!shownHints.tips){
+  if(score>=750000&&!shownHints.tips){
     shownHints.tips=true;autoSave();
     showHintModal('💡',"Click on 'TIPS' in the Bunker to read helpful hints and earn Point Multipliers!");
     return;
@@ -5403,23 +5412,41 @@ function checkContextualHints(){
   }
 }
 
+let _hintCanDismiss=false;
+let _hintDismissTimer=null;
+
 function showHintModal(emoji,text){
   const el=document.getElementById('hintModal');
   const em=document.getElementById('hintModalIcon');
   const tx=document.getElementById('hintModalText');
+  const btn=document.getElementById('hintModalClose');
   if(!el)return;
   if(em)em.textContent=emoji;
   if(tx)tx.textContent=text;
   el.style.display='flex';
+  // Lock dismiss for 6 seconds
+  _hintCanDismiss=false;
+  if(btn){btn.style.opacity='.35';btn.style.pointerEvents='none';}
+  if(_hintDismissTimer)clearTimeout(_hintDismissTimer);
+  _hintDismissTimer=setTimeout(()=>{
+    _hintCanDismiss=true;
+    if(btn){btn.style.opacity='';btn.style.pointerEvents='';}
+  },6000);
+}
+
+function closeHintModal(){
+  if(!_hintCanDismiss)return;
+  document.getElementById('hintModal').style.display='none';
 }
 
 const _hintDismiss=document.getElementById('hintModalClose');
 if(_hintDismiss){
-  _hintDismiss.addEventListener('click',()=>{document.getElementById('hintModal').style.display='none';});
+  _hintDismiss.addEventListener('click',closeHintModal);
+  _hintDismiss.addEventListener('touchend',e=>{e.preventDefault();closeHintModal();});
 }
 const _hintModalEl=document.getElementById('hintModal');
 if(_hintModalEl){
-  _hintModalEl.addEventListener('click',e=>{if(e.target===_hintModalEl)_hintModalEl.style.display='none';});
+  _hintModalEl.addEventListener('click',e=>{if(e.target===_hintModalEl)closeHintModal();});
 }
 
 // Mark tips as seen when tips button clicked

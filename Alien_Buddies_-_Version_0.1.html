@@ -75,7 +75,7 @@ body.store-open #soundboardBtn,body.store-open #padEditToggleBtn,body.store-open
 .header{text-align:center;z-index:3;position:relative;width:100%;}
 .game-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(1.4rem,5.5vw,2.2rem);letter-spacing:.1em;line-height:1;color:#00ff88;transition:color .5s;display:flex;align-items:center;justify-content:center;gap:.3rem;}
 .game-title-emoji{font-size:clamp(1.2rem,4.5vw,1.9rem);}
-.subtitle{font-size:.42rem;color:#3a6a4a;letter-spacing:.35em;text-transform:uppercase;margin-top:.1rem;}
+.subtitle{font-family:'Bebas Neue',sans-serif;font-size:.58rem;color:#3a6a4a;letter-spacing:.25em;text-transform:uppercase;margin-top:.15rem;}
 .btn-left{position:absolute;left:0;top:50%;transform:translateY(-50%);}
 .btn-right{position:absolute;right:0;top:50%;transform:translateY(-50%);}
 .nav-btn{background:#1a1a1a;border:1px solid #333;color:#e8ff00;font-family:'Bebas Neue',sans-serif;font-size:.78rem;letter-spacing:.07em;padding:.3rem .55rem;border-radius:6px;cursor:pointer;transition:background .2s,border-color .2s;touch-action:manipulation;white-space:nowrap;}
@@ -427,7 +427,7 @@ body.desktop-mode.arr-mode .pad-grid[data-pads="3"]{grid-template-columns:1fr 1f
 .back-btn:active{background:#252500;}
 .page-title-wrap{flex:1;}
 .page-title{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;letter-spacing:.1em;color:#e8ff00;line-height:1;}
-.page-sub{font-size:.44rem;color:#666;letter-spacing:.25em;text-transform:uppercase;margin-top:.2rem;}
+.page-sub{font-family:'Bebas Neue',sans-serif;font-size:.62rem;color:#666;letter-spacing:.2em;text-transform:uppercase;margin-top:.25rem;}
 .page-sub span{color:#e8ff00;}
 
 /* ─── STORE ─── */
@@ -713,6 +713,15 @@ body.desktop-mode .back-btn{
 }
 
 body.desktop-mode{overflow:hidden;}
+
+/* File select screen — larger fonts on desktop */
+body.desktop-mode .home-slots{max-width:520px;}
+body.desktop-mode .slot-card{padding:1.1rem 1.4rem;gap:1.1rem;border-radius:14px;}
+body.desktop-mode .slot-name{font-size:1.3rem !important;letter-spacing:.12em !important;}
+body.desktop-mode .slot-detail{font-size:.85rem !important;line-height:1.6 !important;}
+body.desktop-mode .home-slots-label{font-size:.65rem !important;letter-spacing:.25em !important;}
+body.desktop-mode .home-logo-sub{font-size:.65rem !important;letter-spacing:.25em !important;}
+body.desktop-mode .slot-icon{width:44px !important;height:44px !important;font-size:1.8rem !important;}
 
 /* Outer shell: 3-column grid — bunker | game | shop */
 body.desktop-mode #gameScreen{
@@ -1280,7 +1289,7 @@ body.desktop-mode .store-zoom-hint{display:none;}
       </div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:.2rem;">
         <button id="tipsBtn" style="font-family:'Bebas Neue',sans-serif;font-size:.75rem;letter-spacing:.12em;padding:.32rem .75rem;border-radius:8px;border:1px solid #3a3a1a;background:#0d0d02;color:#aaaa33;cursor:pointer;touch-action:manipulation;transition:all .2s;white-space:nowrap;">TIPS</button>
-        <div id="tipsOwnedLabel" style="font-family:'Bebas Neue',sans-serif;font-size:.42rem;letter-spacing:.1em;color:#555;text-align:right;">0 TIPS PURCHASED</div>
+        <div id="tipsOwnedLabel" style="font-family:'Bebas Neue',sans-serif;font-size:.58rem;letter-spacing:.1em;color:#555;text-align:right;">0 TIPS PURCHASED</div>
       </div>
     </div>
     <div class="bunker-body">

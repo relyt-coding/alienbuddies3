@@ -529,6 +529,11 @@ body.desktop-mode .bunker-stat-label{font-size:.55rem!important;display:block!im
 .bunker-progress-label{display:flex;justify-content:space-between;font-size:.5rem;color:#3a6a4a;letter-spacing:.2em;text-transform:uppercase;margin-bottom:4px;}
 .bunker-progress-bar-bg{height:5px;background:#111;border-radius:3px;overflow:hidden;}
 .bunker-progress-bar{height:100%;background:#00ff88;border-radius:3px;transition:width .3s ease;}
+/* Incubator egg cells */
+.egg-cell{background:#1a1400;border:1px solid #2a2200;border-radius:5px;aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:1.1rem;transition:all .2s;position:relative;}
+.egg-cell.has-egg{background:#1a1400;border-color:#aa8844;box-shadow:0 0 8px -2px rgba(232,204,68,.3);animation:eggGlow 3s ease-in-out infinite;}
+@keyframes eggGlow{0%,100%{box-shadow:0 0 8px -2px rgba(232,204,68,.3);}50%{box-shadow:0 0 16px -2px rgba(232,204,68,.6);}}
+
 .bunker-full-banner{display:none;text-align:center;padding:.45rem 1rem;background:#0a2015;border:1px solid #00ff88;border-radius:8px;margin-bottom:.5rem;flex-shrink:0;}
 .bunker-full-banner.show{display:block;}
 .bunker-full-title{font-family:'Bebas Neue',sans-serif;font-size:1rem;color:#00ff88;letter-spacing:.1em;}
@@ -1328,7 +1333,14 @@ body.desktop-mode .store-zoom-hint{display:none;}
 
       </div>
       <div class="bunker-number-label" id="bunkerNumberLabel">BUNKER #1</div>
-      <div class="bunker-grid-wrap"><div class="bunker-grid" id="bunkerGrid"></div></div>
+      <div class="bunker-grid-wrap">
+        <div class="bunker-grid" id="bunkerGrid"></div>
+        <!-- Incubator — shows only after 99 aliens -->
+        <div id="incubatorSection" style="display:none;margin-top:6px;">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:.55rem;letter-spacing:.25em;color:#aa8844;text-align:center;margin-bottom:3px;text-transform:uppercase;">🥚 Incubator</div>
+          <div id="incubatorGrid" class="bunker-grid" style="opacity:.85;"></div>
+        </div>
+      </div>
       <div style="display:flex;flex-direction:column;align-items:center;padding:.6rem 1rem .2rem;gap:.25rem;">
         <button id="matchingGameBtn" style="width:100%;font-family:'Bebas Neue',sans-serif;font-size:.85rem;letter-spacing:.15em;padding:.55rem .8rem;border-radius:12px;border:1px solid #1a3a2a;background:#020d06;color:#336633;cursor:default;touch-action:manipulation;transition:all .2s;opacity:.5;">🃏 MATCHING GAME</button>
         <div id="matchingGameLock" style="font-family:'Bebas Neue',sans-serif;font-size:.5rem;letter-spacing:.12em;color:#2a4a2a;text-align:center;">UNLOCKS AT 4 ALIEN BUDDIES</div>
@@ -1562,6 +1574,17 @@ body.desktop-mode .store-zoom-hint{display:none;}
   </div>
 
   <!-- ONE-TIME HINT MODAL -->
+  <!-- EGG REWARD MODAL -->
+  <div id="eggRewardModal" style="position:fixed;inset:0;z-index:320;display:none;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(160deg,#0a0800 0%,#1a1000 40%,#0a0a00 100%);padding:1.5rem;">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:1.2rem;max-width:340px;width:100%;text-align:center;animation:anmIn .35s cubic-bezier(.34,1.2,.64,1);">
+      <div style="font-size:5rem;animation:logoFloat 3s ease-in-out infinite;filter:drop-shadow(0 0 30px rgba(255,220,50,.5));">🥚</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:.15em;color:#e8cc44;text-shadow:0 0 20px rgba(232,204,68,.5);">YOUR BUNKER IS FULL!</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:.85rem;letter-spacing:.1em;color:#ccc;line-height:1.7;">Thanks for finding so many of our alien friends!<br>We want to thank you with this egg!</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:.65rem;letter-spacing:.15em;color:#aa8844;">🥚 Added to your Incubator in the Bunker</div>
+      <button id="eggRewardClose" style="font-family:'Bebas Neue',sans-serif;font-size:.95rem;letter-spacing:.15em;padding:.65rem 2rem;border-radius:12px;border:2px solid #e8cc44;background:#1a1400;color:#e8cc44;cursor:pointer;touch-action:manipulation;box-shadow:0 0 20px -4px rgba(232,204,68,.4);transition:all .18s;">CLAIM EGG!</button>
+    </div>
+  </div>
+
   <!-- VELOCITY POPOVER -->
   <div id="velPopover" style="position:fixed;z-index:400;display:none;flex-direction:column;gap:.5rem;background:#0d0d1c;border:1px solid #a0a8ff;border-radius:10px;padding:.7rem .9rem;box-shadow:0 4px 24px rgba(0,0,0,.7);min-width:160px;align-items:stretch;">
     <div style="font-family:'Bebas Neue',sans-serif;font-size:.65rem;letter-spacing:.15em;color:#a0a8ff;text-align:center;">NOTE VOLUME</div>
@@ -1747,7 +1770,8 @@ function autoSave(){
     seqLayersSnap,
     seqHasAutoMutedAmbience,
     musicOn,
-    shownHints
+    shownHints,
+    hasReceivedEgg
   });
 }
 
@@ -1766,6 +1790,8 @@ let drumTrackerActive=false; // paid 25pts to activate drum dot tracker
 let shopOpenCount=0;
 let hasSeenSeqHint=false;
 let shownHints={tips:false,matchingIntro:false,matchingGame:false};
+let hasReceivedEgg=false;  // true once player claims their first egg
+let hasShownEggReward=false; // prevent showing reward multiple times
 let partyMode=false;
 
 // Drum state
@@ -1815,6 +1841,7 @@ function loadFromSave(data){
   matchLevelsCompleted=data.matchLevelsCompleted!==undefined?data.matchLevelsCompleted:-1;
   // Restore shownHints and auto-mark matching hints if already played
   if(data.shownHints)Object.assign(shownHints,data.shownHints);
+  if(data.hasReceivedEgg)hasReceivedEgg=data.hasReceivedEgg;
   if(matchLevelsCompleted>=0){shownHints.matchingIntro=true;shownHints.matchingGame=true;}
   matchingMultiplier=data.matchingMultiplier||1;
   matchSavedState=data.matchSavedState||null;
@@ -2759,7 +2786,7 @@ function updateBpmDisplay(){
   if(l)l.textContent=`pattern · ${seqBpm} bpm`;
 }
 function changeBpm(delta){
-  seqBpm=Math.min(500,Math.max(50,seqBpm+delta));
+  seqBpm=Math.min(250,Math.max(50,seqBpm+delta));
   updateBpmDisplay();
   if(seqPlaying){stopSeq();startSeq();}
 }
@@ -2776,7 +2803,7 @@ document.getElementById('seqBpmUp')&&document.getElementById('seqBpmUp').addEven
   function openBpmInput(){
     if(bpmEl.querySelector('input'))return; // already open
     const input=document.createElement('input');
-    input.type='number';input.min=50;input.max=500;input.value=seqBpm;
+    input.type='number';input.min=50;input.max=250;input.value=seqBpm;
     input.style.cssText="width:48px;font-family:'Bebas Neue',sans-serif;font-size:.72rem;letter-spacing:.08em;background:#0a0a1a;border:1px solid #a0a8ff;border-radius:4px;color:#a0a8ff;text-align:center;padding:1px 2px;outline:none;-moz-appearance:textfield;";
     input.addEventListener('click',e=>e.stopPropagation());
     input.addEventListener('pointerdown',e=>e.stopPropagation());
@@ -2788,7 +2815,7 @@ document.getElementById('seqBpmUp')&&document.getElementById('seqBpmUp').addEven
     input.addEventListener('blur',commitBpm);
     function commitBpm(){
       const val=parseInt(input.value)||seqBpm;
-      const clamped=Math.min(500,Math.max(50,val));
+      const clamped=Math.min(250,Math.max(50,val));
       seqBpm=clamped;
       updateBpmDisplay();
       if(seqPlaying){stopSeq();startSeq();}
@@ -2902,7 +2929,7 @@ function buildPatLibrary(){
 function loadPatternIntoEditor(pi){
   const pat=savedPatterns[pi];if(!pat)return;
   seqLayersContainer.innerHTML='';seqLayers=[];
-  pat.layers.forEach(snap=>addSeqLayer(snap.soundId,[...snap.steps]));
+  pat.layers.forEach(snap=>addSeqLayer(snap.soundId,[...snap.steps],snap.vols?[...snap.vols]:null));
   setSeqMode('pattern');
   showToast('Pattern "'+pat.name+'" loaded into editor');
 }
@@ -2910,19 +2937,39 @@ function loadPatternIntoEditor(pi){
 // startSeq / stopSeq
 function startSeq(){
   if(seqTimer)clearInterval(seqTimer);
-  seqStep=0;arrBar=0;arrBarStep=0;
+  seqStep=0;arrBar=0;arrBarStep=0;songSlotIdx=0;songArrBar=0;songArrBarStep=0;
+  // Ensure arrangement array is sized correctly
+  if(seqMode==='arrange'){
+    ensureArrangement();
+    // Rebuild arr ph row if needed
+    if(arrPhEls.length!==arrangeBars){buildArrPhRow();}
+    if(arrBarEls.length!==arrangeBars){buildArrGrid();}
+  }
+  if(seqMode==='song'&&songSlots.length===0){
+    showToast('Add arrangements to the Song tab first!');
+    return;
+  }
   const ms=(60/seqBpm/4)*1000;
   seqTimer=setInterval(()=>{
     if(seqMode==='pattern'){
       seqPhEls.forEach((c,i)=>c.classList.toggle('lit',i===seqStep));
       seqFullPhEls.forEach((c,i)=>c.classList.toggle('lit',i===seqStep));
+      let _seqStepFired=false;
       seqLayers.forEach(layer=>{
         if(layer.steps[seqStep]){
           const btn=layer.stepEls[seqStep];
           btn&&(btn.classList.remove('flash'),void btn.offsetWidth,btn.classList.add('flash'));
           const fbtn=layer.fullStepEls[seqStep];
           fbtn&&(fbtn.classList.remove('flash'),void fbtn.offsetWidth,fbtn.classList.add('flash'));
-          if(!layer.muted){getCtx();playSound(layer.soundId,layer.vols[seqStep]/100);doTap({...gameViewCenter(),silent:true,seq:true});}
+          if(!layer.muted){
+            getCtx();playSound(layer.soundId,layer.vols[seqStep]/100);
+            // Score once per step tick regardless of how many layers fire
+            if(!_seqStepFired){
+              _seqStepFired=true;
+              const _bpmVel=seqBpm<=100?1:seqBpm<=175?0.5:0.25;
+              doTap({...gameViewCenter(),silent:true,seq:true,seqVel:_bpmVel});
+            }
+          }
         }
       });
       seqStep=(seqStep+1)%STEPS;
@@ -2931,12 +2978,25 @@ function startSeq(){
       arrBarEls.forEach((b,i)=>b.classList.toggle('playing',i===arrBar));
       const pat=arrangement[arrBar]!=null?savedPatterns[arrangement[arrBar]]:null;
       if(pat){
+        let _arrStepFired=false;
         pat.layers.forEach(layer=>{
-          if(layer.steps[arrBarStep]&&!layer.muted){getCtx();playSound(layer.soundId,layer.vols[arrBarStep]/100);doTap({...gameViewCenter(),silent:true,seq:true});}
+          if(layer.steps[arrBarStep]&&!layer.muted){
+            getCtx();const _av=(layer.vols&&layer.vols[arrBarStep]!=null)?layer.vols[arrBarStep]/100:1;playSound(layer.soundId,_av);
+            if(!_arrStepFired){
+              _arrStepFired=true;
+              const _bpmVel=seqBpm<=100?1:seqBpm<=175?0.5:0.25;
+              doTap({...gameViewCenter(),silent:true,seq:true,seqVel:_bpmVel});
+            }
+          }
         });
       }
       arrBarStep++;
-      if(arrBarStep>=STEPS){arrBarStep=0;arrBar=(arrBar+1)%arrangeBars;}
+      if(arrBarStep>=STEPS){
+        arrBarStep=0;
+        arrBar=(arrBar+1)%arrangeBars;
+        arrPhEls.forEach((c,i)=>c.classList.toggle('lit',i===arrBar));
+        arrBarEls.forEach((b,i)=>b.classList.toggle('playing',i===arrBar));
+      }
     } else if(seqMode==='song'){
       // Song mode: walk songSlots, each slot = one savedArrangement
       if(songSlots.length===0){return;}
@@ -2949,8 +3009,16 @@ function startSeq(){
         songPhEls.forEach((c,i)=>c.classList.toggle('lit',i===songArrBar));
         const pat=arr.arrangement[songArrBar]!=null?savedPatterns[arr.arrangement[songArrBar]]:null;
         if(pat){
+          let _songStepFired=false;
           pat.layers.forEach(layer=>{
-            if(layer.steps[songArrBarStep]&&!layer.muted){getCtx();playSound(layer.soundId,layer.vols[songArrBarStep]/100);doTap({...gameViewCenter(),silent:true,seq:true});}
+            if(layer.steps[songArrBarStep]&&!layer.muted){
+              getCtx();const _sv=(layer.vols&&layer.vols[songArrBarStep]!=null)?layer.vols[songArrBarStep]/100:1;playSound(layer.soundId,_sv);
+              if(!_songStepFired){
+                _songStepFired=true;
+                const _bpmVel=seqBpm<=100?1:seqBpm<=175?0.5:0.25;
+                doTap({...gameViewCenter(),silent:true,seq:true,seqVel:_bpmVel});
+              }
+            }
           });
         }
         songArrBarStep++;
@@ -3123,7 +3191,7 @@ document.getElementById('seqSavePatBtn')&&document.getElementById('seqSavePatBtn
 });
 document.getElementById('savePatConfirm')&&document.getElementById('savePatConfirm').addEventListener('click',()=>{
   const name=savePatNameInput.value.trim()||('Pattern '+(savedPatterns.length+1));
-  savedPatterns.push({name,color:savePatColor,layers:seqLayers.map(l=>({soundId:l.soundId,steps:[...l.steps]}))});
+  savedPatterns.push({name,color:savePatColor,layers:seqLayers.map(l=>({soundId:l.soundId,steps:[...l.steps],vols:[...l.vols],muted:l.muted||false}))});
   savePatModal.style.display='none';
   buildPatLibrary();
   showToast('Pattern "'+name+'" saved!');
@@ -3174,7 +3242,7 @@ const TIPS_DATA = [
   {cost:12500000,     text:"You can save patterns you create on your sequencer to make an arrangement!"},
   {cost:125000000,    text:"You can save arrangements you create to make a song!"},
   {cost:1250000000,   text:"You can give your alien buddies a name by clicking on their square in the bunker!"},
-  {cost:12500000000,  text:"Double click on the BPM number on the sequencer to manually enter any value between 50 and 500!"},
+  {cost:12500000000,  text:"Double click on the BPM number on the sequencer to manually enter any value between 50 and 250!"},
 ];
 
 function tipCost(idx){
@@ -3913,7 +3981,7 @@ function startGame(slotIndex){
   document.body.classList.add('game-active');
   _adaptiveFPSActive=true;
   updateFullscreenBtnVisibility();
-  buildBunkerGrid();renderUI();
+  buildBunkerGrid();buildIncubatorGrid();updateIncubatorVisibility();renderUI();
   if(!ambStarted)startAmbience();
   // Restore BG music preference
   if(data.musicOn===false){
@@ -4154,6 +4222,24 @@ ensureTiers(1);
 // ══════════════════════════════════════════════
 const bunkerGrid=document.getElementById('bunkerGrid');
 function buildBunkerGrid(){bunkerGrid.innerHTML='';for(let i=0;i<BUNKER_SIZE;i++){const c=document.createElement('div');c.className='alien-cell';c.id=`bcell-${i}`;bunkerGrid.appendChild(c);}}
+
+function buildIncubatorGrid(){
+  const grid=document.getElementById('incubatorGrid');
+  if(!grid)return;
+  grid.innerHTML='';
+  for(let i=0;i<9;i++){
+    const c=document.createElement('div');
+    c.className='egg-cell'+(i===0&&hasReceivedEgg?' has-egg':'');
+    c.id=`ecell-${i}`;
+    if(i===0&&hasReceivedEgg)c.textContent='🥚';
+    grid.appendChild(c);
+  }
+}
+
+function updateIncubatorVisibility(){
+  const sec=document.getElementById('incubatorSection');
+  if(sec)sec.style.display=hasReceivedEgg?'block':'none';
+}
 // ── Bunker Pinch-to-Zoom + Pan ──
 let bZoom=1, bPanX=0, bPanY=0;
 let bPinchStart=null, bDragStart=null;
@@ -4261,7 +4347,18 @@ function renderBunkerView(){
   document.getElementById('bunkerSubEl').textContent=`${inThis} / ${BUNKER_SIZE} ALIENS · BUNKER #${idx+1}`;
   document.getElementById('bunkerNumberLabel').textContent=`BUNKER #${idx+1}`;
   const banner=document.getElementById('bunkerFullBanner');
-  if(inThis>=BUNKER_SIZE){banner.classList.add('show');document.getElementById('bunkerFullSub').textContent=`Bunker #${idx+2} is now open!`;}
+  if(inThis>=BUNKER_SIZE){
+    banner.classList.add('show');
+    document.getElementById('bunkerFullSub').textContent=hasReceivedEgg?'Check your Incubator below!':'Your Bunker is full — claim your egg!';
+    // Trigger egg reward if not yet received
+    if(!hasReceivedEgg&&!hasShownEggReward){
+      hasShownEggReward=true;
+      setTimeout(()=>{
+        const m=document.getElementById('eggRewardModal');
+        if(m)m.style.display='flex';
+      },600);
+    }
+  }
   else banner.classList.remove('show');
   for(let i=0;i<BUNKER_SIZE;i++){
     const cell=document.getElementById(`bcell-${i}`);if(!cell)continue;
@@ -4596,7 +4693,7 @@ function gameViewCenter(){
 
 function doTap(coords){
   const mult=totalMultiplier();const cpt=clicksPerTap();
-  const seqScale=coords.seq?0.000001:1;
+  const seqScale=coords.seq?(coords.seqVel||1):1;
   score+=mult*cpt*seqScale;
   const anims=[];if(!coords.seq){for(let c=0;c<cpt;c++)addDotToTier(0,anims);}
   scoreEl.classList.add('flash');setTimeout(()=>scoreEl.classList.remove('flash'),85);
@@ -4839,7 +4936,9 @@ function renderStore(){
   const perAlienBase=(1.1+(shop.alienBoostLevel>=0?(shop.alienBoostLevel+1)*0.3:0)).toFixed(1);
   const cb=alienMultiplier(),nb=Math.pow(parseFloat(perAlienBase),totalAliens+1);
   document.getElementById('alienCountStat').textContent=totalAliens;
-  const ab2=document.getElementById('alienBuyBtn');ab2.className='alien-store-card '+(canAl?'buyable':'locked');
+  const ab2=document.getElementById('alienBuyBtn');
+  if(totalAliens>=BUNKER_SIZE){ab2.style.display='none';}
+  else{ab2.style.display='';ab2.className='alien-store-card '+(canAl?'buyable':'locked');}
   const ap2=document.getElementById('alienCardPrice');ap2.className='alien-card-price'+(canAl?'':' cant-afford');
   ap2.innerHTML=canAl?`${formatStore(nc)}<small>pts</small>`:`${formatStore(nc)}<small>pts</small>`;
 }
@@ -5533,6 +5632,21 @@ function applyParticleSetting(){
     repositionCollapseButtons();
   });
 })();
+
+// ── Egg Reward ──
+const eggRewardClose=document.getElementById('eggRewardClose');
+eggRewardClose&&eggRewardClose.addEventListener('click',()=>{
+  const m=document.getElementById('eggRewardModal');
+  if(m)m.style.display='none';
+  hasReceivedEgg=true;
+  buildIncubatorGrid();
+  updateIncubatorVisibility();
+  autoSave();
+  showToast('🥚 Egg added to your Incubator in the Bunker!');
+});
+// Close on backdrop tap
+const eggModal=document.getElementById('eggRewardModal');
+eggModal&&eggModal.addEventListener('click',e=>{if(e.target===eggModal){/* don't close on backdrop — force them to click Claim */}});
 
 // ── Contextual Hints ──
 function checkContextualHints(){

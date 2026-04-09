@@ -4616,6 +4616,7 @@ function renderTiers(newlyLit){
 }
 
 function renderUI(newlyLit){
+  checkContextualHints();
   const mult=totalMultiplier();const cpt=clicksPerTap();
   scoreEl.textContent=formatNum(score);
   const scoreSubEl=document.getElementById('scoreSubEl');

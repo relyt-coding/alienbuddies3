@@ -419,7 +419,7 @@ body.desktop-mode.arr-mode .pad-grid[data-pads="3"]{grid-template-columns:1fr 1f
 .edit-mode-badge{display:none;}
 .edit-mode-badge.show{opacity:1;}
 .toast{position:fixed;top:5.2rem;left:50%;transform:translateX(-50%);background:#1a1a2a;border:1px solid #a0a8ff;border-radius:10px;padding:.65rem 1.1rem;color:#a0a8ff;font-family:'Bebas Neue',sans-serif;font-size:.75rem;letter-spacing:.1em;z-index:200;opacity:0;pointer-events:none;transition:opacity .3s;text-align:center;max-width:260px;}
-.toast.show{opacity:1;}
+.toast.show{opacity:1;pointer-events:none;}
 
 /* ─── PAGE HEADER ─── */
 .page-header{display:flex;align-items:center;padding:1.7rem 1.4rem .85rem;padding-top:max(1.7rem,env(safe-area-inset-top,0px));gap:1rem;flex-shrink:0;}
@@ -621,7 +621,6 @@ body.desktop-mode .alien-card-stats,
 
 body.desktop-mode .multiplier,
 body.desktop-mode .lock-label,
-body.desktop-mode .lock-cost,
 body.desktop-mode #matchingGameLock,
 body.desktop-mode .confirm-sub,
 body.desktop-mode .bouncer-name,
@@ -1635,7 +1634,7 @@ const PARTY_COLORS=['#ff0044','#ff8800','#ffee00','#00ff88','#00ccff','#aa44ff',
 function formatNum(n){n=Math.floor(n);const T=1e12;function sci(x){const e=Math.floor(Math.log10(x));return (x/Math.pow(10,e)).toFixed(3).replace(/\.?0+$/,'')+'e'+e;}return n<T?n.toLocaleString():sci(n);}
 function formatSci(n){n=Math.floor(n);if(n===0)return '0';const e=Math.floor(Math.log10(Math.max(1,n)));return (n/Math.pow(10,e)).toFixed(3).replace(/\.?0+$/,'')+'e'+e;}
 function formatFull(n){n=Math.floor(n);return n.toLocaleString();}
-function formatStore(n){n=Math.floor(n);const B=1e9;function sci(x){const e=Math.floor(Math.log10(x));return (x/Math.pow(10,e)).toFixed(2).replace(/\.?0+$/,'')+'E'+e;}return n<B?n.toLocaleString():sci(n);}
+function formatStore(n){n=Math.floor(n);const T=1e12;function sci(x){const e=Math.floor(Math.log10(x));return (x/Math.pow(10,e)).toFixed(2).replace(/\.?0+$/,'')+'E'+e;}if(n<T){if(n>=1e9)return(n/1e9).toFixed(2).replace(/\.?0+$/,'')+'B';if(n>=1e6)return(n/1e6).toFixed(2).replace(/\.?0+$/,'')+'M';if(n>=1e3)return(n/1e3).toFixed(0)+'K';return n.toLocaleString();}return sci(n);}
 function formatRate(n){if(n<1e15){return n<1000?(Math.round(n*100)/100).toString():Math.floor(n).toLocaleString();}const e=Math.floor(Math.log10(n));return (n/Math.pow(10,e)).toFixed(2)+'E'+e;}
 function formatMult(n){if(n<100000)return n.toLocaleString(undefined,{maximumSignificantDigits:5});const e=Math.floor(Math.log10(n));return (n/Math.pow(10,e)).toFixed(2)+'E'+e;}
 
@@ -2070,7 +2069,7 @@ function showToast(msg){
   const el=document.getElementById('toast');
   el.textContent=msg;el.classList.add('show');
   if(toastTimer)clearTimeout(toastTimer);
-  toastTimer=setTimeout(()=>el.classList.remove('show'),4000);
+  toastTimer=setTimeout(()=>el.classList.remove('show'),2500);
 }
 
 // ══════════════════════════════════════════════
@@ -2516,7 +2515,7 @@ function openSeqFull(){
   // Hide sidebar collapse tabs in full sequencer mode
   document.getElementById('collapseBunkerBtn')&&(document.getElementById('collapseBunkerBtn').style.display='none');
   document.getElementById('collapseShopBtn')&&(document.getElementById('collapseShopBtn').style.display='none');
-  if(!hasSeenSeqHint){
+  if(!hasSeenSeqHint&&!document.body.classList.contains('desktop-mode')){
     hasSeenSeqHint=true;
     showHint('🎛','PINCH TO ZOOM IN FOR EASIER READING.\n\n&nbsp;&nbsp;&nbsp;ZOOM OUT BEFORE CLOSING.',null);
   }
@@ -2570,6 +2569,7 @@ function addFullLayerRow(layer){
   for(let i=0;i<STEPS;i++){
     const btn=document.createElement('div');btn.className='seq-step'+(layer.steps[i]?' on':'');
     btn.style.setProperty('--lc',snd.color);
+    if(layer.steps[i])btn.style.opacity=String(0.3+0.7*(layer.vols[i]/100));
     const si=i;
     btn.addEventListener('pointerdown',e=>{
       e.preventDefault();
@@ -2674,6 +2674,7 @@ function addSeqLayer(soundId,stepsInit){
   for(let i=0;i<STEPS;i++){
     const btn=document.createElement('div');btn.className='seq-step'+(layer.steps[i]?' on':'');
     btn.style.setProperty('--lc',snd.color);
+    if(layer.steps[i])btn.style.opacity=String(0.3+0.7*(layer.vols[i]/100));
     const si=i;
     btn.addEventListener('pointerdown',e=>{
       e.preventDefault();
@@ -4969,7 +4970,7 @@ function openStore(){
   shopOpenCount++;
   updateOnboardingArrows();
   if(shopOpenCount===3){
-    showHint('🔍','PINCH TO ZOOM IN FOR EASIER READING.\n\n&nbsp;&nbsp;&nbsp;ZOOM OUT BEFORE CLICKING BACK.',null);
+    if(!document.body.classList.contains('desktop-mode'))showHint('🔍','PINCH TO ZOOM IN FOR EASIER READING.\n\n&nbsp;&nbsp;&nbsp;ZOOM OUT BEFORE CLICKING BACK.',null);
   }
   if(shopOpenCount===5&&shop.autoLevel<0&&shop.multLevel<0){
     setTimeout(()=>showToast('💡 Scroll down for more upgrades!'),800);

@@ -1285,7 +1285,7 @@ body.desktop-mode .store-zoom-hint{display:none;}
         <div class="bunker-stat"><div class="bunker-stat-val" id="statCurrent">0</div><div class="bunker-stat-label">IN THIS BUNKER</div></div>
       </div>
       <div class="bunker-toggles">
-        <button class="bunker-toggle-btn active" id="toggleBouncersBtn">👽 ALIENS</button>
+        <button class="bunker-toggle-btn active" id="toggleBouncersBtn" style="display:none;">👽 ALIENS</button>
 
       </div>
       <div class="bunker-number-label" id="bunkerNumberLabel">BUNKER #1</div>
@@ -1695,7 +1695,8 @@ function autoSave(){
     arrangeBars,
     seqLayersSnap,
     seqHasAutoMutedAmbience,
-    musicOn
+    musicOn,
+    shownHints
   });
 }
 
@@ -1713,6 +1714,7 @@ let tipsMult=1; // permanent ×1.5 per tip
 let drumTrackerActive=false; // paid 25pts to activate drum dot tracker
 let shopOpenCount=0;
 let hasSeenSeqHint=false;
+let shownHints={tips:false,matchingIntro:false,matchingGame:false};
 let partyMode=false;
 
 // Drum state
@@ -3848,6 +3850,7 @@ function startGame(slotIndex){
     }
   }
   updateSoundboardUnlocked();
+  updateBouncerToggleVisibility();
   // Show new game hint
   if(isNewFile){
     const isMobile=!document.body.classList.contains('desktop-mode');
@@ -4616,7 +4619,7 @@ function renderTiers(newlyLit){
 }
 
 function renderUI(newlyLit){
-  checkContextualHints();
+  if(typeof checkContextualHints==='function')checkContextualHints();
   const mult=totalMultiplier();const cpt=clicksPerTap();
   scoreEl.textContent=formatNum(score);
   const scoreSubEl=document.getElementById('scoreSubEl');
@@ -4780,6 +4783,7 @@ function buyNextPad(){
   playSfxPurchase();flashBuy('#a0a8ff');
   rebuildPadGrid();
   updateSoundboardUnlocked();
+  updateBouncerToggleVisibility();
   if(idx>=3)showToast('🥁 New pad unlocked! Tap it to assign a sound.');
   renderUI();autoSave();
 }
@@ -4792,6 +4796,7 @@ function buyNextSound(){
   playSfxPurchase();flashBuy('#a0a8ff');
   const newId=EXTRA_SOUNDS_ORDER[idx-1]||EXTRA_SOUNDS_ORDER[0];
   updateSoundboardUnlocked();
+  updateBouncerToggleVisibility();
   showToast(`🎵 ${(SOUND_MAP[EXTRA_SOUNDS_ORDER[idx]]||{name:'Sound'}).name} unlocked! Assign it to a pad or sequencer track.`);
   renderUI();autoSave();
 }
@@ -5372,6 +5377,55 @@ function applyParticleSetting(){
     repositionCollapseButtons();
   });
 })();
+
+// ── Contextual Hints ──
+function checkContextualHints(){
+  if(activeSlot<0)return;
+  // Only show one at a time; check in priority order
+  if(score>=2000000&&!shownHints.tips){
+    shownHints.tips=true;autoSave();
+    showHintModal('💡',"Click on 'TIPS' in the Bunker to read helpful hints and earn Point Multipliers!");
+    return;
+  }
+  if(score>=4000000&&!shownHints.matchingIntro){
+    shownHints.matchingIntro=true;autoSave();
+    showHintModal('🃏','Play the Matching Game in the Bunker to gain Point Multipliers!');
+    return;
+  }
+  if(totalAliens>=6&&matchLevelsCompleted<0&&!shownHints.matchingGame){
+    shownHints.matchingGame=true;autoSave();
+    showHintModal('🃏','Play the Matching Game in the Bunker to gain Point Multipliers!');
+    return;
+  }
+}
+
+function showHintModal(emoji,text){
+  const el=document.getElementById('hintModal');
+  const em=document.getElementById('hintEmoji');
+  const tx=document.getElementById('hintText');
+  if(!el)return;
+  if(em)em.textContent=emoji;
+  if(tx)tx.textContent=text;
+  el.style.display='flex';
+}
+
+const _hintDismiss=document.getElementById('hintDismiss');
+if(_hintDismiss){
+  _hintDismiss.addEventListener('click',()=>{document.getElementById('hintModal').style.display='none';});
+}
+const _hintModalEl=document.getElementById('hintModal');
+if(_hintModalEl){
+  _hintModalEl.addEventListener('click',e=>{if(e.target===_hintModalEl)_hintModalEl.style.display='none';});
+}
+
+// Mark tips as seen when tips button clicked
+const _tipsBtnHint=document.getElementById('tipsBtn');
+if(_tipsBtnHint){_tipsBtnHint.addEventListener('click',()=>{shownHints.tips=true;},{capture:true,passive:true});}
+
+// Mark matching as seen when matching game opens
+const _matchBtnHint=document.getElementById('matchingBtn');
+if(_matchBtnHint){_matchBtnHint.addEventListener('click',()=>{shownHints.matchingIntro=true;shownHints.matchingGame=true;},{capture:true,passive:true});}
+
 </script>
 </body>
 </html>

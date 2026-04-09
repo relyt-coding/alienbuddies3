@@ -513,6 +513,8 @@ body.desktop-mode.arr-mode .pad-grid[data-pads="3"]{grid-template-columns:1fr 1f
 .bunker-stat{flex:1;background:#141414;border:1px solid #1a3a2a;border-radius:8px;padding:.45rem .55rem;text-align:center;}
 .bunker-stat-val{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;color:#00ff88;line-height:1;}
 .bunker-stat-label{font-size:.28rem;color:#3a6a4a;letter-spacing:.2em;text-transform:uppercase;margin-top:.1rem;}
+body.desktop-mode .bunker-stat-val{font-size:1.6rem!important;}
+body.desktop-mode .bunker-stat-label{font-size:.55rem!important;display:block!important;}
 .bunker-number-label{font-family:'Bebas Neue',sans-serif;font-size:.62rem;letter-spacing:.15em;color:#1a4a2a;text-align:center;margin-bottom:.3rem;flex-shrink:0;}
 .bunker-grid-wrap{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y;position:relative;padding:0 .2rem;}
 .bunker-grid{display:grid;grid-template-columns:repeat(9,1fr);gap:3px;width:100%;}
@@ -596,7 +598,6 @@ body.desktop-mode .score{font-size:clamp(2rem,6vw,4rem) !important;}
 
 /* ── Desktop: enforce readable minimum font sizes ── */
 /* Sub-labels, stats, small captions */
-body.desktop-mode .slot-detail,
 body.desktop-mode .home-logo-sub,
 body.desktop-mode .score-sub,
 body.desktop-mode .auto-info-row,
@@ -617,12 +618,11 @@ body.desktop-mode .seq-arr-bar-idx,
 body.desktop-mode .upgrade-card-sub,
 body.desktop-mode .drum-card-sub,
 body.desktop-mode .alien-card-stats,
-body.desktop-mode .page-sub,
+
 body.desktop-mode .multiplier,
 body.desktop-mode .lock-label,
 body.desktop-mode .lock-cost,
 body.desktop-mode #matchingGameLock,
-body.desktop-mode #tipsOwnedLabel,
 body.desktop-mode .confirm-sub,
 body.desktop-mode .bouncer-name,
 body.desktop-mode #shopPinchHint{display:none;}
@@ -1022,7 +1022,7 @@ body.desktop-mode .store-zoom-hint{display:none;}
             <button class="seq-mode-pill" id="seqModeArrangeBtn">ARR</button>
             <button class="seq-mode-pill" id="seqModeSongBtn">SONG</button>
           </div>
-          <button class="seq-mode-pill" id="seqLevelAdjBtn" style="border:1px solid #2a2a4a;border-radius:4px;padding:.12rem .4rem;">LVL</button>
+          <button class="seq-mode-pill" id="seqLevelAdjBtn" style="border:1px solid #2a2a4a;border-radius:4px;padding:.12rem .4rem;">VELOCITY</button>
           <div class="seq-bpm-wrap">
             <button class="seq-hdr-btn seq-bpm-btn" id="seqBpmDown">−</button>
             <span class="seq-bpm-display" id="seqBpmDisplay">120</span>
@@ -1092,7 +1092,7 @@ body.desktop-mode .store-zoom-hint{display:none;}
         <div id="seqFullTitle">🎛 SEQUENCER</div>
         <div style="display:flex;align-items:center;gap:8px;">
           <div id="seqFullHint">rotate phone for best experience</div>
-          <button class="seq-mode-pill" id="seqFullLevelAdjBtn" style="border:1px solid #2a2a4a;border-radius:4px;padding:.12rem .4rem;">LVL</button>
+          <button class="seq-mode-pill" id="seqFullLevelAdjBtn" style="border:1px solid #2a2a4a;border-radius:4px;padding:.12rem .4rem;">VELOCITY</button>
           <div style="display:flex;flex-direction:column;align-items:center;gap:2px;">
             <button id="seqFullCloseBtn">✕ CLOSE</button>
             <div id="seqFullZoomHint" style="font-size:.38rem;letter-spacing:.12em;color:#2a2a4a;text-transform:uppercase;text-align:center;line-height:1.5;">ZOOM OUT<br>BEFORE CLOSING</div>
@@ -1532,6 +1532,16 @@ body.desktop-mode .store-zoom-hint{display:none;}
   </div>
 
   <!-- ONE-TIME HINT MODAL -->
+  <!-- VELOCITY POPOVER -->
+  <div id="velPopover" style="position:fixed;z-index:400;display:none;flex-direction:column;gap:.5rem;background:#0d0d1c;border:1px solid #a0a8ff;border-radius:10px;padding:.7rem .9rem;box-shadow:0 4px 24px rgba(0,0,0,.7);min-width:160px;align-items:stretch;">
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:.65rem;letter-spacing:.15em;color:#a0a8ff;text-align:center;">NOTE VOLUME</div>
+    <div style="display:flex;align-items:center;gap:.5rem;">
+      <input id="velSlider" type="range" min="1" max="100" value="100" style="flex:1;accent-color:#a0a8ff;cursor:pointer;">
+      <span id="velValue" style="font-family:'Bebas Neue',sans-serif;font-size:.8rem;color:#ccc;min-width:2.2rem;text-align:right;">100</span>
+    </div>
+    <button id="velConfirm" style="font-family:'Bebas Neue',sans-serif;font-size:.75rem;letter-spacing:.12em;padding:.3rem;border-radius:6px;border:1px solid #a0a8ff;background:#0a0a20;color:#a0a8ff;cursor:pointer;touch-action:manipulation;">✓ CONFIRM</button>
+  </div>
+
   <div id="hintModal" style="position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.82);display:none;align-items:center;justify-content:center;padding:1.5rem;backdrop-filter:blur(6px);">
     <div style="background:#111;border:1px solid #333;border-radius:16px;padding:1.6rem 1.4rem;max-width:320px;width:100%;display:flex;flex-direction:column;gap:.9rem;align-items:center;text-align:center;">
       <div id="hintModalIcon" style="font-size:1.8rem;"></div>
@@ -1773,6 +1783,9 @@ function loadFromSave(data){
   shop.multiClickUnlocked=data.shop?.multiClickUnlocked??false;
   totalAliens=data.totalAliens||0;
   matchLevelsCompleted=data.matchLevelsCompleted!==undefined?data.matchLevelsCompleted:-1;
+  // Restore shownHints and auto-mark matching hints if already played
+  if(data.shownHints)Object.assign(shownHints,data.shownHints);
+  if(matchLevelsCompleted>=0){shownHints.matchingIntro=true;shownHints.matchingGame=true;}
   matchingMultiplier=data.matchingMultiplier||1;
   matchSavedState=data.matchSavedState||null;
   tipsOwned=data.tipsOwned||0;
@@ -5493,7 +5506,7 @@ function checkContextualHints(){
     showHintModal('💡',"Click on 'TIPS' in the Bunker to read helpful hints and earn Point Multipliers!");
     return;
   }
-  if(score>=4000000&&!shownHints.matchingIntro){
+  if(score>=4000000&&!shownHints.matchingIntro&&matchLevelsCompleted<0){
     shownHints.matchingIntro=true;autoSave();
     showHintModal('🃏','Play the Matching Game in the Bunker to gain Point Multipliers!');
     return;

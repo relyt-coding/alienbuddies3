@@ -604,9 +604,7 @@ body.desktop-mode .score{font-size:clamp(2rem,6vw,4rem) !important;}
 /* ── Desktop: enforce readable minimum font sizes ── */
 /* Sub-labels, stats, small captions */
 body.desktop-mode .home-logo-sub,
-body.desktop-mode .score-sub,
-body.desktop-mode .auto-info-row,
-body.desktop-mode .alien-mult-info,
+/* score-sub, auto-info, alien-mult now visible on desktop */
 body.desktop-mode .tiers-col-label,
 body.desktop-mode .seq-area-label,
 body.desktop-mode .seq-area-label,
@@ -4699,12 +4697,14 @@ function doTap(coords){
   scoreEl.classList.add('flash');setTimeout(()=>scoreEl.classList.remove('flash'),85);
   renderUI(anims[anims.length-1]);
   const h=highestActive();
-  if(!coords.silent){
-    // Spawn from drum tracker if visible, otherwise from tap coords
+  if(!coords.silent||coords.seq){
+    // Seq taps: spawn particle over drum tracker; manual taps: use drum tracker or tap coords
     const drumPos=getElCenter('tiersContainer');
-    const px=drumPos?drumPos.x:coords.x;
-    const py=drumPos?drumPos.y:coords.y;
-    spawnParticle(px,py,`+${formatNum(mult*cpt)}`,color(Math.max(0,h)).hex);
+    const px=drumPos?drumPos.x:(coords.x||window.innerWidth/2);
+    const py=drumPos?drumPos.y:(coords.y||window.innerHeight/2);
+    if(!coords.silent||(coords.seq&&drumPos)){
+      spawnParticle(px,py,`+${formatNum(mult*cpt*(coords.seqVel||1))}`,color(Math.max(0,h)).hex);
+    }
   }
 }
 function getElCenter(id){
@@ -5050,6 +5050,8 @@ function showHint(icon, text, onClose){
   document.getElementById('hintModal').style.display='flex';
   const _hmc=document.getElementById('hintModalClose');
   _hmc.onclick=null;
+  _hmc.ontouchend=null;
+  _hmc.ontouchend=(e)=>{e.preventDefault();document.getElementById('hintModal').style.display='none';if(typeof onClose==='function')onClose();};
   _hmc.onclick=()=>{
     document.getElementById('hintModal').style.display='none';
     if(onClose)onClose();

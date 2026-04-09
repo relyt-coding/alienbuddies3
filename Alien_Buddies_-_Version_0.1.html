@@ -140,10 +140,11 @@ body.desktop-mode #socialsBtn:active{background:#1a1a1a;border-color:#6699ff;col
 
 /* Dual tier grids */
 .tiers-dual-wrap{display:flex;gap:18px;align-items:flex-start;justify-content:center;z-index:3;width:100%;}
-.tiers-col{display:flex;flex-direction:column;align-items:center;gap:4px;overflow-y:auto;max-height:220px;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+.tiers-col{display:flex;flex-direction:column;align-items:center;gap:4px;overflow-y:auto;max-height:38vh;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
 .tiers-col::-webkit-scrollbar{display:none;}
 .tiers-col-label{font-family:'Bebas Neue',sans-serif;font-size:.52rem;letter-spacing:.28em;text-transform:uppercase;color:#3a6a4a;margin-bottom:1px;}
-.tiers-container{display:flex;flex-direction:column;gap:5px;align-items:center;overflow:hidden;max-height:22vh;}
+.tiers-container{display:flex;flex-direction:column;gap:5px;align-items:center;overflow-y:auto;max-height:22vh;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+.tiers-container::-webkit-scrollbar{display:none;}
 .tiers-divider{width:1px;background:#222;align-self:stretch;margin:0 2px;flex-shrink:0;}
 .tier-row{display:flex;align-items:center;justify-content:center;gap:0;opacity:0;transform:translateY(6px);animation:tierIn .35s ease-out forwards;}
 @keyframes tierIn{to{opacity:1;transform:translateY(0);}}
@@ -1503,7 +1504,7 @@ body.desktop-mode .store-zoom-hint{display:none;}
   </div>
 
   <!-- EDIT MODE REMINDER BUBBLE -->
-  <div id="editModeReminder" style="position:fixed;inset:0;z-index:198;display:none;align-items:center;justify-content:center;pointer-events:none;">
+  <div id="editModeReminder" style="position:fixed;bottom:5.5rem;left:50%;transform:translateX(-50%);z-index:198;display:none;align-items:center;justify-content:center;pointer-events:none;white-space:nowrap;">
     <div style="font-family:'Bebas Neue',sans-serif;font-size:.9rem;letter-spacing:.12em;color:#a0a8ff;background:rgba(10,10,26,.88);border:1px solid #3a3aaa;border-radius:14px;padding:.7rem 1.3rem;text-align:center;animation:editPulse 1.8s ease-in-out infinite;box-shadow:0 0 20px -4px rgba(160,168,255,.4);">PRESS DONE TO RETURN TO PLAY MODE</div>
   </div>
 

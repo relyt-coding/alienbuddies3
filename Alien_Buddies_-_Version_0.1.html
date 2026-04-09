@@ -50,8 +50,8 @@ body.store-open #soundboardBtn,body.store-open #padEditToggleBtn,body.store-open
 .slot-info{flex:1;min-width:0;}
 .slot-name{font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:.1em;color:#00ff88;line-height:1;}
 .slot-name.empty{color:#666;}
-.slot-detail{font-size:.42rem;color:#5a9a6a;letter-spacing:.12em;text-transform:uppercase;}
-.slot-detail.empty{color:#444;}
+.slot-detail{font-family:'Bebas Neue',sans-serif;font-size:.65rem;color:#5a9a6a;letter-spacing:.1em;text-transform:uppercase;line-height:1.5;}
+.slot-detail.empty{font-family:'Bebas Neue',sans-serif;color:#444;}
 .slot-actions{display:flex;gap:.4rem;flex-shrink:0;}
 .slot-del-btn{background:transparent;border:1px solid #555;color:#777;font-size:.7rem;padding:.3rem .5rem;border-radius:6px;cursor:pointer;touch-action:manipulation;transition:border-color .2s,color .2s;}
 .slot-del-btn:active{border-color:#ff4444;color:#ff4444;}
@@ -2890,7 +2890,7 @@ function startSeq(){
           btn&&(btn.classList.remove('flash'),void btn.offsetWidth,btn.classList.add('flash'));
           const fbtn=layer.fullStepEls[seqStep];
           fbtn&&(fbtn.classList.remove('flash'),void fbtn.offsetWidth,fbtn.classList.add('flash'));
-          if(!layer.muted){getCtx();playSound(layer.soundId);doTap({...gameViewCenter(),silent:true,seq:true});}
+          if(!layer.muted){getCtx();playSound(layer.soundId,layer.vols[seqStep]/100);doTap({...gameViewCenter(),silent:true,seq:true});}
         }
       });
       seqStep=(seqStep+1)%STEPS;

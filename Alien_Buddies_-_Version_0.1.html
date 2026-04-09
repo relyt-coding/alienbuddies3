@@ -2261,9 +2261,13 @@ function openPadPicker(padIdx){
     if(isDesktop) updateKeybindDisplay(padIdx);
   }
   padAssignModal.classList.add('open');
+  const _rem=document.getElementById('editModeReminder');
+  if(_rem)_rem.style.visibility='hidden';
 }
 function closePadAssignModal(){
   padAssignModal.classList.remove('open');
+  const _rem=document.getElementById('editModeReminder');
+  if(_rem)_rem.style.visibility='';
   padAssignIdx=null;
 }
 padAssignClose&&padAssignClose.addEventListener('click',closePadAssignModal);
@@ -5401,15 +5405,15 @@ function checkContextualHints(){
 
 function showHintModal(emoji,text){
   const el=document.getElementById('hintModal');
-  const em=document.getElementById('hintEmoji');
-  const tx=document.getElementById('hintText');
+  const em=document.getElementById('hintModalIcon');
+  const tx=document.getElementById('hintModalText');
   if(!el)return;
   if(em)em.textContent=emoji;
   if(tx)tx.textContent=text;
   el.style.display='flex';
 }
 
-const _hintDismiss=document.getElementById('hintDismiss');
+const _hintDismiss=document.getElementById('hintModalClose');
 if(_hintDismiss){
   _hintDismiss.addEventListener('click',()=>{document.getElementById('hintModal').style.display='none';});
 }

@@ -253,6 +253,8 @@ body.desktop-mode .seq-arr-grid{max-height:28vh;}
 #seqFullHeader{display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
 #seqFullTitle{font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:.15em;color:#a0a8ff;}
 #seqFullHint{font-size:.35rem;letter-spacing:.18em;color:#2a2a4a;text-transform:uppercase;}
+body.desktop-mode #seqFullHint{display:none;}
+body.desktop-mode #seqFullZoomHint{display:none;}
 #seqFullCloseBtn{font-family:'Bebas Neue',sans-serif;font-size:.75rem;letter-spacing:.1em;padding:.3rem .7rem;border-radius:6px;border:1px solid #a0a8ff;background:#0a0a1a;color:#a0a8ff;cursor:pointer;touch-action:manipulation;}
 #seqFullPhBar{display:grid;grid-template-columns:repeat(16,1fr);gap:3px;flex-shrink:0;}
 #seqFullPhBar{grid-template-columns:80px 1fr 52px;gap:6px;}
@@ -627,6 +629,7 @@ body.desktop-mode .confirm-sub,
 body.desktop-mode .bouncer-name,
 body.desktop-mode .seq-bpm-display,
 body.desktop-mode .seq-mode-pill,
+body.desktop-mode #shopPinchHint{display:none;}
 body.desktop-mode .seq-save-pat-btn,
 body.desktop-mode .seq-hdr-btn,
 body.desktop-mode .mp-name,
@@ -1021,6 +1024,7 @@ body.desktop-mode .store-zoom-hint{display:none;}
             <button class="seq-mode-pill" id="seqModeArrangeBtn">ARR</button>
             <button class="seq-mode-pill" id="seqModeSongBtn">SONG</button>
           </div>
+          <button class="seq-mode-pill" id="seqLevelAdjBtn" style="border:1px solid #2a2a4a;border-radius:4px;padding:.12rem .4rem;">LVL</button>
           <div class="seq-bpm-wrap">
             <button class="seq-hdr-btn seq-bpm-btn" id="seqBpmDown">−</button>
             <span class="seq-bpm-display" id="seqBpmDisplay">120</span>
@@ -1047,7 +1051,7 @@ body.desktop-mode .store-zoom-hint{display:none;}
             <div class="seq-area-label" id="seqArrangeLabel">arrangement · 4 bars</div>
             <div class="seq-bpm-wrap">
               <button class="seq-hdr-btn seq-bpm-btn" id="seqBarsDown">−</button>
-              <span class="seq-bpm-display" id="seqBarsDisplay">16</span>
+              <span class="seq-bpm-display" id="seqBarsDisplay">4</span>
               <button class="seq-hdr-btn seq-bpm-btn" id="seqBarsUp">+</button>
               <span class="seq-area-label">BARS</span>
             </div>
@@ -1090,9 +1094,10 @@ body.desktop-mode .store-zoom-hint{display:none;}
         <div id="seqFullTitle">🎛 SEQUENCER</div>
         <div style="display:flex;align-items:center;gap:8px;">
           <div id="seqFullHint">rotate phone for best experience</div>
+          <button class="seq-mode-pill" id="seqFullLevelAdjBtn" style="border:1px solid #2a2a4a;border-radius:4px;padding:.12rem .4rem;">LVL</button>
           <div style="display:flex;flex-direction:column;align-items:center;gap:2px;">
             <button id="seqFullCloseBtn">✕ CLOSE</button>
-            <div style="font-size:.38rem;letter-spacing:.12em;color:#2a2a4a;text-transform:uppercase;text-align:center;line-height:1.5;">ZOOM OUT<br>BEFORE CLOSING</div>
+            <div id="seqFullZoomHint" style="font-size:.38rem;letter-spacing:.12em;color:#2a2a4a;text-transform:uppercase;text-align:center;line-height:1.5;">ZOOM OUT<br>BEFORE CLOSING</div>
           </div>
         </div>
       </div>
@@ -1112,8 +1117,7 @@ body.desktop-mode .store-zoom-hint{display:none;}
       </div>
     </div>
     <div class="store-scroll">
-      <div style="text-align:center;font-family:'Bebas Neue',sans-serif;font-size:.6rem;letter-spacing:.15em;color:#444;padding:.5rem 0 0;">PINCH TO ZOOM IN FOR EASIER READING</div>
-      <div style="text-align:center;font-family:'Bebas Neue',sans-serif;font-size:.6rem;letter-spacing:.15em;color:#444;padding:.1rem 0 .3rem;">ZOOM OUT BEFORE CLICKING BACK</div>
+      <div id="shopPinchHint" style="text-align:center;font-family:'Bebas Neue',sans-serif;font-size:.6rem;letter-spacing:.15em;color:#444;padding:.5rem 0 0;">PINCH TO ZOOM IN FOR EASIER READING<br>ZOOM OUT BEFORE CLICKING BACK</div>
 
       <!-- DRUM PAD UPGRADES -->
       <div class="store-section-label" style="border-top:none;margin-top:0;">👽 ALIEN BUDDIES</div>
@@ -1122,8 +1126,7 @@ body.desktop-mode .store-zoom-hint{display:none;}
         <div class="alien-card-info">
           <div class="alien-card-name">PET ALIEN BUDDY</div>
           <div class="alien-card-stats" id="alienCardStats">
-            OWNED: <span id="alienCountStat">0</span> · BOOST: <span id="alienBoostStat">×1.000</span><br>
-            NEXT BUDDY ADDS: <span id="alienNextBoostStat">×1.050</span> total
+            OWNED: <span id="alienCountStat">0</span>
           </div>
         </div>
         <div class="alien-card-price" id="alienCardPrice">1,000<small>pts</small></div>
@@ -1686,7 +1689,7 @@ function slotSummary(data){
 function autoSave(){
   if(activeSlot<0)return;
   // Snapshot current sequencer layers (steps only, no DOM refs)
-  const seqLayersSnap=seqLayers.map(l=>({soundId:l.soundId,steps:[...l.steps],muted:l.muted}));
+  const seqLayersSnap=seqLayers.map(l=>({soundId:l.soundId,steps:[...l.steps],vols:[...l.vols],muted:l.muted}));
   writeSlot(activeSlot,{
     score,tiers,autoTiers,
     shop:{autoLevel:shop.autoLevel,multLevel:shop.multLevel,alienBoostLevel:shop.alienBoostLevel,multiClickLevel:shop.multiClickLevel,alienBoostUnlocked:shop.alienBoostUnlocked,multiClickUnlocked:shop.multiClickUnlocked},
@@ -1837,7 +1840,7 @@ updateMatchingBtn();
     seqLayersContainer.innerHTML='';seqLayers=[];
     data.seqLayersSnap.forEach(snap=>{
       if(seqLayers.length>=drum.seqTracks)return;
-      addSeqLayer(snap.soundId,[...snap.steps]);
+      addSeqLayer(snap.soundId,[...snap.steps],snap.vols?[...snap.vols]:null);
       const layer=seqLayers[seqLayers.length-1];
       if(snap.muted&&layer){
         layer.muted=true;
@@ -1941,7 +1944,7 @@ const ALL_SOUNDS=[
 const SOUND_MAP={};ALL_SOUNDS.forEach(s=>SOUND_MAP[s.id]=s);
 const TAGS=[...new Set(ALL_SOUNDS.map(s=>s.tag))];
 
-function playSound(id){
+function playSound(id,velMult){
   if(!SOUND_MAP[id])return;
   const gv=getSoundGainVal(id);
   SOUND_MAP[id].fn(Tnow(),gv);
@@ -2488,6 +2491,7 @@ function closeSeqFull(){
   }
   setTimeout(()=>{
     seqFullModal.classList.remove('open');
+    setLevelAdjMode(false);
     // Restore sidebar collapse tabs
     if(document.body.classList.contains('desktop-mode')&&document.body.classList.contains('game-active')){
       document.getElementById('collapseBunkerBtn')&&(document.getElementById('collapseBunkerBtn').style.display='');
@@ -2525,10 +2529,13 @@ function addFullLayerRow(layer){
     const si=i;
     btn.addEventListener('pointerdown',e=>{
       e.preventDefault();
+      if(levelAdjMode&&layer.steps[si]){e.stopPropagation();openVelPopover(layer,si,btn);return;}
       layer.steps[si]=!layer.steps[si];
+      if(!layer.steps[si])layer.vols[si]=100;
       btn.classList.toggle('on',layer.steps[si]);
+      btn.style.opacity=layer.steps[si]?String(0.3+0.7*(layer.vols[si]/100)):'';
       // Sync small grid
-      if(layer.stepEls[si])layer.stepEls[si].classList.toggle('on',layer.steps[si]);
+      if(layer.stepEls[si]){layer.stepEls[si].classList.toggle('on',layer.steps[si]);layer.stepEls[si].style.opacity=layer.steps[si]?String(0.3+0.7*(layer.vols[si]/100)):'';}
       if(layer.steps[si]&&!layer.muted){getCtx();playSound(layer.soundId);}
     });
     stepsEl.appendChild(btn);layer.fullStepEls.push(btn);
@@ -2609,7 +2616,8 @@ function addSeqLayer(soundId,stepsInit){
   if(seqLayers.length>=drum.seqTracks)return;
   soundId=soundId||unlockedSounds()[0];
   const snd=SOUND_MAP[soundId]||ALL_SOUNDS[0];
-  const layer={soundId:snd.id,steps:stepsInit?[...stepsInit]:new Array(STEPS).fill(false),muted:false,stepEls:[],fullStepEls:[]};
+  const volsInit=arguments[2];
+  const layer={soundId:snd.id,steps:stepsInit?[...stepsInit]:new Array(STEPS).fill(false),vols:volsInit?[...volsInit]:new Array(STEPS).fill(100),muted:false,stepEls:[],fullStepEls:[]};
   const row=document.createElement('div');row.className='seq-layer-row';
   // Sound pill
   const pill=document.createElement('div');pill.className='seq-snd-pill';
@@ -2625,9 +2633,12 @@ function addSeqLayer(soundId,stepsInit){
     const si=i;
     btn.addEventListener('pointerdown',e=>{
       e.preventDefault();
+      if(levelAdjMode&&layer.steps[si]){e.stopPropagation();openVelPopover(layer,si,btn);return;}
       layer.steps[si]=!layer.steps[si];
+      if(!layer.steps[si])layer.vols[si]=100;
       btn.classList.toggle('on',layer.steps[si]);
-      if(layer.fullStepEls[si])layer.fullStepEls[si].classList.toggle('on',layer.steps[si]);
+      btn.style.opacity=layer.steps[si]?String(0.3+0.7*(layer.vols[si]/100)):'';
+      if(layer.fullStepEls[si]){layer.fullStepEls[si].classList.toggle('on',layer.steps[si]);layer.fullStepEls[si].style.opacity=layer.steps[si]?String(0.3+0.7*(layer.vols[si]/100)):'';}
       if(layer.steps[si]&&!layer.muted){getCtx();playSound(layer.soundId);}
     });
     stepsEl.appendChild(btn);layer.stepEls.push(btn);
@@ -2876,7 +2887,7 @@ function startSeq(){
       const pat=arrangement[arrBar]!=null?savedPatterns[arrangement[arrBar]]:null;
       if(pat){
         pat.layers.forEach(layer=>{
-          if(layer.steps[arrBarStep]&&!layer.muted){getCtx();playSound(layer.soundId);doTap({...gameViewCenter(),silent:true,seq:true});}
+          if(layer.steps[arrBarStep]&&!layer.muted){getCtx();playSound(layer.soundId,layer.vols[arrBarStep]/100);doTap({...gameViewCenter(),silent:true,seq:true});}
         });
       }
       arrBarStep++;
@@ -2894,7 +2905,7 @@ function startSeq(){
         const pat=arr.arrangement[songArrBar]!=null?savedPatterns[arr.arrangement[songArrBar]]:null;
         if(pat){
           pat.layers.forEach(layer=>{
-            if(layer.steps[songArrBarStep]&&!layer.muted){getCtx();playSound(layer.soundId);doTap({...gameViewCenter(),silent:true,seq:true});}
+            if(layer.steps[songArrBarStep]&&!layer.muted){getCtx();playSound(layer.soundId,layer.vols[songArrBarStep]/100);doTap({...gameViewCenter(),silent:true,seq:true});}
           });
         }
         songArrBarStep++;
@@ -3175,6 +3186,7 @@ function buildTipsList(){
         if(score<cost)return;
         if(tipsOwned>=MAX_TIPS)return;
         score-=cost;tipsOwned++;tipsMult*=1.5;
+        showToast(`Tip purchased — your Tap Multiplier increased by ×1.5!`);
         playSfxTierUnlock(tipsOwned);
         buildTipsList();updateTipsLabel();renderUI();autoSave();
         showToast('Tip unlocked! +×1.2 tap multiplier');
@@ -4798,6 +4810,7 @@ function buyNextPad(){
   updateSoundboardUnlocked();
   updateBouncerToggleVisibility();
   if(idx>=3)showToast('🥁 New pad unlocked! Tap it to assign a sound.');
+  showToast('Pad unlocked — your Drum Multiplier increased by ×1.2!');
   renderUI();autoSave();
 }
 
@@ -4810,7 +4823,7 @@ function buyNextSound(){
   const newId=EXTRA_SOUNDS_ORDER[idx-1]||EXTRA_SOUNDS_ORDER[0];
   updateSoundboardUnlocked();
   updateBouncerToggleVisibility();
-  showToast(`🎵 ${(SOUND_MAP[EXTRA_SOUNDS_ORDER[idx]]||{name:'Sound'}).name} unlocked! Assign it to a pad or sequencer track.`);
+  showToast(`${(SOUND_MAP[EXTRA_SOUNDS_ORDER[idx]]||{name:'Sound'}).name} unlocked — your Drum Multiplier increased by ×1.2!`);
   renderUI();autoSave();
 }
 
@@ -4820,6 +4833,7 @@ function buySeqTrack(){
   const cost=seqTrackCost(tracks);if(score<cost)return;
   score-=cost;drum.seqTracks++;
   playSfxPurchase();flashBuy('#33ff99');
+  if(tracks>0)showToast('Sequencer track unlocked — your Drum Multiplier increased by ×1.2!');
   if(tracks===0){
     // First track — unlock sequencer, auto-show it
     seqViewMode='seq';
@@ -4852,12 +4866,12 @@ function buySeqTrack(){
   renderUI();autoSave();
 }
 
-function buyAutoNext(){const lvl=shop.autoLevel+1,up=autoUpgradeAt(lvl);if(score<up.cost)return;score-=up.cost;shop.autoLevel=lvl;if(autoInterval)clearInterval(autoInterval);startAutoClicker();playSfxPurchase();flashBuy();renderUI();autoSave();}
-function buyMultNext(){const lvl=shop.multLevel+1,up=multUpgradeAt(lvl);if(score<up.cost)return;score-=up.cost;shop.multLevel=lvl;playSfxPurchase();flashBuy();renderUI();autoSave();}
+function buyAutoNext(){const lvl=shop.autoLevel+1,up=autoUpgradeAt(lvl);if(score<up.cost)return;score-=up.cost;shop.autoLevel=lvl;if(autoInterval)clearInterval(autoInterval);startAutoClicker();playSfxPurchase();flashBuy();showToast(lvl===0?'Auto Clicker activated — earning points automatically!':up.effectMain+' — Auto Clicker speed increased!');renderUI();autoSave();}
+function buyMultNext(){const lvl=shop.multLevel+1,up=multUpgradeAt(lvl);if(score<up.cost)return;score-=up.cost;shop.multLevel=lvl;playSfxPurchase();flashBuy();showToast(`${up.effectMain} — your Score Multiplier is now ×${Math.pow(2,lvl+1).toLocaleString()}!`);renderUI();autoSave();}
 function unlockMultiClick(){if(score<UNLOCK_COST||shop.multiClickUnlocked)return;score-=UNLOCK_COST;shop.multiClickUnlocked=true;playSfxTierUnlock(2);flashBuy('#cc88ff');renderUI();autoSave();}
 function unlockAlienBoost(){if(score<ALIEN_POWER_UNLOCK_COST||shop.alienBoostUnlocked)return;score-=ALIEN_POWER_UNLOCK_COST;shop.alienBoostUnlocked=true;playSfxTierUnlock(3);flashBuy('#00ccff');renderUI();autoSave();}
-function buyAlienBoostNext(){if(!shop.alienBoostUnlocked)return;const lvl=shop.alienBoostLevel+1,up=alienBoostUpgradeAt(lvl);if(score<up.cost)return;score-=up.cost;shop.alienBoostLevel=lvl;playSfxPurchase();flashBuy('#00ccff');renderUI();autoSave();}
-function buyMultiClickNext(){if(!shop.multiClickUnlocked)return;const lvl=shop.multiClickLevel+1,up=multiClickUpgradeAt(lvl);if(score<up.cost)return;score-=up.cost;shop.multiClickLevel=lvl;playSfxPurchase();flashBuy('#cc88ff');renderUI();autoSave();}
+function buyAlienBoostNext(){if(!shop.alienBoostUnlocked)return;const lvl=shop.alienBoostLevel+1,up=alienBoostUpgradeAt(lvl);if(score<up.cost)return;score-=up.cost;shop.alienBoostLevel=lvl;playSfxPurchase();flashBuy('#00ccff');showToast(`${up.effectMain} — your Alien Boost Multiplier increased!`);renderUI();autoSave();}
+function buyMultiClickNext(){if(!shop.multiClickUnlocked)return;const lvl=shop.multiClickLevel+1,up=multiClickUpgradeAt(lvl);if(score<up.cost)return;score-=up.cost;shop.multiClickLevel=lvl;playSfxPurchase();flashBuy('#cc88ff');showToast(`${up.effectMain} — each tap now counts as ${lvl+2} clicks!`);renderUI();autoSave();}
 function buyAlien(){
   updateBouncerToggleVisibility&&updateBouncerToggleVisibility();const cost=alienCost(totalAliens);if(score<cost)return;score-=cost;totalAliens++;spawnBouncer();updateMatchingBtn();viewingBunker=Math.max(0,Math.floor((totalAliens-1)/BUNKER_SIZE));playSfxAlienBuy();flashBuy(totalAliens%BUNKER_SIZE===0?'#00ff88':'#00cc66');renderUI();
   // Always update bunker sidebar on desktop
@@ -5280,6 +5294,78 @@ document.getElementById('seqExportSongBtn')&&document.getElementById('seqExportS
   const{hits,duration}=buildSongHits();
   renderHitsToWAV(hits,duration,'alien_buddies_song.wav');
 });
+
+
+// ── Level Adjust Mode ──
+let levelAdjMode=false;
+let _velLayer=null,_velStep=-1,_velBtn=null;
+
+function setLevelAdjMode(on){
+  levelAdjMode=on;
+  const b=document.getElementById('seqLevelAdjBtn');
+  const bf=document.getElementById('seqFullLevelAdjBtn');
+  if(b){b.classList.toggle('active',on);b.style.borderColor=on?'#a0a8ff':'#2a2a4a';b.style.color=on?'#a0a8ff':'';}
+  if(bf){bf.classList.toggle('active',on);bf.style.borderColor=on?'#a0a8ff':'#2a2a4a';bf.style.color=on?'#a0a8ff':'';}
+  if(!on)closeVelPopover();
+}
+
+function openVelPopover(layer,si,btn){
+  _velLayer=layer;_velStep=si;_velBtn=btn;
+  const vol=layer.vols[si]||100;
+  const slider=document.getElementById('velSlider');
+  const valEl=document.getElementById('velValue');
+  if(slider)slider.value=vol;
+  if(valEl)valEl.textContent=vol;
+  // Position near the button
+  const pop=document.getElementById('velPopover');
+  if(!pop)return;
+  const r=btn.getBoundingClientRect();
+  const pw=168,ph=110;
+  let left=r.left+(r.width/2)-(pw/2);
+  let top=r.top-ph-8;
+  if(top<8)top=r.bottom+8;
+  if(left<8)left=8;
+  if(left+pw>window.innerWidth-8)left=window.innerWidth-pw-8;
+  pop.style.left=left+'px';
+  pop.style.top=top+'px';
+  pop.style.display='flex';
+}
+
+function closeVelPopover(){
+  const pop=document.getElementById('velPopover');
+  if(pop)pop.style.display='none';
+  _velLayer=null;_velStep=-1;_velBtn=null;
+}
+
+const _velSlider=document.getElementById('velSlider');
+const _velValue=document.getElementById('velValue');
+const _velConfirm=document.getElementById('velConfirm');
+
+_velSlider&&_velSlider.addEventListener('input',()=>{if(_velValue)_velValue.textContent=_velSlider.value;});
+
+_velConfirm&&_velConfirm.addEventListener('click',()=>{
+  if(!_velLayer||_velStep<0)return;
+  const v=parseInt(_velSlider.value)||100;
+  _velLayer.vols[_velStep]=v;
+  const opacity=String(0.3+0.7*(v/100));
+  if(_velBtn){_velBtn.style.opacity=opacity;}
+  if(_velLayer.fullStepEls[_velStep])_velLayer.fullStepEls[_velStep].style.opacity=opacity;
+  if(_velLayer.stepEls[_velStep])_velLayer.stepEls[_velStep].style.opacity=opacity;
+  closeVelPopover();
+  autoSave();
+});
+
+// Close popover on outside click
+document.addEventListener('pointerdown',e=>{
+  const pop=document.getElementById('velPopover');
+  if(pop&&pop.style.display!=='none'&&!pop.contains(e.target))closeVelPopover();
+},{capture:true,passive:true});
+
+const _lvlBtn=document.getElementById('seqLevelAdjBtn');
+const _lvlBtnFull=document.getElementById('seqFullLevelAdjBtn');
+_lvlBtn&&_lvlBtn.addEventListener('click',()=>setLevelAdjMode(!levelAdjMode));
+_lvlBtnFull&&_lvlBtnFull.addEventListener('click',()=>setLevelAdjMode(!levelAdjMode));
+// Reset level adj mode when closing full modal
 
 // ── Reset Sequencer ──
 function openSeqResetModal(){

@@ -443,7 +443,7 @@ body.desktop-mode .pad-grid[data-pads="2"]{max-width:326px;margin:0 auto;}
 .upgrade-counter-lbl{font-size:.34rem;color:#888;letter-spacing:.08em;text-transform:uppercase;margin-top:1px;}
 .upgrade-effect{flex:1;min-width:0;}
 .upgrade-effect-main{font-family:'Bebas Neue',sans-serif;font-size:.85rem;letter-spacing:.07em;line-height:1.1;color:#fff;}
-.upgrade-effect-sub{font-size:.42rem;color:#888;letter-spacing:.08em;text-transform:uppercase;margin-top:.15rem;line-height:1.4;}
+.upgrade-effect-sub{display:none;}
 .upgrade-price{font-family:'Bebas Neue',sans-serif;font-size:.78rem;color:#e8ff00;text-align:right;flex-shrink:0;line-height:1.2;}
 .upgrade-price small{display:block;font-size:.4rem;color:#999;letter-spacing:.05em;font-family:'Space Mono',monospace;}
 .upgrade-price.cant-afford{color:#ff4444;}
@@ -1036,7 +1036,7 @@ body.desktop-mode .store-zoom-hint{display:none;}
         <!-- ARRANGE VIEW -->
         <div id="seqArrangeView" style="display:none;">
           <div class="seq-arrange-header">
-            <div class="seq-area-label" id="seqArrangeLabel">arrangement · 16 bars</div>
+            <div class="seq-area-label" id="seqArrangeLabel">arrangement · 4 bars</div>
             <div class="seq-bpm-wrap">
               <button class="seq-hdr-btn seq-bpm-btn" id="seqBarsDown">−</button>
               <span class="seq-bpm-display" id="seqBarsDisplay">16</span>
@@ -2648,8 +2648,8 @@ let seqMode='pattern';
 let savedPatterns=[];
 let savedArrangements=[]; // [{name,color,bars,arrangement:[]}]
 let songSlots=[]; // [{arrIdx}] up to 16
-let arrangeBars=16;
-const BARS_OPTS=[4,8,12,16,20,24];
+let arrangeBars=4;
+const BARS_OPTS=[4,8,12,16];
 let arrangement=[];
 let arrBar=0,arrBarStep=0;
 let songSlotIdx=0,songArrBar=0,songArrBarStep=0; // song playback cursors
@@ -2773,10 +2773,14 @@ let arrBarEls=[];
 function buildArrGrid(){
   if(!seqArrGrid)return;
   seqArrGrid.innerHTML='';arrBarEls=[];ensureArrangement();
+  // Scale aspect ratio so all rows fit: more bars = flatter cells
+  const rows=Math.ceil(arrangeBars/4);
+  const ratio=(1.6+(rows-1)*0.65).toFixed(2);
   for(let i=0;i<arrangeBars;i++){
     const bar=document.createElement('div');
     const pat=arrangement[i]!=null?savedPatterns[arrangement[i]]:null;
     bar.className='seq-arr-bar'+(pat?'':' empty');
+    bar.style.aspectRatio=ratio;
     if(pat){bar.style.setProperty('--bc',pat.color);bar.style.borderColor=pat.color;bar.style.background=pat.color+'22';}
     const idxEl=document.createElement('div');idxEl.className='seq-arr-bar-idx';idxEl.textContent=i+1;
     const nm=document.createElement('div');nm.className='seq-arr-bar-name';nm.style.color=pat?pat.color:'#333';nm.textContent=pat?pat.name:'—';
@@ -4169,6 +4173,7 @@ function renderBunkerView(){
   const idx=viewingBunker,inThis=Math.max(0,Math.min(BUNKER_SIZE,totalAliens-idx*BUNKER_SIZE));
   const completed=Math.floor(totalAliens/BUNKER_SIZE);
   document.getElementById('statTotal').textContent=totalAliens.toLocaleString();
+  updateBouncerToggleVisibility();
   document.getElementById('statBunkers').textContent=completed;
   document.getElementById('statCurrent').textContent=inThis;
   document.getElementById('bunkerSubEl').textContent=`${inThis} / ${BUNKER_SIZE} ALIENS · BUNKER #${idx+1}`;
@@ -4213,6 +4218,10 @@ toggleBouncersBtn&&toggleBouncersBtn.addEventListener('click',()=>{
   bouncers.forEach(b=>b.el.style.display=showBouncers?'':'none');
   if(document.body.classList.contains('bunker-open'))renderBunkerView();
 });
+
+function updateBouncerToggleVisibility(){
+  if(toggleBouncersBtn)toggleBouncersBtn.style.display=totalAliens>=5?'':'none';
+}
 function applyBouncerNameVisibility(){
   bouncers.forEach(b=>{
     if(!b._nameEl)return;
@@ -4830,7 +4839,8 @@ function unlockMultiClick(){if(score<UNLOCK_COST||shop.multiClickUnlocked)return
 function unlockAlienBoost(){if(score<ALIEN_POWER_UNLOCK_COST||shop.alienBoostUnlocked)return;score-=ALIEN_POWER_UNLOCK_COST;shop.alienBoostUnlocked=true;playSfxTierUnlock(3);flashBuy('#00ccff');renderUI();autoSave();}
 function buyAlienBoostNext(){if(!shop.alienBoostUnlocked)return;const lvl=shop.alienBoostLevel+1,up=alienBoostUpgradeAt(lvl);if(score<up.cost)return;score-=up.cost;shop.alienBoostLevel=lvl;playSfxPurchase();flashBuy('#00ccff');renderUI();autoSave();}
 function buyMultiClickNext(){if(!shop.multiClickUnlocked)return;const lvl=shop.multiClickLevel+1,up=multiClickUpgradeAt(lvl);if(score<up.cost)return;score-=up.cost;shop.multiClickLevel=lvl;playSfxPurchase();flashBuy('#cc88ff');renderUI();autoSave();}
-function buyAlien(){const cost=alienCost(totalAliens);if(score<cost)return;score-=cost;totalAliens++;spawnBouncer();updateMatchingBtn();viewingBunker=Math.max(0,Math.floor((totalAliens-1)/BUNKER_SIZE));playSfxAlienBuy();flashBuy(totalAliens%BUNKER_SIZE===0?'#00ff88':'#00cc66');renderUI();
+function buyAlien(){
+  updateBouncerToggleVisibility&&updateBouncerToggleVisibility();const cost=alienCost(totalAliens);if(score<cost)return;score-=cost;totalAliens++;spawnBouncer();updateMatchingBtn();viewingBunker=Math.max(0,Math.floor((totalAliens-1)/BUNKER_SIZE));playSfxAlienBuy();flashBuy(totalAliens%BUNKER_SIZE===0?'#00ff88':'#00cc66');renderUI();
   // Always update bunker sidebar on desktop
   if(document.body.classList.contains('desktop-mode'))renderBunkerView();
   autoSave();}

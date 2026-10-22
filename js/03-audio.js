@@ -41,13 +41,15 @@ function mkSnd(id,name,tag,color,desc,fn){return{id,name,tag,color,desc,fn};}
 const ALL_SOUNDS=[
   mkSnd('hihat','HI-HAT','drums','#44ffcc','Tight closed hi-hat',(t,gv)=>{
     const c=getCtx();
-    // Shared choke gain node — cancel any previous hi-hat tail before firing
-    if(!drumMasterGain._hhGain){
-      const hhg=c.createGain();hhg.connect(drumMasterGain);drumMasterGain._hhGain=hhg;
+    // Each hit has its own gain; a new hit chokes only the previous hi-hat (never future scheduled ones,
+    // so a pad hit can't silence a sequencer hat that was already queued on the audio clock)
+    const g=c.createGain();g.connect(drumMasterGain);
+    const prev=drumMasterGain._hhLast;
+    if(prev&&prev.t<t){
+      prev.g.gain.cancelScheduledValues(t);
+      prev.g.gain.linearRampToValueAtTime(.0001,t+.004);
     }
-    const g=drumMasterGain._hhGain;
-    // Choke: ramp down any previous tail very quickly
-    g.gain.cancelScheduledValues(t);
+    drumMasterGain._hhLast={g,t};
     g.gain.setValueAtTime(0,t);
     g.gain.linearRampToValueAtTime(.19*(gv??1),t+.002);
     g.gain.exponentialRampToValueAtTime(.001,t+.06);

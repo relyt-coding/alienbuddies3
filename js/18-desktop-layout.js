@@ -25,6 +25,28 @@ function saveV5Settings(){
   try{ localStorage.setItem('ab2_v5_settings', JSON.stringify(v5Settings)); }catch(e){}
 }
 
+// If the window is resized across the 900px line (or opened small then maximised), switch layouts live
+(function(){
+  let t=null;
+  addEventListener('resize',()=>{
+    clearTimeout(t);
+    t=setTimeout(()=>{
+      const now=_detectDesktop();
+      if(now!==IS_DESKTOP){
+        IS_DESKTOP=now;
+        document.body.classList.toggle('desktop-mode',IS_DESKTOP);
+        if(IS_DESKTOP)applyDesktopMode();
+        else{ // back to the phone layout
+          const sv=document.getElementById('storeView'),bv=document.getElementById('bunkerView');
+          sv&&sv.classList.remove('sidebar-collapsed');bv&&bv.classList.remove('sidebar-collapsed');
+        }
+        if(typeof requestRender==='function')requestRender();
+        setTimeout(()=>{typeof clampBouncersToBounds==='function'&&clampBouncersToBounds();},100);
+      }
+    },200);
+  });
+})();
+
 function applyDesktopMode(){
   const useDesktop = IS_DESKTOP;
   document.body.classList.toggle('desktop-mode', useDesktop);

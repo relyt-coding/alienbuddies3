@@ -8,7 +8,7 @@ let alienGems = 0;
 let skillTreeUnlocked = false;
 let unlockedSkills = {}; // {skillId: true}
 let gemInterval = null;
-const GEM_UNLOCK_COST = 2e25;
+const GEM_UNLOCK_COST = 2.6e25; // was 2e25 (+30%)
 const BASE_GEMS_PER_ALIEN_PER_MIN = 1;
 
 // ── Skill Tree Data ──
@@ -820,6 +820,32 @@ if(_tipsBtnHint){_tipsBtnHint.addEventListener('click',()=>{shownHints.tips=true
 const _matchBtnHint=document.getElementById('matchingBtn');
 if(_matchBtnHint){_matchBtnHint.addEventListener('click',()=>{shownHints.matchingIntro=true;shownHints.matchingGame=true;},{capture:true,passive:true});}
 
+
+// ── "More than 10 aliens on screen" setting ──
+(function(){
+  const t=document.getElementById('settingsMoreAliens');
+  const row=document.getElementById('settingsAlienLimitRow');
+  const inp=document.getElementById('settingsAlienLimit');
+  if(!t||!inp)return;
+  const clamp=v=>Math.max(1,Math.min(100,Math.round(+v)||10));
+  function paint(){t.checked=!!v5Settings.moreAliens;row.style.display=t.checked?'flex':'none';inp.value=v5Settings.bouncerLimit||20;}
+  function apply(){
+    if(bouncerPicks&&bouncerPicks.length>bouncerMax())bouncerPicks=bouncerPicks.slice(0,bouncerMax());
+    syncBouncers(false);if(typeof autoSave==='function')autoSave();
+  }
+  paint();
+  t.addEventListener('change',()=>{
+    if(t.checked){
+      if(!confirm('Warning: showing more than 10 alien buddies at once might affect game performance. Turn it on?')){t.checked=false;return;}
+      v5Settings.moreAliens=true;v5Settings.bouncerLimit=v5Settings.bouncerLimit||20;
+    }else v5Settings.moreAliens=false;
+    saveV5Settings();paint();apply();
+  });
+  function setLimit(v){v5Settings.bouncerLimit=clamp(v);saveV5Settings();inp.value=v5Settings.bouncerLimit;apply();}
+  inp.addEventListener('change',()=>setLimit(inp.value));
+  document.getElementById('settingsAlienMinus').addEventListener('click',()=>setLimit((v5Settings.bouncerLimit||20)-1));
+  document.getElementById('settingsAlienPlus').addEventListener('click',()=>setLimit((v5Settings.bouncerLimit||20)+1));
+})();
 
 // ── "Earn while tab hidden" toggle ──
 (function(){

@@ -53,9 +53,9 @@ body.store-open #soundboardBtn,body.store-open #padEditToggleBtn,body.store-open
 /* ─── GAME SCREEN ─── */
 .app{display:flex;flex-direction:column;align-items:center;justify-content:space-between;height:100%;padding:1.4rem 1.5rem 1.5rem;padding-top:max(1.4rem,env(safe-area-inset-top,0px));position:relative;}
 #alienLayer{position:fixed;inset:0;pointer-events:none;z-index:15;overflow:hidden;}
-.bouncer{position:absolute;font-size:1.6rem;line-height:1;will-change:transform;display:flex;flex-direction:column;align-items:center;gap:4px;}
+.bouncer{position:absolute;font-size:1.6rem;line-height:1;will-change:transform;display:flex;flex-direction:column;align-items:center;gap:0;}
 .bouncer-emoji{display:block;}
-.bouncer-name{font-family:'Bebas Neue',sans-serif;font-size:9px;letter-spacing:.04em;white-space:nowrap;opacity:.9;text-shadow:0 1px 4px rgba(0,0,0,1),0 0 8px rgba(0,0,0,.8);transition:opacity .3s;text-align:center;max-width:64px;overflow:hidden;text-overflow:ellipsis;line-height:1;font-weight:700;}
+.bouncer-name{position:absolute;top:100%;left:50%;transform:translateX(-50%);margin-top:1px;font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:.04em;white-space:nowrap;opacity:.9;text-shadow:0 1px 4px rgba(0,0,0,1),0 0 8px rgba(0,0,0,.8);transition:opacity .3s;text-align:center;max-width:120px;overflow:hidden;text-overflow:ellipsis;line-height:1;font-weight:700;}
 .bouncer-name.hidden{opacity:0;}
 .header{text-align:center;z-index:3;position:relative;width:100%;}
 .game-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(1.4rem,5.5vw,2.2rem);letter-spacing:.1em;line-height:1;color:#00ff88;transition:color .5s;display:flex;align-items:center;justify-content:center;gap:.3rem;}
@@ -551,6 +551,8 @@ body.desktop-mode .bunker-stat-label{font-size:.55rem!important;display:block!im
 .alien-cell-name{font-size:clamp(6px,1.8vw,13px);letter-spacing:.02em;opacity:.85;text-align:center;width:100%;overflow:hidden;white-space:nowrap;padding:0 2px;line-height:1.1;font-weight:600;}
 .alien-cell-name.hidden{display:none;}
 @keyframes alienIn{0%{transform:scale(0) rotate(-20deg);opacity:0}100%{transform:scale(1) rotate(0);opacity:1}}
+.alien-cell.onscreen{outline:2px solid #44eebb;outline-offset:-2px;}
+body.pick-mode .alien-cell.occupied:not(.onscreen){opacity:.45;}
 .alien-cell.occupied::after{content:'';position:absolute;inset:0;background:linear-gradient(transparent 50%,rgba(0,255,68,.04) 50%);background-size:100% 4px;pointer-events:none;animation:scanlines 2s linear infinite;}
 @keyframes scanlines{0%{background-position:0 0}100%{background-position:0 8px}}
 .bunker-progress-wrap{margin-top:.55rem;flex-shrink:0;}
@@ -723,7 +725,6 @@ body.desktop-mode .multiplier,
 body.desktop-mode .lock-label,
 body.desktop-mode #matchingGameLock,
 body.desktop-mode .confirm-sub,
-body.desktop-mode .bouncer-name,
 body.desktop-mode #shopPinchHint{display:none;}
 body.desktop-mode .seq-save-pat-btn,
 body.desktop-mode .seq-hdr-btn,

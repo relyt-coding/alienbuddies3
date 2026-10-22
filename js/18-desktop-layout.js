@@ -10,6 +10,8 @@ let v5Settings = {
   bouncerNames: true,
   mobileView: false,
   masterMuted: false,
+  moreAliens: false,   // allow more than 10 bouncing aliens (performance warning)
+  bouncerLimit: 20,    // how many, when moreAliens is on
   earnHidden: true   // keep earning (and playing) while the tab is hidden; turn off to pause instead
 };
 
@@ -216,4 +218,44 @@ function fitPadArea(){
     if(app){ro.observe(app);[...app.children].forEach(ch=>{if(!ch.classList.contains('pad-area'))ro.observe(ch);});}
   }
   schedule();
+})();
+
+// ── Keep the aliens from crossing the sequencer / editor windows ──
+// The alien layer floats above everything, so we cut holes in it where the
+// sequencer window (and edit-mode reminder) are, making aliens pass behind them.
+(function(){
+  const layer=document.getElementById('alienLayer');
+  if(!layer)return;
+  let last='';
+  function rects(){
+    const out=[];
+    ['.view-toggle-bar','.seq-area','#editModeReminder'].forEach(sel=>{
+      document.querySelectorAll(sel).forEach(el=>{
+        if(el.closest('#homeScreen'))return;
+        const cs=getComputedStyle(el);
+        if(cs.display==='none'||cs.visibility==='hidden')return;
+        const r=el.getBoundingClientRect();
+        if(r.width<4||r.height<4)return;
+        out.push(r);
+      });
+    });
+    return out;
+  }
+  function update(){
+    const rs=rects();
+    let v='none';
+    if(rs.length){
+      const W=innerWidth,H=innerHeight;
+      let pts=`0px 0px,${W}px 0px,${W}px ${H}px,0px ${H}px,0px 0px`;
+      rs.forEach(r=>{
+        const x1=Math.round(r.left),y1=Math.round(r.top),x2=Math.round(r.right),y2=Math.round(r.bottom);
+        pts+=`,${x1}px ${y1}px,${x1}px ${y2}px,${x2}px ${y2}px,${x2}px ${y1}px,${x1}px ${y1}px,0px 0px`;
+      });
+      v=`polygon(evenodd,${pts})`;
+    }
+    if(v!==last){last=v;layer.style.clipPath=v;layer.style.webkitClipPath=v;}
+  }
+  setInterval(update,100);
+  addEventListener('resize',update);
+  update();
 })();

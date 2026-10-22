@@ -731,6 +731,77 @@ document.getElementById('savePatConfirm')&&document.getElementById('savePatConfi
   showToast('Pattern "'+name+'" saved!');
 });
 
+// ── Load pattern modal ──
+(function(){
+  const modal=document.getElementById('loadPatModal'),list=document.getElementById('loadPatList');
+  if(!modal)return;
+  const close=()=>{modal.style.display='none';};
+  document.getElementById('seqLoadPatBtn').addEventListener('click',()=>{
+    list.innerHTML='';
+    if(!savedPatterns.length){
+      const e=document.createElement('div');e.className='confirm-sub';e.style.fontSize='.85rem';e.textContent='No saved patterns yet — save one first';list.appendChild(e);
+    }
+    savedPatterns.forEach((pat,pi)=>{
+      const b=document.createElement('button');b.className='confirm-btn no';
+      b.style.color=pat.color;b.style.borderColor=pat.color;b.textContent=pat.name;
+      b.addEventListener('click',()=>{loadPatternIntoEditor(pi);close();autoSave();});
+      list.appendChild(b);
+    });
+    modal.style.display='flex';
+  });
+  document.getElementById('loadPatCancel').addEventListener('click',close);
+  modal.addEventListener('click',e=>{if(e.target===modal)close();});
+})();
+
+// ── Clear tracks modal ──
+(function(){
+  const modal=document.getElementById('clearTrackModal');
+  if(!modal)return;
+  const pick=document.getElementById('clearTrackPick'),conf=document.getElementById('clearTrackConfirm');
+  const btns=document.getElementById('clearTrackBtns'),sub=document.getElementById('clearTrackSub');
+  const title=document.getElementById('clearTrackTitle');
+  let target=null; // track index, or 'all'
+  function close(){modal.style.display='none';}
+  function ask(t){
+    target=t;
+    title.textContent='ARE YOU SURE?';
+    sub.textContent=t==='all'?'Clear ALL tracks? This erases every step.':'Clear track '+(t+1)+'? This erases its steps.';
+    pick.style.display='none';conf.style.display='block';
+  }
+  document.getElementById('seqClearBtn')&&document.getElementById('seqClearBtn').addEventListener('click',()=>{
+    if(!seqLayers.length){showToast('No tracks to clear');return;}
+    title.textContent='CLEAR WHICH TRACK?';
+    conf.style.display='none';pick.style.display='block';
+    btns.innerHTML='';
+    for(let i=0;i<6;i++){
+      const b=document.createElement('button');
+      b.className='confirm-btn no';b.textContent='TRACK '+(i+1);
+      const exists=i<seqLayers.length;
+      if(!exists){b.disabled=true;b.style.opacity='.3';b.style.cursor='default';}
+      else b.addEventListener('click',()=>ask(i));
+      btns.appendChild(b);
+    }
+    modal.style.display='flex';
+  });
+  document.getElementById('clearTrackAll').addEventListener('click',()=>ask('all'));
+  document.getElementById('clearTrackCancel').addEventListener('click',close);
+  document.getElementById('clearTrackNo').addEventListener('click',close);
+  modal.addEventListener('click',e=>{if(e.target===modal)close();});
+  document.getElementById('clearTrackYes').addEventListener('click',()=>{
+    const list=target==='all'?seqLayers:[seqLayers[target]];
+    list.forEach(l=>{
+      if(!l)return;
+      for(let i=0;i<STEPS;i++){
+        l.steps[i]=false;l.vols[i]=100;
+        [l.stepEls[i],l.fullStepEls[i]].forEach(el=>{if(el){el.classList.remove('on');el.style.opacity='';}});
+      }
+    });
+    close();
+    showToast(target==='all'?'All tracks cleared':'Track '+(target+1)+' cleared');
+    autoSave();
+  });
+})();
+
 // ── Arr bar picker modal ──
 const arrBarPickerModal=document.getElementById('arrBarPickerModal');
 let arrPickerBarIdx=null;

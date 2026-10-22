@@ -145,7 +145,7 @@ function goToHomeScreen(){
   seqClockStop();seqPlaying=false;_seqHidePaused=false;
   // Clear all bouncers from the DOM
   bouncers.forEach(b=>b.el.remove());
-  bouncers.length=0;
+  bouncers.length=0;bouncerPicks=null;
   // Return to slot select screen
   gameScreen.style.display='none';
   homeScreen.style.display='';

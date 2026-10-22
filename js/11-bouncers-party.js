@@ -78,7 +78,7 @@ window.addEventListener('pagehide',()=>{if(activeSlot>=0)autoSave();});
         if(fps<FPS_DROP){
           // Laggy — reduce cap and prune excess bouncers cleanly
           adaptiveBouncerCap=Math.max(BOUNCER_CAP_MIN,adaptiveBouncerCap-REDUCE_BY);
-          while(bouncers.length>adaptiveBouncerCap){
+          while(!(v5Settings&&v5Settings.moreAliens)&&bouncers.length>adaptiveBouncerCap){
             const b=bouncers.splice(bouncers.length-1,1)[0];
             if(b&&b.el&&b.el.parentNode)b.el.parentNode.removeChild(b.el);
           }
@@ -104,7 +104,7 @@ function clampBouncersToBounds(){
   const bounds=getBouncerBounds();
   for(const b of bouncers){
     b.x=Math.min(Math.max(b.x,bounds.x),bounds.x+bounds.w-b.sz);
-    b.y=Math.min(Math.max(b.y,bounds.y),bounds.y+bounds.h-b.sz);
+    b.y=Math.min(Math.max(b.y,bounds.y),bounds.y+bounds.h-b.sz-BOUNCER_NAME_PAD);
     if(b.el)b.el.style.transform=`translate(${b.x}px,${b.y}px) scale(${b._scale||1})`;
   }
 }
@@ -118,9 +118,58 @@ function getBouncerBounds(){
   return{x:0,y:0,w:window.innerWidth,h:window.innerHeight};
 }
 
-function spawnBouncer(animate=true){
-  if(bouncers.length>=adaptiveBouncerCap)return; // adaptive cap based on device performance
-  const idx=bouncers.length;
+// ── Which aliens bounce on screen ──
+// bouncerPicks: null = automatic (first aliens you own), otherwise the alien indices you chose in the Bunker.
+let bouncerPicks=null;
+const BOUNCER_NAME_PAD=16; // room under each alien for its name label
+function bouncerMax(){
+  if(v5Settings&&v5Settings.moreAliens)return Math.max(1,Math.min(100,v5Settings.bouncerLimit||20));
+  return 10;
+}
+function desiredBouncerIdxs(){
+  let list;
+  if(bouncerPicks)list=bouncerPicks.filter(i=>Number.isInteger(i)&&i>=0&&i<totalAliens);
+  else{list=[];for(let i=0;i<totalAliens;i++)list.push(i);}
+  list=[...new Set(list)];
+  return list.slice(0,bouncerMax());
+}
+// Make the on-screen bouncers match the chosen set
+function syncBouncers(animate=false){
+  let want=desiredBouncerIdxs();
+  if(!(v5Settings&&v5Settings.moreAliens))want=want.slice(0,Math.max(1,adaptiveBouncerCap)); // weak devices
+  const wantSet=new Set(want);
+  for(let i=bouncers.length-1;i>=0;i--){
+    if(!wantSet.has(bouncers[i].idx)){
+      const b=bouncers.splice(i,1)[0];
+      if(b._partyTimeout)clearTimeout(b._partyTimeout);
+      b._partyAnim=false;
+      if(b.el&&b.el.parentNode)b.el.parentNode.removeChild(b.el);
+    }
+  }
+  const have=new Set(bouncers.map(b=>b.idx));
+  want.forEach(idx=>{if(!have.has(idx))spawnBouncer(animate,idx);});
+  if(typeof refreshBunkerMarks==='function')refreshBunkerMarks();
+}
+function bouncerOnNewAlien(){
+  // an explicit selection with room to spare picks up the new alien automatically
+  if(bouncerPicks&&bouncerPicks.length<bouncerMax())bouncerPicks.push(totalAliens-1);
+  syncBouncers(true);
+}
+function toggleBouncerPick(idx){
+  const cur=desiredBouncerIdxs();
+  if(cur.includes(idx))bouncerPicks=cur.filter(i=>i!==idx);
+  else{
+    if(cur.length>=bouncerMax()){
+      showToast('Max '+bouncerMax()+' on screen — remove one first'+((v5Settings&&v5Settings.moreAliens)?'':' (Settings can raise the limit)'));
+      return false;
+    }
+    bouncerPicks=[...cur,idx];
+  }
+  syncBouncers(true);autoSave();
+  return true;
+}
+function spawnBouncer(animate=true,idx){
+  if(idx===undefined)idx=bouncers.length;
   const col=getAlienColor(idx);
   const data=alienData[idx]||{name:'',color:col};
   const el=document.createElement('div');el.className='bouncer';
@@ -132,7 +181,7 @@ function spawnBouncer(animate=true){
   if(!animate)el.style.opacity='.85';
   if(!showBouncers)el.style.display='none';
   const bounds=getBouncerBounds(),sz=32;
-  const x=bounds.x+Math.random()*(bounds.w-sz),y=bounds.y+Math.random()*(bounds.h-sz);
+  const x=bounds.x+Math.random()*Math.max(1,bounds.w-sz),y=bounds.y+Math.random()*Math.max(1,bounds.h-sz-BOUNCER_NAME_PAD);
   const spd=.9+Math.random()*1.3,ang=Math.random()*Math.PI*2;
   el.style.left='0';el.style.top='0';alienLayer.appendChild(el);
   bouncers.push({el,x,y,vx:Math.cos(ang)*spd,vy:Math.sin(ang)*spd,sz,idx});
@@ -145,7 +194,7 @@ function spawnBouncer(animate=true){
     if(b.x<=minX){b.x=minX;b.vx=Math.abs(b.vx);}
     if(b.y<=minY){b.y=minY;b.vy=Math.abs(b.vy);}
     if(b.x>=maxX-b.sz){b.x=maxX-b.sz;b.vx=-Math.abs(b.vx);}
-    if(b.y>=maxY-b.sz){b.y=maxY-b.sz;b.vy=-Math.abs(b.vy);}
+    if(b.y>=maxY-b.sz-BOUNCER_NAME_PAD){b.y=maxY-b.sz-BOUNCER_NAME_PAD;b.vy=-Math.abs(b.vy);}
     if(showBouncers)b.el.style.transform=`translate(${b.x}px,${b.y}px) scale(${b._scale||1})`;
   }
   requestAnimationFrame(tickBouncers);

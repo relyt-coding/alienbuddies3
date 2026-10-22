@@ -19,7 +19,7 @@ function tipCost(idx){
   else{base=TIPS_DATA[TIPS_DATA.length-1].cost;for(let i=TIPS_DATA.length;i<=idx;i++)base*=10;}
   if(idx>=2)base=Math.round(base*Math.pow(3,idx-1));
   if(idx>=3)base=Math.round(base*100);
-  return base;
+  return bump30(base);
 }
 
 function tipText(idx){

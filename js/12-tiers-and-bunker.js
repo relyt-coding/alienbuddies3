@@ -174,7 +174,7 @@ function renderBunkerView(){
         cell.appendChild(emojiDiv);cell.appendChild(nameDiv);
         if(ad.name)requestAnimationFrame(()=>fitCellName(nameDiv));
         cell._globalIdx=globalIdx;
-        cell.onclick=()=>openAlienNameModal(globalIdx);
+        cell.onclick=()=>{if(bunkerPickMode)toggleBouncerPick(globalIdx);else openAlienNameModal(globalIdx);};
       } else {
         // Update name visibility
         const nameDiv=cell.querySelector('.alien-cell-name');
@@ -182,6 +182,7 @@ function renderBunkerView(){
       }
     }else{cell.classList.remove('occupied');cell.textContent='';cell.style.borderColor='';cell.style.boxShadow='';cell.onclick=null;}
   }
+  refreshBunkerMarks();
   const pct=(inThis/BUNKER_SIZE)*100;document.getElementById('bunkerProgressBar').style.width=pct+'%';document.getElementById('progLabel').textContent=`${inThis} / ${BUNKER_SIZE} SLOTS FILLED`;document.getElementById('progPct').textContent=Math.floor(pct)+'%';
 }
 
@@ -197,6 +198,26 @@ toggleBouncersBtn&&toggleBouncersBtn.addEventListener('click',()=>{
   if(document.body.classList.contains('bunker-open'))renderBunkerView();
 });
 
+// ── Choose which aliens bounce on screen ──
+let bunkerPickMode=false;
+function refreshBunkerMarks(){
+  const on=new Set(desiredBouncerIdxs());
+  document.querySelectorAll('.alien-cell.occupied').forEach(c=>c.classList.toggle('onscreen',on.has(c._globalIdx)));
+  const lbl=document.getElementById('bunkerOnScreenLabel');
+  if(lbl)lbl.textContent=`ON SCREEN ${on.size} / ${bouncerMax()}`;
+  const btn=document.getElementById('bunkerPickBtn');
+  if(btn){btn.classList.toggle('active',bunkerPickMode);btn.textContent=bunkerPickMode?'✓ DONE PICKING':'👽 PICK ON-SCREEN ALIENS';}
+  document.body.classList.toggle('pick-mode',bunkerPickMode);
+  const pb=document.getElementById('anmOnScreenBtn');
+  if(pb&&alienProfileIdx!==null)pb.textContent=on.has(alienProfileIdx)?'🛸 ON SCREEN — TAP TO REMOVE':'🛸 OFF SCREEN — TAP TO ADD';
+}
+document.getElementById('bunkerPickBtn')&&document.getElementById('bunkerPickBtn').addEventListener('click',()=>{
+  bunkerPickMode=!bunkerPickMode;refreshBunkerMarks();
+  if(bunkerPickMode)showToast('Tap aliens to put them on screen or take them off');
+});
+document.getElementById('anmOnScreenBtn')&&document.getElementById('anmOnScreenBtn').addEventListener('click',()=>{
+  if(alienProfileIdx!==null){toggleBouncerPick(alienProfileIdx);refreshBunkerMarks();}
+});
 function updateBouncerToggleVisibility(){
   if(toggleBouncersBtn)toggleBouncersBtn.style.display=totalAliens>=5?'':'none';
 }
@@ -246,6 +267,7 @@ function renderAlienProfile(){
   anmEditBtn.style.display='';
   anmEditOpen=false;
   alienNameInput.value=ad.name||'';
+  refreshBunkerMarks();
 }
 
 function openAlienNameModal(globalIdx){

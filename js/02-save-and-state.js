@@ -54,7 +54,8 @@ function autoSave(){
     hasReceivedEgg,
     alienGems,
     skillTreeUnlocked,
-    unlockedSkills
+    unlockedSkills,
+    bouncerPicks
   });
 }
 
@@ -206,7 +207,8 @@ function loadFromSave(data){
     alienData=data.alienData||[];
 // Fill missing entries
 for(let i=alienData.length;i<totalAliens;i++)alienData.push({name:'',color:getAlienColor(i)});
-for(let i=0;i<totalAliens;i++)spawnBouncer(false);
+bouncerPicks=Array.isArray(data.bouncerPicks)?data.bouncerPicks.filter(Number.isInteger):null;
+syncBouncers(false);
 // Ensure names display correctly after load
 if(typeof applyBouncerNameVisibility==='function')applyBouncerNameVisibility();
 updateMatchingBtn();

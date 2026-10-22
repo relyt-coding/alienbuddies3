@@ -29,16 +29,18 @@ function formatMult(n){if(n<100000)return n.toLocaleString(undefined,{maximumSig
 // ══════════════════════════════════════════════
 //  UPGRADE DEFS
 // ══════════════════════════════════════════════
+// Unlock prices over 5 million are 30% pricier (a longer grind for the big unlocks); cheap early unlocks are untouched.
+function bump30(c){return c>5e6?Math.round(c*1.3):c;}
 const BASE_CPS=5;
-const UNLOCK_COST=60000000;
-const ALIEN_POWER_UNLOCK_COST=600000000;
+const UNLOCK_COST=bump30(60000000);
+const ALIEN_POWER_UNLOCK_COST=bump30(600000000);
 
 // 0.2: the Auto Clicker is now the sequencer (metronome). These two one-time upgrades switch a tracker's dot rows from the ×3 pattern to the ×4 pattern.
 // Cost of the next dot-base upgrade (n = how many have been bought already): 100M, 100M, then x1000 each (100B, 100T, 100Qa ...). Max ×10.
 const DOT_MAX_LEVEL=6; // level 6 = ×10
 // Endgame dot upgrades. Each card (DRUMPAD / SEQUENCER) first has to be unlocked for 1B, then upgraded.
 // Upgrade prices (n = upgrades already bought; each tracker pays separately): ×4 5B, then x1000 per level.
-const DOT_UNLOCK_COST=1e9;
+const DOT_UNLOCK_COST=bump30(1e9);
 const DOT_COSTS=[5e9,5e12,5e15,5e18,5e21,5e24,5e27];
 function dotUpgradeCost(n){return DOT_COSTS[Math.min(n,DOT_COSTS.length-1)];}
 function alienCost(n){
@@ -54,7 +56,7 @@ function alienCost(n){
     if(i>=19)m*=0.6;
     c=Math.round(c*m);
   }
-  return c;
+  return bump30(c);
 }
 function alienBoostUpgradeCost(lvl){if(lvl===0)return 60000000;let c=60000000;for(let i=1;i<=lvl;i++){c=Math.round(c*(100+i*40));if(i>=2)c=Math.round(c*3);}return c;}
 function alienBoostUpgradeAt(lvl){const cost=alienBoostUpgradeCost(lvl);const perAlien=(1.1+(lvl+1)*0.3).toFixed(1);const perAlienNext=(1.1+(lvl+2)*0.3).toFixed(1);return{effectMain:`ALIEN POWER ×${perAlienNext}/ALIEN`,effectSub:`Per-alien base: ×${perAlien} → ×${perAlienNext}`,cost};}
@@ -62,7 +64,7 @@ function multiClickUpgradeCost(lvl){if(lvl===0)return 15000000;let c=15000000;fo
 function multiClickUpgradeAt(lvl){const clicks=lvl+2;return{effectMain:`${clicks}× CLICKS`,effectSub:`Each tap counts as ${clicks} clicks`,cost:multiClickUpgradeCost(lvl)};}
 
 // Pad button costs: 1 free, 2=5 (kick), 3=2.5K (snare), 4=25K, 5=2.5M ...
-const PAD_COSTS=[0,10,2500,25000,2500000,9000000000,60000000000,450000000000]; // pad 2 (kick) is just 10 pts so players find the drum pad fast
+const PAD_COSTS=[0,10,2500,25000,2500000,9000000000,60000000000,450000000000].map(bump30); // pad 2 (kick) is just 10 pts so players find the drum pad fast
 const PAD_DEFAULT_SOUNDS=['hihat','kick','snare',null,null,null,null,null]; // null = no sound, must buy from library
 
 // Sound library unlocks: first = 5M, each ×25
@@ -75,7 +77,7 @@ function soundLibCost(idx){
   // idx 0 = 5,000, idx 1 = 50,000, idx 2 = 500,000, each ×10 after
   let c=5000;
   for(let i=0;i<idx;i++) c*=10;
-  return c;
+  return bump30(c);
 }
 
 // Sequencer tracks: track 1 = 100K, track 2 = 25M, track 3 = 250M, tracks 4-6 keep the old (very large) curve
@@ -90,8 +92,8 @@ function seqTrackCostOld(tracks){
 }
 function seqTrackCost(tracks){
   if(tracks===0)return 100000;
-  if(tracks===1)return 25000000;
-  if(tracks===2)return 250000000;
-  return seqTrackCostOld(tracks);
+  if(tracks===1)return bump30(25000000);
+  if(tracks===2)return bump30(250000000);
+  return bump30(seqTrackCostOld(tracks));
 }
 const MAX_SEQ_TRACKS=6;

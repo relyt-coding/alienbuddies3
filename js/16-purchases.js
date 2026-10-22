@@ -111,7 +111,7 @@ function unlockAlienBoost(){if(score<ALIEN_POWER_UNLOCK_COST||shop.alienBoostUnl
 function buyAlienBoostNext(){if(!shop.alienBoostUnlocked)return;const lvl=shop.alienBoostLevel+1,up=alienBoostUpgradeAt(lvl);if(score<up.cost)return;score-=up.cost;shop.alienBoostLevel=lvl;playSfxPurchase();flashBuy('#00ccff');showToast(`${up.effectMain} — your Alien Boost Multiplier increased!`);renderUI();autoSave();}
 function buyMultiClickNext(){if(!shop.multiClickUnlocked)return;const lvl=shop.multiClickLevel+1,up=multiClickUpgradeAt(lvl);if(score<up.cost)return;score-=up.cost;shop.multiClickLevel=lvl;playSfxPurchase();flashBuy('#cc88ff');showToast(`${up.effectMain} — each tap now counts as ${lvl+2} clicks!`);renderUI();autoSave();}
 function buyAlien(){
-  updateBouncerToggleVisibility&&updateBouncerToggleVisibility();const cost=alienCost(totalAliens);if(score<cost)return;score-=cost;totalAliens++;spawnBouncer();updateMatchingBtn();viewingBunker=Math.max(0,Math.floor((totalAliens-1)/BUNKER_SIZE));playSfxAlienBuy();flashBuy(totalAliens%BUNKER_SIZE===0?'#00ff88':'#00cc66');renderUI();
+  updateBouncerToggleVisibility&&updateBouncerToggleVisibility();const cost=alienCost(totalAliens);if(score<cost)return;score-=cost;totalAliens++;bouncerOnNewAlien();updateMatchingBtn();viewingBunker=Math.max(0,Math.floor((totalAliens-1)/BUNKER_SIZE));playSfxAlienBuy();flashBuy(totalAliens%BUNKER_SIZE===0?'#00ff88':'#00cc66');renderUI();
   // Always update bunker sidebar on desktop
   if(document.body.classList.contains('desktop-mode'))renderBunkerView();
   autoSave();}

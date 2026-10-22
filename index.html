@@ -48,6 +48,23 @@
       </label>
     </div>
 
+    <div class="settings-row">
+      <div><div class="settings-label">👽 MORE THAN 10 ALIENS ON SCREEN</div><div style="font-size:.6rem;color:#886644;letter-spacing:.06em;margin-top:2px;">May affect game performance</div></div>
+      <label class="settings-toggle">
+        <input type="checkbox" id="settingsMoreAliens">
+        <span class="settings-toggle-track"></span>
+        <span class="settings-toggle-thumb"></span>
+      </label>
+    </div>
+    <div class="settings-row" id="settingsAlienLimitRow" style="display:none;">
+      <div><div class="settings-label">👽 ALIENS ON SCREEN</div></div>
+      <div style="display:flex;gap:.4rem;align-items:center;">
+        <button class="sb-mute-btn" id="settingsAlienMinus">−</button>
+        <input type="number" id="settingsAlienLimit" min="1" max="100" value="20" style="width:52px;font-family:'Bebas Neue',sans-serif;font-size:16px;text-align:center;background:#0d0d1c;border:1px solid #2a2a4a;border-radius:6px;color:#a0a8ff;padding:.25rem;">
+        <button class="sb-mute-btn" id="settingsAlienPlus">+</button>
+      </div>
+    </div>
+
     <button class="settings-close-btn" id="settingsFullscreenBtn" style="display:none;">⛶ ENTER FULLSCREEN</button>
     <button class="settings-close-btn" id="settingsSocialsBtn" style="background:#0a0a1a;border-color:#6699ff;color:#6699ff;">SOCIALS</button>
     <button class="settings-close-btn" id="settingsArchipelagoBtn" style="background:#0a1a1a;border-color:#00ccaa;color:#00ccaa;" onclick="alert('🌐 Archipelago multiworld features coming soon!')">🌐 ARCHIPELAGO SETTINGS</button>
@@ -172,6 +189,8 @@
           <div class="seq-bottom-row">
             <button class="seq-add-btn" id="seqAddBtn" disabled>+ ADD TRACK</button>
             <button class="seq-save-pat-btn" id="seqSavePatBtn">💾 SAVE PATTERN</button>
+            <button class="seq-save-pat-btn" id="seqLoadPatBtn">📂 LOAD PATTERN</button>
+            <button class="seq-save-pat-btn" id="seqClearBtn" style="border-color:#aa3344;color:#cc4455;">CLEAR</button>
             <button class="seq-save-pat-btn" id="seqExportPatBtn" style="border-color:#00cc88;color:#00aa66;">⬇ EXPORT WAV</button>
           </div>
         </div>
@@ -383,7 +402,7 @@
           <div class="card-lock-overlay" id="drumDotsLock">
             <div class="lock-icon">🔒</div>
             <div class="lock-label">UNLOCK FOR</div>
-            <div class="lock-cost" id="drumDotsLockCost">1B pts</div>
+            <div class="lock-cost" id="drumDotsLockCost">1.3B pts</div>
             <button class="lock-btn" id="drumDotsUnlockBtn">UNLOCK</button>
           </div>
         </div>
@@ -403,7 +422,7 @@
           <div class="card-lock-overlay" id="seqDotsLock">
             <div class="lock-icon">🔒</div>
             <div class="lock-label">UNLOCK FOR</div>
-            <div class="lock-cost" id="seqDotsLockCost">1B pts</div>
+            <div class="lock-cost" id="seqDotsLockCost">1.3B pts</div>
             <button class="lock-btn" id="seqDotsUnlockBtn">UNLOCK</button>
           </div>
         </div>
@@ -473,6 +492,10 @@
       <div class="bunker-progress-wrap">
         <div class="bunker-progress-label"><span id="progLabel">0 / 99 SLOTS FILLED</span><span id="progPct">0%</span></div>
         <div class="bunker-progress-bar-bg"><div class="bunker-progress-bar" id="bunkerProgressBar" style="width:0%"></div></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-top:.5rem;">
+          <span id="bunkerOnScreenLabel" style="font-family:'Bebas Neue',sans-serif;font-size:.8rem;letter-spacing:.12em;color:#44eebb;">ON SCREEN 0 / 10</span>
+          <button id="bunkerPickBtn" style="font-family:'Bebas Neue',sans-serif;font-size:.75rem;letter-spacing:.1em;padding:.3rem .6rem;border-radius:8px;border:1px solid #1a3a2a;background:#0a1a0f;color:#44eebb;cursor:pointer;">👽 PICK ON-SCREEN ALIENS</button>
+        </div>
       </div>
     </div>
   </div>
@@ -521,6 +544,7 @@
         </div>
       </div>
       <button id="anmEditBtn">✏ EDIT NAME</button>
+      <button id="anmOnScreenBtn" style="font-family:'Bebas Neue',sans-serif;font-size:.85rem;letter-spacing:.1em;padding:.5rem .9rem;border-radius:10px;border:1px solid #1a3a2a;background:#0a1a0f;color:#44eebb;cursor:pointer;margin-top:.4rem;">🛸 ON SCREEN</button>
       <!-- nav row at bottom -->
       <div id="anmNavRow">
         <button class="anm-nav-btn" id="anmPrevBtn">‹</button>
@@ -603,6 +627,32 @@
 </div><!-- end gameScreen -->
 
 
+
+  <!-- LOAD PATTERN MODAL -->
+  <div id="loadPatModal" style="position:fixed;inset:0;z-index:225;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;backdrop-filter:blur(8px);">
+    <div class="confirm-box" style="max-width:360px;width:90%;">
+      <div class="confirm-title" style="color:#a0a8ff;">LOAD WHICH PATTERN?</div>
+      <div class="confirm-sub" style="font-size:.8rem;">Replaces what is on the sequencer now</div>
+      <div id="loadPatList" style="display:flex;flex-direction:column;gap:.4rem;margin-top:1rem;max-height:50vh;overflow-y:auto;"></div>
+      <button class="confirm-btn no" id="loadPatCancel" style="width:100%;margin-top:.8rem;">CANCEL</button>
+    </div>
+  </div>
+
+  <!-- CLEAR TRACKS MODAL -->
+  <div id="clearTrackModal" style="position:fixed;inset:0;z-index:225;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;backdrop-filter:blur(8px);">
+    <div class="confirm-box" style="max-width:340px;width:90%;">
+      <div class="confirm-title" id="clearTrackTitle">CLEAR WHICH TRACK?</div>
+      <div id="clearTrackPick">
+        <div id="clearTrackBtns" style="display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin-top:1rem;"></div>
+        <button class="confirm-btn" id="clearTrackAll" style="width:100%;margin-top:.5rem;background:#1a0000;border-color:#ff4444;color:#ff4444;">ALL TRACKS</button>
+        <button class="confirm-btn no" id="clearTrackCancel" style="width:100%;margin-top:.5rem;">CANCEL</button>
+      </div>
+      <div id="clearTrackConfirm" style="display:none;">
+        <div class="confirm-sub" id="clearTrackSub" style="font-size:.9rem;"></div>
+        <div class="confirm-btns"><button class="confirm-btn yes" id="clearTrackYes">YES</button><button class="confirm-btn no" id="clearTrackNo">NO</button></div>
+      </div>
+    </div>
+  </div>
 
   <!-- SAVE PATTERN MODAL -->
   <div id="savePatModal" style="position:fixed;inset:0;z-index:220;background:rgba(0,0,0,.85);display:none;align-items:flex-end;justify-content:center;backdrop-filter:blur(8px);">

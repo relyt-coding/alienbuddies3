@@ -91,7 +91,7 @@ function rebuildPadGrid(){
       `<div class="pad-edit-hint">✏</div>`+
       `<div class="pad-name">${snd?snd.name:'NO SOUND'}</div><div class="pad-key" data-pad="${i}">${keyHintFor(i)}</div>`+
       `<div class="pad-sub">${snd?snd.tag:'tap to assign'}</div>`+
-      (i===0?'<div class="pad-click-hint" id="padClickHint">CLICK FOR POINTS</div>':'');
+      (i===0?'<div class="pad-click-hint" id="padClickHint" style="display:none;">CLICK FOR POINTS</div>':'');
     const idx=i;
     el.addEventListener('pointerdown',e=>{
       e.preventDefault();
@@ -117,6 +117,12 @@ function rebuildPadGrid(){
     updateGhostPad();
   }
   if(typeof fitPadAreaSoon==='function')fitPadAreaSoon(); // keep the grid inside the free vertical space
+  updatePadClickHint();
+}
+// "CLICK FOR POINTS" only shows on a brand-new save with just the hi-hat pad and 0 points
+function updatePadClickHint(){
+  const hint=document.getElementById('padClickHint');
+  if(hint)hint.style.display=(score===0&&drum.pads<=1&&!(typeof seqPlaying!=='undefined'&&seqPlaying))?'flex':'none';
 }
 function unlockGhostPad(){
   const cost=PAD_COSTS[1];

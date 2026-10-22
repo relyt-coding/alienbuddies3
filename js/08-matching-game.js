@@ -10,7 +10,9 @@ const MATCH_PATTERNS = [
   '🔋','🧬','👁️','🌊','🔴','🟣','🟡','🟢',
   '🎯','🧲','⚗️','🔬','🧪','🌡️','💡','🔭',
   '🏔️','🌋','🗺️','🧭','⚓','🔱','🌐','♾️',
-  '🎴','🃏'
+  '🎴','🃏',
+  // extra patterns so the biggest level (52 pairs) always has enough unique cards
+  '🌑','🌕','🌗','🌘','🌒','🌖','🧿','🪂','🛩️','🔆','🪩','🧊','🌤️'
 ];
 
 let matchCardEls=[];
@@ -30,6 +32,9 @@ let matchTotalPairs=4;
 let matchSavedState=null; // saved mid-game progress
 
 function aliensNeededForLevel(lvl){ return lvl*4; } // lvl1=4, lvl2=8, lvl3=12...
+// Cards per game: intro = 4 cards (2 pairs), level 1 = 8, level 2 = 12 ... +4 cards each level
+function matchPairsForLevel(lvl){ return 2*(lvl+1); }
+let matchIntroInfoStage=false; // true while the intro's 'how it works' card is on screen
 
 function updateMatchingBtn(){
   const btn=document.getElementById('matchingGameBtn');
@@ -75,9 +80,11 @@ function openMatchingGame(){
   document.getElementById('matchTitle').textContent='🃏 MATCHING GAME';
   document.getElementById('matchVictory').style.display='none';
   initMatchStars();
-  if(nextLvl===0){
-    matchCurrentLevel=0;
-    matchTotalPairs=0;
+  matchIntroInfoStage=false;
+  // Intro won but the 'how it works' card wasn't finished: show that card again
+  if(matchSavedState&&matchSavedState.level===nextLvl&&matchSavedState.infoStage){
+    matchCurrentLevel=nextLvl;
+    matchTotalPairs=matchPairsForLevel(nextLvl);
     document.getElementById('matchSubtitle').textContent='INTRO · FLIP THE CARD';
     document.getElementById('matchVictoryReward').textContent='PERMANENT ×'+matchRewardForLevel(0)+' MULTIPLIER EARNED!';
     buildLevel0Grid();
@@ -86,19 +93,23 @@ function openMatchingGame(){
   if(matchSavedState&&matchSavedState.level===nextLvl&&matchSavedState.pairs<matchSavedState.totalPairs){
     matchCurrentLevel=nextLvl;
     matchTotalPairs=matchSavedState.totalPairs;
-    document.getElementById('matchSubtitle').textContent='LEVEL '+matchCurrentLevel+' · RESUMING — '+matchSavedState.pairs+'/'+matchTotalPairs+' PAIRS FOUND';
+    const lbl=nextLvl===0?'INTRO':'LEVEL '+matchCurrentLevel;
+    document.getElementById('matchSubtitle').textContent=lbl+' · RESUMING — '+matchSavedState.pairs+'/'+matchTotalPairs+' PAIRS FOUND';
     document.getElementById('matchVictoryReward').textContent='PERMANENT ×'+matchRewardForLevel(matchCurrentLevel)+' MULTIPLIER EARNED';
     resumeMatchGrid(matchSavedState);
   } else {
     matchCurrentLevel=nextLvl;
-    matchTotalPairs=aliensNeededForLevel(matchCurrentLevel)/2;
-    document.getElementById('matchSubtitle').textContent='LEVEL '+matchCurrentLevel+' · FIND '+matchTotalPairs+' PAIRS ('+matchTotalPairs*2+' CARDS)';
+    matchTotalPairs=matchPairsForLevel(matchCurrentLevel);
+    const lbl=nextLvl===0?'INTRO':'LEVEL '+matchCurrentLevel;
+    document.getElementById('matchSubtitle').textContent=lbl+' · FIND '+matchTotalPairs+' PAIRS ('+matchTotalPairs*2+' CARDS)';
     document.getElementById('matchVictoryReward').textContent='PERMANENT ×'+matchRewardForLevel(matchCurrentLevel)+' MULTIPLIER EARNED';
     buildMatchGrid();
   }
 }
 
 function buildLevel0Grid(){
+  matchIntroInfoStage=true;
+  document.getElementById('matchSubtitle').textContent='INTRO · FLIP THE CARD';
   const grid=document.getElementById('matchGrid');
   grid.innerHTML='';
   matchCardEls=[];matchFlipped=[];matchMatched=[];matchLocked=false;matchPairs=0;
@@ -121,13 +132,11 @@ function buildLevel0Grid(){
   xBtn.textContent='✕ DONE';
   xBtn.style.cssText="position:absolute;top:calc(.7rem + 15px);right:calc(.7rem + 15px);font-family:'Bebas Neue',sans-serif;font-size:.75rem;letter-spacing:.12em;padding:.3rem .7rem;border-radius:8px;border:1px solid #00ff88;background:#041a0d;color:#00ff88;cursor:pointer;touch-action:manipulation;z-index:20;display:none;";
   xBtn.addEventListener('click',()=>{
-    matchingMultiplier*=2;
-    matchLevelsCompleted=0;
+    // Reward is applied once by the victory screen's button (matchVictoryClose)
+    matchIntroInfoStage=false;
     matchSavedState=null;
     document.getElementById('matchVictory').style.display='flex';
     playMatchFanfare();
-    updateMatchingBtn();
-    renderUI();autoSave();
   });
   grid.style.position='relative';
   grid.appendChild(xBtn);
@@ -252,7 +261,7 @@ function buildMatchGrid(){
   document.getElementById('matchProgressBar').style.width='0%';
 
   // Pick patterns for this level
-  const pool=[...MATCH_PATTERNS].sort(()=>Math.random()-.5).slice(0,matchTotalPairs);
+  const pool=[...new Set(MATCH_PATTERNS)].sort(()=>Math.random()-.5).slice(0,matchTotalPairs); // Set removes accidental duplicates
   const cards=[...pool,...pool].sort(()=>Math.random()-.5);
 
   // Grid cols: 4 pairs=8 cards=4×2, 5=10=5×2, 6=12=4×3, 7=14=7×2, 8=16=4×4...
@@ -366,6 +375,13 @@ function onMatchCardClick(idx){
 }
 
 function showMatchVictory(){
+  if(matchCurrentLevel===0&&!matchIntroInfoStage){
+    // Intro won: hand over the card that explains how the alien matching game works
+    matchSavedState=null;
+    playMatchFanfare();
+    buildLevel0Grid();
+    return;
+  }
   const rewardMult=matchRewardForLevel(matchCurrentLevel);
   document.getElementById('matchVictoryReward').textContent='PERMANENT ×'+rewardMult+' MULTIPLIER EARNED!';
   document.getElementById('matchVictory').style.display='flex';
@@ -377,6 +393,7 @@ document.getElementById('matchVictoryClose')&&document.getElementById('matchVict
   // Apply reward
   matchingMultiplier*=matchRewardForLevel(matchCurrentLevel);
   matchLevelsCompleted=matchCurrentLevel;
+  matchIntroInfoStage=false;
   document.getElementById('matchingModal').style.display='none';
   showToast('🏆 ×'+matchRewardForLevel(matchCurrentLevel)+' multiplier added to your tap score!');
   updateMatchingBtn();
@@ -386,7 +403,12 @@ document.getElementById('matchVictoryClose')&&document.getElementById('matchVict
 
 document.getElementById('matchCloseBtn')&&document.getElementById('matchCloseBtn').addEventListener('click',()=>{
   // Save mid-game progress
-  if(matchPairs<matchTotalPairs){
+  if(matchIntroInfoStage){
+    matchSavedState={level:0,totalPairs:matchPairsForLevel(0),pairs:matchPairsForLevel(0),infoStage:true,cards:[]};
+    matchIntroInfoStage=false;
+    autoSave();
+    showToast('Progress saved — resume anytime!');
+  } else if(matchPairs<matchTotalPairs){
     matchSavedState={
       level:matchCurrentLevel,
       totalPairs:matchTotalPairs,

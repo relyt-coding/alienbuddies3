@@ -55,7 +55,7 @@ body.store-open #soundboardBtn,body.store-open #padEditToggleBtn,body.store-open
 #alienLayer{position:fixed;inset:0;pointer-events:none;z-index:15;overflow:hidden;}
 .bouncer{position:absolute;font-size:1.6rem;line-height:1;will-change:transform;display:flex;flex-direction:column;align-items:center;gap:0;}
 .bouncer-emoji{display:block;}
-.bouncer-name{position:absolute;top:100%;left:50%;transform:translateX(-50%);margin-top:1px;font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:.04em;white-space:nowrap;opacity:.9;text-shadow:0 1px 4px rgba(0,0,0,1),0 0 8px rgba(0,0,0,.8);transition:opacity .3s;text-align:center;max-width:120px;overflow:hidden;text-overflow:ellipsis;line-height:1;font-weight:700;}
+.bouncer-name{position:absolute;top:100%;left:50%;transform:translateX(-50%);margin-top:1px;font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:.04em;white-space:nowrap;opacity:.9;text-shadow:-1px -1px 0 #000,1px -1px 0 #000,-1px 1px 0 #000,1px 1px 0 #000,0 -1px 0 #000,0 1px 0 #000,-1px 0 0 #000,1px 0 0 #000,0 1px 4px rgba(0,0,0,1);transition:opacity .3s;text-align:center;max-width:120px;overflow:hidden;text-overflow:ellipsis;line-height:1;font-weight:700;}
 .bouncer-name.hidden{opacity:0;}
 .header{text-align:center;z-index:3;position:relative;width:100%;}
 .game-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(1.4rem,5.5vw,2.2rem);letter-spacing:.1em;line-height:1;color:#00ff88;transition:color .5s;display:flex;align-items:center;justify-content:center;gap:.3rem;}
@@ -674,6 +674,8 @@ body.pick-mode .alien-cell.occupied:not(.onscreen){opacity:.45;}
 #settingsPanel.open{display:flex;}
 #settingsBox{background:#111;border:1px solid #2a2a2a;border-radius:20px;padding:1.4rem 1.5rem 1.8rem;width:100%;max-width:340px;display:flex;flex-direction:column;gap:1rem;}
 .settings-title{font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:.18em;color:#ccc;text-align:center;}
+.alien-step-btn{width:30px;height:30px;border-radius:6px;border:1px solid #666;background:#1c1c1c;color:#fff;font-size:1.2rem;line-height:1;cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center;touch-action:manipulation;}
+.alien-step-btn:hover{border-color:#fff;background:#2a2a2a;}
 .settings-row{display:flex;align-items:center;justify-content:space-between;gap:.8rem;padding:.55rem 0;border-bottom:1px solid #1a1a1a;}
 .settings-row:last-of-type{border-bottom:none;}
 .settings-label{font-family:'Bebas Neue',sans-serif;font-size:.72rem;letter-spacing:.1em;color:#888;}

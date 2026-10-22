@@ -220,16 +220,18 @@ function fitPadArea(){
   schedule();
 })();
 
-// ── Keep the aliens from crossing the sequencer / editor windows ──
-// The alien layer floats above everything, so we cut holes in it where the
-// sequencer window (and edit-mode reminder) are, making aliens pass behind them.
+// ── Keep the aliens from crossing the pad editor window ──
+// The alien layer floats above everything, so while Edit Pads is open we cut holes in it
+// where the editor (pad area, pad-count picker, reminder bubble) is, so the aliens pass behind it.
+// (The sequencer itself is NOT cut out — aliens may float over it.)
 (function(){
   const layer=document.getElementById('alienLayer');
   if(!layer)return;
   let last='';
   function rects(){
     const out=[];
-    ['.view-toggle-bar','.seq-area','#editModeReminder'].forEach(sel=>{
+    const sels=padEditMode?['.pad-area','#padCountSelector','#editModeReminder']:[];
+    sels.forEach(sel=>{
       document.querySelectorAll(sel).forEach(el=>{
         if(el.closest('#homeScreen'))return;
         const cs=getComputedStyle(el);

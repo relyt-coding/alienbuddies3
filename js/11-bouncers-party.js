@@ -184,7 +184,7 @@ function spawnBouncer(animate=true,idx){
   const x=bounds.x+Math.random()*Math.max(1,bounds.w-sz),y=bounds.y+Math.random()*Math.max(1,bounds.h-sz-BOUNCER_NAME_PAD);
   const spd=.9+Math.random()*1.3,ang=Math.random()*Math.PI*2;
   el.style.left='0';el.style.top='0';alienLayer.appendChild(el);
-  bouncers.push({el,x,y,vx:Math.cos(ang)*spd,vy:Math.sin(ang)*spd,sz,idx});
+  bouncers.push({el,x,y,vx:Math.cos(ang)*spd,vy:Math.sin(ang)*spd,sz,idx,_nameEl:nameSpan,_col:col}); // _nameEl/_col live on the bouncer so renaming updates it instantly
 }
 (function tickBouncers(){
   const bounds=getBouncerBounds();

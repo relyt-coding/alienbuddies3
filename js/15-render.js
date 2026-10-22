@@ -188,8 +188,21 @@ function renderStore(){
       const pr=document.getElementById(pre+'Price');pr.className='upgrade-price'+((maxed||can)?'':' cant-afford');
       pr.innerHTML=maxed?'MAX':`${formatStore(cost)}<small>pts</small>`;
     }
-    fill('drumMult',shop.multLevel,false,'','DRUMPAD');
-    fill('seqMult',shop.seqMultLevel,drum.seqTracks<1,'Unlock the sequencer first','SEQUENCER');
+    // 1B unlock lock (same style as Multi-Click / Alien Power); cards already owned count as unlocked
+    function lockFor(pre,unlocked){
+      const lk=document.getElementById(pre+'Lock');if(!lk)return;
+      if(unlocked){lk.classList.add('unlocked');return;}
+      lk.classList.remove('unlocked');
+      const can=score>=DOT_UNLOCK_COST&&(pre!=='seqDots'||drum.seqTracks>=1);
+      const cost=document.getElementById(pre+'LockCost');
+      cost.textContent=(pre==='seqDots'&&drum.seqTracks<1)?'unlock the sequencer first':formatStore(DOT_UNLOCK_COST)+' pts';
+      cost.className='lock-cost'+(can?' affordable':'');
+      document.getElementById(pre+'UnlockBtn').className='lock-btn'+(can?' affordable':'');
+    }
+    const drumOpen=shop.drumDotsUnlocked||shop.multLevel>=0, seqOpen=shop.seqDotsUnlocked||shop.seqMultLevel>=0;
+    lockFor('drumDots',drumOpen);lockFor('seqDots',seqOpen);
+    fill('drumMult',shop.multLevel,!drumOpen,'Unlock this upgrade first','DRUMPAD');
+    fill('seqMult',shop.seqMultLevel,drum.seqTracks<1||!seqOpen,drum.seqTracks<1?'Unlock the sequencer first':'Unlock this upgrade first','SEQUENCER');
   })();
   // ── MULTI-CLICK ──
   const mcUnlocked=shop.multiClickUnlocked;const mcLock=document.getElementById('multiClickLock');

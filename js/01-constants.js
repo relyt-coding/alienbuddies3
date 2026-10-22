@@ -36,15 +36,16 @@ const ALIEN_POWER_UNLOCK_COST=600000000;
 // 0.2: the Auto Clicker is now the sequencer (metronome). These two one-time upgrades switch a tracker's dot rows from the ×3 pattern to the ×4 pattern.
 // Cost of the next dot-base upgrade (n = how many have been bought already): 100M, 100M, then x1000 each (100B, 100T, 100Qa ...). Max ×10.
 const DOT_MAX_LEVEL=6; // level 6 = ×10
-// Endgame dot prices (n = upgrades already bought). Each tracker pays these separately.
-// ×4 unlock 1B, ×5 5B, then x1000 per level: ×6 5T, ×7 5Qa, ×8 5Qi, ×9 5Sx, ×10 5Sp (5E24)
-const DOT_COSTS=[1e9,5e9,5e12,5e15,5e18,5e21,5e24];
+// Endgame dot upgrades. Each card (DRUMPAD / SEQUENCER) first has to be unlocked for 1B, then upgraded.
+// Upgrade prices (n = upgrades already bought; each tracker pays separately): ×4 5B, then x1000 per level.
+const DOT_UNLOCK_COST=1e9;
+const DOT_COSTS=[5e9,5e12,5e15,5e18,5e21,5e24,5e27];
 function dotUpgradeCost(n){return DOT_COSTS[Math.min(n,DOT_COSTS.length-1)];}
 function alienCost(n){
   if(n===0)return 1000;       // alien 1: 1,000
   if(n===1)return 100000;     // alien 2: 100,000
   if(n===2)return 1000000;    // alien 3: 1,000,000
-  if(n===3)return 10000000;   // alien 4: 10,000,000
+  if(n===3)return 2500000;    // alien 4: 2,500,000
   // alien 5+ — existing growth curve starting from 10M
   let c=10000000;
   for(let i=3;i<n;i++){

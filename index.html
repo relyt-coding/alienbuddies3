@@ -367,7 +367,7 @@
       <!-- DOT MULTIPLIER UPGRADES — endgame, extremely expensive (moved to the bottom of the shop) -->
       <div class="store-section-label">⚡ ENDGAME · DOT MULTIPLIERS</div>
       <div class="tracks-row">
-        <div class="upgrade-card">
+        <div class="upgrade-card" style="position:relative;overflow:visible;">
           <div class="upgrade-card-header">
             <div class="upgrade-card-title">DRUMPAD DOTS</div>
             <div class="upgrade-card-sub" id="drumMultCardSub">Pad dot rows climb in ×4s instead of ×3s</div>
@@ -378,10 +378,16 @@
               <div class="upgrade-effect-main" id="drumMultEffectMain">DRUMPAD ×4 DOTS</div>
               <div class="upgrade-effect-sub" id="drumMultEffectSub">×3 · ×9 · ×18 → ×4 · ×12 · ×24</div>
             </div>
-            <div class="upgrade-price" id="drumMultPrice">1B<small>pts</small></div>
+            <div class="upgrade-price" id="drumMultPrice">5B<small>pts</small></div>
+          </div>
+          <div class="card-lock-overlay" id="drumDotsLock">
+            <div class="lock-icon">🔒</div>
+            <div class="lock-label">UNLOCK FOR</div>
+            <div class="lock-cost" id="drumDotsLockCost">1B pts</div>
+            <button class="lock-btn" id="drumDotsUnlockBtn">UNLOCK</button>
           </div>
         </div>
-        <div class="upgrade-card">
+        <div class="upgrade-card" style="position:relative;overflow:visible;">
           <div class="upgrade-card-header">
             <div class="upgrade-card-title" style="color:#4488cc;">SEQUENCER DOTS</div>
             <div class="upgrade-card-sub" id="seqMultCardSub">Unlock the sequencer first</div>
@@ -392,7 +398,13 @@
               <div class="upgrade-effect-main" id="seqMultEffectMain">SEQUENCER ×4 DOTS</div>
               <div class="upgrade-effect-sub" id="seqMultEffectSub">×3 · ×9 · ×18 → ×4 · ×12 · ×24</div>
             </div>
-            <div class="upgrade-price" id="seqMultPrice">1B<small>pts</small></div>
+            <div class="upgrade-price" id="seqMultPrice">5B<small>pts</small></div>
+          </div>
+          <div class="card-lock-overlay" id="seqDotsLock">
+            <div class="lock-icon">🔒</div>
+            <div class="lock-label">UNLOCK FOR</div>
+            <div class="lock-cost" id="seqDotsLockCost">1B pts</div>
+            <button class="lock-btn" id="seqDotsUnlockBtn">UNLOCK</button>
           </div>
         </div>
       </div>
@@ -691,7 +703,7 @@
   <div id="skillTreeModal">
     <div id="skillTreeHeader">
       <div id="skillTreeTitle">🌌 SKILL TREE</div>
-      <div id="skillTreeGemDisplay"><span>💎</span><span id="gemCountTree">0</span><span style="font-size:.5rem;color:#2a6a5a;letter-spacing:.1em;">GEMS</span></div>
+      <div id="skillTreeGemDisplay"><span>💎</span><span id="gemCountTree">0</span><span style="font-size:.8rem;color:#3a8a74;letter-spacing:.1em;">GEMS</span></div>
       <button id="skillTreeCloseBtn">✕ CLOSE</button>
     </div>
     <div id="skillTreeCanvas">

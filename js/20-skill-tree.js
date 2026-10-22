@@ -16,7 +16,7 @@ const BASE_GEMS_PER_ALIEN_PER_MIN = 1;
 // Each node: {id, icon, name, desc, cost, requires, x, y, branch, placeholder}
 const SKILL_TREE_NODES = [
   // ── CENTER ──
-  {id:'core', icon:'✦', name:'Tucana Core', desc:'The heart of the Tucana Galaxy. All four Quad Sun paths begin here.', cost:0, requires:[], x:0, y:0, branch:'center', mult:0},
+  {id:'core', icon:'✦', name:'Tucana Core', desc:'The heart of the Tucana Galaxy. All four Quad Sun paths begin here.', cost:100, requires:[], x:0, y:0, branch:'center', mult:0},
 
   // ── QUAD SUN 1 — Planet Exploration (↖) ──
   {id:'sun_planets', icon:'☀', name:'Quad Sun I', desc:'The first of four Quad Suns. Opens the Planet Exploration path. Grants ×2 points.', cost:150, requires:['core'], x:-200, y:-200, branch:'planets', mult:2},
@@ -207,7 +207,7 @@ function skillAvailable(id){
   const node = SKILL_MAP[id];
   if(!node) return false;
   if(unlockedSkills[id]) return false;
-  return node.requires.every(r => r === 'core' ? true : unlockedSkills[r]);
+  return node.requires.every(r => !!unlockedSkills[r]); // the Tucana Core itself now has to be bought first (100 gems)
 }
 
 // ── Buy skill ──
@@ -325,20 +325,20 @@ function renderSkillTree(){
   // Determine visibility state for each node
   // unlocked → available → silhouette (1 step past available) → hidden
   const availableIds = new Set(
-    SKILL_TREE_NODES.filter(n => n.id!=='core' && !unlockedSkills[n.id] && skillAvailable(n.id)).map(n=>n.id)
+    SKILL_TREE_NODES.filter(n => !unlockedSkills[n.id] && skillAvailable(n.id)).map(n=>n.id)
   );
   const silhouetteIds = new Set(
     SKILL_TREE_NODES.filter(n =>
       !unlockedSkills[n.id] && !availableIds.has(n.id) && n.id!=='core' &&
-      n.requires.some(r => availableIds.has(r) || unlockedSkills[r] || r==='core')
+      n.requires.some(r => availableIds.has(r) || unlockedSkills[r])
     ).map(n=>n.id)
   );
 
   // Draw nodes
   SKILL_TREE_NODES.forEach(node=>{
     const isCenter = node.id === 'core';
-    const isUnlocked = isCenter || !!unlockedSkills[node.id];
-    const isAvailable = !isCenter && availableIds.has(node.id);
+    const isUnlocked = !!unlockedSkills[node.id];
+    const isAvailable = availableIds.has(node.id);
     const isSilhouette = !isCenter && !isUnlocked && !isAvailable && silhouetteIds.has(node.id);
     // Skip nodes that are too far away
     if(!isCenter && !isUnlocked && !isAvailable && !isSilhouette) return;
@@ -377,7 +377,7 @@ function renderSkillTree(){
 
     el.appendChild(circle);
     el.appendChild(label);
-    if(!isCenter && !isSilhouette) el.appendChild(costEl);
+    if(!isSilhouette) el.appendChild(costEl); // (hidden by CSS once unlocked)
 
     el.addEventListener('click', e=>{
       e.stopPropagation();
@@ -394,7 +394,7 @@ let _stDetailNode = null;
 function openStDetail(id, fromEl){
   const node = SKILL_MAP[id];
   if(!node) return;
-  const isUnlocked = id === 'core' || !!unlockedSkills[id];
+  const isUnlocked = !!unlockedSkills[id];
   const isAvailable = !isUnlocked && skillAvailable(id);
   // Don't open for silhouette/hidden nodes
   if(!isUnlocked && !isAvailable) return;
@@ -408,7 +408,7 @@ function openStDetail(id, fromEl){
   document.getElementById('stDetailCost').textContent = isUnlocked ? '✓ UNLOCKED' : `💎 ${node.cost} GEMS`;
 
   const buyBtn = document.getElementById('stDetailBuyBtn');
-  if(isUnlocked || id === 'core'){
+  if(isUnlocked){
     buyBtn.textContent = '✓ UNLOCKED';
     buyBtn.className = 'owned';
     buyBtn.disabled = true;
@@ -439,7 +439,7 @@ function openStDetail(id, fromEl){
   // Map node coords to screen
   const sx = cr.left + stPanX + node.x * stScale;
   const sy = cr.top + stPanY + node.y * stScale;
-  const pw = 270, ph = 220;
+  const pw = 340, ph = 320;
   let left = sx - pw/2;
   let top = sy + 50;
   if(left < 8) left = 8;

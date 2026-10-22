@@ -9,7 +9,7 @@ let activeSlot=-1;
 function defaultSave(){
   return{
     score:0,tiers:[],
-    shop:{seqMultLevel:-1,multLevel:-1,alienBoostLevel:-1,multiClickLevel:-1,alienBoostUnlocked:false,multiClickUnlocked:false},
+    shop:{seqMultLevel:-1,multLevel:-1,alienBoostLevel:-1,multiClickLevel:-1,alienBoostUnlocked:false,multiClickUnlocked:false,drumDotsUnlocked:false,seqDotsUnlocked:false},
     totalAliens:0,
     drum:{pads:1,extraSounds:0,seqTracks:0},
     ts:Date.now()
@@ -34,7 +34,7 @@ function autoSave(){
   const seqLayersSnap=seqLayers.map(l=>({soundId:l.soundId,steps:[...l.steps],vols:[...l.vols],muted:l.muted}));
   writeSlot(activeSlot,{
     score,tiers,autoTiers,
-    shop:{seqMultLevel:shop.seqMultLevel,multLevel:shop.multLevel,alienBoostLevel:shop.alienBoostLevel,multiClickLevel:shop.multiClickLevel,alienBoostUnlocked:shop.alienBoostUnlocked,multiClickUnlocked:shop.multiClickUnlocked},
+    shop:{seqMultLevel:shop.seqMultLevel,multLevel:shop.multLevel,alienBoostLevel:shop.alienBoostLevel,multiClickLevel:shop.multiClickLevel,alienBoostUnlocked:shop.alienBoostUnlocked,multiClickUnlocked:shop.multiClickUnlocked,drumDotsUnlocked:shop.drumDotsUnlocked,seqDotsUnlocked:shop.seqDotsUnlocked},
     totalAliens,alienData,
     drum:{pads:drum.pads,extraSounds:drum.extraSounds,seqTracks:drum.seqTracks},
     matchLevelsCompleted,matchingMultiplier,matchSavedState,tipsOwned,tipsMult,drumTrackerActive,shopOpenCount,hasSeenSeqHint,
@@ -63,7 +63,7 @@ function autoSave(){
 // ══════════════════════════════════════════════
 let score=0,tiers=[],autoTiers=[];
 // multLevel = DRUMPAD ×4 dots (-1 / 0), seqMultLevel = SEQUENCER ×4 dots (-1 / 0)
-const shop={seqMultLevel:-1,multLevel:-1,alienBoostLevel:-1,multiClickLevel:-1,alienBoostUnlocked:false,multiClickUnlocked:false};
+const shop={seqMultLevel:-1,multLevel:-1,alienBoostLevel:-1,multiClickLevel:-1,alienBoostUnlocked:false,multiClickUnlocked:false,drumDotsUnlocked:false,seqDotsUnlocked:false};
 let totalAliens=0,viewingBunker=0;
 let matchingLevel=0; // highest level unlocked (0=none, 1=level1 available, etc)
 let matchingMultiplier=1; // permanent multiplier from wins
@@ -160,6 +160,8 @@ function loadFromSave(data){
   shop.multiClickLevel=data.shop?.multiClickLevel??-1;
   shop.alienBoostUnlocked=data.shop?.alienBoostUnlocked??false;
   shop.multiClickUnlocked=data.shop?.multiClickUnlocked??false;
+  shop.drumDotsUnlocked=data.shop?.drumDotsUnlocked??(shop.multLevel>=0);
+  shop.seqDotsUnlocked=data.shop?.seqDotsUnlocked??(shop.seqMultLevel>=0);
   totalAliens=data.totalAliens||0;
   matchLevelsCompleted=data.matchLevelsCompleted!==undefined?data.matchLevelsCompleted:-1;
   // Restore shownHints and auto-mark matching hints if already played
@@ -168,6 +170,8 @@ function loadFromSave(data){
   if(data.alienGems)alienGems=data.alienGems;
   if(data.skillTreeUnlocked)skillTreeUnlocked=data.skillTreeUnlocked;
   if(data.unlockedSkills)unlockedSkills=Object.assign({},data.unlockedSkills);
+  // Tucana Core used to be free: anyone who already unlocked skills keeps the core
+  if(Object.keys(unlockedSkills).length&&!unlockedSkills.core)unlockedSkills.core=true;
   if(matchLevelsCompleted>=0){shownHints.matchingIntro=true;shownHints.matchingGame=true;}
   matchingMultiplier=data.matchingMultiplier||1;
   matchSavedState=data.matchSavedState||null;

@@ -74,7 +74,19 @@ function buySeqTrack(){
   renderUI();autoSave();
 }
 
+function unlockDrumDots(){
+  if(shop.drumDotsUnlocked||score<DOT_UNLOCK_COST)return;
+  score-=DOT_UNLOCK_COST;shop.drumDotsUnlocked=true;
+  playSfxTierUnlock(4);flashBuy('#e8ff00');renderUI();autoSave();
+}
+function unlockSeqDots(){
+  if(drum.seqTracks<1){showToast('Unlock the sequencer first!');return;}
+  if(shop.seqDotsUnlocked||score<DOT_UNLOCK_COST)return;
+  score-=DOT_UNLOCK_COST;shop.seqDotsUnlocked=true;
+  playSfxTierUnlock(5);flashBuy('#4488ff');renderUI();autoSave();
+}
 function buyDrumMult(){
+  if(!(shop.drumDotsUnlocked||shop.multLevel>=0))return;
   if(shop.multLevel>=DOT_MAX_LEVEL)return;
   const cost=dotUpgradeCost(shop.multLevel+1);
   if(score<cost)return;
@@ -85,6 +97,7 @@ function buyDrumMult(){
 }
 function buySeqMult(){
   if(drum.seqTracks<1){showToast('Unlock the sequencer first!');return;}
+  if(!(shop.seqDotsUnlocked||shop.seqMultLevel>=0))return;
   if(shop.seqMultLevel>=DOT_MAX_LEVEL)return;
   const cost=dotUpgradeCost(shop.seqMultLevel+1);
   if(score<cost)return;
@@ -107,6 +120,8 @@ function addEP(id,fn){const el=document.getElementById(id);if(!el)return;el.addE
 addEP('padButtonsBtn',buyNextPad);
 addEP('soundLibBtn',buyNextSound);
 addEP('seqBtn',buySeqTrack);
+addEP('drumDotsUnlockBtn',unlockDrumDots);
+addEP('seqDotsUnlockBtn',unlockSeqDots);
 addEP('drumMultBtn',buyDrumMult);
 addEP('seqMultBtn',buySeqMult);
 addEP('multiClickUnlockBtn',unlockMultiClick);

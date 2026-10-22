@@ -44,7 +44,7 @@ function buySeqTrack(){
   if(tracks===0){
     // First track — unlock sequencer, auto-show it
     seqEnergy=SEQ_ENERGY_MAX;
-    seqViewMode='seq';
+    seqHidden=false;
     rebuildSeqUI();
     applySeqView();
     startSeq();

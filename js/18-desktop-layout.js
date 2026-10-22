@@ -243,7 +243,16 @@ function fitPadArea(){
     });
     return out;
   }
+  // Any open pop-up window (reassign pad, save/load/clear) hides the aliens completely while it is open
+  function modalOpen(){
+    if(document.getElementById('padAssignModal')?.classList.contains('open'))return true;
+    return ['savePatModal','loadPatModal','clearTrackModal'].some(id=>{
+      const m=document.getElementById(id);return m&&m.style.display&&m.style.display!=='none';
+    });
+  }
   function update(){
+    const hide=modalOpen();
+    if(hide!==layer._hiddenByModal){layer._hiddenByModal=hide;layer.style.visibility=hide?'hidden':'';}
     const rs=rects();
     let v='none';
     if(rs.length){
@@ -257,7 +266,7 @@ function fitPadArea(){
     }
     if(v!==last){last=v;layer.style.clipPath=v;layer.style.webkitClipPath=v;}
   }
-  setInterval(update,100);
+  setInterval(update,40);
   addEventListener('resize',update);
   update();
 })();

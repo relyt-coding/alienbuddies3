@@ -6,7 +6,9 @@ const STEPS=16;
 let seqLayers=[]; // [{soundId, steps:[bool×16], muted, stepEls[], fullStepEls[]}]
 let seqPlaying=false,seqStep=0,seqBpm=100; // base BPM is 100: scoring is normalized around it
 let seqHasAutoMutedAmbience=false;
-let seqViewMode='seq'; // 'seq' or 'tiers'
+// The sequencer and the trackers are shown together; each has a hide/show button (remembered per browser)
+let seqHidden=false,trackersHidden=false;
+try{seqHidden=localStorage.getItem('ab2_hideSeq')==='1';trackersHidden=localStorage.getItem('ab2_hideTrackers')==='1';}catch(e){}
 const seqPhBar=document.getElementById('seqPhBar');
 const seqLayersContainer=document.getElementById('seqLayersContainer');
 const seqAddBtn=document.getElementById('seqAddBtn');
@@ -48,15 +50,17 @@ function applySeqView(){
     return;
   }
   viewToggleBar.style.display='';
-  const showSeq=seqViewMode==='seq';
-  seqArea.classList.toggle('visible',showSeq);
-  tiersWrap.style.display=showSeq?'none':'';
-  vtbSeqBtn.classList.toggle('active',showSeq);
-  vtbTiersBtn.classList.toggle('active',!showSeq);
+  seqArea.classList.toggle('visible',!seqHidden);
+  tiersWrap.style.display=trackersHidden?'none':'';
+  vtbSeqBtn.textContent=seqHidden?'SHOW SEQUENCER':'HIDE SEQUENCER';
+  vtbTiersBtn.textContent=trackersHidden?'SHOW TRACKERS':'HIDE TRACKERS';
+  vtbSeqBtn.classList.toggle('active',!seqHidden);
+  vtbTiersBtn.classList.toggle('active',!trackersHidden);
 }
 
-vtbSeqBtn&&vtbSeqBtn.addEventListener('click',()=>{seqViewMode='seq';applySeqView();setTimeout(clampBouncersToBounds,50);});
-vtbTiersBtn&&vtbTiersBtn.addEventListener('click',()=>{seqViewMode='tiers';applySeqView();setTimeout(clampBouncersToBounds,50);});
+function _saveViewPrefs(){try{localStorage.setItem('ab2_hideSeq',seqHidden?'1':'0');localStorage.setItem('ab2_hideTrackers',trackersHidden?'1':'0');}catch(e){}}
+vtbSeqBtn&&vtbSeqBtn.addEventListener('click',()=>{seqHidden=!seqHidden;_saveViewPrefs();applySeqView();setTimeout(clampBouncersToBounds,50);});
+vtbTiersBtn&&vtbTiersBtn.addEventListener('click',()=>{trackersHidden=!trackersHidden;_saveViewPrefs();applySeqView();setTimeout(clampBouncersToBounds,50);});
 
 // Fullscreen modal
 seqExpandBtn&&seqExpandBtn.addEventListener('click',()=>openSeqFull());
@@ -198,7 +202,6 @@ function buildMpListFull(){
 function rebuildSeqUI(){
   seqLayersContainer.innerHTML='';seqLayers=[];
   const hasSeq=drum.seqTracks>0;
-  seqViewMode='seq';
   applySeqView();
   seqAddBtn.disabled=true;
   if(!hasSeq)return;

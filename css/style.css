@@ -270,6 +270,11 @@ body.desktop-mode #seqFullZoomHint{display:none;}
 .view-toggle-bar{display:flex;gap:5px;width:100%;z-index:3;margin-bottom:4px;}
 .vtb-btn{flex:1;font-family:'Bebas Neue',sans-serif;font-size:.85rem;letter-spacing:.12em;padding:.25rem .5rem;border-radius:6px;border:1px solid #1a1a2a;background:#0d0d1c;color:#2a2a5a;cursor:pointer;touch-action:manipulation;transition:all .18s;}
 .vtb-btn.active{background:#1a1a3a;border-color:#a0a8ff;color:#a0a8ff;box-shadow:0 0 14px -4px rgba(160,168,255,.55);}
+/* Score + trackers sit side by side on desktop once the sequencer is unlocked, so the combos stay visible while you make music */
+body.seq-on.desktop-mode #scoreRow{display:flex;align-items:center;justify-content:center;gap:28px;width:100%;}
+body.seq-on.desktop-mode #scoreRow .score-section{flex:1 1 0;min-width:0;}
+body.seq-on.desktop-mode #scoreRow .tiers-dual-wrap{width:auto;flex:0 0 auto;}
+body.seq-on.desktop-mode #scoreRow .tiers-col{max-height:26vh;}
 .vtb-btn:not(.active):hover{border-color:#2a2a44;color:#4a4a88;}
 
 .pad-edit-btn{font-family:'Bebas Neue',sans-serif;font-size:.72rem;letter-spacing:.12em;padding:.28rem .65rem;border-radius:6px;border:1px solid #2a2a2a;background:#111;color:#555;cursor:pointer;touch-action:manipulation;transition:all .15s;}

@@ -123,6 +123,8 @@
         <button class="nav-btn btn-right" id="openStoreBtn">SHOP</button>
       </div>
 
+      <!-- SCORE + TRACKERS (side by side on desktop once the sequencer is unlocked) -->
+      <div id="scoreRow">
       <div class="score-section" id="scoreSectionBtn" style="cursor:pointer;" title="Tap for score breakdown">
         <div class="score" id="scoreEl">0</div>
         <div class="score-sub" id="scoreSubEl"></div>
@@ -156,10 +158,12 @@
         </div>
       </div>
 
+      </div><!-- /scoreRow -->
+
       <!-- VIEW TOGGLE (shown when sequencer is unlocked) -->
       <div class="view-toggle-bar" id="viewToggleBar" style="display:none;">
-        <button class="vtb-btn" id="vtbSeqBtn">SEQUENCER</button>
-        <button class="vtb-btn" id="vtbTiersBtn">TRACKERS</button>
+        <button class="vtb-btn" id="vtbSeqBtn">HIDE SEQUENCER</button>
+        <button class="vtb-btn" id="vtbTiersBtn">HIDE TRACKERS</button>
       </div>
 
       <!-- SEQUENCER (replaces tiers when visible) -->

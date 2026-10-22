@@ -854,3 +854,21 @@ function openArrBarPicker(i){
 }
 document.getElementById('arrBarPickerClose')&&document.getElementById('arrBarPickerClose').addEventListener('click',()=>{arrBarPickerModal.style.display='none';});
 arrBarPickerModal&&arrBarPickerModal.addEventListener('click',e=>{if(e.target===arrBarPickerModal)arrBarPickerModal.style.display='none';});
+
+// ── 4+ tracks on a shorter screen: only 3½ rows show, the rest scroll (invisible scrollbar) ──
+function fitSeqScroll(){
+  const c=seqLayersContainer;if(!c)return;
+  const rows=c.querySelectorAll('.seq-layer-row');
+  const small=window.innerHeight<1000;
+  if(rows.length<4||!small||c.offsetParent===null){
+    if(c.classList.contains('seq-scroll')){c.classList.remove('seq-scroll');c.style.maxHeight='';}
+    return;
+  }
+  const pitch=rows[1].offsetTop-rows[0].offsetTop;
+  if(!pitch)return;
+  c.classList.add('seq-scroll');
+  c.style.maxHeight=Math.round(pitch*3.5)+'px';
+}
+new MutationObserver(fitSeqScroll).observe(seqLayersContainer,{childList:true});
+addEventListener('resize',fitSeqScroll);
+setInterval(fitSeqScroll,1000);

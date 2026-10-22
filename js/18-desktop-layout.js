@@ -171,3 +171,49 @@ const settingsSocialsBtn=document.getElementById('settingsSocialsBtn');
 settingsSocialsBtn&&settingsSocialsBtn.addEventListener('click',()=>{closeSettings();openSocials();});
 socialsModal&&socialsModal.addEventListener('click',e=>{if(e.target===socialsModal)socialsModal.style.display='none';});
 
+
+// ── Fit the drum pad grid into the vertical space left over (desktop) ──
+// With many sequencer tracks (e.g. 6) the pads used to be pushed off the bottom / the last track got clipped.
+// This measures the free height and shrinks the pad grid just enough (never above its normal size).
+const PAD_GRID_CAPS={1:160,2:326,3:410,4:410,5:560,6:560,7:680,8:680};
+const PAD_GRID_MIN_W=200;
+function fitPadArea(){
+  const grid=document.getElementById('padGrid');
+  const app=document.querySelector('#gameView .app');
+  const area=grid&&grid.closest('.pad-area');
+  if(!grid||!app||!area)return;
+  if(!document.body.classList.contains('desktop-mode')||document.body.classList.contains('arr-mode')||app.offsetHeight===0){grid.style.maxWidth='';return;}
+  const n=Math.max(1,Math.min(8,parseInt(grid.getAttribute('data-pads'))||1));
+  const cap=PAD_GRID_CAPS[n]||410;
+  // height used by everything except the pad area
+  let used=0;
+  [...app.children].forEach(ch=>{
+    if(ch===area)return;
+    const cs=getComputedStyle(ch);
+    if(cs.display==='none'||cs.position==='absolute'||cs.position==='fixed')return;
+    used+=ch.getBoundingClientRect().height+parseFloat(cs.marginTop)+parseFloat(cs.marginBottom);
+  });
+  const acs=getComputedStyle(app),acsArea=getComputedStyle(area);
+  const inner=app.clientHeight-parseFloat(acs.paddingTop)-parseFloat(acs.paddingBottom);
+  const avail=inner-used-parseFloat(acsArea.paddingTop)-parseFloat(acsArea.paddingBottom)-24; // 24px breathing room
+  // grid geometry (matches the CSS: 4:3 pads, 6px gap, columns per pad count)
+  const cols=n<=1?1:(n===3?3:(n<=4?2:(n<=6?3:4)));
+  const rows=Math.ceil(n/cols);
+  const gap=6,ratio=0.75;
+  const padH=(avail-(rows-1)*gap)/rows;
+  let W=(padH/ratio)*cols+(cols-1)*gap;
+  W=Math.max(PAD_GRID_MIN_W,Math.min(cap,W));
+  grid.style.maxWidth=Math.floor(W)+'px';
+}
+(function(){
+  let raf=0;
+  const schedule=()=>{if(raf)return;raf=requestAnimationFrame(()=>{raf=0;fitPadArea();});};
+  window.fitPadAreaSoon=schedule;
+  window.addEventListener('resize',schedule);
+  if(typeof ResizeObserver!=='undefined'){
+    const ro=new ResizeObserver(schedule);
+    const app=document.querySelector('#gameView .app');
+    if(app){ro.observe(app);[...app.children].forEach(ch=>{if(!ch.classList.contains('pad-area'))ro.observe(ch);});}
+  }
+  schedule();
+})();

@@ -461,6 +461,12 @@ function loadPatternIntoEditor(pi){
 // startSeq / stopSeq
 function startSeq(){
   seqClockStop();
+  if(seqEnergy<=0){ // no energy: wait until a pad hit recharges the meter
+    _seqEnergyWait=true;updateEnergyUI();
+    showToast('Energy empty — tap a drum pad to recharge!');
+    return;
+  }
+  _seqEnergyWait=false;
   seqStep=0;arrBar=0;arrBarStep=0;songSlotIdx=0;songArrBar=0;songArrBarStep=0;
   // Ensure arrangement array is sized correctly
   if(seqMode==='arrange'){
@@ -569,7 +575,7 @@ function seqRunStep(quiet,delayMs,audioAt){
   }
 }
 function stopSeq(){
-  seqClockStop();_seqHidePaused=false;
+  seqClockStop();_seqEnergyWait=false;_seqHidePaused=false;
   seqPlaying=false;requestRender();seqStep=0;arrBar=0;arrBarStep=0;songSlotIdx=0;songArrBar=0;songArrBarStep=0;
   seqPhEls.forEach(c=>c.classList.remove('lit'));
   seqFullPhEls.forEach(c=>c.classList.remove('lit'));

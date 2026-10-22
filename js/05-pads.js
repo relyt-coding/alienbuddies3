@@ -116,6 +116,7 @@ function rebuildPadGrid(){
     padGridEl.appendChild(g); // not added to padEls, so pad indexes stay correct
     updateGhostPad();
   }
+  if(typeof fitPadAreaSoon==='function')fitPadAreaSoon(); // keep the grid inside the free vertical space
 }
 function unlockGhostPad(){
   const cost=PAD_COSTS[1];
@@ -374,6 +375,7 @@ window.addEventListener('mousedown',e=>{
 function firePad(idx){
   const sndId=padSounds[idx];if(!sndId)return;
   getCtx();playSound(sndId);
+  if(typeof addSeqEnergy==='function')addSeqEnergy(SEQ_ENERGY_PER_TAP); // every pad hit recharges the sequencer energy meter
   const el=padEls[idx];
   el.classList.remove('lit');void el.offsetWidth;el.classList.add('lit');
   setTimeout(()=>el.classList.remove('lit'),130);

@@ -63,6 +63,62 @@ const SEQ_PARTICLES_PER_SEC=IS_MOBILE_DEVICE?3:5;
 const SEQ_CATCHUP_MAX_MS=30*60*1000;
 const SEQ_LOOKAHEAD_MS=100; // sounds are scheduled this far ahead on the audio clock so UI work can't push them off the beat
 const SEQ_WORKER_TICK_MS=15; // longest stretch of missed steps we'll credit after a browser freeze
+// ══════════════════════════════════════════════
+//  SEQUENCER ENERGY METER
+//  20 sections. Every pad hit adds 1 section. While the sequencer runs it drains 1 section per 15 seconds.
+//  With any energy left the sequencer keeps playing and earning; at 0 it pauses until a pad hit recharges it.
+// ══════════════════════════════════════════════
+const SEQ_ENERGY_MAX=20;
+const SEQ_ENERGY_PER_TAP=1;            // sections added per pad hit
+const SEQ_ENERGY_SEC_PER_SECTION=15;   // seconds for 1 section to drain
+let seqEnergy=SEQ_ENERGY_MAX;
+let _seqEnergyWait=false;              // sequencer is stopped, waiting for energy
+let _energyUiKey='';
+let energyEmptyHints=0;               // how many times we've explained refilling (only the first 2 empties get a popup)
+function addSeqEnergy(n){
+  if(drum.seqTracks<1)return;
+  seqEnergy=Math.min(SEQ_ENERGY_MAX,seqEnergy+n);
+  updateEnergyUI();
+  if(_seqEnergyWait&&seqEnergy>0){_seqEnergyWait=false;getCtx();startSeq();}
+}
+function drainSeqEnergy(sec){seqEnergy=Math.max(0,seqEnergy-sec/SEQ_ENERGY_SEC_PER_SECTION);}
+function _seqEnergyOut(){
+  if(!seqPlaying&&_seqEnergyWait)return;
+  stopSeq();_seqEnergyWait=true;
+  updateEnergyUI();
+  if(energyEmptyHints<2){
+    energyEmptyHints++;
+    showHint('⚡','Your sequencer ran out of <b>energy</b> and paused.<br><br>Tap the drum pads (or press their keys) to refill the meter — each hit adds a section, and the sequencer restarts automatically.');
+    autoSave();
+  }
+}
+function buildEnergyMeter(){
+  const bar=document.getElementById('energySegs');
+  if(!bar||bar.children.length===SEQ_ENERGY_MAX)return;
+  bar.innerHTML='';
+  for(let i=0;i<SEQ_ENERGY_MAX;i++){const d=document.createElement('div');d.className='energy-seg';bar.appendChild(d);}
+}
+function updateEnergyUI(){
+  const wrap=document.getElementById('energyMeter');
+  if(!wrap)return;
+  const on=drum.seqTracks>=1;
+  if(!on){if(wrap.style.display!=='none')wrap.style.display='none';return;}
+  const filled=Math.ceil(seqEnergy-1e-9);
+  const secs=Math.ceil(seqEnergy*SEQ_ENERGY_SEC_PER_SECTION);
+  const key=filled+'|'+secs+'|'+_seqEnergyWait+'|'+seqPlaying;
+  if(key===_energyUiKey&&wrap.style.display!=='none')return;
+  _energyUiKey=key;
+  buildEnergyMeter();
+  wrap.style.display='flex';
+  const segs=document.getElementById('energySegs').children;
+  for(let i=0;i<segs.length;i++)segs[i].classList.toggle('on',i<filled);
+  wrap.classList.toggle('mid',filled<=8&&filled>3);
+  wrap.classList.toggle('low',filled<=3);
+  wrap.classList.toggle('empty',seqEnergy<=0);
+  const lbl=document.getElementById('energyLabel');
+  if(lbl)lbl.textContent=seqEnergy<=0?'TAP A PAD TO RECHARGE':('ENERGY · '+Math.floor(secs/60)+':'+String(secs%60).padStart(2,'0'));
+}
+
 let _seqDotAccum=0;
 function seqStepScale(){return SEQ_BASE_BPM/Math.max(1,seqBpm);}
 function seqStepsPerSec(){return seqBpm/15;} // 16th-note steps
@@ -124,13 +180,17 @@ function _seqClockTick(){
   if(dues.length>cap){dues.splice(0,dues.length-cap);_seqNextDue=now+ms;}
   const ctxNow=getCtx().currentTime;
   for(let i=0;i<dues.length;i++){
+    if(seqEnergy<=0){_seqEnergyOut();return;}   // out of energy: stop here (remaining catch-up steps are not credited)
     const delay=dues[i]-now;           // ms from now until this step should sound (performance clock)
     const late=delay<-40;              // steps already well in the past (frozen tab etc.) still score but stay silent
     // sounds use an evenly spaced grid on the audio clock so spacing is exact no matter when the tick ran
     if(_seqAudioNext<ctxNow-0.04)_seqAudioNext=ctxNow+Math.max(0,delay)/1000; // fell behind: resync
     const at=_seqAudioNext;_seqAudioNext+=ms/1000;
     seqRunStep(late,Math.max(0,(at-ctxNow)*1000),at);
+    drainSeqEnergy(ms/1000);
   }
+  updateEnergyUI();
+  if(seqEnergy<=0){_seqEnergyOut();return;}
   if(dues.length>1)requestRender();
 }
 

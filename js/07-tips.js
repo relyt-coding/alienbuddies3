@@ -44,7 +44,8 @@ function buildTipsList(){
   for(let i=0;i<Math.min(show,20);i++){
     const cost=tipCost(i);
     const owned=i<tipsOwned;
-    const canBuy=!owned&&score>=cost;
+    const isNext=(i===tipsOwned); // tips must be bought in order (otherwise the counter and the ✓ marks get out of sync)
+    const canBuy=isNext&&score>=cost;
     const row=document.createElement('div');
     row.style.cssText='display:flex;align-items:center;justify-content:space-between;gap:.6rem;padding:.55rem .75rem;border-radius:10px;border:1px solid '+(owned?'#1a2a1a':canBuy?'#3a3a1a':'#1a1a1a')+';background:'+(owned?'#050f05':canBuy?'#0d0d04':'#060606')+';';
     // Left: tip label button
@@ -70,7 +71,6 @@ function buildTipsList(){
         showToast(`Tip purchased — your Tap Multiplier increased by ×1.5!`);
         playSfxTierUnlock(tipsOwned);
         buildTipsList();updateTipsLabel();renderUI();autoSave();
-        showToast('Tip unlocked! +×1.2 tap multiplier');
         openTipReader(tipsOwned-1);
       });
       right.appendChild(btn);

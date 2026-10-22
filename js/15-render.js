@@ -102,6 +102,7 @@ function renderUI(newlyLit){
     orig.apply(this,arguments);
     updateDrumTrackerOverlay();
     updateGhostPad();
+    if(typeof updateEnergyUI==='function')updateEnergyUI();
     const hint=document.getElementById('padClickHint');
     if(hint)hint.style.display=(score===0&&drum.pads<=1&&!(typeof seqPlaying!=='undefined'&&seqPlaying))?'flex':'none'; // only on a brand-new save, never after buying pads
     updateOnboardingArrows();

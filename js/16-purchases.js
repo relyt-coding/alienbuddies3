@@ -43,6 +43,7 @@ function buySeqTrack(){
   if(tracks>0)showToast('Sequencer track unlocked — your Drum Multiplier increased by ×1.2!');
   if(tracks===0){
     // First track — unlock sequencer, auto-show it
+    seqEnergy=SEQ_ENERGY_MAX;
     seqViewMode='seq';
     rebuildSeqUI();
     applySeqView();

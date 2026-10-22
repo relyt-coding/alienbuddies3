@@ -36,7 +36,9 @@ const ALIEN_POWER_UNLOCK_COST=600000000;
 // 0.2: the Auto Clicker is now the sequencer (metronome). These two one-time upgrades switch a tracker's dot rows from the ×3 pattern to the ×4 pattern.
 // Cost of the next dot-base upgrade (n = how many have been bought already): 100M, 100M, then x1000 each (100B, 100T, 100Qa ...). Max ×10.
 const DOT_MAX_LEVEL=6; // level 6 = ×10
-function dotUpgradeCost(n){return n<2?100000000:100000000*Math.pow(1000,n-1);} // 100M, 100M, 100B, 100T, 100Qa, 100Qi, 100Sx
+// Endgame prices (n = upgrades already bought): ×4 100M, ×5 100M, then brutal: ×6 1E15, ×7 1E19, ×8 1E24, ×9 1E30, ×10 1E37
+const DOT_COSTS=[1e8,1e8,1e15,1e19,1e24,1e30,1e37];
+function dotUpgradeCost(n){return DOT_COSTS[Math.min(n,DOT_COSTS.length-1)];}
 function alienCost(n){
   if(n===0)return 1000;       // alien 1: 1,000
   if(n===1)return 100000;     // alien 2: 100,000

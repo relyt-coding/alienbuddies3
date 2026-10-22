@@ -117,6 +117,16 @@ body.desktop-mode #socialsBtn:active{background:#1a1a1a;border-color:#6699ff;col
 .auto-info.visible{display:flex;}
 .auto-info-row{font-size:.55rem;letter-spacing:.2em;text-transform:uppercase;color:#555;}
 .auto-info-row span{color:#e8ff00;transition:color .5s;}
+.energy-meter{margin-top:.3rem;flex-direction:column;align-items:center;gap:3px;--ec:#00ff88;}
+.energy-segs{display:flex;gap:2px;}
+.energy-seg{width:9px;height:7px;border-radius:2px;background:#16221c;border:1px solid #1d2d25;box-sizing:border-box;transition:background .15s,box-shadow .15s;}
+.energy-seg.on{background:var(--ec);border-color:var(--ec);box-shadow:0 0 6px -1px var(--ec);}
+.energy-label{font-family:'Bebas Neue',sans-serif;font-size:.62rem;letter-spacing:.18em;color:var(--ec);opacity:.85;}
+.energy-meter.mid{--ec:#ffc83a;}
+.energy-meter.low{--ec:#ff4a4a;}
+.energy-meter.low .energy-seg.on{animation:energyPulse .9s ease-in-out infinite;}
+.energy-meter.empty .energy-label{animation:energyPulse .9s ease-in-out infinite;opacity:1;}
+@keyframes energyPulse{0%,100%{opacity:1;}50%{opacity:.35;}}
 .auto-pulse{width:5px;height:5px;border-radius:50%;background:#e8ff00;display:inline-block;margin-right:4px;animation:pulse 1s ease-in-out infinite;vertical-align:middle;transition:background .5s;}
 @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.65)}}
 .alien-mult-info{margin-top:.2rem;font-size:.55rem;letter-spacing:.2em;text-transform:uppercase;color:#555;display:none;}
@@ -296,6 +306,8 @@ body.seq-on.desktop-mode.arr-mode .pad{aspect-ratio:5/2;}
 .pad-area{width:100%;z-index:3;padding-bottom:4.5rem;}
 body.desktop-mode .pad-area{padding-bottom:1rem;max-width:680px;width:100%;margin:0 auto;}
 body.desktop-mode .pad{aspect-ratio:4/3;}
+/* Pad grid size is the same whether or not the sequencer is unlocked: 4 pads = 410px wide column, 4:3 pads */
+body.desktop-mode .pad-grid[data-pads]{max-width:410px;margin:0 auto;}
 body.desktop-mode .pad-grid[data-pads="1"]{grid-template-columns:1fr;max-width:160px;margin:0 auto;}
 body.desktop-mode .pad-grid[data-pads="2"]{max-width:326px;margin:0 auto;}
 /* 5-8 pads: fill the game column (up to a comfortable size) */
@@ -597,8 +609,8 @@ body.desktop-mode .bunker-stat-label{font-size:.55rem!important;display:block!im
 .st-node.unlocked .st-node-label{color:#3a8a6a;}
 .st-node.available .st-node-label{color:#4466aa;}
 .st-node.center .st-node-label{color:#2266bb;font-size:.55rem;}
-.st-node-cost{font-family:'Bebas Neue',sans-serif;font-size:.42rem;color:#2a4a3a;display:flex;align-items:center;gap:2px;}
-.st-node.available .st-node-cost{color:#44eebb;}
+.st-node-cost{font-family:'Bebas Neue',sans-serif;font-size:.85rem;letter-spacing:.04em;color:#3f7a62;display:flex;align-items:center;gap:4px;margin-top:2px;}
+.st-node.available .st-node-cost{color:#44eebb;text-shadow:0 0 8px rgba(68,238,187,.35);}
 .st-node.unlocked .st-node-cost{display:none;}
 .st-node-check{position:absolute;top:-3px;right:-3px;width:16px;height:16px;border-radius:50%;background:#44eebb;display:none;align-items:center;justify-content:center;font-size:.5rem;color:#020a06;font-weight:700;}
 .st-node.unlocked .st-node-check{display:flex;}

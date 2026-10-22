@@ -114,6 +114,10 @@
           <div class="auto-info-row"><span class="auto-pulse" id="autoPulse"></span>SEQUENCER: <span id="autoCpsDisplay">0</span> STEPS/SEC</div>
           <div class="auto-info-row">EARNING <span id="autoEarnDisplay">—</span>/SEC</div>
         </div>
+        <div class="energy-meter" id="energyMeter" style="display:none;">
+          <div class="energy-segs" id="energySegs"></div>
+          <div class="energy-label" id="energyLabel">ENERGY</div>
+        </div>
         <div class="alien-mult-info" id="alienMultInfo">👽 ALIEN BOOST: <span id="alienMultDisplay">×1</span></div>
       </div>
 
@@ -316,39 +320,6 @@
         </div>
       </div>
 
-      <!-- EXISTING UPGRADES -->
-      <div class="store-section-label">⚡ PERFORMANCE</div>
-      <div class="tracks-row">
-        <div class="upgrade-card">
-          <div class="upgrade-card-header">
-            <div class="upgrade-card-title">DRUMPAD DOTS</div>
-            <div class="upgrade-card-sub" id="drumMultCardSub">Pad dot rows climb in ×4s instead of ×3s</div>
-          </div>
-          <div class="upgrade-buy-btn" id="drumMultBtn">
-            <div class="upgrade-counter"><div class="upgrade-counter-num" id="drumMultCounterNum">0</div><div class="upgrade-counter-lbl">OWNED</div></div>
-            <div class="upgrade-effect">
-              <div class="upgrade-effect-main" id="drumMultEffectMain">DRUMPAD ×4 DOTS</div>
-              <div class="upgrade-effect-sub" id="drumMultEffectSub">×3 · ×9 · ×18 → ×4 · ×12 · ×24</div>
-            </div>
-            <div class="upgrade-price" id="drumMultPrice">100M<small>pts</small></div>
-          </div>
-        </div>
-        <div class="upgrade-card">
-          <div class="upgrade-card-header">
-            <div class="upgrade-card-title" style="color:#4488cc;">SEQUENCER DOTS</div>
-            <div class="upgrade-card-sub" id="seqMultCardSub">Unlock the sequencer first</div>
-          </div>
-          <div class="upgrade-buy-btn" id="seqMultBtn">
-            <div class="upgrade-counter"><div class="upgrade-counter-num" id="seqMultCounterNum">0</div><div class="upgrade-counter-lbl">OWNED</div></div>
-            <div class="upgrade-effect">
-              <div class="upgrade-effect-main" id="seqMultEffectMain">SEQUENCER ×4 DOTS</div>
-              <div class="upgrade-effect-sub" id="seqMultEffectSub">×3 · ×9 · ×18 → ×4 · ×12 · ×24</div>
-            </div>
-            <div class="upgrade-price" id="seqMultPrice">100M<small>pts</small></div>
-          </div>
-        </div>
-      </div>
-
       <div class="store-section-label">🌟 TIER 2 UPGRADES</div>
       <div class="tracks-row" id="tier2Row">
         <div class="upgrade-card" style="border-color:#2a1a3a;position:relative;overflow:visible;">
@@ -402,6 +373,39 @@
           <div style="font-size:.58rem;color:#555;letter-spacing:.12em;text-transform:uppercase;margin-top:.2rem;">Powerful artifacts from across the galaxy</div>
         </div>
         <div style="font-family:'Bebas Neue',sans-serif;font-size:.8rem;letter-spacing:.12em;color:#444;border:1px solid #2a2a2a;border-radius:8px;padding:.3rem .7rem;">COMING SOON</div>
+      </div>
+
+      <!-- DOT MULTIPLIER UPGRADES — endgame, extremely expensive (moved to the bottom of the shop) -->
+      <div class="store-section-label">⚡ ENDGAME · DOT MULTIPLIERS</div>
+      <div class="tracks-row">
+        <div class="upgrade-card">
+          <div class="upgrade-card-header">
+            <div class="upgrade-card-title">DRUMPAD DOTS</div>
+            <div class="upgrade-card-sub" id="drumMultCardSub">Pad dot rows climb in ×4s instead of ×3s</div>
+          </div>
+          <div class="upgrade-buy-btn" id="drumMultBtn">
+            <div class="upgrade-counter"><div class="upgrade-counter-num" id="drumMultCounterNum">0</div><div class="upgrade-counter-lbl">OWNED</div></div>
+            <div class="upgrade-effect">
+              <div class="upgrade-effect-main" id="drumMultEffectMain">DRUMPAD ×4 DOTS</div>
+              <div class="upgrade-effect-sub" id="drumMultEffectSub">×3 · ×9 · ×18 → ×4 · ×12 · ×24</div>
+            </div>
+            <div class="upgrade-price" id="drumMultPrice">100M<small>pts</small></div>
+          </div>
+        </div>
+        <div class="upgrade-card">
+          <div class="upgrade-card-header">
+            <div class="upgrade-card-title" style="color:#4488cc;">SEQUENCER DOTS</div>
+            <div class="upgrade-card-sub" id="seqMultCardSub">Unlock the sequencer first</div>
+          </div>
+          <div class="upgrade-buy-btn" id="seqMultBtn">
+            <div class="upgrade-counter"><div class="upgrade-counter-num" id="seqMultCounterNum">0</div><div class="upgrade-counter-lbl">OWNED</div></div>
+            <div class="upgrade-effect">
+              <div class="upgrade-effect-main" id="seqMultEffectMain">SEQUENCER ×4 DOTS</div>
+              <div class="upgrade-effect-sub" id="seqMultEffectSub">×3 · ×9 · ×18 → ×4 · ×12 · ×24</div>
+            </div>
+            <div class="upgrade-price" id="seqMultPrice">100M<small>pts</small></div>
+          </div>
+        </div>
       </div>
 
     </div>

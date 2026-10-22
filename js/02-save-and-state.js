@@ -43,6 +43,7 @@ function autoSave(){
     soundVols:{...soundVols},
     visiblePads,
     seqBpm,
+    seqEnergy,energyEmptyHints,
     seqMode,
     arrangement:[...arrangement],
     arrangeBars,
@@ -223,6 +224,9 @@ updateMatchingBtn();
   else visiblePads=drum.pads;
   // Restore sequencer state
   if(data.seqBpm)seqBpm=data.seqBpm;
+  seqEnergy=(typeof data.seqEnergy==='number')?Math.max(0,Math.min(SEQ_ENERGY_MAX,data.seqEnergy)):SEQ_ENERGY_MAX; // energy meter (full on a fresh save)
+  energyEmptyHints=(typeof data.energyEmptyHints==='number')?data.energyEmptyHints:0;
+  _seqEnergyWait=false;
   if(data.seqMode)seqMode=data.seqMode;
   if(data.arrangement)arrangement=[...data.arrangement];
   if(data.arrangeBars)arrangeBars=data.arrangeBars;

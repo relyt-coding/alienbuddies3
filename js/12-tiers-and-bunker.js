@@ -348,3 +348,25 @@ document.getElementById('alienNameClear')&&document.getElementById('alienNameCle
 document.getElementById('alienNameClose')&&document.getElementById('alienNameClose').addEventListener('click',closeAlienNameModal);
 alienNameModal&&alienNameModal.addEventListener('pointerdown',e=>{if(e.target===alienNameModal)closeAlienNameModal();});
 alienNameInput&&alienNameInput.addEventListener('keydown',e=>{if(e.key==='Enter')saveAlienName();});
+
+// ── Trackers show only the newest 4 rows; scroll up (no scrollbar) to see the first colours ──
+(function(){
+  const VISIBLE_ROWS=4;
+  ['tiersContainer','autoTiersContainer'].forEach(id=>{
+    const c=document.getElementById(id);if(!c)return;
+    let stick=true;
+    c.addEventListener('scroll',()=>{stick=c.scrollTop+c.clientHeight>=c.scrollHeight-6;},{passive:true});
+    function fit(){
+      const rows=c.querySelectorAll('.tier-row');
+      if(rows.length<=VISIBLE_ROWS){c.style.maxHeight='';return;}
+      const h=rows[rows.length-1].offsetHeight;
+      if(!h)return; // hidden right now
+      const gap=parseFloat(getComputedStyle(c).rowGap)||5;
+      c.style.maxHeight=(VISIBLE_ROWS*h+(VISIBLE_ROWS-1)*gap+2)+'px';
+      if(stick)c.scrollTop=c.scrollHeight;
+    }
+    new MutationObserver(fit).observe(c,{childList:true});
+    addEventListener('resize',fit);
+    setInterval(fit,1000); // cheap catch-all (row heights change with layout)
+  });
+})();

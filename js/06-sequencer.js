@@ -42,6 +42,23 @@ const viewToggleBar=document.getElementById('viewToggleBar');
 const vtbSeqBtn=document.getElementById('vtbSeqBtn');
 const vtbTiersBtn=document.getElementById('vtbTiersBtn');
 
+// The hide/show buttons sit next to CLEAR under the sequencer; when the sequencer is hidden
+// (or on the ARR/SONG views, which have no such row) they live in the standalone bar instead.
+function placeViewButtons(){
+  const clearBtn=document.getElementById('seqClearBtn');
+  const inRow=clearBtn&&drum.seqTracks&&!seqHidden&&seqMode==='pattern';
+  if(inRow){
+    clearBtn.parentNode.insertBefore(vtbSeqBtn,clearBtn);
+    clearBtn.parentNode.insertBefore(vtbTiersBtn,clearBtn);
+    vtbSeqBtn.className=vtbTiersBtn.className='seq-save-pat-btn';
+    viewToggleBar.style.display='none';
+  }else{
+    viewToggleBar.appendChild(vtbSeqBtn);viewToggleBar.appendChild(vtbTiersBtn);
+    vtbSeqBtn.className=vtbTiersBtn.className='vtb-btn';
+    vtbSeqBtn.classList.toggle('active',!seqHidden);vtbTiersBtn.classList.toggle('active',!trackersHidden);
+    viewToggleBar.style.display=drum.seqTracks?'':'none';
+  }
+}
 function applySeqView(){
   if(!drum.seqTracks){
     tiersWrap.style.display='';
@@ -49,13 +66,11 @@ function applySeqView(){
     viewToggleBar.style.display='none';
     return;
   }
-  viewToggleBar.style.display='';
   seqArea.classList.toggle('visible',!seqHidden);
   tiersWrap.style.display=trackersHidden?'none':'';
   vtbSeqBtn.textContent=seqHidden?'SHOW SEQUENCER':'HIDE SEQUENCER';
   vtbTiersBtn.textContent=trackersHidden?'SHOW TRACKERS':'HIDE TRACKERS';
-  vtbSeqBtn.classList.toggle('active',!seqHidden);
-  vtbTiersBtn.classList.toggle('active',!trackersHidden);
+  placeViewButtons();
 }
 
 function _saveViewPrefs(){try{localStorage.setItem('ab2_hideSeq',seqHidden?'1':'0');localStorage.setItem('ab2_hideTrackers',trackersHidden?'1':'0');}catch(e){}}
@@ -298,6 +313,7 @@ function setSeqMode(mode){
   if(seqArrangeView)seqArrangeView.style.display=mode==='arrange'?'':'none';
   document.body.classList.toggle('arr-mode',mode==='arrange');
   if(seqSongView)seqSongView.style.display=mode==='song'?'':'none';
+  if(typeof placeViewButtons==='function')placeViewButtons();
   if(seqPlaying){stopSeq();startSeq();}
 }
 seqModePatternBtn&&seqModePatternBtn.addEventListener('click',()=>setSeqMode('pattern'));

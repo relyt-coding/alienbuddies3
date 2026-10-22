@@ -48,8 +48,10 @@ function placeViewButtons(){
   const clearBtn=document.getElementById('seqClearBtn');
   const inRow=clearBtn&&drum.seqTracks&&!seqHidden&&seqMode==='pattern';
   if(inRow){
-    clearBtn.parentNode.insertBefore(vtbSeqBtn,clearBtn);
-    clearBtn.parentNode.insertBefore(vtbTiersBtn,clearBtn);
+    // hide/show buttons on the left end of the row; the add/save/load/clear/export group is pushed to the right
+    const row=clearBtn.parentNode;
+    row.insertBefore(vtbSeqBtn,row.firstChild);
+    row.insertBefore(vtbTiersBtn,vtbSeqBtn.nextSibling);
     vtbSeqBtn.className=vtbTiersBtn.className='seq-save-pat-btn';
     viewToggleBar.style.display='none';
   }else{

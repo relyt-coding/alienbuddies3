@@ -25,7 +25,7 @@ function doTap(coords){
   requestRender(anims[anims.length-1]);
   const h=highestActive();
   if(!coords.silent){
-    spawnParticle(coords.x||window.innerWidth/2,coords.y||window.innerHeight/2,`+${formatNum(mult*cpt)}`,color(Math.max(0,h)).hex);
+    spawnParticle(coords.x||window.innerWidth/2,coords.y||window.innerHeight/2,`+${formatNum(mult*cpt)}`,coords.hex||color(Math.max(0,h)).hex);
   }
 }
 function getElCenter(id){

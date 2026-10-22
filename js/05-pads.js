@@ -390,5 +390,6 @@ function firePad(idx){
   const _padPos=_padEl?_padEl.getBoundingClientRect():null;
   const _px=_padPos?_padPos.left+_padPos.width/2:window.innerWidth/2;
   const _py=_padPos?_padPos.top+_padPos.height/2:window.innerHeight/2;
-  doTap({x:_px,y:_py});
+  const _snd=SOUND_MAP[sndId];
+  doTap({x:_px,y:_py,hex:_snd&&_snd.color}); // score popup takes the pressed pad's colour
 }

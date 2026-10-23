@@ -201,6 +201,11 @@ toggleBouncersBtn&&toggleBouncersBtn.addEventListener('click',()=>{
 // ── Choose which aliens bounce on screen ──
 let bunkerPickMode=false;
 function refreshBunkerMarks(){
+  // choosing which aliens bounce only matters once there are more than 10
+  const canPick=totalAliens>=11;
+  if(!canPick&&bunkerPickMode)bunkerPickMode=false;
+  const row=document.getElementById('bunkerPickRow');if(row)row.style.display=canPick?'flex':'none';
+  const pbtn=document.getElementById('anmOnScreenBtn');if(pbtn)pbtn.style.display=canPick?'':'none';
   const on=new Set(desiredBouncerIdxs());
   document.querySelectorAll('.alien-cell.occupied').forEach(c=>c.classList.toggle('onscreen',on.has(c._globalIdx)));
   const lbl=document.getElementById('bunkerOnScreenLabel');

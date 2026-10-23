@@ -314,8 +314,6 @@ body.seq-on.desktop-mode .pad-grid[data-pads]{max-width:410px;margin:0 auto;}
 body.seq-on.desktop-mode .pad-grid[data-pads="5"],body.seq-on.desktop-mode .pad-grid[data-pads="6"]{max-width:560px;}
 body.seq-on.desktop-mode .pad-grid[data-pads="7"],body.seq-on.desktop-mode .pad-grid[data-pads="8"]{max-width:680px;}
 body.seq-on.desktop-mode .pad{aspect-ratio:4/3;} /* same 4:3 rectangle as before the sequencer unlock */
-body.seq-on.desktop-mode.arr-mode .pad-area{max-width:100%;}
-body.seq-on.desktop-mode.arr-mode .pad{aspect-ratio:5/2;}
 
 /* ─── DRUM PAD GRID ─── */
 .pad-area{width:100%;z-index:3;padding-bottom:4.5rem;}
@@ -329,12 +327,6 @@ body.desktop-mode .pad-grid[data-pads="2"]{max-width:326px;margin:0 auto;}
 body.desktop-mode .pad-grid[data-pads="5"],body.desktop-mode .pad-grid[data-pads="6"]{max-width:560px;margin:0 auto;}
 body.desktop-mode .pad-grid[data-pads="7"],body.desktop-mode .pad-grid[data-pads="8"]{max-width:680px;margin:0 auto;}
 /* Compact pad layout when arrangement view is active */
-body.desktop-mode.arr-mode .pad-area{max-width:100%;}
-body.desktop-mode.arr-mode .pad{aspect-ratio:5/2;}
-body.desktop-mode.arr-mode .pad-grid{grid-template-columns:repeat(4,1fr)!important;grid-template-rows:unset!important;}
-body.desktop-mode.arr-mode .pad-grid[data-pads="1"]{grid-template-columns:1fr!important;max-width:140px;}
-body.desktop-mode.arr-mode .pad-grid[data-pads="2"]{grid-template-columns:1fr 1fr!important;max-width:unset;}
-body.desktop-mode.arr-mode .pad-grid[data-pads="3"]{grid-template-columns:1fr 1fr 1fr!important;}
 .pad-count-selector{display:flex;gap:4px;justify-content:center;margin-bottom:6px;flex-wrap:wrap;}
 .pad-count-btn{font-family:'Bebas Neue',sans-serif;font-size:.72rem;letter-spacing:.1em;width:28px;height:28px;border-radius:6px;border:1px solid #2a2a2a;background:#111;color:#555;cursor:pointer;touch-action:manipulation;transition:all .15s;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .pad-count-btn.active{border-color:#a0a8ff;color:#a0a8ff;background:#0a0a1a;}
@@ -1060,3 +1052,10 @@ body.desktop-mode .store-zoom-hint{display:none;}
   #settingsBox .settings-row{padding:.3rem 0;}
   #settingsBox .settings-close-btn{padding:.4rem;margin-top:.1rem;}
 }
+
+/* Early game: while the ACTIVATE arrow is showing, leave space under the score so the arrow never covers it */
+.score-section{transition:margin-bottom .25s ease;}
+body.arrow-act .score-section{margin-bottom:130px;}
+
+/* The DRUMPAD label only appears once the SEQUENCER tracker exists beside it */
+body:not(.seq-on) #manualTiersCol .tiers-col-label{display:none !important;}

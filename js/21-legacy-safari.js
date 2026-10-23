@@ -63,7 +63,7 @@
   // ── aspect-ratio: size by width ──
   function padRatio(){
     const b=document.body.classList;
-    if(b.contains('desktop-mode'))return b.contains('arr-mode')?2.5:4/3;
+    if(b.contains('desktop-mode'))return 4/3;
     return 1.4;
   }
   function applyAspect(){

@@ -205,7 +205,7 @@ function fitPadArea(){
   const app=document.querySelector('#gameView .app');
   const area=grid&&grid.closest('.pad-area');
   if(!grid||!app||!area)return;
-  if(!document.body.classList.contains('desktop-mode')||document.body.classList.contains('arr-mode')||app.offsetHeight===0){grid.style.maxWidth='';return;}
+  if(!document.body.classList.contains('desktop-mode')||app.offsetHeight===0){grid.style.maxWidth='';return;}
   const n=Math.max(1,Math.min(8,parseInt(grid.getAttribute('data-pads'))||1));
   const cap=PAD_GRID_CAPS[n]||410;
   // height used by everything except the pad area

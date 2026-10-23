@@ -45,11 +45,12 @@ const vtbTiersBtn=document.getElementById('vtbTiersBtn');
 // The hide/show buttons sit next to CLEAR under the sequencer; when the sequencer is hidden
 // (or on the ARR/SONG views, which have no such row) they live in the standalone bar instead.
 function placeViewButtons(){
-  const clearBtn=document.getElementById('seqClearBtn');
-  const inRow=clearBtn&&drum.seqTracks&&!seqHidden&&seqMode==='pattern';
+  const rowSel={pattern:'#seqPatternView',arrange:'#seqArrangeView',song:'#seqSongView'}[seqMode]||'#seqPatternView';
+  const targetRow=document.querySelector(rowSel+' .seq-bottom-row');
+  const inRow=targetRow&&drum.seqTracks&&!seqHidden;
   if(inRow){
     // hide/show buttons on the left end of the row; the add/save/load/clear/export group is pushed to the right
-    const row=clearBtn.parentNode;
+    const row=targetRow;
     row.insertBefore(vtbSeqBtn,row.firstChild);
     row.insertBefore(vtbTiersBtn,vtbSeqBtn.nextSibling);
     vtbSeqBtn.className=vtbTiersBtn.className='seq-save-pat-btn';

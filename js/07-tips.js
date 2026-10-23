@@ -89,6 +89,7 @@ function updateOnboardingArrows(){
   // Arrows only belong to a running game — never on the home screen (they pointed at hidden buttons there)
   if(!document.body.classList.contains('game-active')){
     ['arrowActivate','arrowShop'].forEach(id=>{const a=document.getElementById(id);if(a)a.style.display='none';});
+    document.body.classList.remove('arrow-act');
     return;
   }
   // Arrow pointing at ACTIVATE button — shows at 50pts if tracker not yet active
@@ -96,6 +97,8 @@ function updateOnboardingArrows(){
   const activateBtn=document.getElementById('drumTrackerActivateBtn');
   if(arrowAct){
     if(!drumTrackerActive&&score>=50&&activateBtn){
+      // make room above the tracker so the arrow sits under the score instead of covering it
+      if(!document.body.classList.contains('arrow-act')){document.body.classList.add('arrow-act');requestAnimationFrame(updateOnboardingArrows);}
       const rect=activateBtn.getBoundingClientRect();
       arrowAct.style.display='flex';
       // Use the arrow element's own width to center it over the button
@@ -104,6 +107,7 @@ function updateOnboardingArrows(){
       arrowAct.style.top=(rect.top-62)+'px';
     } else {
       arrowAct.style.display='none';
+      if(document.body.classList.contains('arrow-act')){document.body.classList.remove('arrow-act');}
     }
   }
   // Arrow pointing at SHOP button — shows at 1500pts if shop never opened

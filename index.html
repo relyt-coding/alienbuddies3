@@ -224,7 +224,6 @@
           <div class="seq-arr-ph-row" id="seqArrPhRow"></div>
           <div class="seq-arr-grid" id="seqArrGrid"></div>
           <div class="seq-bottom-row">
-            <div style="flex:1;"></div>
             <button class="seq-save-pat-btn" id="seqSaveArrBtn">💾 SAVE ARRANGEMENT</button>
             <button class="seq-save-pat-btn" id="seqExportArrBtn" style="border-color:#00cc88;color:#00aa66;">⬇ EXPORT WAV</button>
           </div>
@@ -237,7 +236,7 @@
           </div>
           <div class="seq-arr-ph-row" id="seqSongPhRow"></div>
           <div class="seq-song-slots" id="seqSongSlots"></div>
-          <div style="display:flex;gap:4px;margin-top:4px;">
+          <div class="seq-bottom-row" style="margin-top:4px;">
             <button class="seq-save-pat-btn" id="seqAddArrToSongBtn">+ ADD ARRANGEMENT</button>
             <button class="seq-save-pat-btn" id="seqExportSongBtn" style="border-color:#00cc88;color:#00aa66;">⬇ EXPORT WAV</button>
           </div>
@@ -507,7 +506,7 @@
       <div class="bunker-progress-wrap">
         <div class="bunker-progress-label"><span id="progLabel">0 / 99 SLOTS FILLED</span><span id="progPct">0%</span></div>
         <div class="bunker-progress-bar-bg"><div class="bunker-progress-bar" id="bunkerProgressBar" style="width:0%"></div></div>
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-top:.5rem;">
+        <div id="bunkerPickRow" style="display:none;align-items:center;justify-content:space-between;gap:.5rem;margin-top:.5rem;">
           <span id="bunkerOnScreenLabel" style="font-family:'Bebas Neue',sans-serif;font-size:.8rem;letter-spacing:.12em;color:#44eebb;">ON SCREEN 0 / 10</span>
           <button id="bunkerPickBtn" style="font-family:'Bebas Neue',sans-serif;font-size:.75rem;letter-spacing:.1em;padding:.3rem .6rem;border-radius:8px;border:1px solid #1a3a2a;background:#0a1a0f;color:#44eebb;cursor:pointer;">👽 PICK ON-SCREEN ALIENS</button>
         </div>

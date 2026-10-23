@@ -1050,3 +1050,12 @@ body.desktop-mode .store-zoom-hint{display:none;}
 /* 4+ sequencer tracks on shorter screens: show 3.5 rows, scroll for the rest (no visible scrollbar) */
 #seqLayersContainer.seq-scroll{overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
 #seqLayersContainer.seq-scroll::-webkit-scrollbar{display:none;}
+
+/* Settings: never taller than the screen — scrolls (no visible scrollbar) and tightens up on shorter windows */
+#settingsBox{max-height:94vh;max-height:94dvh;overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y;scrollbar-width:none;}
+#settingsBox::-webkit-scrollbar{display:none;}
+@media (max-height:950px){
+  #settingsBox{gap:.4rem;padding:1rem 1.3rem 1.2rem;}
+  #settingsBox .settings-row{padding:.3rem 0;}
+  #settingsBox .settings-close-btn{padding:.4rem;margin-top:.1rem;}
+}

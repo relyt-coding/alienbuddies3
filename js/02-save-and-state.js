@@ -166,11 +166,14 @@ function loadFromSave(data){
   totalAliens=data.totalAliens||0;
   matchLevelsCompleted=data.matchLevelsCompleted!==undefined?data.matchLevelsCompleted:-1;
   // Restore shownHints and auto-mark matching hints if already played
+  // Everything is reset to its default first, so a NEW file never inherits leftovers from the slot played before
+  Object.keys(shownHints).forEach(k=>delete shownHints[k]);
+  Object.assign(shownHints,{tips:false,matchingIntro:false,matchingGame:false});
   if(data.shownHints)Object.assign(shownHints,data.shownHints);
-  if(data.hasReceivedEgg)hasReceivedEgg=data.hasReceivedEgg;
-  if(data.alienGems)alienGems=data.alienGems;
-  if(data.skillTreeUnlocked)skillTreeUnlocked=data.skillTreeUnlocked;
-  if(data.unlockedSkills)unlockedSkills=Object.assign({},data.unlockedSkills);
+  hasReceivedEgg=!!data.hasReceivedEgg;hasShownEggReward=false;
+  alienGems=data.alienGems||0;
+  skillTreeUnlocked=!!data.skillTreeUnlocked;
+  unlockedSkills=data.unlockedSkills?Object.assign({},data.unlockedSkills):{};
   // Tucana Core used to be free: anyone who already unlocked skills keeps the core
   if(Object.keys(unlockedSkills).length&&!unlockedSkills.core)unlockedSkills.core=true;
   if(matchLevelsCompleted>=0){shownHints.matchingIntro=true;shownHints.matchingGame=true;}
@@ -229,14 +232,14 @@ updateMatchingBtn();
   if(data.visiblePads!==undefined)visiblePads=data.visiblePads;
   else visiblePads=drum.pads;
   // Restore sequencer state
-  if(data.seqBpm)seqBpm=data.seqBpm;
+  seqBpm=data.seqBpm||100;
   seqEnergy=(typeof data.seqEnergy==='number')?Math.max(0,Math.min(SEQ_ENERGY_MAX,data.seqEnergy)):SEQ_ENERGY_MAX; // energy meter (full on a fresh save)
   energyEmptyHints=(typeof data.energyEmptyHints==='number')?data.energyEmptyHints:0;
   _seqEnergyWait=false;
-  if(data.seqMode)seqMode=data.seqMode;
-  if(data.arrangement)arrangement=[...data.arrangement];
-  if(data.arrangeBars)arrangeBars=data.arrangeBars;
-  if(data.seqHasAutoMutedAmbience)seqHasAutoMutedAmbience=data.seqHasAutoMutedAmbience;
+  seqMode=data.seqMode||'pattern';
+  arrangement=data.arrangement?[...data.arrangement]:[];
+  arrangeBars=data.arrangeBars||4;
+  seqHasAutoMutedAmbience=!!data.seqHasAutoMutedAmbience;
   rebuildPadGrid();
   // Force synchronous render so desktop CSS constraints apply immediately
   renderUI();

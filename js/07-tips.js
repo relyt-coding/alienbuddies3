@@ -86,6 +86,11 @@ function updateTipsLabel(){
 }
 
 function updateOnboardingArrows(){
+  // Arrows only belong to a running game — never on the home screen (they pointed at hidden buttons there)
+  if(!document.body.classList.contains('game-active')){
+    ['arrowActivate','arrowShop'].forEach(id=>{const a=document.getElementById(id);if(a)a.style.display='none';});
+    return;
+  }
   // Arrow pointing at ACTIVATE button — shows at 50pts if tracker not yet active
   const arrowAct=document.getElementById('arrowActivate');
   const activateBtn=document.getElementById('drumTrackerActivateBtn');

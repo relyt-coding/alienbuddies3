@@ -11,8 +11,13 @@ function openScoreStats(){
 }
 function closeScoreStats(){scoreStatsModal.classList.remove('open');}
 
-document.getElementById('scoreStatsClose')&&document.getElementById('scoreStatsClose').addEventListener('click',closeScoreStats);
-scoreStatsModal&&scoreStatsModal.addEventListener('pointerdown',e=>{if(e.target===scoreStatsModal)closeScoreStats();});
+['scoreStatsClose','scoreStatsDone'].forEach(id=>{
+  const b=document.getElementById(id);if(!b)return;
+  b.addEventListener('click',closeScoreStats);
+  b.addEventListener('touchend',e=>{e.preventDefault();closeScoreStats();}); // reliable on phones
+});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&scoreStatsModal.classList.contains('open'))closeScoreStats();});
+scoreStatsModal&&scoreStatsModal.addEventListener('pointerdown',e=>{if(e.target===scoreStatsModal)closeScoreStats();}); // tap the dark area to close too
 document.getElementById('scoreSectionBtn')&&document.getElementById('scoreSectionBtn').addEventListener('click',openScoreStats);
 
 function ssRow(icon,label,desc,val,isActive,colorClass){

@@ -821,6 +821,25 @@ const _matchBtnHint=document.getElementById('matchingBtn');
 if(_matchBtnHint){_matchBtnHint.addEventListener('click',()=>{shownHints.matchingIntro=true;shownHints.matchingGame=true;},{capture:true,passive:true});}
 
 
+// ── Version + layout mode (Settings) ──
+(function(){
+  const ver=document.getElementById('settingsVersion');if(ver)ver.textContent='v'+GAME_VERSION;
+  const hv=document.getElementById('homeVersion');if(hv)hv.textContent='v'+GAME_VERSION;
+  const sel=document.getElementById('settingsLayoutSel'),info=document.getElementById('settingsLayoutInfo');
+  if(!sel)return;
+  function paint(){
+    sel.value=v5Settings.layoutMode||'auto';
+    if(info)info.textContent='NOW: '+(IS_DESKTOP?'DESKTOP':'MOBILE')+' · WINDOW '+innerWidth+'PX';
+  }
+  paint();
+  sel.addEventListener('change',()=>{
+    v5Settings.layoutMode=sel.value;saveV5Settings();
+    recheckDesktopMode();paint();
+    showToast('Layout: '+sel.value.toUpperCase()+' → now '+(IS_DESKTOP?'desktop':'mobile'));
+  });
+  window._paintLayoutSetting=paint; // called whenever Settings opens
+})();
+
 // ── "More than 10 aliens on screen" setting ──
 (function(){
   const t=document.getElementById('settingsMoreAliens');

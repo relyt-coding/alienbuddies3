@@ -49,6 +49,16 @@
     </div>
 
     <div class="settings-row">
+      <div><div class="settings-label">🖥 LAYOUT</div><div id="settingsLayoutInfo" style="font-size:.6rem;color:#667;letter-spacing:.06em;margin-top:2px;"></div></div>
+      <select id="settingsLayoutSel" style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:.08em;background:#0d0d1c;border:1px solid #2a2a4a;border-radius:6px;color:#a0a8ff;padding:.3rem .4rem;">
+        <option value="auto">AUTO</option><option value="desktop">DESKTOP</option><option value="mobile">MOBILE</option>
+      </select>
+    </div>
+    <div class="settings-row">
+      <div><div class="settings-label">🏷 VERSION</div></div>
+      <div id="settingsVersion" style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:.12em;color:#44eebb;"></div>
+    </div>
+    <div class="settings-row">
       <div><div class="settings-label">👽 MORE THAN 10 ALIENS ON SCREEN</div><div style="font-size:.6rem;color:#886644;letter-spacing:.06em;margin-top:2px;">May affect game performance</div></div>
       <label class="settings-toggle">
         <input type="checkbox" id="settingsMoreAliens">
@@ -86,6 +96,7 @@
     <div class="home-logo-emoji">👽</div>
     <div class="home-logo-title">ALIEN BUDDIES</div>
     <div class="home-logo-sub">Published By Relyt Citrus</div>
+    <div class="home-logo-sub" id="homeVersion" style="opacity:.6;margin-top:2px;"></div>
     <div class="home-logo-sub" style="margin-top:.15rem;color:#00ff88;">Version 0.2</div>
   </div>
   <div style="width:100%;max-width:340px;padding:0 .5rem;">

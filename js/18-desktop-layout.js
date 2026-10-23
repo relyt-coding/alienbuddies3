@@ -12,6 +12,7 @@ let v5Settings = {
   masterMuted: false,
   moreAliens: false,   // allow more than 10 bouncing aliens (performance warning)
   bouncerLimit: 20,    // how many, when moreAliens is on
+  layoutMode: 'auto',  // 'auto' | 'desktop' | 'mobile'
   earnHidden: true   // keep earning (and playing) while the tab is hidden; turn off to pause instead
 };
 
@@ -25,26 +26,23 @@ function saveV5Settings(){
   try{ localStorage.setItem('ab2_v5_settings', JSON.stringify(v5Settings)); }catch(e){}
 }
 
-// If the window is resized across the 900px line (or opened small then maximised), switch layouts live
+// If the window is resized across the 900px line (or the LAYOUT setting changes), switch layouts live
+function recheckDesktopMode(){
+  const now=_detectDesktop();
+  if(now===IS_DESKTOP)return;
+  IS_DESKTOP=now;
+  document.body.classList.toggle('desktop-mode',IS_DESKTOP);
+  if(IS_DESKTOP)applyDesktopMode();
+  else{ // back to the phone layout
+    const sv=document.getElementById('storeView'),bv=document.getElementById('bunkerView');
+    sv&&sv.classList.remove('sidebar-collapsed');bv&&bv.classList.remove('sidebar-collapsed');
+  }
+  if(typeof requestRender==='function')requestRender();
+  setTimeout(()=>{typeof clampBouncersToBounds==='function'&&clampBouncersToBounds();},100);
+}
 (function(){
   let t=null;
-  addEventListener('resize',()=>{
-    clearTimeout(t);
-    t=setTimeout(()=>{
-      const now=_detectDesktop();
-      if(now!==IS_DESKTOP){
-        IS_DESKTOP=now;
-        document.body.classList.toggle('desktop-mode',IS_DESKTOP);
-        if(IS_DESKTOP)applyDesktopMode();
-        else{ // back to the phone layout
-          const sv=document.getElementById('storeView'),bv=document.getElementById('bunkerView');
-          sv&&sv.classList.remove('sidebar-collapsed');bv&&bv.classList.remove('sidebar-collapsed');
-        }
-        if(typeof requestRender==='function')requestRender();
-        setTimeout(()=>{typeof clampBouncersToBounds==='function'&&clampBouncersToBounds();},100);
-      }
-    },200);
-  });
+  addEventListener('resize',()=>{clearTimeout(t);t=setTimeout(recheckDesktopMode,200);});
 })();
 
 function applyDesktopMode(){
@@ -130,6 +128,7 @@ function repositionCollapseButtons(){
 // ── Settings Panel ──
 function openSettings(){
   syncSettingsUI();
+  if(typeof _paintLayoutSetting==='function')_paintLayoutSetting();
   document.getElementById('settingsPanel').classList.add('open');
 }
 function closeSettings(){

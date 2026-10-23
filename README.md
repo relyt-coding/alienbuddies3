@@ -10,3 +10,5 @@ Plain HTML/CSS/JS, no build step. Open `index.html` (0.2) in a browser or deploy
 
 Rule: top-level code in a file can only use functions/variables from files that load **before** it
 (or call them later, inside event handlers/functions). Keep that in mind when adding code.
+
+Version: set `GAME_VERSION` in `js/01-constants.js` (shown in Settings and on the home screen) — bump it on every build: 0.2.5, 0.2.6, ...

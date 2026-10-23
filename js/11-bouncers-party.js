@@ -121,7 +121,7 @@ function getBouncerBounds(){
 // ── Which aliens bounce on screen ──
 // bouncerPicks: null = automatic (first aliens you own), otherwise the alien indices you chose in the Bunker.
 let bouncerPicks=null;
-const BOUNCER_NAME_PAD=16; // room under each alien for its name label
+const BOUNCER_NAME_PAD=20; // room under each alien for its name label
 function bouncerMax(){
   if(v5Settings&&v5Settings.moreAliens)return Math.max(1,Math.min(100,v5Settings.bouncerLimit||20));
   return 10;

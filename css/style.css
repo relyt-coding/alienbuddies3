@@ -1076,3 +1076,17 @@ body.pads-hidden .pad-area{display:none !important;}
    (instead of spreading to the edges) and keep the pads clear of the SETTINGS / Edit Pads buttons */
 body.seq-on:not(.desktop-mode) .app{justify-content:flex-start;gap:.7rem;}
 body.seq-on:not(.desktop-mode) .pad-area{padding-bottom:4.6rem;}
+
+/* v0.2.23: phone pads are sized in JS (fitPadArea) to stop above SETTINGS / EDIT PADS */
+body.pad-fit:not(.desktop-mode) .pad-grid{grid-auto-rows:1fr;}
+body.pad-fit:not(.desktop-mode) .pad{aspect-ratio:auto;min-height:0;}
+body.pad-fit:not(.desktop-mode).seq-on .pad-area{padding-bottom:0;}
+.seq-bottom-row .seq-save-pat-btn{white-space:nowrap;}
+/* phone: keep VIEW / ADD / SAVE-LOAD / trash / EXPORT on a single line */
+body:not(.desktop-mode) #seqPatternView .seq-bottom-row{flex-wrap:nowrap;gap:3px;}
+body:not(.desktop-mode) #seqPatternView .seq-bottom-row>button{font-size:.58rem;letter-spacing:.04em;padding:.2rem .32rem;flex:0 0 auto;}
+body:not(.desktop-mode) #seqPatternView .seq-bottom-row>#seqAddBtn{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:clip;}
+body:not(.desktop-mode) #seqPatternView .seq-bottom-row>#seqClearBtn{padding-left:.4rem;padding-right:.4rem;}
+
+/* v0.2.24: less clutter under the score: no energy countdown text, no alien boost line (the energy bar stays) */
+#energyLabel,#alienMultInfo,.alien-mult-info{display:none !important;}

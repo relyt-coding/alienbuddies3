@@ -36,7 +36,11 @@
     if(from===1)closeStore();else if(from===2)closeBunker();
     if(target===1)openStore();else if(target===2)openBunker();
     setTimeout(function(){
-      VIEW_IDS.forEach(function(id){var e=document.getElementById(id);e.style.transform='';e.style.transition='';});
+      // snap every page to its resting spot with NO animation (the page that just left would otherwise
+      // visibly fly back across the screen to its parking position)
+      VIEW_IDS.forEach(function(id){var e=document.getElementById(id);e.style.transition='none';e.style.transform='';});
+      void document.body.offsetWidth;
+      VIEW_IDS.forEach(function(id){document.getElementById(id).style.transition='';});
       busy=false;
     },460);
   }

@@ -205,7 +205,23 @@ function fitPadArea(){
   const app=document.querySelector('#gameView .app');
   const area=grid&&grid.closest('.pad-area');
   if(!grid||!app||!area)return;
-  if(!document.body.classList.contains('desktop-mode')||app.offsetHeight===0){grid.style.maxWidth='';return;}
+  if(!document.body.classList.contains('desktop-mode')||app.offsetHeight===0){
+    grid.style.maxWidth='';
+    // phone layout: size the pads to the space left above the SETTINGS / EDIT PADS buttons so they never overlap
+    const sb=document.getElementById('soundboardBtn');
+    if(document.body.classList.contains('seq-on')&&sb&&grid.offsetParent!==null&&!document.body.classList.contains('store-open')&&!document.body.classList.contains('bunker-open')){
+      const gt=grid.getBoundingClientRect().top;
+      const nn=Math.max(1,Math.min(8,parseInt(grid.getAttribute('data-pads'))||1));
+      const colsN=nn<=1?1:(nn===3?3:(nn<=4?2:(nn<=6?3:4)));
+      const rowsN=Math.ceil(nn/colsN);
+      const natural=rowsN*((grid.clientWidth-(colsN-1)*6)/colsN/1.4)+(rowsN-1)*6;
+      const room=sb.getBoundingClientRect().top-10-gt;
+      if(room>0){document.body.classList.add('pad-fit');grid.style.height=Math.floor(Math.max(Math.min(natural,room),Math.min(natural,rowsN*52)))+'px';return;}
+    }
+    document.body.classList.remove('pad-fit');grid.style.height='';
+    return;
+  }
+  document.body.classList.remove('pad-fit');grid.style.height='';
   const n=Math.max(1,Math.min(8,parseInt(grid.getAttribute('data-pads'))||1));
   const cap=PAD_GRID_CAPS[n]||410;
   // height used by everything except the pad area
@@ -233,6 +249,7 @@ function fitPadArea(){
   const schedule=()=>{if(raf)return;raf=requestAnimationFrame(()=>{raf=0;fitPadArea();});};
   window.fitPadAreaSoon=schedule;
   window.addEventListener('resize',schedule);
+  setInterval(schedule,800);
   if(typeof ResizeObserver!=='undefined'){
     const ro=new ResizeObserver(schedule);
     const app=document.querySelector('#gameView .app');

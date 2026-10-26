@@ -769,10 +769,10 @@ PAT_COLORS.forEach(col=>{
 });
 document.getElementById('savePatClose')&&document.getElementById('savePatClose').addEventListener('click',()=>{savePatModal.style.display='none';});
 savePatModal&&savePatModal.addEventListener('click',e=>{if(e.target===savePatModal)savePatModal.style.display='none';});
-document.getElementById('seqSavePatBtn')&&document.getElementById('seqSavePatBtn').addEventListener('click',()=>{
+function openSavePatModal(){
   savePatNameInput.value='Pattern '+(savedPatterns.length+1);
   savePatModal.style.display='flex';
-});
+}
 document.getElementById('savePatConfirm')&&document.getElementById('savePatConfirm').addEventListener('click',()=>{
   const name=savePatNameInput.value.trim()||('Pattern '+(savedPatterns.length+1));
   savedPatterns.push({name,color:savePatColor,layers:seqLayers.map(l=>({soundId:l.soundId,steps:[...l.steps],vols:[...l.vols],muted:l.muted||false}))});
@@ -786,10 +786,15 @@ document.getElementById('savePatConfirm')&&document.getElementById('savePatConfi
   const modal=document.getElementById('loadPatModal'),list=document.getElementById('loadPatList');
   if(!modal)return;
   const close=()=>{modal.style.display='none';};
-  document.getElementById('seqLoadPatBtn').addEventListener('click',()=>{
+  document.getElementById('seqSavePatBtn').addEventListener('click',()=>{
     list.innerHTML='';
+    // one button for both: save the current pattern as a new one, or pick a saved one to load
+    const sv=document.createElement('button');sv.className='confirm-btn yes';sv.textContent='SAVE CURRENT PATTERN';
+    sv.style.marginBottom='.4rem';
+    sv.addEventListener('click',()=>{close();openSavePatModal();});
+    list.appendChild(sv);
     if(!savedPatterns.length){
-      const e=document.createElement('div');e.className='confirm-sub';e.style.fontSize='.85rem';e.textContent='No saved patterns yet — save one first';list.appendChild(e);
+      const e=document.createElement('div');e.className='confirm-sub';e.style.fontSize='.85rem';e.textContent='No saved patterns to load yet';list.appendChild(e);
     }
     savedPatterns.forEach((pat,pi)=>{
       const b=document.createElement('button');b.className='confirm-btn no';

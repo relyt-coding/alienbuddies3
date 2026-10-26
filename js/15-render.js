@@ -173,6 +173,27 @@ function renderStore(){
     const pr=document.getElementById('seqPrice');pr.className='drum-price'+(canBuy?'':' cant-afford');
     pr.innerHTML=canBuy?`${formatStore(cost)}<small>pts</small>`:`${formatStore(cost)}<small>pts</small>`;
   }
+  // ── SEQUENCER: LOOP LENGTH (32 / 64 steps), appears once the first track is owned ──
+  (function(){
+    const card=document.getElementById('stepsCard');if(!card)return;
+    card.style.display=drum.seqTracks>=1?'':'none';
+    if(drum.seqTracks<1)return;
+    const lv=shop.seqStepsLevel||0,maxed=lv>=2;
+    document.getElementById('stepsNum').textContent=[16,32,64][lv];
+    const btn=document.getElementById('stepsBuyBtn'),pr=document.getElementById('stepsPrice');
+    if(maxed){
+      document.getElementById('stepsMain').textContent='64 STEPS UNLOCKED';
+      document.getElementById('stepsSub2').textContent='Longest loops · switch with the STEPS button';
+      btn.className='drum-buy-btn maxed';pr.className='drum-price';pr.textContent='MAX';
+    }else{
+      const cost=SEQ_STEP_COSTS[lv],can=score>=cost,nxt=lv===0?32:64;
+      document.getElementById('stepsMain').textContent='UPGRADE TO '+nxt+' STEPS';
+      document.getElementById('stepsSub2').textContent=(lv===0?'Double-length loops':'Four times the length')+' for the sequencer';
+      btn.className='drum-buy-btn '+(can?'buyable':'locked');
+      pr.className='drum-price'+(can?'':' cant-afford');
+      pr.innerHTML=`${formatStore(cost)}<small>pts</small>`;
+    }
+  })();
   // ── DRUMPAD / SEQUENCER dot-base upgrades ──
   (function(){
     function fill(pre,lvl,locked,lockMsg,nameShort){

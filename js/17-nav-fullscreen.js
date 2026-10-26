@@ -28,6 +28,7 @@ function openStore(){
   }
   document.body.classList.add('store-open');
   renderStore();
+  const _ss=document.querySelector('#storeView .store-scroll');if(_ss)_ss.scrollTop=0; // always start at the top
   shopOpenCount++;
   updateOnboardingArrows();
   if(shopOpenCount===3){

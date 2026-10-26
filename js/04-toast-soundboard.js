@@ -25,14 +25,20 @@ function updateSoundboardUnlocked(){
 
 }
 const masterVolNum=document.getElementById('masterVolNum');
+// master volume is remembered between sessions
+function _saveMasterVol(){try{localStorage.setItem('ab2_masterVol',String(masterVol));}catch(e){}}
+try{
+  const _mv=parseFloat(localStorage.getItem('ab2_masterVol'));
+  if(isFinite(_mv)&&_mv>=0&&_mv<=1){masterVol=_mv;masterVolSlider.value=_mv;if(masterVolNum)masterVolNum.value=Math.round(_mv*100);}
+}catch(e){}
 masterVolSlider.addEventListener('input',()=>{
-  masterVol=parseFloat(masterVolSlider.value);
+  masterVol=parseFloat(masterVolSlider.value);_saveMasterVol();
   if(masterGainNode)masterGainNode.gain.value=masterMuted?0:masterVol;
   if(masterVolNum)masterVolNum.value=Math.round(masterVol*100);
 });
 masterVolNum&&masterVolNum.addEventListener('change',()=>{
   const v=Math.min(100,Math.max(0,parseInt(masterVolNum.value)||0));
-  masterVolNum.value=v;masterVol=v/100;masterVolSlider.value=v/100;
+  masterVolNum.value=v;masterVol=v/100;masterVolSlider.value=v/100;_saveMasterVol();
   if(masterGainNode)masterGainNode.gain.value=masterMuted?0:masterVol;
 });
 // Reset viewport zoom after any number input loses focus (iOS fix)

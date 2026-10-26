@@ -1094,3 +1094,52 @@ body:not(.desktop-mode) #seqPatternView .seq-bottom-row>#seqClearBtn{padding-lef
 
 /* v0.2.27: no "MAX n TRACKS" placeholder; the add button only appears while a track can actually be added */
 #seqAddBtn:disabled,#seqFullAddBtn:disabled{display:none !important;}
+
+/* v0.2.29: tracks are fixed to what's unlocked (no add / delete), VIEW left + other buttons right, more room under the energy bar */
+.seq-add-btn,#seqAddBtn,#seqFullAddBtn{display:none !important;}
+#seqPatternView .seq-bottom-row #seqSavePatBtn{margin-left:auto;}
+.energy-meter{margin-bottom:8px;}
+
+/* v0.2.30: SOLO button next to MUTE */
+.seq-rc-btn.seq-solo-btn.solo-on{background:#2a2400;border-color:#ffd23a;color:#ffd23a;}
+.seq-rc-btn.seq-solo-btn.solo-dim{opacity:.55;}
+
+/* ═══ v0.2.32: 16 / 32 / 64-step loops ═══ */
+.seq-ph-cells,.seq-steps{grid-template-columns:repeat(var(--n,16),1fr);}
+#seqHScroll{position:relative;overflow-x:auto;}
+#seqHInner{width:calc(var(--n,16) * 6.25%);min-width:100%;}
+#seqHScroll.seq-scroll{overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;}
+#seqLayersContainer.seq-scroll{overflow:visible;max-height:none !important;}
+/* when the loop is longer than the screen, the sound pill (left) and M/S (right) stay pinned while the steps scroll */
+body.seq-wide .seq-layer-row>.seq-snd-pill{position:sticky;left:0;z-index:2;}
+body.seq-wide .seq-layer-row>.seq-row-ctrl{position:sticky;right:0;z-index:2;background:#0a0a0a;}
+body.seq-wide .seq-ph-bar>:first-child{position:sticky;left:0;z-index:2;background:#0a0a0a;}
+body.seq-wide .seq-ph-bar>:last-child{position:sticky;right:0;z-index:2;background:#0a0a0a;}
+#seqHScroll .seq-ph-bar{position:sticky;top:0;z-index:3;background:#0a0a0a;padding-bottom:2px;}
+/* phone: drag freely, no scrollbars */
+body:not(.desktop-mode) #seqHScroll{scrollbar-width:none;-ms-overflow-style:none;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;}
+body:not(.desktop-mode) #seqHScroll::-webkit-scrollbar{display:none;}
+/* desktop: a slim glowing horizontal scrollbar (vertical stays invisible) */
+body.desktop-mode #seqHScroll{padding-bottom:2px;}
+body.desktop-mode #seqHScroll::-webkit-scrollbar{height:10px;width:0;}
+body.desktop-mode #seqHScroll::-webkit-scrollbar:vertical{width:0;display:none;}
+body.desktop-mode #seqHScroll::-webkit-scrollbar-track{background:#0e0e1c;border-radius:8px;border:1px solid #1c1c34;}
+body.desktop-mode #seqHScroll::-webkit-scrollbar-thumb{background:linear-gradient(90deg,#4a52c8,#a0a8ff);border-radius:8px;border:1px solid #0e0e1c;box-shadow:0 0 8px rgba(160,168,255,.55);}
+body.desktop-mode #seqHScroll::-webkit-scrollbar-thumb:hover{background:linear-gradient(90deg,#6a72e8,#c4c9ff);}
+@-moz-document url-prefix(){body.desktop-mode #seqHScroll{scrollbar-width:thin;scrollbar-color:#a0a8ff #0e0e1c;}}
+/* fullscreen sequencer: long loops scroll sideways */
+#seqFullLayers{overflow:auto;}
+body.seq-wide #seqFullLayers .seq-layer-row,body.seq-wide #seqFullPhBar{min-width:calc(var(--n,16) * 30px + 150px);}
+#seqFullPhBar{position:sticky;top:0;z-index:3;background:#080810;padding-bottom:3px;}
+/* steps menu shares the VIEW menu look */
+#stepsMenu{position:fixed;z-index:300;flex-direction:column;gap:2px;padding:6px;border-radius:10px;border:1px solid #2a2a5a;background:#0c0c1c;box-shadow:0 8px 24px rgba(0,0,0,.6);min-width:150px;}
+#stepsMenu .vm-row{display:flex;align-items:center;gap:.6rem;font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:.12em;padding:.55rem .7rem;border-radius:7px;border:none;background:transparent;color:#667;cursor:pointer;text-align:left;touch-action:manipulation;}
+#stepsMenu .vm-row.on{color:#cfd2ff;}
+#stepsMenu .vm-row.locked{opacity:.45;}
+#stepsMenu .vm-row:active{background:#1a1a3a;}
+#stepsMenu .vm-check{display:inline-block;width:1.1rem;text-align:center;color:#00ff88;}
+#stepsMenu .vm-sep{height:1px;background:#22224a;margin:3px 6px;}
+#stepsMenu{min-width:200px;}
+#stepsMenu .vm-sep{height:1px;background:#22224a;margin:3px 6px;}
+#stepsMenu{min-width:200px;}
+#patStartModal .confirm-btn.yes{color:#00ff88;border-color:#00cc88;background:#04170e;}

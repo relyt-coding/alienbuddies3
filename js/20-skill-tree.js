@@ -681,6 +681,7 @@ function fullSeqReset(){
   if(drum.seqTracks>0){
     seqLayersContainer.innerHTML='';seqLayers=[];
     addSeqLayer('hihat');
+    ensureAllTracks();
     updateSeqAddBtn();
   }
   closeSeqResetModal();

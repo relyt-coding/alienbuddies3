@@ -2,7 +2,10 @@
 // ══════════════════════════════════════════════
 //  SEQUENCER
 // ══════════════════════════════════════════════
-const STEPS=16;
+let STEPS=16;            // steps in the current loop (16 / 32 / 64 — bought in the shop)
+const MAX_STEPS=64;      // every layer always stores 64 slots so nothing is lost when switching back to a shorter loop
+function padSteps(a,fill){const o=a?Array.prototype.slice.call(a):[];while(o.length<MAX_STEPS)o.push(fill);return o;}
+function patLen(p){return p?(p.stepCount||16):16;}
 let seqLayers=[]; // [{soundId, steps:[bool×16], muted, stepEls[], fullStepEls[]}]
 let seqPlaying=false,seqStep=0,seqBpm=100; // base BPM is 100: scoring is normalized around it
 let seqHasAutoMutedAmbience=false;
@@ -33,7 +36,7 @@ const _phSp2=document.createElement('div');seqPhBar.appendChild(_phSp2);
 const _phFSp1=document.createElement('div');seqFullPhBar.appendChild(_phFSp1);
 const _phFWrap=document.createElement('div');_phFWrap.className='seq-ph-cells';seqFullPhBar.appendChild(_phFWrap);
 const _phFSp2=document.createElement('div');seqFullPhBar.appendChild(_phFSp2);
-for(let i=0;i<STEPS;i++){
+for(let i=0;i<MAX_STEPS;i++){
   const c=document.createElement('div');c.className='seq-ph-cell';_phWrap.appendChild(c);seqPhEls.push(c);
   const cf=document.createElement('div');cf.className='seq-ph-cell';_phFWrap.appendChild(cf);seqFullPhEls.push(cf);
 }
@@ -60,7 +63,7 @@ function placeViewButtons(){
     vtbViewBtn.className='vtb-btn';
     viewToggleBar.style.display=drum.seqTracks?'':'none';
   }
-  closeViewMenu();
+  closeViewMenu();closeStepsMenu&&closeStepsMenu();
 }
 function refreshViewMenu(){
   [['tiers',!trackersHidden],['seq',!seqHidden],['pads',!padsHidden]].forEach(function(p){
@@ -77,6 +80,58 @@ function openViewMenu(){
   const top=r.top-viewMenu.offsetHeight-6;
   viewMenu.style.top=(top>8?top:r.bottom+6)+'px';
 }
+// ── STEPS button + menu (appears once 32 steps are bought) ──
+const seqStepsBtn=document.getElementById('seqStepsBtn');
+const stepsMenu=document.getElementById('stepsMenu');
+function closeStepsMenu(){if(stepsMenu)stepsMenu.style.display='none';}
+function updateStepsBtn(){
+  if(!seqStepsBtn)return;
+  const on=(shop.seqStepsLevel||0)>=1&&drum.seqTracks>=1;
+  seqStepsBtn.style.display=on?'':'none';
+  seqStepsBtn.textContent=STEPS+' STEPS';
+  const sv=document.getElementById('seqSavePatBtn');
+  seqStepsBtn.style.marginLeft=on?'auto':'';
+  if(sv)sv.style.marginLeft=on?'0':'';
+}
+// FOLLOW PLAYHEAD: while playing a loop longer than the screen, the view pages along with the playhead
+let seqFollow=true;try{seqFollow=localStorage.getItem('ab2_seqFollow')!=='0';}catch(e){}
+let _followPage=-1;
+function followPlayhead(st){
+  const sc=document.getElementById('seqHScroll');
+  if(!sc||sc.scrollWidth<=sc.clientWidth+2){_followPage=-1;return;}
+  const page=Math.floor(st/16);
+  if(page===_followPage)return;_followPage=page;
+  const cell=seqPhEls[page*16];if(!cell)return;
+  const left=Math.max(0,sc.scrollLeft+cell.getBoundingClientRect().left-(sc.getBoundingClientRect().left+68));
+  if('scrollBehavior' in document.documentElement.style){try{sc.scrollTo({left:left,behavior:'smooth'});return;}catch(e){}}
+  sc.scrollLeft=left;
+}
+function openStepsMenu(){
+  [16,32,64].forEach(n=>{
+    const r=stepsMenu.querySelector('[data-steps="'+n+'"]');if(!r)return;
+    const ok=n===16||(shop.seqStepsLevel||0)>=(n===32?1:2);
+    r.classList.toggle('on',n===STEPS);r.classList.toggle('locked',!ok);
+    r.firstChild.textContent=n===STEPS?'✓':(ok?'':'🔒');
+  });
+  const fr=stepsMenu.querySelector('[data-follow]');if(fr){fr.classList.toggle('on',seqFollow);fr.firstChild.textContent=seqFollow?'✓':'';}
+  stepsMenu.style.display='flex';
+  const r=seqStepsBtn.getBoundingClientRect();
+  stepsMenu.style.left=Math.max(8,Math.min(r.left,window.innerWidth-stepsMenu.offsetWidth-8))+'px';
+  const top=r.top-stepsMenu.offsetHeight-6;
+  stepsMenu.style.top=(top>8?top:r.bottom+6)+'px';
+}
+seqStepsBtn&&seqStepsBtn.addEventListener('click',e=>{e.stopPropagation();closeViewMenu();stepsMenu.style.display==='flex'?closeStepsMenu():openStepsMenu();});
+stepsMenu&&stepsMenu.addEventListener('click',e=>{
+  e.stopPropagation();
+  const fr=e.target.closest('[data-follow]');
+  if(fr){seqFollow=!seqFollow;_followPage=-1;try{localStorage.setItem('ab2_seqFollow',seqFollow?'1':'0');}catch(e2){}
+    fr.classList.toggle('on',seqFollow);fr.firstChild.textContent=seqFollow?'✓':'';return;}
+  const r=e.target.closest('[data-steps]');if(!r)return;
+  const n=parseInt(r.getAttribute('data-steps'));
+  if(n!==16&&(shop.seqStepsLevel||0)<(n===32?1:2)){showToast('Unlock '+n+' steps in the Shop first');return;}
+  STEPS=n;applyStepCount();closeStepsMenu();autoSave();
+});
+document.addEventListener('click',()=>closeStepsMenu());
 function applySeqView(){
   document.body.classList.toggle('pads-hidden',padsHidden);
   if(!drum.seqTracks){
@@ -122,6 +177,7 @@ function openSeqFull(){
   }
   // Rebuild full layer rows mirroring current seqLayers state
   seqFullLayers.innerHTML='';
+  seqFullLayers.appendChild(seqFullPhBar); // lives inside the scroller so long loops scroll together with the rows
   seqLayers.forEach(layer=>addFullLayerRow(layer));
   updateSeqFullAddBtn();
   seqFullModal.classList.add('open');
@@ -167,13 +223,12 @@ function addFullLayerRow(layer){
   // Steps — share same layer.steps array
   const stepsEl=document.createElement('div');stepsEl.className='seq-steps';
   layer.fullStepEls=[];
-  for(let i=0;i<STEPS;i++){
+  for(let i=0;i<MAX_STEPS;i++){
     const btn=document.createElement('div');btn.className='seq-step'+(layer.steps[i]?' on':'');
     btn.style.setProperty('--lc',snd.color);
     if(layer.steps[i])btn.style.opacity=String(0.3+0.7*(layer.vols[i]/100));
     const si=i;
-    btn.addEventListener('pointerdown',e=>{
-      e.preventDefault();
+    bindStepTap(btn,e=>{
       if(levelAdjMode&&layer.steps[si]){e.stopPropagation();openVelPopover(layer,si,btn);return;}
       layer.steps[si]=!layer.steps[si];
       if(!layer.steps[si])layer.vols[si]=100;
@@ -181,20 +236,20 @@ function addFullLayerRow(layer){
       btn.style.opacity=layer.steps[si]?String(0.3+0.7*(layer.vols[si]/100)):'';
       // Sync small grid
       if(layer.stepEls[si]){layer.stepEls[si].classList.toggle('on',layer.steps[si]);layer.stepEls[si].style.opacity=layer.steps[si]?String(0.3+0.7*(layer.vols[si]/100)):'';}
-      if(layer.steps[si]&&!layer.muted){getCtx();playSound(layer.soundId);}
+      if(layer.steps[si]&&layerAudible(layer)){getCtx();playSound(layer.soundId);}
     });
     stepsEl.appendChild(btn);layer.fullStepEls.push(btn);
   }
   // Controls
   const ctrl=document.createElement('div');ctrl.className='seq-row-ctrl';
   const muteBtn=document.createElement('div');muteBtn.className='seq-rc-btn'+(layer.muted?' muted':'');muteBtn.textContent='M';
-  const delBtn=document.createElement('div');delBtn.className='seq-rc-btn';delBtn.textContent='✕';
+  const soloBtn=makeSoloBtn(layer);
   muteBtn.addEventListener('pointerdown',e=>{e.stopPropagation();layer.muted=!layer.muted;muteBtn.classList.toggle('muted',layer.muted);// sync small
     layer.el&&layer.el.querySelector('.seq-rc-btn')&&(layer.el.querySelector('.seq-rc-btn').classList.toggle('muted',layer.muted));});
-  delBtn.addEventListener('pointerdown',e=>{e.stopPropagation();removeSeqLayer(layer);row.remove();updateSeqFullAddBtn();});
-  ctrl.appendChild(muteBtn);ctrl.appendChild(delBtn);
+  ctrl.appendChild(muteBtn);ctrl.appendChild(soloBtn); // S = solo (tracks can no longer be deleted)
   row.appendChild(pill);row.appendChild(stepsEl);row.appendChild(ctrl);
   seqFullLayers.appendChild(row);
+  applyStepCount();
 }
 
 function updateSeqFullAddBtn(){
@@ -252,7 +307,56 @@ function rebuildSeqUI(){
   seqAddBtn.disabled=true;
   if(!hasSeq)return;
   const defaults=['hihat','snare','kick','clap','sub','chord'];
-  for(let i=0;i<Math.min(drum.seqTracks,1);i++) addSeqLayer(defaults[i]||unlockedSounds()[0]);
+  ensureAllTracks();
+  updateSeqAddBtn();
+}
+// Every unlocked track is always present (tracks can't be added or deleted by hand any more)
+// SOLO: when any track is soloed only soloed tracks (that aren't muted) are heard
+function layerAudible(l){
+  if(l.muted)return false;
+  return !seqLayers.some(x=>x.solo)||!!l.solo;
+}
+function refreshSoloBtns(){
+  const any=seqLayers.some(x=>x.solo);
+  seqLayers.forEach(l=>(l.soloEls||[]).forEach(b=>{b.classList.toggle('solo-on',!!l.solo);b.classList.toggle('solo-dim',any&&!l.solo);}));
+}
+function makeSoloBtn(layer){
+  const b=document.createElement('div');b.className='seq-rc-btn seq-solo-btn';b.title='Solo';b.textContent='S';
+  (layer.soloEls=layer.soloEls||[]).push(b);
+  b.addEventListener('pointerdown',e=>{e.stopPropagation();layer.solo=!layer.solo;refreshSoloBtns();});
+  return b;
+}
+// Touch: a step toggles on a clean TAP (so dragging to scroll the loop never flips steps); mouse/pen: instantly
+function bindStepTap(btn,fn){
+  let sx=0,sy=0,t0=0,down=false;
+  btn.addEventListener('pointerdown',e=>{
+    if(e.pointerType==='touch'){down=true;sx=e.clientX;sy=e.clientY;t0=Date.now();return;}
+    e.preventDefault();fn(e);
+  });
+  btn.addEventListener('pointerup',e=>{
+    if(e.pointerType!=='touch'||!down)return;down=false;
+    if(Math.abs(e.clientX-sx)<10&&Math.abs(e.clientY-sy)<10&&Date.now()-t0<600)fn(e);
+  });
+  btn.addEventListener('pointercancel',()=>{down=false;});
+}
+// Show only the first STEPS cells of every row / playhead; the grids size themselves from --n
+function applyStepCount(){
+  document.documentElement.style.setProperty('--n',STEPS);
+  document.body.classList.toggle('seq-wide',STEPS>16);
+  const vis=(arr)=>arr&&arr.forEach((el,i)=>{const d=i<STEPS?'':'none';if(el.style.display!==d)el.style.display=d;});
+  vis(seqPhEls);vis(seqFullPhEls);
+  seqLayers.forEach(l=>{vis(l.stepEls);vis(l.fullStepEls);});
+  if(seqStep>=STEPS)seqStep=0;
+  if(typeof updateStepsBtn==='function')updateStepsBtn();
+}
+function ensureAllTracks(){
+  if(!drum.seqTracks)return;
+  const defaults=['hihat','snare','kick','clap','sub','chord'];
+  while(seqLayers.length<drum.seqTracks){
+    const before=seqLayers.length;
+    addSeqLayer(defaults[seqLayers.length]||unlockedSounds()[0]);
+    if(seqLayers.length===before)break;
+  }
   updateSeqAddBtn();
 }
 
@@ -261,7 +365,7 @@ function addSeqLayer(soundId,stepsInit){
   soundId=soundId||unlockedSounds()[0];
   const snd=SOUND_MAP[soundId]||ALL_SOUNDS[0];
   const volsInit=arguments[2];
-  const layer={soundId:snd.id,steps:stepsInit?[...stepsInit]:new Array(STEPS).fill(false),vols:volsInit?[...volsInit]:new Array(STEPS).fill(100),muted:false,stepEls:[],fullStepEls:[]};
+  const layer={soundId:snd.id,steps:padSteps(stepsInit,false),vols:padSteps(volsInit,100),muted:false,stepEls:[],fullStepEls:[]};
   const row=document.createElement('div');row.className='seq-layer-row';
   // Sound pill
   const pill=document.createElement('div');pill.className='seq-snd-pill';
@@ -271,34 +375,33 @@ function addSeqLayer(soundId,stepsInit){
   pill.addEventListener('pointerdown',e=>{e.stopPropagation();openMiniPicker(layer,dot,nm);});
   // Steps
   const stepsEl=document.createElement('div');stepsEl.className='seq-steps';
-  for(let i=0;i<STEPS;i++){
+  for(let i=0;i<MAX_STEPS;i++){
     const btn=document.createElement('div');btn.className='seq-step'+(layer.steps[i]?' on':'');
     btn.style.setProperty('--lc',snd.color);
     if(layer.steps[i])btn.style.opacity=String(0.3+0.7*(layer.vols[i]/100));
     const si=i;
-    btn.addEventListener('pointerdown',e=>{
-      e.preventDefault();
+    bindStepTap(btn,e=>{
       if(levelAdjMode&&layer.steps[si]){e.stopPropagation();openVelPopover(layer,si,btn);return;}
       layer.steps[si]=!layer.steps[si];
       if(!layer.steps[si])layer.vols[si]=100;
       btn.classList.toggle('on',layer.steps[si]);
       btn.style.opacity=layer.steps[si]?String(0.3+0.7*(layer.vols[si]/100)):'';
       if(layer.fullStepEls[si]){layer.fullStepEls[si].classList.toggle('on',layer.steps[si]);layer.fullStepEls[si].style.opacity=layer.steps[si]?String(0.3+0.7*(layer.vols[si]/100)):'';}
-      if(layer.steps[si]&&!layer.muted){getCtx();playSound(layer.soundId);}
+      if(layer.steps[si]&&layerAudible(layer)){getCtx();playSound(layer.soundId);}
     });
     stepsEl.appendChild(btn);layer.stepEls.push(btn);
   }
   // Controls
   const ctrl=document.createElement('div');ctrl.className='seq-row-ctrl';
   const muteBtn=document.createElement('div');muteBtn.className='seq-rc-btn';muteBtn.title='Mute';muteBtn.textContent='M';
-  const delBtn=document.createElement('div');delBtn.className='seq-rc-btn';delBtn.title='Delete';delBtn.textContent='✕';
+  const soloBtn=makeSoloBtn(layer);
   muteBtn.addEventListener('pointerdown',e=>{e.stopPropagation();layer.muted=!layer.muted;muteBtn.classList.toggle('muted',layer.muted);});
-  delBtn.addEventListener('pointerdown',e=>{e.stopPropagation();removeSeqLayer(layer);});
-  ctrl.appendChild(muteBtn);ctrl.appendChild(delBtn);
+  ctrl.appendChild(muteBtn);ctrl.appendChild(soloBtn); // S = solo (tracks can no longer be deleted)
   row.appendChild(pill);row.appendChild(stepsEl);row.appendChild(ctrl);
   layer.el=row;
   seqLayersContainer.appendChild(row);
   seqLayers.push(layer);
+  applyStepCount();
   updateSeqAddBtn();
 }
 
@@ -494,7 +597,7 @@ function buildPatLibrary(){
     const nm=document.createElement('div');nm.className='seq-pat-name';nm.style.color=pat.color;nm.textContent=pat.name;
     const acts=document.createElement('div');acts.className='seq-pat-actions';
     const loadBtn=document.createElement('button');loadBtn.className='seq-pat-load-btn';loadBtn.textContent='LOAD';
-    loadBtn.addEventListener('click',e=>{e.stopPropagation();loadPatternIntoEditor(pi);});
+    loadBtn.addEventListener('click',e=>{e.stopPropagation();loadPatternSmart(pi);});
     const delBtn=document.createElement('button');delBtn.className='seq-pat-del-btn';delBtn.textContent='✕';
     delBtn.addEventListener('click',e=>{e.stopPropagation();
       if(confirm('Delete pattern "'+pat.name+'"?')){
@@ -506,12 +609,72 @@ function buildPatLibrary(){
     seqPatLibrary.appendChild(row);
   });
 }
-function loadPatternIntoEditor(pi){
+function loadPatternIntoEditor(pi,offset,wrap){
   const pat=savedPatterns[pi];if(!pat)return;
+  offset=offset||0;
+  if(patLen(pat)>STEPS){STEPS=patLen(pat);offset=0;}
   seqLayersContainer.innerHTML='';seqLayers=[];
-  pat.layers.forEach(snap=>addSeqLayer(snap.soundId,[...snap.steps],snap.vols?[...snap.vols]:null));
+  const len=patLen(pat);
+  pat.layers.forEach(snap=>{
+    let st=snap.steps,vl=snap.vols;
+    if(offset>0||wrap){ // place the (shorter) pattern starting at step offset+1, optionally wrapping its overflow to the start
+      const ns=new Array(MAX_STEPS).fill(false),nv=new Array(MAX_STEPS).fill(100);
+      for(let i=0;i<len;i++){
+        let t=offset+i;
+        if(t>=STEPS){if(!wrap)continue;t=t%STEPS;}
+        ns[t]=!!st[i];nv[t]=(vl&&vl[i]!=null)?vl[i]:100;
+      }
+      st=ns;vl=nv;
+    }
+    addSeqLayer(snap.soundId,[...st],vl?[...vl]:null);
+  });
+  ensureAllTracks();
   setSeqMode('pattern');
   showToast('Pattern "'+pat.name+'" loaded into editor');
+}
+
+// Loading a SHORTER pattern into a longer loop: ask where it should start (and whether overflow wraps)
+function loadPatternSmart(pi){
+  const pat=savedPatterns[pi];if(!pat)return;
+  const len=patLen(pat);
+  if(len>=STEPS){loadPatternIntoEditor(pi);autoSave();return;}
+  let m=document.getElementById('patStartModal');
+  if(!m){
+    m=document.createElement('div');m.id='patStartModal';
+    m.style.cssText='position:fixed;top:0;right:0;bottom:0;left:0;z-index:330;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);';
+    m.innerHTML='<div class="confirm-box" style="max-width:340px;width:90%;"><div class="confirm-title" id="psTitle" style="color:#a0a8ff;"></div><div class="confirm-sub" id="psSub" style="font-size:.8rem;"></div><div id="psBody" style="display:flex;flex-direction:column;gap:.5rem;margin-top:1rem;"></div></div>';
+    document.body.appendChild(m);
+    m.addEventListener('click',e=>{if(e.target===m)m.style.display='none';});
+  }
+  const title=document.getElementById('psTitle'),sub=document.getElementById('psSub'),body=document.getElementById('psBody');
+  const close=()=>{m.style.display='none';};
+  const mk=(txt,cls,fn,css)=>{const b=document.createElement('button');b.className='confirm-btn '+cls;b.textContent=txt;if(css)b.style.cssText=css;b.addEventListener('click',fn);return b;};
+  function finish(start,wrap){close();loadPatternIntoEditor(pi,start-1,wrap);autoSave();}
+  function askWrap(start){
+    const over=start-1+len-STEPS;
+    title.textContent='PATTERN WRAP?';
+    sub.textContent='The last '+over+' step'+(over>1?'s':'')+' run past the end of the loop. Loop them back to the beginning?';
+    body.innerHTML='';
+    body.appendChild(mk('YES — WRAP','yes',()=>finish(start,true)));
+    body.appendChild(mk('NO — CUT OFF','no',()=>finish(start,false)));
+    body.appendChild(mk('BACK','no',askStart,'opacity:.7;'));
+  }
+  function askStart(){
+    title.textContent='START ON WHICH STEP?';
+    sub.textContent='"'+pat.name+'" is '+len+' steps · your loop is '+STEPS;
+    body.innerHTML='';
+    const chips=document.createElement('div');chips.style.cssText='display:flex;gap:.4rem;justify-content:center;flex-wrap:wrap;';
+    const inp=document.createElement('input');inp.type='number';inp.min=1;inp.max=STEPS;inp.value=1;
+    inp.style.cssText='width:100%;box-sizing:border-box;text-align:center;font-family:Bebas Neue,sans-serif;font-size:1.6rem;letter-spacing:.1em;padding:.4rem;border-radius:8px;border:1px solid #2a2a5a;background:#0a0a1a;color:#cfd2ff;';
+    for(let s0=1;s0<=STEPS;s0+=16){chips.appendChild(mk('STEP '+s0,'no',()=>{inp.value=s0;},'flex:1 1 auto;margin:0;padding:.4rem .6rem;'));}
+    body.appendChild(chips);body.appendChild(inp);
+    body.appendChild(mk('OK','yes',()=>{
+      let v=Math.round(parseFloat(inp.value));if(!isFinite(v))v=1;v=Math.min(STEPS,Math.max(1,v));
+      if(v-1+len>STEPS)askWrap(v);else finish(v,false);
+    }));
+    body.appendChild(mk('CANCEL','no',close));
+  }
+  askStart();m.style.display='flex';
 }
 
 // startSeq / stopSeq
@@ -553,6 +716,7 @@ function seqRunStep(quiet,delayMs,audioAt){
       const st=seqStep;
       later(()=>{
         seqPhEls.forEach((c,i)=>c.classList.toggle('lit',i===st));
+        if(seqFollow&&STEPS>16)followPlayhead(st);
         seqFullPhEls.forEach((c,i)=>c.classList.toggle('lit',i===st));
         seqLayers.forEach(layer=>{
           if(layer.steps[st]){
@@ -564,7 +728,7 @@ function seqRunStep(quiet,delayMs,audioAt){
         });
       });
       seqLayers.forEach(layer=>{
-        if(layer.steps[st]&&!layer.muted){getCtx();playSound(layer.soundId,layer.vols[st]/100,_at);}
+        if(layer.steps[st]&&layerAudible(layer)){getCtx();playSound(layer.soundId,layer.vols[st]/100,_at);}
       });
     }
     seqStep=(seqStep+1)%STEPS;
@@ -585,7 +749,7 @@ function seqRunStep(quiet,delayMs,audioAt){
       }
     }
     arrBarStep++;
-    if(arrBarStep>=STEPS){
+    if(arrBarStep>=patLen(arrangement[arrBar]!=null?savedPatterns[arrangement[arrBar]]:null)){
       arrBarStep=0;
       arrBar=(arrBar+1)%arrangeBars;
       if(!quiet){
@@ -616,7 +780,7 @@ function seqRunStep(quiet,delayMs,audioAt){
         }
       }
       songArrBarStep++;
-      if(songArrBarStep>=STEPS){
+      if(songArrBarStep>=patLen(arr.arrangement[songArrBar]!=null?savedPatterns[arr.arrangement[songArrBar]]:null)){
         songArrBarStep=0;songArrBar++;
         if(songArrBar>=totalBars){
           songArrBar=0;
@@ -632,7 +796,7 @@ function seqRunStep(quiet,delayMs,audioAt){
 }
 function stopSeq(){
   seqClockStop();_seqEnergyWait=false;_seqHidePaused=false;
-  seqPlaying=false;requestRender();seqStep=0;arrBar=0;arrBarStep=0;songSlotIdx=0;songArrBar=0;songArrBarStep=0;
+  seqPlaying=false;requestRender();seqStep=0;_followPage=-1;arrBar=0;arrBarStep=0;songSlotIdx=0;songArrBar=0;songArrBarStep=0;
   seqPhEls.forEach(c=>c.classList.remove('lit'));
   seqFullPhEls.forEach(c=>c.classList.remove('lit'));
   arrPhEls.forEach(c=>c.classList.remove('lit'));
@@ -781,7 +945,7 @@ function openSavePatModal(){
 }
 document.getElementById('savePatConfirm')&&document.getElementById('savePatConfirm').addEventListener('click',()=>{
   const name=savePatNameInput.value.trim()||('Pattern '+(savedPatterns.length+1));
-  savedPatterns.push({name,color:savePatColor,layers:seqLayers.map(l=>({soundId:l.soundId,steps:[...l.steps],vols:[...l.vols],muted:l.muted||false}))});
+  savedPatterns.push({name,color:savePatColor,stepCount:STEPS,layers:seqLayers.map(l=>({soundId:l.soundId,steps:l.steps.slice(0,STEPS),vols:l.vols.slice(0,STEPS),muted:l.muted||false}))});
   savePatModal.style.display='none';
   buildPatLibrary();
   showToast('Pattern "'+name+'" saved!');
@@ -806,7 +970,7 @@ document.getElementById('savePatConfirm')&&document.getElementById('savePatConfi
       const wrap=document.createElement('div');wrap.style.cssText='display:flex;gap:.4rem;align-items:stretch;';
       const b=document.createElement('button');b.className='confirm-btn no';
       b.style.cssText='flex:1 1 auto;margin:0;color:'+pat.color+';border-color:'+pat.color+';';b.textContent=pat.name;
-      b.addEventListener('click',()=>{loadPatternIntoEditor(pi);close();autoSave();});
+      b.addEventListener('click',()=>{close();loadPatternSmart(pi);});
       // trash: first tap arms it (turns solid red "DELETE?"), second tap deletes
       const del=document.createElement('button');del.className='confirm-btn no';
       const TR='<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block;margin:0 auto"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>';
@@ -866,7 +1030,7 @@ document.getElementById('savePatConfirm')&&document.getElementById('savePatConfi
     const list=target==='all'?seqLayers:[seqLayers[target]];
     list.forEach(l=>{
       if(!l)return;
-      for(let i=0;i<STEPS;i++){
+      for(let i=0;i<MAX_STEPS;i++){
         l.steps[i]=false;l.vols[i]=100;
         [l.stepEls[i],l.fullStepEls[i]].forEach(el=>{if(el){el.classList.remove('on');el.style.opacity='';}});
       }
@@ -914,38 +1078,38 @@ arrBarPickerModal&&arrBarPickerModal.addEventListener('click',e=>{if(e.target===
 // ── 4+ tracks on a shorter screen: only 3½ rows show, the rest scroll (invisible scrollbar) ──
 function fitSeqScroll(){
   const c=seqLayersContainer;if(!c)return;
+  const sc=document.getElementById('seqHScroll');if(!sc)return;   // the scroller around playhead bar + track rows
   const rows=c.querySelectorAll('.seq-layer-row');
+  const hdr=seqPhBar?seqPhBar.offsetHeight+3:0;
+  const off=()=>{if(sc.classList.contains('seq-scroll')){sc.classList.remove('seq-scroll');sc.style.maxHeight='';}};
   // PHONE LAYOUT: the track list fills whatever vertical space the drum pads leave over
   // (few pads = more rows visible, 8 pads = fewer), scrolling when there are more tracks than fit.
   if(!document.body.classList.contains('desktop-mode')&&document.body.classList.contains('seq-on')&&rows.length&&c.offsetParent!==null){
     const sb=document.getElementById('soundboardBtn'),grid=document.getElementById('padGrid'),area=seqArea;
     if(sb&&grid&&area&&!document.body.classList.contains('store-open')&&!document.body.classList.contains('bunker-open')){
       const pitch=rows.length>1?rows[1].offsetTop-rows[0].offsetTop:rows[0].offsetHeight+6;
-      const full=c.scrollHeight;
+      const full=sc.scrollHeight;
       const nn=Math.max(1,Math.min(8,parseInt(grid.getAttribute('data-pads'))||1));
       const colsN=nn<=1?1:(nn===3?3:(nn<=4?2:(nn<=6?3:4)));
       const rowsN=Math.ceil(nn/colsN);
       const padNat=rowsN*((grid.clientWidth-(colsN-1)*6)/colsN/1.4)+(rowsN-1)*6;
-      const cr=c.getBoundingClientRect(),ar=area.getBoundingClientRect();
+      const cr=sc.getBoundingClientRect(),ar=area.getBoundingClientRect();
       const belowC=ar.bottom-cr.bottom;                      // bottom button row etc.
       const pa=grid.closest('.pad-area'),pcs=pa?getComputedStyle(pa):null;
       const gap=pa?(pa.getBoundingClientRect().top-ar.bottom)+(pcs?parseFloat(pcs.paddingTop)||0:0):12;
       const room=sb.getBoundingClientRect().top-10-cr.top-belowC-gap-padNat;
-      const target=Math.max(pitch*2.5,Math.min(full,room));
-      if(target<full-2){c.classList.add('seq-scroll');c.style.maxHeight=Math.floor(target)+'px';}
-      else{c.classList.remove('seq-scroll');c.style.maxHeight='';}
+      const target=Math.max(pitch*2.5+hdr,Math.min(full,room));
+      if(target<full-2){sc.classList.add('seq-scroll');sc.style.maxHeight=Math.floor(target)+'px';}
+      else off();
       return;
     }
   }
   const small=window.innerHeight<1000;
-  if(rows.length<4||!small||c.offsetParent===null){
-    if(c.classList.contains('seq-scroll')){c.classList.remove('seq-scroll');c.style.maxHeight='';}
-    return;
-  }
+  if(rows.length<4||!small||c.offsetParent===null){off();return;}
   const pitch=rows[1].offsetTop-rows[0].offsetTop;
   if(!pitch)return;
-  c.classList.add('seq-scroll');
-  c.style.maxHeight=Math.round(pitch*3.5)+'px';
+  sc.classList.add('seq-scroll');
+  sc.style.maxHeight=Math.round(pitch*3.5+hdr)+'px';
 }
 new MutationObserver(fitSeqScroll).observe(seqLayersContainer,{childList:true});
 addEventListener('resize',fitSeqScroll);

@@ -176,6 +176,13 @@
         <button class="vtb-btn" id="vtbViewBtn">VIEW</button>
       </div>
 
+      <div id="stepsMenu" style="display:none;">
+        <button type="button" class="vm-row" data-steps="16"><span class="vm-check"></span>16 STEPS</button>
+        <button type="button" class="vm-row" data-steps="32"><span class="vm-check"></span>32 STEPS</button>
+        <button type="button" class="vm-row" data-steps="64"><span class="vm-check"></span>64 STEPS</button>
+        <div class="vm-sep"></div>
+        <button type="button" class="vm-row" data-follow="1"><span class="vm-check"></span>FOLLOW PLAYHEAD</button>
+      </div>
       <div id="viewMenu" style="display:none;">
         <button type="button" class="vm-row" data-vm="tiers"><span class="vm-check"></span>TRACKERS</button>
         <button type="button" class="vm-row" data-vm="seq"><span class="vm-check"></span>SEQUENCER</button>
@@ -204,10 +211,13 @@
         <!-- PATTERN VIEW -->
         <div id="seqPatternView">
           <div class="seq-area-label" id="seqAreaLabel">pattern · 100 bpm</div>
-          <div class="seq-ph-bar" id="seqPhBar"></div>
-          <div id="seqLayersContainer"></div>
+          <div id="seqHScroll"><div id="seqHInner">
+            <div class="seq-ph-bar" id="seqPhBar"></div>
+            <div id="seqLayersContainer"></div>
+          </div></div>
           <div class="seq-bottom-row">
             <button class="seq-add-btn" id="seqAddBtn" disabled>+ ADD TRACK</button>
+            <button class="seq-save-pat-btn" id="seqStepsBtn" style="display:none;">16 STEPS</button>
             <button class="seq-save-pat-btn" id="seqSavePatBtn">SAVE/LOAD PATTERN</button>
             <button class="seq-save-pat-btn" id="seqClearBtn" title="Clear tracks" aria-label="Clear tracks" style="border-color:#aa3344;color:#e0485c;padding-left:.2rem;padding-right:.2rem;width:1.7rem;"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:block"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg></button>
             <button class="seq-save-pat-btn" id="seqExportPatBtn" style="border-color:#00cc88;color:#00aa66;">EXPORT WAV</button>
@@ -269,8 +279,7 @@
           </div>
         </div>
       </div>
-      <div id="seqFullPhBar"></div>
-      <div id="seqFullLayers"></div>
+      <div id="seqFullLayers"><div id="seqFullPhBar"></div></div>
       <button id="seqFullAddBtn" class="seq-add-btn" disabled>+ ADD TRACK</button>
     </div>
   </div>
@@ -353,6 +362,21 @@
               <div class="upgrade-effect-sub" id="seqSub2">1-track loop · every step earns while it plays · +×1.2 tap mult</div>
             </div>
             <div class="drum-price" id="seqPrice">100K<small>pts</small></div>
+          </div>
+        </div>
+        <!-- Longer sequencer loops (shows once the first track is bought) -->
+        <div class="drum-card" id="stepsCard" style="display:none;">
+          <div class="drum-card-header">
+            <div class="drum-card-title">LOOP LENGTH</div>
+            <div class="drum-card-sub">Longer patterns · pick the length with the STEPS button</div>
+          </div>
+          <div class="drum-buy-btn" id="stepsBuyBtn">
+            <div class="drum-counter"><div class="drum-counter-num" id="stepsNum">16</div><div class="drum-counter-lbl">STEPS</div></div>
+            <div class="upgrade-effect">
+              <div class="upgrade-effect-main" id="stepsMain">UPGRADE TO 32 STEPS</div>
+              <div class="upgrade-effect-sub" id="stepsSub2">Double-length loops for the sequencer</div>
+            </div>
+            <div class="drum-price" id="stepsPrice">10M<small>pts</small></div>
           </div>
         </div>
       </div>

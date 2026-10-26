@@ -27,33 +27,29 @@ function downloadBlob(blob,filename){
 
 function buildPatternHits(layers){
   const sd=60/seqBpm/4,hits=[];
-  layers.forEach(l=>{if(l.muted)return;l.steps.forEach((on,i)=>{if(on)hits.push({time:i*sd,soundId:l.soundId});});});
+  layers.forEach(l=>{if(l.muted)return;l.steps.slice(0,STEPS).forEach((on,i)=>{if(on)hits.push({time:i*sd,soundId:l.soundId});});});
   return hits;
 }
 
 function buildArrangementHits(arr){
   if(!arr)return{hits:[],duration:0};
-  const sd=60/seqBpm/4,pd=STEPS*sd,hits=[];
+  const sd=60/seqBpm/4,hits=[];let cursor=0;
   for(let bar=0;bar<arr.bars;bar++){
     const pat=arr.arrangement[bar]!=null?savedPatterns[arr.arrangement[bar]]:null;
-    if(!pat)continue;
-    pat.layers.forEach(l=>{if(l.muted)return;l.steps.forEach((on,i)=>{if(on)hits.push({time:bar*pd+i*sd,soundId:l.soundId});});});
+    if(pat)pat.layers.forEach(l=>{if(l.muted)return;l.steps.forEach((on,i)=>{if(on)hits.push({time:cursor+i*sd,soundId:l.soundId});});});
+    cursor+=patLen(pat)*sd;
   }
-  return{hits,duration:arr.bars*pd};
+  return{hits,duration:cursor};
 }
 
 function buildSongHits(){
   if(!songSlots.length)return{hits:[],duration:0};
-  const sd=60/seqBpm/4,pd=STEPS*sd,hits=[];
-  let cursor=0;
+  const hits=[];let cursor=0;
   songSlots.forEach(slot=>{
     const arr=savedArrangements[slot.arrIdx];if(!arr)return;
-    for(let bar=0;bar<arr.bars;bar++){
-      const pat=arr.arrangement[bar]!=null?savedPatterns[arr.arrangement[bar]]:null;
-      if(!pat)continue;
-      pat.layers.forEach(l=>{if(l.muted)return;l.steps.forEach((on,i)=>{if(on)hits.push({time:cursor+bar*pd+i*sd,soundId:l.soundId});});});
-    }
-    cursor+=arr.bars*pd;
+    const r=buildArrangementHits(arr);
+    r.hits.forEach(h=>hits.push({time:cursor+h.time,soundId:h.soundId}));
+    cursor+=r.duration;
   });
   return{hits,duration:cursor};
 }
@@ -119,12 +115,8 @@ document.getElementById('seqExportPatBtn')&&document.getElementById('seqExportPa
   renderHitsToWAV(buildPatternHits(seqLayers),STEPS*sd,'alien_buddies_pattern.wav');
 });
 document.getElementById('seqExportArrBtn')&&document.getElementById('seqExportArrBtn').addEventListener('click',()=>{
-  const sd=60/seqBpm/4,pd=STEPS*sd,hits=[];
-  for(let bar=0;bar<arrangeBars;bar++){
-    const p=arrangement[bar]!=null?savedPatterns[arrangement[bar]]:null;if(!p)continue;
-    p.layers.forEach(l=>{if(l.muted)return;l.steps.forEach((on,i)=>{if(on)hits.push({time:bar*pd+i*sd,soundId:l.soundId});});});
-  }
-  renderHitsToWAV(hits,arrangeBars*pd,'alien_buddies_arrangement.wav');
+  const r=buildArrangementHits({bars:arrangeBars,arrangement:arrangement});
+  renderHitsToWAV(r.hits,r.duration,'alien_buddies_arrangement.wav');
 });
 document.getElementById('seqExportSongBtn')&&document.getElementById('seqExportSongBtn').addEventListener('click',()=>{
   const{hits,duration}=buildSongHits();

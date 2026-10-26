@@ -278,11 +278,13 @@ function renderAlienProfile(){
 function openAlienNameModal(globalIdx){
   alienProfileIdx=globalIdx;
   alienNameModal.classList.add('open');
+  document.body.classList.add('stats-open'); // hides the floating aliens so they never cover this window
   renderAlienProfile();
 }
 
 function closeAlienNameModal(){
   alienNameModal.classList.remove('open');
+  document.body.classList.remove('stats-open');
   alienProfileIdx=null;
   alienNameInput&&alienNameInput.blur();
   const vp=document.querySelector('meta[name=viewport]');

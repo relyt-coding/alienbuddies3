@@ -2,6 +2,22 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.49 - 2026-10-25 21:29
+
+- changed: css/style.css
+- changed: index.html
+- changed: js/01-constants.js
+- changed: js/02-save-and-state.js
+- changed: js/03-audio.js
+- changed: js/05-pads.js
+- changed: js/06-sequencer.js
+- changed: js/12-tiers-and-bunker.js
+- changed: js/15-render.js
+- changed: js/18-desktop-layout.js
+- changed: js/19-wav-export.js
+- changed: js/20-skill-tree.js
+- added: js/23-more-menu.js
+
 ## v0.2.45 - 2026-10-25 21:11
 
 - changed: css/style.css

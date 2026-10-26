@@ -101,7 +101,11 @@ async function renderHitsToWAV(hits,duration,filename){
     marimba:(t,gv)=>{const c=offCtx,car=c.createOscillator(),mod=c.createOscillator(),mg=c.createGain(),g=c.createGain();car.type='sine';car.frequency.value=523.25;mod.frequency.value=523.25*4;mod.connect(mg);mg.gain.value=200;mg.connect(car.frequency);car.connect(g);g.connect(master);rv(g);g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.65*gv,t+.004);g.gain.exponentialRampToValueAtTime(.001,t+.55);car.start(t);mod.start(t);car.stop(t+.55);mod.stop(t+.55);},
     thud:(t,gv)=>{const c=offCtx,o=c.createOscillator(),g=c.createGain();o.type='triangle';o.frequency.setValueAtTime(80,t);o.frequency.exponentialRampToValueAtTime(45,t+.18);const fl=c.createBiquadFilter();fl.type='lowpass';fl.frequency.value=400;o.connect(fl);fl.connect(g);g.connect(master);g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.65*gv,t+.003);g.gain.exponentialRampToValueAtTime(.001,t+.28);o.start(t);o.stop(t+.28);},
   };
-  hits.forEach(({time,soundId})=>{const fn=R[soundId];if(fn)try{fn(time,soundVols[soundId]!==undefined?soundVols[soundId]:1);}catch(e){}});
+  hits.forEach(({time,soundId})=>{const fn=R[soundId];if(fn)try{
+    const cents=(typeof keyCentsFor==='function')?keyCentsFor(soundId):0;
+    if(cents){const o0=offCtx.createOscillator;offCtx.createOscillator=function(){const o=o0.call(this);o.detune.value=cents;return o;};try{fn(time,soundVols[soundId]!==undefined?soundVols[soundId]:1);}finally{delete offCtx.createOscillator;}}
+    else fn(time,soundVols[soundId]!==undefined?soundVols[soundId]:1);
+  }catch(e){}});
   showToast('Rendering WAV\u2026');
   try{
     const buf=await offCtx.startRendering();

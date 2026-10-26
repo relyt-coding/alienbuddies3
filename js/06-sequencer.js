@@ -43,6 +43,7 @@ for(let i=0;i<MAX_STEPS;i++){
 
 const viewToggleBar=document.getElementById('viewToggleBar');
 const vtbViewBtn=document.getElementById('vtbViewBtn');
+const vtbMoreBtn=document.getElementById('vtbMoreBtn');
 const viewMenu=document.getElementById('viewMenu');
 let padsHidden=false;
 try{padsHidden=localStorage.getItem('ab2_hidePads')==='1';}catch(e){}
@@ -57,13 +58,15 @@ function placeViewButtons(){
   if(inRow){
     targetRow.insertBefore(vtbViewBtn,targetRow.firstChild);
     vtbViewBtn.className='seq-save-pat-btn';
+    if(vtbMoreBtn){targetRow.insertBefore(vtbMoreBtn,vtbViewBtn.nextSibling);vtbMoreBtn.className='seq-save-pat-btn';}
     viewToggleBar.style.display='none';
   }else{
     viewToggleBar.appendChild(vtbViewBtn);
     vtbViewBtn.className='vtb-btn';
+    if(vtbMoreBtn){viewToggleBar.appendChild(vtbMoreBtn);vtbMoreBtn.className='vtb-btn';}
     viewToggleBar.style.display=drum.seqTracks?'':'none';
   }
-  closeViewMenu();closeStepsMenu&&closeStepsMenu();
+  closeViewMenu();closeStepsMenu&&closeStepsMenu();window.closeMoreMenu&&window.closeMoreMenu();
 }
 function refreshViewMenu(){
   [['tiers',!trackersHidden],['seq',!seqHidden],['pads',!padsHidden]].forEach(function(p){
@@ -236,7 +239,7 @@ function addFullLayerRow(layer){
       btn.style.opacity=layer.steps[si]?String(0.3+0.7*(layer.vols[si]/100)):'';
       // Sync small grid
       if(layer.stepEls[si]){layer.stepEls[si].classList.toggle('on',layer.steps[si]);layer.stepEls[si].style.opacity=layer.steps[si]?String(0.3+0.7*(layer.vols[si]/100)):'';}
-      if(layer.steps[si]&&layerAudible(layer)){getCtx();playSound(layer.soundId);}
+      if(layer.steps[si]&&layerAudible(layer)){getCtx();playSound(layer.soundId,undefined,undefined,seqLayers.indexOf(layer));}
     });
     stepsEl.appendChild(btn);layer.fullStepEls.push(btn);
   }
@@ -387,7 +390,7 @@ function addSeqLayer(soundId,stepsInit){
       btn.classList.toggle('on',layer.steps[si]);
       btn.style.opacity=layer.steps[si]?String(0.3+0.7*(layer.vols[si]/100)):'';
       if(layer.fullStepEls[si]){layer.fullStepEls[si].classList.toggle('on',layer.steps[si]);layer.fullStepEls[si].style.opacity=layer.steps[si]?String(0.3+0.7*(layer.vols[si]/100)):'';}
-      if(layer.steps[si]&&layerAudible(layer)){getCtx();playSound(layer.soundId);}
+      if(layer.steps[si]&&layerAudible(layer)){getCtx();playSound(layer.soundId,undefined,undefined,seqLayers.indexOf(layer));}
     });
     stepsEl.appendChild(btn);layer.stepEls.push(btn);
   }
@@ -732,8 +735,8 @@ function seqRunStep(quiet,delayMs,audioAt){
           }
         });
       });
-      seqLayers.forEach(layer=>{
-        if(layer.steps[st]&&layerAudible(layer)){getCtx();playSound(layer.soundId,layer.vols[st]/100,_at);}
+      seqLayers.forEach((layer,_li)=>{
+        if(layer.steps[st]&&layerAudible(layer)){getCtx();playSound(layer.soundId,layer.vols[st]/100,_at,_li);}
       });
     }
     seqStep=(seqStep+1)%STEPS;
@@ -746,9 +749,9 @@ function seqRunStep(quiet,delayMs,audioAt){
       });
       const pat=arrangement[ab]!=null?savedPatterns[arrangement[ab]]:null;
       if(pat){
-        pat.layers.forEach(layer=>{
+        pat.layers.forEach((layer,_li)=>{
           if(layer.steps[as]&&!layer.muted){
-            getCtx();const _av=(layer.vols&&layer.vols[as]!=null)?layer.vols[as]/100:1;playSound(layer.soundId,_av,_at);
+            getCtx();const _av=(layer.vols&&layer.vols[as]!=null)?layer.vols[as]/100:1;playSound(layer.soundId,_av,_at,_li);
           }
         });
       }
@@ -777,9 +780,9 @@ function seqRunStep(quiet,delayMs,audioAt){
         });
         const pat=arr.arrangement[sb]!=null?savedPatterns[arr.arrangement[sb]]:null;
         if(pat){
-          pat.layers.forEach(layer=>{
+          pat.layers.forEach((layer,_li)=>{
             if(layer.steps[sst]&&!layer.muted){
-              getCtx();const _sv=(layer.vols&&layer.vols[sst]!=null)?layer.vols[sst]/100:1;playSound(layer.soundId,_sv,_at);
+              getCtx();const _sv=(layer.vols&&layer.vols[sst]!=null)?layer.vols[sst]/100:1;playSound(layer.soundId,_sv,_at,_li);
             }
           });
         }

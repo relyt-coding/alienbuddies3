@@ -2,7 +2,7 @@
 // ══════════════════════════════════════════════
 //  AUDIO ENGINE
 // ══════════════════════════════════════════════
-let audioCtx=null,masterGainNode=null,drumMasterGain=null,rvbNode=null,rvbGainNode=null,ambGain=null,ambStarted=false;
+let audioCtx=null,masterGainNode=null,drumMasterGain=null,drumMasterReal=null,rvbNode=null,rvbGainNode=null,ambGain=null,ambStarted=false;
 let sfxOn=true;
 let musicOn=true;
 
@@ -11,7 +11,7 @@ function getCtx(){
     audioCtx=new(window.AudioContext||window.webkitAudioContext)();
     masterGainNode=audioCtx.createGain();masterGainNode.gain.value=masterVol;masterGainNode.connect(audioCtx.destination);
     ambGain=audioCtx.createGain();ambGain.gain.value=1;ambGain.connect(masterGainNode);
-    drumMasterGain=audioCtx.createGain();drumMasterGain.gain.value=1;drumMasterGain.connect(masterGainNode);
+    drumMasterGain=audioCtx.createGain();drumMasterGain.gain.value=1;drumMasterGain.connect(masterGainNode);drumMasterReal=drumMasterGain;
     // Reverb
     rvbNode=audioCtx.createConvolver();rvbGainNode=audioCtx.createGain();rvbGainNode.gain.value=.22;
     const L=audioCtx.sampleRate*2.5,ir=audioCtx.createBuffer(2,L,audioCtx.sampleRate);
@@ -244,13 +244,85 @@ function unlockPlanetSound(soundId){
 
 const TAGS=[...new Set(ALL_SOUNDS.map(s=>s.tag))];
 
-function playSound(id,velMult,when){
+// ══════════════════════════════════════════════
+//  KEY LOCK + PER-TRACK REVERB / ECHO
+// ══════════════════════════════════════════════
+const KEY_NAMES=['C','D♭','D','E♭','E','F','F♯','G','A♭','A','B♭','B'];
+const MAJOR_SCALE=[0,2,4,5,7,9,11];
+let seqKey=null; // null = off (sounds play as designed); 0..11 = major key root (C=0)
+// Sounds that have a musical pitch → their base frequency (Hz). Drums / noise / FX are left alone.
+const PITCHED_BASE={sub:55,chord:130.8,lead:349,basenote:73.4,bassslide:110,pad:196,arp:261.6,wobble:55,stab:261.6,bell:440,marimba:523.3,choir:110,
+  om_bell:880,om_bowl:320,sh_steeldrum:370,mn_bitcrush:220,mn_synthpop:880,fw_marimba2:392,fw_softbass:60,mo_caveboom:45,re_gong:180,re_deepdrone:55,re_ceremony:240,re_lowbowl:160,re_resonance:220,po_logdrum:280,be_accent:900};
+function keyCentsFor(id){
+  if(seqKey==null)return 0;
+  const f=PITCHED_BASE[id];if(!f)return 0;
+  const n=69+12*Math.log2(f/440);let best=null;
+  for(let m=Math.floor(n)-2;m<=Math.ceil(n)+2;m++){
+    const pc=(((m-seqKey)%12)+12)%12;
+    if(MAJOR_SCALE.includes(pc)){const d=Math.abs(m-n);if(!best||d<best.d)best={m,d};}
+  }
+  return best?(best.m-n)*100:0;
+}
+// Per-track FX (index = track number): {rvbType,rvbAmt,echoMix,echoDiv,echoFb}
+let trackFx=[];
+const FX_REVERBS={room:{label:'ROOM',len:.9,pow:3,amt:.32},hall:{label:'HALL',len:2.2,pow:2.4,amt:.42},cathedral:{label:'CATHEDRAL',len:4,pow:1.9,amt:.55}};
+const FX_ECHOS={slap:{label:'SLAP',div:.25,fb:.2,mix:.3},eighth:{label:'1/8',div:.5,fb:.35,mix:.35},dotted:{label:'DOTTED 1/8',div:.75,fb:.4,mix:.35},quarter:{label:'1/4',div:1,fb:.4,mix:.35},dub:{label:'DUB',div:.75,fb:.6,mix:.45}};
+function getTrackFx(i,create){
+  let f=trackFx[i];
+  if(!f&&create){f=trackFx[i]={rvbType:'hall',rvbAmt:0,echoMix:0,echoDiv:.5,echoFb:.35};}
+  return f||null;
+}
+function fxIsActive(f){return !!f&&(f.rvbAmt>0||f.echoMix>0);}
+const _fxBuses={},_fxRevs={};
+function getFxRev(type){
+  if(_fxRevs[type])return _fxRevs[type];
+  const c=getCtx(),def=FX_REVERBS[type]||FX_REVERBS.hall,L=Math.round(c.sampleRate*def.len),ir=c.createBuffer(2,L,c.sampleRate);
+  for(let ch=0;ch<2;ch++){const d=ir.getChannelData(ch);for(let i=0;i<L;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/L,def.pow);}
+  const conv=c.createConvolver();conv.buffer=ir;const out=c.createGain();out.gain.value=1;conv.connect(out);out.connect(drumMasterReal);
+  return _fxRevs[type]={conv,out};
+}
+function getFxBus(i,f){
+  const c=getCtx();let b=_fxBuses[i];
+  if(!b){
+    b={input:c.createGain(),rSend:c.createGain(),eSend:c.createGain(),delay:c.createDelay(2.5),fb:c.createGain(),tone:c.createBiquadFilter(),eOut:c.createGain(),rType:null};
+    b.tone.type='lowpass';b.tone.frequency.value=3200;b.eOut.gain.value=1;
+    b.input.connect(drumMasterReal);                       // dry
+    b.input.connect(b.rSend);                              // reverb send (conv chosen below)
+    b.input.connect(b.eSend);b.eSend.connect(b.delay);b.delay.connect(b.tone);b.tone.connect(b.fb);b.fb.connect(b.delay);b.tone.connect(b.eOut);b.eOut.connect(drumMasterReal);
+    _fxBuses[i]=b;
+  }
+  if(b.rType!==f.rvbType){try{b.rSend.disconnect();}catch(e){}b.rSend.connect(getFxRev(f.rvbType).conv);b.rType=f.rvbType;}
+  const bpm=(typeof seqBpm==='number'&&seqBpm>0)?seqBpm:100,now=c.currentTime;
+  b.rSend.gain.setValueAtTime(Math.min(1,f.rvbAmt)*.9,now);
+  b.eSend.gain.setValueAtTime(Math.min(1,f.echoMix)*.9,now);
+  b.delay.delayTime.setValueAtTime(Math.min(2.4,Math.max(.03,f.echoDiv*60/bpm)),now);
+  b.fb.gain.setValueAtTime(Math.min(.9,Math.max(0,f.echoFb)),now);
+  return b;
+}
+// runs a sound's synth function with the key retune and/or the track's FX bus applied
+function runSoundFn(id,t,gv,trackIdx){
+  const c=getCtx(),fx=(trackIdx!==undefined&&trackIdx>=0)?getTrackFx(trackIdx,false):null;
+  const bus=fxIsActive(fx)?getFxBus(trackIdx,fx):null;
+  const cents=keyCentsFor(id);
+  if(!bus&&!cents){SOUND_MAP[id].fn(t,gv);return;}
+  const orig=c.createOscillator;const savedDM=drumMasterGain;
+  try{
+    if(cents)c.createOscillator=function(){const o=orig.call(this);o.detune.value=cents;return o;};
+    if(bus)drumMasterGain=bus.input;
+    SOUND_MAP[id].fn(t,gv);
+  }finally{
+    if(cents)delete c.createOscillator;
+    drumMasterGain=savedDM;
+  }
+}
+
+function playSound(id,velMult,when,trackIdx){
   if(!SOUND_MAP[id])return;
   const gv=getSoundGainVal(id)*(velMult!==undefined?velMult:1);
   const now=Tnow();
   // 'when' = exact audio-clock time (used by the sequencer so notes land on the beat even if the page is busy)
   const t=(when!==undefined&&when>now)?when:now;
-  SOUND_MAP[id].fn(t,gv);
+  runSoundFn(id,t,gv,trackIdx);
   if(t>now+.008)setTimeout(partyPulseOnBeat,(t-now)*1000);else partyPulseOnBeat();
 }
 

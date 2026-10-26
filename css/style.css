@@ -705,7 +705,7 @@ body.pick-mode .alien-cell.occupied:not(.onscreen){opacity:.45;}
 /* Only activates when body has .desktop-mode class */
 
 /* Scale up all rem-based text on desktop */
-body.desktop-mode{font-size:22px;}
+body.desktop-mode{font-size:calc(22px * var(--ds,1));}
 
 /* ── Desktop: cap home screen oversized elements ── */
 body.desktop-mode .home-logo-emoji{font-size:clamp(3rem,8vw,5rem) !important;}
@@ -1196,3 +1196,89 @@ body.stats-open #alienLayer{visibility:hidden;}
 .ss-total-val{font-size:2.1rem;}
 
 .match-card{align-self:start;}
+
+/* v0.2.46 window scaling: --ds (desktop scale) is set from the window size in applyWindowScale() */
+#tooSmallOverlay{position:fixed;top:0;right:0;bottom:0;left:0;z-index:99999;background:#07070f;display:none;align-items:center;justify-content:center;text-align:center;padding:1rem;}
+body.too-small #tooSmallOverlay{display:flex;}
+.ts-box{max-width:420px;}
+.ts-emoji{font-size:2.4rem;margin-bottom:.4rem;}
+.ts-msg{font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:.14em;color:#00ff88;}
+.ts-sub{font-family:'Bebas Neue',sans-serif;font-size:.85rem;letter-spacing:.14em;color:#667;margin-top:.4rem;}
+body.desktop-mode .tier-dots{gap:calc(8px*var(--ds,1));margin:0 calc(10px*var(--ds,1));}
+body.desktop-mode .tier-dot{width:calc(14px*var(--ds,1));height:calc(14px*var(--ds,1));}
+body.desktop-mode .tier-spacer,body.desktop-mode .tier-mult{width:calc(58px*var(--ds,1));}
+body.seq-on.desktop-mode #tiersWrap > div:first-child,body.seq-on.desktop-mode #autoTiersCol{flex:0 0 calc(250px*var(--ds,1));}
+body.desktop-mode .pad-area,body.seq-on.desktop-mode .pad-area{max-width:calc(680px*var(--ds,1));}
+/* short desktop windows: tighter spacing so the sequencer + pads always fit */
+body.desktop-mode.short-win .app{gap:.35rem;padding-top:.7rem;padding-bottom:.7rem;}
+body.desktop-mode.short-win .pad-area{padding-bottom:.4rem;}
+
+/* narrow centre column (small desktop windows): score on top, the two trackers side by side underneath */
+body.seq-on.desktop-mode.narrow-center #scoreRow{flex-wrap:wrap;row-gap:.4rem;column-gap:12px;}
+body.seq-on.desktop-mode.narrow-center #scoreRow .score-section{order:-1;flex:0 0 100%;}
+body.seq-on.desktop-mode.narrow-center #tiersWrap > div:first-child,body.seq-on.desktop-mode.narrow-center #autoTiersCol{flex:0 1 calc(200px*var(--ds,1));}
+body.desktop-mode.narrow-center .score{font-size:clamp(2.2rem,7vw,4rem);}
+body.desktop-mode.narrow-center .seq-area-header{gap:4px 6px;flex-wrap:wrap;justify-content:center;}
+body.desktop-mode.narrow-center .seq-area-header .seq-mode-pill{padding-left:.3rem;padding-right:.3rem;letter-spacing:.04em;}
+body.desktop-mode.narrow-center .seq-area-header .seq-hdr-btn{padding-left:.3rem;padding-right:.3rem;}
+
+/* v0.2.47 popups scale with the desktop window (--ds) */
+body.desktop-mode #scoreStatsBox{max-width:calc(500px*var(--ds,1));}
+body.desktop-mode #scoreStatsBox,body.desktop-mode #seqFullModal,body.desktop-mode .confirm-box{font-size:inherit;}
+body.desktop-mode .confirm-box{max-width:calc(380px*var(--ds,1));}
+body.desktop-mode #matchingModal>div[style*="max-width:460px"]{max-width:min(94vw,calc(1100px*max(var(--ds,1),.9))) !important;}
+
+/* ── MORE menu + modals ── */
+#moreMenu{position:fixed;z-index:300;flex-direction:column;gap:2px;padding:6px;border-radius:10px;border:1px solid #2a2a5a;background:#0c0c1c;box-shadow:0 8px 24px rgba(0,0,0,.6);min-width:210px;display:none;}
+#moreMenu[style*="display: flex"],#moreMenu[style*="display:flex"]{display:flex;}
+#moreMenu .vm-row{display:flex;align-items:center;gap:.6rem;font-family:'Bebas Neue',sans-serif;font-size:1.05rem;letter-spacing:.12em;padding:.6rem .75rem;border-radius:7px;border:none;background:transparent;color:#cfd2ff;cursor:pointer;text-align:left;touch-action:manipulation;}
+#moreMenu .vm-row:active{background:#1a1a3a;}
+.more-modal{position:fixed;top:0;right:0;bottom:0;left:0;z-index:320;background:rgba(0,0,0,.78);display:none;align-items:center;justify-content:center;padding:.8rem;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);}
+.more-box{width:100%;max-width:calc(440px*var(--ds,1));max-height:92vh;max-height:92dvh;overflow-y:auto;background:#0a0a1a;border:1px solid #2a2a5a;border-radius:16px;padding:1rem 1.1rem 1.1rem;touch-action:pan-y;-webkit-overflow-scrolling:touch;font-family:'Bebas Neue',sans-serif;}
+.more-head{display:flex;align-items:center;gap:.6rem;margin-bottom:.4rem;}
+.more-title{flex:1;font-size:1.25rem;letter-spacing:.16em;color:#a0a8ff;}
+.more-x,.more-back{font-family:'Bebas Neue',sans-serif;border:1px solid #3a3a5a;background:#12122a;color:#a0a8ff;border-radius:8px;cursor:pointer;touch-action:manipulation;}
+.more-x{width:36px;height:36px;font-size:1rem;}
+.more-back{padding:.35rem .6rem;font-size:.9rem;letter-spacing:.1em;}
+.more-sub{font-size:.85rem;letter-spacing:.06em;color:#7a7aa8;line-height:1.45;margin:.2rem 0 .8rem;font-family:'Inter',system-ui,sans-serif;}
+.more-foot{font-size:.95rem;letter-spacing:.1em;color:#7a7aa8;text-align:center;margin:.8rem 0 .2rem;}
+.more-done{display:block;width:100%;margin-top:.8rem;font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:.18em;padding:.7rem;border-radius:12px;border:1px solid #a0a8ff;background:#12122a;color:#a0a8ff;cursor:pointer;touch-action:manipulation;}
+.more-done.alt{border-color:#3a3a5a;color:#8a8ab5;}
+.key-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+.key-btn{font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:.06em;padding:.7rem 0;border-radius:10px;border:1px solid #2a2a5a;background:#0d0d1d;color:#8a8ab5;cursor:pointer;touch-action:manipulation;}
+.key-btn.on{border-color:#00ff88;color:#00ff88;background:#04170e;box-shadow:0 0 14px -4px rgba(0,255,136,.6);}
+.key-off{font-size:1.15rem;}
+.fx-list{display:flex;flex-direction:column;gap:8px;}
+.fx-row{display:flex;align-items:center;gap:.7rem;padding:.7rem .8rem;border-radius:10px;border:1px solid #1f1f3c;background:#0d0d1d;cursor:pointer;touch-action:manipulation;font-family:'Bebas Neue',sans-serif;text-align:left;}
+.fx-row.active{border-color:#3a4a8a;}
+.fx-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;}
+.fx-name{flex:1;font-size:1.15rem;letter-spacing:.1em;}
+.fx-go{color:#5a5a8a;font-size:1.4rem;}
+.fx-badges{display:flex;gap:5px;}
+.fx-badge{font-size:.72rem;letter-spacing:.1em;padding:.15rem .4rem;border-radius:5px;border:1px solid #26264a;color:#3c3c64;}
+.fx-badge.on{border-color:#00cc88;color:#00ff88;background:#04170e;}
+.fx-sec{border:1px solid #1f1f3c;border-radius:12px;padding:.7rem .8rem .8rem;margin-top:.7rem;background:#0c0c1b;}
+.fx-sec-title{font-size:1.05rem;letter-spacing:.2em;color:#a0a8ff;margin-bottom:.5rem;}
+.fx-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:.5rem;}
+.fx-chip{font-family:'Bebas Neue',sans-serif;font-size:.95rem;letter-spacing:.08em;padding:.4rem .7rem;border-radius:8px;border:1px solid #2a2a5a;background:#0d0d1d;color:#8a8ab5;cursor:pointer;touch-action:manipulation;}
+.fx-chip.on{border-color:#a0a8ff;color:#e0e4ff;background:#1a1a3a;box-shadow:0 0 10px -4px rgba(160,168,255,.7);}
+.fx-slider{margin:.2rem 0 .5rem;}
+.fx-sl-label{display:flex;justify-content:space-between;font-size:.85rem;letter-spacing:.14em;color:#7a7aa8;margin-bottom:.15rem;}
+.fx-sl-val{color:#cfd2ff;}
+.fx-slider input[type=range]{width:100%;accent-color:#a0a8ff;touch-action:pan-y;height:28px;}
+.fx-clear{font-family:'Bebas Neue',sans-serif;font-size:.95rem;letter-spacing:.14em;padding:.45rem .8rem;border-radius:8px;border:1px solid #aa3344;background:#1a0b10;color:#e0485c;cursor:pointer;touch-action:manipulation;}
+.fx-clear:disabled{opacity:.35;cursor:default;}
+.fx-foot{display:flex;gap:8px;}
+.fx-foot .more-done{flex:1;}
+.fx-foot{position:sticky;bottom:-1.1rem;background:#0a0a1a;padding-bottom:.2rem;}
+
+/* v0.2.48 phone trackers: compact so both columns fit side by side; if rows don't fit, the top multiplier row stays visible and the rest scroll above it */
+body.seq-on:not(.desktop-mode) .tier-dot{width:9px;height:9px;}
+body.seq-on:not(.desktop-mode) .tier-dots{gap:4px;margin:0 4px;}
+body.seq-on:not(.desktop-mode) .tier-spacer,body.seq-on:not(.desktop-mode) .tier-mult{width:36px;}
+body.seq-on:not(.desktop-mode) .tier-mult{font-size:.85rem;}
+body.seq-on:not(.desktop-mode) .tiers-container{gap:5px;max-height:62px;}
+body:not(.desktop-mode) .tiers-container.scrolls{-webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 16px);mask-image:linear-gradient(to bottom,transparent 0,#000 16px);}
+
+/* v0.2.49 phone: pads show only the sound name (no 'DRUMS' category line); empty pads keep their 'tap to assign' hint */
+body:not(.desktop-mode) .pad-sub:not(.empty){display:none;}

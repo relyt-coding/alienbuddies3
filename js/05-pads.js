@@ -90,7 +90,7 @@ function rebuildPadGrid(){
     el.innerHTML=`<div class="pad-rip"></div><div class="pad-dot"></div>`+
       `<div class="pad-edit-hint">✏</div>`+
       `<div class="pad-name">${snd?snd.name:'NO SOUND'}</div><div class="pad-key" data-pad="${i}">${keyHintFor(i)}</div>`+
-      `<div class="pad-sub">${snd?snd.tag:'tap to assign'}</div>`+
+      `<div class="pad-sub${snd?'':' empty'}">${snd?snd.tag:'tap to assign'}</div>`+
       (i===0?'<div class="pad-click-hint" id="padClickHint" style="display:none;">CLICK FOR POINTS</div>':'');
     const idx=i;
     el.addEventListener('pointerdown',e=>{

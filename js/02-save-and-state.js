@@ -42,7 +42,7 @@ function autoSave(){
     padSounds:[...padSounds],
     soundVols:{...soundVols},
     visiblePads,
-    seqBpm,seqSteps:STEPS,
+    seqBpm,seqSteps:STEPS,seqKey,trackFx,
     seqEnergy,energyEmptyHints,
     seqMode,
     arrangement:[...arrangement],
@@ -247,6 +247,8 @@ updateMatchingBtn();
   rebuildPadGrid();
   // Force synchronous render so desktop CSS constraints apply immediately
   renderUI();
+  seqKey=(data.seqKey==null||data.seqKey===''||!(data.seqKey>=0&&data.seqKey<12))?null:data.seqKey;
+  trackFx=Array.isArray(data.trackFx)?data.trackFx.map(f=>f&&typeof f==='object'?Object.assign({rvbType:'hall',rvbAmt:0,echoMix:0,echoDiv:.5,echoFb:.35},f):f):[];
   // Rebuild sequencer with saved layers
   rebuildSeqUI();
   // Restore current sequencer layers into the editor after rebuild

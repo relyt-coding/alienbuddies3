@@ -13,7 +13,18 @@ const autoPulse=document.getElementById('autoPulse');
 const alienMultInfo=document.getElementById('alienMultInfo');
 const alienMultDisplay=document.getElementById('alienMultDisplay');
 
+// Tracker columns: when the rows don't all fit, show the highest multiplier (bottom row) and let the rest scroll above it
+function pinTierScroll(){
+  [document.getElementById('tiersContainer'),document.getElementById('autoTiersContainer')].forEach(c=>{
+    if(!c)return;
+    const n=c.children.length;
+    if(c._rc!==n){c._rc=n;c.scrollTop=c.scrollHeight;}
+    c.classList.toggle('scrolls',c.scrollHeight>c.clientHeight+3);
+  });
+}
+addEventListener('resize',()=>setTimeout(()=>{[document.getElementById('tiersContainer'),document.getElementById('autoTiersContainer')].forEach(c=>{if(c)c._rc=-1;});pinTierScroll();},120));
 function renderTiers(newlyLit){
+  pinTierScroll();
   tiers.forEach((tier,i)=>{
     const row=document.getElementById(`tier-${i}`);if(!row)return;
     const c=color(i);const dots=row.querySelectorAll('.tier-dot');

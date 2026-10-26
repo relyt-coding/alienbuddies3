@@ -264,7 +264,8 @@ function openSkillTree(){
   if(canvas){
     stPanX = canvas.clientWidth / 2;
     stPanY = canvas.clientHeight / 2;
-    stScale = 1;
+    // desktop: start at a zoom that matches the window scale
+    stScale = (typeof IS_DESKTOP!=='undefined'&&IS_DESKTOP)?Math.max(.8,Math.min(1.35,parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--ds'))||1)):1;
     applyStTransform();
   }
 }
@@ -863,6 +864,8 @@ if(_matchBtnHint){_matchBtnHint.addEventListener('click',()=>{shownHints.matchin
   });
   function setLimit(v){v5Settings.bouncerLimit=clamp(v);saveV5Settings();inp.value=v5Settings.bouncerLimit;apply();}
   inp.addEventListener('change',()=>setLimit(inp.value));
+  // mouse wheel over the number (or its − / + buttons) changes it
+  inp.parentElement.addEventListener('wheel',e=>{e.preventDefault();setLimit((v5Settings.bouncerLimit||20)+(e.deltaY<0?1:-1));},{passive:false});
   document.getElementById('settingsAlienMinus').addEventListener('click',()=>setLimit((v5Settings.bouncerLimit||20)-1));
   document.getElementById('settingsAlienPlus').addEventListener('click',()=>setLimit((v5Settings.bouncerLimit||20)+1));
 })();

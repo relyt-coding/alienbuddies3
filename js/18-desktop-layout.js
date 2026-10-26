@@ -27,7 +27,46 @@ function saveV5Settings(){
 }
 
 // If the window is resized across the 900px line (or the LAYOUT setting changes), switch layouts live
+// Desktop: everything scales with the window (rem text, sidebars, tracker dots) and a short window gets a compact layout.
+// Phones keep their own layout. A window that is too small asks for more room instead of breaking.
+function applyWindowScale(){
+  const root=document.documentElement,b=document.body,W=innerWidth,H=innerHeight;
+  if(IS_DESKTOP){
+    const s=Math.max(.7,Math.min(1.3,Math.min(W/1440,H/820)));
+    root.style.fontSize=(16*s).toFixed(2)+'px';
+    root.style.setProperty('--ds',s.toFixed(3));
+    root.style.setProperty('--bunker-w',Math.round(360*s)+'px');
+    root.style.setProperty('--shop-w',Math.round(380*s)+'px');
+    b.classList.toggle('short-win',H<720);
+  }else{
+    root.style.fontSize='';['--ds','--bunker-w','--shop-w'].forEach(k=>root.style.removeProperty(k));
+    b.classList.remove('short-win');
+  }
+  // too small? (computers: window must stay usable; phones held sideways: ask to turn it upright)
+  const phone=IS_MOBILE_DEVICE&&!IS_DESKTOP;
+  const tiny=phone?(H<340&&W>H):(W<520||H<380);
+  const ov=document.getElementById('tooSmallOverlay');
+  if(ov){
+    ov.querySelector('.ts-msg').textContent=phone?'Turn your phone upright to play':'Please make this window bigger';
+    ov.querySelector('.ts-sub').textContent=phone?'This screen is too short':'The game needs a little more room (at least 520 × 380)';
+  }
+  b.classList.toggle('too-small',tiny);
+  if(window._chkNarrow)window._chkNarrow();
+  if(typeof fitPadAreaSoon==='function')fitPadAreaSoon();
+}
+// when the centre column is narrow, stack the score above the two trackers instead of squeezing them side by side
+(function(){
+  const gv=document.getElementById('gameView');
+  const chk=()=>{if(!gv)return;document.body.classList.toggle('narrow-center',IS_DESKTOP&&gv.clientWidth>0&&gv.clientWidth<680);};
+  if(gv&&typeof ResizeObserver!=='undefined')new ResizeObserver(chk).observe(gv);
+  addEventListener('resize',()=>setTimeout(chk,50));
+  window._chkNarrow=chk;
+})();
+addEventListener('resize',applyWindowScale);
+addEventListener('orientationchange',()=>setTimeout(applyWindowScale,250));
+
 function recheckDesktopMode(){
+  applyWindowScale();
   const now=_detectDesktop();
   if(now===IS_DESKTOP)return;
   IS_DESKTOP=now;
@@ -37,6 +76,7 @@ function recheckDesktopMode(){
     const sv=document.getElementById('storeView'),bv=document.getElementById('bunkerView');
     sv&&sv.classList.remove('sidebar-collapsed');bv&&bv.classList.remove('sidebar-collapsed');
   }
+  applyWindowScale();
   if(typeof requestRender==='function')requestRender();
   setTimeout(()=>{typeof clampBouncersToBounds==='function'&&clampBouncersToBounds();},100);
 }
@@ -47,6 +87,7 @@ function recheckDesktopMode(){
 
 function applyDesktopMode(){
   const useDesktop = IS_DESKTOP;
+  applyWindowScale();
   document.body.classList.toggle('desktop-mode', useDesktop);
 
   // Show mobile view toggle row only on desktop
@@ -76,7 +117,7 @@ function updatePartyBtnPosition(){
   if(!pb) return;
   const sv = document.getElementById('storeView');
   const shopCollapsed = sv && sv.classList.contains('sidebar-collapsed');
-  pb.style.right = shopCollapsed ? '1.4rem' : 'calc(380px + 1.4rem)';
+  pb.style.right = shopCollapsed ? '1.4rem' : 'calc(var(--shop-w,380px) + 1.4rem)';
 }
 
 function updateCollapseBtn(side, collapsed){

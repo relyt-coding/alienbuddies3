@@ -1291,3 +1291,15 @@ body:not(.desktop-mode) .pad-sub:not(.empty){display:none;}
 /* desktop sequencer: wider name column so sound names are not cut off (scales with the window) */
 body.desktop-mode .seq-layer-row,body.desktop-mode .seq-ph-bar{grid-template-columns:calc(104px*var(--ds,1)) 1fr calc(48px*var(--ds,1));}
 body.desktop-mode .seq-snd-pill{padding:.2rem .5rem;gap:6px;}
+
+/* v0.2.52 phone: SHOP / BUNKER buttons sit 10px lower */
+body:not(.desktop-mode) .btn-left,body:not(.desktop-mode) .btn-right{top:calc(50% + 10px);}
+
+/* v0.2.53 desktop trackers: a bit smaller (dots were too big once the window scaling kicked in) */
+body.desktop-mode .tier-dots{gap:calc(6px*var(--ds,1));margin:0 calc(8px*var(--ds,1));}
+body.desktop-mode .tier-dot{width:calc(10px*var(--ds,1));height:calc(10px*var(--ds,1));}
+body.desktop-mode .tier-spacer,body.desktop-mode .tier-mult{width:calc(50px*var(--ds,1));}
+body.desktop-mode .tier-mult{font-size:1rem !important;}
+body.desktop-mode .tiers-container{gap:calc(6px*var(--ds,1));}
+body.seq-on.desktop-mode #tiersWrap > div:first-child,body.seq-on.desktop-mode #autoTiersCol{flex:0 0 calc(210px*var(--ds,1));}
+body.desktop-mode #scoreRow .tiers-col-label{font-size:.95rem !important;}

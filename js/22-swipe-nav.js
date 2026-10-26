@@ -23,6 +23,7 @@
     var from=cur();
     if(target===from||busy)return;
     busy=true;
+    resetPageZoom();
     var fromEl=document.getElementById(VIEW_IDS[from]),toEl=document.getElementById(VIEW_IDS[target]);
     // start the incoming page just off-screen on the side it should come from
     toEl.style.transition='none';
@@ -44,6 +45,19 @@
       busy=false;
     },460);
   }
+  // pinch-zoomed in? snap back to normal zoom whenever the page changes (swipe or the SHOP / BUNKER buttons)
+  function resetPageZoom(){
+    var vv=window.visualViewport;
+    if(vv&&vv.scale<=1.01)return;
+    var vp=document.querySelector('meta[name=viewport]');if(!vp)return;
+    vp.content='width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover';
+    setTimeout(function(){vp.content='width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover';},250);
+  }
+  window.resetPageZoom=resetPageZoom;
+  (function(){
+    var last=cur();
+    new MutationObserver(function(){var c=cur();if(c!==last){last=c;resetPageZoom();}}).observe(document.body,{attributes:true,attributeFilter:['class']});
+  })();
   window.swipeNavGo=go;
   document.addEventListener('touchstart',function(e){
     tracking=false;

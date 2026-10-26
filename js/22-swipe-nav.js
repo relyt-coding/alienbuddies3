@@ -45,18 +45,45 @@
       busy=false;
     },460);
   }
-  // pinch-zoomed in? snap back to normal zoom whenever the page changes (swipe or the SHOP / BUNKER buttons)
-  function resetPageZoom(){
-    var vv=window.visualViewport;
-    if(vv&&vv.scale<=1.01)return;
-    var vp=document.querySelector('meta[name=viewport]');if(!vp)return;
-    vp.content='width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover';
-    setTimeout(function(){vp.content='width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover';},250);
+  // pinch-zoomed in? snap back to normal zoom whenever the page changes (swipe or the SHOP / BUNKER buttons).
+  // iOS Safari only re-reads the viewport when the <meta> tag itself is replaced, so swap in a locked copy, then restore.
+  var NORMAL_VP='width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover';
+  var LOCK_VP='width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover';
+  function zoomScale(){var vv=window.visualViewport;return vv?vv.scale:1;}
+  function swapViewport(content){
+    var old=document.querySelector('meta[name=viewport]');
+    var m=document.createElement('meta');m.name='viewport';m.content=content;
+    if(old&&old.parentNode)old.parentNode.replaceChild(m,old);else document.head.appendChild(m);
+  }
+  function resetPageZoom(tries){
+    tries=tries||0;
+    if(zoomScale()<=1.01)return;
+    swapViewport(LOCK_VP);
+    try{window.scrollTo(0,0);}catch(e){}
+    setTimeout(function(){
+      swapViewport(NORMAL_VP);
+      // still zoomed? try once more (Safari sometimes needs a second pass)
+      setTimeout(function(){if(zoomScale()>1.01&&tries<2)resetPageZoom(tries+1);},350);
+    },320);
   }
   window.resetPageZoom=resetPageZoom;
   (function(){
     var last=cur();
     new MutationObserver(function(){var c=cur();if(c!==last){last=c;resetPageZoom();}}).observe(document.body,{attributes:true,attributeFilter:['class']});
+  })();
+  // safety net: while the page is zoomed in, a small RESET ZOOM button follows the visible area
+  (function(){
+    var vv=window.visualViewport;if(!vv)return;
+    var b=document.createElement('button');b.id='zoomResetBtn';b.type='button';b.textContent='⤢ RESET ZOOM';b.style.display='none';
+    document.body.appendChild(b);
+    b.addEventListener('click',function(e){e.stopPropagation();resetPageZoom();});
+    b.addEventListener('touchend',function(e){e.stopPropagation();},{passive:true});
+    function place(){
+      if(vv.scale<=1.08){b.style.display='none';return;}
+      b.style.display='block';
+      b.style.transform='translate('+(vv.offsetLeft+vv.width/2)+'px,'+(vv.offsetTop+10)+'px) scale('+(1/vv.scale)+') translateX(-50%)';
+    }
+    vv.addEventListener('resize',place);vv.addEventListener('scroll',place);place();
   })();
   window.swipeNavGo=go;
   document.addEventListener('touchstart',function(e){

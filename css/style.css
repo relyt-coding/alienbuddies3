@@ -1303,3 +1303,18 @@ body.desktop-mode .tier-mult{font-size:1rem !important;}
 body.desktop-mode .tiers-container{gap:calc(6px*var(--ds,1));}
 body.seq-on.desktop-mode #tiersWrap > div:first-child,body.seq-on.desktop-mode #autoTiersCol{flex:0 0 calc(210px*var(--ds,1));}
 body.desktop-mode #scoreRow .tiers-col-label{font-size:.95rem !important;}
+
+#zoomResetBtn{position:fixed;top:0;left:0;z-index:99998;transform-origin:0 0;font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:.14em;padding:.5rem .9rem;border-radius:999px;border:1px solid #00ff88;background:rgba(4,23,14,.94);color:#00ff88;box-shadow:0 4px 18px rgba(0,0,0,.6);touch-action:manipulation;}
+
+/* v0.2.55 score breakdown on small phones: rows never shrink/overlap (list scrolls instead), tighter text */
+#scoreStatsList>*{flex-shrink:0;}
+@media (max-width:480px){
+  .ss-row{padding:.5rem .65rem;gap:.55rem;}
+  .ss-icon{font-size:1.15rem;width:1.6rem;}
+  .ss-label{font-size:.9rem;letter-spacing:.06em;}
+  .ss-desc{font-size:.68rem;letter-spacing:.02em;}
+  .ss-val{font-size:1.2rem;}
+  .ss-section-label{font-size:.72rem;}
+  .ss-total-val{font-size:1.8rem;}
+  .ss-total-label{font-size:.9rem;}
+}

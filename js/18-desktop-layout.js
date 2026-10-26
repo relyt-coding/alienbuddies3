@@ -242,14 +242,28 @@ socialsModal&&socialsModal.addEventListener('click',e=>{if(e.target===socialsMod
 // This measures the free height and shrinks the pad grid just enough (never above its normal size).
 const PAD_GRID_CAPS={1:160,2:326,3:410,4:410,5:560,6:560,7:680,8:680};
 const PAD_GRID_MIN_W=200;
-// phone, sequencer off: sit the pads in the middle of the free space (between the tracker and SETTINGS) instead of hugging the dots
+// phone: balance the whole composition vertically. The leftover space between the header and the SETTINGS / EDIT PADS
+// buttons is split into equal gaps — header | score+trackers | (sequencer) | pads | buttons — so nothing hugs the top.
+// (Pad heights are fixed BEFORE this runs, so the extra margins never change the pad sizing.)
+function clearPhoneBalance(){
+  ['scoreRow','seqArea'].forEach(id=>{const e=document.getElementById(id);if(e)e.style.marginTop='';});
+  const pa=document.querySelector('#gameView .pad-area');if(pa)pa.style.marginTop='';
+}
 function centerPhonePads(grid,sb,seqOn){
   grid.style.marginTop='';
   const b=document.body.classList;
-  if(seqOn||!sb||grid.offsetParent===null||b.contains('store-open')||b.contains('bunker-open'))return;
-  const r=grid.getBoundingClientRect();
-  const extra=sb.getBoundingClientRect().top-10-r.top-r.height;
-  if(extra>24)grid.style.marginTop=Math.min(Math.round(extra*0.42),130)+'px';
+  if(!sb||b.contains('store-open')||b.contains('bunker-open')||b.contains('desktop-mode'))return;
+  const app=document.querySelector('#gameView .app');if(!app||app.offsetHeight===0)return;
+  const vis=e=>e&&getComputedStyle(e).display!=='none'&&e.getBoundingClientRect().height>0;
+  const scoreRow=document.getElementById('scoreRow'),seqArea=document.getElementById('seqArea'),pa=document.querySelector('#gameView .pad-area');
+  const padsOn=vis(pa)&&grid.offsetParent!==null;
+  const anchors=[scoreRow,vis(seqArea)?seqArea:null,padsOn?pa:null].filter(vis);
+  if(!anchors.length)return;
+  const last=padsOn?grid:anchors[anchors.length-1];
+  const free=sb.getBoundingClientRect().top-8-last.getBoundingClientRect().bottom;
+  if(free<14)return;
+  const each=Math.floor(free/(anchors.length+1));
+  anchors.forEach(e=>{e.style.marginTop=each+'px';});
 }
 function fitPadArea(){
   const grid=document.getElementById('padGrid');
@@ -257,7 +271,7 @@ function fitPadArea(){
   const area=grid&&grid.closest('.pad-area');
   if(!grid||!app||!area)return;
   if(!document.body.classList.contains('desktop-mode')||app.offsetHeight===0){
-    grid.style.maxWidth='';grid.style.marginTop='';
+    grid.style.maxWidth='';grid.style.marginTop='';clearPhoneBalance();
     // phone layout: size the pads to the space left above the SETTINGS / EDIT PADS buttons so they never overlap
     const sb=document.getElementById('soundboardBtn');
     const nPads=Math.max(1,Math.min(8,parseInt(grid.getAttribute('data-pads'))||1));

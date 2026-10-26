@@ -1,11 +1,14 @@
 // ══════════════════════════════════════════════
-//  SWIPE NAV (phone layout): HOME → SHOP → BUNKER → (EXPLORE THE GALAXIES, once unlocked) → HOME …
-//  swipe LEFT = next page, swipe RIGHT = previous page. Little dots at the bottom show where you are.
+//  SWIPE NAV (phone layout): left → right order is  BUNKER · HOME · SHOP · (EXPLORE THE GALAXIES, once unlocked)
+//  swipe LEFT = the page to the right, swipe RIGHT = the page to the left (no wrap-around).
+//  Little dots at the bottom show where you are, in that same order.
 // ══════════════════════════════════════════════
 (function(){
   var VIEW_IDS=['gameView','storeView','bunkerView','skillTreeModal'];
   var busy=false,sx=0,sy=0,st=0,tracking=false;
-  function pageCount(){return (typeof skillTreeUnlocked!=='undefined'&&skillTreeUnlocked)?4:3;}
+  // page ids: 0 home, 1 shop, 2 bunker, 3 galaxies. Screen order left → right:
+  function pageOrder(){return (typeof skillTreeUnlocked!=='undefined'&&skillTreeUnlocked)?[2,0,1,3]:[2,0,1];}
+  function pageCount(){return pageOrder().length;}
   function cur(){
     var b=document.body.classList,m=document.getElementById('skillTreeModal');
     if(m&&m.classList.contains('open'))return 3;
@@ -129,7 +132,7 @@
   var dotsEl=document.createElement('div');dotsEl.id='pageDots';dotsEl.setAttribute('aria-hidden','true');document.body.appendChild(dotsEl);
   var dotsTimer=null;
   function paintDots(){
-    var n=pageCount(),c=cur();
+    var ord=pageOrder(),n=ord.length,c=ord.indexOf(cur());
     if(dotsEl.children.length!==n){dotsEl.innerHTML='';for(var i=0;i<n;i++){var d=document.createElement('span');d.className='pd';dotsEl.appendChild(d);}}
     for(var j=0;j<dotsEl.children.length;j++)dotsEl.children[j].classList.toggle('on',j===c);
   }
@@ -156,8 +159,10 @@
     var t=e.changedTouches[0],dx=t.clientX-sx,dy=t.clientY-sy;
     if(Math.abs(dx)<70||Math.abs(dx)<Math.abs(dy)*1.6||Date.now()-st>900)return;
     var c=cur();
-    var n=pageCount();
-    if(dx<0)go((c+1)%n,-1);else go((c+n-1)%n,1);
+    var ord=pageOrder(),pos=ord.indexOf(c);
+    if(pos<0)return;
+    if(dx<0){if(pos<ord.length-1)go(ord[pos+1],-1);}
+    else if(pos>0)go(ord[pos-1],1);
   },{passive:true});
   document.addEventListener('touchcancel',function(){tracking=false;},{passive:true});
 })();

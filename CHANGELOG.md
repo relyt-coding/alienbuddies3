@@ -2,6 +2,12 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.83 - 2026-10-26 11:09
+
+- changed: js/01-constants.js
+- changed: js/18-desktop-layout.js
+- changed: js/22-swipe-nav.js
+
 ## v0.2.82 - 2026-10-26 08:51
 
 - changed: css/style.css

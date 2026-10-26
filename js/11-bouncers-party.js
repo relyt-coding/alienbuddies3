@@ -121,7 +121,7 @@ function getBouncerBounds(){
 // ── Which aliens bounce on screen ──
 // bouncerPicks: null = automatic (first aliens you own), otherwise the alien indices you chose in the Bunker.
 let bouncerPicks=null;
-const BOUNCER_NAME_PAD=28; // room under each alien for its name label
+const BOUNCER_NAME_PAD=30; // room under each alien for its name label
 function bouncerMax(){
   if(v5Settings&&v5Settings.moreAliens)return Math.max(1,Math.min(100,v5Settings.bouncerLimit||20));
   return 10;
@@ -180,7 +180,7 @@ function spawnBouncer(animate=true,idx){
   el.style.filter=filter;el._baseFilter=filter;el._col=col;el._nameEl=nameSpan;el._emojiEl=emojiSpan;
   if(!animate)el.style.opacity='.85';
   if(!showBouncers)el.style.display='none';
-  const bounds=getBouncerBounds(),sz=37;
+  const bounds=getBouncerBounds(),sz=41;
   const x=bounds.x+Math.random()*Math.max(1,bounds.w-sz),y=bounds.y+Math.random()*Math.max(1,bounds.h-sz-BOUNCER_NAME_PAD);
   const spd=.9+Math.random()*1.3,ang=Math.random()*Math.PI*2;
   el.style.left='0';el.style.top='0';alienLayer.appendChild(el);

@@ -53,7 +53,7 @@ body.store-open #soundboardBtn,body.store-open #padEditToggleBtn,body.store-open
 /* ─── GAME SCREEN ─── */
 .app{display:flex;flex-direction:column;align-items:center;justify-content:space-between;height:100%;padding:1.4rem 1.5rem 1.5rem;padding-top:max(1.4rem,env(safe-area-inset-top,0px));position:relative;}
 #alienLayer{position:fixed;top:0;right:0;bottom:0;left:0;pointer-events:none;z-index:15;overflow:hidden;}
-.bouncer{position:absolute;font-size:1.84rem;line-height:1;will-change:transform;display:flex;flex-direction:column;align-items:center;gap:0;}
+.bouncer{position:absolute;font-size:2.02rem;line-height:1;will-change:transform;display:flex;flex-direction:column;align-items:center;gap:0;}
 .bouncer-emoji{display:block;}
 .bouncer-name{position:absolute;top:100%;left:50%;transform:translateX(-50%);margin-top:-1px;font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:.04em;white-space:nowrap;opacity:.9;text-shadow:1.0px 0.0px 0 #000,0.71px 0.71px 0 #000,0.0px 1.0px 0 #000,-0.71px 0.71px 0 #000,-1.0px 0.0px 0 #000,-0.71px -0.71px 0 #000,-0.0px -1.0px 0 #000,0.71px -0.71px 0 #000,2.0px 0.0px 0 #000,1.85px 0.77px 0 #000,1.41px 1.41px 0 #000,0.77px 1.85px 0 #000,0.0px 2.0px 0 #000,-0.77px 1.85px 0 #000,-1.41px 1.41px 0 #000,-1.85px 0.77px 0 #000,-2.0px 0.0px 0 #000,-1.85px -0.77px 0 #000,-1.41px -1.41px 0 #000,-0.77px -1.85px 0 #000,-0.0px -2.0px 0 #000,0.77px -1.85px 0 #000,1.41px -1.41px 0 #000,1.85px -0.77px 0 #000,2.0px 0.0px 0 #000,1.93px 0.78px 0 #000,1.73px 1.5px 0 #000,1.41px 2.12px 0 #000,1.0px 2.6px 0 #000,0.52px 2.9px 0 #000,0.0px 3.0px 0 #000,-0.52px 2.9px 0 #000,-1.0px 2.6px 0 #000,-1.41px 2.12px 0 #000,-1.73px 1.5px 0 #000,-1.93px 0.78px 0 #000,-2.0px 0.0px 0 #000,-1.93px -0.78px 0 #000,-1.73px -1.5px 0 #000,-1.41px -2.12px 0 #000,-1.0px -2.6px 0 #000,-0.52px -2.9px 0 #000,-0.0px -3.0px 0 #000,0.52px -2.9px 0 #000,1.0px -2.6px 0 #000,1.41px -2.12px 0 #000,1.73px -1.5px 0 #000,1.93px -0.78px 0 #000,-2px -2px 0 #000,-2px -1px 0 #000,-2px 0px 0 #000,-2px 1px 0 #000,-2px 2px 0 #000,2px -2px 0 #000,2px -1px 0 #000,2px 0px 0 #000,2px 1px 0 #000,2px 2px 0 #000,0 0 6px #000;transition:opacity .3s;text-align:center;max-width:160px;padding:4px 3px;overflow:hidden;text-overflow:ellipsis;line-height:1;font-weight:700;}
 .bouncer-name.hidden{opacity:0;}
@@ -1147,3 +1147,12 @@ body.seq-wide #seqFullLayers .seq-layer-row,body.seq-wide #seqFullPhBar{min-widt
 /* v0.2.34: matching game uses the whole desktop window (grid sized in JS) */
 body.desktop-mode #matchingModal>div[style*="max-width:460px"]{max-width:min(92vw,1100px) !important;}
 body.desktop-mode #matchGrid{overflow-y:hidden;}
+
+/* v0.2.37: bigger trackers on desktop */
+body.desktop-mode .tier-dots{gap:8px;margin:0 10px;}
+body.desktop-mode .tier-dot{width:14px;height:14px;}
+body.desktop-mode .tier-spacer{width:58px;}
+body.desktop-mode .tier-mult{width:58px;font-size:1.15rem !important;letter-spacing:.05em !important;}
+body.desktop-mode .tiers-container{gap:8px;}
+body.desktop-mode #scoreRow .tiers-col-label{font-size:1.05rem !important;letter-spacing:.2em !important;margin-bottom:6px;}
+body.seq-on.desktop-mode #tiersWrap > div:first-child,body.seq-on.desktop-mode #autoTiersCol{flex:0 0 250px;}

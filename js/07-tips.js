@@ -11,6 +11,7 @@ const TIPS_DATA = [
   {cost:125000000,    text:"You can save arrangements you create to make a song!"},
   {cost:1250000000,   text:"You can give your alien buddies a name by clicking on their square in the bunker!"},
   {cost:12500000000,  text:"Double click on the BPM number on the sequencer to manually enter any value between 50 and 250!"},
+  {cost:125000000000, text:"Tap VELOCITY on the sequencer, then tap any lit step to change that note's volume!"},
 ];
 
 function tipCost(idx){

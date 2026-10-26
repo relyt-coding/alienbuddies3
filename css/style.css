@@ -1360,3 +1360,4 @@ body:not(.desktop-mode) .alien-cell.occupied::after{animation:none;}
 .pa-empty{padding:1.2rem;text-align:center;font-family:'Bebas Neue',sans-serif;letter-spacing:.14em;color:#444;font-size:.8rem;}
 #padAssignInner{max-height:84vh;}
 body:not(.desktop-mode) #padGpRow{display:none !important;}
+#shopPinchHint{display:none !important;}

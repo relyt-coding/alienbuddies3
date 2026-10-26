@@ -94,7 +94,7 @@
     b.addEventListener('click',function(e){e.stopPropagation();resetPageZoom();});
     b.addEventListener('touchend',function(e){e.stopPropagation();},{passive:true});
     function place(){
-      if(vv.scale<=1.08){b.style.display='none';return;}
+      if(vv.scale<=1.08||document.querySelector('#seqFullModal.open')){b.style.display='none';return;}
       b.style.display='block';
       b.style.transform='translate('+(vv.offsetLeft+vv.width/2)+'px,'+(vv.offsetTop+10)+'px) scale('+(1/vv.scale)+') translateX(-50%)';
     }
@@ -105,6 +105,14 @@
     var t=e.target&&e.target.closest&&e.target.closest('#closeStoreBtn,#closeBunkerBtn');
     if(t&&zoomScale()>1.05){e.stopImmediatePropagation();e.preventDefault();}
   },true);
+  // Pinch-zoom is only allowed inside the full-screen sequencer; everywhere else it is blocked.
+  function inSeqFull(t){return !!(t&&t.closest&&t.closest('#seqFullModal.open'))||!!document.querySelector('#seqFullModal.open');}
+  document.addEventListener('touchmove',function(e){
+    if(e.touches.length>1&&!inSeqFull(e.target))e.preventDefault();
+  },{passive:false,capture:true});
+  ['gesturestart','gesturechange','gestureend'].forEach(function(n){
+    document.addEventListener(n,function(e){if(!inSeqFull(e.target))e.preventDefault();},{passive:false,capture:true});
+  });
   window.swipeNavGo=go;
   document.addEventListener('touchstart',function(e){
     tracking=false;

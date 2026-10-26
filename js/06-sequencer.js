@@ -473,6 +473,14 @@ function refreshArrBar(i){
 }
 
 // Pattern library
+// remove a saved pattern and keep every arrangement's pattern indexes pointing at the right ones
+function deleteSavedPattern(pi){
+  savedPatterns.splice(pi,1);
+  const fix=a=>a.map(v=>v==null?null:v===pi?null:v>pi?v-1:v);
+  arrangement=fix(arrangement);
+  try{(savedArrangements||[]).forEach(a=>{if(a&&Array.isArray(a.arrangement))a.arrangement=fix(a.arrangement);});}catch(e){}
+  buildPatLibrary();buildArrGrid();autoSave();
+}
 function buildPatLibrary(){
   if(!seqPatLibrary)return;
   seqPatLibrary.innerHTML='';
@@ -490,9 +498,7 @@ function buildPatLibrary(){
     const delBtn=document.createElement('button');delBtn.className='seq-pat-del-btn';delBtn.textContent='✕';
     delBtn.addEventListener('click',e=>{e.stopPropagation();
       if(confirm('Delete pattern "'+pat.name+'"?')){
-        savedPatterns.splice(pi,1);
-        arrangement=arrangement.map(v=>v==null?null:v===pi?null:v>pi?v-1:v);
-        buildPatLibrary();buildArrGrid();
+        deleteSavedPattern(pi);
       }
     });
     acts.appendChild(loadBtn);acts.appendChild(delBtn);
@@ -789,18 +795,32 @@ document.getElementById('savePatConfirm')&&document.getElementById('savePatConfi
   document.getElementById('seqSavePatBtn').addEventListener('click',()=>{
     list.innerHTML='';
     // one button for both: save the current pattern as a new one, or pick a saved one to load
-    const sv=document.createElement('button');sv.className='confirm-btn yes';sv.textContent='SAVE CURRENT PATTERN';
-    sv.style.marginBottom='.4rem';
+    const sv=document.createElement('button');sv.className='confirm-btn';sv.textContent='SAVE CURRENT PATTERN';
+    sv.style.cssText='margin-bottom:.4rem;color:#00ff88;border-color:#00cc88;background:#04170e;';
     sv.addEventListener('click',()=>{close();openSavePatModal();});
     list.appendChild(sv);
     if(!savedPatterns.length){
       const e=document.createElement('div');e.className='confirm-sub';e.style.fontSize='.85rem';e.textContent='No saved patterns to load yet';list.appendChild(e);
     }
     savedPatterns.forEach((pat,pi)=>{
+      const wrap=document.createElement('div');wrap.style.cssText='display:flex;gap:.4rem;align-items:stretch;';
       const b=document.createElement('button');b.className='confirm-btn no';
-      b.style.color=pat.color;b.style.borderColor=pat.color;b.textContent=pat.name;
+      b.style.cssText='flex:1 1 auto;margin:0;color:'+pat.color+';border-color:'+pat.color+';';b.textContent=pat.name;
       b.addEventListener('click',()=>{loadPatternIntoEditor(pi);close();autoSave();});
-      list.appendChild(b);
+      // trash: first tap arms it (turns solid red "DELETE?"), second tap deletes
+      const del=document.createElement('button');del.className='confirm-btn no';
+      const TR='<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block;margin:0 auto"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>';
+      del.style.cssText='flex:0 0 auto;margin:0;width:3.2rem;padding-left:0;padding-right:0;color:#e0485c;border-color:#aa3344;';
+      del.innerHTML=TR;del.setAttribute('aria-label','Delete '+pat.name);
+      let armed=false,tmr=0;
+      del.addEventListener('click',e=>{e.stopPropagation();
+        if(!armed){armed=true;del.textContent='SURE?';del.style.background='#5a0f1a';del.style.color='#fff';del.style.width='4.6rem';
+          tmr=setTimeout(()=>{armed=false;del.innerHTML=TR;del.style.background='';del.style.color='#e0485c';del.style.width='3.2rem';},2500);return;}
+        clearTimeout(tmr);deleteSavedPattern(pi);
+        // rebuild the list in place
+        document.getElementById('seqSavePatBtn').click();
+      });
+      wrap.appendChild(b);wrap.appendChild(del);list.appendChild(wrap);
     });
     modal.style.display='flex';
   });
@@ -895,6 +915,28 @@ arrBarPickerModal&&arrBarPickerModal.addEventListener('click',e=>{if(e.target===
 function fitSeqScroll(){
   const c=seqLayersContainer;if(!c)return;
   const rows=c.querySelectorAll('.seq-layer-row');
+  // PHONE LAYOUT: the track list fills whatever vertical space the drum pads leave over
+  // (few pads = more rows visible, 8 pads = fewer), scrolling when there are more tracks than fit.
+  if(!document.body.classList.contains('desktop-mode')&&document.body.classList.contains('seq-on')&&rows.length&&c.offsetParent!==null){
+    const sb=document.getElementById('soundboardBtn'),grid=document.getElementById('padGrid'),area=seqArea;
+    if(sb&&grid&&area&&!document.body.classList.contains('store-open')&&!document.body.classList.contains('bunker-open')){
+      const pitch=rows.length>1?rows[1].offsetTop-rows[0].offsetTop:rows[0].offsetHeight+6;
+      const full=c.scrollHeight;
+      const nn=Math.max(1,Math.min(8,parseInt(grid.getAttribute('data-pads'))||1));
+      const colsN=nn<=1?1:(nn===3?3:(nn<=4?2:(nn<=6?3:4)));
+      const rowsN=Math.ceil(nn/colsN);
+      const padNat=rowsN*((grid.clientWidth-(colsN-1)*6)/colsN/1.4)+(rowsN-1)*6;
+      const cr=c.getBoundingClientRect(),ar=area.getBoundingClientRect();
+      const belowC=ar.bottom-cr.bottom;                      // bottom button row etc.
+      const pa=grid.closest('.pad-area'),pcs=pa?getComputedStyle(pa):null;
+      const gap=pa?(pa.getBoundingClientRect().top-ar.bottom)+(pcs?parseFloat(pcs.paddingTop)||0:0):12;
+      const room=sb.getBoundingClientRect().top-10-cr.top-belowC-gap-padNat;
+      const target=Math.max(pitch*2.5,Math.min(full,room));
+      if(target<full-2){c.classList.add('seq-scroll');c.style.maxHeight=Math.floor(target)+'px';}
+      else{c.classList.remove('seq-scroll');c.style.maxHeight='';}
+      return;
+    }
+  }
   const small=window.innerHeight<1000;
   if(rows.length<4||!small||c.offsetParent===null){
     if(c.classList.contains('seq-scroll')){c.classList.remove('seq-scroll');c.style.maxHeight='';}

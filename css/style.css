@@ -1086,7 +1086,11 @@ body.pad-fit:not(.desktop-mode).seq-on .pad-area{padding-bottom:0;}
 body:not(.desktop-mode) #seqPatternView .seq-bottom-row{flex-wrap:nowrap;gap:3px;}
 body:not(.desktop-mode) #seqPatternView .seq-bottom-row>button{font-size:.58rem;letter-spacing:.04em;padding:.2rem .32rem;flex:0 0 auto;}
 body:not(.desktop-mode) #seqPatternView .seq-bottom-row>#seqAddBtn{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:clip;}
-body:not(.desktop-mode) #seqPatternView .seq-bottom-row>#seqClearBtn{padding-left:.4rem;padding-right:.4rem;}
+body:not(.desktop-mode) #seqPatternView .seq-bottom-row>#seqClearBtn{padding-left:.2rem;padding-right:.2rem;width:1.7rem;}
+#seqClearBtn svg{width:15px;height:15px;margin:0 auto;}
 
 /* v0.2.24: less clutter under the score: no energy countdown text, no alien boost line (the energy bar stays) */
 #energyLabel,#alienMultInfo,.alien-mult-info{display:none !important;}
+
+/* v0.2.27: no "MAX n TRACKS" placeholder; the add button only appears while a track can actually be added */
+#seqAddBtn:disabled,#seqFullAddBtn:disabled{display:none !important;}

@@ -51,26 +51,26 @@ function buildTipsList(){
     row.style.cssText='display:flex;align-items:center;justify-content:space-between;gap:.6rem;padding:.55rem .75rem;border-radius:10px;border:1px solid '+(owned?'#1a2a1a':canBuy?'#3a3a1a':'#1a1a1a')+';background:'+(owned?'#050f05':canBuy?'#0d0d04':'#060606')+';';
     // Left: tip label button
     const label=document.createElement('button');
-    label.style.cssText=`font-family:'Bebas Neue',sans-serif;font-size:.8rem;letter-spacing:.12em;padding:.28rem .7rem;border-radius:7px;border:1px solid ${owned?'#2a4a2a':canBuy?'#3a3a1a':'#1e1e1e'};background:${owned?'#0a1f0a':canBuy?'#1a1a04':'#111'};color:${owned?'#00cc66':canBuy?'#cccc44':'#444'};cursor:${owned?'pointer':'default'};touch-action:manipulation;white-space:nowrap;`;
+    label.style.cssText=`font-family:'Bebas Neue',sans-serif;font-size:1.15rem;letter-spacing:.12em;padding:.35rem .85rem;border-radius:7px;border:1px solid ${owned?'#2a4a2a':canBuy?'#3a3a1a':'#1e1e1e'};background:${owned?'#0a1f0a':canBuy?'#1a1a04':'#111'};color:${owned?'#00cc66':canBuy?'#cccc44':'#444'};cursor:${owned?'pointer':'default'};touch-action:manipulation;white-space:nowrap;`;
     label.textContent=(owned?'✓ ':'')+'TIP '+(i+1);
     if(owned){row.style.cursor='pointer';row.addEventListener('click',()=>openTipReader(i));}
     // Right: cost button or active badge
     const right=document.createElement('div');
     if(owned){
       const badge=document.createElement('div');
-      badge.style.cssText='font-family:Bebas Neue,sans-serif;font-size:.55rem;letter-spacing:.1em;color:#336633;';
+      badge.style.cssText='font-family:Bebas Neue,sans-serif;font-size:.95rem;letter-spacing:.1em;color:#44aa55;';
       badge.textContent='×1.5 ACTIVE';
       right.appendChild(badge);
     } else {
       const btn=document.createElement('button');
-      btn.style.cssText=`font-family:'Bebas Neue',sans-serif;font-size:.6rem;letter-spacing:.1em;padding:.25rem .65rem;border-radius:6px;border:1px solid ${canBuy?'#aaaa33':'#2a2a1a'};background:${canBuy?'#1a1a04':'transparent'};color:${canBuy?'#cccc44':'#444'};cursor:${canBuy?'pointer':'default'};touch-action:manipulation;white-space:nowrap;`;
+      btn.style.cssText=`font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:.1em;padding:.32rem .8rem;border-radius:6px;border:1px solid ${canBuy?'#aaaa33':'#2a2a1a'};background:${canBuy?'#1a1a04':'transparent'};color:${canBuy?'#cccc44':'#444'};cursor:${canBuy?'pointer':'default'};touch-action:manipulation;white-space:nowrap;`;
       btn.textContent=formatStore(cost)+' PTS';
       if(canBuy)btn.addEventListener('click',()=>{
         if(score<cost)return;
         if(tipsOwned>=MAX_TIPS)return;
         score-=cost;tipsOwned++;tipsMult*=1.5;
         showToast(`Tip purchased — your Tap Multiplier increased by ×1.5!`);
-        playSfxTierUnlock(tipsOwned);
+        playSfxTierUnlock(tipsOwned,0.4);
         buildTipsList();updateTipsLabel();renderUI();autoSave();
         openTipReader(tipsOwned-1);
       });
@@ -81,7 +81,14 @@ function buildTipsList(){
   }
 }
 
+// TIPS button glows while the next tip is affordable and still unbought/unread
+function updateTipsGlow(){
+  const b=document.getElementById('tipsBtn');if(!b)return;
+  const can=tipsOwned<MAX_TIPS&&score>=tipCost(tipsOwned);
+  b.classList.toggle('tips-glow',can);
+}
 function updateTipsLabel(){
+  updateTipsGlow();
   const el=document.getElementById('tipsOwnedLabel');
   if(el)el.textContent=tipsOwned+' TIP'+(tipsOwned!==1?'S':'')+' PURCHASED'+(tipsOwned>0?' · ×'+formatMult(tipsMult):'');
 }

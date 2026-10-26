@@ -1,3 +1,7 @@
+/* Fonts are bundled with the game (no Google Fonts request needed) */
+@font-face{font-family:'Bebas Neue';font-style:normal;font-weight:400;font-display:swap;src:url(../fonts/bebas-neue-latin-400-normal.woff2) format('woff2');}
+@font-face{font-family:'Space Mono';font-style:normal;font-weight:400;font-display:swap;src:url(../fonts/space-mono-latin-400-normal.woff2) format('woff2');}
+@font-face{font-family:'Space Mono';font-style:normal;font-weight:700;font-display:swap;src:url(../fonts/space-mono-latin-700-normal.woff2) format('woff2');}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 html,body{height:100%;background:#0a0a0a;color:#fff;font-family:'Bebas Neue',sans-serif;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none;}
 
@@ -168,7 +172,8 @@ body.desktop-mode #socialsBtn:active{background:#1a1a1a;border-color:#6699ff;col
 .seq-bottom-row button,.seq-bottom-row .seq-add-btn{white-space:nowrap;}
 .seq-bottom-row .seq-add-btn{flex:0 0 auto;width:auto;padding:.2rem .6rem;margin-top:0;}
 .seq-bottom-row #vtbViewBtn + *{margin-left:0;}
-.seq-bottom-row #vtbViewBtn + #vtbMoreBtn + *{margin-left:auto;} /* VIEW and MORE sit together on the left; everything after them goes to the right */
+.seq-bottom-row #vtbViewBtn + #vtbKeyBtn + #vtbFxBtn + *{margin-left:auto;} /* VIEW, KEY and EFFECTS sit together on the left; everything after them goes to the right */
+#vtbKeyBtn.active,#vtbFxBtn.active{border-color:#a0a8ff !important;color:#cfd3ff !important;box-shadow:0 0 8px -2px rgba(160,168,255,.7);}
 .seq-save-pat-btn{font-family:'Bebas Neue',sans-serif;font-size:.65rem;letter-spacing:.08em;padding:.18rem .5rem;border-radius:4px;border:1px solid #1a1a3a;background:#0d0d1c;color:#5555aa;cursor:pointer;touch-action:manipulation;transition:all .12s;white-space:nowrap;}
 .seq-save-pat-btn:hover{color:#a0a8ff;border-color:#a0a8ff;}
 .seq-arrange-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:3px;}
@@ -1367,3 +1372,14 @@ body.desktop-mode #matchGrid{overflow-x:hidden !important;}
 body.desktop-mode:not(.seq-on) .pad{aspect-ratio:1/1;}
 /* v0.2.78 desktop, pads hidden: keep the score + sequencer grouped in the middle instead of dropping the sequencer to the bottom */
 body.desktop-mode.pads-hidden .app{justify-content:center;gap:clamp(1.5rem,6vh,4rem);}
+/* v0.2.79 early game desktop: lift the pads off the bottom edge */
+body.desktop-mode:not(.seq-on) .pad-area{padding-bottom:5.5rem;}
+
+/* v0.2.79 TIPS button glows when you can afford the next tip */
+@keyframes tipsGlow{0%,100%{box-shadow:0 0 4px 0 rgba(232,255,0,.25);border-color:#aaaa33;color:#d6d640;}50%{box-shadow:0 0 16px 3px rgba(232,255,0,.6);border-color:#e8ff00;color:#f4ff66;}}
+#tipsBtn.tips-glow{animation:tipsGlow 1.4s ease-in-out infinite;background:#1a1a04 !important;}
+/* v0.2.79 desktop side tabs (SHOP / BUNKER) 40% larger */
+body.desktop-mode .desktop-collapse-btn{font-size:1.19rem;padding:.77rem .45rem;border-radius:8px;}
+
+/* tips page: larger text on desktop */
+body.desktop-mode #tipsModal>div:first-child{zoom:1.3;}

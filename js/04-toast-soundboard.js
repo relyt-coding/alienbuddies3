@@ -5,7 +5,13 @@
 let toastTimer=null;
 function showToast(msg){
   const el=document.getElementById('toast');
-  el.textContent=msg;el.classList.add('show');
+  el.textContent=msg;
+  // sit just under the score numbers (covering the energy meter, which matters less)
+  try{const em=document.getElementById('energyMeter'),sc=document.getElementById('scoreSectionBtn');
+    let r=em&&em.offsetParent!==null?em.getBoundingClientRect():null;
+    const top=r&&r.height>0?r.top:(sc?sc.getBoundingClientRect().bottom:0);
+    if(top>0)el.style.top=(top+4)+'px';}catch(e){}
+  el.classList.add('show');
   if(toastTimer)clearTimeout(toastTimer);
   toastTimer=setTimeout(()=>el.classList.remove('show'),2500);
 }

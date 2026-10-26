@@ -279,7 +279,9 @@ function fitPadArea(){
   document.body.classList.remove('pad-fit');grid.style.height='';grid.style.marginTop='';
   const n=Math.max(1,Math.min(8,parseInt(grid.getAttribute('data-pads'))||1));
   // sequencer not unlocked yet (early game): the pads are the whole screen, so let them be much bigger
-  const cap=Math.min(900,Math.round((PAD_GRID_CAPS[n]||410)*(document.body.classList.contains('seq-on')?1:1.9)));
+  const _cols=n<=1?1:(n===3?3:(n<=4?2:(n<=6?3:4)));
+  // early game: every pad is a comfortable ~195px square no matter how many there are (1 pad isn't giant, 3 aren't tiny)
+  const cap=document.body.classList.contains('seq-on')?(PAD_GRID_CAPS[n]||410):Math.min(900,_cols*195+(_cols-1)*6);
   // height used by everything except the pad area
   let used=0;
   [...app.children].forEach(ch=>{

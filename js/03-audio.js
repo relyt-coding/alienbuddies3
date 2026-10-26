@@ -52,7 +52,7 @@ const ALL_SOUNDS=[
     }
     drumMasterGain._hhLast={g,t};
     g.gain.setValueAtTime(0,t);
-    g.gain.linearRampToValueAtTime(.133*(gv??1),t+.002);
+    g.gain.linearRampToValueAtTime(.0998*(gv??1),t+.002);
     g.gain.exponentialRampToValueAtTime(.001,t+.06);
     const s=c.createBufferSource();s.buffer=noiseBuf(.06);
     const f1=c.createBiquadFilter();f1.type='highpass';f1.frequency.value=7000;
@@ -338,10 +338,11 @@ function playSfxTap(mult){
   g.gain.setValueAtTime(.14,now);g.gain.exponentialRampToValueAtTime(.001,now+.12);
   o.connect(g);g.connect(masterGainNode);o.start(now);o.stop(now+.12);
 }
-function playSfxTierUnlock(idx){
+function playSfxTierUnlock(idx,vol){
+  if(vol===undefined)vol=1; // dot-tracker upgrades pass 0.4 (60% quieter)
   if(!sfxOn)return;const ctx=getCtx(),now=ctx.currentTime;
   const base=220*Math.pow(1.3,idx%8);
-  [1,1.25,1.5,2].forEach((r,i)=>{const o=ctx.createOscillator(),g=ctx.createGain();o.type='sine';o.frequency.value=base*r;g.gain.setValueAtTime(0,now+i*.07);g.gain.linearRampToValueAtTime(.1,now+i*.07+.04);g.gain.exponentialRampToValueAtTime(.001,now+i*.07+.5);o.connect(g);g.connect(masterGainNode);o.start(now+i*.07);o.stop(now+i*.07+.55);});
+  [1,1.25,1.5,2].forEach((r,i)=>{const o=ctx.createOscillator(),g=ctx.createGain();o.type='sine';o.frequency.value=base*r;g.gain.setValueAtTime(0,now+i*.07);g.gain.linearRampToValueAtTime(.1*vol,now+i*.07+.04);g.gain.exponentialRampToValueAtTime(.001,now+i*.07+.5);o.connect(g);g.connect(masterGainNode);o.start(now+i*.07);o.stop(now+i*.07+.55);});
 }
 const SHOP_SFX_VOL=0.3;      // alien-buddy buy sound (unchanged)
 const SHOP_BUY_SFX_VOL=0.18; // other shop buy sounds (v0.2.74: 40% quieter than before)

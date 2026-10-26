@@ -43,7 +43,7 @@ for(let i=0;i<MAX_STEPS;i++){
 
 const viewToggleBar=document.getElementById('viewToggleBar');
 const vtbViewBtn=document.getElementById('vtbViewBtn');
-const vtbMoreBtn=document.getElementById('vtbMoreBtn');
+const vtbKeyBtn=document.getElementById('vtbKeyBtn'),vtbFxBtn=document.getElementById('vtbFxBtn');
 const viewMenu=document.getElementById('viewMenu');
 let padsHidden=false;
 try{padsHidden=localStorage.getItem('ab2_hidePads')==='1';}catch(e){}
@@ -58,12 +58,14 @@ function placeViewButtons(){
   if(inRow){
     targetRow.insertBefore(vtbViewBtn,targetRow.firstChild);
     vtbViewBtn.className='seq-save-pat-btn';
-    if(vtbMoreBtn){targetRow.insertBefore(vtbMoreBtn,vtbViewBtn.nextSibling);vtbMoreBtn.className='seq-save-pat-btn';}
+    if(vtbKeyBtn){targetRow.insertBefore(vtbKeyBtn,vtbViewBtn.nextSibling);vtbKeyBtn.className='seq-save-pat-btn';}
+    if(vtbFxBtn&&vtbKeyBtn){targetRow.insertBefore(vtbFxBtn,vtbKeyBtn.nextSibling);vtbFxBtn.className='seq-save-pat-btn';}
     viewToggleBar.style.display='none';
   }else{
     viewToggleBar.appendChild(vtbViewBtn);
     vtbViewBtn.className='vtb-btn';
-    if(vtbMoreBtn){viewToggleBar.appendChild(vtbMoreBtn);vtbMoreBtn.className='vtb-btn';}
+    if(vtbKeyBtn){viewToggleBar.appendChild(vtbKeyBtn);vtbKeyBtn.className='vtb-btn';}
+    if(vtbFxBtn){viewToggleBar.appendChild(vtbFxBtn);vtbFxBtn.className='vtb-btn';}
     viewToggleBar.style.display=drum.seqTracks?'':'none';
   }
   closeViewMenu();closeStepsMenu&&closeStepsMenu();window.closeMoreMenu&&window.closeMoreMenu();

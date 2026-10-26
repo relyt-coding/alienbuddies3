@@ -113,6 +113,7 @@ function renderUI(newlyLit){
     orig.apply(this,arguments);
     updateDrumTrackerOverlay();
     updateGhostPad();
+    if(typeof updateTipsGlow==='function')updateTipsGlow();
     if(typeof updateEnergyUI==='function')updateEnergyUI();
     updatePadClickHint();
     updateOnboardingArrows();

@@ -37,6 +37,15 @@ function togglePadEditMode(){
   }
 }
 
+// tapping the "PRESS DONE TO RETURN TO PLAY MODE" bubble is the same as pressing DONE
+(function(){
+  const rem=document.getElementById('editModeReminder');
+  const bub=rem&&rem.firstElementChild;
+  if(!bub)return;
+  bub.style.pointerEvents='auto';bub.style.cursor='pointer';bub.style.touchAction='manipulation';
+  bub.addEventListener('click',e=>{e.stopPropagation();if(padEditMode)togglePadEditMode();});
+})();
+
 function exitPadEditMode(){
   if(!padEditMode)return;
   padEditMode=false;

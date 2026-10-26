@@ -119,14 +119,14 @@ function buildLevel0Grid(){
   grid.style.gridTemplateColumns='1fr';
   grid.style.gridAutoRows='';grid.style.justifyContent='';
   grid.style.gridTemplateRows='';
-  grid.style.maxWidth='280px';
+  grid.style.maxWidth=document.body.classList.contains('desktop-mode')?'360px':'290px';
   grid.style.margin='0 auto';
   const msg='Visit the bunker every time you buy 4 Alien Buddies to play the matching game. Finding all matches wins you Multipliers!';
   const card=document.createElement('div');
   card.className='match-card';
   const back=document.createElement('div');back.className='match-card-face match-card-back';
   const front=document.createElement('div');front.className='match-card-face match-card-front';
-  front.style.cssText='background:linear-gradient(135deg,#041a0d,#0a2a18);border-color:#00ff88;font-size:.78rem;font-family:Bebas Neue,sans-serif;letter-spacing:.1em;color:#00ff88;line-height:1.7;padding:1.2rem 1rem;display:flex;align-items:center;justify-content:center;text-align:center;';
+  front.style.cssText='background:linear-gradient(135deg,#041a0d,#0a2a18);border-color:#00ff88;font-size:'+(document.body.classList.contains('desktop-mode')?'1.9rem':'1.4rem')+';font-family:Bebas Neue,sans-serif;letter-spacing:.06em;color:#00ff88;line-height:1.3;padding:3rem 1rem 1.2rem;display:flex;align-items:center;justify-content:center;text-align:center;';
   front.textContent=msg;
   card.appendChild(back);card.appendChild(front);
   // X button that appears after flipping

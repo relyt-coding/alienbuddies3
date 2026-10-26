@@ -2,31 +2,23 @@
 //  MORE MENU — musical key lock + per-track reverb & echo
 // ══════════════════════════════════════════════
 (function(){
-  const moreBtn=document.getElementById('vtbMoreBtn');
-  if(!moreBtn)return;
+  const keyBtn=document.getElementById('vtbKeyBtn'),fxBtn=document.getElementById('vtbFxBtn');
+  if(!keyBtn||!fxBtn)return;
   const $=(tag,cls,txt)=>{const e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e;};
   const saveSoon=(()=>{let t=0;return()=>{clearTimeout(t);t=setTimeout(()=>{typeof autoSave==='function'&&autoSave();},400);};})();
 
-  // ── MORE popup menu ──
-  const menu=$('div');menu.id='moreMenu';menu.style.display='none';
-  const rowKey=$('button','vm-row');rowKey.type='button';
-  const rowFx=$('button','vm-row');rowFx.type='button';
-  menu.appendChild(rowKey);menu.appendChild(rowFx);
-  document.body.appendChild(menu);
-  function keyLabel(){return seqKey==null?'OFF':KEY_NAMES[seqKey]+' MAJOR';}
-  function paintMenu(){rowKey.textContent='🎼  KEY: '+keyLabel();rowFx.textContent='✨  REVERB & ECHO';}
-  function closeMenu(){menu.style.display='none';}
-  window.closeMoreMenu=closeMenu;
-  function openMenu(){
-    paintMenu();menu.style.display='flex';
-    const r=moreBtn.getBoundingClientRect();
-    menu.style.left=Math.max(8,Math.min(r.left,innerWidth-menu.offsetWidth-8))+'px';
-    const top=r.top-menu.offsetHeight-6;menu.style.top=(top>8?top:r.bottom+6)+'px';
+  // ── KEY and EFFECTS buttons (each opens its own window; the button lights up while it is doing something) ──
+  function paintMenu(){
+    keyBtn.classList.toggle('active',seqKey!=null);
+    keyBtn.title=seqKey==null?'Key lock: off':'Locked to '+KEY_NAMES[seqKey]+' major';
+    let fx=false;try{fx=(seqLayers||[]).some((l,i)=>fxIsActive(getTrackFx(i)));}catch(e){}
+    fxBtn.classList.toggle('active',fx);
   }
-  moreBtn.addEventListener('click',e=>{e.stopPropagation();if(typeof closeViewMenu==='function')closeViewMenu();menu.style.display==='flex'?closeMenu():openMenu();});
-  menu.addEventListener('click',e=>e.stopPropagation());
-  document.addEventListener('click',closeMenu);
-  addEventListener('resize',closeMenu);
+  window.closeMoreMenu=function(){}; // (kept so older calls don't break)
+  window.refreshKeyFxButtons=paintMenu;
+  keyBtn.addEventListener('click',e=>{e.stopPropagation();if(typeof closeViewMenu==='function')closeViewMenu();buildKey();km.open();});
+  fxBtn.addEventListener('click',e=>{e.stopPropagation();if(typeof closeViewMenu==='function')closeViewMenu();buildFxList();fm.open();});
+  setTimeout(paintMenu,0);setInterval(paintMenu,1500);
 
   // ── generic modal shell ──
   function makeModal(id){
@@ -59,7 +51,6 @@
     seqKey=i;buildKey();paintMenu();saveSoon();
     try{getCtx();playSound('bell');setTimeout(()=>playSound('marimba'),180);}catch(e){}
   }
-  rowKey.addEventListener('click',()=>{closeMenu();buildKey();km.open();});
 
   // ── REVERB & ECHO modal ──
   const fm=makeModal('fxModal');
@@ -157,5 +148,4 @@
     const bk=$('button','more-done alt','DONE');bk.addEventListener('click',fm.close);foot.appendChild(bk);
     b.appendChild(foot);
   }
-  rowFx.addEventListener('click',()=>{closeMenu();buildFxList();fm.open();});
 })();

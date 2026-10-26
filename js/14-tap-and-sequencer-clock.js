@@ -42,12 +42,12 @@ function addDotToTier(i,anims){
   if(!drumTrackerActive)return; // tracker not activated yet
   ensureTiers(i+1);const tier=tiers[i];tier.litDots++;
   anims.push({src:'manual',tier:i,dot:tier.litDots-1});
-  if(tier.litDots>=DOTS){tier.litDots=0;if(!tier.multiplierActive){tier.multiplierActive=true;flashBuy(color(i).hex);ensureTiers(i+2);playSfxTierUnlock(i);}addDotToTier(i+1,anims);}
+  if(tier.litDots>=DOTS){tier.litDots=0;if(!tier.multiplierActive){tier.multiplierActive=true;flashBuy(color(i).hex);ensureTiers(i+2);playSfxTierUnlock(i,0.4);}addDotToTier(i+1,anims);}
 }
 function addDotToAutoTier(i,anims){
   ensureAutoTiers(i+1);const tier=autoTiers[i];tier.litDots++;
   anims.push({src:'auto',tier:i,dot:tier.litDots-1});
-  if(tier.litDots>=DOTS){tier.litDots=0;if(!tier.multiplierActive){tier.multiplierActive=true;playSfxTierUnlock(i);ensureAutoTiers(i+2);}addDotToAutoTier(i+1,anims);}
+  if(tier.litDots>=DOTS){tier.litDots=0;if(!tier.multiplierActive){tier.multiplierActive=true;playSfxTierUnlock(i,0.4);ensureAutoTiers(i+2);}addDotToAutoTier(i+1,anims);}
 }
 
 // ══════════════════════════════════════════════

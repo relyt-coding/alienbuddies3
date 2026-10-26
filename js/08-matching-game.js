@@ -117,6 +117,7 @@ function buildLevel0Grid(){
   document.getElementById('matchPairsDisplay').textContent='FLIP THE CARD';
   document.getElementById('matchProgressBar').style.width='0%';
   grid.style.gridTemplateColumns='1fr';
+  grid.style.gridAutoRows='';grid.style.justifyContent='';
   grid.style.gridTemplateRows='';
   grid.style.maxWidth='280px';
   grid.style.margin='0 auto';
@@ -402,8 +403,16 @@ function layoutMatchGrid(grid,total){
   grid.dataset.total=total;
   const desktop=document.body.classList.contains('desktop-mode');
   const gap=6,pad=24;
-  const availW=desktop?Math.min(window.innerWidth*0.92,1500):Math.min(520,window.innerWidth);
-  const availH=desktop?Math.max(240,window.innerHeight-150):window.innerHeight*0.72;
+  // phone: measure the room that is really left under the header (iOS toolbars make innerHeight unreliable)
+  let availW=desktop?Math.min(window.innerWidth*0.92,1500):Math.min(520,grid.parentElement?grid.parentElement.clientWidth||window.innerWidth:window.innerWidth);
+  let availH=desktop?Math.max(240,window.innerHeight-150):window.innerHeight*0.72;
+  if(!desktop){
+    const mm=document.getElementById('matchingModal');
+    if(mm&&mm.offsetHeight>0){
+      const room=mm.getBoundingClientRect().bottom-grid.getBoundingClientRect().top-24;
+      if(room>120)availH=Math.min(availH,room);
+    }
+  }
   let best={cols:4,w:0};
   for(let c=2;c<=12;c++){
     const r=Math.ceil(total/c);
@@ -413,11 +422,16 @@ function layoutMatchGrid(grid,total){
     if(w>best.w)best={cols:c,w};
   }
   const cols=best.cols;
-  grid.style.gridTemplateColumns='repeat('+cols+',1fr)';
+  if(desktop){grid.style.gridTemplateColumns='repeat('+cols+',1fr)';grid.style.gridAutoRows='';grid.style.justifyContent='';}
+  else{ // phone: fixed card size so cards can never balloon to full width
+    grid.style.gridTemplateColumns='repeat('+cols+','+best.w+'px)';
+    grid.style.gridAutoRows=Math.round(best.w*4/3)+'px';
+    grid.style.justifyContent='center';
+  }
   grid.style.gridTemplateRows='';
   grid.style.alignContent='start';
   grid.style.margin='';
-  grid.style.maxWidth=Math.min(availW,cols*best.w+(cols-1)*gap+pad)+'px';
+  grid.style.maxWidth=desktop?Math.min(availW,cols*best.w+(cols-1)*gap+pad)+'px':'520px';
   const fs=desktop?Math.max(1,best.w/46):1; // emoji/text scale with the card size
   const base=total<=8?2:total<=16?1.6:total<=32?1.2:total<=60?.9:.7;
   grid.style.setProperty('--mcard-font',(desktop?Math.max(base,Math.min(4.2,best.w/38)):base)+'rem');

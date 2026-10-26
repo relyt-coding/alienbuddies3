@@ -97,7 +97,6 @@
     <div class="home-logo-title">ALIEN BUDDIES</div>
     <div class="home-logo-sub">Published By Relyt Citrus</div>
     <div class="home-logo-sub" id="homeVersion" style="opacity:.6;margin-top:2px;"></div>
-    <div class="home-logo-sub" style="margin-top:.15rem;color:#00ff88;">Version 0.2</div>
   </div>
   <div style="width:100%;max-width:340px;padding:0 .5rem;">
     <div class="home-slots-label">— SELECT SAVE FILE —</div>
@@ -706,6 +705,14 @@
       </div>
       <input id="savePatNameInput" type="text" maxlength="20" placeholder="Pattern name…" autocomplete="off" spellcheck="false"
         style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:.08em;background:#0d0d1c;border:1px solid #2a2a4a;border-radius:8px;color:#a0a8ff;padding:.55rem .75rem;outline:none;width:100%;box-sizing:border-box;">
+      <div id="savePatRange" style="display:none;flex-direction:column;gap:.3rem;">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:.6rem;letter-spacing:.15em;color:#3a3a6a;">STEPS TO SAVE <span id="savePatRangeInfo" style="color:#55558a;"></span></div>
+        <div style="display:flex;align-items:center;gap:.5rem;font-family:'Bebas Neue',sans-serif;letter-spacing:.12em;color:#6a6aaa;font-size:.9rem;">
+          FROM <input id="savePatFrom" type="number" min="1" value="1" style="width:4.2rem;text-align:center;font-family:'Bebas Neue',sans-serif;font-size:16px;background:#0d0d1c;border:1px solid #2a2a4a;border-radius:8px;color:#a0a8ff;padding:.4rem;outline:none;">
+          TO <input id="savePatTo" type="number" min="1" value="16" style="width:4.2rem;text-align:center;font-family:'Bebas Neue',sans-serif;font-size:16px;background:#0d0d1c;border:1px solid #2a2a4a;border-radius:8px;color:#a0a8ff;padding:.4rem;outline:none;">
+          <button type="button" id="savePatFull" style="margin-left:auto;font-family:'Bebas Neue',sans-serif;font-size:.7rem;letter-spacing:.1em;padding:.35rem .6rem;border-radius:6px;border:1px solid #2a2a4a;background:transparent;color:#6a6aaa;cursor:pointer;">FULL</button>
+        </div>
+      </div>
       <div style="display:flex;flex-direction:column;gap:.3rem;">
         <div style="font-family:'Bebas Neue',sans-serif;font-size:.6rem;letter-spacing:.15em;color:#3a3a6a;">COLOUR</div>
         <div id="savePatColors" style="display:flex;gap:6px;flex-wrap:wrap;"></div>

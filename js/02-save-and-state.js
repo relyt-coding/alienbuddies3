@@ -177,6 +177,9 @@ function loadFromSave(data){
   unlockedSkills=data.unlockedSkills?Object.assign({},data.unlockedSkills):{};
   // Tucana Core used to be free: anyone who already unlocked skills keeps the core
   if(Object.keys(unlockedSkills).length&&!unlockedSkills.core)unlockedSkills.core=true;
+  // Re-add every skill-tree sound the player has bought (the unlocked flag lives in memory only, so it used to be lost on reload)
+  if(typeof PLANET_SOUND_DEFS!=='undefined')PLANET_SOUND_DEFS.forEach(ps=>{if(SOUND_MAP[ps.id])SOUND_MAP[ps.id].locked=true;});
+  if(typeof SKILL_TREE_NODES!=='undefined')SKILL_TREE_NODES.forEach(n=>{if(n.soundUnlock&&unlockedSkills[n.id]&&typeof unlockPlanetSound==='function')unlockPlanetSound(n.soundUnlock);});
   if(matchLevelsCompleted>=0){shownHints.matchingIntro=true;shownHints.matchingGame=true;}
   matchingMultiplier=data.matchingMultiplier||1;
   matchSavedState=data.matchSavedState||null;

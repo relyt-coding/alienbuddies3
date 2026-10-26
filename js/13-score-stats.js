@@ -7,9 +7,9 @@ const scoreStatsList=document.getElementById('scoreStatsList');
 
 function openScoreStats(){
   buildScoreStats();
-  scoreStatsModal.classList.add('open');
+  scoreStatsModal.classList.add('open');document.body.classList.add('stats-open');
 }
-function closeScoreStats(){scoreStatsModal.classList.remove('open');}
+function closeScoreStats(){scoreStatsModal.classList.remove('open');document.body.classList.remove('stats-open');}
 
 ['scoreStatsClose','scoreStatsDone'].forEach(id=>{
   const b=document.getElementById(id);if(!b)return;

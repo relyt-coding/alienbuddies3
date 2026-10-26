@@ -1156,3 +1156,43 @@ body.desktop-mode .tier-mult{width:58px;font-size:1.15rem !important;letter-spac
 body.desktop-mode .tiers-container{gap:8px;}
 body.desktop-mode #scoreRow .tiers-col-label{font-size:1.05rem !important;letter-spacing:.2em !important;margin-bottom:6px;}
 body.seq-on.desktop-mode #tiersWrap > div:first-child,body.seq-on.desktop-mode #autoTiersCol{flex:0 0 250px;}
+
+/* v0.2.40 — save-file screen: never squash the logo text on small phones (iPhone 7 etc.) */
+#homeScreen{overflow-y:auto;overflow-x:hidden;touch-action:pan-y;-webkit-overflow-scrolling:touch;justify-content:flex-start;gap:1.2rem;}
+#homeScreen>*{flex-shrink:0;}
+#homeScreen>div:last-child{margin-top:auto;padding-top:.8rem;}
+.home-logo>*{flex-shrink:0;}
+.home-logo-sub{line-height:1.5;text-align:center;}
+@media (max-height:720px){
+  #homeScreen{padding:1.4rem 1.2rem 1.6rem;gap:.8rem;}
+  .home-logo{margin-top:0;gap:.25rem;}
+  .home-logo-emoji{font-size:clamp(3rem,14vw,4.5rem);}
+  .home-logo-title{font-size:clamp(2.2rem,10.5vw,3.2rem);}
+  .home-slots{gap:.5rem;}
+  .slot-card{padding:.65rem 1rem;}
+}
+.home-logo-title{text-align:center;}
+
+/* v0.2.41 phone composition without the sequencer: stack from the top with even gaps, pads fill the free space,
+   bigger tracker dots / multiplier text so the tracker reads easily */
+body.pad-fit:not(.desktop-mode):not(.seq-on) .app{justify-content:flex-start;gap:.9rem;}
+body.pad-fit:not(.desktop-mode):not(.seq-on) .pad-area{padding-bottom:0;}
+body:not(.desktop-mode) .tier-dot{width:12px;height:12px;}
+body:not(.desktop-mode) .tier-dots{gap:7px;margin:0 9px;}
+body:not(.desktop-mode) .tiers-container{gap:8px;max-height:28vh;}
+body:not(.desktop-mode) .tier-mult{font-size:1.1rem;width:48px;}
+
+/* v0.2.42 score breakdown: aliens never float over it; clearer, larger, higher-contrast text for small phones */
+body.stats-open #alienLayer{visibility:hidden;}
+#scoreStatsBox{max-height:92vh;max-height:92dvh;}
+#scoreStatsList{gap:.45rem;padding:.7rem 1rem 1.2rem;}
+.ss-section-label{font-size:.8rem;color:#6d6da8;margin-top:.6rem;letter-spacing:.24em;}
+.ss-row{padding:.55rem .75rem;gap:.65rem;}
+.ss-label{font-size:1.05rem;color:#8a8ab5;line-height:1.1;}
+.ss-desc{font-size:.78rem;color:#6f6f95;letter-spacing:.04em;line-height:1.25;text-transform:none;}
+.ss-desc.active{color:#8f8fb8;}
+.ss-val{font-size:1.5rem;color:#5a5a85;}
+.ss-total-label{font-size:1rem;color:#8a8aca;}
+.ss-total-val{font-size:2.1rem;}
+
+.match-card{align-self:start;}

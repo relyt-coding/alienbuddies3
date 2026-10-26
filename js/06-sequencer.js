@@ -609,16 +609,20 @@ function buildPatLibrary(){
     seqPatLibrary.appendChild(row);
   });
 }
-function loadPatternIntoEditor(pi,offset,wrap){
+function loadPatternIntoEditor(pi,offset,wrap,merge){
   const pat=savedPatterns[pi];if(!pat)return;
   offset=offset||0;
-  if(patLen(pat)>STEPS){STEPS=patLen(pat);offset=0;}
+  if(patLen(pat)>STEPS){const L=patLen(pat);STEPS=L<=16?16:L<=32?32:64;offset=0;merge=false;}
+  const old=seqLayers.map(l=>({sound:l.soundId,steps:l.steps.slice(),vols:l.vols.slice(),muted:l.muted,has:l.steps.some(Boolean)}));
   seqLayersContainer.innerHTML='';seqLayers=[];
   const len=patLen(pat);
-  pat.layers.forEach(snap=>{
-    let st=snap.steps,vl=snap.vols;
-    if(offset>0||wrap){ // place the (shorter) pattern starting at step offset+1, optionally wrapping its overflow to the start
-      const ns=new Array(MAX_STEPS).fill(false),nv=new Array(MAX_STEPS).fill(100);
+  pat.layers.forEach((snap,ti)=>{
+    let st=snap.steps,vl=snap.vols,snd=snap.soundId;
+    const o=merge?old[ti]:null;
+    if(merge||offset>0||wrap){ // place the (shorter) pattern starting at step offset+1, optionally wrapping its overflow to the start
+      // paste mode: keep everything already on the track and only overwrite the pasted range
+      const ns=o?o.steps.slice():new Array(MAX_STEPS).fill(false),nv=o?o.vols.slice():new Array(MAX_STEPS).fill(100);
+      if(o&&o.has)snd=o.sound;
       for(let i=0;i<len;i++){
         let t=offset+i;
         if(t>=STEPS){if(!wrap)continue;t=t%STEPS;}
@@ -626,7 +630,8 @@ function loadPatternIntoEditor(pi,offset,wrap){
       }
       st=ns;vl=nv;
     }
-    addSeqLayer(snap.soundId,[...st],vl?[...vl]:null);
+    addSeqLayer(snd,[...st],vl?[...vl]:null);
+    if(o&&o.muted&&seqLayers.length){const L=seqLayers[seqLayers.length-1];L.muted=true;const mb=L.el&&L.el.querySelector('.seq-rc-btn');if(mb)mb.classList.add('muted');}
   });
   ensureAllTracks();
   setSeqMode('pattern');
@@ -649,7 +654,7 @@ function loadPatternSmart(pi){
   const title=document.getElementById('psTitle'),sub=document.getElementById('psSub'),body=document.getElementById('psBody');
   const close=()=>{m.style.display='none';};
   const mk=(txt,cls,fn,css)=>{const b=document.createElement('button');b.className='confirm-btn '+cls;b.textContent=txt;if(css)b.style.cssText=css;b.addEventListener('click',fn);return b;};
-  function finish(start,wrap){close();loadPatternIntoEditor(pi,start-1,wrap);autoSave();}
+  function finish(start,wrap){close();loadPatternIntoEditor(pi,start-1,wrap,true);autoSave();}
   function askWrap(start){
     const over=start-1+len-STEPS;
     title.textContent='PATTERN WRAP?';
@@ -661,7 +666,7 @@ function loadPatternSmart(pi){
   }
   function askStart(){
     title.textContent='START ON WHICH STEP?';
-    sub.textContent='"'+pat.name+'" is '+len+' steps · your loop is '+STEPS;
+    sub.textContent='"'+pat.name+'" is '+len+' steps · your loop is '+STEPS+' · other steps stay as they are';
     body.innerHTML='';
     const chips=document.createElement('div');chips.style.cssText='display:flex;gap:.4rem;justify-content:center;flex-wrap:wrap;';
     const inp=document.createElement('input');inp.type='number';inp.min=1;inp.max=STEPS;inp.value=1;
@@ -941,11 +946,29 @@ document.getElementById('savePatClose')&&document.getElementById('savePatClose')
 savePatModal&&savePatModal.addEventListener('click',e=>{if(e.target===savePatModal)savePatModal.style.display='none';});
 function openSavePatModal(){
   savePatNameInput.value='Pattern '+(savedPatterns.length+1);
+  // on loops longer than 16 steps you can save just a part (default: the whole loop)
+  const rg=document.getElementById('savePatRange');
+  if(rg){
+    rg.style.display=STEPS>16?'flex':'none';
+    document.getElementById('savePatFrom').value=1;document.getElementById('savePatTo').value=STEPS;
+    document.getElementById('savePatFrom').max=STEPS;document.getElementById('savePatTo').max=STEPS;
+    document.getElementById('savePatRangeInfo').textContent='(1–'+STEPS+')';
+  }
   savePatModal.style.display='flex';
 }
+document.getElementById('savePatFull')&&document.getElementById('savePatFull').addEventListener('click',()=>{
+  document.getElementById('savePatFrom').value=1;document.getElementById('savePatTo').value=STEPS;
+});
 document.getElementById('savePatConfirm')&&document.getElementById('savePatConfirm').addEventListener('click',()=>{
   const name=savePatNameInput.value.trim()||('Pattern '+(savedPatterns.length+1));
-  savedPatterns.push({name,color:savePatColor,stepCount:STEPS,layers:seqLayers.map(l=>({soundId:l.soundId,steps:l.steps.slice(0,STEPS),vols:l.vols.slice(0,STEPS),muted:l.muted||false}))});
+  let from=1,to=STEPS;
+  if(STEPS>16){
+    from=Math.round(parseFloat(document.getElementById('savePatFrom').value));to=Math.round(parseFloat(document.getElementById('savePatTo').value));
+    if(!isFinite(from))from=1;if(!isFinite(to))to=STEPS;
+    from=Math.min(STEPS,Math.max(1,from));to=Math.min(STEPS,Math.max(1,to));
+    if(from>to){const t=from;from=to;to=t;}
+  }
+  savedPatterns.push({name,color:savePatColor,stepCount:to-from+1,layers:seqLayers.map(l=>({soundId:l.soundId,steps:l.steps.slice(from-1,to),vols:l.vols.slice(from-1,to),muted:l.muted||false}))});
   savePatModal.style.display='none';
   buildPatLibrary();
   showToast('Pattern "'+name+'" saved!');

@@ -209,14 +209,18 @@ function fitPadArea(){
     grid.style.maxWidth='';
     // phone layout: size the pads to the space left above the SETTINGS / EDIT PADS buttons so they never overlap
     const sb=document.getElementById('soundboardBtn');
-    if(document.body.classList.contains('seq-on')&&sb&&grid.offsetParent!==null&&!document.body.classList.contains('store-open')&&!document.body.classList.contains('bunker-open')){
+    const nPads=Math.max(1,Math.min(8,parseInt(grid.getAttribute('data-pads'))||1));
+    const seqOn=document.body.classList.contains('seq-on');
+    if((seqOn||nPads>=2)&&sb&&grid.offsetParent!==null&&!document.body.classList.contains('store-open')&&!document.body.classList.contains('bunker-open')){
       const gt=grid.getBoundingClientRect().top;
       const nn=Math.max(1,Math.min(8,parseInt(grid.getAttribute('data-pads'))||1));
       const colsN=nn<=1?1:(nn===3?3:(nn<=4?2:(nn<=6?3:4)));
       const rowsN=Math.ceil(nn/colsN);
       const natural=rowsN*((grid.clientWidth-(colsN-1)*6)/colsN/1.4)+(rowsN-1)*6;
       const room=sb.getBoundingClientRect().top-10-gt;
-      if(room>0){document.body.classList.add('pad-fit');grid.style.height=Math.floor(Math.max(Math.min(natural,room),Math.min(natural,rowsN*52)))+'px';return;}
+      // sequencer on: never taller than natural; sequencer off: let pads grow (up to 35% taller) to fill the free space
+      const want=seqOn?Math.min(natural,room):Math.min(natural*1.35,room);
+      if(room>0){document.body.classList.add('pad-fit');grid.style.height=Math.floor(Math.max(want,Math.min(natural,rowsN*52)))+'px';return;}
     }
     document.body.classList.remove('pad-fit');grid.style.height='';
     return;

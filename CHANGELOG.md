@@ -2,6 +2,18 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.45 - 2026-10-25 21:11
+
+- changed: css/style.css
+- changed: index.html
+- changed: js/01-constants.js
+- changed: js/02-save-and-state.js
+- changed: js/06-sequencer.js
+- changed: js/08-matching-game.js
+- changed: js/13-score-stats.js
+- changed: js/18-desktop-layout.js
+- changed: js/20-skill-tree.js
+
 ## v0.2.38 - 2026-10-25 20:47
 
 - changed: css/style.css

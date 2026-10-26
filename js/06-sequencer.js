@@ -1139,4 +1139,4 @@ function fitSeqScroll(){
 }
 new MutationObserver(fitSeqScroll).observe(seqLayersContainer,{childList:true});
 addEventListener('resize',fitSeqScroll);
-setInterval(fitSeqScroll,1000);
+setInterval(()=>{if(!document.hidden)fitSeqScroll();},1500);

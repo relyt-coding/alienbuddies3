@@ -123,7 +123,9 @@ function getBouncerBounds(){
 let bouncerPicks=null;
 const BOUNCER_NAME_PAD=30; // room under each alien for its name label
 function bouncerMax(){
-  if(v5Settings&&v5Settings.moreAliens)return Math.max(1,Math.min(100,v5Settings.bouncerLimit||20));
+  // while the matching game is open, never more than 10 aliens (the first 10 you picked in the Bunker)
+  const cap=document.body.classList.contains('match-open')?10:100;
+  if(v5Settings&&v5Settings.moreAliens)return Math.max(1,Math.min(cap,v5Settings.bouncerLimit||20));
   return 10;
 }
 function desiredBouncerIdxs(){
@@ -186,8 +188,17 @@ function spawnBouncer(animate=true,idx){
   el.style.left='0';el.style.top='0';alienLayer.appendChild(el);
   bouncers.push({el,x,y,vx:Math.cos(ang)*spd,vy:Math.sin(ang)*spd,sz,idx,_nameEl:nameSpan,_col:col}); // _nameEl/_col live on the bouncer so renaming updates it instantly
 }
-(function tickBouncers(){
-  const bounds=getBouncerBounds();
+// bounds are measured only now and then (every frame forced a layout read)
+let _bbCache=null,_bbAt=0;
+function cachedBouncerBounds(now){
+  if(!_bbCache||now-_bbAt>400){_bbCache=getBouncerBounds();_bbAt=now;}
+  return _bbCache;
+}
+addEventListener('resize',()=>{_bbCache=null;});
+(function tickBouncers(now){
+  requestAnimationFrame(tickBouncers);
+  if(document.hidden||!bouncers.length||!showBouncers)return;
+  const bounds=cachedBouncerBounds(now||performance.now());
   const minX=bounds.x,minY=bounds.y,maxX=bounds.x+bounds.w,maxY=bounds.y+bounds.h;
   for(const b of bouncers){
     b.x+=b.vx;b.y+=b.vy;
@@ -195,9 +206,8 @@ function spawnBouncer(animate=true,idx){
     if(b.y<=minY){b.y=minY;b.vy=Math.abs(b.vy);}
     if(b.x>=maxX-b.sz){b.x=maxX-b.sz;b.vx=-Math.abs(b.vx);}
     if(b.y>=maxY-b.sz-BOUNCER_NAME_PAD){b.y=maxY-b.sz-BOUNCER_NAME_PAD;b.vy=-Math.abs(b.vy);}
-    if(showBouncers)b.el.style.transform=`translate(${b.x}px,${b.y}px) scale(${b._scale||1})`;
+    b.el.style.transform=`translate3d(${b.x.toFixed(1)}px,${b.y.toFixed(1)}px,0) scale(${b._scale||1})`;
   }
-  requestAnimationFrame(tickBouncers);
 })();
 
 // ══════════════════════════════════════════════

@@ -55,7 +55,7 @@ body.store-open #soundboardBtn,body.store-open #padEditToggleBtn,body.store-open
 #alienLayer{position:fixed;top:0;right:0;bottom:0;left:0;pointer-events:none;z-index:15;overflow:hidden;}
 .bouncer{position:absolute;font-size:2.02rem;line-height:1;will-change:transform;display:flex;flex-direction:column;align-items:center;gap:0;}
 .bouncer-emoji{display:block;}
-.bouncer-name{position:absolute;top:100%;left:50%;transform:translateX(-50%);margin-top:-1px;font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:.04em;white-space:nowrap;opacity:.9;text-shadow:1.0px 0.0px 0 #000,0.71px 0.71px 0 #000,0.0px 1.0px 0 #000,-0.71px 0.71px 0 #000,-1.0px 0.0px 0 #000,-0.71px -0.71px 0 #000,-0.0px -1.0px 0 #000,0.71px -0.71px 0 #000,2.0px 0.0px 0 #000,1.85px 0.77px 0 #000,1.41px 1.41px 0 #000,0.77px 1.85px 0 #000,0.0px 2.0px 0 #000,-0.77px 1.85px 0 #000,-1.41px 1.41px 0 #000,-1.85px 0.77px 0 #000,-2.0px 0.0px 0 #000,-1.85px -0.77px 0 #000,-1.41px -1.41px 0 #000,-0.77px -1.85px 0 #000,-0.0px -2.0px 0 #000,0.77px -1.85px 0 #000,1.41px -1.41px 0 #000,1.85px -0.77px 0 #000,2.0px 0.0px 0 #000,1.93px 0.78px 0 #000,1.73px 1.5px 0 #000,1.41px 2.12px 0 #000,1.0px 2.6px 0 #000,0.52px 2.9px 0 #000,0.0px 3.0px 0 #000,-0.52px 2.9px 0 #000,-1.0px 2.6px 0 #000,-1.41px 2.12px 0 #000,-1.73px 1.5px 0 #000,-1.93px 0.78px 0 #000,-2.0px 0.0px 0 #000,-1.93px -0.78px 0 #000,-1.73px -1.5px 0 #000,-1.41px -2.12px 0 #000,-1.0px -2.6px 0 #000,-0.52px -2.9px 0 #000,-0.0px -3.0px 0 #000,0.52px -2.9px 0 #000,1.0px -2.6px 0 #000,1.41px -2.12px 0 #000,1.73px -1.5px 0 #000,1.93px -0.78px 0 #000,-2px -2px 0 #000,-2px -1px 0 #000,-2px 0px 0 #000,-2px 1px 0 #000,-2px 2px 0 #000,2px -2px 0 #000,2px -1px 0 #000,2px 0px 0 #000,2px 1px 0 #000,2px 2px 0 #000,0 0 6px #000;transition:opacity .3s;text-align:center;max-width:160px;padding:4px 3px;overflow:hidden;text-overflow:ellipsis;line-height:1;font-weight:700;}
+.bouncer-name{position:absolute;top:100%;left:50%;transform:translateX(-50%);margin-top:-1px;font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:.04em;white-space:nowrap;opacity:.9;text-shadow:-2px 0 0 #000,2px 0 0 #000,0 -2px 0 #000,0 2px 0 #000,-1.5px -1.5px 0 #000,1.5px -1.5px 0 #000,-1.5px 1.5px 0 #000,1.5px 1.5px 0 #000,0 0 6px #000;transition:opacity .3s;text-align:center;max-width:160px;padding:4px 3px;overflow:hidden;text-overflow:ellipsis;line-height:1;font-weight:700;}
 .bouncer-name.hidden{opacity:0;}
 .header{text-align:center;z-index:3;position:relative;width:100%;}
 .game-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(1.4rem,5.5vw,2.2rem);letter-spacing:.1em;line-height:1;color:#00ff88;transition:color .5s;display:flex;align-items:center;justify-content:center;gap:.3rem;}
@@ -1318,3 +1318,28 @@ body.desktop-mode #scoreRow .tiers-col-label{font-size:.95rem !important;}
   .ss-total-val{font-size:1.8rem;}
   .ss-total-label{font-size:.9rem;}
 }
+
+/* v0.2.56 aliens bounce over the matching game (they never block taps) */
+body.match-open #alienLayer{z-index:240;}
+
+/* v0.2.57 matching game: lighter, snappier cards */
+.match-card{will-change:auto;contain:layout style;-webkit-tap-highlight-color:transparent;transition-duration:.28s;}
+.match-card:active:not(.flipped){transform:scale(.96);}
+.match-card.flipped:active{transform:rotateY(180deg);}
+
+/* v0.2.58 lighter alien layer */
+#alienLayer{contain:layout style;}
+.bouncer{backface-visibility:hidden;}
+
+/* v0.2.59 phone/tablet performance: no live blur behind pop-ups (very costly on older iPhones), calmer skill-tree motion */
+body:not(.desktop-mode) #alienNameModal,
+body:not(.desktop-mode) #scoreStatsModal,
+body:not(.desktop-mode) #padAssignModal,
+body:not(.desktop-mode) #settingsPanel,
+body:not(.desktop-mode) .more-modal{-webkit-backdrop-filter:none;backdrop-filter:none;}
+body:not(.desktop-mode) #alienNameModal,
+body:not(.desktop-mode) #scoreStatsModal,
+body:not(.desktop-mode) .more-modal{background:rgba(0,0,0,.9);}
+body:not(.desktop-mode) .st-node{animation:none;}
+body:not(.desktop-mode) .alien-cell.occupied::after{animation:none;}
+@media (prefers-reduced-motion:reduce){.st-node,.alien-cell.occupied::after,.home-logo-emoji{animation:none !important;}}

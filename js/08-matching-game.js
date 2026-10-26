@@ -113,7 +113,7 @@ function buildLevel0Grid(){
   document.getElementById('matchSubtitle').textContent='INTRO · FLIP THE CARD';
   const grid=document.getElementById('matchGrid');
   grid.innerHTML='';
-  matchCardEls=[];matchFlipped=[];matchMatched=[];matchLocked=false;matchPairs=0;
+  matchWrongPending=null;matchCardEls=[];matchFlipped=[];matchMatched=[];matchLocked=false;matchPairs=0;
   document.getElementById('matchPairsDisplay').textContent='FLIP THE CARD';
   document.getElementById('matchProgressBar').style.width='0%';
   grid.style.gridTemplateColumns='1fr';
@@ -203,7 +203,7 @@ function playMatchFanfare(){
 function resumeMatchGrid(saved){
   const grid=document.getElementById('matchGrid');
   grid.innerHTML='';
-  matchCardEls=[];matchFlipped=[];matchMatched=[];matchLocked=false;matchPairs=saved.pairs;
+  matchWrongPending=null;matchCardEls=[];matchFlipped=[];matchMatched=[];matchLocked=false;matchPairs=saved.pairs;
 
   document.getElementById('matchPairsDisplay').textContent=matchPairs+' / '+matchTotalPairs+' PAIRS';
   document.getElementById('matchProgressBar').style.width=(matchPairs/matchTotalPairs*100)+'%';
@@ -211,6 +211,7 @@ function resumeMatchGrid(saved){
   const total=saved.cards.length;
   layoutMatchGrid(grid,total);
 
+  const frag=document.createDocumentFragment();
   saved.cards.forEach((cardData,idx)=>{
     const card=document.createElement('div');
     card.className='match-card';
@@ -231,15 +232,16 @@ function resumeMatchGrid(saved){
       matchMatched.push(false);matchFlipped.push(false);
       card.addEventListener('click',()=>onMatchCardClick(idx));
     }
-    grid.appendChild(card);
+    frag.appendChild(card);
     matchCardEls.push(card);
   });
+  grid.appendChild(frag);
 }
 
 function buildMatchGrid(){
   const grid=document.getElementById('matchGrid');
   grid.innerHTML='';
-  matchCardEls=[];matchFlipped=[];matchMatched=[];matchLocked=false;matchPairs=0;
+  matchWrongPending=null;matchCardEls=[];matchFlipped=[];matchMatched=[];matchLocked=false;matchPairs=0;
   document.getElementById('matchPairsDisplay').textContent='0 / '+matchTotalPairs+' PAIRS';
   document.getElementById('matchProgressBar').style.width='0%';
 
@@ -251,6 +253,7 @@ function buildMatchGrid(){
   const total=cards.length;
   layoutMatchGrid(grid,total);
 
+  const frag=document.createDocumentFragment();
   cards.forEach((pattern,idx)=>{
     const card=document.createElement('div');
     card.className='match-card';
@@ -271,31 +274,40 @@ function buildMatchGrid(){
 
     card.appendChild(back);card.appendChild(front);
     card.addEventListener('click',()=>onMatchCardClick(idx));
-    grid.appendChild(card);
+    frag.appendChild(card);
     matchCardEls.push(card);
     matchFlipped.push(false);
     matchMatched.push(false);
   });
+  grid.appendChild(frag);
 }
 
+// A wrong pair stays visible until its timer ends, but tapping any card ends it right away (no waiting)
+let matchWrongPending=null;
+function matchSettleWrong(){
+  if(!matchWrongPending)return;
+  const w=matchWrongPending;matchWrongPending=null;clearTimeout(w.t);
+  matchFlipped[w.a]=false;matchFlipped[w.b]=false;
+  matchCardEls[w.a].classList.remove('flipped','wrong');
+  matchCardEls[w.b].classList.remove('flipped','wrong');
+  matchLocked=false;
+}
 function onMatchCardClick(idx){
+  if(matchWrongPending)matchSettleWrong();
   if(matchLocked)return;
   if(matchFlipped[idx]||matchMatched[idx])return;
-  const already=matchFlipped.map((f,i)=>f&&!matchMatched[i]?i:-1).filter(i=>i>=0);
-  if(already.length>=2)return;
+  // cards currently face-up and not yet matched
+  const up=[];
+  for(let i=0;i<matchFlipped.length;i++)if(matchFlipped[i]&&!matchMatched[i])up.push(i);
+  if(up.length>=2)return;
 
-  // Flip this card
   matchFlipped[idx]=true;
   matchCardEls[idx].classList.add('flipped');
-
-  const nowFlipped=matchFlipped.map((f,i)=>f&&!matchMatched[i]?i:-1).filter(i=>i>=0);
-  if(nowFlipped.length===2){
+  up.push(idx);
+  if(up.length===2){
     matchLocked=true;
-    const [a,b]=nowFlipped;
-    const pa=matchCardEls[a].dataset.pattern;
-    const pb=matchCardEls[b].dataset.pattern;
-    if(pa===pb){
-      // Match!
+    const a=up[0],b=up[1];
+    if(matchCardEls[a].dataset.pattern===matchCardEls[b].dataset.pattern){
       playMatchDing();
       setTimeout(()=>{
         matchMatched[a]=true;matchMatched[b]=true;
@@ -306,18 +318,12 @@ function onMatchCardClick(idx){
         document.getElementById('matchPairsDisplay').textContent=matchPairs+' / '+matchTotalPairs+' PAIRS';
         document.getElementById('matchProgressBar').style.width=(matchPairs/matchTotalPairs*100)+'%';
         matchLocked=false;
-        if(matchPairs>=matchTotalPairs)setTimeout(showMatchVictory,500);
-      },400);
+        if(matchPairs>=matchTotalPairs)setTimeout(showMatchVictory,400);
+      },260);
     } else {
-      // No match — flash wrong then flip back
       matchCardEls[a].classList.add('wrong');
       matchCardEls[b].classList.add('wrong');
-      setTimeout(()=>{
-        matchFlipped[a]=false;matchFlipped[b]=false;
-        matchCardEls[a].classList.remove('flipped','wrong');
-        matchCardEls[b].classList.remove('flipped','wrong');
-        matchLocked=false;
-      },900);
+      matchWrongPending={a,b,t:setTimeout(matchSettleWrong,700)};
     }
   }
 }
@@ -373,29 +379,44 @@ document.getElementById('matchCloseBtn')&&document.getElementById('matchCloseBtn
 
 // matchingGameBtn click handled dynamically in updateMatchingBtn via btn.onclick
 
-// Starfield canvas
+// Starfield canvas: ONE loop (never stacks on re-open), ~30fps, stars drawn in 4 batched brightness groups
+let matchStarsRAF=0,matchStarsData=null;
 function initMatchStars(){
   const canvas=document.getElementById('matchStarsCanvas');
   if(!canvas)return;
   const ctx=canvas.getContext('2d');
-  canvas.width=window.innerWidth;canvas.height=window.innerHeight;
+  const W=canvas.width=window.innerWidth,H=canvas.height=window.innerHeight;
+  const n=Math.max(60,Math.min(140,Math.round(W*H/9000)));
   const stars=[];
-  for(let i=0;i<180;i++){
-    stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,r:Math.random()*1.5+.2,o:Math.random()*.8+.2,sp:Math.random()*.0003+.0001});
+  for(let i=0;i<n;i++)stars.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.5+.3,o:Math.random()*.8+.2,sp:Math.random()*.0012+.0004});
+  matchStarsData=stars;
+  if(matchStarsRAF)return; // loop already running, it picks up the new stars
+  let last=0;
+  const mm=document.getElementById('matchingModal');
+  function draw(ts){
+    if(mm.style.display==='none'||document.hidden){matchStarsRAF=0;return;}
+    matchStarsRAF=requestAnimationFrame(draw);
+    if(ts-last<33)return;last=ts;
+    const cw=canvas.width,ch=canvas.height;
+    ctx.clearRect(0,0,cw,ch);
+    const groups=[[],[],[],[]];
+    for(const s of matchStarsData){
+      s.o+=s.sp;if(s.o>1||s.o<.15)s.sp*=-1;
+      groups[Math.min(3,(s.o*4)|0)].push(s);
+    }
+    for(let g=0;g<4;g++){
+      ctx.fillStyle='rgba(255,255,255,'+(0.25+g*0.22)+')';
+      ctx.beginPath();
+      for(const s of groups[g]){ctx.moveTo(s.x+s.r,s.y);ctx.arc(s.x,s.y,s.r,0,6.2832);}
+      ctx.fill();
+    }
   }
-  let animId;
-  function draw(){
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    stars.forEach(s=>{
-      s.o+=s.sp;if(s.o>1||s.o<.1)s.sp*=-1;
-      ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
-      ctx.fillStyle=`rgba(255,255,255,${s.o})`;ctx.fill();
-    });
-    if(document.getElementById('matchingModal').style.display!=='none'){animId=requestAnimationFrame(draw);}
-    else{cancelAnimationFrame(animId);}
-  }
-  draw();
+  matchStarsRAF=requestAnimationFrame(draw);
 }
+document.addEventListener('visibilitychange',()=>{
+  const mm=document.getElementById('matchingModal');
+  if(!document.hidden&&mm&&mm.style.display!=='none'&&!matchStarsRAF)initMatchStars();
+});
 
 // Pick the column count that gives the BIGGEST cards for the screen (3:4 cards), and size the grid to fit.
 // Desktop: uses most of the window. Phone: same as before (narrow column).
@@ -437,4 +458,18 @@ function layoutMatchGrid(grid,total){
   grid.style.setProperty('--mcard-font',(desktop?Math.max(base,Math.min(4.2,best.w/38)):base)+'rem');
 }
 
-addEventListener('resize',()=>{const g=document.getElementById('matchGrid'),m=document.getElementById('matchingModal');if(g&&m&&m.style.display!=='none'&&g.dataset.total)layoutMatchGrid(g,parseInt(g.dataset.total));});
+let matchResizeRAF=0;
+addEventListener('resize',()=>{if(matchResizeRAF)return;matchResizeRAF=requestAnimationFrame(()=>{matchResizeRAF=0;const g=document.getElementById('matchGrid'),m=document.getElementById('matchingModal');if(g&&m&&m.style.display!=='none'&&g.dataset.total)layoutMatchGrid(g,parseInt(g.dataset.total));});});
+
+// aliens also bounce over the matching game (max 10): flag the body while the game is open and refresh the on-screen set
+(function(){
+  const mm=document.getElementById('matchingModal');if(!mm)return;
+  let was=false;
+  const upd=()=>{
+    const open=mm.style.display!=='none'&&mm.style.display!=='';
+    if(open===was)return;was=open;
+    document.body.classList.toggle('match-open',open);
+    if(typeof syncBouncers==='function')syncBouncers(false);
+  };
+  new MutationObserver(upd).observe(mm,{attributes:true,attributeFilter:['style']});
+})();

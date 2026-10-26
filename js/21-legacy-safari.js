@@ -87,6 +87,6 @@
   new MutationObserver(schedule).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
   addEventListener('resize',schedule);
   addEventListener('orientationchange',schedule);
-  setInterval(run,1500); // catch-all
+  setInterval(()=>{if(!document.hidden)run();},2500); // catch-all
   run();
 })();

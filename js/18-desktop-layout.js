@@ -294,7 +294,7 @@ function fitPadArea(){
   const schedule=()=>{if(raf)return;raf=requestAnimationFrame(()=>{raf=0;fitPadArea();});};
   window.fitPadAreaSoon=schedule;
   window.addEventListener('resize',schedule);
-  setInterval(schedule,800);
+  setInterval(()=>{if(!document.hidden)schedule();},1200);
   if(typeof ResizeObserver!=='undefined'){
     const ro=new ResizeObserver(schedule);
     const app=document.querySelector('#gameView .app');
@@ -351,7 +351,7 @@ function fitPadArea(){
     }
     if(v!==last){last=v;layer.style.clipPath=v;layer.style.webkitClipPath=v;}
   }
-  setInterval(update,40);
+  setInterval(()=>{if(!document.hidden)update();},100);
   addEventListener('resize',update);
   update();
 })();

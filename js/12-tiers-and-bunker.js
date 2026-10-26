@@ -374,6 +374,6 @@ alienNameInput&&alienNameInput.addEventListener('keydown',e=>{if(e.key==='Enter'
     }
     new MutationObserver(fit).observe(c,{childList:true});
     addEventListener('resize',fit);
-    setInterval(fit,1000); // cheap catch-all (row heights change with layout)
+    setInterval(()=>{if(!document.hidden)fit();},1500); // cheap catch-all (row heights change with layout)
   });
 })();

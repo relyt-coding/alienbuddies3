@@ -278,7 +278,8 @@ function fitPadArea(){
   }
   document.body.classList.remove('pad-fit');grid.style.height='';grid.style.marginTop='';
   const n=Math.max(1,Math.min(8,parseInt(grid.getAttribute('data-pads'))||1));
-  const cap=PAD_GRID_CAPS[n]||410;
+  // sequencer not unlocked yet (early game): the pads are the whole screen, so let them be much bigger
+  const cap=Math.min(900,Math.round((PAD_GRID_CAPS[n]||410)*(document.body.classList.contains('seq-on')?1:1.9)));
   // height used by everything except the pad area
   let used=0;
   [...app.children].forEach(ch=>{
@@ -289,11 +290,13 @@ function fitPadArea(){
   });
   const acs=getComputedStyle(app),acsArea=getComputedStyle(area);
   const inner=app.clientHeight-parseFloat(acs.paddingTop)-parseFloat(acs.paddingBottom);
-  const avail=inner-used-parseFloat(acsArea.paddingTop)-parseFloat(acsArea.paddingBottom)-24; // 24px breathing room
+  let avail=inner-used-parseFloat(acsArea.paddingTop)-parseFloat(acsArea.paddingBottom)-24; // 24px breathing room
+  // early game (no sequencer yet): the stretched middle block eats the measured space, so give the pads up to ~40% of the column height
+  if(!document.body.classList.contains('seq-on'))avail=Math.max(avail,inner*0.4);
   // grid geometry (matches the CSS: 4:3 pads, 6px gap, columns per pad count)
   const cols=n<=1?1:(n===3?3:(n<=4?2:(n<=6?3:4)));
   const rows=Math.ceil(n/cols);
-  const gap=6,ratio=0.75;
+  const gap=6,ratio=document.body.classList.contains('seq-on')?0.75:1; // early game: square pads
   const padH=(avail-(rows-1)*gap)/rows;
   let W=(padH/ratio)*cols+(cols-1)*gap;
   W=Math.max(PAD_GRID_MIN_W,Math.min(cap,W));

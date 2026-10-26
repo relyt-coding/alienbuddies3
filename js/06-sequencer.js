@@ -97,7 +97,7 @@ function updateStepsBtn(){
   if(sv)sv.style.marginLeft=on?'0':'';
 }
 // FOLLOW PLAYHEAD: while playing a loop longer than the screen, the view pages along with the playhead
-let seqFollow=true;try{seqFollow=localStorage.getItem('ab2_seqFollow')!=='0';}catch(e){}
+let seqFollow=false;try{seqFollow=localStorage.getItem('ab2_seqFollow')==='1';}catch(e){} // off by default; only on if the player turned it on
 let _followPage=-1;
 function followPlayhead(st){
   const sc=document.getElementById('seqHScroll');

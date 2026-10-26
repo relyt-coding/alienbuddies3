@@ -25,6 +25,7 @@
 <meta name="twitter:image" content="https://alienbuddies.space/img/og-image.png">
 <link rel="preload" href="fonts/bebas-neue-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/polish.css">
 </head>
 <body>
 <div class="grid-bg"></div>
@@ -114,8 +115,13 @@
   <div style="width:100%;max-width:340px;padding:0 .5rem;">
     <div class="home-slots-label">— SELECT SAVE FILE —</div>
     <div class="home-slots" id="slotsContainer"></div>
-    <a id="legacyBox" href="v0.1/index.html" style="display:none;margin-top:.9rem;padding:.7rem .9rem;border:1px solid #2a4a38;border-radius:10px;background:#0c1a12;color:#7fcf9f;text-decoration:none;text-align:center;font-family:'Bebas Neue',sans-serif;letter-spacing:.12em;font-size:.95rem;line-height:1.35;">
-      SAVES FOUND FROM VERSION 0.1<br><span style="font-size:.72rem;color:#5a9a6a;letter-spacing:.2em;">TAP TO PLAY 0.1 →</span>
+    <a id="legacyBox" class="legacy-card" href="v0.1/index.html">
+      <span class="lc-icon">📼</span>
+      <span class="lc-text">
+        <span class="lc-title">SAVES FOUND</span>
+        <span class="lc-sub">FROM VERSION 0.1 · TAP TO PLAY</span>
+      </span>
+      <span class="lc-arrow">→</span>
     </a>
   </div>
   <div style="font-size:.52rem;color:#222;letter-spacing:.2em;text-transform:uppercase;">progress saves automatically</div>
@@ -961,5 +967,6 @@
 <script src="js/22-swipe-nav.js"></script>
 <script src="js/23-more-menu.js"></script>
 <script src="js/24-gamepad.js"></script>
+<script src="js/25-polish.js"></script>
 </body>
 </html>

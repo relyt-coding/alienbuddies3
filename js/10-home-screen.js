@@ -11,7 +11,7 @@ let pendingDeleteSlot=-1;
 function hasLegacySaves(){try{return LEGACY_SAVE_KEYS.some(k=>{const d=localStorage.getItem(k);return d&&d.length>2;});}catch(e){return false;}}
 function buildHomeScreen(){
   slotsContainer.innerHTML='';
-  const _lb=document.getElementById('legacyBox');if(_lb)_lb.style.display=hasLegacySaves()?'block':'none';
+  const _lb=document.getElementById('legacyBox');if(_lb)_lb.style.display=hasLegacySaves()?'flex':'none';
   for(let i=0;i<3;i++){
     const data=readSlot(i);const sum=slotSummary(data);
     const card=document.createElement('div');card.className='slot-card '+(sum?'has-save':'empty-save');
@@ -62,7 +62,9 @@ function promptSlotRename(slotIdx, nameEl){
   nameEl.textContent='';
   nameEl.appendChild(input);
   input.focus();input.select();
+  let cancelled=false,done=false;
   function commit(){
+    if(cancelled||done)return;done=true;
     const val=input.value.trim();
     setSlotName(slotIdx,val);
     const fallback=readSlot(slotIdx)?`SLOT ${slotIdx+1}`:`SLOT ${slotIdx+1} — EMPTY`;
@@ -73,8 +75,20 @@ function promptSlotRename(slotIdx, nameEl){
     }
   }
   input.addEventListener('blur',commit);
-  input.addEventListener('keydown',e=>{if(e.key==='Enter')input.blur();if(e.key==='Escape'){nameEl.textContent=orig;input.remove();}});
+  input.addEventListener('keydown',e=>{if(e.key==='Enter')input.blur();if(e.key==='Escape'){cancelled=true;nameEl.textContent=orig;input.remove();}});
 }
+
+// In-game: tap the file name / "SLOT X" under the title to rename the current file without going back to the save screen
+(function(){
+  const st=document.getElementById('slotSubtitle');if(!st)return;
+  st.classList.add('renamable');st.title='Tap to rename this file';
+  st.addEventListener('click',e=>{
+    if(st.querySelector('input')||activeSlot<0)return;
+    e.stopPropagation();
+    promptSlotRename(activeSlot,st);
+    const inp=st.querySelector('input');if(inp){inp.style.width='11rem';inp.style.textAlign='center';inp.style.fontSize='1.05rem';}
+  });
+})();
 
 function confirmDelete(i){pendingDeleteSlot=i;document.getElementById('confirmSubText').textContent=`Delete Slot ${i+1}? Cannot be undone.`;deleteConfirm.classList.add('show');}
 document.getElementById('confirmYes').addEventListener('click',()=>{if(pendingDeleteSlot>=0){deleteSlot(pendingDeleteSlot);pendingDeleteSlot=-1;}deleteConfirm.classList.remove('show');document.body.classList.add('home-visible');

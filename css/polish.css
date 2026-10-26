@@ -1,0 +1,130 @@
+/* ═══════════════════════════════════════════════════════════════
+   POLISH PASS (v0.2.82) — glass panels, shine, neon, glossy pads, motion, starfield.
+   Everything visual in this pass lives in THIS file (+ js/25-polish.js).
+   To revert the whole look: remove the <link rel="stylesheet" href="css/polish.css"> line
+   (and the <script src="js/25-polish.js"> line) from index.html.
+   ═══════════════════════════════════════════════════════════════ */
+:root{
+  --pl-edge:rgba(255,255,255,.085);
+  --pl-glass:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.012) 55%,rgba(255,255,255,0));
+  --pl-r-card:14px;
+  --pl-r-btn:10px;
+}
+
+/* ── glass panels ── */
+.upgrade-card,.drum-card,.alien-store-card{
+  background-image:var(--pl-glass);
+  border-radius:var(--pl-r-card);
+  box-shadow:inset 0 1px 0 var(--pl-edge),0 10px 26px -16px rgba(0,0,0,.85);
+}
+.upgrade-buy-btn,.drum-buy-btn{border-radius:var(--pl-r-btn);}
+#settingsBox{
+  background-image:var(--pl-glass);
+  box-shadow:inset 0 1px 0 var(--pl-edge),0 24px 60px -20px rgba(0,0,0,.9);
+}
+#viewMenu,#stepsMenu,#moreMenu{
+  background:rgba(12,12,28,.82);
+  -webkit-backdrop-filter:blur(14px) saturate(1.3);backdrop-filter:blur(14px) saturate(1.3);
+  box-shadow:inset 0 1px 0 var(--pl-edge),0 14px 34px rgba(0,0,0,.7);
+  border-radius:12px;
+}
+.toast{
+  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+  background:rgba(22,22,44,.86);
+  box-shadow:inset 0 1px 0 var(--pl-edge),0 8px 24px rgba(0,0,0,.55),0 0 18px -6px rgba(160,168,255,.55);
+}
+.page-header{background-image:linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,0));}
+
+/* ── affordable buy buttons get a slow light sweep ── */
+.drum-buy-btn.buyable,.upgrade-buy-btn.buyable,.alien-store-card.buyable{position:relative;overflow:hidden;}
+.drum-buy-btn.buyable::after,.upgrade-buy-btn.buyable::after,.alien-store-card.buyable::after{
+  content:'';position:absolute;top:-10%;bottom:-10%;left:0;width:34%;pointer-events:none;
+  background:linear-gradient(100deg,transparent,rgba(255,255,255,.17),transparent);
+  transform:translateX(-160%) skewX(-18deg);
+  animation:plShine 3.6s ease-in-out infinite;
+}
+@keyframes plShine{0%,52%{transform:translateX(-160%) skewX(-18deg)}100%{transform:translateX(420%) skewX(-18deg)}}
+.drum-buy-btn.buyable{box-shadow:0 0 14px -6px #a0a8ff;}
+.upgrade-buy-btn.buyable{box-shadow:0 0 14px -6px #e8ff00;}
+.alien-store-card.buyable{box-shadow:inset 0 1px 0 var(--pl-edge),0 0 18px -6px #00ff88;}
+
+/* ── neon: brighter core, tighter glow ── */
+.score{text-shadow:0 0 .45rem rgba(0,255,170,.30),0 0 1.5rem rgba(0,255,170,.14);}
+.energy-seg.on{box-shadow:0 0 3px 0 var(--ec),0 0 9px -2px var(--ec),inset 0 1px 0 rgba(255,255,255,.5);}
+.tier-dot{box-shadow:inset 0 1px 1px rgba(255,255,255,.18);}
+.tier-dot.lit{box-shadow:0 0 7px 1px rgba(255,255,255,.28),inset 0 1px 1px rgba(255,255,255,.55);}
+.seq-step.on{box-shadow:0 0 6px -1px var(--lc),inset 0 1px 0 rgba(255,255,255,.4);}
+
+/* ── drum pads: beveled, glossy, with a ring flash on every hit ── */
+.pad{
+  background-image:linear-gradient(165deg,rgba(255,255,255,.06),rgba(255,255,255,0) 45%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.12),inset 0 -14px 20px -14px rgba(0,0,0,.75),0 5px 12px -8px rgba(0,0,0,.9);
+}
+.pad::after{
+  content:'';position:absolute;left:0;right:0;top:0;height:55%;pointer-events:none;border-radius:inherit;
+  background:linear-gradient(180deg,rgba(255,255,255,.075),rgba(255,255,255,.02) 55%,rgba(255,255,255,0));
+}
+.pad.ghost-pad::after{display:none;}
+.pad.lit{
+  box-shadow:0 0 0 1px var(--pc),0 0 20px -2px var(--pc),inset 0 0 24px -6px var(--pc),inset 0 1px 0 rgba(255,255,255,.25);
+  animation:plPadRing .34s ease-out;
+}
+@keyframes plPadRing{0%{box-shadow:0 0 0 0 var(--pc),0 0 26px 2px var(--pc),inset 0 0 28px -4px var(--pc)}100%{box-shadow:0 0 0 12px rgba(0,0,0,0),0 0 20px -2px var(--pc),inset 0 0 24px -6px var(--pc)}}
+
+/* ── score milestone shimmer + pop (js/25-polish.js adds .pl-milestone) ── */
+.score.pl-milestone{
+  background:linear-gradient(100deg,#fff 0%,#fff 38%,#8affd0 50%,#fff 62%,#fff 100%);background-size:260% 100%;
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;
+  animation:plSheen 1.25s ease-out,plPop .38s cubic-bezier(.34,1.56,.64,1);
+  text-shadow:none;filter:drop-shadow(0 0 10px rgba(0,255,170,.55));
+}
+@keyframes plSheen{from{background-position:125% 0}to{background-position:-125% 0}}
+@keyframes plPop{0%{transform:scale(1)}45%{transform:scale(1.07)}100%{transform:scale(1)}}
+
+/* ── unlock burst particles ── */
+.pl-burst{position:fixed;left:0;top:0;width:7px;height:7px;margin:-3.5px 0 0 -3.5px;border-radius:50%;pointer-events:none;z-index:160;background:var(--c);box-shadow:0 0 10px 1px var(--c);animation:plBurst .8s cubic-bezier(.12,.75,.3,1) forwards;}
+@keyframes plBurst{0%{transform:translate(var(--x),var(--y)) scale(1);opacity:1}100%{transform:translate(calc(var(--x) + var(--dx)),calc(var(--y) + var(--dy))) scale(.15);opacity:0}}
+.pl-ring{position:fixed;left:0;top:0;width:20px;height:20px;margin:-10px 0 0 -10px;border-radius:50%;pointer-events:none;z-index:159;border:2px solid var(--c);box-shadow:0 0 16px var(--c),inset 0 0 12px var(--c);animation:plRing .65s ease-out forwards;}
+@keyframes plRing{0%{transform:translate(var(--x),var(--y)) scale(.4);opacity:.95}100%{transform:translate(var(--x),var(--y)) scale(9);opacity:0}}
+
+/* ── page transition: a quick soft blur while swiping between pages (phone) ── */
+#plNavBlur{position:fixed;top:0;right:0;bottom:0;left:0;z-index:150;pointer-events:none;opacity:0;-webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px);}
+#plNavBlur.go{animation:plNav .46s ease-in-out;}
+@keyframes plNav{0%{opacity:0}35%{opacity:1}100%{opacity:0}}
+
+/* ── background: vignette + slow drifting starfield ── */
+.grid-bg{overflow:hidden;}
+.grid-bg::before{content:'';position:absolute;top:0;right:0;bottom:0;left:0;background:radial-gradient(ellipse at 50% 38%,rgba(0,0,0,0) 38%,rgba(0,0,0,.55) 100%);pointer-events:none;}
+.grid-bg::after{
+  content:'';position:absolute;left:0;top:0;width:100%;height:200%;pointer-events:none;will-change:transform;
+  background-image:
+    radial-gradient(1.4px 1.4px at 7% 8%,rgba(255,255,255,.55),transparent),
+    radial-gradient(1px 1px at 19% 31%,rgba(160,200,255,.5),transparent),
+    radial-gradient(1.2px 1.2px at 33% 14%,rgba(255,255,255,.4),transparent),
+    radial-gradient(1px 1px at 46% 42%,rgba(255,255,255,.45),transparent),
+    radial-gradient(1.5px 1.5px at 58% 9%,rgba(190,255,225,.5),transparent),
+    radial-gradient(1px 1px at 71% 27%,rgba(255,255,255,.4),transparent),
+    radial-gradient(1.2px 1.2px at 84% 12%,rgba(255,255,255,.5),transparent),
+    radial-gradient(1px 1px at 93% 38%,rgba(160,200,255,.45),transparent),
+    radial-gradient(1.3px 1.3px at 12% 58%,rgba(255,255,255,.45),transparent),
+    radial-gradient(1px 1px at 27% 76%,rgba(255,255,255,.4),transparent),
+    radial-gradient(1.4px 1.4px at 41% 64%,rgba(190,255,225,.45),transparent),
+    radial-gradient(1px 1px at 55% 88%,rgba(255,255,255,.45),transparent),
+    radial-gradient(1.2px 1.2px at 68% 71%,rgba(255,255,255,.4),transparent),
+    radial-gradient(1px 1px at 79% 93%,rgba(160,200,255,.5),transparent),
+    radial-gradient(1.4px 1.4px at 90% 66%,rgba(255,255,255,.5),transparent),
+    radial-gradient(1px 1px at 4% 91%,rgba(255,255,255,.4),transparent);
+  animation:plDrift 150s linear infinite;
+}
+@keyframes plDrift{from{transform:translateY(0)}to{transform:translateY(-50%)}}
+
+/* ── typography: crisper hierarchy, larger tiny labels ── */
+.store-section-label{font-size:.95rem;color:#5a5a6c;letter-spacing:.2em;}
+.upgrade-card-sub,.drum-card-sub{font-size:.8rem;color:#6c6c80;letter-spacing:.08em;}
+.upgrade-card-title,.drum-card-title{letter-spacing:.12em;text-shadow:0 0 12px rgba(160,168,255,.18);}
+.upgrade-effect-sub{font-size:.78rem;}
+.home-slots-label{letter-spacing:.3em;}
+
+@media (prefers-reduced-motion:reduce){
+  .grid-bg::after,.drum-buy-btn.buyable::after,.upgrade-buy-btn.buyable::after,.alien-store-card.buyable::after,#plNavBlur.go{animation:none !important;}
+}

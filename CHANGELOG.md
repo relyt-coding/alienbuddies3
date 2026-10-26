@@ -2,6 +2,16 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.82 - 2026-10-26 08:51
+
+- changed: css/style.css
+- changed: index.html
+- changed: js/01-constants.js
+- changed: js/10-home-screen.js
+- changed: js/15-render.js
+- added: css/polish.css
+- added: js/25-polish.js
+
 ## v0.2.81 - 2026-10-26 08:33
 
 - changed: css/style.css

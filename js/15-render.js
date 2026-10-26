@@ -296,7 +296,8 @@ function renderStore(){
   updateShopDismiss();
 }
 
-// ── Shop: maxed-out cards get a DISMISS button that tucks them away (saved per file) ──
+// ── Shop: maxed-out cards get a DISMISS button that tucks them away (saved per file); a toggle at the bottom shows them again ──
+let shopShowDismissed=false;
 function _shopCardKey(card){const t=card.querySelector('.drum-card-title,.upgrade-card-title');return t?t.textContent.replace(/[^A-Za-z0-9 \-]/g,'').trim().toUpperCase():null;}
 function updateShopDismiss(){
   const sv=document.getElementById('storeView');if(!sv)return;
@@ -304,15 +305,22 @@ function updateShopDismiss(){
   sv.querySelectorAll('.drum-card,.upgrade-card').forEach(card=>{
     const key=_shopCardKey(card);if(!key)return;
     const maxed=!!card.querySelector('.drum-buy-btn.maxed,.upgrade-buy-btn.maxed');
+    const isDis=maxed&&list.indexOf(key)>=0;
     let btn=card.querySelector('.shop-dismiss-btn');
     if(maxed&&!btn){
       const hdr=card.querySelector('.drum-card-header,.upgrade-card-header');if(!hdr)return;
-      btn=document.createElement('button');btn.type='button';btn.className='shop-dismiss-btn';btn.textContent='DISMISS';
-      btn.addEventListener('click',e=>{e.stopPropagation();e.preventDefault();if(shop.dismissed.indexOf(key)<0)shop.dismissed.push(key);updateShopDismiss();autoSave();});
+      btn=document.createElement('button');btn.type='button';btn.className='shop-dismiss-btn';
+      btn.addEventListener('click',e=>{
+        e.stopPropagation();e.preventDefault();
+        const i=shop.dismissed.indexOf(key);
+        if(i>=0)shop.dismissed.splice(i,1);else shop.dismissed.push(key);
+        updateShopDismiss();autoSave();
+      });
       hdr.appendChild(btn);
     }
-    if(btn)btn.style.display=maxed?'':'none';
-    card.classList.toggle('shop-dismissed',maxed&&list.indexOf(key)>=0);
+    if(btn){btn.style.display=maxed?'':'none';btn.textContent=isDis?'RESTORE':'DISMISS';}
+    card.classList.toggle('shop-dismissed',isDis&&!shopShowDismissed);
+    card.classList.toggle('shop-dismissed-shown',isDis&&shopShowDismissed);
   });
   // hide a section's heading + row once every card in it is dismissed
   sv.querySelectorAll('.store-section-label').forEach(lbl=>{
@@ -323,4 +331,18 @@ function updateShopDismiss(){
     const hide=allGone&&anyDismissed;
     lbl.classList.toggle('shop-dismissed',hide);row.classList.toggle('shop-dismissed',hide);
   });
+  // toggle at the very bottom of the shop (only exists while something is dismissed)
+  const sc=sv.querySelector('.store-scroll');
+  if(sc){
+    let t=document.getElementById('shopShowDismissedBtn');
+    if(!t){
+      t=document.createElement('button');t.type='button';t.id='shopShowDismissedBtn';
+      t.addEventListener('click',()=>{shopShowDismissed=!shopShowDismissed;updateShopDismiss();});
+      sc.appendChild(t);
+    }
+    if(!list.length)shopShowDismissed=false;
+    t.style.display=list.length?'':'none';
+    t.classList.toggle('on',shopShowDismissed);
+    t.textContent=(shopShowDismissed?'HIDE DISMISSED':'SHOW DISMISSED')+' ('+list.length+')';
+  }
 }

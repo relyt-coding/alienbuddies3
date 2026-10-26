@@ -2,6 +2,14 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.76 - 2026-10-26 07:02
+
+- changed: css/style.css
+- changed: js/01-constants.js
+- changed: js/03-audio.js
+- changed: js/05-pads.js
+- changed: js/19-wav-export.js
+
 ## v0.2.72 - 2026-10-26 06:52
 
 - changed: index.html

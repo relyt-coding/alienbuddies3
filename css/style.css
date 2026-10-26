@@ -1361,3 +1361,4 @@ body:not(.desktop-mode) .alien-cell.occupied::after{animation:none;}
 #padAssignInner{max-height:84vh;}
 body:not(.desktop-mode) #padGpRow{display:none !important;}
 #shopPinchHint{display:none !important;}
+body.desktop-mode #matchGrid{overflow-x:hidden !important;}

@@ -78,7 +78,8 @@ function rebuildPadGrid(){
   if(padEditBtn){padEditBtn.classList.remove('active');padEditBtn.textContent='Edit Pads';}  editModeBadge&&editModeBadge.classList.remove('show');
   const _showPads=Math.min(visiblePads,drum.pads);
   // Pad 2 (the kick) shows up as a dim "ghost" pad next to pad 1 until it's bought for 10 pts
-  const _ghost=(drum.pads===1&&visiblePads>=1);
+  // Pad 3 (the snare) does the same once pad 2 is owned, so the way forward is always visible
+  const _ghost=((drum.pads===1||drum.pads===2)&&visiblePads>=drum.pads);
   padGridEl.setAttribute('data-pads',_showPads+(_ghost?1:0));
   for(let i=0;i<_showPads;i++){
     const sndId=padSounds[i];
@@ -110,8 +111,9 @@ function rebuildPadGrid(){
   if(_ghost){
     const g=document.createElement('div');
     g.className='pad ghost-pad';g.id='ghostPad';
-    g.style.setProperty('--pc','#ff7a50');
-    g.innerHTML=`<div class="pad-name">KICK</div><div class="ghost-cost" id="ghostPadSub">${PAD_COSTS[1]} PTS</div>`;
+    const _gi=drum.pads,_gs=SOUND_MAP[['hihat','kick','snare'][_gi]];
+    g.style.setProperty('--pc',_gi===1?'#ff7a50':((_gs&&_gs.color)||'#ffcc44'));
+    g.innerHTML=`<div class="pad-name">${_gi===1?'KICK':'SNARE'}</div><div class="ghost-cost" id="ghostPadSub">${(typeof formatStore==='function'?formatStore(PAD_COSTS[_gi]):PAD_COSTS[_gi])} PTS</div>`;
     g.addEventListener('pointerdown',e=>{e.preventDefault();unlockGhostPad();});
     padGridEl.appendChild(g); // not added to padEls, so pad indexes stay correct
     updateGhostPad();
@@ -125,15 +127,15 @@ function updatePadClickHint(){
   if(hint)hint.style.display=(score===0&&drum.pads<=1&&!(typeof seqPlaying!=='undefined'&&seqPlaying))?'flex':'none';
 }
 function unlockGhostPad(){
-  const cost=PAD_COSTS[1];
-  if(drum.pads!==1)return;
-  if(score<cost){showToast(`Need ${cost} points — keep tapping the hi-hat!`);return;}
+  if(drum.pads!==1&&drum.pads!==2)return;
+  const cost=PAD_COSTS[drum.pads];
+  if(score<cost){showToast(`Need ${typeof formatStore==='function'?formatStore(cost):cost} points — keep tapping!`);return;}
   buyNextPad();
 }
 function updateGhostPad(){
   const g=document.getElementById('ghostPad');
   if(!g)return;
-  g.classList.toggle('affordable',score>=PAD_COSTS[1]);
+  g.classList.toggle('affordable',score>=PAD_COSTS[drum.pads]);
 }
 
 // ── Pad Assign Modal ──

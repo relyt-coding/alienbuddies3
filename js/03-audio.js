@@ -2,7 +2,7 @@
 // ══════════════════════════════════════════════
 //  AUDIO ENGINE
 // ══════════════════════════════════════════════
-const AMB_LEVEL=0.4; // background ambience plays at 40% so it never drowns out the sounds
+const AMB_LEVEL=0.28; // background ambience level (v0.2.73: 0.4 -> 0.28) so it never drowns out the sounds
 let audioCtx=null,masterGainNode=null,drumMasterGain=null,drumMasterReal=null,rvbNode=null,rvbGainNode=null,ambGain=null,ambStarted=false;
 let sfxOn=true;
 let musicOn=true;
@@ -52,7 +52,7 @@ const ALL_SOUNDS=[
     }
     drumMasterGain._hhLast={g,t};
     g.gain.setValueAtTime(0,t);
-    g.gain.linearRampToValueAtTime(.19*(gv??1),t+.002);
+    g.gain.linearRampToValueAtTime(.133*(gv??1),t+.002);
     g.gain.exponentialRampToValueAtTime(.001,t+.06);
     const s=c.createBufferSource();s.buffer=noiseBuf(.06);
     const f1=c.createBiquadFilter();f1.type='highpass';f1.frequency.value=7000;
@@ -341,12 +341,13 @@ function playSfxTap(mult){
 function playSfxTierUnlock(idx){
   if(!sfxOn)return;const ctx=getCtx(),now=ctx.currentTime;
   const base=220*Math.pow(1.3,idx%8);
-  [1,1.25,1.5,2].forEach((r,i)=>{const o=ctx.createOscillator(),g=ctx.createGain();o.type='sine';o.frequency.value=base*r;g.gain.setValueAtTime(0,now+i*.07);g.gain.linearRampToValueAtTime(.2,now+i*.07+.04);g.gain.exponentialRampToValueAtTime(.001,now+i*.07+.5);o.connect(g);g.connect(masterGainNode);o.start(now+i*.07);o.stop(now+i*.07+.55);});
+  [1,1.25,1.5,2].forEach((r,i)=>{const o=ctx.createOscillator(),g=ctx.createGain();o.type='sine';o.frequency.value=base*r;g.gain.setValueAtTime(0,now+i*.07);g.gain.linearRampToValueAtTime(.1,now+i*.07+.04);g.gain.exponentialRampToValueAtTime(.001,now+i*.07+.5);o.connect(g);g.connect(masterGainNode);o.start(now+i*.07);o.stop(now+i*.07+.55);});
 }
-const SHOP_SFX_VOL=0.3; // shop buy sounds play at 30% of their original volume
+const SHOP_SFX_VOL=0.3;      // alien-buddy buy sound (unchanged)
+const SHOP_BUY_SFX_VOL=0.18; // other shop buy sounds (v0.2.74: 40% quieter than before)
 function playSfxPurchase(){
   if(!sfxOn)return;const ctx=getCtx(),now=ctx.currentTime;
-  [[660,0],[880,.08],[1100,.14]].forEach(([f,d])=>{const o=ctx.createOscillator(),g=ctx.createGain();o.type='triangle';o.frequency.value=f;g.gain.setValueAtTime(0,now+d);g.gain.linearRampToValueAtTime(.18*SHOP_SFX_VOL,now+d+.02);g.gain.exponentialRampToValueAtTime(.001,now+d+.35);o.connect(g);g.connect(masterGainNode);o.start(now+d);o.stop(now+d+.4);});
+  [[660,0],[880,.08],[1100,.14]].forEach(([f,d])=>{const o=ctx.createOscillator(),g=ctx.createGain();o.type='triangle';o.frequency.value=f;g.gain.setValueAtTime(0,now+d);g.gain.linearRampToValueAtTime(.18*SHOP_BUY_SFX_VOL,now+d+.02);g.gain.exponentialRampToValueAtTime(.001,now+d+.35);o.connect(g);g.connect(masterGainNode);o.start(now+d);o.stop(now+d+.4);});
 }
 function playSfxAlienBuy(){
   if(!sfxOn)return;const ctx=getCtx(),now=ctx.currentTime;

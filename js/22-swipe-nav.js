@@ -43,6 +43,7 @@
       void document.body.offsetWidth;
       VIEW_IDS.forEach(function(id){document.getElementById(id).style.transition='';});
       busy=false;
+      resetPageZoom();
     },460);
   }
   // pinch-zoomed in? snap back to normal zoom whenever the page changes (swipe or the SHOP / BUNKER buttons).
@@ -55,16 +56,32 @@
     var m=document.createElement('meta');m.name='viewport';m.content=content;
     if(old&&old.parentNode)old.parentNode.replaceChild(m,old);else document.head.appendChild(m);
   }
+  var touchesDown=0;
+  document.addEventListener('touchstart',function(e){touchesDown=e.touches.length;},{passive:true,capture:true});
+  document.addEventListener('touchend',function(e){touchesDown=e.touches.length;},{passive:true,capture:true});
+  document.addEventListener('touchcancel',function(){touchesDown=0;},{passive:true,capture:true});
+  function editViewport(content){ // same <meta>, new content (works on some iOS versions where replacing doesn't)
+    var m=document.querySelector('meta[name=viewport]');
+    if(m)m.setAttribute('content',content);else swapViewport(content);
+  }
+  // iOS ignores viewport changes while a finger is still down, and some versions only react to one of the two
+  // tricks (replace the tag / edit the tag), so keep trying with alternating methods until the zoom is gone.
+  var zoomBusy=false;
   function resetPageZoom(tries){
     tries=tries||0;
-    if(zoomScale()<=1.01)return;
-    swapViewport(LOCK_VP);
+    if(zoomScale()<=1.01){zoomBusy=false;return;}
+    if(tries>5){zoomBusy=false;return;}
+    if(touchesDown>0){setTimeout(function(){resetPageZoom(tries);},120);return;}
+    zoomBusy=true;
+    try{if(document.activeElement&&document.activeElement.blur)document.activeElement.blur();}catch(e){}
+    if(tries%2===0)swapViewport(LOCK_VP);else editViewport(LOCK_VP);
     try{window.scrollTo(0,0);}catch(e){}
     setTimeout(function(){
-      swapViewport(NORMAL_VP);
-      // still zoomed? try once more (Safari sometimes needs a second pass)
-      setTimeout(function(){if(zoomScale()>1.01&&tries<2)resetPageZoom(tries+1);},350);
-    },320);
+      if(tries%2===0)swapViewport(NORMAL_VP);else editViewport(NORMAL_VP);
+      setTimeout(function(){
+        if(zoomScale()>1.01)resetPageZoom(tries+1);else zoomBusy=false;
+      },300);
+    },260+tries*60);
   }
   window.resetPageZoom=resetPageZoom;
   (function(){

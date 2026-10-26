@@ -1,7 +1,7 @@
 // ══════════════════════════════════════════════
 //  CONTROLLER SUPPORT (Gamepad API: PS4/PS5 DualShock/DualSense, Xbox, Switch Pro, etc.)
 //  Pads fire from buttons (rebindable per pad), START plays/stops the sequencer,
-//  light rumble on every hit, and the pad-assign window can be bound with a button press.
+//  and the pad-assign window can be bound with a button press.
 // ══════════════════════════════════════════════
 const GP_DEFAULTS=[0,1,2,3,4,5,6,7]; // pad 1-8 -> Cross/A, Circle/B, Square/X, Triangle/Y, L1, R1, L2, R2 (standard mapping)
 const GP_NAMES=['✕','○','□','△','L1','R1','L2','R2','SHARE','OPTIONS','L3','R3','D↑','D↓','D←','D→','PS'];
@@ -20,6 +20,7 @@ let gpRAF=0,gpCount=0,gpListen=null; // gpListen: callback while waiting for a b
 function gpPressed(b){return !!b&&(b.pressed||b.value>0.5);}
 
 function gpRumblePulse(pad){
+  return; // v0.2.61: controller vibration removed
   if(!gpRumble||!pad)return;
   try{
     const a=pad.vibrationActuator;

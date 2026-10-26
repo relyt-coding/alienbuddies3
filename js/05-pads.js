@@ -144,42 +144,117 @@ const padAssignFiltersEl=document.getElementById('padAssignFilters');
 const padAssignListEl=document.getElementById('padAssignList');
 const padAssignClose=document.getElementById('padAssignClose');
 
-// Filters are rebuilt dynamically when picker opens (see buildPaFilters)
+// ── Sound picker organisation ──
+// Row 1: SOURCE  (ALL · TUCANA · each planet you have unlocked sounds on)
+// Row 2: depends on row 1 — a planet shows its CONTINENTS, TUCANA shows sound TYPES (drums, synth…)
+// The list below is grouped under headers, and a search box narrows it further.
+const PA_PLANET_NAMES={mantra:'MANTRA',hyphae:'HYPHAE'};
+const PA_CONT_NAMES={om:'OM',sohum:'SO HUM',manas:'MANAS',floww:'FLOWW',enoki:'ENOKI',morel:'MOREL',porcini:'PORCINI',oyster:'OYSTER',reishi:'REISHI',bella:'BELLA'};
+function paPlanetName(p){return PA_PLANET_NAMES[p]||String(p).toUpperCase();}
+function paContName(c){return PA_CONT_NAMES[c]||String(c).toUpperCase();}
+let paSub='';      // continent (for a planet) or sound type tag (for tucana); '' = all of the source
+let paSearch='';
+function paAvail(){return unlockedSounds().map(id=>SOUND_MAP[id]).filter(Boolean);}
+function paTotalFor(planet,cont){ // how many sounds exist (locked or not) so chips can show 2/5
+  if(typeof PLANET_SOUND_DEFS==='undefined')return 0;
+  return PLANET_SOUND_DEFS.filter(d=>d.planet===planet&&(!cont||d.continent===cont)).length;
+}
+function paChip(parent,label,on,onClick,extraClass){
+  const ch=document.createElement('div');ch.className='pa-filter-chip'+(on?' on':'')+(extraClass?' '+extraClass:'');
+  ch.textContent=label;ch.addEventListener('click',onClick);parent.appendChild(ch);return ch;
+}
+function paRow(label){
+  const row=document.createElement('div');row.className='pa-frow';
+  const l=document.createElement('span');l.className='pa-flabel';l.textContent=label;row.appendChild(l);
+  padAssignFiltersEl.appendChild(row);return row;
+}
 function buildPaFilters(){
   padAssignFiltersEl.innerHTML='';
-  const avail=unlockedSounds().map(id=>SOUND_MAP[id]).filter(Boolean);
-  // ALL chip
-  const allChip=document.createElement('div');allChip.className='pa-filter-chip'+(paFilter==='all'?' on':'');allChip.textContent='ALL';
-  allChip.addEventListener('click',()=>setPaFilter('all'));padAssignFiltersEl.appendChild(allChip);
-  // Tucana Core (original sounds)
-  const hasTucana=avail.some(s=>!s.planet);
-  if(hasTucana){const ch=document.createElement('div');ch.className='pa-filter-chip'+(paFilter==='tucana'?' on':'');ch.textContent='🌌 TUCANA';ch.dataset.tag='tucana';ch.addEventListener('click',()=>setPaFilter('tucana'));padAssignFiltersEl.appendChild(ch);}
-  // Planet filters
-  const planets=[...new Set(avail.filter(s=>s.planet).map(s=>s.planet))];
-  planets.forEach(p=>{const ch=document.createElement('div');ch.className='pa-filter-chip'+(paFilter===p?' on':'');ch.style.borderColor='#44eebb44';ch.textContent='🪐 '+p.toUpperCase();ch.dataset.tag=p;ch.addEventListener('click',()=>setPaFilter(p));padAssignFiltersEl.appendChild(ch);});
-  // Continent filters for current planet filter
-  if(paFilter!=='all'&&paFilter!=='tucana'&&planets.includes(paFilter)){
-    const conts=[...new Set(avail.filter(s=>s.planet===paFilter).map(s=>s.continent))];
-    conts.forEach(c=>{const ch=document.createElement('div');ch.className='pa-filter-chip'+(paFilter===c?' on':'');ch.style.borderColor='#44eebb22';ch.textContent='  ↳ '+c.toUpperCase();ch.dataset.tag=c;ch.addEventListener('click',()=>setPaFilter(c));padAssignFiltersEl.appendChild(ch);});
+  const avail=paAvail();
+  const tucana=avail.filter(x=>!x.planet);
+  const planets=[...new Set(avail.filter(x=>x.planet).map(x=>x.planet))];
+  if(paFilter!=='all'&&paFilter!=='tucana'&&!planets.includes(paFilter)){paFilter='all';paSub='';}
+  // row 1: source
+  const r1=paRow('SOURCE');
+  paChip(r1,'ALL ('+avail.length+')',paFilter==='all',()=>setPaFilter('all'));
+  if(planets.length)paChip(r1,'🌌 TUCANA ('+tucana.length+')',paFilter==='tucana',()=>setPaFilter('tucana'));
+  planets.forEach(p=>{
+    const n=avail.filter(x=>x.planet===p).length,t=paTotalFor(p);
+    paChip(r1,'🪐 '+paPlanetName(p)+' ('+n+(t>n?'/'+t:'')+')',paFilter===p,()=>setPaFilter(p),'pa-planet');
+  });
+  // row 2: sub filter
+  if(paFilter==='tucana'||(paFilter==='all'&&!planets.length)){
+    const tags=[...new Set(tucana.map(x=>x.tag))];
+    if(tags.length>1){
+      const r2=paRow('TYPE');
+      paChip(r2,'ALL',paSub==='',()=>setPaSub(''));
+      tags.forEach(t=>paChip(r2,t.toUpperCase()+' ('+tucana.filter(x=>x.tag===t).length+')',paSub===t,()=>setPaSub(t)));
+    }
+  } else if(paFilter!=='all'){
+    const inPlanet=avail.filter(x=>x.planet===paFilter);
+    const conts=[...new Set(inPlanet.map(x=>x.continent))];
+    const r2=paRow('CONTINENT');
+    paChip(r2,'ALL '+paPlanetName(paFilter),paSub==='',()=>setPaSub(''));
+    conts.forEach(c=>{
+      const n=inPlanet.filter(x=>x.continent===c).length,t=paTotalFor(paFilter,c);
+      paChip(r2,paContName(c)+' ('+n+(t>n?'/'+t:'')+')',paSub===c,()=>setPaSub(c),'pa-cont');
+    });
   }
-  // Original tag filters (drums, synth etc)
-  const tags=[...new Set(avail.filter(s=>!s.planet).map(s=>s.tag))];
-  tags.forEach(tag=>{const ch=document.createElement('div');ch.className='pa-filter-chip'+(paFilter===tag?' on':'');ch.textContent=tag.toUpperCase();ch.dataset.tag=tag;ch.addEventListener('click',()=>setPaFilter(tag));padAssignFiltersEl.appendChild(ch);});
+  // search (only worth showing once there is a decent number of sounds)
+  if(avail.length>8){
+    const r3=document.createElement('div');r3.className='pa-frow';
+    const inp=document.createElement('input');inp.type='search';inp.id='paSearch';inp.className='pa-search';inp.placeholder='SEARCH SOUNDS…';inp.value=paSearch;
+    inp.autocomplete='off';inp.setAttribute('autocapitalize','off');
+    inp.addEventListener('input',()=>{paSearch=inp.value.trim().toLowerCase();buildPaList();});
+    ['pointerdown','click','keydown','keyup'].forEach(ev=>inp.addEventListener(ev,e=>e.stopPropagation()));
+    r3.appendChild(inp);padAssignFiltersEl.appendChild(r3);
+  }
 }
 
 function setPaFilter(tag){
+  if(paFilter!==tag)paSub='';
   paFilter=tag;
+  if(tag==='all'&&!paAvail().some(x=>x.planet)){/* keep type filter when only Tucana sounds exist */}
+  else if(tag==='all'){paSub='';}
+  buildPaFilters();
+  buildPaList();
+}
+function setPaSub(v){
+  paSub=v;
   buildPaFilters();
   buildPaList();
 }
 
+function paGroupHeader(text,count,color){
+  const h=document.createElement('div');h.className='pa-group';
+  h.innerHTML='<span></span><em></em>';
+  h.firstChild.textContent=text;h.lastChild.textContent=count;
+  if(color)h.firstChild.style.color=color;
+  padAssignListEl.appendChild(h);
+}
 function buildPaList(){
   padAssignListEl.innerHTML='';
-  const avail=unlockedSounds().map(id=>SOUND_MAP[id]).filter(Boolean);
-  const shown=paFilter==='all'?avail:
-    paFilter==='tucana'?avail.filter(s=>!s.planet):
-    avail.filter(s=>s.planet===paFilter||s.continent===paFilter||s.tag===paFilter);
-  shown.forEach(snd=>{
+  const avail=paAvail();
+  let shown=avail;
+  if(paFilter==='tucana'||(paFilter==='all'&&!avail.some(x=>x.planet)))shown=avail.filter(x=>!x.planet&&(!paSub||x.tag===paSub));
+  else if(paFilter!=='all')shown=avail.filter(x=>x.planet===paFilter&&(!paSub||x.continent===paSub));
+  if(paSearch)shown=shown.filter(x=>(x.name+' '+(x.desc||'')+' '+x.tag+' '+(x.planet||'')+' '+(x.continent?paContName(x.continent):'')).toLowerCase().includes(paSearch));
+  if(!shown.length){
+    const e=document.createElement('div');e.className='pa-empty';
+    e.textContent=paSearch?'NO SOUNDS MATCH "'+paSearch.toUpperCase()+'"':'NOTHING HERE YET';
+    padAssignListEl.appendChild(e);return;
+  }
+  // group under headers: ALL -> Tucana / planet·continent;  planet -> continent;  single continent / tucana type -> no header
+  const groupKey=x=>x.planet?(paPlanetName(x.planet)+' · '+paContName(x.continent)):'TUCANA';
+  const keys=[...new Set(shown.map(groupKey))];
+  const useHeaders=keys.length>1;
+  let lastKey=null;
+  const ordered=useHeaders?keys.flatMap(k=>shown.filter(x=>groupKey(x)===k)):shown;
+  ordered.forEach(snd=>{
+    if(useHeaders){
+      const k=groupKey(snd);
+      if(k!==lastKey){lastKey=k;paGroupHeader(k.indexOf('TUCANA')===0?'🌌 '+k:'🪐 '+k,ordered.filter(x=>groupKey(x)===k).length,snd.planet?snd.color:'');}
+    }
     if(soundVols[snd.id]===undefined)soundVols[snd.id]=1;
     const currentSnd=padAssignIdx!==null?padSounds[padAssignIdx]:null;
     const item=document.createElement('div');item.className='pa-item'+(currentSnd===snd.id?' active':'');
@@ -219,6 +294,7 @@ function openPadPicker(padIdx){
   padAssignIdx=padIdx;
   const currentSnd=padSounds[padIdx];
   document.getElementById('padAssignTitle').textContent=currentSnd?`REASSIGN PAD ${padIdx+1}`:`ASSIGN SOUND TO PAD ${padIdx+1}`;
+  paSearch='';paSub='';
   setPaFilter('all');
   // Show keybind row on desktop only
   const row=document.getElementById('padKeybindRow');

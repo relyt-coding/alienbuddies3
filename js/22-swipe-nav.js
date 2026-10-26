@@ -100,6 +100,11 @@
     }
     vv.addEventListener('resize',place);vv.addEventListener('scroll',place);place();
   })();
+  // the BACK buttons also wait until you have zoomed out
+  document.addEventListener('click',function(e){
+    var t=e.target&&e.target.closest&&e.target.closest('#closeStoreBtn,#closeBunkerBtn');
+    if(t&&zoomScale()>1.05){e.stopImmediatePropagation();e.preventDefault();}
+  },true);
   window.swipeNavGo=go;
   document.addEventListener('touchstart',function(e){
     tracking=false;

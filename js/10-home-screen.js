@@ -89,6 +89,7 @@ function startGame(slotIndex){
   const isNewFile=!existingData;
   const data=existingData||defaultSave();
   loadFromSave(data);
+  if(isNewFile&&trackersHidden){trackersHidden=false;_saveViewPrefs();applySeqView();} // new files always start with the TRACKERS view on
   const sn=getSlotName(slotIndex);
   document.getElementById('slotSubtitle').textContent=sn||`SLOT ${slotIndex+1}`;
   homeScreen.classList.add('hidden');gameScreen.style.display='';
@@ -103,6 +104,7 @@ function startGame(slotIndex){
   registerPlanetSounds();
   startGemInterval();
   if(!ambStarted)startAmbience();
+  applyAmbienceLock();
   // Restore BG music preference
   if(data.musicOn===false){
     musicOn=false;

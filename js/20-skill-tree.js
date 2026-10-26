@@ -8,7 +8,7 @@ let alienGems = 0;
 let skillTreeUnlocked = false;
 let unlockedSkills = {}; // {skillId: true}
 let gemInterval = null;
-const GEM_UNLOCK_COST = 2.6e25; // was 2e25 (+30%)
+const GEM_UNLOCK_COST = 50; // v0.2.80: costs 50 Alien Gems (was 2.6e25 points)
 const BASE_GEMS_PER_ALIEN_PER_MIN = 1;
 
 // ── Skill Tree Data ──
@@ -120,13 +120,13 @@ const SKILL_TREE_NODES = [
   // Planet 3 — placeholder (branches from Hyphae)
   {id:'planet_3', icon:'🌑', name:'???', desc:'An unknown world detected at the edge of the Tucana system. Coming in a future update.', cost:1000, requires:['planet_hyphae'], x:-760, y:-1020, branch:'planets', mult:1.5, placeholder:true},
 
-  // ── QUAD SUN 2 — Point Optimization (↗) ──
-  {id:'sun_points', icon:'☀', name:'Quad Sun II', desc:'The second Quad Sun. Opens the Point Optimization path. Grants ×2 points.', cost:150, requires:['core'], x:200, y:-200, branch:'points', mult:2},
-  {id:'neural_tap_1', icon:'⚡', name:'Neural Tap I', desc:'Boosts base click value. Each tap is now worth 1.5× more points.', cost:200, requires:['sun_points'], x:340, y:-300, branch:'points', mult:1.5},
-  {id:'neural_tap_2', icon:'⚡', name:'Neural Tap II', desc:'Deeper neural calibration. Base click value ×2.', cost:400, requires:['neural_tap_1'], x:480, y:-360, branch:'points', mult:1.5},
-  {id:'synaptic_chain', icon:'🧠', name:'Synaptic Chain', desc:'Every 5th click fires a chain reaction worth 5× points.', cost:600, requires:['neural_tap_2'], x:580, y:-460, branch:'points', mult:1.5},
-  {id:'quantum_strike', icon:'💥', name:'Quantum Strike', desc:'Quantum-entangled sequencer. Sequencer steps earn +50%.', cost:800, requires:['synaptic_chain'], x:680, y:-540, branch:'points', mult:1.5},
-  {id:'singularity', icon:'🌟', name:'Singularity', desc:'The Tucana singularity opens. All point sources permanently ×2.', cost:1200, requires:['quantum_strike'], x:760, y:-620, branch:'points', mult:2},
+  // ── QUAD SUN 2 — Musical Toolkit (↗) ──
+  {id:'sun_points', icon:'☀', name:'Quad Sun II', desc:'The second Quad Sun. Opens the Musical Toolkit path: tools and features to make your music better. Grants ×2 points.', cost:150, requires:['core'], x:200, y:-200, branch:'points', mult:2},
+  {id:'neural_tap_1', icon:'🎼', name:'Tuning Fork', desc:'The first tool in your Musical Toolkit. Every point source earns ×1.5.', cost:200, requires:['sun_points'], x:340, y:-300, branch:'points', mult:1.5},
+  {id:'neural_tap_2', icon:'🎧', name:'Studio Monitors', desc:'Hear every detail of your mix. Every point source earns ×1.5.', cost:400, requires:['neural_tap_1'], x:480, y:-360, branch:'points', mult:1.5},
+  {id:'synaptic_chain', icon:'🎛', name:'Sound Lab', desc:'A workshop for shaping your sound. Every point source earns ×1.5.', cost:600, requires:['neural_tap_2'], x:580, y:-460, branch:'points', mult:1.5},
+  {id:'quantum_strike', icon:'🥁', name:'Groove Engine', desc:'Tightens up the sequencer. Sequencer steps earn +50%.', cost:800, requires:['synaptic_chain'], x:680, y:-540, branch:'points', mult:1.5},
+  {id:'singularity', icon:'🎚', name:'Master Mix', desc:'The final polish on your Musical Toolkit. All point sources permanently ×2.', cost:1200, requires:['quantum_strike'], x:760, y:-620, branch:'points', mult:2},
 
   // ── QUAD SUN 3 — Minigames (↙) ──
   {id:'sun_minigames', icon:'☀', name:'Quad Sun III', desc:'The third Quad Sun. Opens the Minigame Nexus path. Grants ×2 points.', cost:150, requires:['core'], x:-200, y:200, branch:'minigames', mult:2},
@@ -188,6 +188,12 @@ function updateGemDisplays(){
   if(rateEl && totalAliens > 0){
     rateEl.textContent = `(${totalAliens} aliens × ${rate/totalAliens}💎/min = ${rate.toFixed(1)}/min)`;
   }
+  // Shop header copy of the gem info (under the balance)
+  const sc=document.getElementById('gemCountShop'),sr=document.getElementById('gemRateShop'),sw=document.getElementById('gemInfoShop');
+  if(sc)sc.textContent=disp.toLocaleString();
+  if(sr&&totalAliens>0)sr.textContent=`(${totalAliens} aliens × ${rate/totalAliens}💎/min = ${rate.toFixed(1)}/min)`;
+  if(sw)sw.style.display=totalAliens>0?'flex':'none';
+  if(typeof updateSkillTreeBtn==='function')updateSkillTreeBtn();
   // Show gem counter in bunker once player has any aliens
   const bc = document.getElementById('gemCounterBunker');
   if(bc) bc.style.display = totalAliens > 0 ? 'flex' : 'none';
@@ -232,20 +238,20 @@ function buySkill(id){
 }
 
 // ── Skill Tree Button render ──
-const SKILL_TREE_COST_STR = '2E25 PTS';
+const SKILL_TREE_COST_STR = '50 💎';
 function updateSkillTreeBtn(){
   const btn = document.getElementById('skillTreeUnlockBtn');
   const costEl = document.getElementById('skillTreeUnlockCost');
   if(!btn) return;
   if(skillTreeUnlocked){
     btn.className = 'unlocked';
-    btn.querySelector('span').textContent = '🌌 SKILL TREE';
+    btn.querySelector('span').textContent = '🌌 EXPLORE THE GALAXIES';
     if(costEl) costEl.textContent = 'OPEN →';
   } else {
-    const canAfford = score >= GEM_UNLOCK_COST;
+    const canAfford = Math.floor(alienGems) >= GEM_UNLOCK_COST;
     btn.className = canAfford ? 'can-afford' : '';
     if(costEl) costEl.textContent = `UNLOCK — ${SKILL_TREE_COST_STR}`;
-  }
+  }  if(typeof window.refreshPageDots==='function') window.refreshPageDots();
 }
 
 // ── Skill Tree Modal ──
@@ -275,9 +281,25 @@ function closeSkillTree(){
   closeStDetail();
 }
 
+const ST_MIN_SCALE = 0.3, ST_MAX_SCALE = 2.5;
 function applyStTransform(){
   const inner = document.getElementById('skillTreeInner');
   if(inner) inner.style.transform = `translate(${stPanX}px,${stPanY}px) scale(${stScale})`;
+  const sl = document.getElementById('stZoomSlider');
+  if(sl){ // slider position is on a log scale so each notch feels like the same amount of zoom
+    const v = Math.log(stScale/ST_MIN_SCALE)/Math.log(ST_MAX_SCALE/ST_MIN_SCALE)*100;
+    sl.value = String(Math.round(Math.min(100,Math.max(0,v))));
+  }
+}
+// zoom around the middle of the map (used by the slider, the +/- buttons and the keyboard)
+function stZoomTo(newScale){
+  const canvas = document.getElementById('skillTreeCanvas'); if(!canvas) return;
+  newScale = Math.min(ST_MAX_SCALE, Math.max(ST_MIN_SCALE, newScale));
+  const mx = canvas.clientWidth/2, my = canvas.clientHeight/2;
+  stPanX = mx - (mx - stPanX) * (newScale / stScale);
+  stPanY = my - (my - stPanY) * (newScale / stScale);
+  stScale = newScale;
+  applyStTransform();
 }
 
 // ── Draw connector line between two nodes ──
@@ -300,7 +322,7 @@ function renderSkillTree(){
   // Draw branch labels
   const branchLabels = [
     {text:'🪐 PLANET ATLAS', x:-250, y:-330, color:BRANCH_COLORS.planets},
-    {text:'⚡ POINT AMP', x:200, y:-80, color:BRANCH_COLORS.points},
+    {text:'🎵 MUSICAL TOOLKIT', x:200, y:-80, color:BRANCH_COLORS.points},
     {text:'🃏 MINIGAMES', x:-340, y:60, color:BRANCH_COLORS.minigames},
     {text:'👽 ALIEN EVO', x:200, y:60, color:BRANCH_COLORS.aliens},
   ];
@@ -454,6 +476,49 @@ function closeStDetail(){
   _stDetailNode = null;
 }
 
+// ── Zoom slider + arrow-key panning ──
+(function(){
+  const sl = document.getElementById('stZoomSlider');
+  sl && sl.addEventListener('input', ()=>{
+    stZoomTo(ST_MIN_SCALE * Math.pow(ST_MAX_SCALE/ST_MIN_SCALE, (+sl.value)/100));
+  });
+  const zin = document.getElementById('stZoomIn'), zout = document.getElementById('stZoomOut');
+  zin && zin.addEventListener('click', ()=>stZoomTo(stScale*1.25));
+  zout && zout.addEventListener('click', ()=>stZoomTo(stScale/1.25));
+  // arrow keys glide the map (hold to keep moving); + / - zoom
+  const held = {};
+  let raf = 0, lastT = 0;
+  function treeOpen(){ const m = document.getElementById('skillTreeModal'); return !!(m && m.classList.contains('open')); }
+  function step(t){
+    raf = 0;
+    if(!treeOpen()){ for(const k in held) delete held[k]; return; }
+    const dt = Math.min(48, t - lastT || 16); lastT = t;
+    const sp = 0.7 * dt; // px per frame-ms
+    let moved = false;
+    if(held.ArrowLeft){ stPanX += sp; moved = true; }
+    if(held.ArrowRight){ stPanX -= sp; moved = true; }
+    if(held.ArrowUp){ stPanY += sp; moved = true; }
+    if(held.ArrowDown){ stPanY -= sp; moved = true; }
+    if(moved) applyStTransform();
+    if(Object.keys(held).length) raf = requestAnimationFrame(step);
+  }
+  window.addEventListener('keydown', e=>{
+    if(!treeOpen()) return;
+    const tg = e.target && e.target.tagName;
+    if(tg === 'INPUT' && e.target.type !== 'range') return;
+    if(tg === 'TEXTAREA' || tg === 'SELECT') return;
+    if(e.key.startsWith('Arrow')){
+      e.preventDefault(); e.stopPropagation();
+      held[e.key] = true;
+      if(!raf){ lastT = performance.now(); raf = requestAnimationFrame(step); }
+    } else if(e.key === '+' || e.key === '='){ e.preventDefault(); stZoomTo(stScale*1.15); }
+    else if(e.key === '-' || e.key === '_'){ e.preventDefault(); stZoomTo(stScale/1.15); }
+    else if(e.key === 'Escape'){ closeSkillTree(); }
+  }, true);
+  window.addEventListener('keyup', e=>{ delete held[e.key]; });
+  window.addEventListener('blur', ()=>{ for(const k in held) delete held[k]; });
+})();
+
 // ── Pan/drag the canvas ──
 function initSkillTreePan(){
   const canvas = document.getElementById('skillTreeCanvas');
@@ -500,7 +565,7 @@ function initSkillTreePan(){
       const dist = Math.sqrt(dx*dx+dy*dy);
       if(stPinchDist > 0){
         const delta = dist / stPinchDist;
-        stScale = Math.min(2, Math.max(0.4, stScale * delta));
+        stScale = Math.min(ST_MAX_SCALE, Math.max(ST_MIN_SCALE, stScale * delta));
         applyStTransform();
       }
       stPinchDist = dist;
@@ -516,7 +581,7 @@ function initSkillTreePan(){
     const r = canvas.getBoundingClientRect();
     const mx = e.clientX - r.left;
     const my = e.clientY - r.top;
-    const newScale = Math.min(2.5, Math.max(0.3, stScale * delta));
+    const newScale = Math.min(ST_MAX_SCALE, Math.max(ST_MIN_SCALE, stScale * delta));
     // Adjust pan so zoom centres on cursor
     stPanX = mx - (mx - stPanX) * (newScale / stScale);
     stPanY = my - (my - stPanY) * (newScale / stScale);
@@ -533,13 +598,14 @@ function initSkillTreePan(){
 // ── Wire buttons ──
 document.getElementById('skillTreeUnlockBtn')&&document.getElementById('skillTreeUnlockBtn').addEventListener('click',()=>{
   if(skillTreeUnlocked){ openSkillTree(); return; }
-  if(score < GEM_UNLOCK_COST){ showToast('Not enough points to unlock the Skill Tree!'); return; }
-  score -= GEM_UNLOCK_COST;
+  if(Math.floor(alienGems) < GEM_UNLOCK_COST){ showToast('Need 50 💎 Alien Gems to Explore the Galaxies!'); return; }
+  alienGems -= GEM_UNLOCK_COST;
+  updateGemDisplays();
   skillTreeUnlocked = true;
   renderUI();
   autoSave();
   updateSkillTreeBtn();
-  showToast('🌌 Skill Tree unlocked! Find it at the top of the Shop.');
+  showToast('🌌 Explore the Galaxies unlocked! Find it at the top of the Shop.');
   openSkillTree();
 });
 document.getElementById('skillTreeCloseBtn')&&document.getElementById('skillTreeCloseBtn').addEventListener('click', closeSkillTree);

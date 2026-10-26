@@ -1383,3 +1383,47 @@ body.desktop-mode .desktop-collapse-btn{font-size:1.19rem;padding:.77rem .45rem;
 
 /* tips page: larger text on desktop */
 body.desktop-mode #tipsModal>div:first-child{zoom:1.3;}
+
+/* v0.2.80: step counts — small numbers inside each sequencer step (View menu → STEP COUNTS) */
+.seq-steps{counter-reset:stp;}
+.seq-step{counter-increment:stp;position:relative;}
+body.sc-beats .seq-step:nth-child(4n+1)::after,
+body.sc-ends .seq-step:nth-child(4n)::after,
+body.sc-all .seq-step::after{
+  content:counter(stp);position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-family:'Bebas Neue',sans-serif;font-size:.7rem;line-height:1;letter-spacing:.04em;color:#8a8a9a;pointer-events:none;
+}
+body.sc-all .seq-step::after{font-size:.62rem;}
+.seq-step.on::after{color:rgba(0,0,0,.7) !important;}
+#seqFullLayers .seq-step::after{font-size:.95rem !important;}
+#viewMenu .vm-sub{padding-left:1.6rem;}
+#viewMenu .vm-sub.dim{opacity:.5;}
+
+/* v0.2.81: phone page dots (carousel position) + the galaxy map as a sliding page */
+#skillTreeModal{transition:transform .38s cubic-bezier(.4,0,.2,1);}
+#pageDots{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 7px);transform:translateX(-50%);z-index:320;display:none;align-items:center;gap:7px;padding:5px 9px;border-radius:99px;background:rgba(8,10,18,.55);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);opacity:0;transition:opacity .9s ease;pointer-events:none;}
+body.game-active:not(.desktop-mode) #pageDots{display:flex;}
+#pageDots.show{opacity:1;transition:opacity .25s ease;}
+#pageDots .pd{width:6px;height:6px;border-radius:99px;background:#3a3f55;transition:width .28s cubic-bezier(.4,0,.2,1),background .28s,box-shadow .28s;}
+#pageDots .pd.on{width:18px;background:#00ff88;box-shadow:0 0 8px rgba(0,255,136,.7);}
+body:has(#seqFullModal.open) #pageDots{display:none !important;}
+#pageDots{bottom:calc(env(safe-area-inset-bottom,0px) + 3px);padding:3px 8px;}
+@media (max-width:600px){#skillTreeTitle{font-size:.95rem;letter-spacing:.08em;}#skillTreeGemDisplay{font-size:1.15rem;}}
+
+/* v0.2.81: dismissable maxed shop cards */
+.drum-card-header,.upgrade-card-header{position:relative;}
+.shop-dismiss-btn{position:absolute;right:.7rem;top:.55rem;font-family:'Bebas Neue',sans-serif;font-size:.95rem;letter-spacing:.12em;padding:.22rem .7rem;border-radius:8px;border:1px solid #2a2a3a;background:#0c0c14;color:#8a8aa8;cursor:pointer;touch-action:manipulation;}
+.shop-dismiss-btn:active{background:#1a1a2a;color:#cfd2ff;}
+.shop-dismissed{display:none !important;}
+
+/* v0.2.81: galaxy map zoom control (right side) */
+#stZoomCtl{position:absolute;right:10px;top:50%;transform:translateY(-50%);z-index:5;display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 5px;border-radius:14px;background:rgba(6,9,22,.78);border:1px solid #14183a;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);}
+#stZoomCtl button{width:30px;height:30px;border-radius:9px;border:1px solid #1a2050;background:#080c1c;color:#7aa8ff;font-family:'Bebas Neue',sans-serif;font-size:1.3rem;line-height:1;cursor:pointer;touch-action:manipulation;padding:0;}
+#stZoomCtl button:active{background:#12184a;}
+#stZoomTrack{width:30px;height:150px;position:relative;}
+#stZoomSlider{position:absolute;left:50%;top:50%;width:150px;height:24px;margin:0;transform:translate(-50%,-50%) rotate(-90deg);-webkit-appearance:none;appearance:none;background:transparent;cursor:pointer;touch-action:none;}
+#stZoomSlider::-webkit-slider-runnable-track{height:4px;border-radius:99px;background:#1a2260;}
+#stZoomSlider::-moz-range-track{height:4px;border-radius:99px;background:#1a2260;}
+#stZoomSlider::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;margin-top:-7px;border-radius:50%;background:#44aaff;box-shadow:0 0 8px rgba(68,170,255,.7);border:none;}
+#stZoomSlider::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:#44aaff;box-shadow:0 0 8px rgba(68,170,255,.7);border:none;}
+#stZoomSlider:focus{outline:none;}

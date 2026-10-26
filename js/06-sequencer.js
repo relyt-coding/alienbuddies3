@@ -70,7 +70,24 @@ function placeViewButtons(){
   }
   closeViewMenu();closeStepsMenu&&closeStepsMenu();window.closeMoreMenu&&window.closeMoreMenu();
 }
+// ── Step counts (small numbers inside each step; off by default) ──
+let stepCountsOn=false,stepCountsMode='beats';
+try{stepCountsOn=localStorage.getItem('ab2_stepCounts')==='1';const m=localStorage.getItem('ab2_stepCountsMode');if(m==='beats'||m==='ends'||m==='all')stepCountsMode=m;}catch(e){}
+function applyStepCounts(){
+  const cl=document.body.classList;
+  cl.toggle('sc-beats',stepCountsOn&&stepCountsMode==='beats');
+  cl.toggle('sc-ends',stepCountsOn&&stepCountsMode==='ends');
+  cl.toggle('sc-all',stepCountsOn&&stepCountsMode==='all');
+  try{localStorage.setItem('ab2_stepCounts',stepCountsOn?'1':'0');localStorage.setItem('ab2_stepCountsMode',stepCountsMode);}catch(e){}
+}
+applyStepCounts();
 function refreshViewMenu(){
+  if(viewMenu)viewMenu.querySelectorAll('[data-sc]').forEach(function(r){
+    const k=r.getAttribute('data-sc');
+    const on=k==='toggle'?stepCountsOn:(stepCountsOn&&stepCountsMode===k);
+    r.classList.toggle('on',on);r.firstChild.textContent=on?(k==='toggle'?'✓':'●'):'';
+    if(k!=='toggle')r.classList.toggle('dim',!stepCountsOn);
+  });
   [['tiers',!trackersHidden],['seq',!seqHidden],['pads',!padsHidden]].forEach(function(p){
     const r=viewMenu.querySelector('[data-vm="'+p[0]+'"]');
     if(r){r.classList.toggle('on',p[1]);r.firstChild.textContent=p[1]?'✓':'';}
@@ -154,6 +171,12 @@ function _saveViewPrefs(){try{localStorage.setItem('ab2_hideSeq',seqHidden?'1':'
 vtbViewBtn&&vtbViewBtn.addEventListener('click',(e)=>{e.stopPropagation();viewMenu.style.display==='flex'?closeViewMenu():openViewMenu();});
 viewMenu&&viewMenu.addEventListener('click',(e)=>{
   e.stopPropagation();
+  const sc=e.target.closest('[data-sc]');
+  if(sc){
+    const k=sc.getAttribute('data-sc');
+    if(k==='toggle')stepCountsOn=!stepCountsOn;else{stepCountsMode=k;stepCountsOn=true;}
+    applyStepCounts();refreshViewMenu();return;
+  }
   const r=e.target.closest('[data-vm]');if(!r)return;
   const k=r.getAttribute('data-vm');
   if(k==='tiers')trackersHidden=!trackersHidden;

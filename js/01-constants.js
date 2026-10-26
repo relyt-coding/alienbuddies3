@@ -31,7 +31,7 @@ function formatMult(n){if(n<100000)return n.toLocaleString(undefined,{maximumSig
 // ══════════════════════════════════════════════
 // Unlock prices over 5 million are 30% pricier (a longer grind for the big unlocks); cheap early unlocks are untouched.
 function bump30(c){return c>5e6?Math.round(c*1.3):c;}
-const GAME_VERSION='0.2.79'; // bump on every delivered build (shown in Settings and on the home screen)
+const GAME_VERSION='0.2.81'; // bump on every delivered build (shown in Settings and on the home screen)
 const BASE_CPS=5;
 const UNLOCK_COST=bump30(60000000);
 const ALIEN_POWER_UNLOCK_COST=bump30(600000000);
@@ -43,8 +43,13 @@ const DOT_MAX_LEVEL=6; // level 6 = ×10
 // Upgrade prices (n = upgrades already bought; each tracker pays separately): ×4 5B, then x1000 per level.
 const DOT_UNLOCK_COST=bump30(1e9);
 // Longer sequencer loops (bought after the first track): level 1 = 32 steps, level 2 = 64 steps
-const SEQ_STEP_COSTS=[1e10,1e13]; // 32 steps = 10B, 64 steps = 10T
-const DOT_COSTS=[5e10,5e14,5e18,5e22,5e26,5e30,5e34]; // v0.2.30: x10,000 per level (was x1000), starting 10x higher
+const SEQ_STEP_COSTS=[1e10,1e14]; // 32 steps = 10B, 64 steps = 100T
+const DOT_COSTS=[5e10,5e17,5e24,5e31,5e38,5e45,5e52]; // v0.2.80: first upgrade unchanged, every level after is x10,000,000 (was x10,000)
+// v0.2.80: TIER 3 — Sequencer Multi-Click (costs more than the dot upgrades, and more to unlock)
+const SEQ_MC_UNLOCK_COST=1e12;
+const SEQ_MC_MAX_LEVEL=6; // level 6 = 8 clicks per step
+function seqMultiClickCost(lvl){return 5e12*Math.pow(1e8,lvl);}
+function seqMultiClickUpgradeAt(lvl){const clicks=lvl+2;return{effectMain:`${clicks}× CLICKS`,effectSub:`Each sequencer step counts as ${clicks} clicks`,cost:seqMultiClickCost(lvl)};}
 function dotUpgradeCost(n){return DOT_COSTS[Math.min(n,DOT_COSTS.length-1)];}
 function alienCost(n){
   if(n===0)return 1000;       // alien 1: 1,000

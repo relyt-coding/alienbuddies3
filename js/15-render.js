@@ -248,6 +248,29 @@ function renderStore(){
   const mcBtn=document.getElementById('multiClickNextBtn');mcBtn.className='upgrade-buy-btn '+(canMC?'buyable':'locked');mcBtn.style.borderColor=canMC?'#cc88ff':'';
   const mcP=document.getElementById('multiClickPrice');mcP.className='upgrade-price'+(canMC?'':' cant-afford');
   mcP.innerHTML=canMC?`${formatStore(nextMC.cost)}<small>pts</small>`:`${formatStore(nextMC.cost)}<small>pts</small>`;
+  // ── TIER 3: SEQUENCER MULTI-CLICK ──
+  (function(){
+    const lock=document.getElementById('seqMultiClickLock');if(!lock)return;
+    const un=shop.seqMultiClickUnlocked;
+    const hasSeq=drum.seqTracks>=1;
+    if(un)lock.classList.add('unlocked');
+    else{
+      lock.classList.remove('unlocked');
+      const can=hasSeq&&score>=SEQ_MC_UNLOCK_COST;
+      const lc=document.getElementById('seqMultiClickLockCost');
+      lc.textContent=hasSeq?formatStore(SEQ_MC_UNLOCK_COST)+' pts':'UNLOCK THE SEQUENCER FIRST';
+      lc.className='lock-cost'+(can?' affordable':'');
+      document.getElementById('seqMultiClickUnlockBtn').className='lock-btn'+(can?' affordable':'');
+    }
+    const lvl=shop.seqMultiClickLevel+1,maxed=lvl>SEQ_MC_MAX_LEVEL,up=seqMultiClickUpgradeAt(Math.min(lvl,SEQ_MC_MAX_LEVEL)),can=!maxed&&score>=up.cost;
+    document.getElementById('seqMultiClickCardSub').textContent=shop.seqMultiClickLevel>=0?`Active: each step = ${shop.seqMultiClickLevel+2} clicks`:'Each sequencer step counts as multiple clicks';
+    document.getElementById('seqMultiClickCounterNum').textContent=Math.max(0,lvl);
+    document.getElementById('seqMultiClickEffectMain').textContent=maxed?'MAXED':up.effectMain;
+    document.getElementById('seqMultiClickEffectSub').textContent=maxed?'Every step counts as 8 clicks':up.effectSub;
+    const b=document.getElementById('seqMultiClickNextBtn');b.className='upgrade-buy-btn '+(maxed?'maxed':(can?'buyable':'locked'));b.style.borderColor=can?'#ff88cc':'';
+    const pr=document.getElementById('seqMultiClickPrice');pr.className='upgrade-price'+(can?'':' cant-afford');
+    pr.innerHTML=maxed?'MAX':`${formatStore(up.cost)}<small>pts</small>`;
+  })();
   // ── ALIEN BOOST ──
   const abUnlocked=shop.alienBoostUnlocked;const abLock=document.getElementById('alienBoostLock');
   if(abUnlocked){abLock.classList.add('unlocked');}
@@ -270,4 +293,34 @@ function renderStore(){
   else{ab2.style.display='';ab2.className='alien-store-card '+(canAl?'buyable':'locked');}
   const ap2=document.getElementById('alienCardPrice');ap2.className='alien-card-price'+(canAl?'':' cant-afford');
   ap2.innerHTML=canAl?`${formatStore(nc)}<small>pts</small>`:`${formatStore(nc)}<small>pts</small>`;
+  updateShopDismiss();
+}
+
+// ── Shop: maxed-out cards get a DISMISS button that tucks them away (saved per file) ──
+function _shopCardKey(card){const t=card.querySelector('.drum-card-title,.upgrade-card-title');return t?t.textContent.replace(/[^A-Za-z0-9 \-]/g,'').trim().toUpperCase():null;}
+function updateShopDismiss(){
+  const sv=document.getElementById('storeView');if(!sv)return;
+  const list=shop.dismissed||(shop.dismissed=[]);
+  sv.querySelectorAll('.drum-card,.upgrade-card').forEach(card=>{
+    const key=_shopCardKey(card);if(!key)return;
+    const maxed=!!card.querySelector('.drum-buy-btn.maxed,.upgrade-buy-btn.maxed');
+    let btn=card.querySelector('.shop-dismiss-btn');
+    if(maxed&&!btn){
+      const hdr=card.querySelector('.drum-card-header,.upgrade-card-header');if(!hdr)return;
+      btn=document.createElement('button');btn.type='button';btn.className='shop-dismiss-btn';btn.textContent='DISMISS';
+      btn.addEventListener('click',e=>{e.stopPropagation();e.preventDefault();if(shop.dismissed.indexOf(key)<0)shop.dismissed.push(key);updateShopDismiss();autoSave();});
+      hdr.appendChild(btn);
+    }
+    if(btn)btn.style.display=maxed?'':'none';
+    card.classList.toggle('shop-dismissed',maxed&&list.indexOf(key)>=0);
+  });
+  // hide a section's heading + row once every card in it is dismissed
+  sv.querySelectorAll('.store-section-label').forEach(lbl=>{
+    const row=lbl.nextElementSibling;if(!row||!(row.classList.contains('drum-upgrade-row')||row.classList.contains('tracks-row')))return;
+    const cards=[...row.querySelectorAll('.drum-card,.upgrade-card')];
+    const allGone=cards.length>0&&cards.every(c=>c.classList.contains('shop-dismissed')||c.style.display==='none');
+    const anyDismissed=cards.some(c=>c.classList.contains('shop-dismissed'));
+    const hide=allGone&&anyDismissed;
+    lbl.classList.toggle('shop-dismissed',hide);row.classList.toggle('shop-dismissed',hide);
+  });
 }

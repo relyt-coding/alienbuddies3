@@ -52,7 +52,7 @@ const ALL_SOUNDS=[
     }
     drumMasterGain._hhLast={g,t};
     g.gain.setValueAtTime(0,t);
-    g.gain.linearRampToValueAtTime(.0998*(gv??1),t+.002);
+    g.gain.linearRampToValueAtTime(.075*(gv??1),t+.002);
     g.gain.exponentialRampToValueAtTime(.001,t+.06);
     const s=c.createBufferSource();s.buffer=noiseBuf(.06);
     const f1=c.createBiquadFilter();f1.type='highpass';f1.frequency.value=7000;
@@ -61,7 +61,16 @@ const ALL_SOUNDS=[
     s.start(t);s.stop(t+.07);
   }),
   mkSnd('snare','SNARE','drums','#ffcc44','Cracking rimshot snare',(t,gv)=>{const c=getCtx(),o=c.createOscillator(),og=c.createGain();o.type='triangle';o.frequency.value=200;o.connect(og);og.connect(drumMasterGain);og.gain.setValueAtTime(0,t);og.gain.linearRampToValueAtTime(.315*(gv??1),t+.002);og.gain.exponentialRampToValueAtTime(.001,t+.18);o.start(t);o.stop(t+.18);const s=c.createBufferSource();s.buffer=noiseBuf(.22);const f=c.createBiquadFilter();f.type='bandpass';f.frequency.value=1800;f.Q.value=.7;const ng=c.createGain();s.connect(f);f.connect(ng);ng.connect(drumMasterGain);ng.connect(rvbNode);ng.gain.setValueAtTime(0,t);ng.gain.linearRampToValueAtTime(.455*(gv??1),t+.002);ng.gain.exponentialRampToValueAtTime(.001,t+.22);s.start(t);s.stop(t+.22);}),
-  mkSnd('kick','KICK','drums','#ff6644','808-style sub kick',(t,gv)=>{const c=getCtx(),o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(drumMasterGain);o.frequency.setValueAtTime(200,t);o.frequency.exponentialRampToValueAtTime(38,t+.22);g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(1.0*(gv??1),t+.003);g.gain.exponentialRampToValueAtTime(.001,t+.5);o.start(t);o.stop(t+.5);const n=c.createOscillator(),ng=c.createGain();n.type='square';n.frequency.value=120;n.connect(ng);ng.connect(drumMasterGain);ng.gain.setValueAtTime(0,t);ng.gain.linearRampToValueAtTime(.3*(gv??1),t+.001);ng.gain.exponentialRampToValueAtTime(.001,t+.02);n.start(t);n.stop(t+.02);}),
+  mkSnd('kick','KICK','drums','#ff6644','Punchy kick drum',(t,gv)=>{const c=getCtx(),G=(gv??1)*.62;
+    // v0.2.80: punchy kick = fast pitch dive body (saturated for weight) + mid thump + beater click
+    const o=c.createOscillator(),g=c.createGain(),sh=c.createWaveShaper();sh.curve=distCurve(1.8);
+    o.frequency.setValueAtTime(190,t);o.frequency.exponentialRampToValueAtTime(62,t+.035);o.frequency.exponentialRampToValueAtTime(42,t+.3);
+    o.connect(sh);sh.connect(g);g.connect(drumMasterGain);
+    g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(1.15*G,t+.002);g.gain.exponentialRampToValueAtTime(.5*G,t+.09);g.gain.exponentialRampToValueAtTime(.001,t+.5);o.start(t);o.stop(t+.52);
+    const o2=c.createOscillator(),g2=c.createGain();o2.type='triangle';o2.frequency.setValueAtTime(130,t);o2.frequency.exponentialRampToValueAtTime(70,t+.08);o2.connect(g2);g2.connect(drumMasterGain);
+    g2.gain.setValueAtTime(0,t);g2.gain.linearRampToValueAtTime(.6*G,t+.002);g2.gain.exponentialRampToValueAtTime(.001,t+.16);o2.start(t);o2.stop(t+.18);
+    const n=c.createBufferSource();n.buffer=noiseBuf(.03);const nf=c.createBiquadFilter();nf.type='bandpass';nf.frequency.value=2800;nf.Q.value=.9;const ng=c.createGain();n.connect(nf);nf.connect(ng);ng.connect(drumMasterGain);
+    ng.gain.setValueAtTime(0,t);ng.gain.linearRampToValueAtTime(.55*G,t+.001);ng.gain.exponentialRampToValueAtTime(.001,t+.02);n.start(t);n.stop(t+.03);}),
   mkSnd('trapkick','TRAP KICK','drums','#ff3322','Hard 808 trap kick',(t,gv)=>{const c=getCtx(),o=c.createOscillator(),g=c.createGain(),d=c.createWaveShaper();d.curve=distCurve(2);o.frequency.setValueAtTime(240,t);o.frequency.exponentialRampToValueAtTime(28,t+.5);o.connect(d);d.connect(g);g.connect(drumMasterGain);g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(0.525*(gv??1),t+.002);g.gain.exponentialRampToValueAtTime(.001,t+.85);o.start(t);o.stop(t+.85);}),
   mkSnd('clap','CLAP','drums','#ffee88','Layered noise clap',(t,gv)=>{const c=getCtx();[0,.012,.026].forEach(off=>{const s=c.createBufferSource();s.buffer=noiseBuf(.14);const f=c.createBiquadFilter();f.type='bandpass';f.frequency.value=1100+Math.random()*400;f.Q.value=.5;const g=c.createGain();s.connect(f);f.connect(g);g.connect(drumMasterGain);g.connect(rvbNode);g.gain.setValueAtTime(0,t+off);g.gain.linearRampToValueAtTime(.6*(gv??1),t+off+.002);g.gain.exponentialRampToValueAtTime(.001,t+off+.18);s.start(t+off);s.stop(t+off+.18);});}),
   mkSnd('rimshot','RIMSHOT','drums','#ffbb44','Sharp rimshot transient',(t,gv)=>{const c=getCtx(),o=c.createOscillator(),g=c.createGain();o.type='triangle';o.frequency.value=450;o.connect(g);g.connect(drumMasterGain);g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(0.6*(gv??1),t+.001);g.gain.exponentialRampToValueAtTime(.001,t+.06);o.start(t);o.stop(t+.06);const s=c.createBufferSource();s.buffer=noiseBuf(.04);const f=c.createBiquadFilter();f.type='highpass';f.frequency.value=4000;const ng=c.createGain();s.connect(f);f.connect(ng);ng.connect(drumMasterGain);ng.gain.setValueAtTime(0,t);ng.gain.linearRampToValueAtTime(.5*(gv??1),t+.001);ng.gain.exponentialRampToValueAtTime(.001,t+.04);s.start(t);s.stop(t+.04);}),

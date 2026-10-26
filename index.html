@@ -43,7 +43,7 @@
         <button class="sb-mute-btn" id="settingsMuteBtn" title="Mute all">🔊</button>
       </div>
     </div>
-    <div class="settings-row">
+    <div class="settings-row" id="settingsBgMusicRow">
       <div><div class="settings-label">🎵 BG MUSIC</div></div>
       <label class="settings-toggle">
         <input type="checkbox" id="settingsBgMusic" checked>
@@ -201,6 +201,11 @@
         <button type="button" class="vm-row" data-vm="tiers"><span class="vm-check"></span>TRACKERS</button>
         <button type="button" class="vm-row" data-vm="seq"><span class="vm-check"></span>SEQUENCER</button>
         <button type="button" class="vm-row" data-vm="pads"><span class="vm-check"></span>DRUM PADS</button>
+        <div class="vm-sep"></div>
+        <button type="button" class="vm-row" data-sc="toggle"><span class="vm-check"></span>STEP COUNTS</button>
+        <button type="button" class="vm-row vm-sub" data-sc="beats"><span class="vm-check"></span>1, 5, 9, 13…</button>
+        <button type="button" class="vm-row vm-sub" data-sc="ends"><span class="vm-check"></span>4, 8, 12, 16…</button>
+        <button type="button" class="vm-row vm-sub" data-sc="all"><span class="vm-check"></span>EVERY STEP</button>
       </div>
 
       <!-- SEQUENCER (replaces tiers when visible) -->
@@ -305,6 +310,11 @@
       <div class="page-title-wrap">
         <div class="page-title">SHOP</div>
         <div class="page-sub">balance: <span id="balanceEl">0</span></div>
+        <div class="gem-counter" id="gemInfoShop" style="display:none;justify-content:flex-start;align-self:flex-start;flex-wrap:wrap;gap:.3rem;margin-top:.3rem;font-size:1.1rem;">
+          <span class="gem-icon">💎</span><span id="gemCountShop">0</span>
+          <span style="font-size:.95rem;color:#2a8a6a;letter-spacing:.12em;">ALIEN GEMS</span>
+          <span id="gemRateShop" style="font-size:.85rem;color:#2a7a62;letter-spacing:.08em;"></span>
+        </div>
       </div>
     </div>
     <div class="store-scroll">
@@ -313,8 +323,8 @@
       <!-- SKILL TREE UNLOCK -->
       <div style="padding:.5rem 0 .2rem;">
         <button id="skillTreeUnlockBtn">
-          <span>🌌 SKILL TREE</span>
-          <span id="skillTreeUnlockCost">UNLOCK — 2E25 PTS</span>
+          <span>🌌 EXPLORE THE GALAXIES</span>
+          <span id="skillTreeUnlockCost">UNLOCK — 50 💎</span>
         </button>
       </div>
 
@@ -484,6 +494,29 @@
         </div>
       </div>
 
+      <div class="store-section-label">🌠 TIER 3 UPGRADES</div>
+      <div class="tracks-row" id="tier3Row">
+        <div class="upgrade-card" style="border-color:#3a1a2a;position:relative;overflow:visible;">
+          <div class="upgrade-card-header" style="border-bottom-color:#3a1a2a;">
+            <div class="upgrade-card-title" style="color:#ff88cc;">🎛 SEQUENCER MULTI-CLICK</div>
+            <div class="upgrade-card-sub" id="seqMultiClickCardSub">Each sequencer step counts as multiple clicks</div>
+          </div>
+          <div class="upgrade-buy-btn" id="seqMultiClickNextBtn">
+            <div class="upgrade-counter" style="border-color:#3a1a2a;"><div class="upgrade-counter-num" id="seqMultiClickCounterNum" style="color:#ff88cc;">0</div><div class="upgrade-counter-lbl">OWNED</div></div>
+            <div class="upgrade-effect">
+              <div class="upgrade-effect-main" id="seqMultiClickEffectMain">2× CLICKS</div>
+              <div class="upgrade-effect-sub" id="seqMultiClickEffectSub">Each sequencer step counts as 2 clicks</div>
+            </div>
+            <div class="upgrade-price" id="seqMultiClickPrice">5T<small>pts</small></div>
+          </div>
+          <div class="card-lock-overlay" id="seqMultiClickLock">
+            <div class="lock-icon">🔒</div>
+            <div class="lock-label">UNLOCK FOR</div>
+            <div class="lock-cost" id="seqMultiClickLockCost">1T pts</div>
+            <button class="lock-btn" id="seqMultiClickUnlockBtn">UNLOCK</button>
+          </div>
+        </div>
+      </div>
 
       <!-- SPACE TOTEM — COMING SOON -->
       <div class="store-section-label">🗿 SPACE TOTEMS</div>
@@ -570,7 +603,7 @@
       <input type="number" class="sb-vol-num" id="masterVolNum" min="0" max="100" step="1" value="100">
       <button class="sb-mute-btn" id="masterMuteBtn" title="Mute all">🔊</button>
     </div>
-    <div class="sb-toggle-row">
+    <div class="sb-toggle-row" id="bgMusicToggleRow">
       <span class="sb-label">🎵 BG MUSIC</span>
       <label class="sb-checkbox-wrap">
         <input type="checkbox" id="bgMusicToggle" checked>
@@ -822,12 +855,17 @@
   <!-- SKILL TREE MODAL -->
   <div id="skillTreeModal">
     <div id="skillTreeHeader">
-      <div id="skillTreeTitle">🌌 SKILL TREE</div>
+      <div id="skillTreeTitle">🌌 EXPLORE THE GALAXIES</div>
       <div id="skillTreeGemDisplay"><span>💎</span><span id="gemCountTree">0</span><span style="font-size:.8rem;color:#3a8a74;letter-spacing:.1em;">GEMS</span></div>
       <button id="skillTreeCloseBtn">✕ CLOSE</button>
     </div>
     <div id="skillTreeCanvas">
       <div id="skillTreeInner"></div>
+    </div>
+    <div id="stZoomCtl" aria-label="Zoom">
+      <button type="button" id="stZoomIn" aria-label="Zoom in">+</button>
+      <div id="stZoomTrack"><input type="range" id="stZoomSlider" min="0" max="100" step="1" value="50" aria-label="Zoom"></div>
+      <button type="button" id="stZoomOut" aria-label="Zoom out">−</button>
     </div>
   </div>
 

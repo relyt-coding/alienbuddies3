@@ -122,9 +122,9 @@ function updateEnergyUI(){
 let _seqDotAccum=0;
 function seqStepScale(){return SEQ_BASE_BPM/Math.max(1,seqBpm);}
 function seqStepsPerSec(){return seqBpm/15;} // 16th-note steps
-function seqEarningsPerSec(){return seqStepsPerSec()*seqStepScale()*seqStepMultiplier()*clicksPerTap();}
+function seqEarningsPerSec(){return seqStepsPerSec()*seqStepScale()*seqStepMultiplier()*clicksPerTap()*seqClicksPerStep();}
 function scoreSeqStep(quiet){
-  const cpt=clicksPerTap(),sc=seqStepScale();
+  const cpt=clicksPerTap()*seqClicksPerStep(),sc=seqStepScale();
   const gain=seqStepMultiplier()*cpt*sc;
   score+=gain;
   // dots advance by the same BPM-scaled amount so tier progress per second is BPM-independent too

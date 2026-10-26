@@ -1,12 +1,14 @@
 // ══════════════════════════════════════════════
-//  SWIPE NAV (phone layout): HOME → SHOP → BUNKER → HOME … a 3-page carousel
-//  swipe LEFT = next page (home→shop→bunker→home), swipe RIGHT = previous page
+//  SWIPE NAV (phone layout): HOME → SHOP → BUNKER → (EXPLORE THE GALAXIES, once unlocked) → HOME …
+//  swipe LEFT = next page, swipe RIGHT = previous page. Little dots at the bottom show where you are.
 // ══════════════════════════════════════════════
 (function(){
-  var VIEW_IDS=['gameView','storeView','bunkerView'];
+  var VIEW_IDS=['gameView','storeView','bunkerView','skillTreeModal'];
   var busy=false,sx=0,sy=0,st=0,tracking=false;
+  function pageCount(){return (typeof skillTreeUnlocked!=='undefined'&&skillTreeUnlocked)?4:3;}
   function cur(){
-    var b=document.body.classList;
+    var b=document.body.classList,m=document.getElementById('skillTreeModal');
+    if(m&&m.classList.contains('open'))return 3;
     return b.contains('store-open')?1:b.contains('bunker-open')?2:0;
   }
   function blocked(t){
@@ -14,9 +16,15 @@
     if(!document.body.classList.contains('game-active'))return true;
     if(!t||!t.closest)return false;
     // don't steal swipes from controls that use their own horizontal drags, or from pop-ups
-    if(t.closest('input,select,textarea,.pad-area,.seq-area,#seqFullModal,#autoTiersCol,#padCountSelector,[id$="Modal"],.modal,.modal-overlay,#settingsBox,#skillTreeView'))return true;
+    var treeOpen=!!document.querySelector('#skillTreeModal.open');
+    if(treeOpen){
+      // the galaxy map pans with one finger, so only its header strip (or the very edge of the screen) swipes pages
+      if(t.closest('#stDetailPop'))return true;
+      return !t.closest('#skillTreeHeader');
+    }
+    if(t.closest('input,select,textarea,.pad-area,.seq-area,#seqFullModal,#autoTiersCol,#padCountSelector,[id$="Modal"],.modal,.modal-overlay,#settingsBox'))return true;
     var pops=document.querySelectorAll('[id$="Modal"]');
-    for(var i=0;i<pops.length;i++){var s=pops[i];if(s.classList.contains('open')||(s.style.display&&s.style.display!=='none'&&s.style.display!==''))return true;}
+    for(var i=0;i<pops.length;i++){var s=pops[i];if(s.id==='skillTreeModal')continue;if(s.classList.contains('open')||(s.style.display&&s.style.display!=='none'&&s.style.display!==''))return true;}
     return false;
   }
   function go(target,dir){ // dir -1 = swiped left (new page enters from the right), +1 = swiped right
@@ -27,15 +35,18 @@
     // start the incoming page just off-screen on the side it should come from
     toEl.style.transition='none';
     toEl.style.transform='translateX('+(-dir*100)+'%)';
+    if(target===3&&typeof openSkillTree==='function')openSkillTree(); // the map is a fixed overlay: show it first so it can slide in
     void toEl.offsetWidth;
     toEl.style.transition='';
     // leaving page exits the opposite way
     fromEl.style.transform='translateX('+(dir*100)+'%)';
     toEl.style.transform='translateX(0)';
     // switch the real state (other code relies on these body classes)
-    if(from===1)closeStore();else if(from===2)closeBunker();
+    closeStore();closeBunker();
     if(target===1)openStore();else if(target===2)openBunker();
+    wakeDots();
     setTimeout(function(){
+      if(from===3&&typeof closeSkillTree==='function')closeSkillTree();
       // snap every page to its resting spot with NO animation (the page that just left would otherwise
       // visibly fly back across the screen to its parking position)
       VIEW_IDS.forEach(function(id){var e=document.getElementById(id);e.style.transition='none';e.style.transform='';});
@@ -114,6 +125,26 @@
     document.addEventListener(n,function(e){if(!inSeqFull(e.target))e.preventDefault();},{passive:false,capture:true});
   });
   window.swipeNavGo=go;
+  // ── page dots (phone): fade in on any swipe / page change, dissolve after 5 s of no swiping ──
+  var dotsEl=document.createElement('div');dotsEl.id='pageDots';dotsEl.setAttribute('aria-hidden','true');document.body.appendChild(dotsEl);
+  var dotsTimer=null;
+  function paintDots(){
+    var n=pageCount(),c=cur();
+    if(dotsEl.children.length!==n){dotsEl.innerHTML='';for(var i=0;i<n;i++){var d=document.createElement('span');d.className='pd';dotsEl.appendChild(d);}}
+    for(var j=0;j<dotsEl.children.length;j++)dotsEl.children[j].classList.toggle('on',j===c);
+  }
+  function wakeDots(){
+    paintDots();dotsEl.classList.add('show');
+    if(dotsTimer)clearTimeout(dotsTimer);
+    dotsTimer=setTimeout(function(){dotsEl.classList.remove('show');},5000);
+  }
+  window.refreshPageDots=function(){paintDots();};
+  var _dsig='';new MutationObserver(function(){var sg=cur()+'|'+document.body.classList.contains('game-active');if(sg===_dsig)return;_dsig=sg;if(document.body.classList.contains('game-active')&&!document.body.classList.contains('desktop-mode'))wakeDots();}).observe(document.body,{attributes:true,attributeFilter:['class']});
+  var tm=document.getElementById('skillTreeModal');
+  tm&&new MutationObserver(function(){paintDots();}).observe(tm,{attributes:true,attributeFilter:['class']});
+  document.addEventListener('touchmove',function(e){
+    if(tracking&&e.touches.length===1&&Math.abs(e.touches[0].clientX-sx)>18)wakeDots();
+  },{passive:true});
   document.addEventListener('touchstart',function(e){
     tracking=false;
     if(e.touches.length!==1||busy||blocked(e.target))return;
@@ -125,7 +156,8 @@
     var t=e.changedTouches[0],dx=t.clientX-sx,dy=t.clientY-sy;
     if(Math.abs(dx)<70||Math.abs(dx)<Math.abs(dy)*1.6||Date.now()-st>900)return;
     var c=cur();
-    if(dx<0)go((c+1)%3,-1);else go((c+2)%3,1);
+    var n=pageCount();
+    if(dx<0)go((c+1)%n,-1);else go((c+n-1)%n,1);
   },{passive:true});
   document.addEventListener('touchcancel',function(){tracking=false;},{passive:true});
 })();

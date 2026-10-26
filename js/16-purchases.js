@@ -63,6 +63,7 @@ function buySeqTrack(){
         ambGain.gain.linearRampToValueAtTime(0,now+2);
       }
     }
+    applyAmbienceLock();
     showToast('🎛 Sequencer unlocked — every step now earns points! Click steps to set beats.');
   }else{
     // Add another track — auto-add it immediately, no button press needed
@@ -110,6 +111,18 @@ function unlockMultiClick(){if(score<UNLOCK_COST||shop.multiClickUnlocked)return
 function unlockAlienBoost(){if(score<ALIEN_POWER_UNLOCK_COST||shop.alienBoostUnlocked)return;score-=ALIEN_POWER_UNLOCK_COST;shop.alienBoostUnlocked=true;playSfxTierUnlock(3);flashBuy('#00ccff');renderUI();autoSave();}
 function buyAlienBoostNext(){if(!shop.alienBoostUnlocked)return;const lvl=shop.alienBoostLevel+1,up=alienBoostUpgradeAt(lvl);if(score<up.cost)return;score-=up.cost;shop.alienBoostLevel=lvl;playSfxPurchase();flashBuy('#00ccff');showToast(`${up.effectMain} — your Alien Boost Multiplier increased!`);renderUI();autoSave();}
 function buyMultiClickNext(){if(!shop.multiClickUnlocked)return;const lvl=shop.multiClickLevel+1,up=multiClickUpgradeAt(lvl);if(score<up.cost)return;score-=up.cost;shop.multiClickLevel=lvl;playSfxPurchase();flashBuy('#cc88ff');showToast(`${up.effectMain} — each tap now counts as ${lvl+2} clicks!`);renderUI();autoSave();}
+function unlockSeqMultiClick(){
+  if(drum.seqTracks<1){showToast('Unlock the sequencer first!');return;}
+  if(shop.seqMultiClickUnlocked||score<SEQ_MC_UNLOCK_COST)return;
+  score-=SEQ_MC_UNLOCK_COST;shop.seqMultiClickUnlocked=true;playSfxTierUnlock(6);flashBuy('#ff88cc');renderUI();autoSave();
+}
+function buySeqMultiClickNext(){
+  if(!shop.seqMultiClickUnlocked)return;
+  const lvl=shop.seqMultiClickLevel+1;if(lvl>SEQ_MC_MAX_LEVEL)return;
+  const up=seqMultiClickUpgradeAt(lvl);if(score<up.cost)return;
+  score-=up.cost;shop.seqMultiClickLevel=lvl;playSfxPurchase();flashBuy('#ff88cc');
+  showToast(`${up.effectMain} — each sequencer step now counts as ${lvl+2} clicks!`);renderUI();autoSave();
+}
 function buyAlien(){
   updateBouncerToggleVisibility&&updateBouncerToggleVisibility();const cost=alienCost(totalAliens);if(score<cost)return;score-=cost;totalAliens++;bouncerOnNewAlien();updateMatchingBtn();viewingBunker=Math.max(0,Math.floor((totalAliens-1)/BUNKER_SIZE));playSfxAlienBuy();flashBuy(totalAliens%BUNKER_SIZE===0?'#00ff88':'#00cc66');renderUI();
   // Always update bunker sidebar on desktop
@@ -139,4 +152,6 @@ addEP('multiClickUnlockBtn',unlockMultiClick);
 addEP('alienBoostUnlockBtn',unlockAlienBoost);
 addEP('alienBoostNextBtn',buyAlienBoostNext);
 addEP('multiClickNextBtn',buyMultiClickNext);
+addEP('seqMultiClickUnlockBtn',unlockSeqMultiClick);
+addEP('seqMultiClickNextBtn',buySeqMultiClickNext);
 addEP('alienBuyBtn',buyAlien);

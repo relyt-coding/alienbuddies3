@@ -9,7 +9,7 @@ let activeSlot=-1;
 function defaultSave(){
   return{
     score:0,tiers:[],
-    shop:{seqMultLevel:-1,multLevel:-1,alienBoostLevel:-1,multiClickLevel:-1,alienBoostUnlocked:false,multiClickUnlocked:false,drumDotsUnlocked:false,seqDotsUnlocked:false,seqStepsLevel:0},
+    shop:{seqMultLevel:-1,multLevel:-1,alienBoostLevel:-1,multiClickLevel:-1,seqMultiClickLevel:-1,seqMultiClickUnlocked:false,dismissed:[],alienBoostUnlocked:false,multiClickUnlocked:false,drumDotsUnlocked:false,seqDotsUnlocked:false,seqStepsLevel:0},
     totalAliens:0,
     drum:{pads:1,extraSounds:0,seqTracks:0},
     ts:Date.now()
@@ -34,7 +34,7 @@ function autoSave(){
   const seqLayersSnap=seqLayers.map(l=>({soundId:l.soundId,steps:[...l.steps],vols:[...l.vols],muted:l.muted}));
   writeSlot(activeSlot,{
     score,tiers,autoTiers,
-    shop:{seqMultLevel:shop.seqMultLevel,multLevel:shop.multLevel,alienBoostLevel:shop.alienBoostLevel,multiClickLevel:shop.multiClickLevel,alienBoostUnlocked:shop.alienBoostUnlocked,multiClickUnlocked:shop.multiClickUnlocked,drumDotsUnlocked:shop.drumDotsUnlocked,seqDotsUnlocked:shop.seqDotsUnlocked,seqStepsLevel:shop.seqStepsLevel||0},
+    shop:{seqMultLevel:shop.seqMultLevel,multLevel:shop.multLevel,alienBoostLevel:shop.alienBoostLevel,multiClickLevel:shop.multiClickLevel,seqMultiClickLevel:shop.seqMultiClickLevel,seqMultiClickUnlocked:shop.seqMultiClickUnlocked,dismissed:shop.dismissed||[],alienBoostUnlocked:shop.alienBoostUnlocked,multiClickUnlocked:shop.multiClickUnlocked,drumDotsUnlocked:shop.drumDotsUnlocked,seqDotsUnlocked:shop.seqDotsUnlocked,seqStepsLevel:shop.seqStepsLevel||0},
     totalAliens,alienData,
     drum:{pads:drum.pads,extraSounds:drum.extraSounds,seqTracks:drum.seqTracks},
     matchLevelsCompleted,matchingMultiplier,matchSavedState,tipsOwned,tipsMult,drumTrackerActive,shopOpenCount,hasSeenSeqHint,
@@ -64,7 +64,7 @@ function autoSave(){
 // ══════════════════════════════════════════════
 let score=0,tiers=[],autoTiers=[];
 // multLevel = DRUMPAD ×4 dots (-1 / 0), seqMultLevel = SEQUENCER ×4 dots (-1 / 0)
-const shop={seqMultLevel:-1,multLevel:-1,alienBoostLevel:-1,multiClickLevel:-1,alienBoostUnlocked:false,multiClickUnlocked:false,drumDotsUnlocked:false,seqDotsUnlocked:false,seqStepsLevel:0};
+const shop={seqMultLevel:-1,multLevel:-1,alienBoostLevel:-1,multiClickLevel:-1,seqMultiClickLevel:-1,seqMultiClickUnlocked:false,dismissed:[],alienBoostUnlocked:false,multiClickUnlocked:false,drumDotsUnlocked:false,seqDotsUnlocked:false,seqStepsLevel:0};
 let totalAliens=0,viewingBunker=0;
 let matchingLevel=0; // highest level unlocked (0=none, 1=level1 available, etc)
 let matchingMultiplier=1; // permanent multiplier from wins
@@ -103,6 +103,7 @@ function tierMultValueFor(kind,i){
 }
 function tierMultValue(i){return tierMultValueFor('drum',i);}
 function alienMultiplier(){const perAlien=1.1+(shop.alienBoostLevel>=0?(shop.alienBoostLevel+1)*0.3:0);return totalAliens>0?Math.pow(perAlien,totalAliens):1;}
+function seqClicksPerStep(){return shop.seqMultiClickLevel>=0?shop.seqMultiClickLevel+2:1;}
 function clicksPerTap(){return shop.multiClickLevel>=0?shop.multiClickLevel+2:1;}
 function drumMultiplier(){
   // Each unlocked extra pad (beyond 1), each extra sound, each seq track = ×1.5
@@ -161,6 +162,9 @@ function loadFromSave(data){
   shop.multiClickLevel=data.shop?.multiClickLevel??-1;
   shop.alienBoostUnlocked=data.shop?.alienBoostUnlocked??false;
   shop.multiClickUnlocked=data.shop?.multiClickUnlocked??false;
+  shop.seqMultiClickLevel=data.shop?.seqMultiClickLevel??-1;
+  shop.seqMultiClickUnlocked=data.shop?.seqMultiClickUnlocked??false;
+  shop.dismissed=Array.isArray(data.shop?.dismissed)?data.shop.dismissed.slice():[];
   shop.drumDotsUnlocked=data.shop?.drumDotsUnlocked??(shop.multLevel>=0);
   shop.seqDotsUnlocked=data.shop?.seqDotsUnlocked??(shop.seqMultLevel>=0);
   shop.seqStepsLevel=Math.min(2,data.shop?.seqStepsLevel||0);

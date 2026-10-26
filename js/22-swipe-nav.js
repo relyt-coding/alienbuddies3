@@ -23,7 +23,6 @@
     var from=cur();
     if(target===from||busy)return;
     busy=true;
-    resetPageZoom();
     var fromEl=document.getElementById(VIEW_IDS[from]),toEl=document.getElementById(VIEW_IDS[target]);
     // start the incoming page just off-screen on the side it should come from
     toEl.style.transition='none';
@@ -43,7 +42,6 @@
       void document.body.offsetWidth;
       VIEW_IDS.forEach(function(id){document.getElementById(id).style.transition='';});
       busy=false;
-      resetPageZoom();
     },460);
   }
   // pinch-zoomed in? snap back to normal zoom whenever the page changes (swipe or the SHOP / BUNKER buttons).
@@ -86,12 +84,12 @@
   window.resetPageZoom=resetPageZoom;
   (function(){
     var last=cur();
-    new MutationObserver(function(){var c=cur();if(c!==last){last=c;resetPageZoom();}}).observe(document.body,{attributes:true,attributeFilter:['class']});
+    new MutationObserver(function(){var c=cur();if(c!==last){last=c;resetPageZoom();}}).observe(document.body,{attributes:true,attributeFilter:['class']}); // (still tries a reset when the SHOP / BUNKER buttons change the page)
   })();
   // safety net: while the page is zoomed in, a small RESET ZOOM button follows the visible area
   (function(){
     var vv=window.visualViewport;if(!vv)return;
-    var b=document.createElement('button');b.id='zoomResetBtn';b.type='button';b.textContent='⤢ RESET ZOOM';b.style.display='none';
+    var b=document.createElement('button');b.id='zoomResetBtn';b.type='button';b.textContent='⤢ ZOOM OUT TO SWIPE';b.style.display='none';
     document.body.appendChild(b);
     b.addEventListener('click',function(e){e.stopPropagation();resetPageZoom();});
     b.addEventListener('touchend',function(e){e.stopPropagation();},{passive:true});
@@ -106,6 +104,7 @@
   document.addEventListener('touchstart',function(e){
     tracking=false;
     if(e.touches.length!==1||busy||blocked(e.target))return;
+    if(zoomScale()>1.05)return; // pinch-zoomed in: swiping pages is off until you zoom back out
     sx=e.touches[0].clientX;sy=e.touches[0].clientY;st=Date.now();tracking=true;
   },{passive:true});
   document.addEventListener('touchend',function(e){

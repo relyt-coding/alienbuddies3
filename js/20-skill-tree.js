@@ -874,7 +874,7 @@ if(_matchBtnHint){_matchBtnHint.addEventListener('click',()=>{shownHints.matchin
 (function(){
   const t=document.getElementById('settingsEarnHidden');
   if(!t)return;
-  t.checked=v5Settings.earnHidden!==false;
+  t.checked=true;
   t.addEventListener('change',()=>{
     v5Settings.earnHidden=t.checked;saveV5Settings();
     showToast(t.checked?'🌙 Earning continues while this tab is hidden':'🌙 Earning pauses while this tab is hidden');

@@ -156,7 +156,7 @@ function buildLevel0Grid(){
 }
 
 // ── Sound effects for matching game ──
-const MATCH_SFX_VOL=0.3; // matching-game sounds play at 30% of their original volume
+const MATCH_SFX_VOL=0.12; // matching-game sounds play at 12% of their original volume (v0.2.72: turned down another 60%)
 function playMatchDing(){
   try{
     getCtx();
@@ -442,8 +442,25 @@ function layoutMatchGrid(grid,total){
     const w=Math.floor(Math.min(wByW,wByH));
     if(w>best.w)best={cols:c,w};
   }
+  // desktop: with only a few cards, don't let them balloon to fill the window — cap the card size and
+  // use the most compact (fewest columns) arrangement that still reaches that size
+  let capped=false;
+  if(desktop){
+    const ds=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--ds'))||1;
+    const cap=Math.round(190*Math.max(ds,.9));
+    if(best.w>cap){
+      let pick=null;
+      for(let c=2;c<=12;c++){
+        const r=Math.ceil(total/c);
+        const w=Math.floor(Math.min((availW-pad-(c-1)*gap)/c,((availH-(r-1)*gap)/r)*3/4));
+        if(w>=cap){pick=c;break;}
+      }
+      best={cols:pick||best.cols,w:cap};capped=true;
+    }
+  }
   const cols=best.cols;
-  if(desktop){grid.style.gridTemplateColumns='repeat('+cols+',1fr)';grid.style.gridAutoRows='';grid.style.justifyContent='';}
+  if(desktop&&capped){grid.style.gridTemplateColumns='repeat('+cols+','+best.w+'px)';grid.style.gridAutoRows='';grid.style.justifyContent='center';}
+  else if(desktop){grid.style.gridTemplateColumns='repeat('+cols+',1fr)';grid.style.gridAutoRows='';grid.style.justifyContent='';}
   else{ // phone: fixed card size so cards can never balloon to full width
     grid.style.gridTemplateColumns='repeat('+cols+','+best.w+'px)';
     grid.style.gridAutoRows=Math.round(best.w*4/3)+'px';
@@ -451,7 +468,7 @@ function layoutMatchGrid(grid,total){
   }
   grid.style.gridTemplateRows='';
   grid.style.alignContent='start';
-  grid.style.margin='';
+  grid.style.margin=capped?'0 auto':'';
   grid.style.maxWidth=desktop?Math.min(availW,cols*best.w+(cols-1)*gap+pad)+'px':'520px';
   const fs=desktop?Math.max(1,best.w/46):1; // emoji/text scale with the card size
   const base=total<=8?2:total<=16?1.6:total<=32?1.2:total<=60?.9:.7;

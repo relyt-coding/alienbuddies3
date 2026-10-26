@@ -2,6 +2,21 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.72 - 2026-10-26 06:52
+
+- changed: index.html
+- changed: js/01-constants.js
+- changed: js/03-audio.js
+- changed: js/04-toast-soundboard.js
+- changed: js/08-matching-game.js
+- changed: js/11-bouncers-party.js
+- changed: js/17-nav-fullscreen.js
+- changed: js/18-desktop-layout.js
+- changed: js/19-wav-export.js
+- changed: js/20-skill-tree.js
+- changed: js/24-gamepad.js
+- added: img/
+
 ## v0.2.66 - 2026-10-25 23:05
 
 - changed: css/style.css

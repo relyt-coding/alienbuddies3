@@ -21,7 +21,7 @@ document.addEventListener('visibilitychange',()=>{
     _adaptiveFPSActive=false;
     _autoParticleAccum=0;
     if(activeSlot>=0)autoSave(); // make sure progress is stored when the tab goes to the background
-    if(v5Settings.earnHidden!==false){
+    if(true){ // always keep earning in the background (the energy meter keeps it balanced)
       // "Earn while tab hidden" ON: leave the sequencer clock (worker) and audio running so music keeps earning.
     }else{
       // OFF: mute audio and stop earning until the tab is visible again (no catch-up).

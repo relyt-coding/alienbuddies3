@@ -2,6 +2,7 @@
 // ══════════════════════════════════════════════
 //  AUDIO ENGINE
 // ══════════════════════════════════════════════
+const AMB_LEVEL=0.4; // background ambience plays at 40% so it never drowns out the sounds
 let audioCtx=null,masterGainNode=null,drumMasterGain=null,drumMasterReal=null,rvbNode=null,rvbGainNode=null,ambGain=null,ambStarted=false;
 let sfxOn=true;
 let musicOn=true;
@@ -10,7 +11,7 @@ function getCtx(){
   if(!audioCtx){
     audioCtx=new(window.AudioContext||window.webkitAudioContext)();
     masterGainNode=audioCtx.createGain();masterGainNode.gain.value=masterVol;masterGainNode.connect(audioCtx.destination);
-    ambGain=audioCtx.createGain();ambGain.gain.value=1;ambGain.connect(masterGainNode);
+    ambGain=audioCtx.createGain();ambGain.gain.value=AMB_LEVEL;ambGain.connect(masterGainNode);
     drumMasterGain=audioCtx.createGain();drumMasterGain.gain.value=1;drumMasterGain.connect(masterGainNode);drumMasterReal=drumMasterGain;
     // Reverb
     rvbNode=audioCtx.createConvolver();rvbGainNode=audioCtx.createGain();rvbGainNode.gain.value=.22;
@@ -60,7 +61,7 @@ const ALL_SOUNDS=[
     s.start(t);s.stop(t+.07);
   }),
   mkSnd('snare','SNARE','drums','#ffcc44','Cracking rimshot snare',(t,gv)=>{const c=getCtx(),o=c.createOscillator(),og=c.createGain();o.type='triangle';o.frequency.value=200;o.connect(og);og.connect(drumMasterGain);og.gain.setValueAtTime(0,t);og.gain.linearRampToValueAtTime(.45*(gv??1),t+.002);og.gain.exponentialRampToValueAtTime(.001,t+.18);o.start(t);o.stop(t+.18);const s=c.createBufferSource();s.buffer=noiseBuf(.22);const f=c.createBiquadFilter();f.type='bandpass';f.frequency.value=1800;f.Q.value=.7;const ng=c.createGain();s.connect(f);f.connect(ng);ng.connect(drumMasterGain);ng.connect(rvbNode);ng.gain.setValueAtTime(0,t);ng.gain.linearRampToValueAtTime(.65*(gv??1),t+.002);ng.gain.exponentialRampToValueAtTime(.001,t+.22);s.start(t);s.stop(t+.22);}),
-  mkSnd('kick','KICK','drums','#ff6644','808-style sub kick',(t,gv)=>{const c=getCtx(),o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(drumMasterGain);o.frequency.setValueAtTime(200,t);o.frequency.exponentialRampToValueAtTime(38,t+.22);g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(0.7*(gv??1),t+.003);g.gain.exponentialRampToValueAtTime(.001,t+.5);o.start(t);o.stop(t+.5);const n=c.createOscillator(),ng=c.createGain();n.type='square';n.frequency.value=120;n.connect(ng);ng.connect(drumMasterGain);ng.gain.setValueAtTime(0,t);ng.gain.linearRampToValueAtTime(.3*(gv??1),t+.001);ng.gain.exponentialRampToValueAtTime(.001,t+.02);n.start(t);n.stop(t+.02);}),
+  mkSnd('kick','KICK','drums','#ff6644','808-style sub kick',(t,gv)=>{const c=getCtx(),o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(drumMasterGain);o.frequency.setValueAtTime(200,t);o.frequency.exponentialRampToValueAtTime(38,t+.22);g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(1.0*(gv??1),t+.003);g.gain.exponentialRampToValueAtTime(.001,t+.5);o.start(t);o.stop(t+.5);const n=c.createOscillator(),ng=c.createGain();n.type='square';n.frequency.value=120;n.connect(ng);ng.connect(drumMasterGain);ng.gain.setValueAtTime(0,t);ng.gain.linearRampToValueAtTime(.3*(gv??1),t+.001);ng.gain.exponentialRampToValueAtTime(.001,t+.02);n.start(t);n.stop(t+.02);}),
   mkSnd('trapkick','TRAP KICK','drums','#ff3322','Hard 808 trap kick',(t,gv)=>{const c=getCtx(),o=c.createOscillator(),g=c.createGain(),d=c.createWaveShaper();d.curve=distCurve(2);o.frequency.setValueAtTime(240,t);o.frequency.exponentialRampToValueAtTime(28,t+.5);o.connect(d);d.connect(g);g.connect(drumMasterGain);g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(0.7*(gv??1),t+.002);g.gain.exponentialRampToValueAtTime(.001,t+.85);o.start(t);o.stop(t+.85);}),
   mkSnd('clap','CLAP','drums','#ffee88','Layered noise clap',(t,gv)=>{const c=getCtx();[0,.012,.026].forEach(off=>{const s=c.createBufferSource();s.buffer=noiseBuf(.14);const f=c.createBiquadFilter();f.type='bandpass';f.frequency.value=1100+Math.random()*400;f.Q.value=.5;const g=c.createGain();s.connect(f);f.connect(g);g.connect(drumMasterGain);g.connect(rvbNode);g.gain.setValueAtTime(0,t+off);g.gain.linearRampToValueAtTime(.6*(gv??1),t+off+.002);g.gain.exponentialRampToValueAtTime(.001,t+off+.18);s.start(t+off);s.stop(t+off+.18);});}),
   mkSnd('rimshot','RIMSHOT','drums','#ffbb44','Sharp rimshot transient',(t,gv)=>{const c=getCtx(),o=c.createOscillator(),g=c.createGain();o.type='triangle';o.frequency.value=450;o.connect(g);g.connect(drumMasterGain);g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(0.6*(gv??1),t+.001);g.gain.exponentialRampToValueAtTime(.001,t+.06);o.start(t);o.stop(t+.06);const s=c.createBufferSource();s.buffer=noiseBuf(.04);const f=c.createBiquadFilter();f.type='highpass';f.frequency.value=4000;const ng=c.createGain();s.connect(f);f.connect(ng);ng.connect(drumMasterGain);ng.gain.setValueAtTime(0,t);ng.gain.linearRampToValueAtTime(.5*(gv??1),t+.001);ng.gain.exponentialRampToValueAtTime(.001,t+.04);s.start(t);s.stop(t+.04);}),

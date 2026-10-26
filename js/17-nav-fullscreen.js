@@ -31,9 +31,6 @@ function openStore(){
   const _ss=document.querySelector('#storeView .store-scroll');if(_ss)_ss.scrollTop=0; // always start at the top
   shopOpenCount++;
   updateOnboardingArrows();
-  if(shopOpenCount===3){
-    if(!document.body.classList.contains('desktop-mode'))showHint('🔍','PINCH TO ZOOM IN FOR EASIER READING.\n\n&nbsp;&nbsp;&nbsp;ZOOM OUT BEFORE CLICKING BACK.',null);
-  }
   if(shopOpenCount===5&&shop.seqMultLevel<0&&shop.multLevel<0){
     setTimeout(()=>showToast('💡 Scroll down for more upgrades!'),800);
   }

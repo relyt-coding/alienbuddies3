@@ -13,7 +13,8 @@ let v5Settings = {
   moreAliens: false,   // allow more than 10 bouncing aliens (performance warning)
   bouncerLimit: 20,    // how many, when moreAliens is on
   layoutMode: 'auto',  // 'auto' | 'desktop' | 'mobile'
-  earnHidden: true   // keep earning (and playing) while the tab is hidden; turn off to pause instead
+  earnHidden: true,  // (always on since v0.2.72)
+  controllerOn: false // gamepad support (Settings)
 };
 
 function loadV5Settings(){
@@ -241,13 +242,22 @@ socialsModal&&socialsModal.addEventListener('click',e=>{if(e.target===socialsMod
 // This measures the free height and shrinks the pad grid just enough (never above its normal size).
 const PAD_GRID_CAPS={1:160,2:326,3:410,4:410,5:560,6:560,7:680,8:680};
 const PAD_GRID_MIN_W=200;
+// phone, sequencer off: sit the pads in the middle of the free space (between the tracker and SETTINGS) instead of hugging the dots
+function centerPhonePads(grid,sb,seqOn){
+  grid.style.marginTop='';
+  const b=document.body.classList;
+  if(seqOn||!sb||grid.offsetParent===null||b.contains('store-open')||b.contains('bunker-open'))return;
+  const r=grid.getBoundingClientRect();
+  const extra=sb.getBoundingClientRect().top-10-r.top-r.height;
+  if(extra>24)grid.style.marginTop=Math.min(Math.round(extra*0.42),130)+'px';
+}
 function fitPadArea(){
   const grid=document.getElementById('padGrid');
   const app=document.querySelector('#gameView .app');
   const area=grid&&grid.closest('.pad-area');
   if(!grid||!app||!area)return;
   if(!document.body.classList.contains('desktop-mode')||app.offsetHeight===0){
-    grid.style.maxWidth='';
+    grid.style.maxWidth='';grid.style.marginTop='';
     // phone layout: size the pads to the space left above the SETTINGS / EDIT PADS buttons so they never overlap
     const sb=document.getElementById('soundboardBtn');
     const nPads=Math.max(1,Math.min(8,parseInt(grid.getAttribute('data-pads'))||1));
@@ -261,12 +271,12 @@ function fitPadArea(){
       const room=sb.getBoundingClientRect().top-10-gt;
       // sequencer on: never taller than natural; sequencer off: let pads grow (up to 35% taller) to fill the free space
       const want=seqOn?Math.min(natural,room):Math.min(natural*1.35,room);
-      if(room>0){document.body.classList.add('pad-fit');grid.style.height=Math.floor(Math.max(want,Math.min(natural,rowsN*52)))+'px';return;}
+      if(room>0){document.body.classList.add('pad-fit');grid.style.height=Math.floor(Math.max(want,Math.min(natural,rowsN*52)))+'px';centerPhonePads(grid,sb,seqOn);return;}
     }
-    document.body.classList.remove('pad-fit');grid.style.height='';
+    document.body.classList.remove('pad-fit');grid.style.height='';centerPhonePads(grid,sb,seqOn);
     return;
   }
-  document.body.classList.remove('pad-fit');grid.style.height='';
+  document.body.classList.remove('pad-fit');grid.style.height='';grid.style.marginTop='';
   const n=Math.max(1,Math.min(8,parseInt(grid.getAttribute('data-pads'))||1));
   const cap=PAD_GRID_CAPS[n]||410;
   // height used by everything except the pad area

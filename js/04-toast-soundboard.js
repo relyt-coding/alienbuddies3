@@ -74,7 +74,7 @@ bgMusicToggleEl&&bgMusicToggleEl.addEventListener('change',()=>{
     const now=audioCtx.currentTime;
     ambGain.gain.cancelScheduledValues(now);
     ambGain.gain.setValueAtTime(ambGain.gain.value,now);
-    ambGain.gain.linearRampToValueAtTime(musicOn?1:0,now+0.8);
+    ambGain.gain.linearRampToValueAtTime(musicOn?AMB_LEVEL:0,now+0.8);
   }
 });
 document.addEventListener('click',e=>{if(!soundboardPanel.contains(e.target)&&e.target!==soundboardBtn)soundboardPanel.classList.remove('open');});

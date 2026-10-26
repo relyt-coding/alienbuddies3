@@ -7,6 +7,7 @@ const GP_DEFAULTS=[0,1,2,3,4,5,6,7]; // pad 1-8 -> Cross/A, Circle/B, Square/X, 
 const GP_NAMES=['✕','○','□','△','L1','R1','L2','R2','SHARE','OPTIONS','L3','R3','D↑','D↓','D←','D→','PS'];
 let padGpBindings={};   // { padIdx: buttonIndex }
 let gpRumble=true;
+function gpEnabled(){return !!(typeof v5Settings!=='undefined'&&v5Settings.controllerOn);} // Settings -> CONTROLLER SUPPORT
 (function(){
   try{const s=JSON.parse(localStorage.getItem('ab2_pad_gp')||'null');if(s&&typeof s==='object')padGpBindings=s;}catch(e){}
   try{const r=localStorage.getItem('ab2_gp_rumble');if(r!==null)gpRumble=r!=='0';}catch(e){}
@@ -46,7 +47,7 @@ function gpHandleButton(pad,i){
 }
 function gpPoll(){
   gpRAF=0;
-  if(!gpCount)return;
+  if(!gpCount||!gpEnabled())return; // off: stop polling entirely
   gpRAF=requestAnimationFrame(gpPoll);
   if(document.hidden)return;
   const pads=navigator.getGamepads?navigator.getGamepads():[];
@@ -60,15 +61,15 @@ function gpPoll(){
     }
   }
 }
-function gpStart(){if(!gpRAF&&gpCount)gpRAF=requestAnimationFrame(gpPoll);}
+function gpStart(){if(!gpRAF&&gpCount&&gpEnabled())gpRAF=requestAnimationFrame(gpPoll);}
 addEventListener('gamepadconnected',e=>{
   gpCount++;gpPrev[e.gamepad.index]=[];
-  try{showToast('🎮 Controller connected — '+(e.gamepad.id||'').replace(/\(.*$/,'').slice(0,28));}catch(_){}
+  if(gpEnabled())try{showToast('🎮 Controller connected — '+(e.gamepad.id||'').replace(/\(.*$/,'').slice(0,28));}catch(_){}
   gpStart();updateGpRow();
 });
 addEventListener('gamepaddisconnected',e=>{
   gpCount=Math.max(0,gpCount-1);delete gpPrev[e.gamepad.index];
-  try{showToast('🎮 Controller disconnected');}catch(_){}
+  if(gpEnabled())try{showToast('🎮 Controller disconnected');}catch(_){}
   updateGpRow();
 });
 // Chrome sometimes only reports a pad after a first button press; also pick up pads already plugged in
@@ -76,6 +77,8 @@ setTimeout(()=>{try{const l=navigator.getGamepads?[...navigator.getGamepads()].f
 
 // ── Binding UI inside the pad-assign window ──
 function updateGpRow(){
+  const row=document.getElementById('padGpRow');
+  if(row)row.style.display=gpEnabled()?'flex':'none'; // only shown when CONTROLLER SUPPORT is on
   const disp=document.getElementById('padGpDisplay');if(!disp)return;
   const p=(typeof padAssignIdx!=='undefined')?padAssignIdx:null;
   const note=document.getElementById('padGpNote');
@@ -102,4 +105,25 @@ function updateGpRow(){
     saveGpBindings();updateGpRow();
   });
   if(modal)new MutationObserver(()=>{if(modal.classList.contains('open'))updateGpRow();else gpListen=null;}).observe(modal,{attributes:true,attributeFilter:['class']});
+})();
+
+// ── Settings toggle ──
+(function(){
+  const t=document.getElementById('settingsController');
+  if(!t)return;
+  t.checked=gpEnabled();
+  t.addEventListener('change',()=>{
+    v5Settings.controllerOn=t.checked;
+    try{saveV5Settings();}catch(e){}
+    if(t.checked){
+      // pick up a controller that is already plugged in
+      try{const l=navigator.getGamepads?[...navigator.getGamepads()].filter(Boolean):[];gpCount=Math.max(gpCount,l.length);}catch(e){}
+      gpStart();
+      showToast('🎮 Controller support on — press a button on your controller');
+    }else{
+      gpListen=null;
+      showToast('🎮 Controller support off');
+    }
+    updateGpRow();
+  });
 })();

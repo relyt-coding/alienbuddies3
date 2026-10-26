@@ -8,9 +8,21 @@
 <meta name="apple-mobile-web-app-title" content="Alien Buddies">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#000000">
-<link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxODAgMTgwIj4KICA8cmVjdCB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgcng9IjQwIiBmaWxsPSIjMGExYTBmIi8+CiAgPHRleHQgeD0iOTAiIHk9IjE0MCIgZm9udC1zaXplPSIxMjAiIHRleHQtYW5jaG9yPSJtaWRkbGUiPvCfkb08L3RleHQ+Cjwvc3ZnPg==">
+<link rel="apple-touch-icon" sizes="180x180" href="img/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="img/icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="img/icon-512.png">
 <title>Alien Buddies v0.2</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👽</text></svg>">
+<meta name="description" content="Alien Buddies: a space idle clicker with a built-in drum machine and step sequencer. Collect aliens, unlock sounds, make beats.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Alien Buddies">
+<meta property="og:title" content="Alien Buddies">
+<meta property="og:description" content="A space idle clicker with a built-in drum machine and step sequencer.">
+<meta property="og:url" content="https://alienbuddies.space/">
+<meta property="og:image" content="https://alienbuddies.space/img/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://alienbuddies.space/img/og-image.png">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
 </head>
@@ -40,9 +52,9 @@
       </label>
     </div>
     <div class="settings-row">
-      <div><div class="settings-label">🌙 EARN WHILE TAB HIDDEN</div></div>
+      <div><div class="settings-label">🎮 CONTROLLER SUPPORT</div><div style="font-size:.6rem;color:#667;letter-spacing:.06em;margin-top:2px;">Play pads with a gamepad · shows controller binds in Edit Pads</div></div>
       <label class="settings-toggle">
-        <input type="checkbox" id="settingsEarnHidden" checked>
+        <input type="checkbox" id="settingsController">
         <span class="settings-toggle-track"></span>
         <span class="settings-toggle-thumb"></span>
       </label>
@@ -78,7 +90,6 @@
     <button class="settings-close-btn" id="settingsFullscreenBtn" style="display:none;">⛶ ENTER FULLSCREEN</button>
     <button class="settings-close-btn" id="settingsSocialsBtn" style="background:#0a0a1a;border-color:#6699ff;color:#6699ff;">SOCIALS</button>
     <button class="settings-close-btn" id="settingsArchipelagoBtn" style="background:#0a1a1a;border-color:#00ccaa;color:#00ccaa;" onclick="alert('🌐 Archipelago multiworld features coming soon!')">🌐 ARCHIPELAGO SETTINGS</button>
-    <button class="settings-close-btn" id="settingsSeqResetBtn" style="background:#1a0a00;border-color:#ff8800;color:#ff8800;">🎛 RESET SEQUENCER</button>
     <button class="settings-close-btn" id="settingsDonateBtn" style="background:#0a0a1a;border-color:#6699ff;color:#6699ff;" onclick="window.open('https://streamlabs.com/attackingtucans/tip','_blank')">💙 SUPPORT THE DEVELOPER</button>
     <button class="settings-close-btn" id="settingsSaveExitBtn" style="background:#0a1a0f;border-color:#00ff88;color:#00ff88;">💾 SAVE AND EXIT</button>
     <button class="settings-close-btn" id="settingsCloseBtn">DONE</button>
@@ -612,7 +623,7 @@
         <div id="padKeybindDisplay" style="font-family:'Bebas Neue',sans-serif;font-size:.75rem;letter-spacing:.1em;color:#a0a8ff;flex:1;text-align:center;background:#111;border:1px solid #2a2a4a;border-radius:5px;padding:.25rem .5rem;cursor:pointer;transition:all .15s;">CLICK TO BIND</div>
         <button id="padKeybindClear" style="font-family:'Bebas Neue',sans-serif;font-size:.55rem;letter-spacing:.08em;padding:.2rem .45rem;border-radius:5px;border:1px solid #2a1a1a;background:transparent;color:#664444;cursor:pointer;touch-action:manipulation;transition:all .12s;">CLEAR</button>
       </div>
-      <div id="padGpRow" style="display:flex;flex-shrink:0;background:#0a0a14;border:1px solid #1a1a2a;border-radius:8px;padding:.55rem .8rem;gap:.6rem;align-items:center;">
+      <div id="padGpRow" style="display:none;flex-shrink:0;background:#0a0a14;border:1px solid #1a1a2a;border-radius:8px;padding:.55rem .8rem;gap:.6rem;align-items:center;">
         <div style="font-family:'Bebas Neue',sans-serif;font-size:.65rem;letter-spacing:.1em;color:#555;flex-shrink:0;">🎮 CONTROLLER</div>
         <div id="padGpDisplay" style="font-family:'Bebas Neue',sans-serif;font-size:.75rem;letter-spacing:.1em;color:#a0a8ff;flex:1;text-align:center;background:#111;border:1px solid #2a2a4a;border-radius:5px;padding:.25rem .5rem;cursor:pointer;">CLICK TO BIND</div>
         <button id="padGpClear" style="font-family:'Bebas Neue',sans-serif;font-size:.55rem;letter-spacing:.08em;padding:.2rem .45rem;border-radius:5px;border:1px solid #2a1a1a;background:transparent;color:#664444;cursor:pointer;touch-action:manipulation;">CLEAR</button>

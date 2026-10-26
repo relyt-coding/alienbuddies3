@@ -31,7 +31,7 @@ function formatMult(n){if(n<100000)return n.toLocaleString(undefined,{maximumSig
 // ══════════════════════════════════════════════
 // Unlock prices over 5 million are 30% pricier (a longer grind for the big unlocks); cheap early unlocks are untouched.
 function bump30(c){return c>5e6?Math.round(c*1.3):c;}
-const GAME_VERSION='0.2.83'; // bump on every delivered build (shown in Settings and on the home screen)
+const GAME_VERSION='0.2.84'; // bump on every delivered build (shown in Settings and on the home screen)
 const BASE_CPS=5;
 const UNLOCK_COST=bump30(60000000);
 const ALIEN_POWER_UNLOCK_COST=bump30(600000000);

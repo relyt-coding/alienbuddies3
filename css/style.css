@@ -1444,3 +1444,8 @@ body:has(#seqFullModal.open) #pageDots{display:none !important;}
 #slotSubtitle.renamable{cursor:pointer;transition:color .15s;}
 #slotSubtitle.renamable:hover{color:#00ff88;}
 #slotSubtitle input{pointer-events:auto;}
+
+/* v0.2.84: the BUNKER button's page lives on the LEFT (slides in from the left), the SHOP's on the right */
+#bunkerView{transform:translateX(-100%);}
+body.bunker-open #gameView{transform:translateX(100%);}
+body.bunker-open #bunkerView{transform:translateX(0);}

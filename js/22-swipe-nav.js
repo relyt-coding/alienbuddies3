@@ -1,7 +1,7 @@
 // ══════════════════════════════════════════════
 //  SWIPE NAV (phone layout): left → right order is  BUNKER · HOME · SHOP · (EXPLORE THE GALAXIES, once unlocked)
-//  swipe LEFT = the page to the right, swipe RIGHT = the page to the left (no wrap-around).
-//  Little dots at the bottom show where you are, in that same order.
+//  swipe LEFT = the page to the right, swipe RIGHT = the page to the left (it loops in a circle).
+//  Little dots at the bottom show where you are (only while swiping, not when the BUNKER / SHOP buttons are used).
 // ══════════════════════════════════════════════
 (function(){
   var VIEW_IDS=['gameView','storeView','bunkerView','skillTreeModal'];
@@ -47,7 +47,6 @@
     // switch the real state (other code relies on these body classes)
     closeStore();closeBunker();
     if(target===1)openStore();else if(target===2)openBunker();
-    wakeDots();
     setTimeout(function(){
       if(from===3&&typeof closeSkillTree==='function')closeSkillTree();
       // snap every page to its resting spot with NO animation (the page that just left would otherwise
@@ -142,7 +141,7 @@
     dotsTimer=setTimeout(function(){dotsEl.classList.remove('show');},5000);
   }
   window.refreshPageDots=function(){paintDots();};
-  var _dsig='';new MutationObserver(function(){var sg=cur()+'|'+document.body.classList.contains('game-active');if(sg===_dsig)return;_dsig=sg;if(document.body.classList.contains('game-active')&&!document.body.classList.contains('desktop-mode'))wakeDots();}).observe(document.body,{attributes:true,attributeFilter:['class']});
+  new MutationObserver(function(){paintDots();}).observe(document.body,{attributes:true,attributeFilter:['class']}); // keep the highlighted dot right, but never wake them
   var tm=document.getElementById('skillTreeModal');
   tm&&new MutationObserver(function(){paintDots();}).observe(tm,{attributes:true,attributeFilter:['class']});
   document.addEventListener('touchmove',function(e){
@@ -161,8 +160,10 @@
     var c=cur();
     var ord=pageOrder(),pos=ord.indexOf(c);
     if(pos<0)return;
-    if(dx<0){if(pos<ord.length-1)go(ord[pos+1],-1);}
-    else if(pos>0)go(ord[pos-1],1);
+    // the pages loop in a circle: swiping past the last one wraps around to the first (and vice-versa)
+    wakeDots();
+    if(dx<0)go(ord[(pos+1)%ord.length],-1);
+    else go(ord[(pos+ord.length-1)%ord.length],1);
   },{passive:true});
   document.addEventListener('touchcancel',function(){tracking=false;},{passive:true});
 })();

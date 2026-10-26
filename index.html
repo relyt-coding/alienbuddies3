@@ -173,8 +173,13 @@
 
       <!-- VIEW TOGGLE (shown when sequencer is unlocked) -->
       <div class="view-toggle-bar" id="viewToggleBar" style="display:none;">
-        <button class="vtb-btn" id="vtbSeqBtn">HIDE SEQUENCER</button>
-        <button class="vtb-btn" id="vtbTiersBtn">HIDE TRACKERS</button>
+        <button class="vtb-btn" id="vtbViewBtn">VIEW</button>
+      </div>
+
+      <div id="viewMenu" style="display:none;">
+        <button type="button" class="vm-row" data-vm="tiers"><span class="vm-check"></span>TRACKERS</button>
+        <button type="button" class="vm-row" data-vm="seq"><span class="vm-check"></span>SEQUENCER</button>
+        <button type="button" class="vm-row" data-vm="pads"><span class="vm-check"></span>DRUM PADS</button>
       </div>
 
       <!-- SEQUENCER (replaces tiers when visible) -->
@@ -865,5 +870,6 @@
 <script src="js/19-wav-export.js"></script>
 <script src="js/20-skill-tree.js"></script>
 <script src="js/21-legacy-safari.js"></script>
+<script src="js/22-swipe-nav.js"></script>
 </body>
 </html>

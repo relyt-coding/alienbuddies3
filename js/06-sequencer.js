@@ -39,30 +39,46 @@ for(let i=0;i<STEPS;i++){
 }
 
 const viewToggleBar=document.getElementById('viewToggleBar');
-const vtbSeqBtn=document.getElementById('vtbSeqBtn');
-const vtbTiersBtn=document.getElementById('vtbTiersBtn');
+const vtbViewBtn=document.getElementById('vtbViewBtn');
+const viewMenu=document.getElementById('viewMenu');
+let padsHidden=false;
+try{padsHidden=localStorage.getItem('ab2_hidePads')==='1';}catch(e){}
 
-// The hide/show buttons sit next to CLEAR under the sequencer; when the sequencer is hidden
-// (or on the ARR/SONG views, which have no such row) they live in the standalone bar instead.
+// One VIEW button (left end of the row under the sequencer, or in the standalone bar when the
+// sequencer is hidden / on views without such a row). It opens a small menu to show/hide
+// the trackers, the sequencer and the drum pads.
 function placeViewButtons(){
   const rowSel={pattern:'#seqPatternView',arrange:'#seqArrangeView',song:'#seqSongView'}[seqMode]||'#seqPatternView';
   const targetRow=document.querySelector(rowSel+' .seq-bottom-row');
   const inRow=targetRow&&drum.seqTracks&&!seqHidden;
   if(inRow){
-    // hide/show buttons on the left end of the row; the add/save/load/clear/export group is pushed to the right
-    const row=targetRow;
-    row.insertBefore(vtbSeqBtn,row.firstChild);
-    row.insertBefore(vtbTiersBtn,vtbSeqBtn.nextSibling);
-    vtbSeqBtn.className=vtbTiersBtn.className='seq-save-pat-btn';
+    targetRow.insertBefore(vtbViewBtn,targetRow.firstChild);
+    vtbViewBtn.className='seq-save-pat-btn';
     viewToggleBar.style.display='none';
   }else{
-    viewToggleBar.appendChild(vtbSeqBtn);viewToggleBar.appendChild(vtbTiersBtn);
-    vtbSeqBtn.className=vtbTiersBtn.className='vtb-btn';
-    vtbSeqBtn.classList.toggle('active',!seqHidden);vtbTiersBtn.classList.toggle('active',!trackersHidden);
+    viewToggleBar.appendChild(vtbViewBtn);
+    vtbViewBtn.className='vtb-btn';
     viewToggleBar.style.display=drum.seqTracks?'':'none';
   }
+  closeViewMenu();
+}
+function refreshViewMenu(){
+  [['tiers',!trackersHidden],['seq',!seqHidden],['pads',!padsHidden]].forEach(function(p){
+    const r=viewMenu.querySelector('[data-vm="'+p[0]+'"]');
+    if(r){r.classList.toggle('on',p[1]);r.firstChild.textContent=p[1]?'✓':'';}
+  });
+}
+function closeViewMenu(){if(viewMenu)viewMenu.style.display='none';}
+function openViewMenu(){
+  refreshViewMenu();
+  viewMenu.style.display='flex';
+  const r=vtbViewBtn.getBoundingClientRect();
+  viewMenu.style.left=Math.max(8,Math.min(r.left,window.innerWidth-viewMenu.offsetWidth-8))+'px';
+  const top=r.top-viewMenu.offsetHeight-6;
+  viewMenu.style.top=(top>8?top:r.bottom+6)+'px';
 }
 function applySeqView(){
+  document.body.classList.toggle('pads-hidden',padsHidden);
   if(!drum.seqTracks){
     tiersWrap.style.display='';
     seqArea.classList.remove('visible');
@@ -71,14 +87,26 @@ function applySeqView(){
   }
   seqArea.classList.toggle('visible',!seqHidden);
   tiersWrap.style.display=trackersHidden?'none':'';
-  vtbSeqBtn.textContent=seqHidden?'SHOW SEQUENCER':'HIDE SEQUENCER';
-  vtbTiersBtn.textContent=trackersHidden?'SHOW TRACKERS':'HIDE TRACKERS';
   placeViewButtons();
 }
 
-function _saveViewPrefs(){try{localStorage.setItem('ab2_hideSeq',seqHidden?'1':'0');localStorage.setItem('ab2_hideTrackers',trackersHidden?'1':'0');}catch(e){}}
-vtbSeqBtn&&vtbSeqBtn.addEventListener('click',()=>{seqHidden=!seqHidden;_saveViewPrefs();applySeqView();setTimeout(clampBouncersToBounds,50);});
-vtbTiersBtn&&vtbTiersBtn.addEventListener('click',()=>{trackersHidden=!trackersHidden;_saveViewPrefs();applySeqView();setTimeout(clampBouncersToBounds,50);});
+function _saveViewPrefs(){try{localStorage.setItem('ab2_hideSeq',seqHidden?'1':'0');localStorage.setItem('ab2_hideTrackers',trackersHidden?'1':'0');localStorage.setItem('ab2_hidePads',padsHidden?'1':'0');}catch(e){}}
+vtbViewBtn&&vtbViewBtn.addEventListener('click',(e)=>{e.stopPropagation();viewMenu.style.display==='flex'?closeViewMenu():openViewMenu();});
+viewMenu&&viewMenu.addEventListener('click',(e)=>{
+  e.stopPropagation();
+  const r=e.target.closest('[data-vm]');if(!r)return;
+  const k=r.getAttribute('data-vm');
+  if(k==='tiers')trackersHidden=!trackersHidden;
+  else if(k==='seq')seqHidden=!seqHidden;
+  else padsHidden=!padsHidden;
+  _saveViewPrefs();applySeqView();refreshViewMenu();
+  if(viewMenu.style.display==='flex')openViewMenu(); // re-anchor: the button may have moved
+  setTimeout(clampBouncersToBounds,50);
+});
+document.addEventListener('click',()=>closeViewMenu());
+// Edit Pads needs the pads on screen
+(function(){const eb=document.getElementById('padEditToggleBtn');
+  eb&&eb.addEventListener('click',()=>{if(padsHidden){padsHidden=false;_saveViewPrefs();applySeqView();}},true);})();
 
 // Fullscreen modal
 seqExpandBtn&&seqExpandBtn.addEventListener('click',()=>openSeqFull());

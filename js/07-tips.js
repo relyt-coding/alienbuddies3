@@ -154,6 +154,7 @@ function updateDrumTrackerOverlay(){
   const overlay=document.getElementById('drumTrackerOverlay');
   if(!overlay)return;
   overlay.style.display=drumTrackerActive?'none':'flex';
+  document.body.classList.toggle('drum-overlay',!drumTrackerActive); // gives the ACTIVATE button room so it never covers the score text
   const btn=document.getElementById('drumTrackerActivateBtn');
   if(btn&&!drumTrackerActive){
     const canAfford=score>=25;

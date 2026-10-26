@@ -208,26 +208,7 @@ function resumeMatchGrid(saved){
   document.getElementById('matchProgressBar').style.width=(matchPairs/matchTotalPairs*100)+'%';
 
   const total=saved.cards.length;
-  let cols;
-  if(total<=4)cols=2;else if(total<=8)cols=4;else if(total<=12)cols=4;
-  else if(total<=16)cols=4;else if(total<=20)cols=5;else if(total<=24)cols=6;
-  else if(total<=30)cols=6;else if(total<=40)cols=8;else if(total<=50)cols=10;
-  else if(total<=60)cols=10;else cols=10;
-  const rows=Math.ceil(total/cols);
-  grid.style.gridTemplateColumns=`repeat(${cols},1fr)`;
-  grid.style.gridTemplateRows='';
-  grid.style.alignContent='start';
-  grid.style.maxWidth='';
-  grid.style.margin='';
-  // Constrain card width so all rows fit on screen (3:4 ratio, so height = width * 4/3)
-  const cardRows=Math.ceil(total/cols);
-  const availH=window.innerHeight*0.72;
-  const maxCardH=Math.floor((availH-(cardRows-1)*6)/cardRows);
-  const maxCardW=Math.floor(maxCardH*3/4);
-  const gridW=Math.min(520,cols*maxCardW+(cols-1)*6+24);
-  grid.style.maxWidth=gridW+'px';
-  const fontSize=total<=8?'2rem':total<=16?'1.6rem':total<=32?'1.2rem':total<=60?'.9rem':'.7rem';
-  grid.style.setProperty('--mcard-font',fontSize);
+  layoutMatchGrid(grid,total);
 
   saved.cards.forEach((cardData,idx)=>{
     const card=document.createElement('div');
@@ -267,42 +248,7 @@ function buildMatchGrid(){
 
   // Grid cols: 4 pairs=8 cards=4×2, 5=10=5×2, 6=12=4×3, 7=14=7×2, 8=16=4×4...
   const total=cards.length;
-  let cols;
-  if(total<=8)cols=4;
-  else if(total<=16)cols=4;
-  else if(total<=20)cols=5;
-  else if(total<=24)cols=6;
-  else if(total<=28)cols=7;
-  else if(total<=32)cols=8;
-  else cols=8;
-  // Pick cols for best fit — aim for roughly square grid
-  if(total<=4)cols=2;
-  else if(total<=8)cols=4;
-  else if(total<=12)cols=4;
-  else if(total<=16)cols=4;
-  else if(total<=20)cols=5;
-  else if(total<=24)cols=6;
-  else if(total<=30)cols=6;
-  else if(total<=40)cols=8;
-  else if(total<=50)cols=10;
-  else if(total<=60)cols=10;
-  else if(total<=80)cols=10;
-  else cols=10;
-  const rows=Math.ceil(total/cols);
-  grid.style.gridTemplateColumns=`repeat(${cols},1fr)`;
-  grid.style.gridTemplateRows='';
-  grid.style.alignContent='start';
-  grid.style.maxWidth='';
-  grid.style.margin='';
-  // Constrain card width so all rows fit on screen (3:4 ratio)
-  const cardRows=Math.ceil(total/cols);
-  const availH=window.innerHeight*0.72;
-  const maxCardH=Math.floor((availH-(cardRows-1)*6)/cardRows);
-  const maxCardW=Math.floor(maxCardH*3/4);
-  const gridW=Math.min(520,cols*maxCardW+(cols-1)*6+24);
-  grid.style.maxWidth=gridW+'px';
-  const fontSize=total<=8?'2rem':total<=16?'1.6rem':total<=32?'1.2rem':total<=60?'.9rem':'.7rem';
-  grid.style.setProperty('--mcard-font',fontSize);
+  layoutMatchGrid(grid,total);
 
   cards.forEach((pattern,idx)=>{
     const card=document.createElement('div');
@@ -449,3 +395,32 @@ function initMatchStars(){
   }
   draw();
 }
+
+// Pick the column count that gives the BIGGEST cards for the screen (3:4 cards), and size the grid to fit.
+// Desktop: uses most of the window. Phone: same as before (narrow column).
+function layoutMatchGrid(grid,total){
+  grid.dataset.total=total;
+  const desktop=document.body.classList.contains('desktop-mode');
+  const gap=6,pad=24;
+  const availW=desktop?Math.min(window.innerWidth*0.92,1500):Math.min(520,window.innerWidth);
+  const availH=desktop?Math.max(240,window.innerHeight-150):window.innerHeight*0.72;
+  let best={cols:4,w:0};
+  for(let c=2;c<=12;c++){
+    const r=Math.ceil(total/c);
+    const wByW=(availW-pad-(c-1)*gap)/c;
+    const wByH=((availH-(r-1)*gap)/r)*3/4;
+    const w=Math.floor(Math.min(wByW,wByH));
+    if(w>best.w)best={cols:c,w};
+  }
+  const cols=best.cols;
+  grid.style.gridTemplateColumns='repeat('+cols+',1fr)';
+  grid.style.gridTemplateRows='';
+  grid.style.alignContent='start';
+  grid.style.margin='';
+  grid.style.maxWidth=Math.min(availW,cols*best.w+(cols-1)*gap+pad)+'px';
+  const fs=desktop?Math.max(1,best.w/46):1; // emoji/text scale with the card size
+  const base=total<=8?2:total<=16?1.6:total<=32?1.2:total<=60?.9:.7;
+  grid.style.setProperty('--mcard-font',(desktop?Math.max(base,Math.min(4.2,best.w/38)):base)+'rem');
+}
+
+addEventListener('resize',()=>{const g=document.getElementById('matchGrid'),m=document.getElementById('matchingModal');if(g&&m&&m.style.display!=='none'&&g.dataset.total)layoutMatchGrid(g,parseInt(g.dataset.total));});

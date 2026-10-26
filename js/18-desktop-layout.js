@@ -274,7 +274,9 @@ function fitPadArea(){
         if(el.closest('#homeScreen'))return;
         const cs=getComputedStyle(el);
         if(cs.display==='none'||cs.visibility==='hidden')return;
-        const r=el.getBoundingClientRect();
+        // the reminder's wrapper is stretched tall; only its bubble should block the aliens
+        const tgt=(sel==='#editModeReminder'&&el.firstElementChild)?el.firstElementChild:el;
+        const r=tgt.getBoundingClientRect();
         if(r.width<4||r.height<4)return;
         out.push(r);
       });

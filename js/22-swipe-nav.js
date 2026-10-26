@@ -14,7 +14,7 @@
     if(!document.body.classList.contains('game-active'))return true;
     if(!t||!t.closest)return false;
     // don't steal swipes from controls that use their own horizontal drags, or from pop-ups
-    if(t.closest('input,select,textarea,.pad-area,#autoTiersCol,#padCountSelector,[id$="Modal"],.modal,.modal-overlay,#settingsBox,#skillTreeView'))return true;
+    if(t.closest('input,select,textarea,.pad-area,.seq-area,#seqFullModal,#autoTiersCol,#padCountSelector,[id$="Modal"],.modal,.modal-overlay,#settingsBox,#skillTreeView'))return true;
     var pops=document.querySelectorAll('[id$="Modal"]');
     for(var i=0;i<pops.length;i++){var s=pops[i];if(s.classList.contains('open')||(s.style.display&&s.style.display!=='none'&&s.style.display!==''))return true;}
     return false;

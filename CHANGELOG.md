@@ -2,6 +2,11 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.50 - 2026-10-25 21:35
+
+- changed: css/style.css
+- changed: js/01-constants.js
+
 ## v0.2.49 - 2026-10-25 21:29
 
 - changed: css/style.css

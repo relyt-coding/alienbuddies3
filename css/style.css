@@ -1282,3 +1282,12 @@ body:not(.desktop-mode) .tiers-container.scrolls{-webkit-mask-image:linear-gradi
 
 /* v0.2.49 phone: pads show only the sound name (no 'DRUMS' category line); empty pads keep their 'tap to assign' hint */
 body:not(.desktop-mode) .pad-sub:not(.empty){display:none;}
+
+/* v0.2.50 iPhone/Safari: make the card flip render reliably (prefixed 3D properties, no clipping of the flipped face) */
+.match-card{-webkit-transform-style:preserve-3d;will-change:transform;}
+.match-card-face{-webkit-backface-visibility:hidden;backface-visibility:hidden;overflow:visible;-webkit-transform:translateZ(0);}
+.match-card-front{-webkit-transform:rotateY(180deg) translateZ(0);transform:rotateY(180deg) translateZ(0);}
+.match-card-back{-webkit-transform:rotateY(0deg) translateZ(1px);transform:rotateY(0deg) translateZ(1px);}
+/* desktop sequencer: wider name column so sound names are not cut off (scales with the window) */
+body.desktop-mode .seq-layer-row,body.desktop-mode .seq-ph-bar{grid-template-columns:calc(104px*var(--ds,1)) 1fr calc(48px*var(--ds,1));}
+body.desktop-mode .seq-snd-pill{padding:.2rem .5rem;gap:6px;}

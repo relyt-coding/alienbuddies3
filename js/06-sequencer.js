@@ -243,7 +243,7 @@ function addFullLayerRow(layer){
   const snd=SOUND_MAP[layer.soundId]||ALL_SOUNDS[0];
   const row=document.createElement('div');row.className='seq-layer-row';
   // Pill
-  const pill=document.createElement('div');pill.className='seq-snd-pill';
+  const pill=document.createElement('div');pill.className='seq-snd-pill';pill.style.setProperty('--lc',snd.color);
   const dot=document.createElement('div');dot.className='seq-pill-dot';dot.style.background=snd.color;
   const nm=document.createElement('div');nm.className='seq-pill-name';nm.style.color=snd.color;nm.textContent=snd.name;
   pill.appendChild(dot);pill.appendChild(nm);
@@ -320,6 +320,7 @@ function buildMpListFull(){
         mpFullDot.style.background=snd.color;mpFullName.style.color=snd.color;mpFullName.textContent=snd.name;
         mpFullLayer.fullStepEls&&mpFullLayer.fullStepEls.forEach(s=>s.style.setProperty('--lc',snd.color));
         mpFullLayer.stepEls&&mpFullLayer.stepEls.forEach(s=>s.style.setProperty('--lc',snd.color));
+        mpFullDot.parentElement&&mpFullDot.parentElement.style.setProperty("--lc",snd.color);
         mpFullLayer=null;
       }
       closeMiniPicker();
@@ -396,7 +397,7 @@ function addSeqLayer(soundId,stepsInit){
   const layer={soundId:snd.id,steps:padSteps(stepsInit,false),vols:padSteps(volsInit,100),muted:false,stepEls:[],fullStepEls:[]};
   const row=document.createElement('div');row.className='seq-layer-row';
   // Sound pill
-  const pill=document.createElement('div');pill.className='seq-snd-pill';
+  const pill=document.createElement('div');pill.className='seq-snd-pill';pill.style.setProperty('--lc',snd.color);
   const dot=document.createElement('div');dot.className='seq-pill-dot';dot.style.background=snd.color;
   const nm=document.createElement('div');nm.className='seq-pill-name';nm.style.color=snd.color;nm.textContent=snd.name;
   pill.appendChild(dot);pill.appendChild(nm);

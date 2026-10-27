@@ -1382,7 +1382,7 @@ body.desktop-mode:not(.seq-on) .pad-area{padding-bottom:5.5rem;}
 body.desktop-mode .desktop-collapse-btn{font-size:1.19rem;padding:.77rem .45rem;border-radius:8px;}
 
 /* tips page: larger text on desktop */
-body.desktop-mode #tipsModal>div:first-child{zoom:1.3;}
+body.desktop-mode #tipsModal>div:first-child{zoom:1.04;}
 
 /* v0.2.80: step counts — small numbers inside each sequencer step (View menu → STEP COUNTS) */
 .seq-steps{counter-reset:stp;}
@@ -1449,3 +1449,38 @@ body:has(#seqFullModal.open) #pageDots{display:none !important;}
 #bunkerView{transform:translateX(-100%);}
 body.bunker-open #gameView{transform:translateX(100%);}
 body.bunker-open #bunkerView{transform:translateX(0);}
+
+/* v0.2.85: the tracker rows scroll (overflow:auto), which clipped the dots' glow into a hard line.
+   Give the glow room inside the scroll box and pull the layout back with matching negative margins. */
+.tiers-container{padding:14px 16px;margin:-14px -16px;box-sizing:content-box;}
+.tiers-col{position:relative;z-index:2;}
+
+/* matching game: larger header/buttons on desktop */
+body.desktop-mode #matchTitle{font-size:2.4rem !important;}
+body.desktop-mode #matchSubtitle{font-size:1.2rem !important;}
+body.desktop-mode #matchCloseBtn{font-size:1.5rem !important;padding:.55rem 1.3rem !important;}
+body.desktop-mode #matchPairsDisplay,body.desktop-mode #matchScoreDisplay{font-size:1.35rem !important;}
+body.desktop-mode #matchVictoryTitle{font-size:4rem !important;}
+body.desktop-mode #matchVictoryReward{font-size:1.7rem !important;}
+body.desktop-mode #matchVictoryClose{font-size:1.9rem !important;padding:1rem 3.2rem !important;}
+
+/* v0.2.85 desktop, 4 pads before the sequencer: center title + score + pads vertically (same feel as after buying the sequencer) */
+body.desktop-mode:not(.seq-on):not(.pads-hidden) .app{justify-content:center;gap:clamp(1.2rem,5vh,3.5rem);}
+body.desktop-mode:not(.seq-on) .pad-area{padding-bottom:1rem;}
+/* v0.2.85 bunker + tips headers bigger; bunker cells shorter (grid is long and scrolls) */
+#bunkerView .page-header{padding-top:1.2rem;padding-bottom:.7rem;}
+#bunkerView .page-title{font-size:2.1rem !important;}
+#bunkerView .page-sub{font-size:.9rem !important;letter-spacing:.1em !important;white-space:nowrap;}
+#bunkerView #tipsBtn{font-size:1.15rem !important;padding:.4rem 1rem !important;border-radius:10px !important;}
+#bunkerView #tipsOwnedLabel{font-size:.9rem !important;}
+.bunker-stat{padding:.35rem .55rem;}
+.bunker-stat-val{font-size:1.6rem;}
+.bunker-stat-label{font-size:.7rem;}
+body.desktop-mode .bunker-stat-val{font-size:1.9rem !important;}
+body.desktop-mode .bunker-stat-label{font-size:.75rem !important;}
+.alien-cell,.egg-cell{aspect-ratio:1.45;}
+
+/* v0.2.85 sequencer sound pill: tinted with the track color so it reads as a label, not an empty step */
+.seq-snd-pill{--lc:#44ddaa;background:color-mix(in srgb,var(--lc) 16%,#0c0c10) !important;border:1px solid color-mix(in srgb,var(--lc) 55%,#111) !important;box-shadow:0 0 8px -2px color-mix(in srgb,var(--lc) 45%,transparent), inset 0 1px 0 color-mix(in srgb,var(--lc) 25%,transparent);}
+.seq-snd-pill:hover{border-color:var(--lc) !important;}
+.seq-pill-name{font-weight:700;}

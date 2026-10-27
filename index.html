@@ -787,27 +787,27 @@
     <!-- Header -->
     <div style="position:relative;z-index:2;width:100%;max-width:460px;padding:max(.8rem,env(safe-area-inset-top,.8rem)) 1.2rem .4rem;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
       <div>
-        <div id="matchTitle" style="font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:.2em;color:#00ff88;">🃏 MATCHING GAME</div>
-        <div id="matchSubtitle" style="font-family:'Bebas Neue',sans-serif;font-size:.6rem;letter-spacing:.15em;color:#335533;">LEVEL 1 · FIND 4 PAIRS</div>
+        <div id="matchTitle" style="font-family:'Bebas Neue',sans-serif;font-size:1.7rem;letter-spacing:.14em;color:#00ff88;">🃏 MATCHING GAME</div>
+        <div id="matchSubtitle" style="font-family:'Bebas Neue',sans-serif;font-size:.95rem;letter-spacing:.14em;margin-top:.1rem;color:#335533;">LEVEL 1 · FIND 4 PAIRS</div>
       </div>
-      <button id="matchCloseBtn" style="font-family:'Bebas Neue',sans-serif;font-size:.75rem;padding:.3rem .7rem;border-radius:8px;border:1px solid #1a3a2a;background:transparent;color:#336633;cursor:pointer;touch-action:manipulation;">✕ CLOSE</button>
+      <button id="matchCloseBtn" style="font-family:'Bebas Neue',sans-serif;font-size:1.15rem;letter-spacing:.1em;padding:.45rem 1rem;border-radius:10px;border:1px solid #1a3a2a;background:transparent;color:#336633;cursor:pointer;touch-action:manipulation;">✕ CLOSE</button>
     </div>
     <!-- Score bar -->
     <div id="matchScoreBar" style="position:relative;z-index:2;width:100%;max-width:460px;padding:.2rem 1.2rem .5rem;display:flex;gap:6px;align-items:center;flex-shrink:0;">
-      <div id="matchPairsDisplay" style="font-family:'Bebas Neue',sans-serif;font-size:.7rem;letter-spacing:.12em;color:#00ff88;">0 / 4 PAIRS</div>
-      <div style="flex:1;height:4px;background:#0a1a10;border-radius:2px;overflow:hidden;">
+      <div id="matchPairsDisplay" style="font-family:'Bebas Neue',sans-serif;font-size:1.05rem;letter-spacing:.1em;white-space:nowrap;color:#00ff88;">0 / 4 PAIRS</div>
+      <div style="flex:1;height:7px;background:#0a1a10;border-radius:4px;overflow:hidden;">
         <div id="matchProgressBar" style="height:100%;width:0%;background:#00ff88;border-radius:2px;transition:width .3s;"></div>
       </div>
-      <div id="matchScoreDisplay" style="font-family:'Bebas Neue',sans-serif;font-size:.7rem;letter-spacing:.08em;color:#ffee44;flex-shrink:0;"></div>
+      <div id="matchScoreDisplay" style="font-family:'Bebas Neue',sans-serif;font-size:1.05rem;letter-spacing:.08em;color:#ffee44;flex-shrink:0;"></div>
     </div>
     <!-- Card grid -->
     <div id="matchGrid" style="position:relative;z-index:2;display:grid;gap:6px;padding:.5rem 1.2rem max(1rem,env(safe-area-inset-bottom,1rem));width:100%;max-width:520px;box-sizing:border-box;overflow-y:auto;align-content:start;-webkit-overflow-scrolling:touch;"></div>
     <!-- Victory overlay -->
     <div id="matchVictory" style="position:absolute;top:0;right:0;bottom:0;left:0;z-index:10;display:none;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,5,16,.92);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);">
-      <div style="font-size:3rem;margin-bottom:.5rem;">🏆</div>
-      <div id="matchVictoryTitle" style="font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:.2em;color:#00ff88;">VICTORY!</div>
-      <div id="matchVictoryReward" style="font-family:'Bebas Neue',sans-serif;font-size:.9rem;letter-spacing:.15em;color:#ffee44;margin:.4rem 0 1.2rem;">PERMANENT ×2 MULTIPLIER EARNED</div>
-      <button id="matchVictoryClose" style="font-family:'Bebas Neue',sans-serif;font-size:.9rem;letter-spacing:.15em;padding:.6rem 1.8rem;border-radius:12px;border:1px solid #00ff88;background:#041a0d;color:#00ff88;cursor:pointer;touch-action:manipulation;">CLAIM REWARD</button>
+      <div style="font-size:4.2rem;margin-bottom:.5rem;">🏆</div>
+      <div id="matchVictoryTitle" style="font-family:'Bebas Neue',sans-serif;font-size:3rem;letter-spacing:.2em;color:#00ff88;">VICTORY!</div>
+      <div id="matchVictoryReward" style="font-family:'Bebas Neue',sans-serif;font-size:1.35rem;letter-spacing:.14em;color:#ffee44;margin:.5rem 0 1.6rem;text-align:center;padding:0 1rem;">PERMANENT ×2 MULTIPLIER EARNED</div>
+      <button id="matchVictoryClose" style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:.15em;padding:.85rem 2.6rem;border-radius:14px;border:1px solid #00ff88;background:#041a0d;color:#00ff88;cursor:pointer;touch-action:manipulation;">CLAIM REWARD</button>
     </div>
   </div>
 

@@ -2,6 +2,15 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.85 - 2026-10-26 21:37
+
+- changed: css/style.css
+- changed: index.html
+- changed: js/01-constants.js
+- changed: js/06-sequencer.js
+- changed: js/08-matching-game.js
+- changed: js/09-sound-picker.js
+
 ## v0.2.84 - 2026-10-26 16:56
 
 - changed: css/style.css

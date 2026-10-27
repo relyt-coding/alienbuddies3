@@ -32,6 +32,7 @@ function buildMpList(){
         mpTargetDot.style.background=snd.color;
         mpTargetName.style.color=snd.color;mpTargetName.textContent=snd.name;
         mpTarget.stepEls.forEach(s=>s.style.setProperty('--lc',snd.color));
+        if(mpTargetDot.parentElement)mpTargetDot.parentElement.style.setProperty("--lc",snd.color);
         closeMiniPicker();
       }
     });

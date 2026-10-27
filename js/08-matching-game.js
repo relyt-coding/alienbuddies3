@@ -132,7 +132,7 @@ function buildLevel0Grid(){
   // X button that appears after flipping
   const xBtn=document.createElement('button');
   xBtn.textContent='✕ DONE';
-  xBtn.style.cssText="position:absolute;top:calc(.7rem + 15px);right:calc(.7rem + 15px);font-family:'Bebas Neue',sans-serif;font-size:.75rem;letter-spacing:.12em;padding:.3rem .7rem;border-radius:8px;border:1px solid #00ff88;background:#041a0d;color:#00ff88;cursor:pointer;touch-action:manipulation;z-index:20;display:none;";
+  xBtn.style.cssText="position:absolute;top:calc(.7rem + 15px);right:calc(.7rem + 15px);font-family:'Bebas Neue',sans-serif;font-size:"+(IS_DESKTOP?'1.6rem':'1.2rem')+";letter-spacing:.12em;padding:.5rem 1.1rem;border-radius:10px;border:1px solid #00ff88;background:#041a0d;color:#00ff88;cursor:pointer;touch-action:manipulation;z-index:20;display:none;";
   xBtn.addEventListener('click',()=>{
     // Reward is applied once by the victory screen's button (matchVictoryClose)
     matchIntroInfoStage=false;

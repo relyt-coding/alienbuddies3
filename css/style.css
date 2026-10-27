@@ -1092,7 +1092,7 @@ body.pad-fit:not(.desktop-mode).seq-on .pad-area{padding-bottom:0;}
 body:not(.desktop-mode) #seqPatternView .seq-bottom-row{flex-wrap:nowrap;gap:3px;}
 body:not(.desktop-mode) #seqPatternView .seq-bottom-row>button{font-size:.58rem;letter-spacing:.04em;padding:.2rem .32rem;flex:0 0 auto;}
 body:not(.desktop-mode) #seqPatternView .seq-bottom-row>#seqAddBtn{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:clip;}
-body:not(.desktop-mode) #seqPatternView .seq-bottom-row>#seqClearBtn{padding-left:.2rem;padding-right:.2rem;width:1.7rem;}
+body:not(.desktop-mode) #seqPatternView .seq-bottom-row>#seqClearBtn{padding-left:.5rem;padding-right:.5rem;width:auto;}
 #seqClearBtn svg{width:15px;height:15px;margin:0 auto;}
 
 /* v0.2.24: less clutter under the score: no energy countdown text, no alien boost line (the energy bar stays) */
@@ -1472,15 +1472,22 @@ body.desktop-mode:not(.seq-on) .pad-area{padding-bottom:1rem;}
 #bunkerView .page-title{font-size:2.1rem !important;}
 #bunkerView .page-sub{font-size:.9rem !important;letter-spacing:.1em !important;white-space:nowrap;}
 #bunkerView #tipsBtn{font-size:1.15rem !important;padding:.4rem 1rem !important;border-radius:10px !important;}
-#bunkerView #tipsOwnedLabel{font-size:.9rem !important;}
 .bunker-stat{padding:.35rem .55rem;}
 .bunker-stat-val{font-size:1.6rem;}
 .bunker-stat-label{font-size:.7rem;}
 body.desktop-mode .bunker-stat-val{font-size:1.9rem !important;}
 body.desktop-mode .bunker-stat-label{font-size:.75rem !important;}
-.alien-cell,.egg-cell{aspect-ratio:1.45;}
 
 /* v0.2.85 sequencer sound pill: tinted with the track color so it reads as a label, not an empty step */
 .seq-snd-pill{--lc:#44ddaa;background:color-mix(in srgb,var(--lc) 16%,#0c0c10) !important;border:1px solid color-mix(in srgb,var(--lc) 55%,#111) !important;box-shadow:0 0 8px -2px color-mix(in srgb,var(--lc) 45%,transparent), inset 0 1px 0 color-mix(in srgb,var(--lc) 25%,transparent);}
 .seq-snd-pill:hover{border-color:var(--lc) !important;}
 .seq-pill-name{font-weight:700;}
+
+/* v0.2.86 bunker header: BACK left, title centered, TIPS right — buttons same height + width */
+#bunkerView .page-header{align-items:center;gap:.6rem;}
+#bunkerView .page-title-wrap{text-align:center;min-width:0;}
+#bunkerView .page-title,#bunkerView .page-sub{text-align:center;}
+#bunkerView .back-btn,#bunkerView #tipsBtn{box-sizing:border-box;flex:0 0 5.6rem;width:5.6rem;height:2.7rem;display:flex;align-items:center;justify-content:center;padding:0 !important;font-size:1.15rem !important;letter-spacing:.1em;border-radius:10px !important;}
+#bunkerView .bunker-hdr-right{flex:0 0 5.6rem;display:flex;justify-content:flex-end;}
+#bunkerView .page-sub{font-size:.8rem !important;letter-spacing:.08em !important;}
+body.desktop-mode #bunkerView .page-header::before{content:'';flex:0 0 5.6rem;}

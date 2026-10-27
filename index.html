@@ -244,7 +244,7 @@
             <button class="seq-add-btn" id="seqAddBtn" disabled>+ ADD TRACK</button>
             <button class="seq-save-pat-btn" id="seqStepsBtn" style="display:none;">16 STEPS</button>
             <button class="seq-save-pat-btn" id="seqSavePatBtn">SAVE/LOAD PATTERN</button>
-            <button class="seq-save-pat-btn" id="seqClearBtn" title="Clear tracks" aria-label="Clear tracks" style="border-color:#aa3344;color:#e0485c;padding-left:.2rem;padding-right:.2rem;width:1.7rem;"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:block"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg></button>
+            <button class="seq-save-pat-btn" id="seqClearBtn" title="Clear tracks" aria-label="Clear tracks" style="border-color:#aa3344;color:#e0485c;">CLEAR</button>
             <button class="seq-save-pat-btn" id="seqExportPatBtn" style="border-color:#00cc88;color:#00aa66;">EXPORT WAV</button>
           </div>
         </div>
@@ -546,9 +546,9 @@
         <div class="page-title" style="color:#00ff88">BUNKER</div>
         <div class="page-sub" id="bunkerSubEl">0 / 100 ALIENS · BUNKER #1</div>
       </div>
-      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:.2rem;">
+      <div class="bunker-hdr-right">
         <button id="tipsBtn" style="font-family:'Bebas Neue',sans-serif;font-size:.75rem;letter-spacing:.12em;padding:.32rem .75rem;border-radius:8px;border:1px solid #3a3a1a;background:#0d0d02;color:#aaaa33;cursor:pointer;touch-action:manipulation;transition:all .2s;white-space:nowrap;">TIPS</button>
-        <div id="tipsOwnedLabel" style="font-family:'Bebas Neue',sans-serif;font-size:.58rem;letter-spacing:.1em;color:#555;text-align:right;">0 TIPS PURCHASED</div>
+        
       </div>
     </div>
     <div class="bunker-body">
@@ -819,6 +819,7 @@
         <div style="display:flex;flex-direction:column;align-items:center;gap:.2rem;">
           <div style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:.18em;color:#cccc44;">TIPS</div>
           <div id="tipsModalScore" style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:.1em;color:#999;"></div>
+          <div id="tipsOwnedLabel" style="font-family:'Bebas Neue',sans-serif;font-size:.95rem;letter-spacing:.1em;color:#aaaa55;text-align:center;">0 TIPS PURCHASED</div>
         </div>
         <div style="width:90px;"></div>
       </div>

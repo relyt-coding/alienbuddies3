@@ -31,7 +31,7 @@ function formatMult(n){if(n<100000)return n.toLocaleString(undefined,{maximumSig
 // ══════════════════════════════════════════════
 // Unlock prices over 5 million are 30% pricier (a longer grind for the big unlocks); cheap early unlocks are untouched.
 function bump30(c){return c>5e6?Math.round(c*1.3):c;}
-const GAME_VERSION='0.2.85'; // bump on every delivered build (shown in Settings and on the home screen)
+const GAME_VERSION='0.2.86'; // bump on every delivered build (shown in Settings and on the home screen)
 const BASE_CPS=5;
 const UNLOCK_COST=bump30(60000000);
 const ALIEN_POWER_UNLOCK_COST=bump30(600000000);
@@ -71,8 +71,8 @@ function alienBoostUpgradeAt(lvl){const cost=alienBoostUpgradeCost(lvl);const pe
 function multiClickUpgradeCost(lvl){if(lvl===0)return 15000000;let c=15000000;for(let i=1;i<=lvl;i++){c=Math.round(c*(100+i*40));if(i>=2)c=Math.round(c*3);}return c;}
 function multiClickUpgradeAt(lvl){const clicks=lvl+2;return{effectMain:`${clicks}× CLICKS`,effectSub:`Each tap counts as ${clicks} clicks`,cost:multiClickUpgradeCost(lvl)};}
 
-// Pad button costs: 1 free, 2=5 (kick), 3=2.5K (snare), 4=25K, 5=2.5M ...
-const PAD_COSTS=[0,10,2500,25000,2500000,9000000000,60000000000,450000000000].map(bump30); // pad 2 (kick) is just 10 pts so players find the drum pad fast
+// Pad button costs: 1 free, 2=5 (kick), 3=100 (snare), 4=3K, 5=2.5M ...
+const PAD_COSTS=[0,10,100,3000,2500000,9000000000,60000000000,450000000000].map(bump30); // pad 2 (kick) is just 10 pts so players find the drum pad fast
 const PAD_DEFAULT_SOUNDS=['hihat','kick','snare',null,null,null,null,null]; // null = no sound, must buy from library
 
 // Sound library unlocks: first = 5M, each ×25

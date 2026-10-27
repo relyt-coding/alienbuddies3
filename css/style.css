@@ -1491,3 +1491,13 @@ body.desktop-mode .bunker-stat-label{font-size:.75rem !important;}
 #bunkerView .bunker-hdr-right{flex:0 0 5.6rem;display:flex;justify-content:flex-end;}
 #bunkerView .page-sub{font-size:.8rem !important;letter-spacing:.08em !important;}
 body.desktop-mode #bunkerView .page-header::before{content:'';flex:0 0 5.6rem;}
+
+/* v0.2.87 matching game button glows whenever a level is ready to play */
+@keyframes matchGlow{0%,100%{box-shadow:0 0 5px 0 rgba(0,255,136,.25);border-color:#00cc70;color:#00e07a;}50%{box-shadow:0 0 18px 3px rgba(0,255,136,.65);border-color:#66ffbb;color:#aaffd6;}}
+#matchingGameBtn.match-glow{animation:matchGlow 1.4s ease-in-out infinite;}
+
+/* v0.2.87 bunker header: TIPS on the left, BACK on the right */
+#bunkerView .bunker-hdr-right{order:1;justify-content:flex-start;}
+#bunkerView .page-title-wrap{order:2;}
+#bunkerView .back-btn{order:3;}
+body.desktop-mode #bunkerView .page-header::before{order:3;}

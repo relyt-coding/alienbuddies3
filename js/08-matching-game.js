@@ -49,6 +49,7 @@ function updateMatchingBtn(){
     btn.style.background='#020d06';
     btn.style.cursor='default';
     btn.style.boxShadow='none';
+    btn.classList.remove('match-glow');
     const left=needed-totalAliens;
     btn.textContent='🃏 MATCHING GAME · '+left+' MORE ALIEN'+(left===1?'':'S')+' TO UNLOCK LVL '+nextLvl;
     lck.textContent='UNLOCKS AT '+needed+' ALIEN BUDDIES';
@@ -60,6 +61,7 @@ function updateMatchingBtn(){
     btn.style.background='#041a0d';
     btn.style.cursor='pointer';
     btn.style.boxShadow='0 0 18px -4px rgba(0,255,136,.3)';
+    btn.classList.toggle('match-glow',nextLvl<=25);
     if(nextLvl>25){
       btn.textContent='🃏 MATCHING GAME · ALL COMPLETE 🏆';
       lck.textContent='';

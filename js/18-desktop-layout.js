@@ -270,6 +270,7 @@ function fitPadArea(){
   const app=document.querySelector('#gameView .app');
   const area=grid&&grid.closest('.pad-area');
   if(!grid||!app||!area)return;
+  if(!document.body.classList.contains('desktop-mode')&&(document.body.classList.contains('store-open')||document.body.classList.contains('bunker-open')))return; // phone: home is off-screen — keep its last layout so it doesn't reflow on return
   if(!document.body.classList.contains('desktop-mode')||app.offsetHeight===0){
     grid.style.maxWidth='';grid.style.marginTop='';clearPhoneBalance();
     // phone layout: size the pads to the space left above the SETTINGS / EDIT PADS buttons so they never overlap

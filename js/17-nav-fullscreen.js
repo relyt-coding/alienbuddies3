@@ -38,6 +38,7 @@ function openStore(){
 function closeStore(){
   if(document.body.classList.contains('desktop-mode'))return;
   document.body.classList.remove('store-open');
+  if(typeof fitPadArea==='function')fitPadArea(); // lay the pads out NOW so they don't jump after the slide-back
 }
 function openBunker(){
   viewingBunker=Math.max(0,Math.floor((Math.max(0,totalAliens-1))/BUNKER_SIZE));
@@ -59,6 +60,7 @@ function openBunker(){
 function closeBunker(){
   if(document.body.classList.contains('desktop-mode'))return;
   document.body.classList.remove('bunker-open');
+  if(typeof fitPadArea==='function')fitPadArea();
 }
 addEP('openStoreBtn',openStore);
 addEP('closeStoreBtn',closeStore);

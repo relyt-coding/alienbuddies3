@@ -2,7 +2,7 @@
 // ══════════════════════════════════════════════
 //  SEQUENCER
 // ══════════════════════════════════════════════
-let STEPS=16;            // steps in the current loop (16 / 32 / 64 — bought in the shop)
+let STEPS=16;            // steps in the current loop (16 / 32 / 64 — unlocked in the skill tree)
 const MAX_STEPS=64;      // every layer always stores 64 slots so nothing is lost when switching back to a shorter loop
 function padSteps(a,fill){const o=a?Array.prototype.slice.call(a):[];while(o.length<MAX_STEPS)o.push(fill);return o;}
 function patLen(p){return p?(p.stepCount||16):16;}
@@ -150,7 +150,7 @@ stepsMenu&&stepsMenu.addEventListener('click',e=>{
     fr.classList.toggle('on',seqFollow);fr.firstChild.textContent=seqFollow?'✓':'';return;}
   const r=e.target.closest('[data-steps]');if(!r)return;
   const n=parseInt(r.getAttribute('data-steps'));
-  if(n!==16&&(shop.seqStepsLevel||0)<(n===32?1:2)){showToast('Unlock '+n+' steps in the Shop first');return;}
+  if(n!==16&&(shop.seqStepsLevel||0)<(n===32?1:2)){showToast('🔒 Unlock '+n+' Steps in the Galaxy (Musical Toolkit)');return;}
   STEPS=n;applyStepCount();closeStepsMenu();autoSave();
 });
 document.addEventListener('click',()=>closeStepsMenu());

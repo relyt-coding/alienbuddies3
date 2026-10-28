@@ -42,7 +42,7 @@ function autoSave(){
     padSounds:[...padSounds],
     soundVols:{...soundVols},
     visiblePads,
-    seqBpm,seqSteps:STEPS,seqKey,trackFx,
+    seqBpm,seqSteps:STEPS,seqKey,seqKeyMinor,trackFx,
     seqEnergy,energyEmptyHints,
     seqMode,
     arrangement:[...arrangement],
@@ -124,7 +124,7 @@ function drumTierProduct(){return tiers.reduce((m,t,i)=>t.multiplierActive?m*tie
 function seqTierProduct(){return autoTiers.reduce((m,t,i)=>t.multiplierActive?m*tierMultValueFor('seq',i):m,1);}
 function totalMultiplier(){return drumTierProduct()*sharedMultiplier();} // value of one pad tap
 function seqStepMultiplier(){
-  const qs=(typeof unlockedSkills!=='undefined'&&unlockedSkills&&unlockedSkills['quantum_strike'])?1.5:1; // Quantum Strike: sequencer steps +50%
+  const qs=(typeof unlockedSkills!=='undefined'&&unlockedSkills&&unlockedSkills['mt_groove'])?1.5:1; // Groove hub: sequencer steps +50%
   return seqTierProduct()*sharedMultiplier()*qs;
 }
 function highestActive(){let h=-1;tiers.forEach((t,i)=>{if(t.multiplierActive)h=i;});return h;}
@@ -168,7 +168,6 @@ function loadFromSave(data){
   shop.dismissed=Array.isArray(data.shop?.dismissed)?data.shop.dismissed.slice():[];
   shop.drumDotsUnlocked=data.shop?.drumDotsUnlocked??(shop.multLevel>=0);
   shop.seqDotsUnlocked=data.shop?.seqDotsUnlocked??(shop.seqMultLevel>=0);
-  shop.seqStepsLevel=Math.min(2,data.shop?.seqStepsLevel||0);
   totalAliens=data.totalAliens||0;
   matchLevelsCompleted=data.matchLevelsCompleted!==undefined?data.matchLevelsCompleted:-1;
   // Restore shownHints and auto-mark matching hints if already played
@@ -182,6 +181,8 @@ function loadFromSave(data){
   unlockedSkills=data.unlockedSkills?Object.assign({},data.unlockedSkills):{};
   // Tucana Core used to be free: anyone who already unlocked skills keeps the core
   if(Object.keys(unlockedSkills).length&&!unlockedSkills.core)unlockedSkills.core=true;
+  // 32 / 64 steps now come from the skill tree (Musical Toolkit), not the shop
+  shop.seqStepsLevel=unlockedSkills.mt_steps64?2:(unlockedSkills.mt_steps32?1:0);
   // Re-add every skill-tree sound the player has bought (the unlocked flag lives in memory only, so it used to be lost on reload)
   if(typeof PLANET_SOUND_DEFS!=='undefined')PLANET_SOUND_DEFS.forEach(ps=>{if(SOUND_MAP[ps.id])SOUND_MAP[ps.id].locked=true;});
   if(typeof SKILL_TREE_NODES!=='undefined')SKILL_TREE_NODES.forEach(n=>{if(n.soundUnlock&&unlockedSkills[n.id]&&typeof unlockPlanetSound==='function')unlockPlanetSound(n.soundUnlock);});
@@ -253,6 +254,7 @@ updateMatchingBtn();
   // Force synchronous render so desktop CSS constraints apply immediately
   renderUI();
   seqKey=(data.seqKey==null||data.seqKey===''||!(data.seqKey>=0&&data.seqKey<12))?null:data.seqKey;
+  seqKeyMinor=!!data.seqKeyMinor;
   trackFx=Array.isArray(data.trackFx)?data.trackFx.map(f=>f&&typeof f==='object'?Object.assign({rvbType:'hall',rvbAmt:0,echoMix:0,echoDiv:.5,echoFb:.35},f):f):[];
   // Rebuild sequencer with saved layers
   rebuildSeqUI();
@@ -275,5 +277,6 @@ updateMatchingBtn();
   { const want=data.seqSteps; STEPS=([32,64].includes(want)&&shop.seqStepsLevel>=(want===32?1:2))?want:16; }
   applyStepCount();
   ensureAllTracks();
+  if(typeof applyMusicUnlocks==='function')applyMusicUnlocks();
 }
 setInterval(()=>{if(activeSlot>=0)autoSave();},10000);

@@ -43,7 +43,7 @@ const DOT_MAX_LEVEL=6; // level 6 = ×10
 // Upgrade prices (n = upgrades already bought; each tracker pays separately): ×4 5B, then x1000 per level.
 const DOT_UNLOCK_COST=bump30(1e9);
 // Longer sequencer loops (bought after the first track): level 1 = 32 steps, level 2 = 64 steps
-const SEQ_STEP_COSTS=[1e10,1e14]; // 32 steps = 10B, 64 steps = 100T
+// (32 / 64 steps are skill-tree nodes now: mt_steps32 / mt_steps64)
 const DOT_COSTS=[5e10,5e17,5e24,5e31,5e38,5e45,5e52]; // v0.2.80: first upgrade unchanged, every level after is x10,000,000 (was x10,000)
 // v0.2.80: TIER 3 — Sequencer Multi-Click (costs more than the dot upgrades, and more to unlock)
 const SEQ_MC_UNLOCK_COST=1e12;

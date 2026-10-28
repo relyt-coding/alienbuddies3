@@ -1512,3 +1512,19 @@ body.desktop-mode #bunkerView .page-header::before{order:3;}
 #skillTreeCloseBtn{font-size:1.15rem !important;letter-spacing:.1em;padding:.5rem 1.1rem !important;border-radius:10px !important;color:#8a8aaa !important;border-color:#2a2a5a !important;}
 @media (max-width:600px){#skillTreeGemDisplay{font-size:1.7rem !important;}#skillTreeCloseBtn{font-size:1rem !important;padding:.45rem .8rem !important;}}
 #matchVictory>*{zoom:.7;}
+
+/* ── v0.2.90 Musical Toolkit: hub bubbles, music facts, key pairs ── */
+.st-node.hub .st-node-circle{width:84px;height:84px;font-size:2.2rem;border-width:3px;box-shadow:0 0 26px -6px rgba(255,204,0,.55);}
+.st-node.hub .st-node-label{font-size:1.08rem;color:#b89a3a;letter-spacing:.12em;}
+.st-node.hub.unlocked .st-node-label{color:#3a8a6a;}
+.st-node.hub.unlocked .st-node-circle{box-shadow:0 0 26px -4px rgba(68,238,187,.5);}
+#stDetailFact{background:#0b0d18;border:1px solid #2a2a14;border-left:3px solid #ffcc00;border-radius:8px;padding:.55rem .7rem;text-align:left;}
+.st-fact-head{font-family:'Bebas Neue',sans-serif;font-size:.85rem;letter-spacing:.14em;color:#ffcc00;margin-bottom:.2rem;}
+.st-fact-text{font-family:'Bebas Neue',sans-serif;font-size:.95rem;letter-spacing:.05em;line-height:1.4;color:#c9cbe0;}
+.key-grid.key-grid-pairs{grid-template-columns:repeat(6,1fr);gap:6px;}
+.key-pair{display:flex;flex-direction:column;gap:4px;}
+.key-pair .key-btn{font-size:1.2rem;padding:.5rem 0;}
+.key-pair .key-btn.key-min{font-size:1rem;background:#0a0a16;color:#7a7aa8;}
+.key-btn.locked{opacity:.35;font-size:.9rem!important;}
+.key-pair .key-btn.key-min.on{color:#00ff88;background:#04170e;}
+@media (max-width:420px){.key-pair .key-btn{font-size:1rem;}.key-pair .key-btn.key-min{font-size:.85rem;}}

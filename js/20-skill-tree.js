@@ -11,6 +11,96 @@ let gemInterval = null;
 const GEM_UNLOCK_COST = 25; // costs 25 Alien Gems to Explore the Galaxies (was 50; originally 2.6e25 points)
 const BASE_GEMS_PER_ALIEN_PER_MIN = 1;
 
+// ── Key packs: every key is a major key + its relative minor (same notes). C major / A minor are free with the KEY hub.
+// Packs go outward around the circle of fifths: the first ones change just one note from C major, the last ones change five.
+// majors = relative-major roots (0 = C ... 11 = B)
+const KEY_PACKS=[
+  {majors:[7], label:'G / E min',            long:'G major and E minor',                     why:'1 sharp (F♯), just one note away from C major.'},
+  {majors:[5], label:'F / D min',            long:'F major and D minor',                     why:'1 flat (B♭), just one note away from C major.'},
+  {majors:[2], label:'D / B min',            long:'D major and B minor',                     why:'2 sharps (F♯, C♯).'},
+  {majors:[10],label:'B♭ / G min',           long:'B♭ major and G minor',                    why:'2 flats (B♭, E♭).'},
+  {majors:[9,4],label:'A / F♯ min · E / C♯ min',long:'A major, F♯ minor, E major and C♯ minor', why:'3 and 4 sharps: bright guitar keys.'},
+  {majors:[3,8],label:'E♭ / C min · A♭ / F min',long:'E♭ major, C minor, A♭ major and F minor', why:'3 and 4 flats: warm, darker keys.'},
+  {majors:[11,6],label:'B / G♯ min · F♯ / D♯ min',long:'B major, G♯ minor, F♯ major and D♯ minor',why:'5 and 6 sharps: the far side of the circle of fifths.'},
+  {majors:[1], label:'D♭ / B♭ min',          long:'D♭ major and B♭ minor',                   why:'5 flats: the very last stop on the circle.'},
+];
+function musicHas(id){return !!(typeof unlockedSkills!=='undefined'&&unlockedSkills&&unlockedSkills[id]);}
+// can this key be picked yet?
+function keyUnlocked(root,minor){
+  if(!musicHas('mt_key')||root==null)return false;
+  const R=relMajorRoot(root,minor);
+  if(R===0)return true;
+  const i=KEY_PACKS.findIndex(p=>p.majors.includes(R));
+  return i>=0&&musicHas('mt_keys'+(i+1));
+}
+function pianoRollLayers(){if(!musicHas('mt_piano'))return 0;let n=1;for(let L=2;L<=6;L++)if(musicHas('mt_piano'+L))n=L;return n;}
+
+// ── Musical Toolkit nodes (built here so the positions can be laid out along the branch) ──
+// The branch runs up and to the right from Tuning Fork. ax/ay = one step along the branch, px/py = sideways.
+const MUSIC_TREE_NODES=(function(){
+  const ax=Math.SQRT1_2,ay=-Math.SQRT1_2,px=Math.SQRT1_2,py=Math.SQRT1_2;
+  const along=(o,d)=>({x:Math.round(o.x+ax*d),y:Math.round(o.y+ay*d)});
+  const side=(o,d)=>({x:Math.round(o.x+px*d),y:Math.round(o.y+py*d)});
+  const polar=(o,deg,r)=>({x:Math.round(o.x+Math.cos(deg*Math.PI/180)*r),y:Math.round(o.y+Math.sin(deg*Math.PI/180)*r)});
+  const N=[];
+  const hub=(id,icon,name,desc,fact,cost,req,pos,extra)=>{N.push(Object.assign({id,icon,name,desc,fact,cost,requires:[req],x:pos.x,y:pos.y,branch:'points',mult:0,gemMult:1.5,hub:true},extra||{}));return pos;};
+  const br=(id,icon,name,desc,cost,req,pos,extra)=>{N.push(Object.assign({id,icon,name,desc,cost,requires:[req],x:pos.x,y:pos.y,branch:'points',mult:0,gemMult:1.2},extra||{}));return pos;};
+  const fork={x:340,y:-300};
+
+  // 32 / 64 STEPS
+  const s32=br('mt_steps32','🔢','32 Steps','Doubles the sequencer loop to 32 steps (2 bars). Switch lengths with the STEPS button. ×1.2 Alien Gems.',300,'neural_tap_1',{x:470,y:-430},
+    {fact:'One sequencer step is a 16th note, so 16 steps make one bar of 4/4 time. 32 steps = 2 bars.'});
+  br('mt_steps64','🔢','64 Steps','Four bars in one loop: 64 steps. ×1.2 Alien Gems.',450,'mt_steps32',side(s32,150),
+    {fact:'Most dance music is built in 4, 8 and 16 bar phrases. 64 steps is a full 4-bar phrase.'});
+
+  // EFFECTS
+  const fx=hub('mt_effects','🌀','Effects','Opens the world of audio effects. Unlock Reverb and Echo from here. ×1.5 Alien Gems, ×1.5 points.',
+    'Effects (FX) change a sound after it is made. Reverb and echo are "time-based" effects: they add copies of the sound that arrive a little later, so it feels like it is happening in a real space.',
+    600,'mt_steps32',along(s32,340),{mult:1.5});
+  br('mt_reverb','🏛','Reverb','Unlocks REVERB in the EFFECTS window: room, hall and cathedral spaces for any track. ×1.2 Alien Gems.',400,'mt_effects',side(fx,170),
+    {fact:'Reverb is the wash of thousands of tiny reflections bouncing off walls. A cathedral can ring for 5+ seconds.'});
+  br('mt_echo','📣','Echo','Unlocks ECHO in the EFFECTS window: repeats that lock to the beat. ×1.2 Alien Gems.',400,'mt_effects',side(fx,-170),
+    {fact:'Echo (also called delay) repeats a sound in time with the beat. Dub producers in 1970s Jamaica turned it into an instrument of its own.'});
+
+  // KEY
+  const key=hub('mt_key','🎼','Key','Unlocks the KEY button. Melodic sounds (bass, synths, bells, marimba…) now play in key: C major. Unlock more keys from here. ×1.5 Alien Gems, ×1.5 points.',
+    'A key is the set of notes a song is built from. Every major key has a "relative minor" that uses the exact same 7 notes: C major and A minor share every note, they just feel at home on a different one.',
+    1800,'mt_effects',along(fx,400),{mult:1.5});
+  // 8 key packs, closest keys first (each pack = major keys + their relative minors, by how many notes they share with C major)
+  KEY_PACKS.forEach((pk,i)=>{
+    const ang=[5,185,35,215,65,245,95,275][i];
+    br('mt_keys'+(i+1),'🎹',pk.label,'Unlocks '+pk.long+'. '+pk.why+' ×1.2 Alien Gems.',500+i*100,'mt_key',polar(key,ang,210));
+  });
+
+  // PIANO ROLL
+  const pr=hub('mt_piano','🎹','Piano Roll','Unlocks the PIANO ROLL: write melodies and chords with real notes, lined up with the sequencer. (Piano roll arrives in the next update.) ×1.5 Alien Gems.',
+    'The name comes from player pianos: they read songs from long rolls of paper with holes punched in them, one hole per note. Music software still draws notes the same way.',
+    5400,'mt_key',along(key,480));
+  let prev='mt_piano',pos=pr;
+  for(let L=2;L<=6;L++){
+    pos=side(pos,L===2?160:115);
+    br('mt_piano'+L,'🎼','Roll Layer '+L,'Adds piano roll layer '+L+': one more instrument with its own melody. ×1.2 Alien Gems.',1500+(L-2)*500,prev,pos,{placeholder:true});
+    prev='mt_piano'+L;
+  }
+
+  // GROOVE
+  const gr=hub('mt_groove','🥁','Groove','Tightens the sequencer: sequencer steps earn +50%. Unlock Velocity from here. ×1.5 Alien Gems, ×1.5 points.',
+    'Groove is the feel that makes music move: tiny differences in timing and loudness between notes. Two drummers can play the same pattern and sound totally different because of it.',
+    16200,'mt_piano',along(pr,420),{mult:1.5,seqBoost:1.5});
+  br('mt_velocity','📶','Velocity','Unlocks the VELOCITY button: set how hard each step hits. ×1.2 Alien Gems.',6000,'mt_groove',side(gr,-170),
+    {fact:'Velocity comes from MIDI keyboards: it measures how fast a key is pressed, which is why harder hits play louder.'});
+
+  // ARRANGEMENT
+  const ar=hub('mt_arrangement','🎬','Arrangement','The art of building a whole track out of patterns. Unlock Arrangement and Song mode from here. ×1.5 Alien Gems, ×2 points.',
+    'Arrangement is deciding what plays when: intro, verse, chorus, drop, outro. Most pop songs reuse only a handful of patterns, just in a smart order.',
+    48600,'mt_groove',along(gr,420),{mult:2});
+  const am=br('mt_arrange','🧩','Arrangement Mode','Unlocks the PAT / ARR switch: chain saved patterns into an arrangement. ×1.2 Alien Gems.',15000,'mt_arrangement',side(ar,170),
+    {fact:'Producers often loop one 8-bar section for hours, then build the full arrangement once the loop feels right.'});
+  br('mt_song','💿','Song Mode','Unlocks SONG mode: line up whole arrangements into a song. ×1.2 Alien Gems.',20000,'mt_arrange',side(am,130),
+    {fact:'A typical pop song is about 3 minutes long, which at 100 BPM is roughly 75 bars.'});
+  return N;
+})();
+
 // ── Skill Tree Data ──
 // Layout: center at (0,0), branches go diagonally
 // Each node: {id, icon, name, desc, cost, requires, x, y, branch, placeholder}
@@ -125,10 +215,9 @@ const SKILL_TREE_NODES = [
   // ── QUAD SUN 2 — Musical Toolkit (↗) ──
   {id:'sun_points', icon:'☀', name:'Quad Sun II', desc:'The second Quad Sun. Opens the Musical Toolkit path: tools and features to make your music better. Grants ×2 points.', cost:150, requires:['core'], x:200, y:-200, branch:'points', mult:2},
   {id:'neural_tap_1', icon:'🎼', name:'Tuning Fork', desc:'The first tool in your Musical Toolkit. Every point source earns ×1.5.', cost:200, requires:['sun_points'], x:340, y:-300, branch:'points', mult:1.5},
-  {id:'neural_tap_2', icon:'🎧', name:'Studio Monitors', desc:'Hear every detail of your mix. Every point source earns ×1.5.', cost:400, requires:['neural_tap_1'], x:480, y:-360, branch:'points', mult:1.5},
-  {id:'synaptic_chain', icon:'🎛', name:'Sound Lab', desc:'A workshop for shaping your sound. Every point source earns ×1.5.', cost:600, requires:['neural_tap_2'], x:580, y:-460, branch:'points', mult:1.5},
-  {id:'quantum_strike', icon:'🥁', name:'Groove Engine', desc:'Tightens up the sequencer. Sequencer steps earn +50%.', cost:800, requires:['synaptic_chain'], x:680, y:-540, branch:'points', mult:1.5},
-  {id:'singularity', icon:'🎚', name:'Master Mix', desc:'The final polish on your Musical Toolkit. All point sources permanently ×2.', cost:1200, requires:['quantum_strike'], x:760, y:-620, branch:'points', mult:2},
+  // ── Musical Toolkit (v0.2.90): each big HUB opens a new idea, and its small branches unlock the actual features.
+  //    Hubs: ×1.5 Alien Gems + a music fact. Branches: ×1.2 Alien Gems. Sequencer features stay hidden until bought.
+  ...MUSIC_TREE_NODES,
 
   // ── QUAD SUN 3 — Minigames (↙) ──
   {id:'sun_minigames', icon:'☀', name:'Quad Sun III', desc:'The third Quad Sun. Opens the Minigame Nexus path. Grants ×2 points.', cost:150, requires:['core'], x:-200, y:200, branch:'minigames', mult:2},
@@ -162,7 +251,14 @@ function gemsPerMinute(){
   let rate = totalAliens * BASE_GEMS_PER_ALIEN_PER_MIN;
   if(unlockedSkills['gem_harvester_2']) rate *= 2;
   else if(unlockedSkills['gem_harvester_1']) rate *= 1.5;
+  rate *= skillGemMultiplier();
   return rate;
+}
+// Musical Toolkit hubs (×1.5) and branches (×1.2) multiply the gem rate
+function skillGemMultiplier(){
+  let m=1;
+  SKILL_TREE_NODES.forEach(n=>{if(n.gemMult&&unlockedSkills[n.id])m*=n.gemMult;});
+  return m;
 }
 
 // ── Gem interval ──
@@ -178,6 +274,7 @@ function startGemInterval(){
   }, 5000);
 }
 
+function fmtGemRate(v){return v>=1000?Math.round(v).toLocaleString():String(Math.round(v*100)/100);}
 function updateGemDisplays(){
   const disp = Math.floor(alienGems);
   const el1 = document.getElementById('gemCountBunker');
@@ -188,12 +285,12 @@ function updateGemDisplays(){
   const rate = gemsPerMinute();
   const rateEl = document.getElementById('gemRateDisplay');
   if(rateEl && totalAliens > 0){
-    rateEl.textContent = `(${totalAliens} aliens × ${rate/totalAliens}💎/min = ${rate.toFixed(1)}/min)`;
+    rateEl.textContent = `(${totalAliens} aliens × ${fmtGemRate(rate/totalAliens)}💎/min = ${fmtGemRate(rate)}/min)`;
   }
   // Shop header copy of the gem info (under the balance)
   const sc=document.getElementById('gemCountShop'),sr=document.getElementById('gemRateShop'),sw=document.getElementById('gemInfoShop');
   if(sc)sc.textContent=disp.toLocaleString();
-  if(sr&&totalAliens>0)sr.textContent=`(${totalAliens} aliens × ${rate/totalAliens}💎/min = ${rate.toFixed(1)}/min)`;
+  if(sr&&totalAliens>0)sr.textContent=`(${totalAliens} aliens × ${fmtGemRate(rate/totalAliens)}💎/min = ${fmtGemRate(rate)}/min)`;
   if(sw)sw.style.display=totalAliens>0?'flex':'none';
   if(typeof updateSkillTreeBtn==='function')updateSkillTreeBtn();
   // Show gem counter in bunker once player has any aliens
@@ -229,6 +326,8 @@ function buySkill(id){
   unlockedSkills[id] = true;
   // Unlock sound if this node grants one
   if(node.soundUnlock) unlockPlanetSound(node.soundUnlock);
+  // Musical Toolkit: show the newly unlocked sequencer feature
+  if(typeof applyMusicUnlocks==='function') applyMusicUnlocks(id);
   // quantum_strike is read live by seqStepMultiplier(), nothing to restart
   applySkillEffects();
   updateGemDisplays();
@@ -371,11 +470,13 @@ function renderSkillTree(){
     const el = document.createElement('div');
     el.className = 'st-node' +
       (isCenter ? ' center' : '') +
+      (node.hub ? ' hub' : '') +
       (isUnlocked ? ' unlocked' : '') +
       (isAvailable ? ' available' : '') +
       (isSilhouette ? ' silhouette' : '') +
       (!isUnlocked && !isAvailable && !isSilhouette && !isCenter ? ' locked' : '');
-    const r = isCenter ? 36 : 27;
+    const isHub = !!node.hub;
+    const r = isCenter ? 36 : isHub ? 42 : 27;
     el.style.cssText = `left:${node.x - r}px;top:${node.y - r}px;`;
 
     const circle = document.createElement('div');
@@ -430,6 +531,16 @@ function openStDetail(id, fromEl){
   document.getElementById('stDetailIcon').textContent = node.icon;
   document.getElementById('stDetailName').textContent = node.name;
   document.getElementById('stDetailDesc').textContent = node.desc;
+  const factEl = document.getElementById('stDetailFact');
+  if(factEl){
+    factEl.style.display = node.fact ? '' : 'none';
+    factEl.innerHTML = '';
+    if(node.fact){
+      const h = document.createElement('div'); h.className = 'st-fact-head'; h.textContent = node.hub ? '💡 MUSIC 101' : '💡 DID YOU KNOW?';
+      const t = document.createElement('div'); t.className = 'st-fact-text'; t.textContent = node.fact;
+      factEl.appendChild(h); factEl.appendChild(t);
+    }
+  }
   document.getElementById('stDetailCost').textContent = isUnlocked ? '✓ UNLOCKED' : `💎 ${node.cost} GEMS`;
 
   const buyBtn = document.getElementById('stDetailBuyBtn');
@@ -464,7 +575,7 @@ function openStDetail(id, fromEl){
   // Map node coords to screen
   const sx = cr.left + stPanX + node.x * stScale;
   const sy = cr.top + stPanY + node.y * stScale;
-  const pw = 340, ph = 320;
+  const pw = 340, ph = node.fact ? 440 : 320;
   let left = sx - pw/2;
   let top = sy + 50;
   if(left < 8) left = 8;

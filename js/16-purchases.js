@@ -133,17 +133,7 @@ function addEP(id,fn){const el=document.getElementById(id);if(!el)return;el.addE
 addEP('padButtonsBtn',buyNextPad);
 addEP('soundLibBtn',buyNextSound);
 addEP('seqBtn',buySeqTrack);
-function buySeqSteps(){
-  if(drum.seqTracks<1)return;
-  const lv=shop.seqStepsLevel||0;if(lv>=2)return;
-  const cost=SEQ_STEP_COSTS[lv];if(score<cost)return;
-  score-=cost;shop.seqStepsLevel=lv+1;
-  STEPS=lv===0?32:64;applyStepCount();   // switch to the new length straight away
-  playSfxPurchase();flashBuy('#a0a8ff');
-  showToast(`🎛 ${STEPS} steps unlocked! Use the STEPS button to switch length.`);
-  renderUI();autoSave();
-}
-addEP('stepsBuyBtn',buySeqSteps);
+// (32 / 64 steps moved to the skill tree: Musical Toolkit → 32 Steps / 64 Steps)
 addEP('drumDotsUnlockBtn',unlockDrumDots);
 addEP('seqDotsUnlockBtn',unlockSeqDots);
 addEP('drumMultBtn',buyDrumMult);

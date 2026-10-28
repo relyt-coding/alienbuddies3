@@ -86,7 +86,7 @@ const ALL_SOUNDS=[
   mkSnd('arp','ARP','synth','#66ffee','Fast pentatonic arpeggio burst',(t,gv)=>{const c=getCtx(),notes=[261.63,329.63,392,493.88,523.25],g=c.createGain(),fl=c.createBiquadFilter();fl.type='lowpass';fl.frequency.value=2000;g.connect(fl);fl.connect(drumMasterGain);fl.connect(rvbNode);notes.forEach((f,i)=>{const st=t+i*.075,o=c.createOscillator();o.type='square';o.frequency.value=f;const e=c.createGain();o.connect(e);e.connect(g);e.gain.setValueAtTime(0,st);e.gain.linearRampToValueAtTime(.16*(gv??1),st+.01);e.gain.exponentialRampToValueAtTime(.001,st+.07);o.start(st);o.stop(st+.08);});}),
   mkSnd('wobble','WOBBLE','bass','#ff66dd','LFO wobble bass drop',(t,gv)=>{const c=getCtx(),o=c.createOscillator(),lfo=c.createOscillator(),lg=c.createGain(),fl=c.createBiquadFilter(),g=c.createGain();o.type='sawtooth';o.frequency.value=55;fl.type='lowpass';fl.Q.value=8;fl.frequency.value=300;lfo.frequency.value=4;lfo.connect(lg);lg.gain.value=500;lg.connect(fl.frequency);o.connect(fl);fl.connect(g);g.connect(drumMasterGain);g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.55*(gv??1),t+.02);g.gain.setValueAtTime(.55*(gv??1),t+.32);g.gain.exponentialRampToValueAtTime(.001,t+.75);o.start(t);lfo.start(t);o.stop(t+.75);lfo.stop(t+.75);}),
   mkSnd('stab','STAB','synth','#ffee00','Punchy detuned unison stab',(t,gv)=>{const c=getCtx(),g=c.createGain(),fl=c.createBiquadFilter();fl.type='lowpass';fl.frequency.value=2400;fl.frequency.exponentialRampToValueAtTime(400,t+.25);const d=c.createWaveShaper();d.curve=distCurve(2);g.connect(fl);fl.connect(d);d.connect(drumMasterGain);d.connect(rvbNode);g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.3*(gv??1),t+.01);g.gain.exponentialRampToValueAtTime(.001,t+.32);[261.63,262.5,260.8].forEach(f=>{const o=c.createOscillator();o.type='sawtooth';o.frequency.value=f;o.connect(g);o.start(t);o.stop(t+.32);});}),
-  mkSnd('pluck','PLUCK','synth','#aaffcc','Karplus-Strong plucked string',(t,gv)=>{const c=getCtx(),freq=220,s=c.createBufferSource();s.buffer=noiseBuf(.025);const fl=c.createBiquadFilter();fl.type='lowpass';fl.frequency.value=freq*2;const g=c.createGain(),dl=c.createDelay(),fb=c.createGain();dl.delayTime.value=1/freq;fb.gain.value=.97;s.connect(fl);fl.connect(g);g.connect(dl);dl.connect(fb);fb.connect(dl);dl.connect(drumMasterGain);dl.connect(rvbNode);g.gain.setValueAtTime(gv??1,t);g.gain.exponentialRampToValueAtTime(.001,t+1.5);s.start(t);s.stop(t+.025);}),
+  mkSnd('pluck','PLUCK','synth','#aaffcc','Karplus-Strong plucked string',(t,gv)=>{const c=getCtx(),freq=220*_ksMul,s=c.createBufferSource();s.buffer=noiseBuf(.025);const fl=c.createBiquadFilter();fl.type='lowpass';fl.frequency.value=freq*2;const g=c.createGain(),dl=c.createDelay(),fb=c.createGain();dl.delayTime.value=1/freq;fb.gain.value=.97;s.connect(fl);fl.connect(g);g.connect(dl);dl.connect(fb);fb.connect(dl);dl.connect(drumMasterGain);dl.connect(rvbNode);g.gain.setValueAtTime(gv??1,t);g.gain.exponentialRampToValueAtTime(.001,t+1.5);s.start(t);s.stop(t+.025);}),
   mkSnd('bell','BELL','perc','#ffffaa','FM bell tone, long decay',(t,gv)=>{const c=getCtx(),car=c.createOscillator(),mod=c.createOscillator(),mg=c.createGain(),g=c.createGain();car.type='sine';car.frequency.value=440;mod.frequency.value=440*3.5;mod.connect(mg);mg.gain.value=880;mg.connect(car.frequency);car.connect(g);g.connect(drumMasterGain);g.connect(rvbNode);g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.55*(gv??1),t+.004);g.gain.exponentialRampToValueAtTime(.001,t+2);car.start(t);mod.start(t);car.stop(t+2);mod.stop(t+2);}),
   mkSnd('cowbell','COWBELL','perc','#ffcc88','Classic metallic cowbell',(t,gv)=>{const c=getCtx(),g=c.createGain(),fl=c.createBiquadFilter();fl.type='bandpass';fl.frequency.value=562;fl.Q.value=5;[562,845].forEach(f=>{const o=c.createOscillator();o.type='square';o.frequency.value=f;o.connect(fl);o.start(t);o.stop(t+.55);});fl.connect(g);g.connect(drumMasterGain);g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.55*(gv??1),t+.003);g.gain.exponentialRampToValueAtTime(.001,t+.55);}),
   mkSnd('riser','RISER','fx','#88eeff','Sweeping noise riser',(t,gv)=>{const c=getCtx(),s=c.createBufferSource();s.buffer=noiseBuf(.7);const fl=c.createBiquadFilter();fl.type='bandpass';fl.frequency.setValueAtTime(200,t);fl.frequency.exponentialRampToValueAtTime(8000,t+.65);fl.Q.value=3;const g=c.createGain();s.connect(fl);fl.connect(g);g.connect(drumMasterGain);g.connect(rvbNode);g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.65*(gv??1),t+.3);g.gain.setValueAtTime(.65*(gv??1),t+.55);g.gain.exponentialRampToValueAtTime(.001,t+.7);s.start(t);s.stop(t+.7);}),
@@ -255,24 +255,55 @@ function unlockPlanetSound(soundId){
 const TAGS=[...new Set(ALL_SOUNDS.map(s=>s.tag))];
 
 // ══════════════════════════════════════════════
-//  KEY LOCK + PER-TRACK REVERB / ECHO
+//  MUSICAL KEY + PER-TRACK REVERB / ECHO
 // ══════════════════════════════════════════════
+// Key = a root (0..11, C=0) + major/minor. It only applies once the KEY node in the skill tree is bought
+// (before that, seqKey stays null and every sound plays exactly as designed). Default key: C major.
 const KEY_NAMES=['C','D♭','D','E♭','E','F','F♯','G','A♭','A','B♭','B'];
+const KEY_MINOR_NAMES=['C','C♯','D','E♭','E','F','F♯','G','G♯','A','B♭','B']; // minor keys spell a few roots with sharps (G♯ minor, not A♭ minor)
 const MAJOR_SCALE=[0,2,4,5,7,9,11];
-let seqKey=null; // null = off (sounds play as designed); 0..11 = major key root (C=0)
-// Sounds that have a musical pitch → their base frequency (Hz). Drums / noise / FX are left alone.
-const PITCHED_BASE={sub:55,chord:130.8,lead:349,basenote:73.4,bassslide:110,pad:196,arp:261.6,wobble:55,stab:261.6,bell:440,marimba:523.3,choir:110,
-  om_bell:880,om_bowl:320,sh_steeldrum:370,mn_bitcrush:220,mn_synthpop:880,fw_marimba2:392,fw_softbass:60,mo_caveboom:45,re_gong:180,re_deepdrone:55,re_ceremony:240,re_lowbowl:160,re_resonance:220,po_logdrum:280,be_accent:900};
-function keyCentsFor(id){
-  if(seqKey==null)return 0;
-  const f=PITCHED_BASE[id];if(!f)return 0;
-  const n=69+12*Math.log2(f/440);let best=null;
-  for(let m=Math.floor(n)-2;m<=Math.ceil(n)+2;m++){
-    const pc=(((m-seqKey)%12)+12)%12;
-    if(MAJOR_SCALE.includes(pc)){const d=Math.abs(m-n);if(!best||d<best.d)best={m,d};}
-  }
-  return best?(best.m-n)*100:0;
+let seqKey=null;       // null = no key (sounds as designed); 0..11 = root
+let seqKeyMinor=false; // true = minor key (seqKey is the minor root, e.g. 9 + minor = A minor)
+// (the game font is all caps, so minor keys say "A MIN" rather than "Am", which would read as "AM")
+function keyLabel(root,minor){return root==null?'—':(minor?KEY_MINOR_NAMES[root]+' min':KEY_NAMES[root]);}
+function keyLongName(root,minor){return root==null?'no key':(minor?KEY_MINOR_NAMES[root]+' minor':KEY_NAMES[root]+' major');}
+// The major key that shares its notes with this key (A minor → C major)
+function relMajorRoot(root,minor){return minor?(root+3)%12:root;}
+// Every sound with a musical pitch, and how it follows the key:
+//  bass  → moves to the key's home note (tonic), so the low end always sits on the root
+//  note  → moves to the nearest note of the key's scale (single-pitch bells, plucks, marimbas, drones…)
+//  min / maj / maj7 → sounds with several notes inside them (chords, arps, the lead). The whole sound
+//                    moves to the nearest chord of the same type that exists in the key, so every note stays in key.
+// Shifts are always the shortest way (never more than 6 semitones), and detune keeps each sound's length the same.
+// Drums, noise and sweeping FX are left alone. `roll:true` = playable in the piano roll (phase 2).
+const PITCHED_SOUNDS={
+  sub:{f:55,r:'bass',roll:1},basenote:{f:73.42,r:'bass',roll:1},bassslide:{f:110,r:'bass'},wobble:{f:55,r:'bass',roll:1},
+  fw_softbass:{f:60,r:'bass',roll:1},re_deepdrone:{f:55,r:'bass',roll:1},mo_caveboom:{f:45,r:'bass'},
+  chord:{f:130.81,r:'min'},lead:{f:261.63,r:'min'},arp:{f:261.63,r:'maj7'},pad:{f:196,r:'maj'},
+  stab:{f:261.63,r:'note',roll:1},pluck:{f:220,r:'note',roll:1},bell:{f:440,r:'note',roll:1},marimba:{f:523.25,r:'note',roll:1},choir:{f:110,r:'note',roll:1},
+  om_bell:{f:880,r:'note',roll:1},om_bowl:{f:320,r:'note'},sh_steeldrum:{f:370,r:'note',roll:1},mn_bitcrush:{f:220,r:'note',roll:1},
+  mn_synthpop:{f:880,r:'note',roll:1},fw_marimba2:{f:392,r:'note',roll:1},re_gong:{f:180,r:'note'},re_ceremony:{f:240,r:'note'},
+  re_lowbowl:{f:160,r:'note'},re_resonance:{f:220,r:'note',roll:1},po_logdrum:{f:280,r:'note',roll:1},be_accent:{f:900,r:'note'},oy_softbend:{f:660,r:'note'},
+};
+// Chord roots that exist in a major key, counted up from its root: major triads on I/IV/V, maj7 on I/IV, minor on ii/iii/vi
+const KEY_CHORD_ROOTS={maj:[0,5,7],maj7:[0,5],min:[2,4,9]};
+function keyIsActive(){
+  if(seqKey==null)return false;
+  return typeof musicHas==='function'?musicHas('mt_key'):false;
 }
+// how many cents to retune a sound so it sits in the current key (0 = leave it alone)
+function keyCentsFor(id){
+  if(!keyIsActive())return 0;
+  const ps=PITCHED_SOUNDS[id];if(!ps)return 0;
+  const R=relMajorRoot(seqKey,seqKeyMinor);
+  const n=69+12*Math.log2(ps.f/440);
+  const near=(from,pcs)=>{let best=null;for(let m=Math.floor(from)-7;m<=Math.ceil(from)+7;m++){const pc=((m%12)+12)%12;if(pcs.includes(pc)){const d=Math.abs(m-from);if(!best||d<best.d)best={m,d};}}return best?best.m:from;};
+  if(ps.r==='bass')return (near(n,[seqKey])-n)*100;
+  if(ps.r==='note')return (near(n,MAJOR_SCALE.map(x=>(x+R)%12))-n)*100;
+  const root=Math.round(n),roots=(KEY_CHORD_ROOTS[ps.r]||[0]).map(x=>(x+R)%12);
+  return (near(root,roots)-root)*100;
+}
+let _ksMul=1; // pitch multiplier for the delay-tuned PLUCK (its pitch comes from a delay line, not an oscillator)
 // Per-track FX (index = track number): {rvbType,rvbAmt,echoMix,echoDiv,echoFb}
 let trackFx=[];
 const FX_REVERBS={room:{label:'ROOM',len:.9,pow:3,amt:.32},hall:{label:'HALL',len:2.2,pow:2.4,amt:.42},cathedral:{label:'CATHEDRAL',len:4,pow:1.9,amt:.55}};
@@ -311,17 +342,24 @@ function getFxBus(i,f){
 }
 // runs a sound's synth function with the key retune and/or the track's FX bus applied
 function runSoundFn(id,t,gv,trackIdx){
-  const c=getCtx(),fx=(trackIdx!==undefined&&trackIdx>=0)?getTrackFx(trackIdx,false):null;
+  const c=getCtx();
+  let fx=(trackIdx!==undefined&&trackIdx>=0)?getTrackFx(trackIdx,false):null;
+  // reverb / echo only work once their skill-tree nodes are bought
+  if(fx&&typeof musicHas==='function'){
+    const r=musicHas('mt_reverb'),e=musicHas('mt_echo');
+    if(!r||!e)fx=Object.assign({},fx,{rvbAmt:r?fx.rvbAmt:0,echoMix:e?fx.echoMix:0});
+  }
   const bus=fxIsActive(fx)?getFxBus(trackIdx,fx):null;
   const cents=keyCentsFor(id);
   if(!bus&&!cents){SOUND_MAP[id].fn(t,gv);return;}
   const orig=c.createOscillator;const savedDM=drumMasterGain;
   try{
-    if(cents)c.createOscillator=function(){const o=orig.call(this);o.detune.value=cents;return o;};
+    if(cents){c.createOscillator=function(){const o=orig.call(this);o.detune.value=cents;return o;};_ksMul=Math.pow(2,cents/1200);}
     if(bus)drumMasterGain=bus.input;
     SOUND_MAP[id].fn(t,gv);
   }finally{
     if(cents)delete c.createOscillator;
+    _ksMul=1;
     drumMasterGain=savedDM;
   }
 }

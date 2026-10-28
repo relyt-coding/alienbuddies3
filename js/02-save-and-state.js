@@ -144,8 +144,9 @@ function refreshTierBadges(){
 
 // All unlocked sounds (starts with 3 default pads worth)
 function unlockedSounds(){
-  // Base sounds gated by how many pads you own (1=hihat, 2=kick, 3=snare)
-  const base=['hihat','kick','snare'].slice(0,drum.pads);
+  // Base sounds gated by how many pads you own (1=hihat, 2=kick, 3=snare, 4=trap kick in the library — the 4th pad itself starts blank)
+  const base=['hihat','kick','snare','trapkick'].slice(0,drum.pads);
+  if(drum.extraSounds>0&&!base.includes('trapkick'))base.push('trapkick'); // older saves that already owned Trap Kick keep it
   const extras=EXTRA_SOUNDS_ORDER.slice(0,drum.extraSounds);
   // Planet sounds unlocked via skill tree
   const planetSounds=(typeof PLANET_SOUND_DEFS!=='undefined')

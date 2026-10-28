@@ -1501,3 +1501,6 @@ body.desktop-mode #bunkerView .page-header::before{content:'';flex:0 0 5.6rem;}
 #bunkerView .page-title-wrap{order:2;}
 #bunkerView .back-btn{order:3;}
 body.desktop-mode #bunkerView .page-header::before{order:3;}
+
+/* v0.2.88 TIPS button 25% smaller (BACK unchanged) */
+#bunkerView #tipsBtn{width:4.2rem;height:2.03rem;flex:0 0 4.2rem;font-size:.86rem !important;border-radius:8px !important;}

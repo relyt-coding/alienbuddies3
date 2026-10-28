@@ -120,9 +120,9 @@ function rebuildPadGrid(){
   if(_ghost){
     const g=document.createElement('div');
     g.className='pad ghost-pad';g.id='ghostPad';
-    const _gi=drum.pads,_gs=SOUND_MAP[['hihat','kick','snare'][_gi]];
+    const _gi=drum.pads,_gs=SOUND_MAP[PAD_DEFAULT_SOUNDS[_gi]];
     g.style.setProperty('--pc',_gi===1?'#ff7a50':((_gs&&_gs.color)||'#ffcc44'));
-    g.innerHTML=`<div class="pad-name">${_gi===1?'KICK':'SNARE'}</div><div class="ghost-cost" id="ghostPadSub">${(typeof formatStore==='function'?formatStore(PAD_COSTS[_gi]):PAD_COSTS[_gi])} PTS</div>`;
+    g.innerHTML=`<div class="pad-name">${(_gs&&_gs.name)||'NEW PAD'}</div><div class="ghost-cost" id="ghostPadSub">${(typeof formatStore==='function'?formatStore(PAD_COSTS[_gi]):PAD_COSTS[_gi])} PTS</div>`;
     g.addEventListener('pointerdown',e=>{e.preventDefault();unlockGhostPad();});
     padGridEl.appendChild(g); // not added to padEls, so pad indexes stay correct
     updateGhostPad();

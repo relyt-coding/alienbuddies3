@@ -2,6 +2,13 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.88 - 2026-10-27 20:34
+
+- changed: css/style.css
+- changed: js/01-constants.js
+- changed: js/02-save-and-state.js
+- changed: js/05-pads.js
+
 ## v0.2.87 - 2026-10-26 23:14
 
 - changed: css/style.css

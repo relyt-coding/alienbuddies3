@@ -25,9 +25,21 @@ function downloadBlob(blob,filename){
   setTimeout(()=>{document.body.removeChild(a);URL.revokeObjectURL(url);},1000);
 }
 
+// piano roll notes → hits with an exact pitch (midi) and length (dur, seconds)
+function rollHits(roll,offset,maxSteps){
+  const out=[];
+  if(!roll||!roll.layers||typeof musicHas!=='function'||!musicHas('mt_piano'))return out;
+  const sd=60/seqBpm/4,n=pianoRollLayers();
+  roll.layers.forEach((L,li)=>{
+    if(li>=n||!L||L.muted||!L.soundId)return;
+    L.notes.forEach(nt=>{if(nt.s<maxSteps)out.push({time:offset+nt.s*sd,soundId:L.soundId,midi:nt.m,dur:nt.l*sd});});
+  });
+  return out;
+}
 function buildPatternHits(layers){
   const sd=60/seqBpm/4,hits=[];
   layers.forEach(l=>{if(l.muted)return;l.steps.slice(0,STEPS).forEach((on,i)=>{if(on)hits.push({time:i*sd,soundId:l.soundId});});});
+  if(layers===seqLayers&&typeof pianoRoll!=='undefined')hits.push(...rollHits(pianoRoll,0,STEPS));
   return hits;
 }
 
@@ -37,6 +49,7 @@ function buildArrangementHits(arr){
   for(let bar=0;bar<arr.bars;bar++){
     const pat=arr.arrangement[bar]!=null?savedPatterns[arr.arrangement[bar]]:null;
     if(pat)pat.layers.forEach(l=>{if(l.muted)return;l.steps.forEach((on,i)=>{if(on)hits.push({time:cursor+i*sd,soundId:l.soundId});});});
+    if(pat&&pat.roll)hits.push(...rollHits(pat.roll,cursor,patLen(pat)));
     cursor+=patLen(pat)*sd;
   }
   return{hits,duration:cursor};
@@ -48,7 +61,7 @@ function buildSongHits(){
   songSlots.forEach(slot=>{
     const arr=savedArrangements[slot.arrIdx];if(!arr)return;
     const r=buildArrangementHits(arr);
-    r.hits.forEach(h=>hits.push({time:cursor+h.time,soundId:h.soundId}));
+    r.hits.forEach(h=>hits.push(Object.assign({},h,{time:cursor+h.time})));
     cursor+=r.duration;
   });
   return{hits,duration:cursor};
@@ -58,7 +71,8 @@ async function renderHitsToWAV(hits,duration,filename){
   if(!hits.length){showToast('Nothing to export — add some notes first!');return;}
   const SR=44100,tail=2.5,total=duration+tail;
   const offCtx=new OfflineAudioContext(2,Math.ceil(total*SR),SR);
-  const master=offCtx.createGain();master.gain.value=0.85;master.connect(offCtx.destination);
+  let master=offCtx.createGain();master.gain.value=0.85;master.connect(offCtx.destination);
+  const outMaster=master; // piano roll notes swap `master` for a short-lived gate so each note stops on time
   let offRvb=null;
   try{
     const il=Math.round(SR*1.2),ib=offCtx.createBuffer(2,il,SR);
@@ -108,7 +122,15 @@ async function renderHitsToWAV(hits,duration,filename){
     marimba:(t,gv)=>{const c=offCtx,car=c.createOscillator(),mod=c.createOscillator(),mg=c.createGain(),g=c.createGain();car.type='sine';car.frequency.value=523.25;mod.frequency.value=523.25*4;mod.connect(mg);mg.gain.value=200;mg.connect(car.frequency);car.connect(g);g.connect(master);rv(g);g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.65*gv,t+.004);g.gain.exponentialRampToValueAtTime(.001,t+.55);car.start(t);mod.start(t);car.stop(t+.55);mod.stop(t+.55);},
     thud:(t,gv)=>{const c=offCtx,o=c.createOscillator(),g=c.createGain();o.type='triangle';o.frequency.setValueAtTime(80,t);o.frequency.exponentialRampToValueAtTime(45,t+.18);const fl=c.createBiquadFilter();fl.type='lowpass';fl.frequency.value=400;o.connect(fl);fl.connect(g);g.connect(master);g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.65*gv,t+.003);g.gain.exponentialRampToValueAtTime(.001,t+.28);o.start(t);o.stop(t+.28);},
   };
-  hits.forEach(({time,soundId})=>{const fn=R[soundId];if(fn)try{
+  hits.forEach(({time,soundId,midi,dur})=>{const fn=R[soundId];if(fn)try{
+    if(midi!=null&&typeof rollBaseMidi==='function'){ // piano roll note: exact pitch, cut off after its length
+      const cents=(midi-rollBaseMidi(soundId))*100,gate=offCtx.createGain(),end=time+Math.max(.06,dur);
+      gate.connect(outMaster);gate.gain.setValueAtTime(1,time);gate.gain.setValueAtTime(1,end);gate.gain.linearRampToValueAtTime(0,end+.05);
+      const o0=offCtx.createOscillator;offCtx.createOscillator=function(){const o=o0.call(this);o.detune.value=cents;return o;};
+      _ksMul=Math.pow(2,cents/1200);master=gate;
+      try{fn(time,soundVols[soundId]!==undefined?soundVols[soundId]:1);}finally{delete offCtx.createOscillator;_ksMul=1;master=outMaster;}
+      return;
+    }
     const cents=(typeof keyCentsFor==='function')?keyCentsFor(soundId):0;
     if(cents){const o0=offCtx.createOscillator;offCtx.createOscillator=function(){const o=o0.call(this);o.detune.value=cents;return o;};_ksMul=Math.pow(2,cents/1200);try{fn(time,soundVols[soundId]!==undefined?soundVols[soundId]:1);}finally{delete offCtx.createOscillator;_ksMul=1;}}
     else fn(time,soundVols[soundId]!==undefined?soundVols[soundId]:1);

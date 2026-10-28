@@ -42,6 +42,7 @@ function applyMusicUnlocks(justBoughtId){
   if((seqMode==='arrange'&&!arr)||(seqMode==='song'&&!song)){if(typeof setSeqMode==='function')setSeqMode('pattern');}
 
   if(typeof window.refreshKeyFxButtons==='function')window.refreshKeyFxButtons();
+  if(typeof refreshRollUI==='function')refreshRollUI();
 
   // a short pointer to where the new feature lives
   const where={
@@ -53,8 +54,11 @@ function applyMusicUnlocks(justBoughtId){
     mt_velocity:'📶 VELOCITY button unlocked at the top of the sequencer.',
     mt_arrange:'🧩 PAT / ARR switch unlocked at the top of the sequencer.',
     mt_song:'💿 SONG mode unlocked next to PAT / ARR.',
+    mt_piano:'🎹 ROLL button unlocked at the top of the sequencer.',
   }[justBoughtId];
   if(where&&typeof showToast==='function')setTimeout(()=>showToast(where),1600);
+  if(justBoughtId&&/^mt_piano\d$/.test(justBoughtId)&&typeof showToast==='function')
+    setTimeout(()=>showToast('🎹 Piano roll layer '+justBoughtId.slice(8)+' unlocked: tap ROLL to pick a layer.'),1600);
   if(justBoughtId&&/^mt_keys\d$/.test(justBoughtId)&&typeof showToast==='function'){
     const pk=KEY_PACKS[+justBoughtId.slice(7)-1];
     if(pk)setTimeout(()=>showToast('🎹 New keys: '+pk.long+'. Pick them with the KEY button.'),1600);

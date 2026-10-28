@@ -663,7 +663,10 @@ function loadPatternIntoEditor(pi,offset,wrap,merge){
     if(o&&o.muted&&seqLayers.length){const L=seqLayers[seqLayers.length-1];L.muted=true;const mb=L.el&&L.el.querySelector('.seq-rc-btn');if(mb)mb.classList.add('muted');}
   });
   ensureAllTracks();
+  if(typeof rollPaste==='function'&&pat.roll)rollPaste(pat.roll,offset,len,wrap,merge||offset>0||wrap);
+  else if(typeof rollPaste==='function'&&!merge&&!(offset>0||wrap))pianoRoll={layers:pianoRoll.layers.map(L=>({soundId:L.soundId,muted:L.muted,notes:[]}))};
   setSeqMode('pattern');
+  if(typeof refreshRollUI==='function')refreshRollUI();
   showToast('Pattern "'+pat.name+'" loaded into editor');
 }
 
@@ -752,6 +755,7 @@ function seqRunStep(quiet,delayMs,audioAt){
         seqPhEls.forEach((c,i)=>c.classList.toggle('lit',i===st));
         if(seqFollow&&STEPS>16)followPlayhead(st);
         seqFullPhEls.forEach((c,i)=>c.classList.toggle('lit',i===st));
+        if(typeof rollPlayhead==='function')rollPlayhead(st);
         seqLayers.forEach(layer=>{
           if(layer.steps[st]){
             const btn=layer.stepEls[st];
@@ -764,6 +768,7 @@ function seqRunStep(quiet,delayMs,audioAt){
       seqLayers.forEach((layer,_li)=>{
         if(layer.steps[st]&&layerAudible(layer)){getCtx();playSound(layer.soundId,layer.vols[st]/100,_at,_li);}
       });
+      typeof rollPlayStep==='function'&&rollPlayStep(pianoRoll,st,_at); // piano roll notes that start inside this step
     }
     seqStep=(seqStep+1)%STEPS;
   } else if(seqMode==='arrange'){
@@ -780,6 +785,7 @@ function seqRunStep(quiet,delayMs,audioAt){
             getCtx();const _av=(layer.vols&&layer.vols[as]!=null)?layer.vols[as]/100:1;playSound(layer.soundId,_av,_at,_li);
           }
         });
+        typeof rollPlayStep==='function'&&rollPlayStep(pat.roll,as,_at);
       }
     }
     arrBarStep++;
@@ -811,6 +817,7 @@ function seqRunStep(quiet,delayMs,audioAt){
               getCtx();const _sv=(layer.vols&&layer.vols[sst]!=null)?layer.vols[sst]/100:1;playSound(layer.soundId,_sv,_at,_li);
             }
           });
+          typeof rollPlayStep==='function'&&rollPlayStep(pat.roll,sst,_at);
         }
       }
       songArrBarStep++;
@@ -833,6 +840,7 @@ function stopSeq(){
   seqPlaying=false;requestRender();seqStep=0;_followPage=-1;arrBar=0;arrBarStep=0;songSlotIdx=0;songArrBar=0;songArrBarStep=0;
   seqPhEls.forEach(c=>c.classList.remove('lit'));
   seqFullPhEls.forEach(c=>c.classList.remove('lit'));
+  if(typeof rollPlayhead==='function')rollPlayhead(-1);
   arrPhEls.forEach(c=>c.classList.remove('lit'));
   arrBarEls.forEach(b=>b.classList.remove('playing'));
   songSlotEls.forEach(b=>b.classList.remove('playing'));
@@ -997,7 +1005,7 @@ document.getElementById('savePatConfirm')&&document.getElementById('savePatConfi
     from=Math.min(STEPS,Math.max(1,from));to=Math.min(STEPS,Math.max(1,to));
     if(from>to){const t=from;from=to;to=t;}
   }
-  savedPatterns.push({name,color:savePatColor,stepCount:to-from+1,layers:seqLayers.map(l=>({soundId:l.soundId,steps:l.steps.slice(from-1,to),vols:l.vols.slice(from-1,to),muted:l.muted||false}))});
+  savedPatterns.push({name,color:savePatColor,stepCount:to-from+1,layers:seqLayers.map(l=>({soundId:l.soundId,steps:l.steps.slice(from-1,to),vols:l.vols.slice(from-1,to),muted:l.muted||false})),roll:(typeof rollSlice==='function'&&musicHas('mt_piano'))?rollSlice(pianoRoll,from-1,to):undefined});
   savePatModal.style.display='none';
   buildPatLibrary();
   showToast('Pattern "'+name+'" saved!');
@@ -1056,11 +1064,15 @@ document.getElementById('savePatConfirm')&&document.getElementById('savePatConfi
   function ask(t){
     target=t;
     title.textContent='ARE YOU SURE?';
-    sub.textContent=t==='all'?'Clear ALL tracks? This erases every step.':'Clear track '+(t+1)+'? This erases its steps.';
+    sub.textContent=t==='all'?'Clear ALL tracks? This erases every step.':
+      t==='rollall'?'Clear ALL piano roll layers? This erases every note.':
+      (typeof t==='string'&&t.indexOf('roll')===0)?'Clear piano roll layer '+(+t.slice(4)+1)+'? This erases its notes.':
+      'Clear track '+(t+1)+'? This erases its steps.';
     pick.style.display='none';conf.style.display='block';
   }
   document.getElementById('seqClearBtn')&&document.getElementById('seqClearBtn').addEventListener('click',()=>{
-    if(!seqLayers.length){showToast('No tracks to clear');return;}
+    const rollN=(typeof pianoRollLayers==='function')?pianoRollLayers():0;
+    if(!seqLayers.length&&!rollN){showToast('No tracks to clear');return;}
     title.textContent='CLEAR WHICH TRACK?';
     conf.style.display='none';pick.style.display='block';
     btns.innerHTML='';
@@ -1072,6 +1084,24 @@ document.getElementById('savePatConfirm')&&document.getElementById('savePatConfi
       else b.addEventListener('click',()=>ask(i));
       btns.appendChild(b);
     }
+    // piano roll layers (once the Piano Roll is unlocked): one button per layer + all layers
+    let rw=document.getElementById('clearRollWrap');
+    if(!rw){rw=document.createElement('div');rw.id='clearRollWrap';btns.parentNode.insertBefore(rw,document.getElementById('clearTrackAll'));}
+    rw.innerHTML='';rw.style.display=rollN?'':'none';
+    if(rollN){
+      const lbl=document.createElement('div');lbl.className='clear-roll-lbl';lbl.textContent='PIANO ROLL';rw.appendChild(lbl);
+      const g=document.createElement('div');g.style.cssText='display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;';
+      for(let i=0;i<6;i++){
+        const b=document.createElement('button');b.className='confirm-btn no';b.textContent='ROLL '+(i+1);
+        if(i>=rollN){b.disabled=true;b.style.opacity='.3';b.style.cursor='default';}
+        else b.addEventListener('click',()=>ask('roll'+i));
+        g.appendChild(b);
+      }
+      rw.appendChild(g);
+      const all=document.createElement('button');all.className='confirm-btn';all.textContent='ALL ROLL LAYERS';
+      all.style.cssText='width:100%;margin-top:.5rem;background:#10001a;border-color:#bb66ff;color:#cc88ff;';
+      all.addEventListener('click',()=>ask('rollall'));rw.appendChild(all);
+    }
     modal.style.display='flex';
   });
   document.getElementById('clearTrackAll').addEventListener('click',()=>ask('all'));
@@ -1079,6 +1109,12 @@ document.getElementById('savePatConfirm')&&document.getElementById('savePatConfi
   document.getElementById('clearTrackNo').addEventListener('click',close);
   modal.addEventListener('click',e=>{if(e.target===modal)close();});
   document.getElementById('clearTrackYes').addEventListener('click',()=>{
+    if(typeof target==='string'&&target.indexOf('roll')===0){
+      const which=target==='rollall'?'all':+target.slice(4);
+      clearRollLayers(which);close();
+      showToast(which==='all'?'All piano roll layers cleared':'Piano roll layer '+(which+1)+' cleared');
+      return;
+    }
     const list=target==='all'?seqLayers:[seqLayers[target]];
     list.forEach(l=>{
       if(!l)return;

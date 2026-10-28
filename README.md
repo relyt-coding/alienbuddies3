@@ -5,7 +5,7 @@ Plain HTML/CSS/JS, no build step. Open `index.html` (0.2) in a browser or deploy
 - `index.html` – page markup, links the CSS and loads the scripts in order
 - `css/style.css` – all styles
 - `js/` – game code, loaded in numeric order with plain `<script>` tags (not modules):
-  `00-bootstrap` (must stay first) · `01-constants` · `02-save-and-state` · `03-audio` · `04-toast-soundboard` · `05-pads` · `06-sequencer` · `07-tips` · `08-matching-game` · `09-sound-picker` · `10-home-screen` · `11-bouncers-party` · `12-tiers-and-bunker` · `13-score-stats` · `14-tap-and-sequencer-clock` · `15-render` · `16-purchases` · `17-nav-fullscreen` · `18-desktop-layout` · `19-wav-export` · `20-skill-tree` · `21-legacy-safari` (fallbacks for old iPhones) · `22-swipe-nav` · `23-more-menu` (KEY + EFFECTS windows) · `24-gamepad` · `25-polish` · `26-music-unlocks` (shows sequencer features as they're bought in the Musical Toolkit branch)
+  `00-bootstrap` (must stay first) · `01-constants` · `02-save-and-state` · `03-audio` · `04-toast-soundboard` · `05-pads` · `06-sequencer` · `07-tips` · `08-matching-game` · `09-sound-picker` · `10-home-screen` · `11-bouncers-party` · `12-tiers-and-bunker` · `13-score-stats` · `14-tap-and-sequencer-clock` · `15-render` · `16-purchases` · `17-nav-fullscreen` · `18-desktop-layout` · `19-wav-export` · `20-skill-tree` · `21-legacy-safari` (fallbacks for old iPhones) · `22-swipe-nav` · `23-more-menu` (KEY + EFFECTS windows) · `24-gamepad` · `25-polish` · `26-music-unlocks` (shows sequencer features as they're bought in the Musical Toolkit branch) · `27-piano-roll`
 - `v0.1/index.html` – frozen Version 0.1 (single file, untouched)
 
 Rule: top-level code in a file can only use functions/variables from files that load **before** it

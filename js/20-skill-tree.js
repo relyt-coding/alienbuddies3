@@ -73,13 +73,14 @@ const MUSIC_TREE_NODES=(function(){
   });
 
   // PIANO ROLL
-  const pr=hub('mt_piano','🎹','Piano Roll','Unlocks the PIANO ROLL: write melodies and chords with real notes, lined up with the sequencer. (Piano roll arrives in the next update.) ×1.5 Alien Gems.',
+  const pr=hub('mt_piano','🎹','Piano Roll','Unlocks the ROLL button: write melodies and chords with real notes on a grid that lines up with the sequencer steps. Up to 7 notes at once. ×1.5 Alien Gems.',
     'The name comes from player pianos: they read songs from long rolls of paper with holes punched in them, one hole per note. Music software still draws notes the same way.',
     5400,'mt_key',along(key,480));
   let prev='mt_piano',pos=pr;
   for(let L=2;L<=6;L++){
     pos=side(pos,L===2?160:115);
-    br('mt_piano'+L,'🎼','Roll Layer '+L,'Adds piano roll layer '+L+': one more instrument with its own melody. ×1.2 Alien Gems.',1500+(L-2)*500,prev,pos,{placeholder:true});
+    br('mt_piano'+L,'🎼','Roll Layer '+L,'Adds piano roll layer '+L+': one more instrument with its own melody. The ROLL button then asks which layer to show. ×1.2 Alien Gems.',1500+(L-2)*500,prev,pos,
+      {fact:L===2?'A melody needs something under it: most songs layer a bassline, chords and a lead, each on its own instrument.':undefined});
     prev='mt_piano'+L;
   }
 
@@ -819,6 +820,7 @@ function closeSeqResetModal(){
 }
 
 function clearCurrentNotes(){
+  if(typeof clearRollLayers==='function')clearRollLayers('all');
   // Clear all steps in all current editor layers
   seqLayers.forEach(layer=>{
     layer.steps.fill(false);
@@ -843,6 +845,7 @@ function clearSavedPatternsAndArrangements(){
 }
 
 function fullSeqReset(){
+  if(typeof pianoRoll!=='undefined'){pianoRoll={layers:[]};if(typeof refreshRollUI==='function')refreshRollUI();}
   // Clear current notes
   seqLayers.forEach(layer=>{
     layer.steps.fill(false);

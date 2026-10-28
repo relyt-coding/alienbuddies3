@@ -48,6 +48,7 @@ function autoSave(){
     arrangement:[...arrangement],
     arrangeBars,
     seqLayersSnap,
+    pianoRoll:(typeof pianoRoll!=='undefined')?pianoRoll:undefined,
     seqHasAutoMutedAmbience,
     musicOn,
     shownHints,
@@ -277,6 +278,7 @@ updateMatchingBtn();
   { const want=data.seqSteps; STEPS=([32,64].includes(want)&&shop.seqStepsLevel>=(want===32?1:2))?want:16; }
   applyStepCount();
   ensureAllTracks();
+  if(typeof rollSanitize==='function'){pianoRoll=rollSanitize(data.pianoRoll);rollView=-1;}
   if(typeof applyMusicUnlocks==='function')applyMusicUnlocks();
 }
 setInterval(()=>{if(activeSlot>=0)autoSave();},10000);

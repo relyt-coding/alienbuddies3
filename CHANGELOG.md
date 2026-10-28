@@ -2,6 +2,14 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.90 - 2026-10-28 00:37
+
+- Musical Toolkit skill tree: 32/64 Steps (moved out of the shop), Effects (Reverb, Echo), Key (8 key packs), Piano Roll (layers 2-6), Groove (Velocity), Arrangement (Arrangement Mode, Song Mode)
+- Sequencer controls stay hidden until their node is bought
+- Song key (major/minor) retunes melodic sounds
+- Piano roll: up to 6 instrument layers lined up with the sequencer steps
+- added: js/26-music-unlocks.js, js/27-piano-roll.js
+
 ## v0.2.89 - 2026-10-27 21:46
 
 - changed: css/style.css

@@ -42,19 +42,45 @@ const MUSIC_TREE_NODES=(function(){
   const along=(o,d)=>({x:Math.round(o.x+ax*d),y:Math.round(o.y+ay*d)});
   const side=(o,d)=>({x:Math.round(o.x+px*d),y:Math.round(o.y+py*d)});
   const polar=(o,deg,r)=>({x:Math.round(o.x+Math.cos(deg*Math.PI/180)*r),y:Math.round(o.y+Math.sin(deg*Math.PI/180)*r)});
+  // angle measured from the branch: 0 = sideways (+), 90 = forward along the branch, 180 = sideways (−), 270 = back
+  const rel=(o,deg,r)=>{const a=deg*Math.PI/180,c=Math.cos(a)*r,sn=Math.sin(a)*r;return{x:Math.round(o.x+px*c+ax*sn),y:Math.round(o.y+py*c+ay*sn)};};
   const N=[];
   const hub=(id,icon,name,desc,fact,cost,req,pos,extra)=>{N.push(Object.assign({id,icon,name,desc,fact,cost,requires:[req],x:pos.x,y:pos.y,branch:'points',mult:0,gemMult:1.5,hub:true},extra||{}));return pos;};
   const br=(id,icon,name,desc,cost,req,pos,extra)=>{N.push(Object.assign({id,icon,name,desc,cost,requires:[req],x:pos.x,y:pos.y,branch:'points',mult:0,gemMult:1.2},extra||{}));return pos;};
   const fork={x:340,y:-300};
 
-  // EFFECTS
-  const fx=hub('mt_effects','🌀','Effects','Opens the world of audio effects. Unlock Reverb and Echo from here. ×1.5 Alien Gems, ×1.5 points.',
+  // EFFECTS — Reverb / Echo (+ Ping-Pong) on one side, a chain of sound-shaping effects on the other
+  const fx=hub('mt_effects','🌀','Effects','Opens the world of audio effects. Unlock Reverb, Echo and a whole chain of sound-shaping effects from here. Effects work on sequencer tracks and piano roll layers. ×1.5 Alien Gems, ×1.5 points.',
     'Effects (FX) change a sound after it is made. Reverb and echo are "time-based" effects: they add copies of the sound that arrive a little later, so it feels like it is happening in a real space.',
     600,'neural_tap_1',along(fork,520),{mult:1.5});
-  br('mt_reverb','🏛','Reverb','Unlocks REVERB in the EFFECTS window: room, hall and cathedral spaces for any track. ×1.2 Alien Gems.',400,'mt_effects',side(fx,170),
+  br('mt_reverb','🏛','Reverb','Unlocks REVERB in the EFFECTS window: room, hall and cathedral spaces. ×1.2 Alien Gems.',400,'mt_effects',rel(fx,205,185),
     {fact:'Reverb is the wash of thousands of tiny reflections bouncing off walls. A cathedral can ring for 5+ seconds.'});
-  br('mt_echo','📣','Echo','Unlocks ECHO in the EFFECTS window: repeats that lock to the beat. ×1.2 Alien Gems.',400,'mt_effects',side(fx,-170),
+  const echo=br('mt_echo','📣','Echo','Unlocks ECHO in the EFFECTS window: repeats that lock to the beat. ×1.2 Alien Gems.',400,'mt_effects',rel(fx,150,185),
     {fact:'Echo (also called delay) repeats a sound in time with the beat. Dub producers in 1970s Jamaica turned it into an instrument of its own.'});
+  br('mt_pingpong','🏓','Ping-Pong','Adds PING-PONG to Echo: each repeat bounces between the left and right speaker. ×1.2 Alien Gems.',800,'mt_echo',rel(echo,165,140),
+    {fact:'Ping-pong delay bounces each echo between the left and right speakers. It sounds best on headphones.'});
+  const FX_CHAIN=[
+    ['mt_filter','🎚','Filter','Unlocks FILTER: low-pass, high-pass and band-pass with a cutoff knob. ×1.2 Alien Gems.',700,
+      'A low-pass filter lets low sounds through and cuts the highs. Slowly opening one up is the classic way DJs build tension before a drop.'],
+    ['mt_distortion','🔥','Distortion','Unlocks DISTORTION: grit and crunch, great on bass and kicks. ×1.2 Alien Gems.',900,
+      'Distorted guitar started with damaged amps and torn speakers in the 1950s. Players loved the sound, so pedals were built to do it on purpose.'],
+    ['mt_chorus','🌊','Chorus','Unlocks CHORUS: makes one sound feel wide, like several playing at once. ×1.2 Alien Gems.',1200,
+      'Chorus copies a sound and wobbles the copy\'s timing a tiny bit. Roland\'s Juno synths had it built in, and it became part of their famous 80s sound.'],
+    ['mt_bitcrusher','👾','Bitcrusher','Unlocks BITCRUSH: crunchy 8-bit, lo-fi video game sound. ×1.2 Alien Gems.',1600,
+      'Bit depth is how many steps a sound wave can use. The E-mu SP-1200 sampler only had 12 bits, which is a big part of classic 90s hip-hop grit.'],
+    ['mt_flanger','✈','Flanger','Unlocks FLANGER: a sweeping jet-plane whoosh. ×1.2 Alien Gems.',2200,
+      'Flanging was first made with two tape machines: pressing a finger on the rim (the flange) of one reel slowed it down for a sweeping whoosh.'],
+    ['mt_phaser','🌀','Phaser','Unlocks PHASER: a swirly, spacey sweep. ×1.2 Alien Gems.',3000,
+      'Phasers took off in the 1970s. The swooshing sweep on funk guitar and space-rock keyboards is very often a phaser.'],
+    ['mt_tremolo','〰','Tremolo','Unlocks TREMOLO: the volume pulses in time with the beat. ×1.2 Alien Gems.',4000,
+      'Tremolo is a volume wobble. Lots of guitar amps from the 1950s and 60s had it built in.'],
+  ];
+  let fprev='mt_effects',fpos=rel(fx,15,185);
+  FX_CHAIN.forEach(([id,icon,name,desc,cost,fact],i)=>{
+    if(i>0)fpos=along(side(fpos,128),i%2?-42:42);
+    br(id,icon,name,desc,cost,fprev,fpos,{fact});
+    fprev=id;
+  });
 
   // KEY
   const key=hub('mt_key','🎼','Key','Unlocks the KEY button. Melodic sounds (bass, synths, bells, marimba…) now play in key: C major. Unlock more keys from here. ×1.5 Alien Gems, ×1.5 points.',
@@ -87,8 +113,21 @@ const MUSIC_TREE_NODES=(function(){
   // 32 / 64 STEPS (longer loops come later, once the player has the basics)
   const s32=br('mt_steps32','🔢','32 Steps','Doubles the sequencer loop to 32 steps (2 bars). Switch lengths with the STEPS button. ×1.2 Alien Gems.',8000,'mt_groove',side(gr,170),
     {fact:'One sequencer step is a 16th note, so 16 steps make one bar of 4/4 time. 32 steps = 2 bars.'});
-  br('mt_steps64','🔢','64 Steps','Four bars in one loop: 64 steps. ×1.2 Alien Gems.',12000,'mt_steps32',side(s32,150),
+  br('mt_steps64','🔢','64 Steps','Four bars in one loop: 64 steps. ×1.2 Alien Gems.',12000,'mt_steps32',rel(s32,280,150),
     {fact:'Most dance music is built in 4, 8 and 16 bar phrases. 64 steps is a full 4-bar phrase.'});
+
+  // MASTERING — mixing tools for each track, plus EQ / compression on the whole song (the MASTER channel)
+  const ms=hub('mt_mastering','💽','Mastering','Opens the mixing and mastering tools: EQ, Compression, Panning and Sidechain. EQ and Compression also work on the MASTER channel (the whole song). ×1.5 Alien Gems, ×1.5 points.',
+    'Mixing is balancing every track against the others. Mastering is the final polish on the whole song, so it sounds good everywhere, from phone speakers to club systems.',
+    24000,'mt_steps32',side(s32,380),{mult:1.5});
+  br('mt_eq','📊','EQ','Unlocks EQ: turn the lows, mids and highs of a track (or the whole song) up or down. ×1.2 Alien Gems.',9000,'mt_mastering',rel(ms,-60,210),
+    {fact:'EQ (equalization) turns certain frequencies up or down. Cutting a little low end from everything except the kick and bass is one of the oldest mixing tricks.'});
+  br('mt_compression','🗜','Compression','Unlocks COMPRESSION: evens out loud and quiet moments so a track sits steady and punchy. ×1.2 Alien Gems.',10000,'mt_mastering',rel(ms,-15,210),
+    {fact:'A compressor turns down the loudest moments so quiet and loud parts sit closer together. Almost every song on the radio uses it.'});
+  br('mt_panning','↔','Panning','Unlocks PAN and AUTO-PAN: place a track left or right, or let it bounce between the speakers. ×1.2 Alien Gems.',11000,'mt_mastering',rel(ms,30,210),
+    {fact:'Panning places a sound between the left and right speakers. Some early stereo mixes put the whole band on one side and the singer on the other.'});
+  br('mt_sidechain','💓','Sidechain','Unlocks SIDECHAIN: a track ducks out of the way every time a kick hits, for that pumping dance-music feel. ×1.2 Alien Gems.',12000,'mt_mastering',rel(ms,75,210),
+    {fact:'Sidechain makes other sounds duck every time the kick hits, creating the "pumping" feel of dance music. Stardust\'s "Music Sounds Better With You" (1998) made it famous.'});
 
   // ARRANGEMENT
   const ar=hub('mt_arrangement','🎬','Arrangement','The art of building a whole track out of patterns. Unlock Arrangement and Song mode from here. ×1.5 Alien Gems, ×2 points.',

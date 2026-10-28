@@ -256,7 +256,8 @@ updateMatchingBtn();
   renderUI();
   seqKey=(data.seqKey==null||data.seqKey===''||!(data.seqKey>=0&&data.seqKey<12))?null:data.seqKey;
   seqKeyMinor=!!data.seqKeyMinor;
-  trackFx=Array.isArray(data.trackFx)?data.trackFx.map(f=>f&&typeof f==='object'?Object.assign({rvbType:'hall',rvbAmt:0,echoMix:0,echoDiv:.5,echoFb:.35},f):f):[];
+  trackFx=Array.isArray(data.trackFx)?data.trackFx.map(f=>f&&typeof f==='object'?fxNormalize(f):null):[];
+  if(typeof applyMasterFx==='function')applyMasterFx();
   // Rebuild sequencer with saved layers
   rebuildSeqUI();
   // Restore current sequencer layers into the editor after rebuild

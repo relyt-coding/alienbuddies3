@@ -18,6 +18,7 @@ function getCtx(){
     const L=audioCtx.sampleRate*2.5,ir=audioCtx.createBuffer(2,L,audioCtx.sampleRate);
     for(let c=0;c<2;c++){const d=ir.getChannelData(c);for(let i=0;i<L;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/L,2.3);}
     rvbNode.buffer=ir;rvbNode.connect(rvbGainNode);rvbGainNode.connect(drumMasterGain);
+    if(typeof applyMasterFx==='function')applyMasterFx(); // master EQ / compression (Mastering)
   }
   if(audioCtx.state==='suspended')audioCtx.resume();
   return audioCtx;
@@ -304,16 +305,55 @@ function keyCentsFor(id){
   return (near(root,roots)-root)*100;
 }
 let _ksMul=1; // pitch multiplier for the delay-tuned PLUCK (its pitch comes from a delay line, not an oscillator)
-// Per-track FX (index = track number): {rvbType,rvbAmt,echoMix,echoDiv,echoFb}
+// ══════════════════════════════════════════════
+//  EFFECTS ENGINE (per channel)
+// ══════════════════════════════════════════════
+// Channels: 0-5 = sequencer tracks · 6-11 = piano roll layers 1-6 · 12 = MASTER (the whole mix).
+// trackFx[ch] holds that channel's settings. Each effect only works once its skill-tree node is bought.
+// Signal path per channel:  sound → [EQ → FILTER → DISTORTION → BITCRUSH → CHORUS → FLANGER → PHASER → TREMOLO → COMPRESSOR] → PAN → SIDECHAIN DUCK → mix
+//                                                                                                                         ↘ reverb send / echo send
+// Only the effects that are switched on are wired in, so an unused channel costs nothing.
+const FX_ROLL_BASE=6,FX_MASTER=12;
 let trackFx=[];
 const FX_REVERBS={room:{label:'ROOM',len:.9,pow:3,amt:.32},hall:{label:'HALL',len:2.2,pow:2.4,amt:.42},cathedral:{label:'CATHEDRAL',len:4,pow:1.9,amt:.55}};
 const FX_ECHOS={slap:{label:'SLAP',div:.25,fb:.2,mix:.3},eighth:{label:'1/8',div:.5,fb:.35,mix:.35},dotted:{label:'DOTTED 1/8',div:.75,fb:.4,mix:.35},quarter:{label:'1/4',div:1,fb:.4,mix:.35},dub:{label:'DUB',div:.75,fb:.6,mix:.45}};
+const FX_DEFAULTS={rvbType:'hall',rvbAmt:0,echoMix:0,echoDiv:.5,echoFb:.35,echoPing:false,
+  filtOn:false,filtType:'lowpass',filtFreq:800,filtRes:1,
+  distAmt:0,crushAmt:0,
+  chorusMix:0,chorusRate:.8,
+  flangerMix:0,flangerRate:.25,flangerFb:.6,
+  phaserMix:0,phaserRate:.5,
+  tremDepth:0,tremDiv:1,tremShape:'sine',
+  eqOn:false,eqLow:0,eqMid:0,eqHigh:0,
+  compAmt:0,
+  pan:0,panAuto:0,panDiv:4,
+  scAmt:0,scRel:.5};
+// which skill-tree node unlocks each setting (master gets only EQ + compression)
+const FX_UNLOCK={rvbAmt:'mt_reverb',echoMix:'mt_echo',echoPing:'mt_pingpong',filtOn:'mt_filter',distAmt:'mt_distortion',crushAmt:'mt_bitcrusher',
+  chorusMix:'mt_chorus',flangerMix:'mt_flanger',phaserMix:'mt_phaser',tremDepth:'mt_tremolo',eqOn:'mt_eq',compAmt:'mt_compression',
+  pan:'mt_panning',panAuto:'mt_panning',scAmt:'mt_sidechain'};
+const FX_OFF={rvbAmt:0,echoMix:0,echoPing:false,filtOn:false,distAmt:0,crushAmt:0,chorusMix:0,flangerMix:0,phaserMix:0,tremDepth:0,eqOn:false,compAmt:0,pan:0,panAuto:0,scAmt:0};
+const FX_MASTER_KEYS=['eqOn','compAmt'];
+function fxNormalize(f){return f&&typeof f==='object'?Object.assign({},FX_DEFAULTS,f):f;}
 function getTrackFx(i,create){
   let f=trackFx[i];
-  if(!f&&create){f=trackFx[i]={rvbType:'hall',rvbAmt:0,echoMix:0,echoDiv:.5,echoFb:.35};}
+  if(!f&&create){f=trackFx[i]=Object.assign({},FX_DEFAULTS);}
+  else if(f&&f.filtType===undefined){f=trackFx[i]=fxNormalize(f);} // older saves only had reverb/echo
   return f||null;
 }
-function fxIsActive(f){return !!f&&(f.rvbAmt>0||f.echoMix>0);}
+// the settings that are actually allowed to sound (locked effects count as off)
+function fxEffective(f,ch){
+  if(!f)return null;
+  const has=typeof musicHas==='function'?musicHas:()=>false;
+  const e=Object.assign({},FX_DEFAULTS,f);
+  Object.keys(FX_UNLOCK).forEach(k=>{if(!has(FX_UNLOCK[k]))e[k]=FX_OFF[k];});
+  if(ch===FX_MASTER)Object.keys(FX_OFF).forEach(k=>{if(!FX_MASTER_KEYS.includes(k))e[k]=FX_OFF[k];});
+  return e;
+}
+function eqActive(f){return f.eqOn&&(f.eqLow||f.eqMid||f.eqHigh);}
+function fxIsActive(f){
+  return !!f&&(f.rvbAmt>0||f.echoMix>0||f.filtOn||f.distAmt>0||f.crushAmt>0||f.chorusMix>0||f.flangerMix>0||f.phaserMix>0||f.tremDepth>0||eqActive(f)||f.compAmt>0||f.pan!==0||f.panAuto>0||f.scAmt>0);
+}
 const _fxBuses={},_fxRevs={};
 function getFxRev(type){
   if(_fxRevs[type])return _fxRevs[type];
@@ -322,34 +362,137 @@ function getFxRev(type){
   const conv=c.createConvolver();conv.buffer=ir;const out=c.createGain();out.gain.value=1;conv.connect(out);out.connect(drumMasterReal);
   return _fxRevs[type]={conv,out};
 }
+const _beat=()=>60/((typeof seqBpm==='number'&&seqBpm>0)?seqBpm:100);
+const _curveCache={};
+function _driveCurve(amt){const k=Math.round(amt*40);if(_curveCache['d'+k])return _curveCache['d'+k];const n=2048,v=new Float32Array(n),K=1+k*2;for(let i=0;i<n;i++){const x=i*2/(n-1)-1;v[i]=Math.tanh(x*K)/Math.tanh(K);}return _curveCache['d'+k]=v;}
+function _crushCurve(amt){const bits=Math.max(2,Math.round(12-amt*10));if(_curveCache['c'+bits])return _curveCache['c'+bits];const n=8192,v=new Float32Array(n),steps=Math.pow(2,bits-1);for(let i=0;i<n;i++){const x=i*2/(n-1)-1;v[i]=Math.round(x*steps)/steps;}return _curveCache['c'+bits]=v;}
+function _lfo(c,freq,amount,target,type){const o=c.createOscillator(),g=c.createGain();o.type=type||'sine';o.frequency.value=freq;g.gain.value=amount;o.connect(g);g.connect(target);o.start();return{o,g};}
+// a wet/dry stage: in → dry → out, in → (wet path) → wet → out
+function _mixStage(c,buildWet){const s={in:c.createGain(),out:c.createGain(),dry:c.createGain(),wet:c.createGain()};s.in.connect(s.dry);s.dry.connect(s.out);const w=buildWet(s.in);w.connect(s.wet);s.wet.connect(s.out);return s;}
+// each stage: make(c) → {in,out,...}; set(stage,f,now) updates its knobs
+const FX_STAGES=[
+  {key:'eq',on:f=>eqActive(f),make(c){const lo=c.createBiquadFilter(),mid=c.createBiquadFilter(),hi=c.createBiquadFilter();lo.type='lowshelf';lo.frequency.value=220;mid.type='peaking';mid.frequency.value=1000;mid.Q.value=.9;hi.type='highshelf';hi.frequency.value=4500;lo.connect(mid);mid.connect(hi);return{in:lo,out:hi,lo,mid,hi};},
+    set(s,f,t){s.lo.gain.setValueAtTime(f.eqLow,t);s.mid.gain.setValueAtTime(f.eqMid,t);s.hi.gain.setValueAtTime(f.eqHigh,t);}},
+  {key:'filt',on:f=>f.filtOn,make(c){const b=c.createBiquadFilter();return{in:b,out:b,b};},
+    set(s,f,t){s.b.type=f.filtType;s.b.frequency.setValueAtTime(Math.max(40,Math.min(18000,f.filtFreq)),t);s.b.Q.setValueAtTime(f.filtRes,t);}},
+  {key:'dist',on:f=>f.distAmt>0,make(c){const ws=c.createWaveShaper(),g=c.createGain();ws.oversample='4x';ws.connect(g);return{in:ws,out:g,ws,g};},
+    set(s,f){s.ws.curve=_driveCurve(f.distAmt);s.g.gain.value=1-f.distAmt*.45;}},
+  {key:'crush',on:f=>f.crushAmt>0,make(c){const ws=c.createWaveShaper();return{in:ws,out:ws,ws};},
+    set(s,f){s.ws.curve=_crushCurve(f.crushAmt);}},
+  {key:'chorus',on:f=>f.chorusMix>0,make(c){let d,l;const s=_mixStage(c,inp=>{d=c.createDelay(.1);d.delayTime.value=.022;inp.connect(d);l=_lfo(c,.8,.004,d.delayTime);return d;});s.d=d;s.l=l;return s;},
+    set(s,f,t){s.wet.gain.setValueAtTime(f.chorusMix,t);s.dry.gain.setValueAtTime(1-f.chorusMix*.35,t);s.l.o.frequency.setValueAtTime(f.chorusRate,t);}},
+  {key:'flanger',on:f=>f.flangerMix>0,make(c){let d,l,fb;const s=_mixStage(c,inp=>{d=c.createDelay(.05);d.delayTime.value=.003;fb=c.createGain();inp.connect(d);d.connect(fb);fb.connect(d);l=_lfo(c,.25,.0022,d.delayTime);return d;});s.d=d;s.l=l;s.fb=fb;return s;},
+    set(s,f,t){s.wet.gain.setValueAtTime(f.flangerMix*(1-Math.min(.9,f.flangerFb)*.6),t);s.dry.gain.setValueAtTime(1-f.flangerMix*.3,t);s.l.o.frequency.setValueAtTime(f.flangerRate,t);s.fb.gain.setValueAtTime(Math.min(.9,f.flangerFb),t);}},
+  {key:'phaser',on:f=>f.phaserMix>0,make(c){const aps=[];let l;const s=_mixStage(c,inp=>{let prev=inp;for(let i=0;i<5;i++){const a=c.createBiquadFilter();a.type='allpass';a.frequency.value=700;a.Q.value=.6;prev.connect(a);prev=a;aps.push(a);}
+      const lg=c.createGain();lg.gain.value=1;l=_lfo(c,.5,550,lg);aps.forEach(a=>lg.connect(a.frequency));return prev;});s.l=l;return s;},
+    set(s,f,t){s.wet.gain.setValueAtTime(f.phaserMix,t);s.dry.gain.setValueAtTime(1,t);s.l.o.frequency.setValueAtTime(f.phaserRate,t);}},
+  {key:'trem',on:f=>f.tremDepth>0,make(c){const g=c.createGain();const l=_lfo(c,2,.5,g.gain);return{in:g,out:g,g,l};},
+    set(s,f,t){const d=Math.min(1,f.tremDepth);s.g.gain.setValueAtTime(1-d/2,t);s.l.g.gain.setValueAtTime(d/2,t);if(s.l.o.type!==f.tremShape)s.l.o.type=f.tremShape;s.l.o.frequency.setValueAtTime(1/(_beat()*f.tremDiv),t);}},
+  {key:'comp',on:f=>f.compAmt>0,make(c){const k=c.createDynamicsCompressor(),g=c.createGain();k.connect(g);k.attack.value=.004;k.release.value=.18;return{in:k,out:g,k,g};},
+    set(s,f,t){const a=f.compAmt;s.k.threshold.setValueAtTime(-6-a*34,t);s.k.ratio.setValueAtTime(1.5+a*10.5,t);s.k.knee.setValueAtTime(18-a*12,t);s.g.gain.setValueAtTime(Math.pow(10,(a*7)/20),t);}},
+];
+function _fxSig(f){return FX_STAGES.filter(st=>st.on(f)).map(st=>st.key).join(',')+'|'+(f.echoPing?'p':'m');}
+// builds (once) and re-wires (when switched effects change) a channel's chain, then sets every knob
 function getFxBus(i,f){
   const c=getCtx();let b=_fxBuses[i];
   if(!b){
-    b={input:c.createGain(),rSend:c.createGain(),eSend:c.createGain(),delay:c.createDelay(2.5),fb:c.createGain(),tone:c.createBiquadFilter(),eOut:c.createGain(),rType:null};
-    b.tone.type='lowpass';b.tone.frequency.value=3200;b.eOut.gain.value=1;
-    b.input.connect(drumMasterReal);                       // dry
-    b.input.connect(b.rSend);                              // reverb send (conv chosen below)
-    b.input.connect(b.eSend);b.eSend.connect(b.delay);b.delay.connect(b.tone);b.tone.connect(b.fb);b.fb.connect(b.delay);b.tone.connect(b.eOut);b.eOut.connect(drumMasterReal);
+    b={ch:i,input:c.createGain(),stages:{},post:c.createGain(),pan:c.createStereoPanner?c.createStereoPanner():null,duck:c.createGain(),
+       rSend:c.createGain(),eSend:c.createGain(),rType:null,sig:null};
+    // mono echo
+    b.delay=c.createDelay(2.5);b.fb=c.createGain();b.tone=c.createBiquadFilter();b.eOut=c.createGain();
+    b.tone.type='lowpass';b.tone.frequency.value=3200;
+    b.delay.connect(b.tone);b.tone.connect(b.fb);b.fb.connect(b.delay);b.tone.connect(b.eOut);b.eOut.connect(drumMasterReal);
+    // ping-pong echo: left and right delays feed each other, so repeats bounce between the speakers
+    b.dL=c.createDelay(2.5);b.dR=c.createDelay(2.5);b.pfb=c.createGain();b.ptone=c.createBiquadFilter();b.ptone.type='lowpass';b.ptone.frequency.value=3200;
+    b.merge=c.createChannelMerger(2);b.pOut=c.createGain();
+    b.dL.connect(b.ptone);b.ptone.connect(b.dR);b.dR.connect(b.pfb);b.pfb.connect(b.dL);
+    b.ptone.connect(b.merge,0,0);b.dR.connect(b.merge,0,1);b.merge.connect(b.pOut);b.pOut.connect(drumMasterReal);
+    // fixed tail: post → pan → duck → mix (+ sends)
+    // a stereo panner sends a centred mono sound out at -3 dB per side, so add that back: centre stays as loud as with no effects
+    if(b.pan){b.panMake=c.createGain();b.panMake.gain.value=Math.SQRT2;b.post.connect(b.pan);b.pan.connect(b.panMake);b.panMake.connect(b.duck);}else b.post.connect(b.duck);
+    b.duck.connect(drumMasterReal);b.duck.connect(b.rSend);b.duck.connect(b.eSend);
     _fxBuses[i]=b;
   }
+  const sig=_fxSig(f);
+  if(sig!==b.sig){
+    b.sig=sig;
+    try{b.input.disconnect();}catch(e){}
+    Object.values(b.stages).forEach(s=>{try{s.out.disconnect();}catch(e){}});
+    let prev=b.input;
+    FX_STAGES.forEach(st=>{
+      if(!st.on(f))return;
+      const s=b.stages[st.key]||(b.stages[st.key]=st.make(c));
+      prev.connect(s.in);prev=s.out;
+    });
+    prev.connect(b.post);
+    try{b.eSend.disconnect();}catch(e){}
+    b.eSend.connect(f.echoPing?b.dL:b.delay);
+  }
+  const now=c.currentTime;
+  FX_STAGES.forEach(st=>{if(st.on(f))st.set(b.stages[st.key],f,now);});
   if(b.rType!==f.rvbType){try{b.rSend.disconnect();}catch(e){}b.rSend.connect(getFxRev(f.rvbType).conv);b.rType=f.rvbType;}
-  const bpm=(typeof seqBpm==='number'&&seqBpm>0)?seqBpm:100,now=c.currentTime;
   b.rSend.gain.setValueAtTime(Math.min(1,f.rvbAmt)*.9,now);
   b.eSend.gain.setValueAtTime(Math.min(1,f.echoMix)*.9,now);
-  b.delay.delayTime.setValueAtTime(Math.min(2.4,Math.max(.03,f.echoDiv*60/bpm)),now);
-  b.fb.gain.setValueAtTime(Math.min(.9,Math.max(0,f.echoFb)),now);
+  const dt=Math.min(2.4,Math.max(.03,f.echoDiv*_beat()));
+  b.delay.delayTime.setValueAtTime(dt,now);b.dL.delayTime.setValueAtTime(dt,now);b.dR.delayTime.setValueAtTime(dt,now);
+  const fbv=Math.min(.9,Math.max(0,f.echoFb));b.fb.gain.setValueAtTime(fbv,now);b.pfb.gain.setValueAtTime(fbv,now);
+  if(b.pan){
+    if(f.panAuto>0){
+      if(!b.panL)b.panL=_lfo(c,1,0,b.pan.pan);
+      b.panL.o.frequency.setValueAtTime(1/(_beat()*f.panDiv),now);
+      const depth=Math.min(1,f.panAuto),base=Math.max(-1+depth,Math.min(1-depth,f.pan));
+      b.pan.pan.setValueAtTime(base,now);b.panL.g.gain.setValueAtTime(depth,now);
+    }else{
+      if(b.panL)b.panL.g.gain.setValueAtTime(0,now);
+      b.pan.pan.setValueAtTime(Math.max(-1,Math.min(1,f.pan)),now);
+    }
+  }
+  b.sc=f.scAmt;b.scRel=f.scRel;
   return b;
 }
-// runs a sound's synth function with the key retune and/or the track's FX bus applied
+// SIDECHAIN: every kick that plays makes the channels with sidechain on duck out of its way
+const SC_TRIGGERS=['kick','trapkick','thud','mo_earththud','mo_hollowboom'];
+function sidechainHit(t,fromCh){
+  if(typeof musicHas!=='function'||!musicHas('mt_sidechain'))return;
+  Object.values(_fxBuses).forEach(b=>{
+    if(b.ch===fromCh||b.ch===FX_MASTER)return;
+    const f=fxEffective(getTrackFx(b.ch,false),b.ch);
+    if(!f||!(f.scAmt>0))return;
+    const g=b.duck.gain,amt=Math.min(.95,f.scAmt),rel=Math.max(.04,_beat()*f.scRel);
+    g.cancelScheduledValues(t);
+    g.setTargetAtTime(1-amt,t,.004);
+    g.setTargetAtTime(1,t+.02,rel/3);
+  });
+}
+// MASTER channel: EQ + compression on the whole mix (sits between all the music and the volume knob)
+let _masterSig=null;const _masterStages={};
+function applyMasterFx(){
+  if(!audioCtx||!drumMasterReal)return;
+  const f=fxEffective(getTrackFx(FX_MASTER,false),FX_MASTER)||Object.assign({},FX_DEFAULTS);
+  const use=FX_STAGES.filter(st=>FX_MASTER_KEYS.some(k=>(st.key==='eq'&&k==='eqOn')||(st.key==='comp'&&k==='compAmt'))&&st.on(f));
+  const sig=use.map(s=>s.key).join(',');
+  const c=audioCtx,now=c.currentTime;
+  if(sig!==_masterSig){
+    _masterSig=sig;
+    try{drumMasterReal.disconnect();}catch(e){}
+    Object.values(_masterStages).forEach(s=>{try{s.out.disconnect();}catch(e){}});
+    let prev=drumMasterReal;
+    use.forEach(st=>{const s=_masterStages[st.key]||(_masterStages[st.key]=st.make(c));prev.connect(s.in);prev=s.out;});
+    prev.connect(masterGainNode);
+  }
+  use.forEach(st=>st.set(_masterStages[st.key],f,now));
+}
+// which channel a call belongs to: number = sequencer track; {roll:i} = piano roll layer
+function fxChannelOf(trackIdx){return (trackIdx!==undefined&&trackIdx!==null&&trackIdx>=0)?trackIdx:-1;}
+function fxBusFor(ch){
+  if(ch<0)return null;
+  const fx=fxEffective(getTrackFx(ch,false),ch);
+  return fxIsActive(fx)?getFxBus(ch,fx):null;
+}
+// runs a sound's synth function with the key retune and/or the channel's effects applied
 function runSoundFn(id,t,gv,trackIdx){
   const c=getCtx();
-  let fx=(trackIdx!==undefined&&trackIdx>=0)?getTrackFx(trackIdx,false):null;
-  // reverb / echo only work once their skill-tree nodes are bought
-  if(fx&&typeof musicHas==='function'){
-    const r=musicHas('mt_reverb'),e=musicHas('mt_echo');
-    if(!r||!e)fx=Object.assign({},fx,{rvbAmt:r?fx.rvbAmt:0,echoMix:e?fx.echoMix:0});
-  }
-  const bus=fxIsActive(fx)?getFxBus(trackIdx,fx):null;
+  const bus=fxBusFor(fxChannelOf(trackIdx));
   const cents=keyCentsFor(id);
   if(!bus&&!cents){SOUND_MAP[id].fn(t,gv);return;}
   const orig=c.createOscillator;const savedDM=drumMasterGain;
@@ -371,6 +514,7 @@ function playSound(id,velMult,when,trackIdx){
   // 'when' = exact audio-clock time (used by the sequencer so notes land on the beat even if the page is busy)
   const t=(when!==undefined&&when>now)?when:now;
   runSoundFn(id,t,gv,trackIdx);
+  if(SC_TRIGGERS.includes(id))sidechainHit(t,fxChannelOf(trackIdx));
   if(t>now+.008)setTimeout(partyPulseOnBeat,(t-now)*1000);else partyPulseOnBeat();
 }
 

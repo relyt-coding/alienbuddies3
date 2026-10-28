@@ -6,6 +6,8 @@
 //   32 / 64 Steps → STEPS button · Reverb / Echo → EFFECTS button · Key → KEY button (+ key packs)
 //   Velocity → VELOCITY button · Arrangement Mode → PAT / ARR switch · Song Mode → SONG
 // Locked controls are hidden, not greyed out, so the first look at the sequencer stays simple.
+// every skill-tree node that adds something to the EFFECTS window
+const FX_NODE_IDS=['mt_reverb','mt_echo','mt_pingpong','mt_filter','mt_distortion','mt_chorus','mt_bitcrusher','mt_flanger','mt_phaser','mt_tremolo','mt_eq','mt_compression','mt_panning','mt_sidechain'];
 function _muShow(id,on){const el=document.getElementById(id);if(el)el.style.display=on?'':'none';}
 
 function applyMusicUnlocks(justBoughtId){
@@ -28,7 +30,8 @@ function applyMusicUnlocks(justBoughtId){
   _muShow('vtbKeyBtn',musicHas('mt_key'));
 
   // ── effects ──
-  _muShow('vtbFxBtn',musicHas('mt_reverb')||musicHas('mt_echo'));
+  _muShow('vtbFxBtn',FX_NODE_IDS.some(musicHas));
+  if(typeof applyMasterFx==='function')applyMasterFx();
 
   // ── velocity ──
   const vel=musicHas('mt_velocity');
@@ -55,6 +58,13 @@ function applyMusicUnlocks(justBoughtId){
     mt_arrange:'🧩 PAT / ARR switch unlocked at the top of the sequencer.',
     mt_song:'💿 SONG mode unlocked next to PAT / ARR.',
     mt_piano:'🎹 ROLL button unlocked at the top of the sequencer.',
+    mt_pingpong:'🏓 Ping-Pong unlocked: turn it on in the ECHO section of EFFECTS.',
+    mt_filter:'🎚 Filter unlocked: open EFFECTS and pick a track or roll layer.',
+    mt_distortion:'🔥 Distortion unlocked in EFFECTS.',mt_chorus:'🌊 Chorus unlocked in EFFECTS.',mt_bitcrusher:'👾 Bitcrusher unlocked in EFFECTS.',
+    mt_flanger:'✈ Flanger unlocked in EFFECTS.',mt_phaser:'🌀 Phaser unlocked in EFFECTS.',mt_tremolo:'〰 Tremolo unlocked in EFFECTS.',
+    mt_eq:'📊 EQ unlocked in EFFECTS: on any track, roll layer, or the MASTER channel.',
+    mt_compression:'🗜 Compression unlocked in EFFECTS: on any track, roll layer, or the MASTER channel.',
+    mt_panning:'↔ Panning unlocked in EFFECTS.',mt_sidechain:'💓 Sidechain unlocked: tracks with it on duck every time a kick plays.',
   }[justBoughtId];
   if(where&&typeof showToast==='function')setTimeout(()=>showToast(where),1600);
   if(justBoughtId&&/^mt_piano\d$/.test(justBoughtId)&&typeof showToast==='function')

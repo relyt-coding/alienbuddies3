@@ -91,12 +91,15 @@ function rollInKey(m){
 
 // ── sound ──
 // plays one note: the instrument retuned to `midi` and cut off (with a short fade) after `durSec`
-function playRollNote(id,midi,at,durSec,vel){
+function playRollNote(id,midi,at,durSec,vel,layer){
   if(!SOUND_MAP[id]||!PITCHED_SOUNDS[id])return;
   const c=getCtx(),now=c.currentTime;at=Math.max(at||now,now);
   const cents=(midi-rollBaseMidi(id))*100;
   const gv=getSoundGainVal(id)*(vel==null?1:vel);
-  const gate=c.createGain();gate.connect(drumMasterGain);
+  // each roll layer has its own effects channel (6 + layer), just like a sequencer track
+  const lay=(layer==null)?(typeof rollView==='number'?rollView:-1):layer;
+  const bus=(lay>=0&&typeof fxBusFor==='function')?fxBusFor(FX_ROLL_BASE+lay):null;
+  const gate=c.createGain();gate.connect(bus?bus.input:drumMasterGain);
   const end=at+Math.max(.06,durSec);
   gate.gain.setValueAtTime(1,at);gate.gain.setValueAtTime(1,end);gate.gain.linearRampToValueAtTime(0,end+.05);
   const orig=c.createOscillator,saved=drumMasterGain;
@@ -112,7 +115,7 @@ function rollPlayStep(roll,st,at){
   const sd=60/seqBpm/4,n=pianoRollLayers();
   roll.layers.forEach((L,li)=>{
     if(li>=n||!L||L.muted||!L.soundId||!SOUND_MAP[L.soundId])return;
-    L.notes.forEach(nt=>{if(nt.s>=st&&nt.s<st+1)playRollNote(L.soundId,nt.m,at+(nt.s-st)*sd,nt.l*sd,1);});
+    L.notes.forEach(nt=>{if(nt.s>=st&&nt.s<st+1)playRollNote(L.soundId,nt.m,at+(nt.s-st)*sd,nt.l*sd,1,li);});
   });
 }
 

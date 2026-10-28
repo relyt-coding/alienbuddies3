@@ -343,12 +343,16 @@ anmPrevBtn&&anmPrevBtn.addEventListener('click',()=>{if(alienProfileIdx>0){alien
 anmNextBtn&&anmNextBtn.addEventListener('click',()=>{if(alienProfileIdx<totalAliens-1){alienProfileIdx++;renderAlienProfile();}});
 
 // Edit toggle
-anmEditBtn&&anmEditBtn.addEventListener('click',()=>{
+function openAnmEdit(){
+  if(anmEditOpen&&anmEditSection.style.display==='flex')return;
   anmEditOpen=true;
   anmEditSection.style.display='flex';
   anmEditBtn.style.display='none';
   alienNameInput.value=(alienData[alienProfileIdx]||{name:''}).name||'';
-});
+  try{alienNameInput.focus();alienNameInput.select();}catch(e){}
+}
+anmEditBtn&&anmEditBtn.addEventListener('click',openAnmEdit);
+anmNameEl&&anmNameEl.addEventListener('click',openAnmEdit); // tapping the name (or NO NAME YET) edits it too
 
 document.getElementById('alienNameSave')&&document.getElementById('alienNameSave').addEventListener('click',saveAlienName);
 document.getElementById('alienNameClear')&&document.getElementById('alienNameClear').addEventListener('click',()=>{alienNameInput.value='';});

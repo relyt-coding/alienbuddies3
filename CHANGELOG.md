@@ -2,6 +2,15 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.89 - 2026-10-27 21:46
+
+- changed: css/style.css
+- changed: index.html
+- changed: js/01-constants.js
+- changed: js/05-pads.js
+- changed: js/12-tiers-and-bunker.js
+- changed: js/20-skill-tree.js
+
 ## v0.2.88 - 2026-10-27 20:34
 
 - changed: css/style.css

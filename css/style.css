@@ -1504,3 +1504,11 @@ body.desktop-mode #bunkerView .page-header::before{order:3;}
 
 /* v0.2.88 TIPS button 25% smaller (BACK unchanged) */
 #bunkerView #tipsBtn{width:4.2rem;height:2.03rem;flex:0 0 4.2rem;font-size:.86rem !important;border-radius:8px !important;}
+#anmName{cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
+#anmName:hover{text-shadow:0 0 10px var(--anc,#00ff88);}
+
+/* v0.2.89 skill tree: bigger close button + gem count; matching victory popup 30% smaller */
+#skillTreeGemDisplay{font-size:2.1rem !important;gap:.5rem;}
+#skillTreeCloseBtn{font-size:1.15rem !important;letter-spacing:.1em;padding:.5rem 1.1rem !important;border-radius:10px !important;color:#8a8aaa !important;border-color:#2a2a5a !important;}
+@media (max-width:600px){#skillTreeGemDisplay{font-size:1.7rem !important;}#skillTreeCloseBtn{font-size:1rem !important;padding:.45rem .8rem !important;}}
+#matchVictory>*{zoom:.7;}

@@ -156,7 +156,7 @@ const padAssignListEl=document.getElementById('padAssignList');
 const padAssignClose=document.getElementById('padAssignClose');
 
 // ── Sound picker organisation ──
-// Row 1: SOURCE  (ALL · TUCANA · each planet you have unlocked sounds on)
+// Row 1: SOURCE  (ALL · SPACESHIP (the shop sounds; key 'tucana') · each planet you have unlocked sounds on)
 // Row 2: depends on row 1 — a planet shows its CONTINENTS, TUCANA shows sound TYPES (drums, synth…)
 // The list below is grouped under headers, and a search box narrows it further.
 const PA_PLANET_NAMES={mantra:'MANTRA',hyphae:'HYPHAE'};
@@ -188,7 +188,7 @@ function buildPaFilters(){
   // row 1: source
   const r1=paRow('SOURCE');
   paChip(r1,'ALL ('+avail.length+')',paFilter==='all',()=>setPaFilter('all'));
-  if(planets.length)paChip(r1,'🌌 TUCANA ('+tucana.length+')',paFilter==='tucana',()=>setPaFilter('tucana'));
+  if(planets.length)paChip(r1,'SPACESHIP ('+tucana.length+')',paFilter==='tucana',()=>setPaFilter('tucana'));
   planets.forEach(p=>{
     const n=avail.filter(x=>x.planet===p).length,t=paTotalFor(p);
     paChip(r1,'🪐 '+paPlanetName(p)+' ('+n+(t>n?'/'+t:'')+')',paFilter===p,()=>setPaFilter(p),'pa-planet');
@@ -256,7 +256,7 @@ function buildPaList(){
     padAssignListEl.appendChild(e);return;
   }
   // group under headers: ALL -> Tucana / planet·continent;  planet -> continent;  single continent / tucana type -> no header
-  const groupKey=x=>x.planet?(paPlanetName(x.planet)+' · '+paContName(x.continent)):'TUCANA';
+  const groupKey=x=>x.planet?(paPlanetName(x.planet)+' · '+paContName(x.continent)):'SPACESHIP';
   const keys=[...new Set(shown.map(groupKey))];
   const useHeaders=keys.length>1;
   let lastKey=null;
@@ -264,7 +264,7 @@ function buildPaList(){
   ordered.forEach(snd=>{
     if(useHeaders){
       const k=groupKey(snd);
-      if(k!==lastKey){lastKey=k;paGroupHeader(k.indexOf('TUCANA')===0?'🌌 '+k:'🪐 '+k,ordered.filter(x=>groupKey(x)===k).length,snd.planet?snd.color:'');}
+      if(k!==lastKey){lastKey=k;paGroupHeader(k==='SPACESHIP'?k:'🪐 '+k,ordered.filter(x=>groupKey(x)===k).length,snd.planet?snd.color:'');}
     }
     if(soundVols[snd.id]===undefined)soundVols[snd.id]=1;
     const currentSnd=padAssignIdx!==null?padSounds[padAssignIdx]:null;

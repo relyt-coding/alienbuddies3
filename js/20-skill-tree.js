@@ -8,7 +8,7 @@ let alienGems = 0;
 let skillTreeUnlocked = false;
 let unlockedSkills = {}; // {skillId: true}
 let gemInterval = null;
-const GEM_UNLOCK_COST = 50; // v0.2.80: costs 50 Alien Gems (was 2.6e25 points)
+const GEM_UNLOCK_COST = 25; // costs 25 Alien Gems to Explore the Galaxies (was 50; originally 2.6e25 points)
 const BASE_GEMS_PER_ALIEN_PER_MIN = 1;
 
 // ── Skill Tree Data ──
@@ -16,109 +16,111 @@ const BASE_GEMS_PER_ALIEN_PER_MIN = 1;
 // Each node: {id, icon, name, desc, cost, requires, x, y, branch, placeholder}
 const SKILL_TREE_NODES = [
   // ── CENTER ──
-  {id:'core', icon:'✦', name:'Tucana Core', desc:'The heart of the Tucana Galaxy. All four Quad Sun paths begin here.', cost:100, requires:[], x:0, y:0, branch:'center', mult:0},
+  {id:'core', icon:'✦', name:'Tucana Core', desc:'The heart of the Tucana Galaxy. All four Quad Sun paths begin here.', cost:50, requires:[], x:0, y:0, branch:'center', mult:0},
 
   // ── QUAD SUN 1 — Planet Exploration (↖) ──
   {id:'sun_planets', icon:'☀', name:'Quad Sun I', desc:'The first of four Quad Suns. Opens the Planet Exploration path. Grants ×2 points.', cost:150, requires:['core'], x:-200, y:-200, branch:'planets', mult:2},
 
   // Planet Mantra
-  {id:'planet_mantra', icon:'🌍', name:'Planet Mantra', desc:'First contact with Planet Mantra. Unlocks the Om continent and standard sounds. Grants ×1.5 points.', cost:300, requires:['sun_planets'], x:-340, y:-300, branch:'planets', mult:1.5},
+  {id:'planet_mantra', icon:'🌍', name:'Planet Mantra', desc:'First contact with Planet Mantra. Unlocks the Om continent and standard sounds. Grants ×1.5 points.', cost:300, requires:['sun_planets'], x:-260, y:-540, branch:'planets', mult:1.5},
   // Mantra continents
-  {id:'cont_om', icon:'🔔', name:'Continent: Om', desc:'The spiritual heartland of Mantra. Enriches the standard drum kit with 4 new sounds. ×1.5 points.', cost:200, requires:['planet_mantra'], x:-440, y:-230, branch:'planets', mult:1.5,
+  {id:'cont_om', icon:'🔔', name:'Continent: Om', desc:'The spiritual heartland of Mantra. Enriches the standard drum kit with 4 new sounds. ×1.5 points.', cost:200, requires:['planet_mantra'], x:-475, y:-830, branch:'planets', mult:1.5,
     sounds:['om_bell','om_bowl','om_rim','om_shaker2']},
-  {id:'cont_sohum', icon:'🥁', name:'Continent: So Hum', desc:'Lofi metallic instruments from the ancient forges of So Hum. 5 new sounds. ×1.5 points.', cost:200, requires:['planet_mantra'], x:-450, y:-340, branch:'planets', mult:1.5,
+  {id:'cont_sohum', icon:'🥁', name:'Continent: So Hum', desc:'Lofi metallic instruments from the ancient forges of So Hum. 5 new sounds. ×1.5 points.', cost:200, requires:['planet_mantra'], x:-360, y:-830, branch:'planets', mult:1.5,
     sounds:['sh_metalclick','sh_tinpan','sh_steeldrum','sh_cymbal_lo','sh_chain']},
-  {id:'cont_manas', icon:'🌀', name:'Continent: Manas', desc:'Abstract electronic pulses from the digital wastes of Manas. 5 new sounds. ×1.5 points.', cost:200, requires:['planet_mantra'], x:-420, y:-100, branch:'planets', mult:1.5,
+  {id:'cont_manas', icon:'🌀', name:'Continent: Manas', desc:'Abstract electronic pulses from the digital wastes of Manas. 5 new sounds. ×1.5 points.', cost:200, requires:['planet_mantra'], x:-160, y:-830, branch:'planets', mult:1.5,
     sounds:['mn_bitcrush','mn_glitchperc','mn_databend','mn_synthpop','mn_digitalsnare']},
-  {id:'cont_floww', icon:'💧', name:'Continent: Floww', desc:'Water, marimba and soft bass from the ocean plains of Floww. 5 new sounds. ×1.5 points.', cost:200, requires:['planet_mantra'], x:-230, y:-440, branch:'planets', mult:1.5,
+  {id:'cont_floww', icon:'💧', name:'Continent: Floww', desc:'Water, marimba and soft bass from the ocean plains of Floww. 5 new sounds. ×1.5 points.', cost:200, requires:['planet_mantra'], x:-45, y:-830, branch:'planets', mult:1.5,
     sounds:['fw_waterdrip','fw_marimba2','fw_softbass','fw_wave','fw_woodblock']},
 
   // Sound nodes for Om
-  {id:'snd_om_bell', icon:'🔔', name:'Om Bell', desc:'A pure resonant bell tone from the Om temples. ×1.5 points.', cost:50, requires:['cont_om'], x:-540, y:-254, branch:'planets', mult:1.5, soundUnlock:'om_bell'},
-  {id:'snd_om_bowl', icon:'🎵', name:'Om Bowl', desc:'A singing bowl strike with long harmonic decay. ×1.5 points.', cost:50, requires:['snd_om_bell'], x:-640, y:-206, branch:'planets', mult:1.5, soundUnlock:'om_bowl'},
-  {id:'snd_om_rim', icon:'🥁', name:'Om Rim', desc:'A crisp rim knock on a ceremonial drum. ×1.5 points.', cost:50, requires:['snd_om_bowl'], x:-740, y:-254, branch:'planets', mult:1.5, soundUnlock:'om_rim'},
-  {id:'snd_om_shaker2', icon:'🎶', name:'Om Shaker', desc:'A soft organic shaker from Om rituals. ×1.5 points.', cost:50, requires:['snd_om_rim'], x:-840, y:-206, branch:'planets', mult:1.5, soundUnlock:'om_shaker2'},
+  {id:'snd_om_bell', icon:'🔔', name:'Om Bell', desc:'A pure resonant bell tone from the Om temples. ×1.5 points.', cost:50, requires:['cont_om'], x:-495, y:-925, branch:'planets', mult:1.5, soundUnlock:'om_bell'},
+  {id:'snd_om_bowl', icon:'🎵', name:'Om Bowl', desc:'A singing bowl strike with long harmonic decay. ×1.5 points.', cost:50, requires:['snd_om_bell'], x:-455, y:-1020, branch:'planets', mult:1.5, soundUnlock:'om_bowl'},
+  {id:'snd_om_rim', icon:'🥁', name:'Om Rim', desc:'A crisp rim knock on a ceremonial drum. ×1.5 points.', cost:50, requires:['snd_om_bowl'], x:-495, y:-1115, branch:'planets', mult:1.5, soundUnlock:'om_rim'},
+  {id:'snd_om_shaker2', icon:'🎶', name:'Om Shaker', desc:'A soft organic shaker from Om rituals. ×1.5 points.', cost:50, requires:['snd_om_rim'], x:-455, y:-1210, branch:'planets', mult:1.5, soundUnlock:'om_shaker2'},
 
   // Sound nodes for So Hum
-  {id:'snd_sh_metalclick', icon:'⚙', name:'Metal Click', desc:'A sharp metallic click from So Hum forges. ×1.5 points.', cost:50, requires:['cont_sohum'], x:-481, y:-440, branch:'planets', mult:1.5, soundUnlock:'sh_metalclick'},
-  {id:'snd_sh_tinpan', icon:'🥫', name:'Tin Pan', desc:'A hollow tin pan strike with buzzy overtones. ×1.5 points.', cost:50, requires:['snd_sh_metalclick'], x:-418, y:-540, branch:'planets', mult:1.5, soundUnlock:'sh_tinpan'},
-  {id:'snd_sh_steeldrum', icon:'🎺', name:'Steel Drum', desc:'A warm steel drum tone from the So Hum markets. ×1.5 points.', cost:50, requires:['snd_sh_cymbal_lo'], x:-481, y:-840, branch:'planets', mult:1.5, soundUnlock:'sh_steeldrum'},
-  {id:'snd_sh_cymbal_lo', icon:'💿', name:'Lo Cymbal', desc:'A dark low cymbal wash, lofi and dusty. ×1.5 points.', cost:50, requires:['snd_sh_chain'], x:-418, y:-740, branch:'planets', mult:1.5, soundUnlock:'sh_cymbal_lo'},
-  {id:'snd_sh_chain', icon:'⛓', name:'Chain Rattle', desc:'A metallic chain rattle with industrial character. ×1.5 points.', cost:50, requires:['snd_sh_tinpan'], x:-481, y:-640, branch:'planets', mult:1.5, soundUnlock:'sh_chain'},
+  {id:'snd_sh_metalclick', icon:'⚙', name:'Metal Click', desc:'A sharp metallic click from So Hum forges. ×1.5 points.', cost:50, requires:['cont_sohum'], x:-380, y:-925, branch:'planets', mult:1.5, soundUnlock:'sh_metalclick'},
+  {id:'snd_sh_tinpan', icon:'🥫', name:'Tin Pan', desc:'A hollow tin pan strike with buzzy overtones. ×1.5 points.', cost:50, requires:['snd_sh_metalclick'], x:-340, y:-1020, branch:'planets', mult:1.5, soundUnlock:'sh_tinpan'},
+  {id:'snd_sh_steeldrum', icon:'🎺', name:'Steel Drum', desc:'A warm steel drum tone from the So Hum markets. ×1.5 points.', cost:50, requires:['snd_sh_cymbal_lo'], x:-380, y:-1305, branch:'planets', mult:1.5, soundUnlock:'sh_steeldrum'},
+  {id:'snd_sh_cymbal_lo', icon:'💿', name:'Lo Cymbal', desc:'A dark low cymbal wash, lofi and dusty. ×1.5 points.', cost:50, requires:['snd_sh_chain'], x:-340, y:-1210, branch:'planets', mult:1.5, soundUnlock:'sh_cymbal_lo'},
+  {id:'snd_sh_chain', icon:'⛓', name:'Chain Rattle', desc:'A metallic chain rattle with industrial character. ×1.5 points.', cost:50, requires:['snd_sh_tinpan'], x:-380, y:-1115, branch:'planets', mult:1.5, soundUnlock:'sh_chain'},
 
   // Sound nodes for Manas
-  {id:'snd_mn_bitcrush', icon:'💾', name:'Bit Crush', desc:'An 8-bit crunchy percussive hit. ×1.5 points.', cost:50, requires:['cont_manas'], x:-520, y:-124, branch:'planets', mult:1.5, soundUnlock:'mn_bitcrush'},
-  {id:'snd_mn_glitchperc', icon:'📡', name:'Glitch Perc', desc:'A fragmented digital percussion burst. ×1.5 points.', cost:50, requires:['snd_mn_bitcrush'], x:-620, y:-76, branch:'planets', mult:1.5, soundUnlock:'mn_glitchperc'},
-  {id:'snd_mn_databend', icon:'🖥', name:'Data Bend', desc:'A data-corrupted tone with alien texture. ×1.5 points.', cost:50, requires:['snd_mn_glitchperc'], x:-720, y:-124, branch:'planets', mult:1.5, soundUnlock:'mn_databend'},
-  {id:'snd_mn_synthpop', icon:'🎹', name:'Synth Pop', desc:'A bright synthetic pop with punchy attack. ×1.5 points.', cost:50, requires:['snd_mn_digitalsnare'], x:-920, y:-124, branch:'planets', mult:1.5, soundUnlock:'mn_synthpop'},
-  {id:'snd_mn_digitalsnare', icon:'📟', name:'Digital Snare', desc:'A lo-fi digital snare crack. ×1.5 points.', cost:50, requires:['snd_mn_databend'], x:-820, y:-76, branch:'planets', mult:1.5, soundUnlock:'mn_digitalsnare'},
+  {id:'snd_mn_bitcrush', icon:'💾', name:'Bit Crush', desc:'An 8-bit crunchy percussive hit. ×1.5 points.', cost:50, requires:['cont_manas'], x:-180, y:-925, branch:'planets', mult:1.5, soundUnlock:'mn_bitcrush'},
+  {id:'snd_mn_glitchperc', icon:'📡', name:'Glitch Perc', desc:'A fragmented digital percussion burst. ×1.5 points.', cost:50, requires:['snd_mn_bitcrush'], x:-140, y:-1020, branch:'planets', mult:1.5, soundUnlock:'mn_glitchperc'},
+  {id:'snd_mn_databend', icon:'🖥', name:'Data Bend', desc:'A data-corrupted tone with alien texture. ×1.5 points.', cost:50, requires:['snd_mn_glitchperc'], x:-180, y:-1115, branch:'planets', mult:1.5, soundUnlock:'mn_databend'},
+  {id:'snd_mn_synthpop', icon:'🎹', name:'Synth Pop', desc:'A bright synthetic pop with punchy attack. ×1.5 points.', cost:50, requires:['snd_mn_digitalsnare'], x:-180, y:-1305, branch:'planets', mult:1.5, soundUnlock:'mn_synthpop'},
+  {id:'snd_mn_digitalsnare', icon:'📟', name:'Digital Snare', desc:'A lo-fi digital snare crack. ×1.5 points.', cost:50, requires:['snd_mn_databend'], x:-140, y:-1210, branch:'planets', mult:1.5, soundUnlock:'mn_digitalsnare'},
 
   // Sound nodes for Floww
-  {id:'snd_fw_waterdrip', icon:'💦', name:'Water Drip', desc:'A single water droplet with crystalline resonance. ×1.5 points.', cost:50, requires:['cont_floww'], x:-261, y:-540, branch:'planets', mult:1.5, soundUnlock:'fw_waterdrip'},
-  {id:'snd_fw_marimba2', icon:'🪘', name:'Ocean Marimba', desc:'A soft watery marimba tone. ×1.5 points.', cost:50, requires:['snd_fw_wave'], x:-261, y:-740, branch:'planets', mult:1.5, soundUnlock:'fw_marimba2'},
-  {id:'snd_fw_softbass', icon:'🐋', name:'Soft Bass', desc:'A warm rounded bass note from deep Floww waters. ×1.5 points.', cost:50, requires:['snd_fw_woodblock'], x:-261, y:-940, branch:'planets', mult:1.5, soundUnlock:'fw_softbass'},
-  {id:'snd_fw_wave', icon:'🌊', name:'Wave Crash', desc:'A gentle wave crash with white noise tail. ×1.5 points.', cost:50, requires:['snd_fw_waterdrip'], x:-198, y:-640, branch:'planets', mult:1.5, soundUnlock:'fw_wave'},
-  {id:'snd_fw_woodblock', icon:'🪵', name:'Wood Block', desc:'A hollow wooden block strike with warm tone. ×1.5 points.', cost:50, requires:['snd_fw_marimba2'], x:-198, y:-840, branch:'planets', mult:1.5, soundUnlock:'fw_woodblock'},
+  {id:'snd_fw_waterdrip', icon:'💦', name:'Water Drip', desc:'A single water droplet with crystalline resonance. ×1.5 points.', cost:50, requires:['cont_floww'], x:-65, y:-925, branch:'planets', mult:1.5, soundUnlock:'fw_waterdrip'},
+  {id:'snd_fw_marimba2', icon:'🪘', name:'Ocean Marimba', desc:'A soft watery marimba tone. ×1.5 points.', cost:50, requires:['snd_fw_wave'], x:-65, y:-1115, branch:'planets', mult:1.5, soundUnlock:'fw_marimba2'},
+  {id:'snd_fw_softbass', icon:'🐋', name:'Soft Bass', desc:'A warm rounded bass note from deep Floww waters. ×1.5 points.', cost:50, requires:['snd_fw_woodblock'], x:-65, y:-1305, branch:'planets', mult:1.5, soundUnlock:'fw_softbass'},
+  {id:'snd_fw_wave', icon:'🌊', name:'Wave Crash', desc:'A gentle wave crash with white noise tail. ×1.5 points.', cost:50, requires:['snd_fw_waterdrip'], x:-25, y:-1020, branch:'planets', mult:1.5, soundUnlock:'fw_wave'},
+  {id:'snd_fw_woodblock', icon:'🪵', name:'Wood Block', desc:'A hollow wooden block strike with warm tone. ×1.5 points.', cost:50, requires:['snd_fw_marimba2'], x:-25, y:-1210, branch:'planets', mult:1.5, soundUnlock:'fw_woodblock'},
 
   // Planet Hyphae (branches from Mantra)
-  {id:'planet_hyphae', icon:'🍄', name:'Planet Hyphae', desc:'A mushroom-covered world of organic textures. Unlocks 6 continents of fungal sound. ×1.5 points.', cost:500, requires:['planet_mantra'], x:-600, y:-380, branch:'planets', mult:1.5},
+  {id:'planet_hyphae', icon:'🍄', name:'Planet Hyphae', desc:'A mushroom-covered world of organic textures. Unlocks 6 continents of fungal sound. ×1.5 points.', cost:500, requires:['sun_planets'], x:-570, y:-330, branch:'planets', mult:1.5},
   // Hyphae continents
-  {id:'cont_enoki', icon:'🌿', name:'Continent: Enoki', desc:'Thin, high metallic taps and light woody clicks. Delicate and sparse. 5 sounds. ×1.5 points.', cost:300, requires:['planet_hyphae'], x:-940, y:-540, branch:'planets', mult:1.5,
+  {id:'cont_enoki', icon:'🌿', name:'Continent: Enoki', desc:'Thin, high metallic taps and light woody clicks. Delicate and sparse. 5 sounds. ×1.5 points.', cost:300, requires:['planet_hyphae'], x:-860, y:-230, branch:'planets', mult:1.5,
     sounds:['en_tinktap','en_woodtap','en_highping','en_lightrim','en_softclick']},
-  {id:'cont_morel', icon:'🌑', name:'Continent: Morel', desc:'Deep hollow thuds and earthy low tones. Warm and organic. 5 sounds. ×1.5 points.', cost:300, requires:['planet_hyphae'], x:-940, y:-430, branch:'planets', mult:1.5,
+  {id:'cont_morel', icon:'🌑', name:'Continent: Morel', desc:'Deep hollow thuds and earthy low tones. Warm and organic. 5 sounds. ×1.5 points.', cost:300, requires:['planet_hyphae'], x:-860, y:-115, branch:'planets', mult:1.5,
     sounds:['mo_earththud','mo_hollowboom','mo_deepmud','mo_lowknock','mo_caveboom']},
-  {id:'cont_porcini', icon:'🟤', name:'Continent: Porcini', desc:'Rich mid-range woody percussion. Full-bodied and round. 5 sounds. ×1.5 points.', cost:300, requires:['planet_hyphae'], x:-940, y:-320, branch:'planets', mult:1.5,
+  {id:'cont_porcini', icon:'🟤', name:'Continent: Porcini', desc:'Rich mid-range woody percussion. Full-bodied and round. 5 sounds. ×1.5 points.', cost:300, requires:['planet_hyphae'], x:-860, y:0, branch:'planets', mult:1.5,
     sounds:['po_woodmid','po_roundbonk','po_treeknock','po_stump','po_logdrum']},
-  {id:'cont_oyster', icon:'🦪', name:'Continent: Oyster', desc:'Smooth sliding tones and breathy textures. Airy and wet. 5 sounds. ×1.5 points.', cost:300, requires:['planet_hyphae'], x:-940, y:-650, branch:'planets', mult:1.5,
+  {id:'cont_oyster', icon:'🦪', name:'Continent: Oyster', desc:'Smooth sliding tones and breathy textures. Airy and wet. 5 sounds. ×1.5 points.', cost:300, requires:['planet_hyphae'], x:-860, y:-430, branch:'planets', mult:1.5,
     sounds:['oy_breathslide','oy_airblow','oy_wetslap','oy_softbend','oy_shimmer']},
-  {id:'cont_reishi', icon:'🪬', name:'Continent: Reishi', desc:'Slow ceremonial gongs and deep drones. Meditative and long decay. 5 sounds. ×1.5 points.', cost:300, requires:['planet_hyphae'], x:-940, y:-760, branch:'planets', mult:1.5,
+  {id:'cont_reishi', icon:'🪬', name:'Continent: Reishi', desc:'Slow ceremonial gongs and deep drones. Meditative and long decay. 5 sounds. ×1.5 points.', cost:300, requires:['planet_hyphae'], x:-860, y:-545, branch:'planets', mult:1.5,
     sounds:['re_gong','re_deepdrone','re_ceremony','re_lowbowl','re_resonance']},
-  {id:'cont_bella', icon:'✨', name:'Continent: Bella', desc:'Bright snappy accents and quick woody snaps. Punchy and lively. 5 sounds. ×1.5 points.', cost:300, requires:['planet_hyphae'], x:-940, y:-870, branch:'planets', mult:1.5,
+  {id:'cont_bella', icon:'✨', name:'Continent: Bella', desc:'Bright snappy accents and quick woody snaps. Punchy and lively. 5 sounds. ×1.5 points.', cost:300, requires:['planet_hyphae'], x:-860, y:-660, branch:'planets', mult:1.5,
     sounds:['be_snap','be_woodsnap','be_brightpop','be_crackle','be_accent']},
 
   // Hyphae sound nodes (just a few representative ones — full set below)
-  {id:'snd_en_tinktap', icon:'🌿', name:'Tink Tap', desc:'A delicate high metallic tap. ×1.5 points.', cost:80, requires:['cont_enoki'], x:-1040, y:-564, branch:'planets', mult:1.5, soundUnlock:'en_tinktap'},
-  {id:'snd_en_woodtap', icon:'🌿', name:'Wood Tap', desc:'A light woody click from Enoki forests. ×1.5 points.', cost:80, requires:['snd_en_lightrim'], x:-1340, y:-516, branch:'planets', mult:1.5, soundUnlock:'en_woodtap'},
-  {id:'snd_en_highping', icon:'🌿', name:'High Ping', desc:'A bright metallic ping with quick decay. ×1.5 points.', cost:80, requires:['snd_en_tinktap'], x:-1140, y:-516, branch:'planets', mult:1.5, soundUnlock:'en_highping'},
-  {id:'snd_en_lightrim', icon:'🌿', name:'Light Rim', desc:'A feather-light rim tap. ×1.5 points.', cost:80, requires:['snd_en_highping'], x:-1240, y:-564, branch:'planets', mult:1.5, soundUnlock:'en_lightrim'},
-  {id:'snd_en_softclick', icon:'🌿', name:'Soft Click', desc:'A barely-there soft click. ×1.5 points.', cost:80, requires:['snd_en_woodtap'], x:-1440, y:-564, branch:'planets', mult:1.5, soundUnlock:'en_softclick'},
+  {id:'snd_en_tinktap', icon:'🌿', name:'Tink Tap', desc:'A delicate high metallic tap. ×1.5 points.', cost:80, requires:['cont_enoki'], x:-955, y:-250, branch:'planets', mult:1.5, soundUnlock:'en_tinktap'},
+  {id:'snd_en_woodtap', icon:'🌿', name:'Wood Tap', desc:'A light woody click from Enoki forests. ×1.5 points.', cost:80, requires:['snd_en_lightrim'], x:-1240, y:-210, branch:'planets', mult:1.5, soundUnlock:'en_woodtap'},
+  {id:'snd_en_highping', icon:'🌿', name:'High Ping', desc:'A bright metallic ping with quick decay. ×1.5 points.', cost:80, requires:['snd_en_tinktap'], x:-1050, y:-210, branch:'planets', mult:1.5, soundUnlock:'en_highping'},
+  {id:'snd_en_lightrim', icon:'🌿', name:'Light Rim', desc:'A feather-light rim tap. ×1.5 points.', cost:80, requires:['snd_en_highping'], x:-1145, y:-250, branch:'planets', mult:1.5, soundUnlock:'en_lightrim'},
+  {id:'snd_en_softclick', icon:'🌿', name:'Soft Click', desc:'A barely-there soft click. ×1.5 points.', cost:80, requires:['snd_en_woodtap'], x:-1335, y:-250, branch:'planets', mult:1.5, soundUnlock:'en_softclick'},
 
-  {id:'snd_mo_earththud', icon:'🌑', name:'Earth Thud', desc:'A deep hollow earth thud. ×1.5 points.', cost:80, requires:['cont_morel'], x:-1040, y:-454, branch:'planets', mult:1.5, soundUnlock:'mo_earththud'},
-  {id:'snd_mo_hollowboom', icon:'🌑', name:'Hollow Boom', desc:'A cavernous boom from deep Morel earth. ×1.5 points.', cost:80, requires:['snd_mo_deepmud'], x:-1240, y:-454, branch:'planets', mult:1.5, soundUnlock:'mo_hollowboom'},
-  {id:'snd_mo_deepmud', icon:'🌑', name:'Deep Mud', desc:'A thick low muddy thud. ×1.5 points.', cost:80, requires:['snd_mo_earththud'], x:-1140, y:-406, branch:'planets', mult:1.5, soundUnlock:'mo_deepmud'},
-  {id:'snd_mo_lowknock', icon:'🌑', name:'Low Knock', desc:'A heavy low wood knock. ×1.5 points.', cost:80, requires:['snd_mo_caveboom'], x:-1440, y:-454, branch:'planets', mult:1.5, soundUnlock:'mo_lowknock'},
-  {id:'snd_mo_caveboom', icon:'🌑', name:'Cave Boom', desc:'A resonant cave boom with long decay. ×1.5 points.', cost:80, requires:['snd_mo_hollowboom'], x:-1340, y:-406, branch:'planets', mult:1.5, soundUnlock:'mo_caveboom'},
+  {id:'snd_mo_earththud', icon:'🌑', name:'Earth Thud', desc:'A deep hollow earth thud. ×1.5 points.', cost:80, requires:['cont_morel'], x:-955, y:-135, branch:'planets', mult:1.5, soundUnlock:'mo_earththud'},
+  {id:'snd_mo_hollowboom', icon:'🌑', name:'Hollow Boom', desc:'A cavernous boom from deep Morel earth. ×1.5 points.', cost:80, requires:['snd_mo_deepmud'], x:-1145, y:-135, branch:'planets', mult:1.5, soundUnlock:'mo_hollowboom'},
+  {id:'snd_mo_deepmud', icon:'🌑', name:'Deep Mud', desc:'A thick low muddy thud. ×1.5 points.', cost:80, requires:['snd_mo_earththud'], x:-1050, y:-95, branch:'planets', mult:1.5, soundUnlock:'mo_deepmud'},
+  {id:'snd_mo_lowknock', icon:'🌑', name:'Low Knock', desc:'A heavy low wood knock. ×1.5 points.', cost:80, requires:['snd_mo_caveboom'], x:-1335, y:-135, branch:'planets', mult:1.5, soundUnlock:'mo_lowknock'},
+  {id:'snd_mo_caveboom', icon:'🌑', name:'Cave Boom', desc:'A resonant cave boom with long decay. ×1.5 points.', cost:80, requires:['snd_mo_hollowboom'], x:-1240, y:-95, branch:'planets', mult:1.5, soundUnlock:'mo_caveboom'},
 
   // Porcini sounds
-  {id:'snd_po_woodmid', icon:'🟤', name:'Wood Mid', desc:'A full-bodied mid-range wood hit. ×1.5 points.', cost:80, requires:['cont_porcini'], x:-1040, y:-344, branch:'planets', mult:1.5, soundUnlock:'po_woodmid'},
-  {id:'snd_po_roundbonk', icon:'🟤', name:'Round Bonk', desc:'A round resonant bonk. ×1.5 points.', cost:80, requires:['snd_po_treeknock'], x:-1240, y:-344, branch:'planets', mult:1.5, soundUnlock:'po_roundbonk'},
-  {id:'snd_po_treeknock', icon:'🟤', name:'Tree Knock', desc:'A hollow tree knock with bark resonance. ×1.5 points.', cost:80, requires:['snd_po_woodmid'], x:-1140, y:-296, branch:'planets', mult:1.5, soundUnlock:'po_treeknock'},
-  {id:'snd_po_stump', icon:'🟤', name:'Stump Hit', desc:'A heavy stump hit with warm thud. ×1.5 points.', cost:80, requires:['snd_po_roundbonk'], x:-1340, y:-296, branch:'planets', mult:1.5, soundUnlock:'po_stump'},
-  {id:'snd_po_logdrum', icon:'🟤', name:'Log Drum', desc:'A slap on a hollow log drum. ×1.5 points.', cost:80, requires:['snd_po_stump'], x:-1440, y:-344, branch:'planets', mult:1.5, soundUnlock:'po_logdrum'},
+  {id:'snd_po_woodmid', icon:'🟤', name:'Wood Mid', desc:'A full-bodied mid-range wood hit. ×1.5 points.', cost:80, requires:['cont_porcini'], x:-955, y:-20, branch:'planets', mult:1.5, soundUnlock:'po_woodmid'},
+  {id:'snd_po_roundbonk', icon:'🟤', name:'Round Bonk', desc:'A round resonant bonk. ×1.5 points.', cost:80, requires:['snd_po_treeknock'], x:-1145, y:-20, branch:'planets', mult:1.5, soundUnlock:'po_roundbonk'},
+  {id:'snd_po_treeknock', icon:'🟤', name:'Tree Knock', desc:'A hollow tree knock with bark resonance. ×1.5 points.', cost:80, requires:['snd_po_woodmid'], x:-1050, y:20, branch:'planets', mult:1.5, soundUnlock:'po_treeknock'},
+  {id:'snd_po_stump', icon:'🟤', name:'Stump Hit', desc:'A heavy stump hit with warm thud. ×1.5 points.', cost:80, requires:['snd_po_roundbonk'], x:-1240, y:20, branch:'planets', mult:1.5, soundUnlock:'po_stump'},
+  {id:'snd_po_logdrum', icon:'🟤', name:'Log Drum', desc:'A slap on a hollow log drum. ×1.5 points.', cost:80, requires:['snd_po_stump'], x:-1335, y:-20, branch:'planets', mult:1.5, soundUnlock:'po_logdrum'},
 
   // Oyster sounds
-  {id:'snd_oy_breathslide', icon:'🦪', name:'Breath Slide', desc:'A breathy sliding exhale. ×1.5 points.', cost:80, requires:['cont_oyster'], x:-1040, y:-674, branch:'planets', mult:1.5, soundUnlock:'oy_breathslide'},
-  {id:'snd_oy_airblow', icon:'🦪', name:'Air Blow', desc:'A soft air blow with wispy texture. ×1.5 points.', cost:80, requires:['snd_oy_breathslide'], x:-1140, y:-626, branch:'planets', mult:1.5, soundUnlock:'oy_airblow'},
-  {id:'snd_oy_wetslap', icon:'🦪', name:'Wet Slap', desc:'A wet percussive slap. ×1.5 points.', cost:80, requires:['snd_oy_shimmer'], x:-1440, y:-674, branch:'planets', mult:1.5, soundUnlock:'oy_wetslap'},
-  {id:'snd_oy_softbend', icon:'🦪', name:'Soft Bend', desc:'A gentle pitch bend with smooth decay. ×1.5 points.', cost:80, requires:['snd_oy_airblow'], x:-1240, y:-674, branch:'planets', mult:1.5, soundUnlock:'oy_softbend'},
-  {id:'snd_oy_shimmer', icon:'🦪', name:'Shimmer', desc:'A shimmering high texture. ×1.5 points.', cost:80, requires:['snd_oy_softbend'], x:-1340, y:-626, branch:'planets', mult:1.5, soundUnlock:'oy_shimmer'},
+  {id:'snd_oy_breathslide', icon:'🦪', name:'Breath Slide', desc:'A breathy sliding exhale. ×1.5 points.', cost:80, requires:['cont_oyster'], x:-955, y:-450, branch:'planets', mult:1.5, soundUnlock:'oy_breathslide'},
+  {id:'snd_oy_airblow', icon:'🦪', name:'Air Blow', desc:'A soft air blow with wispy texture. ×1.5 points.', cost:80, requires:['snd_oy_breathslide'], x:-1050, y:-410, branch:'planets', mult:1.5, soundUnlock:'oy_airblow'},
+  {id:'snd_oy_wetslap', icon:'🦪', name:'Wet Slap', desc:'A wet percussive slap. ×1.5 points.', cost:80, requires:['snd_oy_shimmer'], x:-1335, y:-450, branch:'planets', mult:1.5, soundUnlock:'oy_wetslap'},
+  {id:'snd_oy_softbend', icon:'🦪', name:'Soft Bend', desc:'A gentle pitch bend with smooth decay. ×1.5 points.', cost:80, requires:['snd_oy_airblow'], x:-1145, y:-450, branch:'planets', mult:1.5, soundUnlock:'oy_softbend'},
+  {id:'snd_oy_shimmer', icon:'🦪', name:'Shimmer', desc:'A shimmering high texture. ×1.5 points.', cost:80, requires:['snd_oy_softbend'], x:-1240, y:-410, branch:'planets', mult:1.5, soundUnlock:'oy_shimmer'},
 
   // Reishi sounds
-  {id:'snd_re_gong', icon:'🪬', name:'Gong', desc:'A ceremonial gong strike with long sustain. ×1.5 points.', cost:80, requires:['cont_reishi'], x:-1040, y:-784, branch:'planets', mult:1.5, soundUnlock:'re_gong'},
-  {id:'snd_re_deepdrone', icon:'🪬', name:'Deep Drone', desc:'A low resonant drone from Reishi caves. ×1.5 points.', cost:80, requires:['snd_re_lowbowl'], x:-1340, y:-736, branch:'planets', mult:1.5, soundUnlock:'re_deepdrone'},
-  {id:'snd_re_ceremony', icon:'🪬', name:'Ceremony', desc:'A ritualistic ceremonial strike. ×1.5 points.', cost:80, requires:['snd_re_deepdrone'], x:-1440, y:-784, branch:'planets', mult:1.5, soundUnlock:'re_ceremony'},
-  {id:'snd_re_lowbowl', icon:'🪬', name:'Low Bowl', desc:'A deep singing bowl with slow decay. ×1.5 points.', cost:80, requires:['snd_re_resonance'], x:-1240, y:-784, branch:'planets', mult:1.5, soundUnlock:'re_lowbowl'},
-  {id:'snd_re_resonance', icon:'🪬', name:'Resonance', desc:'A pure resonant tone from Reishi crystals. ×1.5 points.', cost:80, requires:['snd_re_gong'], x:-1140, y:-736, branch:'planets', mult:1.5, soundUnlock:'re_resonance'},
+  {id:'snd_re_gong', icon:'🪬', name:'Gong', desc:'A ceremonial gong strike with long sustain. ×1.5 points.', cost:80, requires:['cont_reishi'], x:-955, y:-565, branch:'planets', mult:1.5, soundUnlock:'re_gong'},
+  {id:'snd_re_deepdrone', icon:'🪬', name:'Deep Drone', desc:'A low resonant drone from Reishi caves. ×1.5 points.', cost:80, requires:['snd_re_lowbowl'], x:-1240, y:-525, branch:'planets', mult:1.5, soundUnlock:'re_deepdrone'},
+  {id:'snd_re_ceremony', icon:'🪬', name:'Ceremony', desc:'A ritualistic ceremonial strike. ×1.5 points.', cost:80, requires:['snd_re_deepdrone'], x:-1335, y:-565, branch:'planets', mult:1.5, soundUnlock:'re_ceremony'},
+  {id:'snd_re_lowbowl', icon:'🪬', name:'Low Bowl', desc:'A deep singing bowl with slow decay. ×1.5 points.', cost:80, requires:['snd_re_resonance'], x:-1145, y:-565, branch:'planets', mult:1.5, soundUnlock:'re_lowbowl'},
+  {id:'snd_re_resonance', icon:'🪬', name:'Resonance', desc:'A pure resonant tone from Reishi crystals. ×1.5 points.', cost:80, requires:['snd_re_gong'], x:-1050, y:-525, branch:'planets', mult:1.5, soundUnlock:'re_resonance'},
 
   // Bella sounds
-  {id:'snd_be_snap', icon:'✨', name:'Snap', desc:'A bright finger snap. ×1.5 points.', cost:80, requires:['cont_bella'], x:-1040, y:-894, branch:'planets', mult:1.5, soundUnlock:'be_snap'},
-  {id:'snd_be_woodsnap', icon:'✨', name:'Wood Snap', desc:'A crisp wood snap with quick attack. ×1.5 points.', cost:80, requires:['snd_be_snap'], x:-1140, y:-846, branch:'planets', mult:1.5, soundUnlock:'be_woodsnap'},
-  {id:'snd_be_brightpop', icon:'✨', name:'Bright Pop', desc:'A bright poppy accent hit. ×1.5 points.', cost:80, requires:['snd_be_crackle'], x:-1340, y:-846, branch:'planets', mult:1.5, soundUnlock:'be_brightpop'},
-  {id:'snd_be_crackle', icon:'✨', name:'Crackle', desc:'A snappy crackle with energy. ×1.5 points.', cost:80, requires:['snd_be_woodsnap'], x:-1240, y:-894, branch:'planets', mult:1.5, soundUnlock:'be_crackle'},
-  {id:'snd_be_accent', icon:'✨', name:'Accent', desc:'A punchy accent note from Bella peaks. ×1.5 points.', cost:80, requires:['snd_be_brightpop'], x:-1440, y:-894, branch:'planets', mult:1.5, soundUnlock:'be_accent'},
+  {id:'snd_be_snap', icon:'✨', name:'Snap', desc:'A bright finger snap. ×1.5 points.', cost:80, requires:['cont_bella'], x:-955, y:-680, branch:'planets', mult:1.5, soundUnlock:'be_snap'},
+  {id:'snd_be_woodsnap', icon:'✨', name:'Wood Snap', desc:'A crisp wood snap with quick attack. ×1.5 points.', cost:80, requires:['snd_be_snap'], x:-1050, y:-640, branch:'planets', mult:1.5, soundUnlock:'be_woodsnap'},
+  {id:'snd_be_brightpop', icon:'✨', name:'Bright Pop', desc:'A bright poppy accent hit. ×1.5 points.', cost:80, requires:['snd_be_crackle'], x:-1240, y:-640, branch:'planets', mult:1.5, soundUnlock:'be_brightpop'},
+  {id:'snd_be_crackle', icon:'✨', name:'Crackle', desc:'A snappy crackle with energy. ×1.5 points.', cost:80, requires:['snd_be_woodsnap'], x:-1145, y:-680, branch:'planets', mult:1.5, soundUnlock:'be_crackle'},
+  {id:'snd_be_accent', icon:'✨', name:'Accent', desc:'A punchy accent note from Bella peaks. ×1.5 points.', cost:80, requires:['snd_be_brightpop'], x:-1335, y:-680, branch:'planets', mult:1.5, soundUnlock:'be_accent'},
 
-  // Planet 3 — placeholder (branches from Hyphae)
-  {id:'planet_3', icon:'🌑', name:'???', desc:'An unknown world detected at the edge of the Tucana system. Coming in a future update.', cost:1000, requires:['planet_hyphae'], x:-760, y:-1020, branch:'planets', mult:1.5, placeholder:true},
+  // Planet 3 — placeholder (branches from Hyphae, far left)
+  {id:'planet_3', icon:'🌑', name:'???', desc:'An unknown world detected at the edge of the Tucana system. Coming in a future update.', cost:1000, requires:['planet_hyphae'], x:-1530, y:-330, branch:'planets', mult:1.5, placeholder:true},
+  // Planet 4 — placeholder (branches from Mantra)
+  {id:'planet_4', icon:'🌑', name:'???', desc:'An unknown world detected at the edge of the Tucana system. Coming in a future update.', cost:1000, requires:['planet_mantra'], x:-260, y:-1480, branch:'planets', mult:1.5, placeholder:true},
 
   // ── QUAD SUN 2 — Musical Toolkit (↗) ──
   {id:'sun_points', icon:'☀', name:'Quad Sun II', desc:'The second Quad Sun. Opens the Musical Toolkit path: tools and features to make your music better. Grants ×2 points.', cost:150, requires:['core'], x:200, y:-200, branch:'points', mult:2},
@@ -213,7 +215,7 @@ function skillAvailable(id){
   const node = SKILL_MAP[id];
   if(!node) return false;
   if(unlockedSkills[id]) return false;
-  return node.requires.every(r => !!unlockedSkills[r]); // the Tucana Core itself now has to be bought first (100 gems)
+  return node.requires.every(r => !!unlockedSkills[r]); // the Tucana Core itself now has to be bought first (50 gems)
 }
 
 // ── Buy skill ──
@@ -238,7 +240,7 @@ function buySkill(id){
 }
 
 // ── Skill Tree Button render ──
-const SKILL_TREE_COST_STR = '50 💎';
+const SKILL_TREE_COST_STR = '25 💎';
 function updateSkillTreeBtn(){
   const btn = document.getElementById('skillTreeUnlockBtn');
   const costEl = document.getElementById('skillTreeUnlockCost');
@@ -598,7 +600,7 @@ function initSkillTreePan(){
 // ── Wire buttons ──
 document.getElementById('skillTreeUnlockBtn')&&document.getElementById('skillTreeUnlockBtn').addEventListener('click',()=>{
   if(skillTreeUnlocked){ openSkillTree(); return; }
-  if(Math.floor(alienGems) < GEM_UNLOCK_COST){ showToast('Need 50 💎 Alien Gems to Explore the Galaxies!'); return; }
+  if(Math.floor(alienGems) < GEM_UNLOCK_COST){ showToast('Need 25 💎 Alien Gems to Explore the Galaxies!'); return; }
   alienGems -= GEM_UNLOCK_COST;
   updateGemDisplays();
   skillTreeUnlocked = true;

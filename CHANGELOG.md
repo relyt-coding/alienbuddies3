@@ -2,6 +2,15 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.91 - 2026-10-28 09:24
+
+- Skill tree popup always stays on screen next to its bubble (phones slide the map)
+- 32 / 64 Steps moved after Groove; Tuning Fork leads straight to Effects
+- New effects: Filter, Distortion, Chorus, Bitcrusher, Flanger, Phaser, Tremolo, Ping-Pong
+- Mastering hub after 32 Steps: EQ, Compression, Panning (+ auto-pan), Sidechain
+- Effects work on piano roll layers, plus a MASTER channel (EQ + compression on the whole song)
+- Effects window: channel list + collapsible sections
+
 ## v0.2.90 - 2026-10-28 00:37
 
 - Musical Toolkit skill tree: 32/64 Steps (moved out of the shop), Effects (Reverb, Echo), Key (8 key packs), Piano Roll (layers 2-6), Groove (Velocity), Arrangement (Arrangement Mode, Song Mode)

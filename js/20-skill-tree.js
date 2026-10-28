@@ -47,16 +47,10 @@ const MUSIC_TREE_NODES=(function(){
   const br=(id,icon,name,desc,cost,req,pos,extra)=>{N.push(Object.assign({id,icon,name,desc,cost,requires:[req],x:pos.x,y:pos.y,branch:'points',mult:0,gemMult:1.2},extra||{}));return pos;};
   const fork={x:340,y:-300};
 
-  // 32 / 64 STEPS
-  const s32=br('mt_steps32','🔢','32 Steps','Doubles the sequencer loop to 32 steps (2 bars). Switch lengths with the STEPS button. ×1.2 Alien Gems.',300,'neural_tap_1',{x:470,y:-430},
-    {fact:'One sequencer step is a 16th note, so 16 steps make one bar of 4/4 time. 32 steps = 2 bars.'});
-  br('mt_steps64','🔢','64 Steps','Four bars in one loop: 64 steps. ×1.2 Alien Gems.',450,'mt_steps32',side(s32,150),
-    {fact:'Most dance music is built in 4, 8 and 16 bar phrases. 64 steps is a full 4-bar phrase.'});
-
   // EFFECTS
   const fx=hub('mt_effects','🌀','Effects','Opens the world of audio effects. Unlock Reverb and Echo from here. ×1.5 Alien Gems, ×1.5 points.',
     'Effects (FX) change a sound after it is made. Reverb and echo are "time-based" effects: they add copies of the sound that arrive a little later, so it feels like it is happening in a real space.',
-    600,'mt_steps32',along(s32,340),{mult:1.5});
+    600,'neural_tap_1',along(fork,520),{mult:1.5});
   br('mt_reverb','🏛','Reverb','Unlocks REVERB in the EFFECTS window: room, hall and cathedral spaces for any track. ×1.2 Alien Gems.',400,'mt_effects',side(fx,170),
     {fact:'Reverb is the wash of thousands of tiny reflections bouncing off walls. A cathedral can ring for 5+ seconds.'});
   br('mt_echo','📣','Echo','Unlocks ECHO in the EFFECTS window: repeats that lock to the beat. ×1.2 Alien Gems.',400,'mt_effects',side(fx,-170),
@@ -85,11 +79,16 @@ const MUSIC_TREE_NODES=(function(){
   }
 
   // GROOVE
-  const gr=hub('mt_groove','🥁','Groove','Tightens the sequencer: sequencer steps earn +50%. Unlock Velocity from here. ×1.5 Alien Gems, ×1.5 points.',
+  const gr=hub('mt_groove','🥁','Groove','Tightens the sequencer: sequencer steps earn +50%. Unlock Velocity and longer loops (32 / 64 steps) from here. ×1.5 Alien Gems, ×1.5 points.',
     'Groove is the feel that makes music move: tiny differences in timing and loudness between notes. Two drummers can play the same pattern and sound totally different because of it.',
     16200,'mt_piano',along(pr,420),{mult:1.5,seqBoost:1.5});
   br('mt_velocity','📶','Velocity','Unlocks the VELOCITY button: set how hard each step hits. ×1.2 Alien Gems.',6000,'mt_groove',side(gr,-170),
     {fact:'Velocity comes from MIDI keyboards: it measures how fast a key is pressed, which is why harder hits play louder.'});
+  // 32 / 64 STEPS (longer loops come later, once the player has the basics)
+  const s32=br('mt_steps32','🔢','32 Steps','Doubles the sequencer loop to 32 steps (2 bars). Switch lengths with the STEPS button. ×1.2 Alien Gems.',8000,'mt_groove',side(gr,170),
+    {fact:'One sequencer step is a 16th note, so 16 steps make one bar of 4/4 time. 32 steps = 2 bars.'});
+  br('mt_steps64','🔢','64 Steps','Four bars in one loop: 64 steps. ×1.2 Alien Gems.',12000,'mt_steps32',side(s32,150),
+    {fact:'Most dance music is built in 4, 8 and 16 bar phrases. 64 steps is a full 4-bar phrase.'});
 
   // ARRANGEMENT
   const ar=hub('mt_arrangement','🎬','Arrangement','The art of building a whole track out of patterns. Unlock Arrangement and Song mode from here. ×1.5 Alien Gems, ×2 points.',
@@ -570,18 +569,33 @@ function openStDetail(id, fromEl){
   const pop = document.getElementById('stDetailPop');
   pop.classList.add('open');
 
-  // Position near node
+  // Position next to the node, always fully on screen (uses the popup's real size)
   const canvas = document.getElementById('skillTreeCanvas');
   const cr = canvas ? canvas.getBoundingClientRect() : {left:0,top:0,width:window.innerWidth,height:window.innerHeight};
-  // Map node coords to screen
   const sx = cr.left + stPanX + node.x * stScale;
   const sy = cr.top + stPanY + node.y * stScale;
-  const pw = 340, ph = node.fact ? 440 : 320;
-  let left = sx - pw/2;
-  let top = sy + 50;
-  if(left < 8) left = 8;
-  if(left + pw > window.innerWidth - 8) left = window.innerWidth - pw - 8;
-  if(top + ph > window.innerHeight - 8) top = sy - ph - 50;
+  const nodeR = (node.id==='core' ? 36 : node.hub ? 42 : 27) * stScale;
+  const vw = window.innerWidth, vh = window.innerHeight, M = 8;
+  pop.style.maxHeight = (vh - M*2) + 'px';
+  pop.style.overflowY = 'auto';
+  pop.style.left = '0px'; pop.style.top = '0px';
+  const pw = Math.min(pop.offsetWidth, vw - M*2), ph = Math.min(pop.offsetHeight, vh - M*2);
+  const gap = 14, labelH = 34 * stScale; // room for the node's name + price under the bubble
+  const clampX = x => Math.max(M, Math.min(vw - pw - M, x));
+  const clampY = y => Math.max(M, Math.min(vh - ph - M, y));
+  let left, top;
+  const below = sy + nodeR + labelH + gap, above = sy - nodeR - gap - ph;
+  if(below + ph <= vh - M){ left = clampX(sx - pw/2); top = below; }
+  else if(above >= M){ left = clampX(sx - pw/2); top = above; }
+  else if(sx + nodeR + gap + pw <= vw - M){ left = sx + nodeR + gap; top = clampY(sy - ph/2); }
+  else if(sx - nodeR - gap - pw >= M){ left = sx - nodeR - gap - pw; top = clampY(sy - ph/2); }
+  else {
+    // no room anywhere (phones): slide the map so the bubble sits just above the popup at the bottom of the screen
+    const wantSy = vh - M - ph - gap - labelH - nodeR;
+    const topLimit = cr.top + nodeR + 4;
+    if(wantSy >= topLimit){ stPanY += wantSy - sy; applyStTransform(); left = clampX(sx - pw/2); top = vh - M - ph; }
+    else { left = clampX((vw - pw)/2); top = clampY((vh - ph)/2); } // tiny screens: centre it
+  }
   pop.style.left = left + 'px';
   pop.style.top = top + 'px';
 }

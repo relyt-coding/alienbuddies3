@@ -192,7 +192,9 @@ function stopAutoplay(reason){
 }
 let lastUi=0,lastSave=0;
 function autoplayTick(){
-  const now=performance.now(),budget=opts.speed==='max'?45:30;let simmed=0;
+  if(activeSlot<0||document.body.classList.contains('home-visible')){stopAutoplay('left the game');return;}
+  // phones get a smaller slice of each 100 ms so the screen stays smooth while fast-forwarding
+  const now=performance.now(),budget=(opts.speed==='max'?45:30)*(IS_MOBILE_DEVICE?.5:1);let simmed=0;
   const target=opts.speed==='max'?Infinity:Math.min(+opts.speed*Math.min(.25,(now-lastReal)/1000),+opts.speed*.25);
   lastReal=now;
   let reason='';
@@ -333,7 +335,9 @@ const css=document.createElement('style');css.textContent=`
 #tmPanel .tm-tabs{display:flex;gap:4px;padding:6px 8px;border-bottom:1px solid #16221d;overflow-x:auto;}
 #tmPanel .tm-tab{font-family:'Bebas Neue',sans-serif;letter-spacing:.1em;font-size:.95rem;padding:.3rem .65rem;border-radius:7px;border:1px solid #22223a;background:#0c0c18;color:#8a8ab5;cursor:pointer;white-space:nowrap;}
 #tmPanel .tm-tab.on{border-color:#00ff88;color:#00ff88;background:#04170e;}
-#tmPanel .tm-body{flex:1;overflow-y:auto;padding:10px 12px 24px;-webkit-overflow-scrolling:touch;}
+#tmPanel .tm-body{flex:1;overflow-y:auto;overscroll-behavior:contain;padding:10px 12px calc(24px + env(safe-area-inset-bottom,0px));-webkit-overflow-scrolling:touch;}
+@media (pointer:coarse){#tmPanel input[type=number],#tmPanel input[type=text],#tmPanel select{font-size:16px;} #tmPanel button.tm-b,#tmPanel .tm-chip{padding:8px 11px;}}
+#tmPanel.tm-touch input[type=number],#tmPanel.tm-touch input[type=text],#tmPanel.tm-touch select{font-size:16px;min-height:32px;} #tmPanel.tm-touch button.tm-b,#tmPanel.tm-touch .tm-chip{padding:8px 11px;}
 #tmPanel h4{font-family:'Bebas Neue',sans-serif;letter-spacing:.14em;font-size:.95rem;color:#7a7aa8;margin:14px 0 6px;font-weight:normal;}
 #tmPanel .tm-row{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:4px 0;}
 #tmPanel button.tm-b,#tmPanel .tm-chip{font:inherit;font-size:12px;padding:6px 10px;border-radius:7px;border:1px solid #2a2a4a;background:#10101e;color:#cfd2e6;cursor:pointer;touch-action:manipulation;}
@@ -356,10 +360,11 @@ const css=document.createElement('style');css.textContent=`
 #tmPanel .tm-feed span:first-child{color:#7a7aa8;min-width:62px;}
 #tmPanel svg{width:100%;height:auto;display:block;background:#0a0a14;border-radius:8px;border:1px solid #17172c;}
 #tmOverlay{position:fixed;left:8px;top:calc(env(safe-area-inset-top,0px) + 40px);z-index:394;font:11px/1.35 ui-monospace,Menlo,monospace;background:#000c;color:#9fffc8;padding:5px 7px;border-radius:7px;border:1px solid #1f3a2f;pointer-events:none;display:none;}
+@media (max-width:700px){#tmOverlay{top:auto;bottom:calc(env(safe-area-inset-bottom,0px) + 74px);left:6px;right:auto;max-width:calc(100vw - 60px);font-size:9px;padding:3px 5px;background:#000a;}}
 #tmToast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:400;background:#04170e;border:1px solid #00ff88;color:#00ff88;padding:8px 14px;border-radius:9px;font-family:system-ui;font-size:13px;display:none;}
 `;document.head.appendChild(css);
 const badge=document.createElement('button');badge.id='tmBadge';badge.textContent='🧪 TEST';document.body.appendChild(badge);
-const panel=document.createElement('div');panel.id='tmPanel';document.body.appendChild(panel);
+const panel=document.createElement('div');panel.id='tmPanel';if(IS_MOBILE_DEVICE||('ontouchstart' in window))panel.classList.add('tm-touch');document.body.appendChild(panel);
 const tmToast=document.createElement('div');tmToast.id='tmToast';document.body.appendChild(tmToast);
 const say=t=>{tmToast.textContent=t;tmToast.style.display='block';clearTimeout(say._t);say._t=setTimeout(()=>tmToast.style.display='none',2200);};
 let tab='run';
@@ -372,8 +377,10 @@ function render(){
   badge.classList.toggle('rec',running);
   if(!panel.classList.contains('open'))return;
   const tabs=[['run','RUN'],['times','TIME TABLE'],['compare','COMPARE'],['cheats','CHEATS'],['perf','PERF']];
+  const oldBody=panel.querySelector('.tm-body'),keepScroll=oldBody&&panel.dataset.tab===tab?oldBody.scrollTop:0;panel.dataset.tab=tab;
   panel.innerHTML=`<div class="tm-hd"><b>🧪 TEST MODE</b><span class="tm-sub">v${esc(VER)}</span><button class="tm-b" data-a="close">✕</button></div>
     <div class="tm-tabs">${tabs.map(([k,l])=>`<button class="tm-tab${tab===k?' on':''}" data-tab="${k}">${l}</button>`).join('')}</div><div class="tm-body">${({run:viewRun,times:viewTimes,compare:viewCompare,cheats:viewCheats,perf:viewPerf}[tab])()}</div>`;
+  if(keepScroll)panel.querySelector('.tm-body').scrollTop=keepScroll;
 }
 function renderLive(){ // cheap refresh of the RUN tab while things are moving
   badge.classList.toggle('rec',running);

@@ -48,7 +48,7 @@ function autoSave(){
     arrangement:[...arrangement],
     arrangeBars,
     seqLayersSnap,
-    pianoRoll:(typeof pianoRoll!=='undefined')?pianoRoll:undefined,
+    pianoRoll:(typeof pianoRoll!=='undefined')?{layers:pianoRoll.layers.map(L=>({soundId:L.soundId,muted:L.muted,notes:L.notes.map(n=>({s:n.s,l:n.l,m:n.m}))}))}:undefined,
     seqHasAutoMutedAmbience,
     musicOn,
     shownHints,

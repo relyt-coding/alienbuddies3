@@ -152,7 +152,10 @@
       if(isMaster){playSound('kick');setTimeout(()=>playSound('snare'),260);setTimeout(()=>playSound('marimba'),520);return;}
       if(ch>=FX_ROLL_BASE){const L=pianoRoll.layers[ch-FX_ROLL_BASE];if(L&&L.soundId)playRollNote(L.soundId,Math.round(rollBaseMidi(L.soundId)),0,.5,1,ch-FX_ROLL_BASE);return;}
       playSound(seqLayers[ch].soundId,1,undefined,ch);}catch(e){}};
-    const changed=(doPreview)=>{saveSoon();if(isMaster&&typeof applyMasterFx==='function')applyMasterFx();paintAll();if(doPreview)preview();};
+    const changed=(doPreview)=>{saveSoon();
+      if(isMaster&&typeof applyMasterFx==='function')applyMasterFx();
+      else if(_fxBuses[ch]){const e=fxEffective(f,ch);if(fxIsActive(e))getFxBus(ch,e);}
+      paintAll();if(doPreview)preview();};
     const painters=[];
     const paintAll=()=>painters.forEach(p=>p());
 

@@ -768,7 +768,8 @@ function seqRunStep(quiet,delayMs,audioAt){
       seqLayers.forEach((layer,_li)=>{
         if(layer.steps[st]&&layerAudible(layer)){getCtx();playSound(layer.soundId,layer.vols[st]/100,_at,_li);}
       });
-      typeof rollPlayStep==='function'&&rollPlayStep(pianoRoll,st,_at); // piano roll notes that start inside this step
+      typeof rollPlayStep==='function'&&rollPlayStep(pianoRoll,st,_at,true); // piano roll notes that start inside this step
+      if(st%16===0&&typeof fxBeatSync==='function')fxBeatSync(_at); // keep tremolo / auto-pan locked to the bar
     }
     seqStep=(seqStep+1)%STEPS;
   } else if(seqMode==='arrange'){
@@ -786,6 +787,7 @@ function seqRunStep(quiet,delayMs,audioAt){
           }
         });
         typeof rollPlayStep==='function'&&rollPlayStep(pat.roll,as,_at);
+        if(as%16===0&&typeof fxBeatSync==='function')fxBeatSync(_at);
       }
     }
     arrBarStep++;
@@ -818,6 +820,7 @@ function seqRunStep(quiet,delayMs,audioAt){
             }
           });
           typeof rollPlayStep==='function'&&rollPlayStep(pat.roll,sst,_at);
+          if(sst%16===0&&typeof fxBeatSync==='function')fxBeatSync(_at);
         }
       }
       songArrBarStep++;

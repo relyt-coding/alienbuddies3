@@ -54,7 +54,7 @@ function rollSlice(r,from,to){
 // paste a saved pattern's roll into the editor (same rules as the step tracks: offset, optional wrap, merge keeps the rest)
 function rollPaste(src,offset,len,wrap,merge){
   src=rollSanitize(src);
-  if(!merge){pianoRoll={layers:[]};}
+  if(!merge)pianoRoll.layers.forEach(L=>{L.notes=[];});
   src.layers.forEach((S,i)=>{
     const L=pianoRoll.layers[i]||(pianoRoll.layers[i]={soundId:S.soundId,muted:S.muted,notes:[]});
     if(!merge||!L.notes.length){L.soundId=S.soundId;L.muted=S.muted;}
@@ -105,13 +105,16 @@ function playRollNote(id,midi,at,durSec,vel,layer){
   const orig=c.createOscillator,saved=drumMasterGain;
   try{
     c.createOscillator=function(){const o=orig.call(this);o.detune.value=cents;return o;};
-    _ksMul=Math.pow(2,cents/1200);drumMasterGain=gate;
+    _ksMul=Math.pow(2,cents/1200);drumMasterGain=gate;if(bus)rvbNode=bus.rvIn;
     SOUND_MAP[id].fn(at,gv);
-  }finally{delete c.createOscillator;_ksMul=1;drumMasterGain=saved;}
+  }finally{delete c.createOscillator;_ksMul=1;drumMasterGain=saved;rvbNode=rvbReal||rvbNode;}
+  // the gate is done once the note has faded: disconnect it so long sessions don't pile up audio nodes
+  setTimeout(()=>{try{gate.disconnect();}catch(e){}},Math.max(0,(end+.3-c.currentTime)*1000));
 }
 // called by the sequencer clock for every step it plays (pattern, arrangement and song modes)
-function rollPlayStep(roll,st,at){
+function rollPlayStep(roll,st,at,respectSolo){
   if(!roll||!roll.layers||!musicHas('mt_piano'))return;
+  if(respectSolo&&typeof seqLayers!=='undefined'&&seqLayers.some(x=>x.solo))return;
   const sd=60/seqBpm/4,n=pianoRollLayers();
   roll.layers.forEach((L,li)=>{
     if(li>=n||!L||L.muted||!L.soundId||!SOUND_MAP[L.soundId])return;
@@ -260,6 +263,11 @@ function buildRollGrid(){
   const s=SOUND_MAP[L.soundId];seqRollGrid.style.setProperty('--lc',s?s.color:'#a0a8ff');
   renderRollNotes();
 }
+function placeRollNote(el,n,hi,rh){
+  el.style.setProperty('--s',n.s);el.style.setProperty('--l',n.l);
+  el.style.top=((hi-n.m)*rh)+'px';
+  el.style.display=n.s>=STEPS?'none':'';
+}
 function renderRollNotes(){
   const i=rollView;if(i<0)return;
   const L=rollLayer(i);if(!L.soundId)return;
@@ -267,12 +275,14 @@ function renderRollNotes(){
   rollNotes.innerHTML='';
   L.notes.forEach(n=>{
     const el=_rollEl('div','roll-note');
-    el.style.setProperty('--s',n.s);el.style.setProperty('--l',n.l);
-    el.style.top=((hi-n.m)*rh)+'px';
-    if(n.s>=STEPS)el.style.display='none';
+    placeRollNote(el,n,hi,rh);
     el.appendChild(_rollEl('div','roll-note-h'));
-    el._note=n;rollNotes.appendChild(el);
+    el._note=n;Object.defineProperty(n,'_el',{value:el,writable:true,configurable:true,enumerable:false});rollNotes.appendChild(el); // hidden link: never saved or copied
   });
+}
+function updateRollNote(n){
+  if(!n||!n._el||!n._el.isConnected){renderRollNotes();return;}
+  const L=rollLayer(rollView);placeRollNote(n._el,n,rollRange(L.soundId).hi,rollRowH());
 }
 function rollScrollToMiddle(){
   const sc=document.getElementById('seqHScroll');if(!sc||rollView<0)return;
@@ -350,7 +360,7 @@ rollArea.addEventListener('pointermove',e=>{
     const nm=Math.max(lo,Math.min(hi,o.m+dm));
     if(nm!==n.m){n.m=rollFitKey(nm,lo,hi);playRollNote(L.soundId,n.m,0,.2);}
   }
-  renderRollNotes();
+  updateRollNote(n);
 });
 function rollEnd(e){
   if(!_rd||e.pointerId!==_rd.id)return;
@@ -364,13 +374,15 @@ function rollEnd(e){
     if(why==='same')return;
     L.notes.push(n);renderRollNotes();playRollNote(L.soundId,n.m,0,.3);autoSave();return;
   }
+  if(e.type==='pointercancel'){ // the browser took over the touch: put the note back, never delete it
+    Object.assign(d.n,d.orig);renderRollNotes();return;
+  }
   if((d.kind==='move'||d.kind==='resize')&&!d.moved){ // a click/tap on a note deletes it (also on its resize edge)
     L.notes=L.notes.filter(n=>n!==d.n);renderRollNotes();autoSave();return;
   }
   const why=rollCommit(L,d.n,d.n);
-  if(why){ // undo the drag
+  if(why){ // the drag ended on top of another note: go back to where it was
     Object.assign(d.n,d.orig);
-    if(d.kind==='new')L.notes=L.notes.filter(n=>n!==d.n);
     if(why==='poly')showToast('🎹 Max '+ROLL_MAX_POLY+' notes at once on one layer');
   }
   renderRollNotes();autoSave();

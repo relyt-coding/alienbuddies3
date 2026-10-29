@@ -3,7 +3,7 @@
 //  AUDIO ENGINE
 // ══════════════════════════════════════════════
 const AMB_LEVEL=0.28; // background ambience level (v0.2.73: 0.4 -> 0.28) so it never drowns out the sounds
-let audioCtx=null,masterGainNode=null,drumMasterGain=null,drumMasterReal=null,rvbNode=null,rvbGainNode=null,ambGain=null,ambStarted=false;
+let audioCtx=null,masterGainNode=null,drumMasterGain=null,drumMasterReal=null,rvbReal=null,rvbNode=null,rvbGainNode=null,ambGain=null,ambStarted=false;
 let sfxOn=true;
 let musicOn=true;
 
@@ -17,7 +17,7 @@ function getCtx(){
     rvbNode=audioCtx.createConvolver();rvbGainNode=audioCtx.createGain();rvbGainNode.gain.value=.22;
     const L=audioCtx.sampleRate*2.5,ir=audioCtx.createBuffer(2,L,audioCtx.sampleRate);
     for(let c=0;c<2;c++){const d=ir.getChannelData(c);for(let i=0;i<L;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/L,2.3);}
-    rvbNode.buffer=ir;rvbNode.connect(rvbGainNode);rvbGainNode.connect(drumMasterGain);
+    rvbNode.buffer=ir;rvbNode.connect(rvbGainNode);rvbGainNode.connect(drumMasterGain);rvbReal=rvbNode;
     if(typeof applyMasterFx==='function')applyMasterFx(); // master EQ / compression (Mastering)
   }
   if(audioCtx.state==='suspended')audioCtx.resume();
@@ -366,7 +366,14 @@ const _beat=()=>60/((typeof seqBpm==='number'&&seqBpm>0)?seqBpm:100);
 const _curveCache={};
 function _driveCurve(amt){const k=Math.round(amt*40);if(_curveCache['d'+k])return _curveCache['d'+k];const n=2048,v=new Float32Array(n),K=1+k*2;for(let i=0;i<n;i++){const x=i*2/(n-1)-1;v[i]=Math.tanh(x*K)/Math.tanh(K);}return _curveCache['d'+k]=v;}
 function _crushCurve(amt){const bits=Math.max(2,Math.round(12-amt*10));if(_curveCache['c'+bits])return _curveCache['c'+bits];const n=8192,v=new Float32Array(n),steps=Math.pow(2,bits-1);for(let i=0;i<n;i++){const x=i*2/(n-1)-1;v[i]=Math.round(x*steps)/steps;}return _curveCache['c'+bits]=v;}
-function _lfo(c,freq,amount,target,type){const o=c.createOscillator(),g=c.createGain();o.type=type||'sine';o.frequency.value=freq;g.gain.value=amount;o.connect(g);g.connect(target);o.start();return{o,g};}
+function _lfo(c,freq,amount,target,type){const o=c.createOscillator(),g=c.createGain();o.type=type||'sine';o.frequency.value=freq;g.gain.value=amount;o.connect(g);g.connect(target);o.start();return{o,g,freq,type:o.type};}
+let _cosWave=null;
+function _setLfoShape(c,o,type){if(type==='cos'){if(!_cosWave||_cosWave.c!==c){_cosWave=c.createPeriodicWave(new Float32Array([0,1]),new Float32Array([0,0]));_cosWave.c=c;}o.setPeriodicWave(_cosWave);}else o.type=type;}
+// restart an LFO so its cycle begins exactly at time t (used to lock tremolo / auto-pan to the beat)
+function _lfoRestartAt(c,l,t){
+  try{const o=c.createOscillator();_setLfoShape(c,o,l.type);o.frequency.value=l.freq;o.connect(l.g);o.start(t);l.o.stop(t);l.o=o;}catch(e){}
+}
+function _lfoStop(l){if(!l)return;try{l.o.stop();}catch(e){}try{l.o.disconnect();l.g.disconnect();}catch(e){}}
 // a wet/dry stage: in → dry → out, in → (wet path) → wet → out
 function _mixStage(c,buildWet){const s={in:c.createGain(),out:c.createGain(),dry:c.createGain(),wet:c.createGain()};s.in.connect(s.dry);s.dry.connect(s.out);const w=buildWet(s.in);w.connect(s.wet);s.wet.connect(s.out);return s;}
 // each stage: make(c) → {in,out,...}; set(stage,f,now) updates its knobs
@@ -387,7 +394,11 @@ const FX_STAGES=[
       const lg=c.createGain();lg.gain.value=1;l=_lfo(c,.5,550,lg);aps.forEach(a=>lg.connect(a.frequency));return prev;});s.l=l;return s;},
     set(s,f,t){s.wet.gain.setValueAtTime(f.phaserMix,t);s.dry.gain.setValueAtTime(1,t);s.l.o.frequency.setValueAtTime(f.phaserRate,t);}},
   {key:'trem',on:f=>f.tremDepth>0,make(c){const g=c.createGain();const l=_lfo(c,2,.5,g.gain);return{in:g,out:g,g,l};},
-    set(s,f,t){const d=Math.min(1,f.tremDepth);s.g.gain.setValueAtTime(1-d/2,t);s.l.g.gain.setValueAtTime(d/2,t);if(s.l.o.type!==f.tremShape)s.l.o.type=f.tremShape;s.l.o.frequency.setValueAtTime(1/(_beat()*f.tremDiv),t);}},
+    // sine pulses use a cosine LFO, so after a beat-sync restart the volume is at its loudest right on the beat
+    set(s,f,t){const d=Math.min(1,f.tremDepth),ty=f.tremShape==='square'?'square':'cos',fr=1/(_beat()*f.tremDiv);
+      s.g.gain.setValueAtTime(1-d/2,t);s.l.g.gain.setValueAtTime(d/2,t);
+      if(s.l.type!==ty){_setLfoShape(audioCtx,s.l.o,ty);s.l.type=ty;}
+      s.l.freq=fr;s.l.o.frequency.setValueAtTime(fr,t);}},
   {key:'comp',on:f=>f.compAmt>0,make(c){const k=c.createDynamicsCompressor(),g=c.createGain();k.connect(g);k.attack.value=.004;k.release.value=.18;return{in:k,out:g,k,g};},
     set(s,f,t){const a=f.compAmt;s.k.threshold.setValueAtTime(-6-a*34,t);s.k.ratio.setValueAtTime(1.5+a*10.5,t);s.k.knee.setValueAtTime(18-a*12,t);s.g.gain.setValueAtTime(Math.pow(10,(a*7)/20),t);}},
 ];
@@ -397,7 +408,10 @@ function getFxBus(i,f){
   const c=getCtx();let b=_fxBuses[i];
   if(!b){
     b={ch:i,input:c.createGain(),stages:{},post:c.createGain(),pan:c.createStereoPanner?c.createStereoPanner():null,duck:c.createGain(),
-       rSend:c.createGain(),eSend:c.createGain(),rType:null,sig:null};
+       rSend:c.createGain(),eSend:c.createGain(),rType:null,sig:null,key:null,
+       // the sounds' own built-in reverb send: goes through a copy of the channel's FILTER, so a muffled track has a muffled tail
+       rvIn:c.createGain(),rvF:c.createBiquadFilter()};
+    b.rvF.type='allpass';b.rvIn.connect(b.rvF);if(rvbReal)b.rvF.connect(rvbReal);
     // mono echo
     b.delay=c.createDelay(2.5);b.fb=c.createGain();b.tone=c.createBiquadFilter();b.eOut=c.createGain();
     b.tone.type='lowpass';b.tone.frequency.value=3200;
@@ -418,6 +432,8 @@ function getFxBus(i,f){
     b.sig=sig;
     try{b.input.disconnect();}catch(e){}
     Object.values(b.stages).forEach(s=>{try{s.out.disconnect();}catch(e){}});
+    // effects that were switched off: stop their LFOs and drop them (rebuilt if switched back on)
+    FX_STAGES.forEach(st=>{const s=b.stages[st.key];if(s&&!st.on(f)){_lfoStop(s.l);try{s.in.disconnect();}catch(e){}delete b.stages[st.key];}});
     let prev=b.input;
     FX_STAGES.forEach(st=>{
       if(!st.on(f))return;
@@ -428,8 +444,14 @@ function getFxBus(i,f){
     try{b.eSend.disconnect();}catch(e){}
     b.eSend.connect(f.echoPing?b.dL:b.delay);
   }
+  // only touch the knobs when a setting (or the BPM) actually changed: this runs for every note
+  const bpm=(typeof seqBpm==='number'&&seqBpm>0)?seqBpm:100;
+  const key=JSON.stringify(f)+bpm;
+  if(key===b.key){b.sc=f.scAmt;return b;}
+  b.key=key;
   const now=c.currentTime;
   FX_STAGES.forEach(st=>{if(st.on(f))st.set(b.stages[st.key],f,now);});
+  if(f.filtOn){b.rvF.type=f.filtType;b.rvF.frequency.setValueAtTime(Math.max(40,Math.min(18000,f.filtFreq)),now);b.rvF.Q.setValueAtTime(f.filtRes,now);}else b.rvF.type='allpass';
   if(b.rType!==f.rvbType){try{b.rSend.disconnect();}catch(e){}b.rSend.connect(getFxRev(f.rvbType).conv);b.rType=f.rvbType;}
   b.rSend.gain.setValueAtTime(Math.min(1,f.rvbAmt)*.9,now);
   b.eSend.gain.setValueAtTime(Math.min(1,f.echoMix)*.9,now);
@@ -439,16 +461,24 @@ function getFxBus(i,f){
   if(b.pan){
     if(f.panAuto>0){
       if(!b.panL)b.panL=_lfo(c,1,0,b.pan.pan);
-      b.panL.o.frequency.setValueAtTime(1/(_beat()*f.panDiv),now);
+      b.panL.freq=1/(_beat()*f.panDiv);b.panL.o.frequency.setValueAtTime(b.panL.freq,now);
       const depth=Math.min(1,f.panAuto),base=Math.max(-1+depth,Math.min(1-depth,f.pan));
       b.pan.pan.setValueAtTime(base,now);b.panL.g.gain.setValueAtTime(depth,now);
     }else{
-      if(b.panL)b.panL.g.gain.setValueAtTime(0,now);
+      if(b.panL){_lfoStop(b.panL);b.panL=null;}
       b.pan.pan.setValueAtTime(Math.max(-1,Math.min(1,f.pan)),now);
     }
   }
   b.sc=f.scAmt;b.scRel=f.scRel;
   return b;
+}
+// at the start of every bar the sequencer calls this, so tremolo and auto-pan stay locked to the beat
+function fxBeatSync(t){
+  if(!audioCtx)return;
+  Object.values(_fxBuses).forEach(b=>{
+    const tr=b.stages.trem;if(tr&&tr.l)_lfoRestartAt(audioCtx,tr.l,t);
+    if(b.panL)_lfoRestartAt(audioCtx,b.panL,t);
+  });
 }
 // SIDECHAIN: every kick that plays makes the channels with sidechain on duck out of its way
 const SC_TRIGGERS=['kick','trapkick','thud','mo_earththud','mo_hollowboom'];
@@ -459,12 +489,25 @@ function sidechainHit(t,fromCh){
     const f=fxEffective(getTrackFx(b.ch,false),b.ch);
     if(!f||!(f.scAmt>0))return;
     const g=b.duck.gain,amt=Math.min(.95,f.scAmt),rel=Math.max(.04,_beat()*f.scRel);
-    g.cancelScheduledValues(t);
     g.setTargetAtTime(1-amt,t,.004);
     g.setTargetAtTime(1,t+.02,rel/3);
   });
 }
-// MASTER channel: EQ + compression on the whole mix (sits between all the music and the volume knob)
+// SAFETY LIMITER: the last thing before the volume knob. Six tracks + six roll layers + effects can add up to
+// several times full scale, which the browser would hard-clip into harsh crackle. A fast limiter catches the
+// overload near the top and a soft clipper rounds off anything left; normal-level sounds pass through unchanged.
+let _lim=null;
+function masterLimiter(c){
+  if(_lim&&_lim.c===c)return _lim;
+  const inp=c.createGain(),k=c.createDynamicsCompressor(),pre=c.createGain(),ws=c.createWaveShaper(),out=c.createGain();
+  k.threshold.value=-2;k.knee.value=2;k.ratio.value=20;k.attack.value=.002;k.release.value=.1; // only acts in the top 2 dB (measured: single sounds unchanged)
+  const H=4,n=4096,cv=new Float32Array(n),T=.75; // curve covers ±4 (pre-gain 1/4), linear up to 0.75 then rounds off towards 1
+  for(let i=0;i<n;i++){const x=(i/(n-1)*2-1)*H,a=Math.abs(x);cv[i]=Math.sign(x)*(a<=T?a:T+(1-T)*Math.tanh((a-T)/(1-T)));}
+  pre.gain.value=1/H;ws.curve=cv;
+  inp.connect(k);k.connect(pre);pre.connect(ws);ws.connect(out);out.connect(masterGainNode);
+  return _lim={c,inp,out,k,pre,ws};
+}
+// MASTER channel: EQ + compression on the whole mix (sits between all the music and the safety limiter)
 let _masterSig=null;const _masterStages={};
 function applyMasterFx(){
   if(!audioCtx||!drumMasterReal)return;
@@ -478,7 +521,7 @@ function applyMasterFx(){
     Object.values(_masterStages).forEach(s=>{try{s.out.disconnect();}catch(e){}});
     let prev=drumMasterReal;
     use.forEach(st=>{const s=_masterStages[st.key]||(_masterStages[st.key]=st.make(c));prev.connect(s.in);prev=s.out;});
-    prev.connect(masterGainNode);
+    prev.connect(masterLimiter(c).inp);
   }
   use.forEach(st=>st.set(_masterStages[st.key],f,now));
 }
@@ -498,12 +541,12 @@ function runSoundFn(id,t,gv,trackIdx){
   const orig=c.createOscillator;const savedDM=drumMasterGain;
   try{
     if(cents){c.createOscillator=function(){const o=orig.call(this);o.detune.value=cents;return o;};_ksMul=Math.pow(2,cents/1200);}
-    if(bus)drumMasterGain=bus.input;
+    if(bus){drumMasterGain=bus.input;rvbNode=bus.rvIn;}
     SOUND_MAP[id].fn(t,gv);
   }finally{
     if(cents)delete c.createOscillator;
     _ksMul=1;
-    drumMasterGain=savedDM;
+    drumMasterGain=savedDM;rvbNode=rvbReal||rvbNode;
   }
 }
 

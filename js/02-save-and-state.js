@@ -48,7 +48,7 @@ function autoSave(){
     arrangement:[...arrangement],
     arrangeBars,
     seqLayersSnap,
-    pianoRoll:(typeof pianoRoll!=='undefined')?{layers:pianoRoll.layers.map(L=>({soundId:L.soundId,muted:L.muted,notes:L.notes.map(n=>({s:n.s,l:n.l,m:n.m}))}))}:undefined,
+    pianoRoll:(typeof pianoRoll!=='undefined')?{layers:pianoRoll.layers.map(L=>({soundId:L.soundId,muted:L.muted,notes:L.notes.map(n=>{const o={s:n.s,l:n.l,m:n.m};if(n.v!=null)o.v=n.v;return o;})}))}:undefined,
     seqHasAutoMutedAmbience,
     musicOn,
     shownHints,

@@ -54,7 +54,7 @@ function applyMusicUnlocks(justBoughtId){
     mt_reverb:'🏛 Reverb unlocked: open EFFECTS under the sequencer.',
     mt_echo:'📣 Echo unlocked: open EFFECTS under the sequencer.',
     mt_key:'🎼 The KEY button is here. Your song is now in C major.',
-    mt_velocity:'📶 VELOCITY button unlocked at the top of the sequencer.',
+    mt_velocity:'📶 VELOCITY button unlocked: turn it on, then tap a step or a piano roll note to set how hard it hits.',
     mt_arrange:'🧩 PAT / ARR switch unlocked at the top of the sequencer.',
     mt_song:'💿 SONG mode unlocked next to PAT / ARR.',
     mt_piano:'🎹 ROLL button unlocked at the top of the sequencer.',

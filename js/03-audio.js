@@ -7,20 +7,26 @@ let audioCtx=null,masterGainNode=null,drumMasterGain=null,drumMasterReal=null,rv
 let sfxOn=true;
 let musicOn=true;
 
+// builds the music graph (volume knob, music bus, built-in reverb, master effects + limiter) on a context.
+// The game's live AudioContext uses it once; WAV export builds a second copy on an OfflineAudioContext.
+function _initAudioGraph(c,vol){
+  masterGainNode=c.createGain();masterGainNode.gain.value=vol;masterGainNode.connect(c.destination);
+  ambGain=c.createGain();ambGain.gain.value=AMB_LEVEL;ambGain.connect(masterGainNode);
+  drumMasterGain=c.createGain();drumMasterGain.gain.value=1;drumMasterGain.connect(masterGainNode);drumMasterReal=drumMasterGain;
+  // Reverb
+  rvbNode=c.createConvolver();rvbGainNode=c.createGain();rvbGainNode.gain.value=.22;
+  const L=c.sampleRate*2.5,ir=c.createBuffer(2,L,c.sampleRate);
+  for(let ch=0;ch<2;ch++){const d=ir.getChannelData(ch);for(let i=0;i<L;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/L,2.3);}
+  rvbNode.buffer=ir;rvbNode.connect(rvbGainNode);rvbGainNode.connect(drumMasterGain);rvbReal=rvbNode;
+  if(typeof applyMasterFx==='function')applyMasterFx(); // master EQ / compression (Mastering) + safety limiter
+}
+let _exporting=false; // true while a WAV export is being scheduled (sounds go to the offline context)
 function getCtx(){
   if(!audioCtx){
     audioCtx=new(window.AudioContext||window.webkitAudioContext)();
-    masterGainNode=audioCtx.createGain();masterGainNode.gain.value=masterVol;masterGainNode.connect(audioCtx.destination);
-    ambGain=audioCtx.createGain();ambGain.gain.value=AMB_LEVEL;ambGain.connect(masterGainNode);
-    drumMasterGain=audioCtx.createGain();drumMasterGain.gain.value=1;drumMasterGain.connect(masterGainNode);drumMasterReal=drumMasterGain;
-    // Reverb
-    rvbNode=audioCtx.createConvolver();rvbGainNode=audioCtx.createGain();rvbGainNode.gain.value=.22;
-    const L=audioCtx.sampleRate*2.5,ir=audioCtx.createBuffer(2,L,audioCtx.sampleRate);
-    for(let c=0;c<2;c++){const d=ir.getChannelData(c);for(let i=0;i<L;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/L,2.3);}
-    rvbNode.buffer=ir;rvbNode.connect(rvbGainNode);rvbGainNode.connect(drumMasterGain);rvbReal=rvbNode;
-    if(typeof applyMasterFx==='function')applyMasterFx(); // master EQ / compression (Mastering)
+    _initAudioGraph(audioCtx,masterVol);
   }
-  if(audioCtx.state==='suspended')audioCtx.resume();
+  if(!_exporting&&audioCtx.state==='suspended')audioCtx.resume();
   return audioCtx;
 }
 const Tnow=()=>getCtx().currentTime;
@@ -558,6 +564,7 @@ function playSound(id,velMult,when,trackIdx){
   const t=(when!==undefined&&when>now)?when:now;
   runSoundFn(id,t,gv,trackIdx);
   if(SC_TRIGGERS.includes(id))sidechainHit(t,fxChannelOf(trackIdx));
+  if(_exporting)return; // no party flashes for notes being rendered to a file
   if(t>now+.008)setTimeout(partyPulseOnBeat,(t-now)*1000);else partyPulseOnBeat();
 }
 

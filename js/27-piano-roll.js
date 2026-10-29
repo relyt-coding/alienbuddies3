@@ -13,8 +13,55 @@ let rollView=-1;           // -1 = sequencer grid is showing; 0..5 = that roll l
 let rollSnap=1;try{const v=parseFloat(localStorage.getItem('ab2_rollSnap'));if(ROLL_SNAPS.some(x=>x[0]===v))rollSnap=v;}catch(e){}
 let rollKeyLock=false;try{rollKeyLock=localStorage.getItem('ab2_rollKeyLock')==='1';}catch(e){}
 
+// ── sustaining instruments (free with the Piano Roll) ──
+// The game's other sounds are one-shots: they ring for a fixed time whatever the note length. These four are
+// built for the roll: they hold for as long as the note lasts, then fade out with their own release.
+// note(t, gain, freq, dur, vel): start at t, hold for dur seconds; returns the release time (seconds).
+function _env(g,t,dur,a,d,sus,r,peak){
+  const end=t+Math.max(dur,.02);
+  a=Math.min(a,Math.max(.003,dur*.6)); // short notes get a quicker attack so they still speak
+  g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(peak,t+a);
+  g.gain.setTargetAtTime(peak*sus,t+a,d/3);
+  g.gain.cancelScheduledValues(end);g.gain.setTargetAtTime(0,end,r/3);
+  return end+r*2.5; // when it's silent
+}
+const ROLL_SYNTHS={
+  rs_bass:{name:'SYNTH BASS',color:'#ff5577',f:55,r:'bass',
+    note(t,gv,f,dur,vel){const c=getCtx(),g=c.createGain(),lp=c.createBiquadFilter(),o1=c.createOscillator(),o2=c.createOscillator(),g2=c.createGain();
+      o1.type='sawtooth';o1.frequency.value=f;o2.type='square';o2.frequency.value=f/2;g2.gain.value=.5;
+      lp.type='lowpass';lp.Q.value=5;const top=500+1600*vel;lp.frequency.setValueAtTime(top,t);lp.frequency.setTargetAtTime(220+300*vel,t+.01,.09);
+      o1.connect(lp);o2.connect(g2);g2.connect(lp);lp.connect(g);g.connect(drumMasterGain);
+      const stop=_env(g,t,dur,.004,.18,.75,.07,.34*gv);[o1,o2].forEach(o=>{o.start(t);o.stop(stop);});return .07;}},
+  rs_keys:{name:'KEYS',color:'#ffcc66',f:261.63,r:'note',
+    note(t,gv,f,dur,vel){const c=getCtx(),g=c.createGain(),car=c.createOscillator(),mod=c.createOscillator(),mg=c.createGain(),tine=c.createOscillator(),tg=c.createGain();
+      car.type='sine';car.frequency.value=f;mod.type='sine';mod.frequency.value=f;
+      mg.gain.setValueAtTime(f*(1.2+2*vel),t);mg.gain.setTargetAtTime(f*.25,t,.25);mod.connect(mg);mg.connect(car.frequency);
+      tine.type='sine';tine.frequency.value=f*4;tg.gain.setValueAtTime(.12*vel,t);tg.gain.setTargetAtTime(0,t,.04);tine.connect(tg);tg.connect(g);
+      car.connect(g);g.connect(drumMasterGain);
+      g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.42*gv,t+.003);g.gain.setTargetAtTime(.16*gv,t+.003,.5); // piano-like: fades slowly while held
+      const end=t+Math.max(dur,.02);g.gain.cancelScheduledValues(end);g.gain.setTargetAtTime(0,end,.25/3);const stop=end+.65;
+      [car,mod,tine].forEach(o=>{o.start(t);o.stop(stop);});return .25;}},
+  rs_pad:{name:'WARM PAD',color:'#88aaff',f:261.63,r:'note',
+    note(t,gv,f,dur,vel){const c=getCtx(),g=c.createGain(),lp=c.createBiquadFilter();lp.type='lowpass';lp.Q.value=.7;
+      lp.frequency.setValueAtTime(700,t);lp.frequency.linearRampToValueAtTime(900+900*vel,t+Math.min(1.2,Math.max(.3,dur)));lp.connect(g);g.connect(drumMasterGain);
+      const os=[[-9,1],[0,1],[9,1],[-1200,.6]].map(([cents,lvl])=>{const o=c.createOscillator(),og=c.createGain();o.type='sawtooth';o.frequency.value=f;o.detune.value=cents;og.gain.value=lvl*.16;o.connect(og);og.connect(lp);return o;});
+      const stop=_env(g,t,dur,.3,.4,.9,.6,gv);os.forEach(o=>{o.start(t);o.stop(stop);});return .6;}},
+  rs_lead:{name:'LEAD',color:'#66ffaa',f:523.25,r:'note',
+    note(t,gv,f,dur,vel){const c=getCtx(),g=c.createGain(),lp=c.createBiquadFilter(),o1=c.createOscillator(),o2=c.createOscillator(),g1=c.createGain(),g2=c.createGain(),vib=c.createOscillator(),vg=c.createGain();
+      o1.type='square';o2.type='sawtooth';o1.frequency.value=f;o2.frequency.value=f;o2.detune.value=6;g1.gain.value=.55;g2.gain.value=.45;
+      vib.frequency.value=5.5;vg.gain.setValueAtTime(0,t);vg.gain.linearRampToValueAtTime(0,t+.22);vg.gain.linearRampToValueAtTime(f*.006,t+.5); // vibrato fades in on held notes
+      vib.connect(vg);vg.connect(o1.frequency);vg.connect(o2.frequency);
+      lp.type='lowpass';lp.frequency.value=1800+2200*vel;lp.Q.value=1.5;o1.connect(g1);o2.connect(g2);g1.connect(lp);g2.connect(lp);lp.connect(g);g.connect(drumMasterGain);
+      const stop=_env(g,t,dur,.008,.15,.8,.12,.4*gv);[o1,o2,vib].forEach(o=>{o.start(t);o.stop(stop);});return .12;}},
+};
+const ROLL_SYNTH_IDS=Object.keys(ROLL_SYNTHS);
+// register them so names / colours / effects work like any other sound (they are not in the sound library or on the pads)
+ROLL_SYNTH_IDS.forEach(id=>{const R=ROLL_SYNTHS[id];
+  SOUND_MAP[id]={id,name:R.name,tag:'roll',color:R.color,rollSynth:true,fn:(t,gv)=>R.note(t,gv,R.f,.4,1)};
+  PITCHED_SOUNDS[id]={f:R.f,r:R.r,roll:1};});
+
 // ── data helpers ──
-function rollSounds(){return unlockedSounds().filter(id=>PITCHED_SOUNDS[id]&&PITCHED_SOUNDS[id].roll);}
+function rollSounds(){return ROLL_SYNTH_IDS.concat(unlockedSounds().filter(id=>PITCHED_SOUNDS[id]&&PITCHED_SOUNDS[id].roll));}
 function rollBaseMidi(id){const p=PITCHED_SOUNDS[id];return p?69+12*Math.log2(p.f/440):60;}
 // 3 octaves per instrument: from the C an octave below its natural pitch (basses start on their own octave)
 function rollRange(id){
@@ -37,7 +84,7 @@ function rollSanitize(r){
   if(r&&Array.isArray(r.layers))r.layers.slice(0,ROLL_MAX_LAYERS).forEach(L=>{
     out.layers.push({soundId:(L&&SOUND_MAP[L.soundId])?L.soundId:null,muted:!!(L&&L.muted),
       notes:(L&&Array.isArray(L.notes)?L.notes:[]).filter(n=>n&&isFinite(n.s)&&isFinite(n.l)&&isFinite(n.m)&&n.l>0)
-        .map(n=>({s:+n.s,l:+n.l,m:Math.round(n.m)}))});
+        .map(n=>{const o={s:+n.s,l:+n.l,m:Math.round(n.m)};if(isFinite(n.v)&&n.v>0&&n.v<1)o.v=+n.v;return o;})});
   });
   return out;
 }
@@ -47,7 +94,7 @@ function rollHasNotes(r){return !!(r&&r.layers&&r.layers.some(L=>L.notes.length)
 function rollSlice(r,from,to){
   const out={layers:[]};
   (r.layers||[]).forEach(L=>{
-    out.layers.push({soundId:L.soundId,muted:L.muted,notes:L.notes.filter(n=>n.s>=from&&n.s<to).map(n=>({s:n.s-from,l:Math.min(n.l,to-n.s),m:n.m}))});
+    out.layers.push({soundId:L.soundId,muted:L.muted,notes:L.notes.filter(n=>n.s>=from&&n.s<to).map(n=>{const o={s:n.s-from,l:Math.min(n.l,to-n.s),m:n.m};if(n.v!=null)o.v=n.v;return o;})});
   });
   return out;
 }
@@ -65,7 +112,7 @@ function rollPaste(src,offset,len,wrap,merge){
     S.notes.forEach(n=>{
       let s=n.s+offset;
       if(s>=STEPS){if(!wrap)return;s=s%STEPS;}
-      L.notes.push({s,l:n.l,m:n.m});
+      const o={s,l:n.l,m:n.m};if(n.v!=null)o.v=n.v;L.notes.push(o);
     });
   });
 }
@@ -100,16 +147,21 @@ function playRollNote(id,midi,at,durSec,vel,layer){
   const lay=(layer==null)?(typeof rollView==='number'?rollView:-1):layer;
   const bus=(lay>=0&&typeof fxBusFor==='function')?fxBusFor(FX_ROLL_BASE+lay):null;
   const gate=c.createGain();gate.connect(bus?bus.input:drumMasterGain);
-  const end=at+Math.max(.06,durSec);
-  gate.gain.setValueAtTime(1,at);gate.gain.setValueAtTime(1,end);gate.gain.linearRampToValueAtTime(0,end+.05);
-  const orig=c.createOscillator,saved=drumMasterGain;
-  try{
-    c.createOscillator=function(){const o=orig.call(this);o.detune.value=cents;return o;};
-    _ksMul=Math.pow(2,cents/1200);drumMasterGain=gate;if(bus)rvbNode=bus.rvIn;
-    SOUND_MAP[id].fn(at,gv);
-  }finally{delete c.createOscillator;_ksMul=1;drumMasterGain=saved;rvbNode=rvbReal||rvbNode;}
+  const end=at+Math.max(.06,durSec),synth=ROLL_SYNTHS[id];let rel=.05;
+  if(synth){ // sustaining instrument: plays the exact pitch for the whole note, with its own release
+    const saved=drumMasterGain;
+    try{drumMasterGain=gate;rel=synth.note(at,gv,440*Math.pow(2,(midi-69)/12),end-at,vel==null?1:vel);}finally{drumMasterGain=saved;}
+  }else{ // one-shot: retune it and cut it off at the end of the note
+    gate.gain.setValueAtTime(1,at);gate.gain.setValueAtTime(1,end);gate.gain.linearRampToValueAtTime(0,end+.05);
+    const orig=c.createOscillator,saved=drumMasterGain;
+    try{
+      c.createOscillator=function(){const o=orig.call(this);o.detune.value=cents;return o;};
+      _ksMul=Math.pow(2,cents/1200);drumMasterGain=gate;if(bus)rvbNode=bus.rvIn;
+      SOUND_MAP[id].fn(at,gv);
+    }finally{delete c.createOscillator;_ksMul=1;drumMasterGain=saved;rvbNode=rvbReal||rvbNode;}
+  }
   // the gate is done once the note has faded: disconnect it so long sessions don't pile up audio nodes
-  setTimeout(()=>{try{gate.disconnect();}catch(e){}},Math.max(0,(end+.3-c.currentTime)*1000));
+  if(!(typeof _exporting!=='undefined'&&_exporting))setTimeout(()=>{try{gate.disconnect();}catch(e){}},Math.max(0,(end+rel*3+.3-c.currentTime)*1000));
 }
 // called by the sequencer clock for every step it plays (pattern, arrangement and song modes)
 function rollPlayStep(roll,st,at,respectSolo){
@@ -118,7 +170,7 @@ function rollPlayStep(roll,st,at,respectSolo){
   const sd=60/seqBpm/4,n=pianoRollLayers();
   roll.layers.forEach((L,li)=>{
     if(li>=n||!L||L.muted||!L.soundId||!SOUND_MAP[L.soundId])return;
-    L.notes.forEach(nt=>{if(nt.s>=st&&nt.s<st+1)playRollNote(L.soundId,nt.m,at+(nt.s-st)*sd,nt.l*sd,1,li);});
+    L.notes.forEach(nt=>{if(nt.s>=st&&nt.s<st+1)playRollNote(L.soundId,nt.m,at+(nt.s-st)*sd,nt.l*sd,nt.v==null?1:nt.v,li);});
   });
 }
 
@@ -209,7 +261,10 @@ function buildRollBar(){
   const have=rollSounds();
   if(have.length){
     const sel=document.createElement('select');sel.className='roll-select';sel.title='Instrument for this layer';
-    have.forEach(id=>{const o=document.createElement('option');o.value=id;o.textContent=SOUND_MAP[id].name;sel.appendChild(o);});
+    const grp=(label,ids)=>{if(!ids.length)return;const g=document.createElement('optgroup');g.label=label;
+      ids.forEach(id=>{const o=document.createElement('option');o.value=id;o.textContent=SOUND_MAP[id].name;g.appendChild(o);});sel.appendChild(g);};
+    grp('HOLD FOR THE NOTE',have.filter(id=>ROLL_SYNTHS[id]));
+    grp('ONE-SHOT (RINGS ITS OWN LENGTH)',have.filter(id=>!ROLL_SYNTHS[id]));
     sel.value=L.soundId||have[0];
     const s=SOUND_MAP[sel.value];if(s){sel.style.color=s.color;sel.style.borderColor=s.color;}
     sel.addEventListener('change',()=>{rollSetSound(i,sel.value);buildRollBar();buildRollGrid();rollScrollToMiddle();autoSave();
@@ -243,7 +298,7 @@ function buildRollGrid(){
   seqRollGrid.style.setProperty('--rh',rh+'px');
   rollKeys.innerHTML='';rollRows.innerHTML='';
   if(!L.soundId){
-    rollEmpty.style.display='';rollEmpty.textContent='Unlock a melodic sound first (SUB, BASE NOTE, BELL, MARIMBA, PLUCK… from the sound library or the planets), then pick it here.';
+    rollEmpty.style.display='';rollEmpty.textContent='Pick an instrument for this layer.';
     rollArea.style.display='none';rollKeys.style.display='none';rollSide.style.display='none';return;
   }
   rollEmpty.style.display='none';rollArea.style.display='';rollKeys.style.display='';rollSide.style.display='';
@@ -265,6 +320,7 @@ function buildRollGrid(){
 }
 function placeRollNote(el,n,hi,rh){
   el.style.setProperty('--s',n.s);el.style.setProperty('--l',n.l);
+  el.style.opacity=String(.3+.7*(n.v==null?1:n.v)); // same look as sequencer steps: dimmer = softer
   el.style.top=((hi-n.m)*rh)+'px';
   el.style.display=n.s>=STEPS?'none':'';
 }
@@ -326,6 +382,14 @@ rollArea.addEventListener('pointerdown',e=>{
   const L=rollLayer(rollView);if(!L.soundId)return;
   const{lo,hi}=rollRange(L.soundId),p=rollPos(e);
   const ne=e.target.closest('.roll-note');
+  if(ne&&typeof levelAdjMode!=='undefined'&&levelAdjMode&&typeof openVelPopover==='function'){
+    // VELOCITY mode: reuse the sequencer's velocity slider; it reads/writes this note's v (0..1) as 0..100
+    e.preventDefault();e.stopPropagation();
+    const n=ne._note,vols={};
+    Object.defineProperty(vols,0,{get:()=>Math.round((n.v==null?1:n.v)*100),set:v=>{v=Math.max(5,Math.min(100,+v||100));if(v>=100)delete n.v;else n.v=v/100;
+      updateRollNote(n);try{playRollNote(L.soundId,n.m,0,.3,n.v==null?1:n.v);}catch(err){}}});
+    openVelPopover({vols,stepEls:[],fullStepEls:[]},0,ne);return;
+  }
   if(ne){
     e.preventDefault();e.stopPropagation();
     const n=ne._note,resize=!!e.target.closest('.roll-note-h');

@@ -93,7 +93,7 @@ const MUSIC_TREE_NODES=(function(){
   });
 
   // PIANO ROLL
-  const pr=hub('mt_piano','🎹','Piano Roll','Unlocks the ROLL button: write melodies and chords with real notes on a grid that lines up with the sequencer steps. Up to 7 notes at once. ×1.5 Alien Gems.',
+  const pr=hub('mt_piano','🎹','Piano Roll','Unlocks the ROLL button: write melodies and chords with real notes on a grid that lines up with the sequencer steps. Comes with 4 instruments that hold for the whole note (Synth Bass, Keys, Warm Pad, Lead). Up to 7 notes at once. ×1.5 Alien Gems.',
     'The name comes from player pianos: they read songs from long rolls of paper with holes punched in them, one hole per note. Music software still draws notes the same way.',
     5400,'mt_key',along(key,480));
   let prev='mt_piano',pos=pr;
@@ -108,7 +108,7 @@ const MUSIC_TREE_NODES=(function(){
   const gr=hub('mt_groove','🥁','Groove','Tightens the sequencer: sequencer steps earn +50%. Unlock Velocity and longer loops (32 / 64 steps) from here. ×1.5 Alien Gems, ×1.5 points.',
     'Groove is the feel that makes music move: tiny differences in timing and loudness between notes. Two drummers can play the same pattern and sound totally different because of it.',
     16200,'mt_piano',along(pr,420),{mult:1.5,seqBoost:1.5});
-  br('mt_velocity','📶','Velocity','Unlocks the VELOCITY button: set how hard each step hits. ×1.2 Alien Gems.',6000,'mt_groove',side(gr,-170),
+  br('mt_velocity','📶','Velocity','Unlocks the VELOCITY button: set how hard each step and each piano roll note hits. ×1.2 Alien Gems.',6000,'mt_groove',side(gr,-170),
     {fact:'Velocity comes from MIDI keyboards: it measures how fast a key is pressed, which is why harder hits play louder.'});
   // 32 / 64 STEPS (longer loops come later, once the player has the basics)
   const s32=br('mt_steps32','🔢','32 Steps','Doubles the sequencer loop to 32 steps (2 bars). Switch lengths with the STEPS button. ×1.2 Alien Gems.',8000,'mt_groove',side(gr,170),
@@ -285,6 +285,21 @@ const BRANCH_COLORS = {
   aliens: '#44eebb',
 };
 
+// ── Prices ──
+// Musical Toolkit nodes get pricier as you go: every music node you own makes the remaining ones ×1.2.
+// That matches the ×1.2 gem bonus each branch node gives, so later unlocks keep taking real time instead of
+// snowballing (simulated with 10 aliens: Effects ~30 min, Key ~6 h, Piano Roll ~17 h, whole branch ~3 days).
+const MUSIC_COST_GROWTH=1.2;
+function musicOwnedCount(){let n=0;for(const k in unlockedSkills)if(unlockedSkills[k]&&k.startsWith('mt_'))n++;return n;}
+function _round2(v){if(v<100)return Math.round(v);const p=Math.pow(10,Math.floor(Math.log10(v))-1);return Math.round(v/p)*p;}
+function skillCost(node){
+  if(typeof node==='string')node=SKILL_MAP[node];
+  if(!node)return Infinity;
+  if(!node.id.startsWith('mt_'))return node.cost;
+  return _round2(node.cost*Math.pow(MUSIC_COST_GROWTH,musicOwnedCount()));
+}
+function fmtGems(v){return v<100000?Math.round(v).toLocaleString():formatStore(v);}
+
 // ── Gem rate calculation ──
 function gemsPerMinute(){
   let rate = totalAliens * BASE_GEMS_PER_ALIEN_PER_MIN;
@@ -359,9 +374,10 @@ function buySkill(id){
   const node = SKILL_MAP[id];
   if(!node || unlockedSkills[id]) return;
   if(!skillAvailable(id)) { showToast('Unlock the required skills first!'); return; }
-  if(Math.floor(alienGems) < node.cost) { showToast('Not enough Alien Gems!'); return; }
+  const price = skillCost(node);
+  if(Math.floor(alienGems) < price) { showToast('Not enough Alien Gems!'); return; }
   if(node.placeholder && id !== 'memory_boost') { showToast('🔒 Coming in a future update!'); return; }
-  alienGems -= node.cost;
+  alienGems -= price;
   unlockedSkills[id] = true;
   // Unlock sound if this node grants one
   if(node.soundUnlock) unlockPlanetSound(node.soundUnlock);
@@ -538,7 +554,7 @@ function renderSkillTree(){
 
     const costEl = document.createElement('div');
     costEl.className = 'st-node-cost';
-    costEl.innerHTML = `💎 ${node.cost}`;
+    costEl.innerHTML = `💎 ${fmtGems(skillCost(node))}`;
 
     el.appendChild(circle);
     el.appendChild(label);
@@ -564,7 +580,8 @@ function openStDetail(id, fromEl){
   // Don't open for silhouette/hidden nodes
   if(!isUnlocked && !isAvailable) return;
   _stDetailNode = id;
-  const canAfford = Math.floor(alienGems) >= node.cost;
+  const price = skillCost(node);
+  const canAfford = Math.floor(alienGems) >= price;
   const isPlaceholder = node.placeholder;
 
   document.getElementById('stDetailIcon').textContent = node.icon;
@@ -580,7 +597,7 @@ function openStDetail(id, fromEl){
       factEl.appendChild(h); factEl.appendChild(t);
     }
   }
-  document.getElementById('stDetailCost').textContent = isUnlocked ? '✓ UNLOCKED' : `💎 ${node.cost} GEMS`;
+  document.getElementById('stDetailCost').textContent = isUnlocked ? '✓ UNLOCKED' : `💎 ${fmtGems(price)} GEMS`;
 
   const buyBtn = document.getElementById('stDetailBuyBtn');
   if(isUnlocked){
@@ -596,11 +613,11 @@ function openStDetail(id, fromEl){
     buyBtn.className = '';
     buyBtn.disabled = true;
   } else if(!canAfford){
-    buyBtn.textContent = `NEED ${node.cost - Math.floor(alienGems)} MORE GEMS`;
+    buyBtn.textContent = `NEED ${fmtGems(price - Math.floor(alienGems))} MORE GEMS`;
     buyBtn.className = '';
     buyBtn.disabled = true;
   } else {
-    buyBtn.textContent = `UNLOCK — 💎 ${node.cost}`;
+    buyBtn.textContent = `UNLOCK — 💎 ${fmtGems(price)}`;
     buyBtn.className = '';
     buyBtn.disabled = false;
   }

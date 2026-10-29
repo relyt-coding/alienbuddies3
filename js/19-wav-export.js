@@ -93,7 +93,10 @@ function buildSongHits(){
 const WAV_LEAD=.02; // a tiny bit of silence at the start so the first hit isn't clipped
 function renderOffline(res){
   const SR=44100,tail=3,total=res.duration+tail+WAV_LEAD;
-  const off=new OfflineAudioContext(2,Math.ceil(total*SR),SR);
+  // older iPhones (iOS 14.4 and below) only have the prefixed version
+  const OAC=window.OfflineAudioContext||window.webkitOfflineAudioContext;
+  if(!OAC)return Promise.reject(new Error('this browser cannot render audio files'));
+  const off=new OAC(2,Math.ceil(total*SR),SR);
   // ── save the live engine ──
   const live={audioCtx,masterGainNode,ambGain,drumMasterGain,drumMasterReal,rvbNode,rvbGainNode,rvbReal,_lim,_masterSig,masterVol,
     buses:Object.assign({},_fxBuses),revs:Object.assign({},_fxRevs),mstages:Object.assign({},_masterStages)};
@@ -119,7 +122,11 @@ function renderOffline(res){
     clear(_fxBuses);Object.assign(_fxBuses,live.buses);clear(_fxRevs);Object.assign(_fxRevs,live.revs);clear(_masterStages);Object.assign(_masterStages,live.mstages);
     _exporting=false;
   }
-  return off.startRendering();
+  // old Safari's startRendering() doesn't return a promise; it fires oncomplete instead
+  return new Promise((resolve,reject)=>{
+    off.oncomplete=e=>resolve(e.renderedBuffer);
+    try{const p=off.startRendering();if(p&&p.then)p.then(resolve,reject);}catch(e){reject(e);}
+  });
 }
 // trims the silent end of the tail (keeps a short fade-out room), so files aren't padded with seconds of nothing
 function trimTail(buf,minLen){
@@ -128,9 +135,9 @@ function trimTail(buf,minLen){
   while(end>minLen&&Math.abs(L[end-1])<thr&&Math.abs(R[end-1])<thr)end--;
   end=Math.min(buf.length,end+Math.round(buf.sampleRate*.05));
   if(end>=buf.length)return buf;
-  const out=new AudioBuffer({length:end,numberOfChannels:buf.numberOfChannels,sampleRate:buf.sampleRate});
-  for(let c=0;c<buf.numberOfChannels;c++)out.copyToChannel(buf.getChannelData(c).subarray(0,end),c);
-  return out;
+  // a plain object with the same shape encodeWAV reads (works everywhere, no AudioBuffer constructor needed)
+  const chans=[];for(let c=0;c<buf.numberOfChannels;c++)chans.push(buf.getChannelData(c).subarray(0,end));
+  return{sampleRate:buf.sampleRate,numberOfChannels:buf.numberOfChannels,length:end,getChannelData:c=>chans[c]};
 }
 let _wavBusy=false;
 async function renderHitsToWAV(res,filename){

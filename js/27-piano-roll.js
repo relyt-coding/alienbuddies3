@@ -44,7 +44,10 @@ const ROLL_SYNTHS={
   rs_pad:{name:'WARM PAD',color:'#88aaff',f:261.63,r:'note',
     note(t,gv,f,dur,vel){const c=getCtx(),g=c.createGain(),lp=c.createBiquadFilter();lp.type='lowpass';lp.Q.value=.7;
       lp.frequency.setValueAtTime(700,t);lp.frequency.linearRampToValueAtTime(900+900*vel,t+Math.min(1.2,Math.max(.3,dur)));lp.connect(g);g.connect(drumMasterGain);
-      const os=[[-9,1],[0,1],[9,1],[-1200,.6]].map(([cents,lvl])=>{const o=c.createOscillator(),og=c.createGain();o.type='sawtooth';o.frequency.value=f;o.detune.value=cents;og.gain.value=lvl*.16;o.connect(og);og.connect(lp);return o;});
+      // two detuned saws + a sine an octave down (lighter on phones than 4 saws, same warm, wide sound)
+      const mix=c.createGain();mix.gain.value=.22;mix.connect(lp);
+      const os=[-8,8].map(cents=>{const o=c.createOscillator();o.type='sawtooth';o.frequency.value=f;o.detune.value=cents;o.connect(mix);return o;});
+      const sub=c.createOscillator(),sg=c.createGain();sub.type='sine';sub.frequency.value=f/2;sg.gain.value=.16;sub.connect(sg);sg.connect(lp);os.push(sub);
       const stop=_env(g,t,dur,.3,.4,.9,.6,gv);os.forEach(o=>{o.start(t);o.stop(stop);});return .6;}},
   rs_lead:{name:'LEAD',color:'#66ffaa',f:523.25,r:'note',
     note(t,gv,f,dur,vel){const c=getCtx(),g=c.createGain(),lp=c.createBiquadFilter(),o1=c.createOscillator(),o2=c.createOscillator(),g1=c.createGain(),g2=c.createGain(),vib=c.createOscillator(),vg=c.createGain();
@@ -205,6 +208,8 @@ function showRoll(i){
   if(i>=0&&typeof seqMode!=='undefined'&&seqMode!=='pattern'&&typeof setSeqMode==='function')setSeqMode('pattern');
   const on=i>=0;
   document.body.classList.toggle('roll-on',on);
+  // phones: the roll takes the whole screen (in the normal layout it would start halfway down and run off the bottom)
+  document.body.classList.toggle('roll-full',on&&!IS_DESKTOP);
   seqLayersContainer.style.display=on?'none':'';
   seqRollGrid.style.display=on?'':'none';
   seqRollBar.style.display=on?'':'none';
@@ -392,7 +397,8 @@ rollArea.addEventListener('pointerdown',e=>{
   }
   if(ne){
     e.preventDefault();e.stopPropagation();
-    const n=ne._note,resize=!!e.target.closest('.roll-note-h');
+    // on a phone a 1-step note is only ~15px wide, so its resize edge would swallow every touch: only use it on wide notes
+    const n=ne._note,resize=!!e.target.closest('.roll-note-h')&&(e.pointerType!=='touch'||ne.getBoundingClientRect().width>=30);
     _rd={kind:resize?'resize':'move',n,el:ne,x0:e.clientX,y0:e.clientY,p0:p,orig:{s:n.s,l:n.l,m:n.m},moved:false,id:e.pointerId};
     try{rollArea.setPointerCapture(e.pointerId);}catch(err){}
     return;
@@ -469,3 +475,5 @@ function refreshRollUI(){
   else seqRollBtn.textContent='ROLL';
 }
 refreshRollUI();
+// switching between phone and desktop layout (rotate / resize / Settings → LAYOUT) moves the roll in or out of full screen
+addEventListener('resize',()=>{if(rollView>=0)document.body.classList.toggle('roll-full',!IS_DESKTOP);});

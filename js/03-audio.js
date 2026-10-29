@@ -388,7 +388,7 @@ const FX_STAGES=[
     set(s,f,t){s.lo.gain.setValueAtTime(f.eqLow,t);s.mid.gain.setValueAtTime(f.eqMid,t);s.hi.gain.setValueAtTime(f.eqHigh,t);}},
   {key:'filt',on:f=>f.filtOn,make(c){const b=c.createBiquadFilter();return{in:b,out:b,b};},
     set(s,f,t){s.b.type=f.filtType;s.b.frequency.setValueAtTime(Math.max(40,Math.min(18000,f.filtFreq)),t);s.b.Q.setValueAtTime(f.filtRes,t);}},
-  {key:'dist',on:f=>f.distAmt>0,make(c){const ws=c.createWaveShaper(),g=c.createGain();ws.oversample='4x';ws.connect(g);return{in:ws,out:g,ws,g};},
+  {key:'dist',on:f=>f.distAmt>0,make(c){const ws=c.createWaveShaper(),g=c.createGain();ws.oversample='2x';ws.connect(g);return{in:ws,out:g,ws,g};},
     set(s,f){s.ws.curve=_driveCurve(f.distAmt);s.g.gain.value=1-f.distAmt*.45;}},
   {key:'crush',on:f=>f.crushAmt>0,make(c){const ws=c.createWaveShaper();return{in:ws,out:ws,ws};},
     set(s,f){s.ws.curve=_crushCurve(f.crushAmt);}},

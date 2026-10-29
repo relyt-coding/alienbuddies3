@@ -64,11 +64,15 @@ function alienCost(n){
     if(i>=19)m*=0.6;
     c=Math.round(c*m);
   }
-  return bump30(c);
+  // v0.2.92 second-half balance: every alien after #20 costs an extra ×1.5 on top of the curve above
+  // (simulated: early game unchanged; waits between matching levels after level 5 go from ~0 to ~5-50 min)
+  return bump30(c)*(n>20?Math.pow(1.5,n-20):1);
 }
-function alienBoostUpgradeCost(lvl){if(lvl===0)return 60000000;let c=60000000;for(let i=1;i<=lvl;i++){c=Math.round(c*(100+i*40));if(i>=2)c=Math.round(c*3);}return c;}
+// Alien Power: each level makes EVERY alien worth more, so it snowballs with alien count. Levels after 4 cost ×1000 extra each.
+function alienBoostUpgradeCost(lvl){if(lvl===0)return 60000000;let c=60000000;for(let i=1;i<=lvl;i++){c=Math.round(c*(100+i*40));if(i>=2)c=Math.round(c*3);}return lvl>4?c*Math.pow(1000,lvl-4):c;}
 function alienBoostUpgradeAt(lvl){const cost=alienBoostUpgradeCost(lvl);const perAlien=(1.1+(lvl+1)*0.3).toFixed(1);const perAlienNext=(1.1+(lvl+2)*0.3).toFixed(1);return{effectMain:`ALIEN POWER ×${perAlienNext}/ALIEN`,effectSub:`Per-alien base: ×${perAlien} → ×${perAlienNext}`,cost};}
-function multiClickUpgradeCost(lvl){if(lvl===0)return 15000000;let c=15000000;for(let i=1;i<=lvl;i++){c=Math.round(c*(100+i*40));if(i>=2)c=Math.round(c*3);}return c;}
+// Multi-Click: levels after 5 cost ×100 extra each
+function multiClickUpgradeCost(lvl){if(lvl===0)return 15000000;let c=15000000;for(let i=1;i<=lvl;i++){c=Math.round(c*(100+i*40));if(i>=2)c=Math.round(c*3);}return lvl>5?c*Math.pow(100,lvl-5):c;}
 function multiClickUpgradeAt(lvl){const clicks=lvl+2;return{effectMain:`${clicks}× CLICKS`,effectSub:`Each tap counts as ${clicks} clicks`,cost:multiClickUpgradeCost(lvl)};}
 
 // Pad button costs: 1 free, 2=5 (kick), 3=100 (snare), 4=3K, 5=2.5M ...

@@ -1390,7 +1390,7 @@ body.desktop-mode #tipsModal>div:first-child{zoom:1.04;}
 body.sc-beats .seq-step:nth-child(4n+1)::after,
 body.sc-ends .seq-step:nth-child(4n)::after,
 body.sc-all .seq-step::after{
-  content:counter(stp);position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  content:counter(stp);position:absolute;top:0;right:0;bottom:0;left:0;display:flex;align-items:center;justify-content:center;
   font-family:'Bebas Neue',sans-serif;font-size:.7rem;line-height:1;letter-spacing:.04em;color:#8a8a9a;pointer-events:none;
 }
 body.sc-all .seq-step::after{font-size:.62rem;}
@@ -1550,7 +1550,7 @@ body.roll-on.desktop-mode #seqHScroll{max-height:min(52vh,440px);}
 .roll-key.tonic{box-shadow:inset 3px 0 0 #00ff88;}
 .roll-side{position:sticky;right:0;z-index:2;background:#0a0a0a;}
 .roll-area{position:relative;overflow:hidden;border-radius:4px;background:#0d0d12;touch-action:pan-x pan-y;cursor:crosshair;}
-.roll-rows{position:absolute;inset:0;display:flex;flex-direction:column;pointer-events:none;}
+.roll-rows{position:absolute;top:0;right:0;bottom:0;left:0;display:flex;flex-direction:column;pointer-events:none;}
 .roll-row{height:var(--rh);flex:none;box-sizing:border-box;border-bottom:1px solid #16161e;}
 .roll-row.black{background:#09090d;}
 .roll-row.inkey{background:rgba(0,255,136,.045);}
@@ -1558,10 +1558,10 @@ body.roll-on.desktop-mode #seqHScroll{max-height:min(52vh,440px);}
 .roll-row.tonic{background:rgba(0,255,136,.1);}
 .roll-row.c{border-bottom-color:#2a2a3a;}
 /* vertical lines: every step, every beat (4 steps) and every bar (16 steps), like the sequencer */
-.roll-lines{position:absolute;inset:0;pointer-events:none;
+.roll-lines{position:absolute;top:0;right:0;bottom:0;left:0;pointer-events:none;
   background-image:linear-gradient(to right,rgba(160,168,255,.4) 0 2px,transparent 2px),linear-gradient(to right,rgba(255,255,255,.2) 0 1px,transparent 1px),linear-gradient(to right,rgba(255,255,255,.07) 0 1px,transparent 1px);
   background-size:calc(1600% / var(--n,16)) 100%,calc(400% / var(--n,16)) 100%,calc(100% / var(--n,16)) 100%;}
-.roll-notes{position:absolute;inset:0;}
+.roll-notes{position:absolute;top:0;right:0;bottom:0;left:0;}
 .roll-note{position:absolute;left:calc(var(--s) * 100% / var(--n,16));width:calc(var(--l) * 100% / var(--n,16) - 1px);height:calc(var(--rh) - 2px);margin-top:1px;
   background:var(--lc);border-radius:3px;box-shadow:0 0 6px -1px var(--lc);cursor:grab;touch-action:none;box-sizing:border-box;border:1px solid rgba(0,0,0,.35);}
 .roll-note-h{position:absolute;right:0;top:0;bottom:0;width:7px;cursor:ew-resize;border-left:1px solid rgba(0,0,0,.3);}
@@ -1584,3 +1584,20 @@ body.roll-on.desktop-mode #seqHScroll{max-height:min(52vh,440px);}
 .fx-sec-body{display:none;padding:0 .8rem .8rem;}
 .fx-coll.open .fx-sec-body{display:block;}
 .fx-note{font-size:.85rem;letter-spacing:.05em;color:#7a7aa8;margin-bottom:.5rem;line-height:1.35;}
+
+/* ── v0.2.92 phones: the piano roll opens full screen ── */
+body.roll-on #seqPhBar{display:none;} /* the roll has its own playhead */
+body.roll-full #seqArea{position:fixed;top:0;right:0;bottom:0;left:0;z-index:210;margin:0;max-width:none;background:#06060c;
+  display:flex;flex-direction:column;box-sizing:border-box;padding:calc(env(safe-area-inset-top,0px) + 8px) 8px calc(env(safe-area-inset-bottom,0px) + 8px);}
+body.roll-full #seqPatternView{flex:1;min-height:0;display:flex;flex-direction:column;}
+body.roll-full #seqHScroll{flex:1;min-height:0;max-height:none !important;}
+body.roll-full .seq-roll{grid-template-columns:44px 1fr;gap:3px;}
+body.roll-full .roll-side{display:none;}
+body.roll-full .roll-key{font-size:.58rem;}
+body.roll-full #pageDots{display:none !important;}
+body.roll-full .toast{z-index:260;}
+body.roll-full .seq-bottom-row{flex-wrap:wrap;row-gap:4px;}
+/* everything that floats over the game hides while the full-screen roll is open */
+body.roll-full #settingsOpenBtn,body.roll-full #soundboardBtn,body.roll-full #partyBtn,body.roll-full #padEditToggleBtn,body.roll-full #padEditBtn,
+body.roll-full #arrowActivate,body.roll-full #arrowShop,body.roll-full #editModeReminder,
+body.roll-full .bouncer,body.roll-full .particle{visibility:hidden !important;pointer-events:none !important;}

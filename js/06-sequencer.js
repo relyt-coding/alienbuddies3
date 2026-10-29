@@ -717,7 +717,8 @@ function loadPatternSmart(pi){
 // startSeq / stopSeq
 function startSeq(){
   seqClockStop();
-  if(seqEnergy<=0){ // no energy: wait until a pad hit recharges the meter
+  const _recording=typeof voxRec!=='undefined'&&voxRec&&!voxRec.cal; // recording vocals: studio time, no energy needed
+  if(seqEnergy<=0&&!_recording){ // no energy: wait until a pad hit recharges the meter
     _seqEnergyWait=true;updateEnergyUI();
     showToast('Energy empty — tap a drum pad to recharge!');
     return;
@@ -737,6 +738,7 @@ function startSeq(){
   }
   seqPlaying=true;
   _seqHidePaused=false;
+  if(typeof voxOnStart==='function')voxOnStart(); // vocals: start from the green flag when the VOX view is open
   seqClockStart();
   if(seqPlayPauseBtn){seqPlayPauseBtn.textContent='PAUSE';seqPlayPauseBtn.classList.add('playing');}
   requestRender();
@@ -747,7 +749,9 @@ function seqRunStep(quiet,delayMs,audioAt){
   delayMs=delayMs||0;
   const _at=(audioAt!==undefined)?audioAt:Tnow()+delayMs/1000; // audio-clock time this step should sound
   const later=fn=>{if(delayMs>6)setTimeout(fn,delayMs);else fn();};
-  scoreSeqStep(quiet);
+  // while vocals are recording the sequencer is in "studio time": it doesn't score (and doesn't use energy)
+  if(!(typeof voxIsRecording==='function'&&voxIsRecording()))scoreSeqStep(quiet);
+  if(typeof voxStep==='function')voxStep(quiet,_at); // vocal takes that start in this step (every mode)
   if(seqMode==='pattern'){
     if(!quiet){
       const st=seqStep;
@@ -839,7 +843,8 @@ function seqRunStep(quiet,delayMs,audioAt){
   }
 }
 function stopSeq(){
-  seqClockStop();_seqEnergyWait=false;_seqHidePaused=false;
+  seqClockStop();
+  if(typeof voxOnStop==='function')voxOnStop();_seqEnergyWait=false;_seqHidePaused=false;
   seqPlaying=false;requestRender();seqStep=0;_followPage=-1;arrBar=0;arrBarStep=0;songSlotIdx=0;songArrBar=0;songArrBarStep=0;
   seqPhEls.forEach(c=>c.classList.remove('lit'));
   seqFullPhEls.forEach(c=>c.classList.remove('lit'));

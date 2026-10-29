@@ -179,18 +179,19 @@ function _seqClockTick(){
   const cap=Math.max(1,Math.floor(SEQ_CATCHUP_MAX_MS/ms));
   if(dues.length>cap){dues.splice(0,dues.length-cap);_seqNextDue=now+ms;}
   const ctxNow=getCtx().currentTime;
+  const studio=typeof voxIsRecording==='function'&&voxIsRecording(); // recording vocals: energy is not used
   for(let i=0;i<dues.length;i++){
-    if(seqEnergy<=0){_seqEnergyOut();return;}   // out of energy: stop here (remaining catch-up steps are not credited)
+    if(seqEnergy<=0&&!studio){_seqEnergyOut();return;}   // out of energy: stop here (remaining catch-up steps are not credited)
     const delay=dues[i]-now;           // ms from now until this step should sound (performance clock)
     const late=delay<-40;              // steps already well in the past (frozen tab etc.) still score but stay silent
     // sounds use an evenly spaced grid on the audio clock so spacing is exact no matter when the tick ran
     if(_seqAudioNext<ctxNow-0.04)_seqAudioNext=ctxNow+Math.max(0,delay)/1000; // fell behind: resync
     const at=_seqAudioNext;_seqAudioNext+=ms/1000;
     seqRunStep(late,Math.max(0,(at-ctxNow)*1000),at);
-    drainSeqEnergy(ms/1000);
+    if(!studio)drainSeqEnergy(ms/1000);
   }
   updateEnergyUI();
-  if(seqEnergy<=0){_seqEnergyOut();return;}
+  if(seqEnergy<=0&&!studio){_seqEnergyOut();return;}
   if(dues.length>1)requestRender();
 }
 

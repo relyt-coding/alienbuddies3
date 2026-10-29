@@ -71,13 +71,17 @@
   // ── EFFECTS modal: pick a channel (track / piano roll layer / master), then tweak its effects ──
   const fm=makeModal('fxModal');
   const openSecs=new Set(); // which sections are expanded (remembered while the game is open)
+  const isVox=ch=>typeof FX_VOX_BASE!=='undefined'&&ch>=FX_VOX_BASE&&ch<FX_VOX_BASE+VOX_MAX_LAYERS;
+  const voxN=()=>typeof voxLayerCount==='function'?voxLayerCount():0;
   function chName(ch){
     if(ch===FX_MASTER)return 'MASTER';
+    if(isVox(ch))return voxLayerName(ch-FX_VOX_BASE);
     if(ch>=FX_ROLL_BASE){const L=(typeof pianoRoll!=='undefined'&&pianoRoll.layers[ch-FX_ROLL_BASE])||null;const s=L&&L.soundId&&SOUND_MAP[L.soundId];return 'ROLL '+(ch-FX_ROLL_BASE+1)+'  ·  '+(s?s.name:'—');}
     const l=seqLayers[ch];const s=l&&SOUND_MAP[l.soundId];return (ch+1)+'  ·  '+(s?s.name:'—');
   }
   function chColor(ch){
     if(ch===FX_MASTER)return '#ffcc00';
+    if(isVox(ch))return VOX_LANE_COLORS[ch-FX_VOX_BASE];
     let id=null;
     if(ch>=FX_ROLL_BASE){const L=(typeof pianoRoll!=='undefined'&&pianoRoll.layers[ch-FX_ROLL_BASE])||null;id=L&&L.soundId;}else{const l=seqLayers[ch];id=l&&l.soundId;}
     const s=id&&SOUND_MAP[id];return s?s.color:'#888';
@@ -95,8 +99,10 @@
   function anyChannelActive(){
     const chs=[];(seqLayers||[]).forEach((l,i)=>chs.push(i));
     const rn=(typeof pianoRollLayers==='function')?pianoRollLayers():0;for(let i=0;i<rn;i++)chs.push(FX_ROLL_BASE+i);chs.push(FX_MASTER);
+    for(let i=0;i<voxN();i++)chs.push(FX_VOX_BASE+i);
     return chs.some(ch=>fxIsActive(fxEffective(getTrackFx(ch,false),ch)));
   }
+  window.openFxChannel=ch=>{if(typeof closeViewMenu==='function')closeViewMenu();buildFxDetail(ch);fm.open();};
   window._fxAnyActive=anyChannelActive;
   function listRow(ch,list){
     const row=$('button','fx-row'+(activeNames(ch).length?' active':''));
@@ -112,11 +118,12 @@
     const b=fm.box;b.innerHTML='';
     const hd=$('div','more-head');hd.appendChild($('div','more-title','✨ EFFECTS'));
     const x=$('button','more-x','✕');x.addEventListener('click',fm.close);hd.appendChild(x);b.appendChild(hd);
-    b.appendChild($('div','more-sub','Pick a track, piano roll layer'+((musicHas('mt_eq')||musicHas('mt_compression'))?' or the MASTER (whole song)':'')+' to add effects to it.'));
+    b.appendChild($('div','more-sub','Pick a track, piano roll layer'+(voxN()?', vocal layer':'')+((musicHas('mt_eq')||musicHas('mt_compression'))?' or the MASTER (whole song)':'')+' to add effects to it.'));
     const list=$('div','fx-list');
     if(seqLayers.length){list.appendChild($('div','fx-group','SEQUENCER TRACKS'));seqLayers.forEach((l,i)=>listRow(i,list));}
     const rn=(typeof pianoRollLayers==='function')?pianoRollLayers():0;
     if(rn){list.appendChild($('div','fx-group','PIANO ROLL'));for(let i=0;i<rn;i++){if(typeof rollLayer==='function')rollLayer(i);listRow(FX_ROLL_BASE+i,list);}}
+    if(voxN()){list.appendChild($('div','fx-group','VOCALS'));for(let i=0;i<voxN();i++)listRow(FX_VOX_BASE+i,list);}
     if(musicHas('mt_eq')||musicHas('mt_compression')){list.appendChild($('div','fx-group','MASTERING'));listRow(FX_MASTER,list);}
     if(!list.children.length)b.appendChild($('div','more-foot','No tracks yet — buy a sequencer track in the shop first.'));
     b.appendChild(list);
@@ -150,11 +157,13 @@
     const body=$('div','fx-body');b.appendChild(body);
     const preview=()=>{try{getCtx();
       if(isMaster){playSound('kick');setTimeout(()=>playSound('snare'),260);setTimeout(()=>playSound('marimba'),520);return;}
+      if(isVox(ch)){voxAudition(ch-FX_VOX_BASE);return;}
       if(ch>=FX_ROLL_BASE){const L=pianoRoll.layers[ch-FX_ROLL_BASE];if(L&&L.soundId)playRollNote(L.soundId,Math.round(rollBaseMidi(L.soundId)),0,.5,1,ch-FX_ROLL_BASE);return;}
       playSound(seqLayers[ch].soundId,1,undefined,ch);}catch(e){}};
     const changed=(doPreview)=>{saveSoon();
       if(isMaster&&typeof applyMasterFx==='function')applyMasterFx();
       else if(_fxBuses[ch]){const e=fxEffective(f,ch);if(fxIsActive(e))getFxBus(ch,e);}
+      if(isVox(ch)&&typeof voxRouteAll==='function'){voxRouteAll();if(typeof voxOpen!=='undefined'&&voxOpen)voxRender();} // takes that are already playing switch over straight away
       paintAll();if(doPreview)preview();};
     const painters=[];
     const paintAll=()=>painters.forEach(p=>p());

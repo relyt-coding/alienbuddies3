@@ -137,6 +137,17 @@ const MUSIC_TREE_NODES=(function(){
     {fact:'Producers often loop one 8-bar section for hours, then build the full arrangement once the loop feels right.'});
   br('mt_song','💿','Song Mode','Unlocks SONG mode: line up whole arrangements into a song. ×1.2 Alien Gems.',20000,'mt_arrange',side(am,130),
     {fact:'A typical pop song is about 3 minutes long, which at 100 BPM is roughly 75 bars.'});
+
+  // VOCALS — record your own voice on layers, then arrange the takes on the song timeline
+  const vx=hub('mt_vocals','🎤','Vocals','Unlocks the VOX button: record your voice with your phone\'s or computer\'s mic (or one you plug in) on 2 vocal layers. Drag, trim, split and copy takes anywhere on the song. Every layer has its own effects rack. ×1.5 Alien Gems, ×1.5 points.',
+    'Multitrack recording puts every part on its own track, so each one can be redone or changed later. Guitarist Les Paul pioneered it in the 1940s and 50s, stacking his guitar and Mary Ford\'s voice again and again on modified tape machines.',
+    64800,'mt_arrangement',along(ar,430),{mult:1.5});
+  const v4=br('mt_vox4','🎙','Backing Vocals','2 more vocal layers (4 in total): harmonies, ad-libs and doubles. ×1.2 Alien Gems.',18000,'mt_vocals',side(vx,170),
+    {fact:'Double-tracking means singing the same part twice on two tracks: the tiny differences make a voice sound bigger. The Beatles did it so often that Abbey Road engineers invented ADT (artificial double tracking) in 1966 to fake it.'});
+  const v7=br('mt_vox7','🎶','Vocal Stack','3 more vocal layers (7 in total). ×1.2 Alien Gems.',24000,'mt_vox4',side(v4,130),
+    {fact:'Stacking means recording the same line many times and layering the takes. Big pop choruses often hide 10 or more vocal takes behind the lead.'});
+  br('mt_vox10','👥','Choir','3 more vocal layers (10 in total): enough to be your own choir. ×1.2 Alien Gems.',32000,'mt_vox7',side(v7,130),
+    {fact:'A classic choir has four parts: soprano, alto, tenor and bass (SATB). With 10 layers you can sing all four and still double them.'});
   return N;
 })();
 
@@ -916,6 +927,7 @@ function clearSavedPatternsAndArrangements(){
 
 function fullSeqReset(){
   if(typeof pianoRoll!=='undefined'){pianoRoll={layers:[]};if(typeof refreshRollUI==='function')refreshRollUI();}
+  if(typeof voxLoad==='function')voxLoad(null); // vocal takes go too (the audio is cleaned up next time the game loads)
   // Clear current notes
   seqLayers.forEach(layer=>{
     layer.steps.fill(false);

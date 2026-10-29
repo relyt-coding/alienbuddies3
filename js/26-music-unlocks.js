@@ -4,7 +4,7 @@
 // A brand-new sequencer is just: play, BPM, tracks, steps. Everything else appears as the player buys it
 // in the Musical Toolkit branch of the skill tree:
 //   32 / 64 Steps → STEPS button · Reverb / Echo → EFFECTS button · Key → KEY button (+ key packs)
-//   Velocity → VELOCITY button · Arrangement Mode → PAT / ARR switch · Song Mode → SONG
+//   Velocity → VELOCITY button · Arrangement Mode → PAT / ARR switch · Song Mode → SONG · Vocals → VOX button
 // Locked controls are hidden, not greyed out, so the first look at the sequencer stays simple.
 // every skill-tree node that adds something to the EFFECTS window
 const FX_NODE_IDS=['mt_reverb','mt_echo','mt_pingpong','mt_filter','mt_distortion','mt_chorus','mt_bitcrusher','mt_flanger','mt_phaser','mt_tremolo','mt_eq','mt_compression','mt_panning','mt_sidechain'];
@@ -46,6 +46,7 @@ function applyMusicUnlocks(justBoughtId){
 
   if(typeof window.refreshKeyFxButtons==='function')window.refreshKeyFxButtons();
   if(typeof refreshRollUI==='function')refreshRollUI();
+  if(typeof refreshVoxUI==='function')refreshVoxUI();
 
   // a short pointer to where the new feature lives
   const where={
@@ -64,6 +65,8 @@ function applyMusicUnlocks(justBoughtId){
     mt_flanger:'✈ Flanger unlocked in EFFECTS.',mt_phaser:'🌀 Phaser unlocked in EFFECTS.',mt_tremolo:'〰 Tremolo unlocked in EFFECTS.',
     mt_eq:'📊 EQ unlocked in EFFECTS: on any track, roll layer, or the MASTER channel.',
     mt_compression:'🗜 Compression unlocked in EFFECTS: on any track, roll layer, or the MASTER channel.',
+    mt_vocals:'🎤 VOX button unlocked at the top of the sequencer: record your voice!',
+    mt_vox4:'🎙 4 vocal layers: open VOX to use them.',mt_vox7:'🎶 7 vocal layers: open VOX to use them.',mt_vox10:'👥 10 vocal layers: a whole choir of you.',
     mt_panning:'↔ Panning unlocked in EFFECTS.',mt_sidechain:'💓 Sidechain unlocked: tracks with it on duck every time a kick plays.',
   }[justBoughtId];
   if(where&&typeof showToast==='function')setTimeout(()=>showToast(where),1600);

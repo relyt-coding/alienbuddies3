@@ -28,7 +28,8 @@ function downloadBlob(blob,filename){
 // ══════════════════════════════════════════════
 //  WHAT TO RENDER
 // ══════════════════════════════════════════════
-// A hit is one thing to play: a step {time, soundId, vel, ch} or a piano roll note {time, soundId, midi, dur, vel, layer}.
+// A hit is one thing to play: a step {time, soundId, vel, ch}, a piano roll note {time, soundId, midi, dur, vel, layer}
+// or a vocal take {vox, time, clip, li, maxDur}.
 // bars = the start time of every 16 steps (tremolo / auto-pan restart there, just like when the sequencer plays).
 // Everything goes through the real sound engine, so the file has the same effects, key, velocity and instruments you hear.
 
@@ -48,14 +49,27 @@ function _barsFor(offset,steps,sd,out){for(let s=0;s<steps;s+=16)out.push(offset
 function buildPatternHits(layers){
   const sd=60/seqBpm/4,hits=[],bars=[];
   const live=layers===seqLayers;
-  layers.forEach((l,ch)=>{
-    if(live?!layerAudible(l):l.muted)return; // the editor follows mute + solo, like playback
-    l.steps.slice(0,STEPS).forEach((on,i)=>{if(on)hits.push({time:i*sd,soundId:l.soundId,vel:_vel(l,i),ch});});
-  });
+  // with vocals, the loop repeats for as long as the vocal takes run (like it does when you press play)
+  const vox=live&&typeof voxHasClips==='function'&&voxHasClips();
+  const total=vox?voxLoopLen():STEPS,reps=Math.round(total/STEPS);
   const solo=live&&seqLayers.some(x=>x.solo);
-  if(live&&!solo&&typeof pianoRoll!=='undefined')hits.push(...rollHits(pianoRoll,0,STEPS));
-  _barsFor(0,STEPS,sd,bars);
-  return{hits,duration:STEPS*sd,bars};
+  for(let r=0;r<reps;r++){
+    const off=r*STEPS*sd;
+    layers.forEach((l,ch)=>{
+      if(live?!layerAudible(l):l.muted)return; // the editor follows mute + solo, like playback
+      l.steps.slice(0,STEPS).forEach((on,i)=>{if(on)hits.push({time:off+i*sd,soundId:l.soundId,vel:_vel(l,i),ch});});
+    });
+    if(live&&!solo&&typeof pianoRoll!=='undefined')hits.push(...rollHits(pianoRoll,off,STEPS));
+  }
+  if(vox)hits.push(...voxHits(total));
+  _barsFor(0,total,sd,bars);
+  return{hits,duration:total*sd,bars};
+}
+// vocal takes on top of an arrangement / song (cut off where the song ends)
+function _withVox(res){
+  if(typeof voxHits!=='function'||!res.duration)return res;
+  res.hits.push(...voxHits(Math.round(res.duration/(60/seqBpm/4))));
+  return res;
 }
 
 function buildArrangementHits(arr){
@@ -99,6 +113,7 @@ function renderOffline(res){
   const off=new OAC(2,Math.ceil(total*SR),SR);
   // ── save the live engine ──
   const live={audioCtx,masterGainNode,ambGain,drumMasterGain,drumMasterReal,rvbNode,rvbGainNode,rvbReal,_lim,_masterSig,masterVol,
+    voxN:typeof _voxN!=='undefined'?_voxN:null,
     buses:Object.assign({},_fxBuses),revs:Object.assign({},_fxRevs),mstages:Object.assign({},_masterStages)};
   const clear=o=>{for(const k in o)delete o[k];};
   try{
@@ -107,11 +122,13 @@ function renderOffline(res){
     masterVol=1;audioCtx=off;_initAudioGraph(off,1); // the file doesn't depend on the volume slider
     // make every channel that has effects up front, so sidechain ducks from the very first kick
     for(let ch=0;ch<FX_MASTER;ch++)fxBusFor(ch);
+    if(typeof FX_VOX_BASE!=='undefined'){_voxN=null;for(let i=0;i<VOX_MAX_LAYERS;i++)fxBusFor(FX_VOX_BASE+i);}
     res.bars.forEach(t=>fxBeatSync(WAV_LEAD+t));
     res.hits.slice().sort((a,b)=>a.time-b.time).forEach(h=>{
       const t=WAV_LEAD+h.time;
       try{
-        if(h.midi!=null)playRollNote(h.soundId,h.midi,t,h.dur,h.vel,h.layer);
+        if(h.vox)voxPlayClip(h.clip,h.li,t,0,h.maxDur);
+        else if(h.midi!=null)playRollNote(h.soundId,h.midi,t,h.dur,h.vel,h.layer);
         else playSound(h.soundId,h.vel,t,h.ch);
       }catch(e){console.warn('export: skipped',h.soundId,e);}
     });
@@ -120,6 +137,7 @@ function renderOffline(res){
     audioCtx=live.audioCtx;masterGainNode=live.masterGainNode;ambGain=live.ambGain;drumMasterGain=live.drumMasterGain;drumMasterReal=live.drumMasterReal;
     rvbNode=live.rvbNode;rvbGainNode=live.rvbGainNode;rvbReal=live.rvbReal;_lim=live._lim;_masterSig=live._masterSig;masterVol=live.masterVol;
     clear(_fxBuses);Object.assign(_fxBuses,live.buses);clear(_fxRevs);Object.assign(_fxRevs,live.revs);clear(_masterStages);Object.assign(_masterStages,live.mstages);
+    if(typeof _voxN!=='undefined')_voxN=live.voxN;
     _exporting=false;
   }
   // old Safari's startRendering() doesn't return a promise; it fires oncomplete instead
@@ -157,8 +175,8 @@ document.getElementById('seqExportPatBtn')&&document.getElementById('seqExportPa
   renderHitsToWAV(buildPatternHits(seqLayers),'alien_buddies_pattern.wav');
 });
 document.getElementById('seqExportArrBtn')&&document.getElementById('seqExportArrBtn').addEventListener('click',()=>{
-  renderHitsToWAV(buildArrangementHits({bars:arrangeBars,arrangement:arrangement}),'alien_buddies_arrangement.wav');
+  renderHitsToWAV(_withVox(buildArrangementHits({bars:arrangeBars,arrangement:arrangement})),'alien_buddies_arrangement.wav');
 });
 document.getElementById('seqExportSongBtn')&&document.getElementById('seqExportSongBtn').addEventListener('click',()=>{
-  renderHitsToWAV(buildSongHits(),'alien_buddies_song.wav');
+  renderHitsToWAV(_withVox(buildSongHits()),'alien_buddies_song.wav');
 });

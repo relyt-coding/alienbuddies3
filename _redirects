@@ -1,0 +1,5 @@
+# Test mode: alienbuddies.space/test serves the normal game with the test panel switched on
+/test      /index.html   200
+/test/     /index.html   200
+# anything the browser asks for under /test/ (css, js, img, fonts) is the same file at the site root
+/test/*    /:splat       200

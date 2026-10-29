@@ -1,4 +1,7 @@
 
+// TEST MODE: alienbuddies.space/test (or ?test when opened locally). Separate saves + the 🧪 test panel (js/28-test-mode.js).
+const TEST_MODE=/^\/test\/?$/i.test(location.pathname)||/[?&]test(=|&|$)/i.test(location.search);
+
 // ══════════════════════════════════════════════
 //  CONSTANTS & COLORS
 // ══════════════════════════════════════════════

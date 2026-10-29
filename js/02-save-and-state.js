@@ -2,7 +2,8 @@
 // ══════════════════════════════════════════════
 //  SAVE / LOAD
 // ══════════════════════════════════════════════
-const SAVE_KEYS=['ab2_slot0','ab2_slot1','ab2_slot2']; // 0.2 uses fresh keys; 0.1 saves live under ab_slot0..2
+const SAVE_KEYS=TEST_MODE?['ab2t_slot0','ab2t_slot1','ab2t_slot2']:['ab2_slot0','ab2_slot1','ab2_slot2']; // 0.2 uses fresh keys; 0.1 saves live under ab_slot0..2; test mode has its own
+const SLOT_NAME_PREFIX=TEST_MODE?'ab2t_slot_name_':'ab2_slot_name_';
 const LEGACY_SAVE_KEYS=['ab_slot0','ab_slot1','ab_slot2'];
 let activeSlot=-1;
 
@@ -17,9 +18,9 @@ function defaultSave(){
 }
 function readSlot(i){try{const d=localStorage.getItem(SAVE_KEYS[i]);return d?JSON.parse(d):null;}catch(e){return null;}}
 function writeSlot(i,data){try{localStorage.setItem(SAVE_KEYS[i],JSON.stringify({...data,ts:Date.now()}));}catch(e){}}
-function getSlotName(i){try{return localStorage.getItem('ab2_slot_name_'+i)||'';}catch(e){return'';}}
-function setSlotName(i,name){try{localStorage.setItem('ab2_slot_name_'+i,name);}catch(e){}}
-function deleteSlot(i){try{localStorage.removeItem(SAVE_KEYS[i]);localStorage.removeItem('ab2_slot_name_'+i);}catch(e){}}
+function getSlotName(i){try{return localStorage.getItem(SLOT_NAME_PREFIX+i)||'';}catch(e){return'';}}
+function setSlotName(i,name){try{localStorage.setItem(SLOT_NAME_PREFIX+i,name);}catch(e){}}
+function deleteSlot(i){try{localStorage.removeItem(SAVE_KEYS[i]);localStorage.removeItem(SLOT_NAME_PREFIX+i);}catch(e){}}
 function slotSummary(data){
   if(!data)return null;
   const d=new Date(data.ts);

@@ -165,6 +165,7 @@ function playRollNote(id,midi,at,durSec,vel,layer){
   }
   // the gate is done once the note has faded: disconnect it so long sessions don't pile up audio nodes
   if(!(typeof _exporting!=='undefined'&&_exporting))setTimeout(()=>{try{gate.disconnect();}catch(e){}},Math.max(0,(end+rel*3+.3-c.currentTime)*1000));
+  return{gate,rel}; // (a MIDI keyboard uses this to let go of a held note early)
 }
 // called by the sequencer clock for every step it plays (pattern, arrangement and song modes)
 function rollPlayStep(roll,st,at,respectSolo){

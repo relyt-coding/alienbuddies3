@@ -148,6 +148,30 @@ const MUSIC_TREE_NODES=(function(){
     {fact:'Stacking means recording the same line many times and layering the takes. Big pop choruses often hide 10 or more vocal takes behind the lead.'});
   br('mt_vox10','👥','Choir','3 more vocal layers (10 in total): enough to be your own choir. ×1.2 Alien Gems.',32000,'mt_vox7',side(v7,130),
     {fact:'A classic choir has four parts: soprano, alto, tenor and bass (SATB). With 10 layers you can sing all four and still double them.'});
+  // MULTIPLE TAKES → MICROFADE EDITS (recording tools, after Vocals)
+  br('mt_takes','🔁','Multiple Takes','Unlocks LOOP recording and take folders: record a part again and again, then pick your best take with ◀ ▶. ×1.2 Alien Gems.',26000,'mt_vocals',rel(vx,30,330),
+    {fact:'Comping (from "compiling") means recording several takes and stitching the best moments together. Most lead vocals you hear are comped from many passes.'});
+  br('mt_fades','◢','Microfade Edits','Unlocks FADE IN / FADE OUT on every take (every cut already gets a click-free 2 ms fade). ×1.2 Alien Gems.',30000,'mt_takes',rel(vx,38,480),
+    {fact:'Cutting audio in the middle of a wave makes a click. Engineers add tiny fades of a few milliseconds to every edit so nobody hears the joins.'});
+  // VOCAL CHOPS (the next big section: slice takes into playable sounds)
+  const ch=hub('mt_chops','✂','Vocal Chops','Unlocks ✂ CHOP: slice any vocal take into chops that play on your drum pads and sequencer tracks, like any other sound. Chop bank: 8 slots. ×1.5 Alien Gems, ×1.5 points.',
+    'Chopping means slicing a recording into short pieces and playing them back in a new order. Vocal chops are all over house, hip-hop and future bass.',
+    80000,'mt_vocals',along(vx,470),{mult:1.5});
+  br('mt_chopauto','✨','Auto Slice','Adds ✨ AUTO to the chop editor: it cuts exactly where each syllable starts. ×1.2 Alien Gems.',26000,'mt_chops',rel(ch,20,190),
+    {fact:'A transient is the sharp start of a sound, like a consonant or a drum hit. Samplers look for them to cut a recording right where each syllable begins.'});
+  br('mt_choptricks','⏪','Chop Tricks','Unlocks REVERSE, PITCH and CHOKE for each chop in the chop bank. ×1.2 Alien Gems.',30000,'mt_chops',rel(ch,160,190),
+    {fact:'Backwards vocals are an old studio trick: The Beatles ended "Rain" (1966) with a vocal played in reverse.'});
+  br('mt_chopkeys','🎹','Chop Keys','Chops with a clear note become piano roll instruments, and they follow the song KEY like other melodic sounds. ×1.2 Alien Gems.',40000,'mt_chops',rel(ch,65,200),
+    {fact:'Playing one recorded sound across a whole keyboard is how early samplers like the Fairlight CMI turned a single voice into a choir.'});
+  br('mt_chopbank','🗃','Bigger Chop Bank','The chop bank grows from 8 to 24 slots. ×1.2 Alien Gems.',34000,'mt_chops',rel(ch,115,200),
+    {fact:'Akai\'s MPC samplers put 16 pads under your fingers, and that 4×4 grid became the classic way to play chops.'});
+  // MIDI KEYBOARD (Piano Roll upgrade)
+  br('mt_midi','🎛','MIDI Keyboard','Plug in a MIDI keyboard: play the piano roll\'s instruments with velocity and the sustain pedal, and record straight into the roll while the sequencer plays. Works in Chrome / Edge (computers) and Chrome on Android. ×1.2 Alien Gems.',3000,'mt_piano',side(pr,-170),
+    {fact:'MIDI (1983) lets instruments from any brand talk to each other. The same 5-pin standard still works today, now mostly over USB.'});
+  // AUTOMATION (late upgrade off Effects)
+  br('mt_automation','📈','Automation','Unlocks the AUTO button: draw how volume, filter, reverb, echo and pan change over the song on any track, roll layer, vocal layer or the master. ×1.2 Alien Gems.',150000,'mt_effects',rel(fx,300,230),
+    {fact:'Automation lets settings move by themselves during a song, like a filter slowly opening before the drop. Big mixing desks of the late 1970s added motorized faders that could replay every move.'});
+
   // VOCAL EFFECTS (other side of the Vocals hub)
   const at=br('mt_autotune','🎯','Autotune','Unlocks AUTOTUNE for vocal layers: snaps your singing to the notes of the song key. Slow it down to sound natural, or set it to instant for the robotic pop sound. ×1.2 Alien Gems.',22000,'mt_vocals',side(vx,-170),
     {fact:'Auto-Tune was invented by Andy Hildebrand, an engineer who used the same math to read oil-field seismic data. Cher\'s "Believe" (1998) made its instant, robotic setting famous.'});
@@ -937,6 +961,7 @@ function clearSavedPatternsAndArrangements(){
 function fullSeqReset(){
   if(typeof pianoRoll!=='undefined'){pianoRoll={layers:[]};if(typeof refreshRollUI==='function')refreshRollUI();}
   if(typeof voxLoad==='function')voxLoad(null); // vocal takes go too (the audio is cleaned up next time the game loads)
+  if(typeof automationLoad==='function')automationLoad(null);
   // Clear current notes
   seqLayers.forEach(layer=>{
     layer.steps.fill(false);

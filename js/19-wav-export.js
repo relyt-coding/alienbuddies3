@@ -50,7 +50,7 @@ function buildPatternHits(layers){
   const sd=60/seqBpm/4,hits=[],bars=[];
   const live=layers===seqLayers;
   // with vocals, the loop repeats for as long as the vocal takes run (like it does when you press play)
-  const vox=live&&typeof voxHasClips==='function'&&voxHasClips();
+  const vox=live&&((typeof voxHasClips==='function'&&voxHasClips())||(typeof autoHasLanes==='function'&&autoHasLanes()));
   const total=vox?voxLoopLen():STEPS,reps=Math.round(total/STEPS);
   const solo=live&&seqLayers.some(x=>x.solo);
   for(let r=0;r<reps;r++){
@@ -61,7 +61,7 @@ function buildPatternHits(layers){
     });
     if(live&&!solo&&typeof pianoRoll!=='undefined')hits.push(...rollHits(pianoRoll,off,STEPS));
   }
-  if(vox)hits.push(...voxHits(total));
+  if(vox&&typeof voxHits==='function')hits.push(...voxHits(total));
   _barsFor(0,total,sd,bars);
   return{hits,duration:total*sd,bars};
 }
@@ -124,6 +124,7 @@ function renderOffline(res){
     for(let ch=0;ch<FX_MASTER;ch++)fxBusFor(ch);
     if(typeof FX_VOX_BASE!=='undefined'){_voxN=null;for(let i=0;i<VOX_MAX_LAYERS;i++)fxBusFor(FX_VOX_BASE+i);}
     res.bars.forEach(t=>fxBeatSync(WAV_LEAD+t));
+    if(typeof autoRenderOffline==='function')autoRenderOffline(Math.round(res.duration/(60/seqBpm/4)),WAV_LEAD); // automation moves
     res.hits.slice().sort((a,b)=>a.time-b.time).forEach(h=>{
       const t=WAV_LEAD+h.time;
       try{

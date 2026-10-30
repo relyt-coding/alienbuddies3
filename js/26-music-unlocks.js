@@ -48,6 +48,10 @@ function applyMusicUnlocks(justBoughtId){
   if(typeof window.refreshKeyFxButtons==='function')window.refreshKeyFxButtons();
   if(typeof refreshRollUI==='function')refreshRollUI();
   if(typeof refreshVoxUI==='function')refreshVoxUI();
+  if(typeof refreshChopsUI==='function')refreshChopsUI();
+  if(typeof refreshAutoUI==='function')refreshAutoUI();
+  if(typeof voxBuildBar==='function'&&typeof voxOpen!=='undefined'&&voxOpen)voxBuildBar();
+  if(typeof rollView!=='undefined'&&rollView>=0&&typeof buildRollBar==='function')buildRollBar();
 
   // a short pointer to where the new feature lives
   const where={
@@ -67,6 +71,13 @@ function applyMusicUnlocks(justBoughtId){
     mt_eq:'📊 EQ unlocked in EFFECTS: on any track, roll layer, or the MASTER channel.',
     mt_compression:'🗜 Compression unlocked in EFFECTS: on any track, roll layer, or the MASTER channel.',
     mt_vocals:'🎤 VOX button unlocked at the top of the sequencer: record your voice!',
+    mt_takes:'🔁 Multiple Takes: VOX now has 🔁 LOOP, and recording again from the same spot adds a take (pick with ◀ ▶).',
+    mt_fades:'◢ Microfade Edits: select a take in VOX to set its FADE IN / FADE OUT.',
+    mt_chops:'✂ Vocal Chops: select a take in VOX and tap ✂ CHOP. Chops go in your sound library.',
+    mt_chopauto:'✨ Auto Slice: the chop editor has ✨ AUTO now.',mt_choptricks:'⏪ Chop Tricks: reverse, pitch and choke in VOX → ✂ CHOPS.',
+    mt_chopkeys:'🎹 Chop Keys: chops with a clear note are piano roll instruments now.',mt_chopbank:'🗃 The chop bank holds 24 chops now.',
+    mt_midi:'🎛 MIDI Keyboard: open ROLL and tap 🎹 MIDI to connect your keyboard.',
+    mt_automation:'📈 Automation: the AUTO button is at the top of the sequencer.',
     mt_autotune:'🎯 Autotune unlocked: VOX → a layer\'s FX button.',mt_voicefx:'👽 Voice Changer unlocked: VOX → a layer\'s FX button.',
     mt_harmonizer:'🎼 Harmonizer unlocked: VOX → a layer\'s FX button.',mt_vocoder:'🤖 Vocoder unlocked: VOX → a layer\'s FX button. Pick a piano roll layer (or a drone) to play its notes.',
     mt_vox4:'🎙 4 vocal layers: open VOX to use them.',mt_vox7:'🎶 7 vocal layers: open VOX to use them.',mt_vox10:'👥 10 vocal layers: a whole choir of you.',

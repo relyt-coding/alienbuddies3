@@ -99,8 +99,9 @@ function _voxDspCore(){
     }
     const F=Math.pow(2,p.formant/12),mk=marks(x,sr,g,frameAt);
     const y=psola(x,sr,mk,ratio,frameAt,F,1);
-    hr.forEach(h=>{const z=psola(x,sr,mk,h,frameAt,F,0);for(let i=0;i<y.length;i++)y[i]+=z[i]*p.harmMix;});
-    return{y,f0:f0p};
+    // the harmony voice comes back separately: it's mixed in live, so its volume can change without re-processing
+    let h=null;hr.forEach(r=>{const z=psola(x,sr,mk,r,frameAt,F,0);if(!h)h=z;else for(let i=0;i<h.length;i++)h[i]+=z[i];});
+    return{y,h,f0:f0p};
   }
   return{process,yinTrack};
 }
@@ -118,7 +119,7 @@ let _voxW=null,_voxWFail=false,_voxCore=null,_voxJobId=0;const _voxJobCb=new Map
 function voxWorker(){
   if(_voxW||_voxWFail)return _voxW;
   try{
-    const src='const core=('+_voxDspCore.toString()+')();self.onmessage=e=>{const d=e.data;try{const r=core.process(d.x,d.sr,d.f0,d.p);self.postMessage({id:d.id,y:r.y,f0:r.f0},[r.y.buffer]);}catch(err){self.postMessage({id:d.id,err:String(err)});}};';
+    const src='const core=('+_voxDspCore.toString()+')();self.onmessage=e=>{const d=e.data;try{const r=core.process(d.x,d.sr,d.f0,d.p);const tr=[r.y.buffer];if(r.h)tr.push(r.h.buffer);self.postMessage({id:d.id,y:r.y,h:r.h,f0:r.f0},tr);}catch(err){self.postMessage({id:d.id,err:String(err)});}};';
     _voxW=new Worker(URL.createObjectURL(new Blob([src],{type:'application/javascript'})));
     _voxW.onmessage=e=>{const cb=_voxJobCb.get(e.data.id);if(cb){_voxJobCb.delete(e.data.id);cb(e.data);}};
     _voxW.onerror=()=>{_voxWFail=true;_voxW=null;_voxJobCb.forEach(cb=>cb({err:'worker failed'}));_voxJobCb.clear();};
@@ -129,7 +130,7 @@ function voxDsp(x,sr,f0,p){
   return new Promise(res=>{
     const w=voxWorker();
     if(w){const id=++_voxJobId;_voxJobCb.set(id,res);w.postMessage({id,x,sr,f0,p},[x.buffer]);return;}
-    setTimeout(()=>{try{_voxCore=_voxCore||_voxDspCore();const r=_voxCore.process(x,sr,f0,p);res({y:r.y,f0:r.f0});}catch(err){res({err:String(err)});}},20);
+    setTimeout(()=>{try{_voxCore=_voxCore||_voxDspCore();const r=_voxCore.process(x,sr,f0,p);res({y:r.y,h:r.h,f0:r.f0});}catch(err){res({err:String(err)});}},20);
   });
 }
 const voxProc=new Map(),voxF0=new Map(),_voxQueue=[];let _voxBusy=false;
@@ -141,7 +142,7 @@ function voxVoiceParams(li){
   const keyOn=typeof keyIsActive==='function'&&keyIsActive(),R=keyOn?relMajorRoot(seqKey,seqKeyMinor):0;
   return{pcs:keyOn?MAJOR_SCALE.map(x=>(x+R)%12):[0,1,2,3,4,5,6,7,8,9,10,11],tonic:keyOn?seqKey:0,
     tune:{on:tune,amt:+f.tuneAmt,speed:+f.tuneSpeed},robot:!!f.robot,pitch:+f.pitch||0,formant:+f.formant||0,
-    harm:harm?VOX_HARMS[f.harm].v:null,harmMix:+f.harmMix};
+    harm:harm?VOX_HARMS[f.harm].v:null}; // (harmony volume is mixed live, so it isn't part of the processing)
 }
 const _voxKey=(t,p)=>t+'|'+JSON.stringify(p);
 function voxWantedKeys(){
@@ -149,14 +150,15 @@ function voxWantedKeys(){
   vocals.layers.forEach((L,li)=>{if(li>=n)return;const p=voxVoiceParams(li);if(p)L.clips.forEach(c=>s.add(_voxKey(c.t,p)));});
   return s;
 }
-// processed buffer for this take on this layer, if it's ready (starts the work if it isn't)
-function voxProcessedBuf(t,li){
+// processed take (+ its harmony voice) for this layer, if it's ready (starts the work if it isn't)
+function voxProcessedPair(t,li){
   const p=voxVoiceParams(li);if(!p)return null;
   const k=_voxKey(t,p),e=voxProc.get(k);
-  if(e&&e.buf)return e.buf;
+  if(e&&e.buf)return{buf:e.buf,hbuf:e.hbuf||null};
   if(!e)voxEnqueue(t,p,k);
   return null;
 }
+function voxProcessedBuf(t,li){const r=voxProcessedPair(t,li);return r?r.buf:null;}
 function voxEnqueue(t,p,k){
   if(voxProc.has(k))return voxProc.get(k).promise;
   let done;const e={buf:null,promise:new Promise(r=>{done=r;})};e.done=done;voxProc.set(k,e);
@@ -176,7 +178,7 @@ async function voxPump(){
       const r=await voxDsp(raw.getChannelData(0).slice(0),raw.sampleRate,voxF0.get(job.t)||null,job.p);
       if(r.err||!r.y){console.warn('vocal fx failed',r.err);voxProc.delete(job.k);e.done(null);continue;}
       if(r.f0)voxF0.set(job.t,r.f0);
-      e.buf=voxMakeBuffer(r.y,raw.sampleRate);e.done(e.buf);
+      e.buf=voxMakeBuffer(r.y,raw.sampleRate);if(r.h)e.hbuf=voxMakeBuffer(r.h,raw.sampleRate);e.done(e.buf);
     }
   }finally{_voxBusy=false;voxPaintProc();}
 }

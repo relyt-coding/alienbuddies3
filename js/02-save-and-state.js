@@ -51,6 +51,8 @@ function autoSave(){
     seqLayersSnap,
     pianoRoll:(typeof pianoRoll!=='undefined')?{layers:pianoRoll.layers.map(L=>({soundId:L.soundId,muted:L.muted,notes:L.notes.map(n=>{const o={s:n.s,l:n.l,m:n.m};if(n.v!=null)o.v=n.v;return o;})}))}:undefined,
     vocals:(typeof voxSave==='function')?voxSave():undefined,
+    chops:(typeof chopsSave==='function')?chopsSave():undefined,
+    automation:(typeof automationSave==='function')?automationSave():undefined,
     seqHasAutoMutedAmbience,
     musicOn,
     shownHints,
@@ -283,6 +285,7 @@ updateMatchingBtn();
   ensureAllTracks();
   if(typeof rollSanitize==='function'){pianoRoll=rollSanitize(data.pianoRoll);rollView=-1;}
   if(typeof voxLoad==='function')voxLoad(data.vocals);
+  if(typeof automationLoad==='function')automationLoad(data.automation);
   if(typeof applyMusicUnlocks==='function')applyMusicUnlocks();
 }
 setInterval(()=>{if(activeSlot>=0)autoSave();},10000);

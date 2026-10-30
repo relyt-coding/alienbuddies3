@@ -385,6 +385,8 @@ function startBindingListen(padIdx){
   const onKey=(e)=>{
     e.preventDefault();e.stopPropagation();
     if(e.code==='Escape'){cancelBinding();return;}
+    // arrow keys are saved for zooming / scrolling timelines (VOX, automation), so they can't fire a pad
+    if(/^Arrow/.test(e.code)){disp.textContent='ARROW KEYS ARE SAVED FOR ZOOM · PICK ANOTHER KEY';return;}
     const label=e.key.length===1?e.key.toUpperCase():e.code.replace('Key','').replace('Digit','');
     padBindings[padIdx]={key:e.code,label};
     savePadBindings();

@@ -16,14 +16,20 @@ function voxLayerCount(){if(typeof musicHas!=='function'||!musicHas('mt_vocals')
 function voxLayer(i){while(vocals.layers.length<=i)vocals.layers.push({name:'',vol:1,muted:false,solo:false,clips:[]});return vocals.layers[i];}
 function voxLayerName(i){const L=vocals.layers[i];return (L&&L.name)||('VOX '+(i+1));}
 function voxSanitize(v){
-  const out={layers:[],start:0,arm:0};
+  const out={layers:[],start:0,arm:0,loop:0};
   if(v&&typeof v==='object'){
     out.start=Math.max(0,+v.start||0);out.arm=Math.max(0,Math.min(VOX_MAX_LAYERS-1,v.arm|0));
+    out.loop=[0,1,2,4,8].includes(+v.loop)?+v.loop:0;
     (Array.isArray(v.layers)?v.layers:[]).slice(0,VOX_MAX_LAYERS).forEach(L=>{
       L=L||{};
       out.layers.push({name:String(L.name||'').slice(0,16),vol:isFinite(L.vol)?Math.max(0,Math.min(1.5,+L.vol)):1,muted:!!L.muted,solo:!!L.solo,
         clips:(Array.isArray(L.clips)?L.clips:[]).filter(c=>c&&typeof c.t==='string'&&isFinite(c.s)&&isFinite(c.o)&&c.d>0)
-          .map(c=>{const o={t:c.t,s:Math.max(0,+c.s),o:Math.max(0,+c.o),d:+c.d};if(isFinite(c.g)&&c.g!==1)o.g=Math.max(0,Math.min(2,+c.g));return o;})});
+          .map(c=>{const o={t:c.t,s:Math.max(0,+c.s),o:Math.max(0,+c.o),d:+c.d};if(isFinite(c.g)&&c.g!==1)o.g=Math.max(0,Math.min(2,+c.g));
+            if(c.fi>0)o.fi=Math.min(4,+c.fi);if(c.fo>0)o.fo=Math.min(4,+c.fo);
+            // take folder: several takes of the same part, one plays (ai)
+            const al=Array.isArray(c.alts)?c.alts.filter(a=>a&&typeof a.t==='string'&&a.d>0).slice(0,32).map(a=>({t:a.t,o:Math.max(0,+a.o),d:+a.d})):[];
+            if(al.length>1){o.ai=Math.max(0,Math.min(al.length-1,c.ai|0));al[o.ai]={t:o.t,o:o.o,d:o.d};o.alts=al;}
+            return o;})});
     });
   }
   return out;
@@ -57,6 +63,9 @@ function voxSongLen(){
 // PAT mode: the beat keeps looping while the vocal timeline runs to the end of the last take (whole loops, so the beat stays in step)
 function voxLoopLen(){
   let e=voxLastEnd();if(voxOpen)e=Math.max(e,vocals.start+1);
+  const lp=voxLoopRegion();if(lp)e=Math.max(e,lp.b+1); // past the loop end, so the loop (not the pattern) decides where it jumps back
+  if(typeof autoLastPos==='function')e=Math.max(e,autoLastPos()+1); // and through the last automation point
+  if(typeof autoOpen!=='undefined'&&autoOpen)e=Math.max(e,vocals.start+1);
   return Math.max(STEPS,Math.ceil((e-1e-6)/STEPS)*STEPS);
 }
 let voxPos=0,voxLastPos=-1,voxJoin=true,voxPlayFrom=null,_voxAnchor=null;
@@ -98,48 +107,72 @@ function voxRoute(li){
   const bus=fxBusFor(FX_VOX_BASE+li),t=bus?bus.input:drumMasterReal;
   const dest=typeof voxVoiceChain==='function'?voxVoiceChain(li,t):t; // vocoder sits in front of the effects channel
   if(N.tgt[li]!==dest){try{g.disconnect();}catch(e){}g.connect(dest);N.tgt[li]=dest;if(voxMic&&li===vocals.arm&&!_exporting)voxApplyMonitor();}
+  if(!_exporting){const hm=voxHarmMix(li);voxActive.forEach(a=>{if(a.li===li&&a.hg&&Math.abs(a.hg.gain.value-hm)>.001)a.hg.gain.setTargetAtTime(hm,N.c.currentTime,.02);});}
   const L=vocals.layers[li],v=voxAudible(L,li,voxSoloOn())?(L.vol==null?1:L.vol):0;
   if(g._v!==v){if(_exporting)g.gain.value=v;else g.gain.setTargetAtTime(v,N.c.currentTime,.015);g._v=v;}
 }
 function voxRouteAll(){if(!audioCtx)return;const N=voxNodes();N.ins.forEach((g,li)=>{if(g)voxRoute(li);});}
 // play one clip, starting `skip` seconds into it, at audio time `at`. maxDur cuts it short (song end in an export)
+const VOX_MICROFADE=.002; // every cut gets a 2 ms fade in and out, so cutting mid-word never clicks
+function voxFadeLens(c){
+  let fi=Math.max(VOX_MICROFADE,c.fi||0),fo=Math.max(VOX_MICROFADE,c.fo||0);
+  if(fi+fo>c.d){const k=c.d/(fi+fo);fi*=k;fo*=k;}
+  return{fi,fo};
+}
 function voxPlayClip(c,li,at,skip,maxDur){
   // autotune / voice changer / harmonizer: the processed take (same length), once it's ready
-  const buf=(typeof voxProcessedBuf==='function'&&voxProcessedBuf(c.t,li))||voxBuf.get(c.t);if(!buf)return null;
+  const pr=typeof voxProcessedPair==='function'?voxProcessedPair(c.t,li):null;
+  const buf=(pr&&pr.buf)||voxBuf.get(c.t);if(!buf)return null;
   const ctx=getCtx();skip=Math.max(0,skip||0);
   const off=c.o+skip;let dur=Math.min(c.d-skip,buf.duration-off);if(maxDur!=null)dur=Math.min(dur,maxDur);
-  if(!(dur>.02))return null;
-  const src=ctx.createBufferSource();src.buffer=buf;
-  const g=ctx.createGain(),gv=c.g==null?1:c.g,f=Math.min(.008,dur/4);
-  // tiny fades at both edges, so cutting a take mid-word never clicks
-  g.gain.setValueAtTime(0,at);g.gain.linearRampToValueAtTime(gv,at+f);g.gain.setValueAtTime(gv,at+dur-f);g.gain.linearRampToValueAtTime(0,at+dur);
-  src.connect(g);g.connect(voxIn(li));
-  src.start(at,off,dur+.005);
+  if(!(dur>.004))return null;
+  const g=ctx.createGain(),gv=c.g==null?1:c.g;
+  // fade envelope over the clip (x = seconds into the clip); joining late starts part-way through it
+  const{fi,fo}=voxFadeLens(c),x0=skip,x1=skip+dur,cut=x1<c.d-1e-6;
+  const fadeStart=cut?x1-Math.min(VOX_MICROFADE,dur/2):c.d-fo,T=x=>at+(x-x0);
+  const lvl=x=>Math.max(0,Math.min(1,x/fi,(c.d-x)/fo));
+  g.gain.setValueAtTime(x0<=0?0:gv*lvl(x0),at);
+  if(x0<fi&&fadeStart>x0)g.gain.linearRampToValueAtTime(gv*Math.min(1,fadeStart/fi),T(Math.min(fi,fadeStart)));
+  if(fadeStart>Math.max(x0,fi))g.gain.setValueAtTime(gv,T(fadeStart));
+  g.gain.linearRampToValueAtTime(0,T(x1));
+  g.connect(voxIn(li));
+  const src=ctx.createBufferSource();src.buffer=buf;src.connect(g);src.start(at,off,dur+.002);
+  // harmonizer voice: its own sound, so HARMONY VOLUME works live (no re-processing)
+  let hs=null,hg=null;
+  if(pr&&pr.hbuf){hs=ctx.createBufferSource();hs.buffer=pr.hbuf;hg=ctx.createGain();hg.gain.value=voxHarmMix(li);hs.connect(hg);hg.connect(g);hs.start(at,off,dur+.002);}
   if(!_exporting){
-    const a={src,g,li,c,end:at+dur};voxActive.push(a);
+    const a={src,hs,hg,g,li,c,end:at+dur};voxActive.push(a);
     src.onended=()=>{const i=voxActive.indexOf(a);if(i>=0)voxActive.splice(i,1);try{g.disconnect();}catch(e){}};
   }
   return src;
 }
+function voxHarmMix(li){const ch=FX_VOX_BASE+li,f=fxEffective(getTrackFx(ch,false),ch);return f&&f.harm&&f.harm!=='none'?Math.max(0,Math.min(1,+f.harmMix)):0;}
 function voxStopAll(at){
   if(!audioCtx)return;const now=audioCtx.currentTime,t=Math.max(now,at||now);
-  voxActive.slice().forEach(a=>{try{a.g.gain.cancelScheduledValues(t);a.g.gain.setValueAtTime(a.g.gain.value,t);a.g.gain.linearRampToValueAtTime(0,t+.02);a.src.stop(t+.03);}catch(e){}});
+  voxActive.slice().forEach(a=>{a.stopping=true;try{a.g.gain.cancelScheduledValues(t);a.g.gain.setValueAtTime(a.g.gain.value,t);a.g.gain.linearRampToValueAtTime(0,t+.02);a.src.stop(t+.03);if(a.hs)a.hs.stop(t+.03);}catch(e){}});
   if(!at)voxActive.length=0;
 }
 // called by the sequencer clock for every step, in every mode, before it moves on
+// LOOP (Multiple Takes): while VOX is open, the bars from the green flag repeat
+function voxLoopRegion(){if(!voxOpen||!vocals.loop||!musicHas('mt_takes'))return null;const a=vocals.start;return{a,b:a+vocals.loop*16};}
 function voxStep(quiet,at){
-  const pos=voxCurPos(),n=voxLayerCount();
+  let pos=voxCurPos();const n=voxLayerCount();
+  const lp=voxLoopRegion();let looped=false;
+  if(lp&&pos>=lp.b){voxSeek(lp.a);pos=voxCurPos();looped=true;voxJoin=true;}
   const wrapped=voxLastPos>=0&&pos<voxLastPos;voxLastPos=pos;
+  if(typeof autoStep==='function')autoStep(pos,at,quiet); // AUTOMATION follows the same song position
   if(voxRec&&!voxRec.cal){
     if(voxRec.state==='armed'){voxRec.state='rec';voxRec.T=at;voxRec.pos0=pos;voxPaintRec();}
     else if(voxRec.state==='rec'&&!voxRec.endAt&&at-voxRec.T>VOX_MAX_TAKE){ // long takes use a lot of memory on phones
       voxRec.endAt=at;const ms=Math.max(0,(at-getCtx().currentTime)*1000);
       setTimeout(()=>{if(seqPlaying)stopSeq();showToast('🎤 Takes can be up to '+(VOX_MAX_TAKE/60)+' minutes: take saved. Record the next part from the flag.');},ms);
     }
-    else if(voxRec.state==='rec'&&wrapped&&!voxRec.endAt){ // ARR / SONG went back to the start: the take ends at the end of the song
+    else if(voxRec.state==='rec'&&wrapped&&!looped&&!voxRec.endAt){ // ARR / SONG went back to the start: the take ends at the end of the song
       voxRec.endAt=at;const ms=Math.max(0,(at-getCtx().currentTime)*1000);
       setTimeout(()=>{if(seqPlaying)stopSeq();showToast('🎤 Reached the end of the song: take saved');},ms);
     }
+    // each time the loop starts over, a new take begins
+    if(voxRec.state==='rec'&&voxRec.lp&&Math.abs(pos-voxRec.lp.a)<1e-6&&!voxRec.endAt){voxRec.passes.push(at);voxPaintFoot();}
   }
   if(n){
     if(wrapped)voxStopAll(at);
@@ -151,18 +184,20 @@ function voxStep(quiet,at){
         L.clips.forEach(c=>{
           if(c.s>=pos-1e-9&&c.s<pos+1-1e-9){voxPlayClip(c,li,at+(c.s-pos)*sd,0);return;}
           // joining in the middle of a take (played from the flag, or the tab was in the background)
-          if(voxJoin&&c.s<pos&&voxClipEnd(c)>pos+.05&&!voxActive.some(a=>a.c===c&&a.end>at))voxPlayClip(c,li,at,(pos-c.s)*sd);
+          if(voxJoin&&c.s<pos&&voxClipEnd(c)>pos+.05&&!voxActive.some(a=>a.c===c&&a.end>at&&!a.stopping))voxPlayClip(c,li,at,(pos-c.s)*sd);
         });
       }
       voxJoin=false;
     }else voxJoin=true;
   }
-  if(voxOpen&&!quiet){_voxAnchor={pos,at};if(voxSettings.click&&pos%4===0)voxClick(at,pos%16===0);} // CLICK: a beat to sing to (only you hear it)
+  if((voxOpen||(typeof autoOpen!=='undefined'&&autoOpen))&&!quiet)_voxAnchor={pos,at};
+  if(voxOpen&&!quiet){if(voxSettings.click&&pos%4===0)voxClick(at,pos%16===0);} // CLICK: a beat to sing to (only you hear it)
   if(seqMode==='pattern'){voxPos++;if(!voxRec&&voxPos>=voxLoopLen())voxPos=0;}
 }
 function voxOnStart(){
   voxStopAll();voxJoin=true;voxPos=0;voxLastPos=-1;_voxAnchor=null;
-  if(voxOpen&&musicHas('mt_vocals')){const from=voxPlayFrom!=null?voxPlayFrom:vocals.start;if(from>0)voxSeek(from);}
+  const fromFlag=(voxOpen&&musicHas('mt_vocals'))||(typeof autoOpen!=='undefined'&&autoOpen);
+  if(fromFlag){const from=voxPlayFrom!=null?voxPlayFrom:vocals.start;if(from>0)voxSeek(from);}
   voxPlayFrom=null;
   if(voxOpen)voxFollowT=0;
 }
@@ -170,6 +205,7 @@ function voxOnStop(){
   if(voxRec&&!voxRec.cal)voxStopRecording();
   voxStopAll();_voxAnchor=null;voxLastPos=-1;
   if(voxOpen)voxPaintPh(null);
+  if(typeof autoResetParams==='function')autoResetParams();
   if(typeof voxIdleVocoders==='function')setTimeout(voxIdleVocoders,1500);
 }
 function voxIsRecording(){return !!(voxRec&&!voxRec.cal);}
@@ -255,7 +291,8 @@ function voxGC(){
 // a long take is a lot of memory once decoded (about 11 MB a minute): drop takes nothing points at any more
 // (not even an undo step). They stay in storage until the next clean-up, so loading the save brings them back if needed.
 function voxFreeUnused(){
-  const used=new Set();vocals.layers.forEach(L=>L.clips.forEach(c=>used.add(c.t)));
+  const used=new Set();vocals.layers.forEach(L=>L.clips.forEach(c=>{used.add(c.t);(c.alts||[]).forEach(a=>used.add(a.t));}));
+  if(typeof chopTakeIds==='function')chopTakeIds().forEach(id=>used.add(id)); // vocal chops keep their own audio
   voxUndo.forEach(u=>{(u.match(/vx_[a-z0-9]+/g)||[]).forEach(id=>used.add(id));});
   if(voxRec&&voxRec.li!=null)return;
   [...voxBuf.keys()].forEach(id=>{if(!used.has(id)&&!voxActive.some(a=>a.c.t===id)){voxBuf.delete(id);voxPeaks.delete(id);}});
@@ -361,7 +398,7 @@ async function voxRecord(){
   const li=Math.min(vocals.arm,voxLayerCount()-1);
   try{await voxMicOpen();}catch(e){showToast(voxMicError(e));return;}
   if(seqPlaying)stopSeq();
-  const c=getCtx(),rec={li,state:'count',chunks:[],start:vocals.start,ts:Date.now()};
+  const c=getCtx(),rec={li,state:'count',chunks:[],start:vocals.start,ts:Date.now(),lp:voxLoopRegion(),passes:[]};
   voxRec=rec;voxMic.cap.onChunk=d=>{if(voxRec===rec)rec.chunks.push(d);};voxMic.cap.start();
   voxRouteAll();voxPaintRec();
   const go=()=>{
@@ -397,16 +434,23 @@ async function voxStopRecording(discard){
   if(rec.endAt)d=Math.min(d,rec.endAt-rec.T);
   if(o<0){s+= -o/sd;d+=o;o=0;}
   if(rec.start>s){const cut=(rec.start-s)*sd;o+=cut;d-=cut;s=rec.start;} // the lead-in bar stays in the take: drag the left edge to get it back
-  if(!(d>.25)){showToast('🎤 Take too short: keep REC going a little longer');if(voxOpen)voxRender();return;}
   const id=voxNewId();
+  let clip={t:id,s,o,d};
+  if(rec.lp){ // LOOP: every pass around the loop is a take of the same part
+    const lenS=(rec.lp.b-rec.lp.a)*sd,total=A.f.length/A.sr,alts=[];
+    (rec.passes||[]).forEach(pt=>{const po=(pt-A.t0)+lat;let pd=Math.min(lenS,total-po);if(rec.endAt)pd=Math.min(pd,rec.endAt-pt);if(po>=0&&pd>Math.min(1,lenS*.5))alts.push({t:id,o:po,d:pd});});
+    if(!alts.length){showToast('🎤 Keep going until the loop comes round at least once');if(voxOpen)voxRender();return;}
+    const last=alts[alts.length-1];clip={t:id,s:rec.lp.a,o:last.o,d:last.d};
+    if(alts.length>1){clip.alts=alts;clip.ai=alts.length-1;}
+  }else if(!(d>.25)){showToast('🎤 Take too short: keep REC going a little longer');if(voxOpen)voxRender();return;}
   voxAddTakeToMemory(id,A.f,A.sr);
   voxPushUndo();
-  const L=voxLayer(rec.li),clip={t:id,s,o,d};voxPlace(L,clip);voxSel={li:rec.li,clip};
+  const L=voxLayer(rec.li);clip=voxPlaceTake(L,clip);voxSel={li:rec.li,clip};
   if(voxOpen)voxRender();
   autoSave();
   voxSaveTake(id,A.f,A.sr).then(()=>{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(()=>{});})
     .catch(e=>{showToast('⚠ Couldn\'t store the take on this device ('+((e&&e.name)||'storage full')+'). It will play until you close the game.');});
-  showToast('🎤 Take saved on '+voxLayerName(rec.li));
+  showToast(clip.alts?'🎤 '+voxLayerName(rec.li)+': take '+(clip.ai+1)+' of '+clip.alts.length+' (pick with ◀ ▶)':'🎤 Take saved on '+voxLayerName(rec.li));
 }
 // AUTO SYNC: plays clicks through the speaker and listens for them, to measure how late recordings land on this device
 async function voxAutoSync(){
@@ -448,22 +492,52 @@ function voxDoUndo(){
   voxRender();autoSave();
 }
 // put a clip on a layer: whatever it lands on gets trimmed away underneath it (newest on top, like recording over tape)
+// same clip, new window (s / o / d); the other takes in its folder move with it
+function voxReclip(c,s,o,d){
+  const n=Object.assign({},c,{s,o,d});
+  if(c.alts){const dO=o-c.o;n.alts=c.alts.map((a,i)=>i===c.ai?{t:c.t,o,d}:{t:a.t,o:Math.max(0,a.o+dO),d:Math.max(.03,Math.min(a.d-dO,d))});}
+  return n;
+}
+function voxCopyClip(c){const n=Object.assign({},c);if(c.alts)n.alts=c.alts.map(a=>Object.assign({},a));return n;}
 function voxPlace(L,nc){
   const sd=voxSd(),a=nc.s,b=voxClipEnd(nc),out=[];
   L.clips.forEach(c=>{
     if(c===nc)return;
     const cs=c.s,ce=voxClipEnd(c);
     if(ce<=a+1e-6||cs>=b-1e-6){out.push(c);return;}
-    if(cs<a-1e-6){const d=(a-cs)*sd;if(d>.03)out.push(Object.assign({},c,{d}));}
-    if(ce>b+1e-6){const cut=(b-cs)*sd,d=c.d-cut;if(d>.03)out.push(Object.assign({},c,{s:b,o:c.o+cut,d}));}
+    if(cs<a-1e-6){const d=(a-cs)*sd;if(d>.03)out.push(voxReclip(c,c.s,c.o,d));}
+    if(ce>b+1e-6){const cut=(b-cs)*sd,d=c.d-cut;if(d>.03)out.push(voxReclip(c,b,c.o+cut,d));}
   });
   out.push(nc);out.sort((x,y)=>x.s-y.s);L.clips=out;
+}
+// MULTIPLE TAKES: recording again from where a part starts adds the new take to that part's folder
+// instead of replacing it (the newest plays; ◀ ▶ picks another)
+function voxPlaceTake(L,clip){
+  if(musicHas('mt_takes')){
+    const f=L.clips.find(c=>Math.abs(c.s-clip.s)<.01);
+    if(f){
+      const alts=(f.alts||[{t:f.t,o:f.o,d:f.d}]).concat(clip.alts||[{t:clip.t,o:clip.o,d:clip.d}]).slice(-32);
+      const n=Object.assign(voxCopyClip(f),{t:clip.t,o:clip.o,d:clip.d,alts,ai:alts.length-1});
+      L.clips=L.clips.filter(c=>c!==f);voxPlace(L,n);return n;
+    }
+  }
+  voxPlace(L,clip);return clip;
+}
+// switch which take of a folder plays (it stops short of the next part on the layer)
+function voxUseAlt(li,c,i){
+  if(!c.alts||!c.alts[i])return;
+  c.alts[c.ai]={t:c.t,o:c.o,d:c.d};
+  const L=vocals.layers[li],nx=L.clips.filter(x=>x!==c&&x.s>c.s+1e-6).sort((a,b)=>a.s-b.s)[0];
+  const a=c.alts[i];let d=a.d;if(nx)d=Math.min(d,(nx.s-c.s)*voxSd());
+  c.t=a.t;c.o=a.o;c.d=Math.max(.03,d);c.ai=i;
+  voxActive.filter(x=>x.c===c).forEach(x=>{try{x.src.stop();if(x.hs)x.hs.stop();}catch(e){}});
+  voxLoadTake(c.t).then(()=>{if(voxOpen)voxRender();});
 }
 function voxSplit(li,c,p){
   const L=vocals.layers[li];if(!L)return false;
   const e=voxClipEnd(c);if(!(p>c.s+.05&&p<e-.05))return false;
   const sd=voxSd(),cut=(p-c.s)*sd;
-  const left=Object.assign({},c,{d:cut}),right=Object.assign({},c,{s:p,o:c.o+cut,d:c.d-cut});
+  const left=voxReclip(c,c.s,c.o,cut),right=voxReclip(c,p,c.o+cut,c.d-cut);
   const i=L.clips.indexOf(c);if(i<0)return false;
   L.clips.splice(i,1,left,right);voxSel={li,clip:right};return true;
 }
@@ -486,7 +560,7 @@ const voxBar=_vx('div','vox-bar'),voxSelBar=_vx('div','vox-selbar'),voxScroll=_v
 voxView.appendChild(voxBar);voxView.appendChild(voxSelBar);voxView.appendChild(voxScroll);voxView.appendChild(voxFoot);
 const voxHeads=_vx('div','vox-heads'),voxTl=_vx('div','vox-tl');voxScroll.appendChild(voxHeads);voxScroll.appendChild(voxTl);
 const voxInner=_vx('div','vox-inner');voxTl.appendChild(voxInner);
-const voxRuler=_vx('div','vox-ruler'),voxLanes=_vx('div','vox-lanes'),voxPh=_vx('div','vox-ph'),voxFlag=_vx('div','vox-flag'),voxEnd=_vx('div','vox-end'),voxPast=_vx('div','vox-past');
+const voxRuler=_vx('div','vox-ruler'),voxLanes=_vx('div','vox-lanes'),voxPh=_vx('div','vox-ph'),voxFlag=_vx('div','vox-flag'),voxEnd=_vx('div','vox-end'),voxPast=_vx('div','vox-past'),voxLoopEl=_vx('div','vox-loop');
 [voxRuler,voxLanes,voxPast,voxEnd,voxFlag,voxPh].forEach(e=>voxInner.appendChild(e));
 const voxMeter=_vx('div','vox-meter'),voxMeterFill=_vx('div','vox-meter-fill'),voxFootTxt=_vx('span','vox-foot-txt');
 voxMeter.appendChild(voxMeterFill);voxFoot.appendChild(voxMeter);voxFoot.appendChild(voxFootTxt);
@@ -522,6 +596,12 @@ function voxBuildBar(){
   voxRecBtn=voxChip('● REC','vox-rec','Record on the armed layer (from the green flag)',()=>{if(voxRec&&!voxRec.cal){if(seqPlaying)stopSeq();else voxStopRecording();}else voxRecord();});
   voxBar.appendChild(voxRecBtn);
   voxBar.appendChild(voxChip('↶','','Undo',voxDoUndo));
+  if(musicHas('mt_takes')){
+    const lb=voxChip(vocals.loop?'🔁 '+vocals.loop+' BAR'+(vocals.loop>1?'S':''):'🔁 LOOP',vocals.loop?'on':'','Loop the bars from the green flag. Recording in a loop makes a new take every time round.',()=>{
+      const o=[0,1,2,4,8];vocals.loop=o[(o.indexOf(vocals.loop)+1)%o.length];voxBuildBar();voxPaintMarkers();autoSave();
+      if(seqPlaying&&!voxRec){stopSeq();startSeq();}});
+    voxBar.appendChild(lb);
+  }
   const sn=_vx('div','roll-snaps');sn.appendChild(_vx('span','roll-snap-lbl','SNAP'));
   VOX_SNAPS.forEach(([v,t])=>sn.appendChild(voxChip(t,voxSnap===v?'on':'','Clips snap to '+(v?t.toLowerCase():'nothing'),()=>{voxSnap=v;try{localStorage.setItem('ab2_voxSnap',String(v));}catch(e){}voxBuildBar();})));
   voxBar.appendChild(sn);
@@ -550,7 +630,9 @@ function voxPaintFoot(){
   const n=voxLayerCount();
   const pend=typeof voxProcPending==='function'?voxProcPending():0;
   if(pend&&!(voxRec&&!voxRec.cal)){voxFootTxt.textContent='🎯 Processing vocal effects ('+pend+' take'+(pend>1?'s':'')+' left). The plain take plays until it\'s ready.';return;}
-  if(voxRec&&!voxRec.cal){voxFootTxt.textContent=voxRec.state==='count'?'Count-in… sing on the 1 after four clicks':'Recording on '+voxLayerName(voxRec.li)+' · tap ■ STOP (or pause) when done';return;}
+  if(voxRec&&!voxRec.cal){voxFootTxt.textContent=voxRec.state==='count'?'Count-in… sing on the 1 after four clicks':
+    voxRec.lp?'Loop recording on '+voxLayerName(voxRec.li)+': take '+Math.max(1,voxRec.passes.length)+' · every time round is a new take · ■ STOP when done':
+    'Recording on '+voxLayerName(voxRec.li)+' · tap ■ STOP (or pause) when done';return;}
   if(!voxHasClips())voxFootTxt.textContent='Tap ● on a layer to arm it, drag the green flag to where you want to start, then hit REC. Headphones help!';
   else voxFootTxt.textContent=(IS_DESKTOP?'Click':'Tap')+' a take to select it, then drag to move, pull its edges to trim. ▶ plays from the green flag.'+(n<VOX_MAX_LAYERS?'':'');
 }
@@ -633,11 +715,22 @@ function voxDrawClip(el,c){
     let m=0;for(let k=a;k<b&&k<P.p.length;k++)if(P.p[k]>m)m=P.p[k];
     const y=Math.min(1,Math.sqrt(m)*g)*mid*.9;x.fillRect(i,mid-y,1,Math.max(1,y*2));
   }
+  // fades: shade the faded-out corners
+  if((c.fi||0)>VOX_MICROFADE||(c.fo||0)>VOX_MICROFADE){
+    const{fi,fo}=voxFadeLens(c);x.globalAlpha=.55;x.fillStyle='#000';
+    if(c.fi>VOX_MICROFADE){const w=fi/c.d*W;x.beginPath();x.moveTo(0,0);x.lineTo(w,0);x.lineTo(0,H);x.fill();}
+    if(c.fo>VOX_MICROFADE){const w=fo/c.d*W;x.beginPath();x.moveTo(W,0);x.lineTo(W-w,0);x.lineTo(W,H);x.fill();}
+    x.globalAlpha=1;
+  }
+  if(c.alts&&c.alts.length>1){x.fillStyle='#fff';x.globalAlpha=.85;x.font=Math.round(9*dpr)+'px monospace';x.fillText('TAKE '+(c.ai+1)+'/'+c.alts.length,W-Math.round(64*dpr),Math.round(11*dpr));x.globalAlpha=1;}
 }
 function voxFmtTime(s){s=Math.max(0,s);const m=Math.floor(s/60),r=s-m*60;return m?m+':'+String(Math.floor(r)).padStart(2,'0'):r.toFixed(1)+'s';}
 function voxPaintMarkers(){
   const pps=voxZoom();
   voxFlag.style.left=(vocals.start*pps)+'px';
+  const lp=voxLoopRegion();
+  if(!voxLoopEl.parentNode)voxInner.insertBefore(voxLoopEl,voxFlag);
+  voxLoopEl.style.display=lp?'':'none';if(lp){voxLoopEl.style.left=(lp.a*pps)+'px';voxLoopEl.style.width=((lp.b-lp.a)*pps)+'px';}
   const end=seqMode==='pattern'?(voxHasClips()?voxLoopLen():0):voxSongLen();
   voxEnd.style.display=end>0?'':'none';voxEnd.style.left=(end*pps)+'px';
   voxEnd.dataset.lbl=seqMode==='pattern'?'LOOP':'END';
@@ -685,10 +778,18 @@ function voxBuildSelBar(){
   voxSelBar.classList.remove('empty');
   const c=s.clip;
   voxSelBar.appendChild(_vx('span','vox-sel-lbl',voxLayerName(s.li)+' · '+voxFmtTime(c.d)));
+  if(c.alts&&c.alts.length>1){ // take folder
+    const n=c.alts.length,go=i=>{voxUseAlt(s.li,c,(i+n)%n);voxRender();autoSave();};
+    voxSelBar.appendChild(voxChip('◀','','Previous take',()=>go(c.ai-1)));
+    voxSelBar.appendChild(_vx('span','vox-sel-lbl','TAKE '+(c.ai+1)+'/'+n));
+    voxSelBar.appendChild(voxChip('▶','','Next take',()=>go(c.ai+1)));
+    voxSelBar.appendChild(voxChip('KEEP','','Keep this take and throw the others away',()=>{voxPushUndo();delete c.alts;delete c.ai;voxRender();autoSave();showToast('Kept take (↶ to undo)');}));
+  }
+  if(typeof openChopEditor==='function'&&musicHas('mt_chops'))voxSelBar.appendChild(voxChip('✂ CHOP','on','Slice this take into chops for the pads and sequencer',()=>openChopEditor(s.li,c)));
   voxSelBar.appendChild(voxChip('✂ SPLIT','','Split this take at the green flag',()=>{
     voxPushUndo();if(voxSplit(s.li,c,vocals.start)){voxRender();autoSave();}else{voxUndo.pop();showToast('Put the green flag inside the take to split it there');}}));
   voxSelBar.appendChild(voxChip('⧉ COPY','','Copy this take right after itself',()=>{
-    voxPushUndo();const L=vocals.layers[s.li],e=voxClipEnd(c),cp=Object.assign({},c,{s:voxSnap?Math.ceil(e/voxSnap-1e-6)*voxSnap:e});voxPlace(L,cp);voxSel={li:s.li,clip:cp};voxRender();autoSave();}));
+    voxPushUndo();const L=vocals.layers[s.li],e=voxClipEnd(c),cp=Object.assign(voxCopyClip(c),{s:voxSnap?Math.ceil(e/voxSnap-1e-6)*voxSnap:e});voxPlace(L,cp);voxSel={li:s.li,clip:cp};voxRender();autoSave();}));
   voxSelBar.appendChild(voxChip('🗑 DELETE','muted','Delete this take',()=>voxDeleteSel()));
   const vw=_vx('label','vox-gain');vw.appendChild(_vx('span',null,'VOL'));
   const r=document.createElement('input');r.type='range';r.min=0;r.max=200;r.value=Math.round((c.g==null?1:c.g)*100);
@@ -697,6 +798,15 @@ function voxBuildSelBar(){
     const el=[...voxLanes.querySelectorAll('.vox-clip')].find(x=>x._clip===c);if(el){voxDrawClip(el,c);const lb=el.querySelector('.vox-clip-lbl');if(lb)lb.textContent=voxFmtTime(c.d)+(c.g!=null?' · '+Math.round(c.g*100)+'%':'');}});
   r.addEventListener('change',()=>autoSave());
   vw.appendChild(r);voxSelBar.appendChild(vw);
+  if(musicHas('mt_fades')){ // MICROFADE EDITS: fade lengths per take
+    const fs=(lbl,key,tip)=>{const w=_vx('label','vox-gain');w.title=tip;w.appendChild(_vx('span',null,lbl));
+      const r=document.createElement('input');r.type='range';r.min=0;r.max=100;r.value=Math.round(Math.sqrt(Math.min(2,c[key]||0)/2)*100);
+      const v=_vx('span','vox-fade-v',Math.round((c[key]||VOX_MICROFADE)*1000)+'ms');let pushed=false;
+      r.addEventListener('input',()=>{if(!pushed){voxPushUndo();pushed=true;}const sec=Math.pow(+r.value/100,2)*2;if(sec<=VOX_MICROFADE)delete c[key];else c[key]=+sec.toFixed(3);
+        v.textContent=Math.round((c[key]||VOX_MICROFADE)*1000)+'ms';const el=[...voxLanes.querySelectorAll('.vox-clip')].find(x=>x._clip===c);if(el)voxDrawClip(el,c);});
+      r.addEventListener('change',()=>autoSave());w.appendChild(r);w.appendChild(v);voxSelBar.appendChild(w);};
+    fs('FADE IN','fi','How long the take fades in (2 ms is the click-free minimum)');fs('FADE OUT','fo','How long the take fades out');
+  }
   voxSelBar.appendChild(voxChip('✕','','Deselect',()=>{voxSel=null;voxRender();}));
 }
 function voxDeleteSel(){
@@ -764,7 +874,7 @@ function voxPointerEnd(e){
   const c=d.c;
   if(e.type==='pointercancel'||!d.moved){Object.assign(c,d.orig);voxPlaceEl(d.el,c);if(d.lane!==d.li)voxRender();return;}
   // commit: back up the old state first, then let the clip land (and trim whatever it covers)
-  const now={s:c.s,o:c.o,d:c.d};Object.assign(c,d.orig);voxPushUndo();Object.assign(c,now);
+  const now={s:c.s,o:c.o,d:c.d};Object.assign(c,d.orig);voxPushUndo();Object.assign(c,voxReclip(c,now.s,now.o,now.d));
   const from=vocals.layers[d.li],to=voxLayer(d.lane);
   if(from!==to){from.clips=from.clips.filter(x=>x!==c);}
   voxPlace(to,c);voxSel={li:d.lane,clip:c};
@@ -878,3 +988,19 @@ function voxHits(totalSteps){
     L.clips.forEach(c=>{if(c.s<totalSteps&&voxBuf.has(c.t))out.push({vox:true,time:c.s*sd,clip:c,li,maxDur:(totalSteps-c.s)*sd});});});
   return out;
 }
+
+// ── arrow keys on timelines: ↑ / ↓ zoom, ← / → scroll a bar (shift: 4 bars). Arrows never reach the drum pads here. ──
+function tlArrowTarget(){
+  if(voxOpen)return{zoom:k=>voxSetZoom(voxZoom()*k),scroll:px=>{voxTl.scrollLeft+=px;voxFollowT=performance.now();},bar:()=>16*voxZoom()};
+  if(typeof autoArrowTarget==='function')return autoArrowTarget();
+  return null;
+}
+window.addEventListener('keydown',e=>{
+  if(!/^Arrow/.test(e.code||''))return;
+  const t=e.target;if(t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.tagName==='SELECT'||t.isContentEditable))return;
+  const tl=tlArrowTarget();if(!tl)return;
+  e.preventDefault();e.stopPropagation();
+  if(e.code==='ArrowUp')tl.zoom(1.25);
+  else if(e.code==='ArrowDown')tl.zoom(1/1.25);
+  else tl.scroll((e.code==='ArrowRight'?1:-1)*tl.bar()*(e.shiftKey?4:1));
+},true);

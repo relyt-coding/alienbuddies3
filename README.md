@@ -5,7 +5,7 @@ Plain HTML/CSS/JS, no build step. Open `index.html` (0.2) in a browser or deploy
 - `index.html` – page markup, links the CSS and loads the scripts in order
 - `css/style.css` – all styles
 - `js/` – game code, loaded in numeric order with plain `<script>` tags (not modules):
-  `00-bootstrap` (must stay first) · `01-constants` · `02-save-and-state` · `03-audio` · `04-toast-soundboard` · `05-pads` · `06-sequencer` · `07-tips` · `08-matching-game` · `09-sound-picker` · `10-home-screen` · `11-bouncers-party` · `12-tiers-and-bunker` · `13-score-stats` · `14-tap-and-sequencer-clock` · `15-render` · `16-purchases` · `17-nav-fullscreen` · `18-desktop-layout` · `19-wav-export` · `20-skill-tree` · `21-legacy-safari` (fallbacks for old iPhones) · `22-swipe-nav` · `23-more-menu` (KEY + EFFECTS windows) · `24-gamepad` · `25-polish` · `26-music-unlocks` (shows sequencer features as they're bought in the Musical Toolkit branch) · `27-piano-roll` · `28-test-mode` (only active at /test) · `29-vocals` (VOX: microphone recording on up to 10 layers) · `30-vocal-fx` (Autotune, Voice Changer, Harmonizer, Vocoder)
+  `00-bootstrap` (must stay first) · `01-constants` · `02-save-and-state` · `03-audio` · `04-toast-soundboard` · `05-pads` · `06-sequencer` · `07-tips` · `08-matching-game` · `09-sound-picker` · `10-home-screen` · `11-bouncers-party` · `12-tiers-and-bunker` · `13-score-stats` · `14-tap-and-sequencer-clock` · `15-render` · `16-purchases` · `17-nav-fullscreen` · `18-desktop-layout` · `19-wav-export` · `20-skill-tree` · `21-legacy-safari` (fallbacks for old iPhones) · `22-swipe-nav` · `23-more-menu` (KEY + EFFECTS windows) · `24-gamepad` · `25-polish` · `26-music-unlocks` (shows sequencer features as they're bought in the Musical Toolkit branch) · `27-piano-roll` · `28-test-mode` (only active at /test) · `29-vocals` (VOX: microphone recording on up to 10 layers) · `30-vocal-fx` (Autotune, Voice Changer, Harmonizer, Vocoder) · `31-midi` (MIDI keyboard for the piano roll) · `32-chops` (Vocal Chops) · `33-automation` (AUTO lanes)
 - `v0.1/index.html` – frozen Version 0.1 (single file, untouched)
 
 Rule: top-level code in a file can only use functions/variables from files that load **before** it
@@ -33,3 +33,21 @@ Unlocked by the **Vocals** hub in the Musical Toolkit (after Arrangement): 2 lay
 - Vocal effects (`30-vocal-fx`, in each vocal layer's EFFECTS → VOICE): Autotune, Voice Changer (pitch / formant / robot) and Harmonizer re-work the take in a
   Web Worker (YIN pitch tracking + PSOLA), cached per take + settings; until ready the raw take plays, and WAV export waits for it. The Vocoder is live
   (16 bands); its synth plays a piano roll layer's notes (the layer can stay muted) or a drone of the song key's chord.
+- Every vocal clip gets a 2 ms fade in / out (`VOX_MICROFADE`); **Microfade Edits** adds per-clip `fi` / `fo`. **Multiple Takes**: take folders (`alts` + `ai` on a clip;
+  recording again from the same start adds a take) and LOOP (`vocals.loop` bars from the flag; each pass of a loop recording is a take of one stored recording).
+- The harmonizer voice is processed separately (`hbuf`) and mixed live, so HARMONY VOLUME doesn't re-process.
+- Arrow keys: ↑ / ↓ zoom and ← / → scroll the VOX / AUTO timelines; they can't be bound to drum pads.
+
+## MIDI keyboard (`31-midi`)
+Piano Roll upgrade (`mt_midi`). Web MIDI (Chrome / Edge, Chrome on Android; not iPhone Safari). Plays the open roll layer (velocity, sustain pedal);
+● REC writes notes into the roll while the sequencer plays (pattern mode), snapped to the roll's NOTE size, compensating for output latency.
+
+## Vocal Chops (`32-chops`)
+Hub `mt_chops` after Vocals, branches Auto Slice, Chop Tricks (reverse / pitch / choke), Chop Keys (chops with a clear pitch become piano roll instruments
+and follow the key), Bigger Chop Bank (8 → 24). A chop's audio is baked (with the layer's vocal effects) into its own take in IndexedDB; saves keep
+`chops:[{id:'chop_…',name,t,d,f0,rev,semi,choke,color}]`. Chops are registered in SOUND_MAP (tag `chops`) before the save's pads / tracks load.
+
+## Automation (`33-automation`)
+Late upgrade off Effects (`mt_automation`). `automation.lanes:[{ch,param,pts:[{p,v}]}]`, params vol / filt / rvb / echo / pan (master: vol), on the song
+timeline (same position as VOX, called from `voxStep`). Scheduled per step on the audio clock, rendered in WAV export, reset when playback stops.
+A channel with lanes always gets an effects bus (`fxEffective` sets `autoOn`). Note: the save function is `automationSave` (the game's own is `autoSave`).

@@ -353,18 +353,21 @@ function getTrackFx(i,create){
 }
 // the settings that are actually allowed to sound (locked effects count as off)
 function fxEffective(f,ch){
-  if(!f)return null;
+  // AUTOMATION: a channel with automation lanes always gets an effects bus (that's where the automated knobs live)
+  const auto=typeof autoChannelParams==='function'&&ch!==FX_MASTER?autoChannelParams(ch):null;
+  if(!f&&!auto)return null;
   const has=typeof musicHas==='function'?musicHas:()=>false;
-  const e=Object.assign({},FX_DEFAULTS,f);
+  const e=Object.assign({},FX_DEFAULTS,f||{});
   Object.keys(FX_UNLOCK).forEach(k=>{if(!has(FX_UNLOCK[k]))e[k]=FX_OFF[k];});
   if(ch===FX_MASTER)Object.keys(FX_OFF).forEach(k=>{if(!FX_MASTER_KEYS.includes(k))e[k]=FX_OFF[k];});
+  if(auto){e.autoOn=true;if(auto.filt&&!e.filtOn){e.filtOn=true;e.filtType='lowpass';}}
   return e;
 }
 // vocal-layer effects (they work on the take / in front of the channel, so they don't need the effects bus)
 function fxVoiceActive(f){return !!f&&!!((f.tuneOn&&f.tuneAmt>0)||f.pitch||f.formant||f.robot||(f.harm&&f.harm!=='none')||f.vocOn);}
 function eqActive(f){return f.eqOn&&(f.eqLow||f.eqMid||f.eqHigh);}
 function fxIsActive(f){
-  return !!f&&(f.rvbAmt>0||f.echoMix>0||f.filtOn||f.distAmt>0||f.crushAmt>0||f.chorusMix>0||f.flangerMix>0||f.phaserMix>0||f.tremDepth>0||eqActive(f)||f.compAmt>0||f.pan!==0||f.panAuto>0||f.scAmt>0);
+  return !!f&&(f.autoOn||f.rvbAmt>0||f.echoMix>0||f.filtOn||f.distAmt>0||f.crushAmt>0||f.chorusMix>0||f.flangerMix>0||f.phaserMix>0||f.tremDepth>0||eqActive(f)||f.compAmt>0||f.pan!==0||f.panAuto>0||f.scAmt>0);
 }
 const _fxBuses={},_fxRevs={};
 function getFxRev(type){

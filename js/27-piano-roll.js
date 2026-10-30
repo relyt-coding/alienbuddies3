@@ -23,7 +23,7 @@ function _env(g,t,dur,a,d,sus,r,peak){
   g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(peak,t+a);
   g.gain.setTargetAtTime(peak*sus,t+a,d/3);
   g.gain.cancelScheduledValues(end);g.gain.setTargetAtTime(0,end,r/3);
-  return end+r*2.5; // when it's silent
+  return end+r*1.7; // when it's silent (-40 dB: the release is a curve with time constant r/3)
 }
 const ROLL_SYNTHS={
   rs_bass:{name:'SYNTH BASS',color:'#ff5577',f:55,r:'bass',
@@ -39,7 +39,7 @@ const ROLL_SYNTHS={
       tine.type='sine';tine.frequency.value=f*4;tg.gain.setValueAtTime(.12*vel,t);tg.gain.setTargetAtTime(0,t,.04);tine.connect(tg);tg.connect(g);
       car.connect(g);g.connect(drumMasterGain);
       g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.42*gv,t+.003);g.gain.setTargetAtTime(.16*gv,t+.003,.5); // piano-like: fades slowly while held
-      const end=t+Math.max(dur,.02);g.gain.cancelScheduledValues(end);g.gain.setTargetAtTime(0,end,.25/3);const stop=end+.65;
+      const end=t+Math.max(dur,.02);g.gain.cancelScheduledValues(end);g.gain.setTargetAtTime(0,end,.25/3);const stop=end+.45;
       [car,mod,tine].forEach(o=>{o.start(t);o.stop(stop);});return .25;}},
   rs_pad:{name:'WARM PAD',color:'#88aaff',f:261.63,r:'note',
     note(t,gv,f,dur,vel){const c=getCtx(),g=c.createGain(),lp=c.createBiquadFilter();lp.type='lowpass';lp.Q.value=.7;

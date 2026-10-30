@@ -360,7 +360,7 @@ function fxEffective(f,ch){
   const e=Object.assign({},FX_DEFAULTS,f||{});
   Object.keys(FX_UNLOCK).forEach(k=>{if(!has(FX_UNLOCK[k]))e[k]=FX_OFF[k];});
   if(ch===FX_MASTER)Object.keys(FX_OFF).forEach(k=>{if(!FX_MASTER_KEYS.includes(k))e[k]=FX_OFF[k];});
-  if(auto){e.autoOn=true;if(auto.filt&&!e.filtOn){e.filtOn=true;e.filtType='lowpass';}}
+  if(auto){e.autoOn=true;e.autoRvb=!!auto.rvb;e.autoEcho=!!auto.echo;if(auto.filt&&!e.filtOn){e.filtOn=true;e.filtType='lowpass';}}
   return e;
 }
 // vocal-layer effects (they work on the take / in front of the channel, so they don't need the effects bus)
@@ -374,9 +374,13 @@ function getFxRev(type){
   if(_fxRevs[type])return _fxRevs[type];
   const c=getCtx(),def=FX_REVERBS[type]||FX_REVERBS.hall,L=Math.round(c.sampleRate*def.len),ir=c.createBuffer(2,L,c.sampleRate);
   for(let ch=0;ch<2;ch++){const d=ir.getChannelData(ch);for(let i=0;i<L;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/L,def.pow);}
-  const conv=c.createConvolver();conv.buffer=ir;const out=c.createGain();out.gain.value=1;conv.connect(out);out.connect(drumMasterReal);
-  return _fxRevs[type]={conv,out};
+  const conv=c.createConvolver();conv.buffer=ir;const out=c.createGain();out.gain.value=1;conv.connect(out);
+  return _fxRevs[type]={conv,out,users:new Set(),on:false,len:def.len,t:0};
 }
+// a reverb only runs (convolution is expensive) while at least one channel sends to it
+function _revUse(type,ch){const r=getFxRev(type);r.users.add(ch);clearTimeout(r.t);if(!r.on){r.out.connect(drumMasterReal);r.on=true;}return r;}
+function _revRelease(type,ch){const r=_fxRevs[type];if(!r)return;r.users.delete(ch);
+  if(!r.users.size&&r.on){clearTimeout(r.t);const go=()=>{if(!r.users.size&&r.on){try{r.out.disconnect();}catch(e){}r.on=false;}};if(_exporting)go();else r.t=setTimeout(go,(r.len+.5)*1000);}} // let the tail ring out first
 const _beat=()=>60/((typeof seqBpm==='number'&&seqBpm>0)?seqBpm:100);
 const _curveCache={};
 function _driveCurve(amt){const k=Math.round(amt*40);if(_curveCache['d'+k])return _curveCache['d'+k];const n=2048,v=new Float32Array(n),K=1+k*2;for(let i=0;i<n;i++){const x=i*2/(n-1)-1;v[i]=Math.tanh(x*K)/Math.tanh(K);}return _curveCache['d'+k]=v;}
@@ -417,7 +421,8 @@ const FX_STAGES=[
   {key:'comp',on:f=>f.compAmt>0,make(c){const k=c.createDynamicsCompressor(),g=c.createGain();k.connect(g);k.attack.value=.004;k.release.value=.18;return{in:k,out:g,k,g};},
     set(s,f,t){const a=f.compAmt;s.k.threshold.setValueAtTime(-6-a*34,t);s.k.ratio.setValueAtTime(1.5+a*10.5,t);s.k.knee.setValueAtTime(18-a*12,t);s.g.gain.setValueAtTime(Math.pow(10,(a*7)/20),t);}},
 ];
-function _fxSig(f){return FX_STAGES.filter(st=>st.on(f)).map(st=>st.key).join(',')+'|'+(f.echoPing?'p':'m');}
+const _echoOn=f=>f.echoMix>0||!!f.autoEcho;
+function _fxSig(f){return FX_STAGES.filter(st=>st.on(f)).map(st=>st.key).join(',')+'|'+(_echoOn(f)?(f.echoPing?'p':'m'):'-');}
 // builds (once) and re-wires (when switched effects change) a channel's chain, then sets every knob
 function getFxBus(i,f){
   const c=getCtx();let b=_fxBuses[i];
@@ -430,12 +435,12 @@ function getFxBus(i,f){
     // mono echo
     b.delay=c.createDelay(2.5);b.fb=c.createGain();b.tone=c.createBiquadFilter();b.eOut=c.createGain();
     b.tone.type='lowpass';b.tone.frequency.value=3200;
-    b.delay.connect(b.tone);b.tone.connect(b.fb);b.fb.connect(b.delay);b.tone.connect(b.eOut);b.eOut.connect(drumMasterReal);
+    b.delay.connect(b.tone);b.tone.connect(b.fb);b.fb.connect(b.delay);b.tone.connect(b.eOut); // (eOut joins the mix only while echo is on)
     // ping-pong echo: left and right delays feed each other, so repeats bounce between the speakers
     b.dL=c.createDelay(2.5);b.dR=c.createDelay(2.5);b.pfb=c.createGain();b.ptone=c.createBiquadFilter();b.ptone.type='lowpass';b.ptone.frequency.value=3200;
     b.merge=c.createChannelMerger(2);b.pOut=c.createGain();
     b.dL.connect(b.ptone);b.ptone.connect(b.dR);b.dR.connect(b.pfb);b.pfb.connect(b.dL);
-    b.ptone.connect(b.merge,0,0);b.dR.connect(b.merge,0,1);b.merge.connect(b.pOut);b.pOut.connect(drumMasterReal);
+    b.ptone.connect(b.merge,0,0);b.dR.connect(b.merge,0,1);b.merge.connect(b.pOut);
     // fixed tail: post → pan → duck → mix (+ sends)
     // a stereo panner sends a centred mono sound out at -3 dB per side, so add that back: centre stays as loud as with no effects
     if(b.pan){b.panMake=c.createGain();b.panMake.gain.value=Math.SQRT2;b.post.connect(b.pan);b.pan.connect(b.panMake);b.panMake.connect(b.duck);}else b.post.connect(b.duck);
@@ -456,8 +461,9 @@ function getFxBus(i,f){
       prev.connect(s.in);prev=s.out;
     });
     prev.connect(b.post);
-    try{b.eSend.disconnect();}catch(e){}
-    b.eSend.connect(f.echoPing?b.dL:b.delay);
+    // echo / ping-pong: only wired in while echo is on (unconnected, their delay loops cost nothing)
+    try{b.eSend.disconnect();}catch(e){}try{b.eOut.disconnect();}catch(e){}try{b.pOut.disconnect();}catch(e){}
+    if(_echoOn(f)){b.eSend.connect(f.echoPing?b.dL:b.delay);(f.echoPing?b.pOut:b.eOut).connect(drumMasterReal);}
   }
   // only touch the knobs when a setting (or the BPM) actually changed: this runs for every note
   const bpm=(typeof seqBpm==='number'&&seqBpm>0)?seqBpm:100;
@@ -467,7 +473,8 @@ function getFxBus(i,f){
   const now=c.currentTime;
   FX_STAGES.forEach(st=>{if(st.on(f))st.set(b.stages[st.key],f,now);});
   if(f.filtOn){b.rvF.type=f.filtType;b.rvF.frequency.setValueAtTime(Math.max(40,Math.min(18000,f.filtFreq)),now);b.rvF.Q.setValueAtTime(f.filtRes,now);}else b.rvF.type='allpass';
-  if(b.rType!==f.rvbType){try{b.rSend.disconnect();}catch(e){}b.rSend.connect(getFxRev(f.rvbType).conv);b.rType=f.rvbType;}
+  const rt=(f.rvbAmt>0||f.autoRvb)?f.rvbType:null;
+  if(b.rType!==rt){if(b.rType){try{b.rSend.disconnect();}catch(e){}_revRelease(b.rType,b.ch);}if(rt)b.rSend.connect(_revUse(rt,b.ch).conv);b.rType=rt;}
   b.rSend.gain.setValueAtTime(Math.min(1,f.rvbAmt)*.9,now);
   b.eSend.gain.setValueAtTime(Math.min(1,f.echoMix)*.9,now);
   const dt=Math.min(2.4,Math.max(.03,f.echoDiv*_beat()));

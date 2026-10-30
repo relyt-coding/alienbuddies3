@@ -65,6 +65,7 @@
   }
   function setKey(root,minor){
     seqKey=root;seqKeyMinor=!!minor;buildKey();paintMenu();saveSoon();
+    if(typeof voxQueueAll==='function')voxQueueAll(); // autotune / harmonizer follow the key: get the takes ready in the new one
     try{getCtx();playSound('basenote');setTimeout(()=>playSound('marimba'),180);}catch(e){}
   }
 
@@ -164,7 +165,7 @@
     const changed=(doPreview)=>{saveSoon();
       if(isMaster&&typeof applyMasterFx==='function')applyMasterFx();
       else if(_fxBuses[ch]){const e=fxEffective(f,ch);if(fxIsActive(e))getFxBus(ch,e);}
-      if(isVox(ch)&&typeof voxRouteAll==='function'){voxRouteAll();if(typeof voxOpen!=='undefined'&&voxOpen)voxRender();} // takes that are already playing switch over straight away
+      if(isVox(ch)&&typeof voxRouteAll==='function'){voxRouteAll();voxQueueAll();if(typeof voxOpen!=='undefined'&&voxOpen)voxPaintLaneFx();} // takes that are already playing switch over straight away
       paintAll();if(doPreview)preview();};
     const painters=[];
     const paintAll=()=>painters.forEach(p=>p());

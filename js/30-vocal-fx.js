@@ -269,8 +269,28 @@ function _vocTeardown(C){
   C.drones.forEach(d=>{try{d.o1.stop();d.o2.stop();d.g.disconnect();}catch(e){}});
   try{C.in.disconnect();C.out.disconnect();C.voc.inp.disconnect();C.voc.out.disconnect();C.voc.nodes.forEach(n=>n.disconnect());}catch(e){}
 }
+// nothing playing: drop the vocoders (their drones and 16 bands would keep the CPU busy). They're rebuilt on the next note.
+function voxIdleVocoders(){
+  if(typeof seqPlaying!=='undefined'&&seqPlaying)return;
+  const N=_voxN;if(!N||!N.chains)return;
+  N.chains.forEach((C,li)=>{
+    if(!C)return;
+    if(voxMic&&voxSettings.monitor&&voxOpen&&li===vocals.arm)return; // you're singing through it right now
+    if(voxActive.some(a=>a.li===li))return;
+    _vocTeardown(C);N.chains[li]=null;
+    const g=N.ins[li];if(g){try{g.disconnect();}catch(e){}N.tgt[li]=null;} // re-routed (and the vocoder rebuilt) on the next step that plays
+  });
+}
+// EFFECTS preview: a vocoder listening to a piano roll layer plays that layer's first notes with the preview
+function voxAuditionCarrier(li,t0,dur){
+  const ch=FX_VOX_BASE+li,f=fxEffective(getTrackFx(ch,false),ch);
+  if(!f||!f.vocOn||typeof f.vocCarrier!=='number'||typeof pianoRoll==='undefined')return;
+  const L=pianoRoll.layers[f.vocCarrier];if(!L)return;const sd=voxSd();
+  L.notes.forEach(n=>{const t=n.s*sd;if(t<dur)voxCarrierNote(li,n.m,t0+t,Math.min(n.l*sd,dur-t),n.v==null?1:n.v);});
+}
 // a carrier note (from the piano roll layer the vocoder listens to)
 function voxCarrierNote(li,midi,at,dur,vel){
+  if(!isFinite(midi)||!isFinite(at))return;
   voxIn(li);const N=voxNodes(),C=N.chains&&N.chains[li];if(!C||!C.voc)return;
   _vocSaw(N.c,midi,at,dur,.22*(vel==null?1:vel),C.voc.carrier,false);
 }

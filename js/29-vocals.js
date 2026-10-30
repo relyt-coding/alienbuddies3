@@ -97,7 +97,7 @@ function voxRoute(li){
   const N=voxNodes(),g=N.ins[li];if(!g)return;
   const bus=fxBusFor(FX_VOX_BASE+li),t=bus?bus.input:drumMasterReal;
   const dest=typeof voxVoiceChain==='function'?voxVoiceChain(li,t):t; // vocoder sits in front of the effects channel
-  if(N.tgt[li]!==dest){try{g.disconnect();}catch(e){}g.connect(dest);N.tgt[li]=dest;}
+  if(N.tgt[li]!==dest){try{g.disconnect();}catch(e){}g.connect(dest);N.tgt[li]=dest;if(voxMic&&li===vocals.arm&&!_exporting)voxApplyMonitor();}
   const L=vocals.layers[li],v=voxAudible(L,li,voxSoloOn())?(L.vol==null?1:L.vol):0;
   if(g._v!==v){if(_exporting)g.gain.value=v;else g.gain.setTargetAtTime(v,N.c.currentTime,.015);g._v=v;}
 }
@@ -132,6 +132,10 @@ function voxStep(quiet,at){
   const wrapped=voxLastPos>=0&&pos<voxLastPos;voxLastPos=pos;
   if(voxRec&&!voxRec.cal){
     if(voxRec.state==='armed'){voxRec.state='rec';voxRec.T=at;voxRec.pos0=pos;voxPaintRec();}
+    else if(voxRec.state==='rec'&&!voxRec.endAt&&at-voxRec.T>VOX_MAX_TAKE){ // long takes use a lot of memory on phones
+      voxRec.endAt=at;const ms=Math.max(0,(at-getCtx().currentTime)*1000);
+      setTimeout(()=>{if(seqPlaying)stopSeq();showToast('🎤 Takes can be up to '+(VOX_MAX_TAKE/60)+' minutes: take saved. Record the next part from the flag.');},ms);
+    }
     else if(voxRec.state==='rec'&&wrapped&&!voxRec.endAt){ // ARR / SONG went back to the start: the take ends at the end of the song
       voxRec.endAt=at;const ms=Math.max(0,(at-getCtx().currentTime)*1000);
       setTimeout(()=>{if(seqPlaying)stopSeq();showToast('🎤 Reached the end of the song: take saved');},ms);
@@ -153,7 +157,7 @@ function voxStep(quiet,at){
       voxJoin=false;
     }else voxJoin=true;
   }
-  if(voxOpen&&!quiet)_voxAnchor={pos,at};
+  if(voxOpen&&!quiet){_voxAnchor={pos,at};if(voxSettings.click&&pos%4===0)voxClick(at,pos%16===0);} // CLICK: a beat to sing to (only you hear it)
   if(seqMode==='pattern'){voxPos++;if(!voxRec&&voxPos>=voxLoopLen())voxPos=0;}
 }
 function voxOnStart(){
@@ -166,6 +170,7 @@ function voxOnStop(){
   if(voxRec&&!voxRec.cal)voxStopRecording();
   voxStopAll();_voxAnchor=null;voxLastPos=-1;
   if(voxOpen)voxPaintPh(null);
+  if(typeof voxIdleVocoders==='function')setTimeout(voxIdleVocoders,1500);
 }
 function voxIsRecording(){return !!(voxRec&&!voxRec.cal);}
 // EFFECTS window preview: a couple of seconds of the layer's first take
@@ -182,7 +187,8 @@ async function voxAudition(li){
   // play it even if the layer is muted / not soloed, then put the layer level back
   const g=voxIn(li);g.gain.cancelScheduledValues(ctx.currentTime);g.gain.setValueAtTime(L.vol==null?1:L.vol,ctx.currentTime);g._v=-1;
   voxPlayClip(c,li,ctx.currentTime+.03,0,2.5);const last=voxActive[voxActive.length-1];if(last)last.aud=true;
-  setTimeout(()=>{if(my===_voxAud)voxRoute(li);},2700);
+  if(typeof voxAuditionCarrier==='function')voxAuditionCarrier(li,ctx.currentTime+.03,2.5);
+  setTimeout(()=>{if(my===_voxAud){voxRoute(li);if(typeof voxIdleVocoders==='function')voxIdleVocoders();}},2700);
 }
 
 // ══════════════════════════════════════════════
@@ -262,7 +268,8 @@ function voxNewId(){return 'vx_'+Date.now().toString(36)+Math.random().toString(
 // ══════════════════════════════════════════════
 // device settings (not part of a save: they belong to this phone / computer)
 const voxSettings=(function(){let s={};try{s=JSON.parse(localStorage.getItem('ab2_voxSet')||'{}')||{};}catch(e){}
-  return Object.assign({lat:null,nudge:0,countIn:true,monitor:false,device:''},s);})();
+  return Object.assign({lat:null,nudge:0,countIn:true,monitor:false,click:false,device:''},s);})();
+const VOX_MAX_TAKE=360; // seconds
 function voxSaveSettings(){try{localStorage.setItem('ab2_voxSet',JSON.stringify(voxSettings));}catch(e){}}
 // how late a recording lands compared with the beat you heard (speaker delay + mic delay), in seconds
 function voxLatencyEst(){const c=audioCtx;return c?(c.outputLatency||0)+(c.baseLatency||0)+.012:.03;}
@@ -338,7 +345,8 @@ function voxMicClose(){
 function voxApplyMonitor(){
   if(!voxMic)return;
   const want=voxSettings.monitor&&voxOpen;
-  const tgt=want?voxIn(vocals.arm):null;
+  // straight into the armed layer's vocoder / effects, past its volume (which is silent while that layer records)
+  let tgt=null;if(want){voxIn(vocals.arm);tgt=voxNodes().tgt[vocals.arm]||null;}
   if(voxMic.monTo!==tgt){try{voxMic.mon.disconnect();}catch(e){}if(tgt)voxMic.mon.connect(tgt);voxMic.monTo=tgt;}
   voxMic.mon.gain.setTargetAtTime(want?1:0,voxMic.c.currentTime,.02);
 }
@@ -595,6 +603,9 @@ function voxRender(){
   voxFreeUnused();
   if(typeof voxQueueAll==='function')voxQueueAll();
 }
+function voxPaintLaneFx(){
+  voxHeads.querySelectorAll('.vox-fxb').forEach((b,li)=>{const fe=fxEffective(getTrackFx(FX_VOX_BASE+li,false),FX_VOX_BASE+li);b.classList.toggle('fx-on',!!fe&&(fxIsActive(fe)||fxVoiceActive(fe)));});
+}
 function voxClipEl(c,li){
   const sel=voxSel&&voxSel.clip===c;
   const el=_vx('div','vox-clip'+(sel?' sel':'')+(voxMissing.has(c.t)?' missing':''));
@@ -820,8 +831,10 @@ async function voxOpenSettings(){
     if(voxSettings.monitor)showToast('🎧 Use headphones, or the speaker will feed back into the mic');});
   const ci=_vx('button','roll-chip'+(voxSettings.countIn?' on':''),voxSettings.countIn?'COUNT-IN: ON':'COUNT-IN: OFF');
   ci.addEventListener('click',()=>{voxSettings.countIn=!voxSettings.countIn;voxSaveSettings();ci.classList.toggle('on',voxSettings.countIn);ci.textContent=voxSettings.countIn?'COUNT-IN: ON':'COUNT-IN: OFF';});
-  const r2=_vx('div','vox-mrow');r2.appendChild(mon);r2.appendChild(ci);body.appendChild(r2);
-  body.appendChild(_vx('div','fx-note','HEAR YOURSELF plays your mic live through the armed layer\'s effects. COUNT-IN clicks 4 beats first when you record from the very start (from later in the song, the bar before the flag plays instead).'));
+  const ck=_vx('button','roll-chip'+(voxSettings.click?' on':''),voxSettings.click?'CLICK: ON':'CLICK: OFF');
+  ck.addEventListener('click',()=>{voxSettings.click=!voxSettings.click;voxSaveSettings();ck.classList.toggle('on',voxSettings.click);ck.textContent=voxSettings.click?'CLICK: ON':'CLICK: OFF';});
+  const r2=_vx('div','vox-mrow');r2.appendChild(mon);r2.appendChild(ci);r2.appendChild(ck);body.appendChild(r2);
+  body.appendChild(_vx('div','fx-note','HEAR YOURSELF plays your mic live through the armed layer\'s effects. COUNT-IN clicks 4 beats first when you record from the very start (from later in the song, the bar before the flag plays instead). CLICK ticks on every beat while VOX is open; it isn\'t in exports (use headphones so the mic doesn\'t catch it).'));
   // sync
   sec('SYNC');
   const syncTxt=_vx('div','more-sub');body.appendChild(syncTxt);

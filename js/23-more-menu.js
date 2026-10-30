@@ -94,13 +94,14 @@
     if(f.distAmt>0)n.push('DIST');if(f.crushAmt>0)n.push('CRUSH');if(f.chorusMix>0)n.push('CHORUS');if(f.flangerMix>0)n.push('FLANGER');
     if(f.phaserMix>0)n.push('PHASER');if(f.tremDepth>0)n.push('TREM');if(eqActive(f))n.push('EQ');if(f.compAmt>0)n.push('COMP');
     if(f.pan!==0||f.panAuto>0)n.push('PAN');if(f.scAmt>0)n.push('SIDECHAIN');
+    if(isVox(ch)&&typeof fxVoiceSummary==='function')return fxVoiceSummary(f).concat(n);
     return n;
   }
   function anyChannelActive(){
     const chs=[];(seqLayers||[]).forEach((l,i)=>chs.push(i));
     const rn=(typeof pianoRollLayers==='function')?pianoRollLayers():0;for(let i=0;i<rn;i++)chs.push(FX_ROLL_BASE+i);chs.push(FX_MASTER);
     for(let i=0;i<voxN();i++)chs.push(FX_VOX_BASE+i);
-    return chs.some(ch=>fxIsActive(fxEffective(getTrackFx(ch,false),ch)));
+    return chs.some(ch=>{const e=fxEffective(getTrackFx(ch,false),ch);return fxIsActive(e)||(isVox(ch)&&fxVoiceActive(e));});
   }
   window.openFxChannel=ch=>{if(typeof closeViewMenu==='function')closeViewMenu();buildFxDetail(ch);fm.open();};
   window._fxAnyActive=anyChannelActive;
@@ -198,6 +199,46 @@
     const groups={};
     function group(name){if(!groups[name]){groups[name]=$('div','fx-group',name);body.appendChild(groups[name]);}}
     const has=id=>musicHas(id)&&(!isMaster||['mt_eq','mt_compression'].includes(id));
+
+    // ── VOICE (vocal layers only) ──
+    if(isVox(ch)){
+      const vli=ch-FX_VOX_BASE;
+      const vhas=id=>musicHas(id);
+      if(['mt_autotune','mt_voicefx','mt_harmonizer','mt_vocoder'].some(vhas)){
+        group('VOICE');
+        body.appendChild($('div','fx-note','Autotune, Voice Changer and Harmonizer re-work the recording: after a change the plain take plays for a moment while it\'s processed.'));
+      }
+      if(vhas('mt_autotune'))body.appendChild(section('tune','AUTOTUNE',()=>f.tuneOn&&f.tuneAmt>0,()=>{f.tuneOn=false;},inner=>{
+        const p=(a,s)=>()=>{f.tuneOn=true;f.tuneAmt=a;f.tuneSpeed=s;},q=(a,s)=>()=>f.tuneOn&&near(f.tuneAmt,a)&&f.tuneSpeed===s;
+        chips(inner,null,[['OFF',()=>{f.tuneOn=false;},()=>!f.tuneOn,false],['SUBTLE',p(.6,90),q(.6,90)],['POP',p(1,30),q(1,30)],['🤖 ROBOT',p(1,0),q(1,0)]]);
+        sl(inner,'STRENGTH',0,100,()=>Math.round(f.tuneAmt*100),v=>{f.tuneOn=true;f.tuneAmt=v/100;},pct);
+        sl(inner,'RETUNE SPEED',0,200,()=>f.tuneSpeed,v=>{f.tuneOn=true;f.tuneSpeed=v;},v=>v===0?'INSTANT':v+' ms');
+        inner.appendChild($('div','fx-note',(typeof keyIsActive==='function'&&keyIsActive())?'Snaps to the notes of '+keyLongName(seqKey,seqKeyMinor)+' (the KEY button).':'No song key yet, so it snaps to the nearest of all 12 notes. Set a KEY to keep it in key.'));
+      }));
+      if(vhas('mt_voicefx'))body.appendChild(section('voice','VOICE CHANGER',()=>!!(f.pitch||f.formant||f.robot),()=>{f.pitch=0;f.formant=0;f.robot=false;},inner=>{
+        const pv=k=>()=>{const v=VOX_VOICES[k];f.pitch=v.pitch;f.formant=v.formant;f.robot=false;},qv=k=>()=>{const v=VOX_VOICES[k];return !f.robot&&f.pitch===v.pitch&&f.formant===v.formant;};
+        chips(inner,null,[['NORMAL',()=>{f.pitch=0;f.formant=0;f.robot=false;},()=>!f.pitch&&!f.formant&&!f.robot,false]].concat(Object.keys(VOX_VOICES).map(k=>[VOX_VOICES[k].label,pv(k),qv(k)])));
+        chips(inner,'ROBOT',[['OFF',()=>{f.robot=false;},()=>!f.robot],['🤖 ONE NOTE',()=>{f.robot=true;},()=>!!f.robot]]);
+        const st=v=>v===0?'0':(v>0?'+':'')+v+' semitones';
+        sl(inner,'PITCH',-12,12,()=>f.pitch,v=>{f.pitch=v;},st);
+        sl(inner,'THROAT SIZE',-12,12,()=>-f.formant,v=>{f.formant=-v;},v=>v===0?'NORMAL':(v>0?'BIGGER ':'SMALLER ')+Math.abs(v));
+        inner.appendChild($('div','fx-note','PITCH moves the notes; THROAT SIZE changes the character of the voice without moving the notes. ROBOT sings everything on the key note.'));
+      }));
+      if(vhas('mt_harmonizer'))body.appendChild(section('harm','HARMONIZER',()=>f.harm&&f.harm!=='none',()=>{f.harm='none';},inner=>{
+        chips(inner,null,[['OFF',()=>{f.harm='none';},()=>!f.harm||f.harm==='none',false]].concat(Object.keys(VOX_HARMS).map(k=>[VOX_HARMS[k].label,()=>{f.harm=k;},()=>f.harm===k])));
+        sl(inner,'HARMONY VOLUME',0,100,()=>Math.round(f.harmMix*100),v=>{f.harmMix=v/100;},pct);
+        inner.appendChild($('div','fx-note','The extra voice follows the song key, so a 3rd is major or minor depending on the note, just like a real backing singer.'));
+      }));
+      if(vhas('mt_vocoder'))body.appendChild(section('voc','VOCODER',()=>!!f.vocOn,()=>{f.vocOn=false;},inner=>{
+        const rn=(typeof pianoRollLayers==='function')?pianoRollLayers():0;
+        const cars=[['DRONE',()=>{f.vocOn=true;f.vocCarrier='drone';},()=>f.vocOn&&(f.vocCarrier==null||f.vocCarrier==='drone')]];
+        for(let i=0;i<rn;i++){const L=pianoRoll.layers[i];cars.push(['ROLL '+(i+1)+(L&&L.notes.length?'':' (EMPTY)'),()=>{f.vocOn=true;f.vocCarrier=i;},()=>f.vocOn&&f.vocCarrier===i]);}
+        chips(inner,null,[['OFF',()=>{f.vocOn=false;},()=>!f.vocOn,false]]);
+        chips(inner,'NOTES FROM',cars);
+        sl(inner,'MIX',0,100,()=>Math.round((f.vocMix==null?1:f.vocMix)*100),v=>{f.vocMix=v/100;},v=>v>=100?'ALL ROBOT':v<=0?'ALL VOICE':v+'%');
+        inner.appendChild($('div','fx-note',rn?'ROLL plays the notes of that piano roll layer (only its notes: you can mute the layer). DRONE holds the song key\'s chord.':'DRONE holds the song key\'s chord. Unlock the Piano Roll to make it sing your own melody.'));
+      }));
+    }
 
     // ── SPACE ──
     if(has('mt_reverb')||has('mt_echo'))group('SPACE');

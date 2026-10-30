@@ -7,7 +7,8 @@
 //   Velocity → VELOCITY button · Arrangement Mode → PAT / ARR switch · Song Mode → SONG · Vocals → VOX button
 // Locked controls are hidden, not greyed out, so the first look at the sequencer stays simple.
 // every skill-tree node that adds something to the EFFECTS window
-const FX_NODE_IDS=['mt_reverb','mt_echo','mt_pingpong','mt_filter','mt_distortion','mt_chorus','mt_bitcrusher','mt_flanger','mt_phaser','mt_tremolo','mt_eq','mt_compression','mt_panning','mt_sidechain'];
+const FX_NODE_IDS=['mt_reverb','mt_echo','mt_pingpong','mt_filter','mt_distortion','mt_chorus','mt_bitcrusher','mt_flanger','mt_phaser','mt_tremolo','mt_eq','mt_compression','mt_panning','mt_sidechain',
+  'mt_autotune','mt_voicefx','mt_harmonizer','mt_vocoder'];
 function _muShow(id,on){const el=document.getElementById(id);if(el)el.style.display=on?'':'none';}
 
 function applyMusicUnlocks(justBoughtId){
@@ -66,6 +67,8 @@ function applyMusicUnlocks(justBoughtId){
     mt_eq:'📊 EQ unlocked in EFFECTS: on any track, roll layer, or the MASTER channel.',
     mt_compression:'🗜 Compression unlocked in EFFECTS: on any track, roll layer, or the MASTER channel.',
     mt_vocals:'🎤 VOX button unlocked at the top of the sequencer: record your voice!',
+    mt_autotune:'🎯 Autotune unlocked: VOX → a layer\'s FX button.',mt_voicefx:'👽 Voice Changer unlocked: VOX → a layer\'s FX button.',
+    mt_harmonizer:'🎼 Harmonizer unlocked: VOX → a layer\'s FX button.',mt_vocoder:'🤖 Vocoder unlocked: VOX → a layer\'s FX button. Pick a piano roll layer (or a drone) to play its notes.',
     mt_vox4:'🎙 4 vocal layers: open VOX to use them.',mt_vox7:'🎶 7 vocal layers: open VOX to use them.',mt_vox10:'👥 10 vocal layers: a whole choir of you.',
     mt_panning:'↔ Panning unlocked in EFFECTS.',mt_sidechain:'💓 Sidechain unlocked: tracks with it on duck every time a kick plays.',
   }[justBoughtId];

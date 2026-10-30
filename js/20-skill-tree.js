@@ -139,7 +139,7 @@ const MUSIC_TREE_NODES=(function(){
     {fact:'A typical pop song is about 3 minutes long, which at 100 BPM is roughly 75 bars.'});
 
   // VOCALS — record your own voice on layers, then arrange the takes on the song timeline
-  const vx=hub('mt_vocals','🎤','Vocals','Unlocks the VOX button: record your voice with your phone\'s or computer\'s mic (or one you plug in) on 2 vocal layers. Drag, trim, split and copy takes anywhere on the song. Every layer has its own effects rack. ×1.5 Alien Gems, ×1.5 points.',
+  const vx=hub('mt_vocals','🎤','Vocals','Unlocks the VOX button: record your voice with your phone\'s or computer\'s mic (or one you plug in) on 2 vocal layers. Drag, trim, split and copy takes anywhere on the song. Every layer has its own effects rack, and vocal effects (Autotune, Voice Changer, Harmonizer, Vocoder) unlock from here. ×1.5 Alien Gems, ×1.5 points.',
     'Multitrack recording puts every part on its own track, so each one can be redone or changed later. Guitarist Les Paul pioneered it in the 1940s and 50s, stacking his guitar and Mary Ford\'s voice again and again on modified tape machines.',
     64800,'mt_arrangement',along(ar,430),{mult:1.5});
   const v4=br('mt_vox4','🎙','Backing Vocals','2 more vocal layers (4 in total): harmonies, ad-libs and doubles. ×1.2 Alien Gems.',18000,'mt_vocals',side(vx,170),
@@ -148,6 +148,15 @@ const MUSIC_TREE_NODES=(function(){
     {fact:'Stacking means recording the same line many times and layering the takes. Big pop choruses often hide 10 or more vocal takes behind the lead.'});
   br('mt_vox10','👥','Choir','3 more vocal layers (10 in total): enough to be your own choir. ×1.2 Alien Gems.',32000,'mt_vox7',side(v7,130),
     {fact:'A classic choir has four parts: soprano, alto, tenor and bass (SATB). With 10 layers you can sing all four and still double them.'});
+  // VOCAL EFFECTS (other side of the Vocals hub)
+  const at=br('mt_autotune','🎯','Autotune','Unlocks AUTOTUNE for vocal layers: snaps your singing to the notes of the song key. Slow it down to sound natural, or set it to instant for the robotic pop sound. ×1.2 Alien Gems.',22000,'mt_vocals',side(vx,-170),
+    {fact:'Auto-Tune was invented by Andy Hildebrand, an engineer who used the same math to read oil-field seismic data. Cher\'s "Believe" (1998) made its instant, robotic setting famous.'});
+  br('mt_harmonizer','🎼','Harmonizer','Unlocks HARMONIZER: adds a second voice singing a 3rd, 5th or octave away, always in key. ×1.2 Alien Gems.',30000,'mt_autotune',side(at,-130),
+    {fact:'Eventide\'s H910 Harmonizer (1975) was one of the first digital pitch shifters. Studios used it to thicken voices and to make new harmonies from a single take.'});
+  br('mt_voicefx','👽','Voice Changer','Unlocks the VOICE CHANGER: Alien, Chipmunk, Giant and Robot voices, or set the pitch and "throat size" yourself. ×1.2 Alien Gems.',20000,'mt_vocals',rel(vx,60,190),
+    {fact:'Formants are the resonances of your throat and mouth: they make a voice sound like you. Shift them up and a voice sounds tiny, shift them down and it sounds huge, even at the same pitch.'});
+  br('mt_vocoder','🤖','Vocoder','Unlocks the VOCODER: your voice shapes a synth, so it sings the notes of a piano roll layer (or a drone in the song key). ×1.2 Alien Gems.',36000,'mt_vocals',rel(vx,120,190),
+    {fact:'The vocoder was invented at Bell Labs in the 1930s by Homer Dudley, to squeeze speech down phone lines. Decades later, bands like Kraftwerk made it sing.'});
   return N;
 })();
 

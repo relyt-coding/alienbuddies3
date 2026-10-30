@@ -96,14 +96,16 @@ function voxIn(li){const N=voxNodes();if(!N.ins[li]){N.ins[li]=N.c.createGain();
 function voxRoute(li){
   const N=voxNodes(),g=N.ins[li];if(!g)return;
   const bus=fxBusFor(FX_VOX_BASE+li),t=bus?bus.input:drumMasterReal;
-  if(N.tgt[li]!==t){try{g.disconnect();}catch(e){}g.connect(t);N.tgt[li]=t;}
+  const dest=typeof voxVoiceChain==='function'?voxVoiceChain(li,t):t; // vocoder sits in front of the effects channel
+  if(N.tgt[li]!==dest){try{g.disconnect();}catch(e){}g.connect(dest);N.tgt[li]=dest;}
   const L=vocals.layers[li],v=voxAudible(L,li,voxSoloOn())?(L.vol==null?1:L.vol):0;
   if(g._v!==v){if(_exporting)g.gain.value=v;else g.gain.setTargetAtTime(v,N.c.currentTime,.015);g._v=v;}
 }
 function voxRouteAll(){if(!audioCtx)return;const N=voxNodes();N.ins.forEach((g,li)=>{if(g)voxRoute(li);});}
 // play one clip, starting `skip` seconds into it, at audio time `at`. maxDur cuts it short (song end in an export)
 function voxPlayClip(c,li,at,skip,maxDur){
-  const buf=voxBuf.get(c.t);if(!buf)return null;
+  // autotune / voice changer / harmonizer: the processed take (same length), once it's ready
+  const buf=(typeof voxProcessedBuf==='function'&&voxProcessedBuf(c.t,li))||voxBuf.get(c.t);if(!buf)return null;
   const ctx=getCtx();skip=Math.max(0,skip||0);
   const off=c.o+skip;let dur=Math.min(c.d-skip,buf.duration-off);if(maxDur!=null)dur=Math.min(dur,maxDur);
   if(!(dur>.02))return null;
@@ -167,14 +169,20 @@ function voxOnStop(){
 }
 function voxIsRecording(){return !!(voxRec&&!voxRec.cal);}
 // EFFECTS window preview: a couple of seconds of the layer's first take
-function voxAudition(li){
+let _voxAud=0;
+async function voxAudition(li){
   const L=vocals.layers[li];const c=L&&L.clips.find(x=>voxBuf.has(x.t));
   if(!c){showToast('🎤 Record something on '+voxLayerName(li)+' to hear its effects');return;}
+  const my=++_voxAud;
+  // vocal effects that re-work the take: wait for it (only the newest preview plays)
+  const p=typeof voxVoiceParams==='function'&&voxVoiceParams(li);
+  if(p){const k=_voxKey(c.t,p),e=voxProc.get(k);if(!e||!e.buf){showToast('🎯 Processing…');await voxEnqueue(c.t,p,k);if(my!==_voxAud)return;}}
+  voxActive.filter(a=>a.aud).forEach(a=>{try{a.src.stop();}catch(e){}});
   const ctx=getCtx();voxRoute(li);
   // play it even if the layer is muted / not soloed, then put the layer level back
   const g=voxIn(li);g.gain.cancelScheduledValues(ctx.currentTime);g.gain.setValueAtTime(L.vol==null?1:L.vol,ctx.currentTime);g._v=-1;
-  voxPlayClip(c,li,ctx.currentTime+.03,0,2.5);
-  setTimeout(()=>{voxRoute(li);},2700);
+  voxPlayClip(c,li,ctx.currentTime+.03,0,2.5);const last=voxActive[voxActive.length-1];if(last)last.aud=true;
+  setTimeout(()=>{if(my===_voxAud)voxRoute(li);},2700);
 }
 
 // ══════════════════════════════════════════════
@@ -245,6 +253,7 @@ function voxFreeUnused(){
   voxUndo.forEach(u=>{(u.match(/vx_[a-z0-9]+/g)||[]).forEach(id=>used.add(id));});
   if(voxRec&&voxRec.li!=null)return;
   [...voxBuf.keys()].forEach(id=>{if(!used.has(id)&&!voxActive.some(a=>a.c.t===id)){voxBuf.delete(id);voxPeaks.delete(id);}});
+  if(typeof voxFreeProcessed==='function')voxFreeProcessed();
 }
 function voxNewId(){return 'vx_'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
 
@@ -531,6 +540,8 @@ function voxPaintRec(){
 }
 function voxPaintFoot(){
   const n=voxLayerCount();
+  const pend=typeof voxProcPending==='function'?voxProcPending():0;
+  if(pend&&!(voxRec&&!voxRec.cal)){voxFootTxt.textContent='🎯 Processing vocal effects ('+pend+' take'+(pend>1?'s':'')+' left). The plain take plays until it\'s ready.';return;}
   if(voxRec&&!voxRec.cal){voxFootTxt.textContent=voxRec.state==='count'?'Count-in… sing on the 1 after four clicks':'Recording on '+voxLayerName(voxRec.li)+' · tap ■ STOP (or pause) when done';return;}
   if(!voxHasClips())voxFootTxt.textContent='Tap ● on a layer to arm it, drag the green flag to where you want to start, then hit REC. Headphones help!';
   else voxFootTxt.textContent=(IS_DESKTOP?'Click':'Tap')+' a take to select it, then drag to move, pull its edges to trim. ▶ plays from the green flag.'+(n<VOX_MAX_LAYERS?'':'');
@@ -571,7 +582,8 @@ function voxRender(){
     const m=_vx('button','vox-lb'+(L.muted?' m-on':''),'M');m.title='Mute';m.addEventListener('click',e=>{e.stopPropagation();L.muted=!L.muted;voxRouteAll();voxRender();autoSave();});
     const s=_vx('button','vox-lb'+(L.solo?' s-on':''),'S');s.title='Solo (only soloed vocal layers play)';s.addEventListener('click',e=>{e.stopPropagation();L.solo=!L.solo;voxRouteAll();voxRender();autoSave();});
     const fx=_vx('button','vox-lb vox-fxb','FX');fx.title='Effects for this layer';
-    const fxOn=typeof fxIsActive==='function'&&fxIsActive(fxEffective(getTrackFx(FX_VOX_BASE+li,false),FX_VOX_BASE+li));if(fxOn)fx.classList.add('fx-on');
+    const fe=fxEffective(getTrackFx(FX_VOX_BASE+li,false),FX_VOX_BASE+li);
+    if(fxIsActive(fe)||fxVoiceActive(fe))fx.classList.add('fx-on');
     fx.addEventListener('click',e=>{e.stopPropagation();if(typeof window.openFxChannel==='function'&&typeof FX_NODE_IDS!=='undefined'&&FX_NODE_IDS.some(musicHas))window.openFxChannel(FX_VOX_BASE+li);else showToast('✨ Unlock an effect in the skill tree (Effects hub) to use the FX rack');});
     r2.appendChild(m);r2.appendChild(s);r2.appendChild(fx);h.appendChild(r2);
     voxHeads.appendChild(h);
@@ -581,6 +593,7 @@ function voxRender(){
   }
   voxPaintMarkers();voxPaintFoot();voxBuildSelBar();
   voxFreeUnused();
+  if(typeof voxQueueAll==='function')voxQueueAll();
 }
 function voxClipEl(c,li){
   const sel=voxSel&&voxSel.clip===c;

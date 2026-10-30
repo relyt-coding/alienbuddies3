@@ -5,7 +5,7 @@ Plain HTML/CSS/JS, no build step. Open `index.html` (0.2) in a browser or deploy
 - `index.html` – page markup, links the CSS and loads the scripts in order
 - `css/style.css` – all styles
 - `js/` – game code, loaded in numeric order with plain `<script>` tags (not modules):
-  `00-bootstrap` (must stay first) · `01-constants` · `02-save-and-state` · `03-audio` · `04-toast-soundboard` · `05-pads` · `06-sequencer` · `07-tips` · `08-matching-game` · `09-sound-picker` · `10-home-screen` · `11-bouncers-party` · `12-tiers-and-bunker` · `13-score-stats` · `14-tap-and-sequencer-clock` · `15-render` · `16-purchases` · `17-nav-fullscreen` · `18-desktop-layout` · `19-wav-export` · `20-skill-tree` · `21-legacy-safari` (fallbacks for old iPhones) · `22-swipe-nav` · `23-more-menu` (KEY + EFFECTS windows) · `24-gamepad` · `25-polish` · `26-music-unlocks` (shows sequencer features as they're bought in the Musical Toolkit branch) · `27-piano-roll` · `28-test-mode` (only active at /test) · `29-vocals` (VOX: microphone recording on up to 10 layers)
+  `00-bootstrap` (must stay first) · `01-constants` · `02-save-and-state` · `03-audio` · `04-toast-soundboard` · `05-pads` · `06-sequencer` · `07-tips` · `08-matching-game` · `09-sound-picker` · `10-home-screen` · `11-bouncers-party` · `12-tiers-and-bunker` · `13-score-stats` · `14-tap-and-sequencer-clock` · `15-render` · `16-purchases` · `17-nav-fullscreen` · `18-desktop-layout` · `19-wav-export` · `20-skill-tree` · `21-legacy-safari` (fallbacks for old iPhones) · `22-swipe-nav` · `23-more-menu` (KEY + EFFECTS windows) · `24-gamepad` · `25-polish` · `26-music-unlocks` (shows sequencer features as they're bought in the Musical Toolkit branch) · `27-piano-roll` · `28-test-mode` (only active at /test) · `29-vocals` (VOX: microphone recording on up to 10 layers) · `30-vocal-fx` (Autotune, Voice Changer, Harmonizer, Vocoder)
 - `v0.1/index.html` – frozen Version 0.1 (single file, untouched)
 
 Rule: top-level code in a file can only use functions/variables from files that load **before** it
@@ -30,3 +30,6 @@ Unlocked by the **Vocals** hub in the Musical Toolkit (after Arrangement): 2 lay
 - Each vocal layer is effects channel `13 + layer` (EFFECTS window → VOCALS). Vocals are included in WAV export.
 - While recording, the sequencer is in "studio time": no energy used, no points earned.
 - Sync: takes are shifted earlier by the device's audio latency (estimated, or measured with ⚙ MIC → AUTO SYNC) plus a manual nudge; stored per device in `ab2_voxSet`.
+- Vocal effects (`30-vocal-fx`, in each vocal layer's EFFECTS → VOICE): Autotune, Voice Changer (pitch / formant / robot) and Harmonizer re-work the take in a
+  Web Worker (YIN pitch tracking + PSOLA), cached per take + settings; until ready the raw take plays, and WAV export waits for it. The Vocoder is live
+  (16 bands); its synth plays a piano roll layer's notes (the layer can stay muted) or a drone of the song key's chord.

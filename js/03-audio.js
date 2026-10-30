@@ -333,12 +333,16 @@ const FX_DEFAULTS={rvbType:'hall',rvbAmt:0,echoMix:0,echoDiv:.5,echoFb:.35,echoP
   eqOn:false,eqLow:0,eqMid:0,eqHigh:0,
   compAmt:0,
   pan:0,panAuto:0,panDiv:4,
-  scAmt:0,scRel:.5};
+  scAmt:0,scRel:.5,
+  // vocal layers only (js/30-vocal-fx.js)
+  tuneOn:false,tuneAmt:1,tuneSpeed:25,pitch:0,formant:0,robot:false,harm:'none',harmMix:.6,vocOn:false,vocCarrier:'drone',vocMix:1};
 // which skill-tree node unlocks each setting (master gets only EQ + compression)
 const FX_UNLOCK={rvbAmt:'mt_reverb',echoMix:'mt_echo',echoPing:'mt_pingpong',filtOn:'mt_filter',distAmt:'mt_distortion',crushAmt:'mt_bitcrusher',
   chorusMix:'mt_chorus',flangerMix:'mt_flanger',phaserMix:'mt_phaser',tremDepth:'mt_tremolo',eqOn:'mt_eq',compAmt:'mt_compression',
-  pan:'mt_panning',panAuto:'mt_panning',scAmt:'mt_sidechain'};
-const FX_OFF={rvbAmt:0,echoMix:0,echoPing:false,filtOn:false,distAmt:0,crushAmt:0,chorusMix:0,flangerMix:0,phaserMix:0,tremDepth:0,eqOn:false,compAmt:0,pan:0,panAuto:0,scAmt:0};
+  pan:'mt_panning',panAuto:'mt_panning',scAmt:'mt_sidechain',
+  tuneOn:'mt_autotune',pitch:'mt_voicefx',formant:'mt_voicefx',robot:'mt_voicefx',harm:'mt_harmonizer',vocOn:'mt_vocoder'};
+const FX_OFF={rvbAmt:0,echoMix:0,echoPing:false,filtOn:false,distAmt:0,crushAmt:0,chorusMix:0,flangerMix:0,phaserMix:0,tremDepth:0,eqOn:false,compAmt:0,pan:0,panAuto:0,scAmt:0,
+  tuneOn:false,pitch:0,formant:0,robot:false,harm:'none',vocOn:false};
 const FX_MASTER_KEYS=['eqOn','compAmt'];
 function fxNormalize(f){return f&&typeof f==='object'?Object.assign({},FX_DEFAULTS,f):f;}
 function getTrackFx(i,create){
@@ -356,6 +360,8 @@ function fxEffective(f,ch){
   if(ch===FX_MASTER)Object.keys(FX_OFF).forEach(k=>{if(!FX_MASTER_KEYS.includes(k))e[k]=FX_OFF[k];});
   return e;
 }
+// vocal-layer effects (they work on the take / in front of the channel, so they don't need the effects bus)
+function fxVoiceActive(f){return !!f&&!!((f.tuneOn&&f.tuneAmt>0)||f.pitch||f.formant||f.robot||(f.harm&&f.harm!=='none')||f.vocOn);}
 function eqActive(f){return f.eqOn&&(f.eqLow||f.eqMid||f.eqHigh);}
 function fxIsActive(f){
   return !!f&&(f.rvbAmt>0||f.echoMix>0||f.filtOn||f.distAmt>0||f.crushAmt>0||f.chorusMix>0||f.flangerMix>0||f.phaserMix>0||f.tremDepth>0||eqActive(f)||f.compAmt>0||f.pan!==0||f.panAuto>0||f.scAmt>0);

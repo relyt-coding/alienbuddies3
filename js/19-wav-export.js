@@ -128,6 +128,7 @@ function renderOffline(res){
       const t=WAV_LEAD+h.time;
       try{
         if(h.vox)voxPlayClip(h.clip,h.li,t,0,h.maxDur);
+        else if(h.vcar)voxCarrierNote(h.li,h.midi,t,h.dur,h.vel);
         else if(h.midi!=null)playRollNote(h.soundId,h.midi,t,h.dur,h.vel,h.layer);
         else playSound(h.soundId,h.vel,t,h.ch);
       }catch(e){console.warn('export: skipped',h.soundId,e);}
@@ -162,6 +163,7 @@ async function renderHitsToWAV(res,filename){
   if(!res.hits.length){showToast('Nothing to export — add some notes first!');return;}
   if(_wavBusy){showToast('Already exporting…');return;}
   _wavBusy=true;
+  try{if(typeof voxPrepareExport==='function')await voxPrepareExport();}catch(e){}
   showToast('Rendering WAV…');
   try{
     const buf=trimTail(await renderOffline(res),Math.ceil((res.duration+WAV_LEAD)*44100));

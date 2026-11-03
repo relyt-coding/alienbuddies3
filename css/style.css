@@ -1782,3 +1782,22 @@ body.daw-wide .pad{aspect-ratio:auto !important;}
 body.phone-land .bunker-body{overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y;padding-bottom:1.5rem;}
 body.phone-land .bunker-grid-wrap{flex:none;overflow:visible;}
 body.phone-land .bunker-grid{max-width:480px;margin:0 auto;}
+
+/* ══════════════════════════════════════════════
+   SOLAR-SYSTEM SKILL TREE — orbit ring, docks, 3D view
+   ══════════════════════════════════════════════ */
+#skillTreeInner{transform-style:preserve-3d;}
+.st-orbit{position:absolute;border-radius:50%;border:2px dashed rgba(120,150,255,.28);box-shadow:0 0 30px -6px rgba(90,130,255,.35),inset 0 0 30px -6px rgba(90,130,255,.25);pointer-events:none;animation:stOrbitSpin 240s linear infinite;}
+@keyframes stOrbitSpin{to{transform:rotate(360deg);}}
+.st-dock{position:absolute;width:14px;height:14px;margin:-7px 0 0 -7px;border-radius:50%;border:2px solid #335;background:#05060c;pointer-events:none;box-shadow:0 0 10px -2px currentColor;}
+.st-node[data-sun]{z-index:3;padding:26px;margin:-26px 0 0 -26px;} /* extra room so the glow isn't clipped to a square in 3D */
+.st-node[data-sun] .st-node-circle{box-shadow:0 0 26px -2px rgba(255,200,80,.55);}
+#stViewToggle{position:absolute;left:max(14px,env(safe-area-inset-left,0px));bottom:max(14px,env(safe-area-inset-bottom,0px));z-index:6;font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:.12em;padding:.45rem .9rem;border-radius:50px;border:1px solid #2a2a5a;background:rgba(8,8,20,.85);color:#a0a8ff;cursor:pointer;touch-action:manipulation;box-shadow:0 0 14px -4px rgba(160,168,255,.5);}
+#stViewToggle:hover{border-color:#a0a8ff;color:#cfd3ff;}
+/* 3D: nodes and labels stand up off the plate and face the camera */
+#skillTreeModal.st-3d .st-node,#skillTreeModal.st-3d .st-branch-label{rotate:x -55deg;}
+#skillTreeModal.st-3d .st-node{transform-origin:50% 27px;}
+#skillTreeModal.st-3d .st-node.center{transform-origin:50% 36px;}
+#skillTreeModal.st-3d .st-node[data-sun]{transform-origin:50% 53px;}
+#skillTreeModal.st-3d #skillTreeCanvas{background:radial-gradient(ellipse at 50% 70%,#0a1030 0%,#030510 60%);}
+#skillTreeModal.st-3d .st-line{height:3px;}

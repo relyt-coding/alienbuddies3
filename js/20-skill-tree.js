@@ -487,9 +487,11 @@ function openSkillTree(){
   const canvas = document.getElementById('skillTreeCanvas');
   if(canvas){
     stPanX = canvas.clientWidth / 2;
-    stPanY = canvas.clientHeight / 2;
+    stPanY = canvas.clientHeight * ((typeof stIs3D==='function'&&stIs3D()) ? 0.6 : 0.5); // 3D: most of the map lies "far away" (up), so sit the core a little low
     // desktop: start at a zoom that matches the window scale
     stScale = (typeof IS_DESKTOP!=='undefined'&&IS_DESKTOP)?Math.max(.8,Math.min(1.35,parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--ds'))||1)):1;
+    // 3D solar system on a narrow screen: start zoomed out enough that the whole sun orbit fits across
+    if(typeof stIs3D==='function'&&stIs3D()) stScale = Math.min(stScale, Math.max(ST_MIN_SCALE, canvas.clientWidth/720));
     applyStTransform();
   }
 }
@@ -502,7 +504,8 @@ function closeSkillTree(){
 const ST_MIN_SCALE = 0.3, ST_MAX_SCALE = 2.5;
 function applyStTransform(){
   const inner = document.getElementById('skillTreeInner');
-  if(inner) inner.style.transform = `translate(${stPanX}px,${stPanY}px) scale(${stScale})`;
+  // 3D view (js/35-solar-tree.js): the map is a tilted plate seen in perspective, vanishing point at the core
+  if(inner) inner.style.transform = `translate(${stPanX}px,${stPanY}px) scale(${stScale})`+(typeof stIs3D==='function'&&stIs3D()?` perspective(${ST_PERSP}px) rotateX(${ST_TILT}deg)`:'');
   const sl = document.getElementById('stZoomSlider');
   if(sl){ // slider position is on a log scale so each notch feels like the same amount of zoom
     const v = Math.log(stScale/ST_MIN_SCALE)/Math.log(ST_MAX_SCALE/ST_MIN_SCALE)*100;
@@ -552,11 +555,15 @@ function renderSkillTree(){
     inner.appendChild(lbl);
   });
 
+  // The four Quad Suns orbit the core on a ring (js/35-solar-tree.js); the paths stay put and start from the ring
+  if(typeof stDrawOrbit==='function') stDrawOrbit(inner);
+
   // Draw connector lines first (behind nodes)
   SKILL_TREE_NODES.forEach(node=>{
     node.requires.forEach(reqId=>{
       const req = SKILL_MAP[reqId];
       if(!req) return;
+      if(reqId==='core' && /^sun_/.test(node.id)) return; // the orbit ring replaces core → sun spokes
       const active = unlockedSkills[node.id] || unlockedSkills[reqId];
       // Line from center of req node to center of this node
       drawLine(inner, req.x, req.y, node.x, node.y, active);
@@ -628,8 +635,11 @@ function renderSkillTree(){
       openStDetail(node.id, el);
     });
 
+    el.dataset.node = node.id;
+    if(/^sun_/.test(node.id)) el.dataset.sun = node.id;
     inner.appendChild(el);
   });
+  if(typeof stOrbitRefresh==='function') stOrbitRefresh();
 }
 
 // ── Node detail popup ──
@@ -690,9 +700,13 @@ function openStDetail(id, fromEl){
   // Position next to the node, always fully on screen (uses the popup's real size)
   const canvas = document.getElementById('skillTreeCanvas');
   const cr = canvas ? canvas.getBoundingClientRect() : {left:0,top:0,width:window.innerWidth,height:window.innerHeight};
-  const sx = cr.left + stPanX + node.x * stScale;
-  const sy = cr.top + stPanY + node.y * stScale;
-  const nodeR = (node.id==='core' ? 36 : node.hub ? 42 : 27) * stScale;
+  let sx = cr.left + stPanX + node.x * stScale;
+  let sy = cr.top + stPanY + node.y * stScale;
+  let nodeR = (node.id==='core' ? 36 : node.hub ? 42 : 27) * stScale;
+  // use where the bubble really is on screen (3D view, orbiting suns)
+  if(!fromEl || !fromEl.querySelector) fromEl = document.querySelector('#skillTreeInner .st-node[data-node="'+id+'"]');
+  const _circ = fromEl ? fromEl.querySelector('.st-node-circle') : null;
+  if(_circ){ const b=_circ.getBoundingClientRect(); if(b.width>0){ sx=b.left+b.width/2; sy=b.top+b.height/2; nodeR=b.width/2; } }
   const vw = window.innerWidth, vh = window.innerHeight, M = 8;
   pop.style.maxHeight = (vh - M*2) + 'px';
   pop.style.overflowY = 'auto';

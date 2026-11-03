@@ -216,7 +216,8 @@ addEventListener('resize',()=>{_bbCache=null;});
 let partyBeat=0;
 const partyOverlay=document.getElementById('partyOverlay');
 const partyBtn=document.getElementById('partyBtn');
-function startParty(){partyMode=true;partyBtn.classList.add('active');partyBtn.textContent='STOP PARTY';}
+function startParty(){partyMode=true;partyBtn.classList.add('active');partyBtn.textContent='STOP PARTY';
+  if(typeof bouncerMode!=='undefined'&&bouncerMode!=='all'){setBouncerMode('all');showToast('👽 Aliens are back for the party!');}} // hidden buddies come back out for a party
 function stopParty(){
   partyMode=false;partyBtn.classList.remove('active');partyBtn.textContent='ALIEN PARTY';
   // Reset all bouncers to their base filter/transform

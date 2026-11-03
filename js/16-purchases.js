@@ -12,7 +12,7 @@ function buyNextPad(){
   visiblePads=drum.pads; // always show new pad on unlock
   // Set default sound for this pad (null for pads 3+, since idx is 0-based and 3/4 = 4th/5th pad)
   padSounds[idx]=PAD_DEFAULT_SOUNDS[idx]||null;
-  playSfxPurchase();flashBuy('#a0a8ff');
+  if(!playUnlockPreview(padSounds[idx]))playSfxPurchase();flashBuy('#a0a8ff');
   rebuildPadGrid();
   updateSoundboardUnlocked();
   updateBouncerToggleVisibility();
@@ -22,11 +22,18 @@ function buyNextPad(){
 }
 
 // Drum: buy next sound
+// buying a sound plays that sound instead of the usual chime: a little sample of what you just unlocked
+function playUnlockPreview(id,delay){
+  if(typeof sfxOn!=='undefined'&&!sfxOn)return false;
+  if(!id||!SOUND_MAP[id])return false;
+  setTimeout(()=>{try{getCtx();playSound(id);}catch(e){}},delay||0);
+  return true;
+}
 function buyNextSound(){
   const idx=drum.extraSounds;if(idx>=EXTRA_SOUNDS_ORDER.length)return;
   const cost=soundLibCost(idx);if(score<cost)return;
   score-=cost;drum.extraSounds++;
-  playSfxPurchase();flashBuy('#a0a8ff');
+  if(!playUnlockPreview(EXTRA_SOUNDS_ORDER[idx]))playSfxPurchase();flashBuy('#a0a8ff');
   const newId=EXTRA_SOUNDS_ORDER[idx-1]||EXTRA_SOUNDS_ORDER[0];
   updateSoundboardUnlocked();
   updateBouncerToggleVisibility();

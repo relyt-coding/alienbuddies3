@@ -1713,3 +1713,11 @@ body.auto-on .vox-view:not(.auto-view){display:none;}
 .auto-pt{stroke:#fff;stroke-width:1.5;cursor:grab;touch-action:none;}
 body.vox-on .auto-view{display:none !important;}
 .chop-pitch{display:inline-flex;align-items:center;gap:3px;white-space:nowrap;}
+
+/* bunker header: the line under BUNKER stays between TIPS and BACK (wraps between its two parts if it has to) */
+#bunkerView .page-sub{white-space:normal !important;overflow-wrap:normal;font-size:clamp(.66rem,3.4vw,.8rem) !important;line-height:1.25;}
+#bunkerView .page-sub span{white-space:nowrap;}
+#bunkerView .page-title-wrap{flex:1 1 0;min-width:0;}
+#bunkerView .page-title{font-size:clamp(1.5rem,9vw,2.1rem) !important;}
+#alienNameRandom{font-family:'Bebas Neue',sans-serif;font-size:.85rem;letter-spacing:.08em;padding:.38rem .65rem;border-radius:8px;border:1px solid var(--anc,#00ff88);background:transparent;color:var(--anc,#00ff88);cursor:pointer;touch-action:manipulation;white-space:nowrap;}
+#alienNameRandom:active{transform:scale(.96);}

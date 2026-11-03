@@ -143,7 +143,8 @@ function renderBunkerView(){
   updateBouncerToggleVisibility();
   document.getElementById('statBunkers').textContent=completed;
   document.getElementById('statCurrent').textContent=inThis;
-  document.getElementById('bunkerSubEl').textContent=`${inThis} / ${BUNKER_SIZE} ALIENS · BUNKER #${idx+1}`;
+  // two pieces that each stay whole, so on a narrow phone it wraps between them instead of running under BACK
+  document.getElementById('bunkerSubEl').innerHTML=`<span>${inThis} / ${BUNKER_SIZE} ALIENS ·</span> <span>BUNKER #${idx+1}</span>`;
   document.getElementById('bunkerNumberLabel').textContent=`BUNKER #${idx+1}`;
   const banner=document.getElementById('bunkerFullBanner');
   if(inThis>=BUNKER_SIZE){
@@ -191,12 +192,28 @@ function renderBunkerView(){
 // ══════════════════════════════════════════════
 const toggleBouncersBtn=document.getElementById('toggleBouncersBtn');
 
-toggleBouncersBtn&&toggleBouncersBtn.addEventListener('click',()=>{
-  showBouncers=!showBouncers;
-  toggleBouncersBtn.classList.toggle('active',showBouncers);
+// ALIENS button: 3 settings, saved with the game
+//   all    = buddies bounce everywhere (default)
+//   bunker = they only come out while the bunker is open
+//   off    = no bouncing buddies (ALIEN PARTY switches them back to all)
+let bouncerMode='all';
+const BOUNCER_MODES={all:'👽 ALIENS: ALL',bunker:'👽 ALIENS: BUNKER ONLY',off:'👽 ALIENS: OFF'};
+function applyBouncerMode(){
+  if(!BOUNCER_MODES[bouncerMode])bouncerMode='all';
+  const want=bouncerMode==='all'||(bouncerMode==='bunker'&&document.body.classList.contains('bunker-open'));
+  if(toggleBouncersBtn){toggleBouncersBtn.textContent=BOUNCER_MODES[bouncerMode];toggleBouncersBtn.classList.toggle('active',bouncerMode!=='off');}
+  if(want===showBouncers)return;
+  showBouncers=want;
   bouncers.forEach(b=>b.el.style.display=showBouncers?'':'none');
+}
+function setBouncerMode(m){bouncerMode=m;applyBouncerMode();if(typeof autoSave==='function')autoSave();}
+toggleBouncersBtn&&toggleBouncersBtn.addEventListener('click',()=>{
+  const order=['all','bunker','off'];setBouncerMode(order[(order.indexOf(bouncerMode)+1)%order.length]);
+  showToast({all:'👽 Aliens bounce everywhere',bunker:'👽 Aliens only come out in the bunker',off:'👽 Aliens are hidden (ALIEN PARTY brings them back)'}[bouncerMode]);
   if(document.body.classList.contains('bunker-open'))renderBunkerView();
 });
+// opening / closing the bunker shows or hides them in BUNKER ONLY mode
+new MutationObserver(()=>{if(bouncerMode==='bunker')applyBouncerMode();}).observe(document.body,{attributes:true,attributeFilter:['class']});
 
 // ── Choose which aliens bounce on screen ──
 let bunkerPickMode=false;
@@ -249,6 +266,23 @@ const anmPrevBtn=document.getElementById('anmPrevBtn');
 const anmNextBtn=document.getElementById('anmNextBtn');
 const anmEditSection=document.getElementById('anmEditSection');
 const anmEditBtn=document.getElementById('anmEditBtn');
+// 🎲 NAME FOR ME: cycles through 100 alien names (skipping ones your buddies already have; no repeats until all are used)
+const ALIEN_NAMES=['Zorp','Blixa','Quibble','Nebbo','Glorp','Vexi','Plonk','Zuzu','Orbo','Kip-Kip','Fizzle','Bloop','Nova','Pixel','Quasar','Zib','Mimbo','Gloob','Tanzo','Yibbit','Snorkel','Wubzy','Kooza','Plinth','Zazzle','Bimble','Orbit','Flick','Grub','Squee','Tiko','Momo','Zing','Lumo','Blip','Gizmo','Quorx','Vroom','Nubbin','Zeppo','Fluxy','Comet','Doodle','Ziggy','Plorp','Wizzle','Jinx','Moxie','Spork','Noodle','Bixby','Glim','Rizzo','Twinkle','Zork','Pebble','Fuzzle','Kazoo','Yonder','Boop','Zylo','Squiggle','Nimbus','Gloop','Tinker','Wobble','Zap','Mork','Pip','Quix','Blorbo','Zinnia','Skoot','Huxley','Lumen','Frizz','Orbix','Zuzzle','Bebop','Kibble','Sprocket','Glimmer','Zeebo','Nibs','Woozy','Plip','Cosmo','Zarf','Tibbles','Floof','Grizzle','Mibbo','Starla','Vortex','Pudding','Zoink','Bubbles','Ziggo','Krill','Ollie'];
+let _nameDeck=[];
+function nextAlienName(){
+  const taken=new Set((alienData||[]).filter(Boolean).map(a=>(a.name||'').toLowerCase()));
+  for(let tries=0;tries<2;tries++){
+    if(!_nameDeck.length){_nameDeck=ALIEN_NAMES.slice();for(let i=_nameDeck.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[_nameDeck[i],_nameDeck[j]]=[_nameDeck[j],_nameDeck[i]];}}
+    while(_nameDeck.length){const n=_nameDeck.pop();if(!taken.has(n.toLowerCase()))return n;}
+  }
+  return ALIEN_NAMES[Math.floor(Math.random()*ALIEN_NAMES.length)]; // every name is taken: allow a repeat
+}
+(function(){
+  const btns=document.getElementById('alienNameBtns');if(!btns||!alienNameInput)return;
+  const b=document.createElement('button');b.id='alienNameRandom';b.textContent='🎲 NAME FOR ME';b.title='Tap again for another name';
+  b.addEventListener('click',e=>{e.preventDefault();alienNameInput.value=nextAlienName();alienNameInput.dispatchEvent(new Event('input',{bubbles:true}));});
+  btns.insertBefore(b,btns.firstChild);
+})();
 
 function setAnmColor(col){
   alienNameBox.style.setProperty('--anc',col);

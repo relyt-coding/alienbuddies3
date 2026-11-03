@@ -50,6 +50,7 @@ function autoSave(){
     arrangeBars,
     seqLayersSnap,
     pianoRoll:(typeof pianoRoll!=='undefined')?{layers:pianoRoll.layers.map(L=>({soundId:L.soundId,muted:L.muted,notes:L.notes.map(n=>{const o={s:n.s,l:n.l,m:n.m};if(n.v!=null)o.v=n.v;return o;})}))}:undefined,
+    bouncerMode:(typeof bouncerMode!=='undefined')?bouncerMode:'all',
     vocals:(typeof voxSave==='function')?voxSave():undefined,
     chops:(typeof chopsSave==='function')?chopsSave():undefined,
     automation:(typeof automationSave==='function')?automationSave():undefined,
@@ -116,21 +117,17 @@ function drumMultiplier(){
   const total=extraPads+drum.extraSounds+drum.seqTracks;
   return total>0?Math.pow(1.2,total):1;
 }
-// Shared boosts (aliens, drum upgrades, matching game, tips, skill tree) apply to BOTH earning sources.
+// Shared boosts (aliens, drum upgrades, matching game, tips) apply to BOTH earning sources.
+// (The skill tree only boosts Alien Gems, not points.)
 function sharedMultiplier(){
-  let _skillMult=1;
-  if(typeof SKILL_TREE_NODES!=='undefined'&&typeof unlockedSkills!=='undefined'){
-    SKILL_TREE_NODES.forEach(n=>{if(n.mult&&n.mult>0&&unlockedSkills[n.id])_skillMult*=n.mult;});
-  }
-  return alienMultiplier()*drumMultiplier()*matchingMultiplier*tipsMult*_skillMult;
+  return alienMultiplier()*drumMultiplier()*matchingMultiplier*tipsMult;
 }
 // Each tracker keeps its own tier multipliers: DRUMPAD (left) for pad taps, SEQUENCER (right) for sequencer steps.
 function drumTierProduct(){return tiers.reduce((m,t,i)=>t.multiplierActive?m*tierMultValueFor('drum',i):m,1);}
 function seqTierProduct(){return autoTiers.reduce((m,t,i)=>t.multiplierActive?m*tierMultValueFor('seq',i):m,1);}
 function totalMultiplier(){return drumTierProduct()*sharedMultiplier();} // value of one pad tap
 function seqStepMultiplier(){
-  const qs=(typeof unlockedSkills!=='undefined'&&unlockedSkills&&unlockedSkills['mt_groove'])?1.5:1; // Groove hub: sequencer steps +50%
-  return seqTierProduct()*sharedMultiplier()*qs;
+  return seqTierProduct()*sharedMultiplier();
 }
 function highestActive(){let h=-1;tiers.forEach((t,i)=>{if(t.multiplierActive)h=i;});return h;}
 function highestActiveSeq(){let h=-1;autoTiers.forEach((t,i)=>{if(t.multiplierActive)h=i;});return h;}
@@ -285,6 +282,7 @@ updateMatchingBtn();
   ensureAllTracks();
   if(typeof rollSanitize==='function'){pianoRoll=rollSanitize(data.pianoRoll);rollView=-1;}
   if(typeof voxLoad==='function')voxLoad(data.vocals);
+  if(typeof applyBouncerMode==='function'){bouncerMode=['all','bunker','off'].includes(data.bouncerMode)?data.bouncerMode:'all';applyBouncerMode();}
   if(typeof automationLoad==='function')automationLoad(data.automation);
   if(typeof applyMusicUnlocks==='function')applyMusicUnlocks();
 }

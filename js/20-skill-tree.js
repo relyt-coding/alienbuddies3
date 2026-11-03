@@ -105,7 +105,7 @@ const MUSIC_TREE_NODES=(function(){
   }
 
   // GROOVE
-  const gr=hub('mt_groove','🥁','Groove','Tightens the sequencer: sequencer steps earn +50%. Unlock Velocity and longer loops (32 / 64 steps) from here. ×1.5 Alien Gems, ×1.5 points.',
+  const gr=hub('mt_groove','🥁','Groove','The rhythm hub: unlock Velocity and longer loops (32 / 64 steps) from here. ×1.5 Alien Gems.',
     'Groove is the feel that makes music move: tiny differences in timing and loudness between notes. Two drummers can play the same pattern and sound totally different because of it.',
     16200,'mt_piano',along(pr,420),{mult:1.5,seqBoost:1.5});
   br('mt_velocity','📶','Velocity','Unlocks the VELOCITY button: set how hard each step and each piano roll note hits. ×1.2 Alien Gems.',6000,'mt_groove',side(gr,-170),
@@ -317,6 +317,24 @@ const SKILL_TREE_NODES = [
   {id:'dna_splice', icon:'🧬', name:'DNA Splice', desc:'Aliens occasionally double-tap automatically.', cost:600, requires:['alien_awakening'], x:680, y:380, branch:'aliens', mult:1.5},
   {id:'ascension', icon:'🌠', name:'Ascension', desc:'All alien effects ×3 and your egg begins to incubate.', cost:900, requires:['dna_splice'], x:760, y:460, branch:'aliens', mult:1.5},
 ];
+// ── The skill tree only boosts Alien Gems (no point bonuses) ──
+// Tucana Core ×2, each Quad Sun ×4. Nodes that gave a point bonus give a small gem bonus instead
+// (×1.5 points → ×1.05 gems, ×2 → ×1.1); nodes that already boosted gems just lose their point part.
+(function gemsOnly(){
+  const fmt=v=>'×'+(+v.toFixed(2));
+  SKILL_TREE_NODES.forEach(n=>{
+    let gm=n.gemMult||1;
+    if(n.id==='core')gm=2;
+    else if(/^sun_/.test(n.id))gm=4;
+    else if(n.mult>0&&!n.gemMult)gm=+(1+(n.mult-1)*.1).toFixed(3);
+    n.mult=0;delete n.seqBoost;
+    if(gm!==1)n.gemMult=gm;
+    let d=(n.desc||'').replace(/\s*Grants ×[\d.]+ points\.?/i,'').replace(/,?\s*×[\d.]+ points\.?/gi,'').trim();
+    if(gm!==1&&!/Alien Gems/.test(d))d=(d&&!/[.!?]$/.test(d)?d+'.':d)+' '+fmt(gm)+' Alien Gems.';
+    d=d.trim();if(d&&!/[.!?]$/.test(d))d+='.';
+    n.desc=d;
+  });
+})();
 const SKILL_MAP = {};
 SKILL_TREE_NODES.forEach(n => SKILL_MAP[n.id] = n);
 
@@ -352,7 +370,7 @@ function gemsPerMinute(){
   rate *= skillGemMultiplier();
   return rate;
 }
-// Musical Toolkit hubs (×1.5) and branches (×1.2) multiply the gem rate
+// every skill node with a gem bonus multiplies the gem rate (Core ×2, Quad Suns ×4, music hubs ×1.5, branches ×1.2, …)
 function skillGemMultiplier(){
   let m=1;
   SKILL_TREE_NODES.forEach(n=>{if(n.gemMult&&unlockedSkills[n.id])m*=n.gemMult;});
@@ -424,7 +442,7 @@ function buySkill(id){
   alienGems -= price;
   unlockedSkills[id] = true;
   // Unlock sound if this node grants one
-  if(node.soundUnlock) unlockPlanetSound(node.soundUnlock);
+  if(node.soundUnlock){unlockPlanetSound(node.soundUnlock);if(typeof playUnlockPreview==='function')playUnlockPreview(node.soundUnlock,350);} // hear the new sound after the unlock effect
   // Musical Toolkit: show the newly unlocked sequencer feature
   if(typeof applyMusicUnlocks==='function') applyMusicUnlocks(id);
   // quantum_strike is read live by seqStepMultiplier(), nothing to restart

@@ -34,6 +34,19 @@ function formatMult(n){if(n<100000)return n.toLocaleString(undefined,{maximumSig
 // ══════════════════════════════════════════════
 // Unlock prices over 5 million are 30% pricier (a longer grind for the big unlocks); cheap early unlocks are untouched.
 function bump30(c){return c>5e6?Math.round(c*1.3):c;}
+// ── Progress discount (the skill tree no longer boosts points) ──
+// Point prices get cheaper as you collect aliens, by the same amount the old skill-tree point bonuses used to add at that
+// stage (measured with the test-mode bot: none until alien 24, about ×10^8 by alien 50, ×10^13 by 60, ×10^14 at 79).
+// So the alien pace stays where it was. Table: [aliens owned, log10 of the discount], straight lines in between.
+const PROGRESS_DISCOUNT=[[23,0],[27,.9],[31,1.2],[35,2.8],[40,4],[45,6],[50,8.2],[55,11.4],[60,13.4],[65,13.8],[70,13.9],[79,14.4]];
+function progressDiscount(a){
+  if(a==null)a=typeof totalAliens==='number'?totalAliens:0;
+  const T=PROGRESS_DISCOUNT;if(a<=T[0][0])return 1;
+  let L=T[T.length-1][1];
+  for(let i=1;i<T.length;i++)if(a<=T[i][0]){const[a0,l0]=T[i-1],[a1,l1]=T[i];L=l0+(l1-l0)*(a-a0)/(a1-a0);break;}
+  return Math.pow(10,L);
+}
+const _disc=c=>{const d=progressDiscount();return d>1?Math.max(1,Math.round(c/d)):c;};
 const GAME_VERSION='0.2.91'; // bump on every delivered build (shown in Settings and on the home screen)
 const BASE_CPS=5;
 const UNLOCK_COST=bump30(60000000);
@@ -51,9 +64,9 @@ const DOT_COSTS=[5e10,5e17,5e24,5e31,5e38,5e45,5e52]; // v0.2.80: first upgrade 
 // v0.2.80: TIER 3 — Sequencer Multi-Click (costs more than the dot upgrades, and more to unlock)
 const SEQ_MC_UNLOCK_COST=1e12;
 const SEQ_MC_MAX_LEVEL=6; // level 6 = 8 clicks per step
-function seqMultiClickCost(lvl){return 5e12*Math.pow(1e8,lvl);}
+function seqMultiClickCost(lvl){return _disc(5e12*Math.pow(1e8,lvl));}
 function seqMultiClickUpgradeAt(lvl){const clicks=lvl+2;return{effectMain:`${clicks}× CLICKS`,effectSub:`Each sequencer step counts as ${clicks} clicks`,cost:seqMultiClickCost(lvl)};}
-function dotUpgradeCost(n){return DOT_COSTS[Math.min(n,DOT_COSTS.length-1)];}
+function dotUpgradeCost(n){return _disc(DOT_COSTS[Math.min(n,DOT_COSTS.length-1)]);}
 function alienCost(n){
   if(n===0)return 1000;       // alien 1: 1,000
   if(n===1)return 100000;     // alien 2: 100,000
@@ -69,13 +82,14 @@ function alienCost(n){
   }
   // v0.2.92 second-half balance: every alien after #20 costs an extra ×1.5 on top of the curve above
   // (simulated: early game unchanged; waits between matching levels after level 5 go from ~0 to ~5-50 min)
-  return bump30(c)*(n>20?Math.pow(1.5,n-20):1);
+  const d=progressDiscount(n);
+  return Math.max(1,Math.round(bump30(c)*(n>20?Math.pow(1.5,n-20):1)/d));
 }
 // Alien Power: each level makes EVERY alien worth more, so it snowballs with alien count. Levels after 4 cost ×1000 extra each.
-function alienBoostUpgradeCost(lvl){if(lvl===0)return 60000000;let c=60000000;for(let i=1;i<=lvl;i++){c=Math.round(c*(100+i*40));if(i>=2)c=Math.round(c*3);}return lvl>4?c*Math.pow(1000,lvl-4):c;}
+function alienBoostUpgradeCost(lvl){if(lvl===0)return _disc(60000000);let c=60000000;for(let i=1;i<=lvl;i++){c=Math.round(c*(100+i*40));if(i>=2)c=Math.round(c*3);}return _disc(lvl>4?c*Math.pow(1000,lvl-4):c);}
 function alienBoostUpgradeAt(lvl){const cost=alienBoostUpgradeCost(lvl);const perAlien=(1.1+(lvl+1)*0.3).toFixed(1);const perAlienNext=(1.1+(lvl+2)*0.3).toFixed(1);return{effectMain:`ALIEN POWER ×${perAlienNext}/ALIEN`,effectSub:`Per-alien base: ×${perAlien} → ×${perAlienNext}`,cost};}
 // Multi-Click: levels after 5 cost ×100 extra each
-function multiClickUpgradeCost(lvl){if(lvl===0)return 15000000;let c=15000000;for(let i=1;i<=lvl;i++){c=Math.round(c*(100+i*40));if(i>=2)c=Math.round(c*3);}return lvl>5?c*Math.pow(100,lvl-5):c;}
+function multiClickUpgradeCost(lvl){if(lvl===0)return _disc(15000000);let c=15000000;for(let i=1;i<=lvl;i++){c=Math.round(c*(100+i*40));if(i>=2)c=Math.round(c*3);}return _disc(lvl>5?c*Math.pow(100,lvl-5):c);}
 function multiClickUpgradeAt(lvl){const clicks=lvl+2;return{effectMain:`${clicks}× CLICKS`,effectSub:`Each tap counts as ${clicks} clicks`,cost:multiClickUpgradeCost(lvl)};}
 
 // Pad button costs: 1 free, 2=5 (kick), 3=100 (snare), 4=3K, 5=2.5M ...
@@ -92,7 +106,7 @@ function soundLibCost(idx){
   // idx 0 = 5,000, idx 1 = 50,000, idx 2 = 500,000, each ×10 after
   let c=5000;
   for(let i=0;i<idx;i++) c*=10;
-  return bump30(c);
+  return _disc(bump30(c));
 }
 
 // Sequencer tracks: track 1 = 100K, track 2 = 25M, track 3 = 250M, tracks 4-6 keep the old (very large) curve
@@ -108,7 +122,7 @@ function seqTrackCostOld(tracks){
 function seqTrackCost(tracks){
   if(tracks===0)return 100000;
   if(tracks===1)return bump30(25000000);
-  if(tracks===2)return bump30(250000000);
-  return bump30(seqTrackCostOld(tracks));
+  if(tracks===2)return _disc(bump30(250000000));
+  return _disc(bump30(seqTrackCostOld(tracks)));
 }
 const MAX_SEQ_TRACKS=6;

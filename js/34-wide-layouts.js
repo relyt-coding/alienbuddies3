@@ -47,7 +47,7 @@
     const area=$('seqArea'),c=$('seqLayersContainer');
     if(!area||!c||!area.classList.contains('visible'))return;
     const land=B.classList.contains('phone-land');
-    const base=land?20:18,max=land?34:44;
+    const base=land?20:18,max=land?34:Math.max(44,Math.round(innerHeight*.06)); // big monitors get taller steps
     const rows=c.querySelectorAll('.seq-layer-row');
     area.style.setProperty('--seq-step-h',base+'px');
     if(!rows.length||area.clientHeight<40)return;

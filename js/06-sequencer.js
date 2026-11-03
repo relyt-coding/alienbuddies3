@@ -1195,7 +1195,9 @@ function fitSeqScroll(){
       const belowC=ar.bottom-cr.bottom;                      // bottom button row etc.
       const pa=grid.closest('.pad-area'),pcs=pa?getComputedStyle(pa):null;
       const gap=pa?(pa.getBoundingClientRect().top-ar.bottom)+(pcs?parseFloat(pcs.paddingTop)||0:0):12;
-      const room=sb.getBoundingClientRect().top-10-cr.top-belowC-gap-padNat;
+      // (the even spacing margins added by centerPhonePads are just leftover room — count them as free)
+      const _bal=['scoreRow','seqArea'].reduce((a,id)=>{const e=document.getElementById(id);return a+(e?parseFloat(e.style.marginTop)||0:0);},0)+(pa?parseFloat(pa.style.marginTop)||0:0);
+      const room=sb.getBoundingClientRect().top-10-cr.top-belowC-gap-padNat+_bal;
       const target=Math.max(pitch*2.5+hdr,Math.min(full,room));
       if(target<full-2){sc.classList.add('seq-scroll');sc.style.maxHeight=Math.floor(target)+'px';}
       else off();

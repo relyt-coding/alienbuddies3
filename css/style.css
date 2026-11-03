@@ -1801,3 +1801,5 @@ body.phone-land .bunker-grid{max-width:480px;margin:0 auto;}
 #skillTreeModal.st-3d .st-node[data-sun]{transform-origin:50% 53px;}
 #skillTreeModal.st-3d #skillTreeCanvas{background:radial-gradient(ellipse at 50% 70%,#0a1030 0%,#030510 60%);}
 #skillTreeModal.st-3d .st-line{height:3px;}
+/* phone/tablet: the ACTIVATE hint arrow belongs to the main screen — never float it over the shop or bunker */
+body.store-open:not(.desktop-mode) #arrowActivate,body.bunker-open:not(.desktop-mode) #arrowActivate{display:none !important;}

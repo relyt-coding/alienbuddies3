@@ -1721,3 +1721,64 @@ body.vox-on .auto-view{display:none !important;}
 #bunkerView .page-title{font-size:clamp(1.5rem,9vw,2.1rem) !important;}
 #alienNameRandom{font-family:'Bebas Neue',sans-serif;font-size:.85rem;letter-spacing:.08em;padding:.38rem .65rem;border-radius:8px;border:1px solid var(--anc,#00ff88);background:transparent;color:var(--anc,#00ff88);cursor:pointer;touch-action:manipulation;white-space:nowrap;}
 #alienNameRandom:active{transform:scale(.96);}
+
+/* ══════════════════════════════════════════════
+   SIDEWAYS PHONE (body.phone-land) — slim header, full-height sequencer, one row of pads
+   ══════════════════════════════════════════════ */
+body.phone-land #gameView .app{justify-content:flex-start;gap:4px;padding:4px max(10px,env(safe-area-inset-right,0px)) max(4px,env(safe-area-inset-bottom,0px)) max(10px,env(safe-area-inset-left,0px));overflow:hidden;}
+body.phone-land #gameView .header{flex:0 0 auto;height:30px;}
+body.phone-land #gameView .header .game-title,body.phone-land #gameView .header .subtitle{display:none !important;}
+body.phone-land .btn-left,body.phone-land .btn-right{top:50% !important;}
+body.phone-land .nav-btn{font-size:.68rem;padding:.22rem .5rem;}
+/* score + points/sec sit in the middle of the header */
+body.phone-land #scoreRow{position:absolute;top:4px;left:50%;transform:translateX(-50%);height:30px;display:flex;align-items:center;gap:8px;z-index:4;margin:0 !important;width:auto;max-width:44vw;}
+body.phone-land #scoreRow .score-section{display:flex;align-items:baseline;gap:7px;margin:0 !important;white-space:nowrap;}
+body.phone-land .score{font-size:1.45rem !important;line-height:1;}
+body.phone-land #scoreSubEl,body.phone-land #multEl,body.phone-land #autoInfo,body.phone-land #energyMeter,body.phone-land #alienMultInfo{display:none !important;}
+.land-rate{display:none;font-family:'Bebas Neue',sans-serif;font-size:.72rem;letter-spacing:.08em;color:#5fae85;}
+body.phone-land .land-rate{display:inline;}
+/* no trackers sideways — except the one-time ACTIVATE button, so it can still be bought */
+body.phone-land #tiersWrap{display:none !important;}
+body.phone-land.drum-overlay #tiersWrap{display:block !important;margin:0 !important;}
+body.phone-land.drum-overlay #tiersWrap .tiers-col-label,body.phone-land.drum-overlay #tiersContainer,body.phone-land.drum-overlay #tiersDivider,body.phone-land.drum-overlay #autoTiersCol{display:none !important;}
+body.phone-land.drum-overlay #tiersWrap > div:first-child{min-height:0 !important;margin-top:0 !important;}
+body.phone-land #drumTrackerActivateBtn{transform:none !important;animation:none !important;font-size:.6rem !important;padding:.2rem .55rem !important;}
+body.phone-land #soundboardBtn{display:none !important;}
+body.phone-land #drumTrackerOverlay{position:static !important;background:none !important;-webkit-backdrop-filter:none !important;backdrop-filter:none !important;}
+body.phone-land #arrowActivate,body.phone-land #arrowShop{display:none !important;}
+/* utility buttons move up into the header row (JS lines them up next to BUNKER / SHOP) */
+body.phone-land #settingsOpenBtn,body.phone-land #soundboardBtn,body.phone-land #padEditToggleBtn,body.phone-land #partyBtn{bottom:auto !important;top:calc(4px + env(safe-area-inset-top,0px));font-size:.62rem !important;padding:.24rem .5rem !important;animation:none;border-width:1px;}
+body.phone-land #partyBtn{box-shadow:0 0 8px -2px #ff00cc;}
+/* sequencer takes all the room between the header and the pads */
+body.phone-land.seq-on .seq-area.visible{flex:1 1 0;min-height:0;overflow-y:auto;overscroll-behavior:contain;margin:0 !important;scrollbar-width:none;}
+body.phone-land .seq-area::-webkit-scrollbar{display:none;}
+body.phone-land .seq-area-header{position:sticky;top:0;z-index:4;background:#0a0a0a;}
+body.phone-land .seq-step{height:var(--seq-step-h,20px);}
+body.phone-land .pad-area{flex:0 0 auto;padding:0 !important;margin:0 !important;max-width:none !important;}
+body.phone-land:not(.seq-on) .pad-area{flex:1 1 0;min-height:0;display:flex;flex-direction:column;justify-content:flex-end;}
+body.phone-land .pad-grid{grid-template-columns:repeat(var(--np,1),minmax(0,1fr)) !important;grid-template-rows:none !important;grid-auto-rows:1fr;max-width:none !important;margin:0 auto !important;}
+body.phone-land .pad{aspect-ratio:auto !important;min-height:0;padding:.3rem .45rem;}
+
+/* ══════════════════════════════════════════════
+   DESKTOP DAW MODE (body.daw-wide) — sequencer unlocked and the side panels closed (or FILL chosen)
+   ══════════════════════════════════════════════ */
+body.daw-wide #gameView .app{justify-content:flex-start;gap:.5rem;padding-top:.7rem;padding-bottom:4.4rem;}
+body.daw-wide .header{flex:0 0 auto;}
+body.daw-wide .score{font-size:clamp(2rem,4.2vh,3rem) !important;}
+body.daw-wide #scoreRow{flex:0 0 auto;margin-top:0 !important;}
+body.daw-wide .tiers-container{max-height:13vh;}
+body.daw-wide.seq-on .seq-area.visible{flex:1 1 0;min-height:0;overflow-y:auto;overscroll-behavior:contain;margin-top:0 !important;scrollbar-width:thin;scrollbar-color:#2a2a4a transparent;}
+body.daw-wide .seq-area-header{position:sticky;top:0;z-index:4;background:#0a0a0a;}
+body.daw-wide .seq-step{height:var(--seq-step-h,18px);}
+body.daw-wide .seq-arr-grid{max-height:none;}
+body.daw-wide .pad-area,body.daw-wide.seq-on .pad-area{flex:0 0 auto;max-width:none !important;padding-bottom:0 !important;margin-top:0 !important;}
+body.daw-wide .pad-grid[data-pads]{grid-template-columns:repeat(var(--np,1),minmax(0,1fr)) !important;grid-template-rows:none !important;grid-auto-rows:clamp(64px,12vh,120px);max-width:calc(var(--np,1) * 230px) !important;margin:0 auto !important;}
+body.daw-wide .pad{aspect-ratio:auto !important;}
+/* opt-in FILL button in an empty side column */
+#dawFillBtn{position:fixed;top:50%;z-index:52;display:none;transform:translate(-50%,-50%);font-family:'Bebas Neue',sans-serif;font-size:.95rem;letter-spacing:.12em;padding:.5rem .9rem;border-radius:50px;border:1px solid #2a2a4a;background:#0d0d1c;color:#a0a8ff;cursor:pointer;opacity:.75;transition:opacity .15s,border-color .15s,box-shadow .15s;}
+#dawFillBtn:hover{opacity:1;border-color:#a0a8ff;box-shadow:0 0 14px -3px rgba(160,168,255,.6);}
+#dawFillBtn.show{display:block;}
+/* sideways phone: the bunker scrolls as one page instead of squeezing the alien grid into a sliver */
+body.phone-land .bunker-body{overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y;padding-bottom:1.5rem;}
+body.phone-land .bunker-grid-wrap{flex:none;overflow:visible;}
+body.phone-land .bunker-grid{max-width:480px;margin:0 auto;}

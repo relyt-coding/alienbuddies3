@@ -45,7 +45,7 @@ function applyWindowScale(){
   }
   // too small? (computers: window must stay usable; phones held sideways: ask to turn it upright)
   const phone=IS_MOBILE_DEVICE&&!IS_DESKTOP;
-  const tiny=phone?(H<340&&W>H):(W<520||H<380);
+  const tiny=phone?(H<230&&W>H):(W<520||H<380); // phones held sideways get their own layout (js/34-wide-layouts.js); only truly tiny screens are asked to turn
   const ov=document.getElementById('tooSmallOverlay');
   if(ov){
     ov.querySelector('.ts-msg').textContent=phone?'Turn your phone upright to play':'Please make this window bigger';
@@ -270,6 +270,9 @@ function fitPadArea(){
   const app=document.querySelector('#gameView .app');
   const area=grid&&grid.closest('.pad-area');
   if(!grid||!app||!area)return;
+  // sideways phone / desktop DAW mode have their own one-row pad sizing (js/34-wide-layouts.js)
+  if(document.body.classList.contains('phone-land')){document.body.classList.remove('pad-fit');clearPhoneBalance();if(typeof fitLandPads==='function')fitLandPads();return;}
+  if(document.body.classList.contains('daw-wide')){grid.style.maxWidth='';grid.style.height='';grid.style.marginTop='';return;}
   if(!document.body.classList.contains('desktop-mode')&&(document.body.classList.contains('store-open')||document.body.classList.contains('bunker-open')))return; // phone: home is off-screen — keep its last layout so it doesn't reflow on return
   if(!document.body.classList.contains('desktop-mode')||app.offsetHeight===0){
     grid.style.maxWidth='';grid.style.marginTop='';clearPhoneBalance();

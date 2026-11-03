@@ -1178,6 +1178,8 @@ function fitSeqScroll(){
   const rows=c.querySelectorAll('.seq-layer-row');
   const hdr=seqPhBar?seqPhBar.offsetHeight+3:0;
   const off=()=>{if(sc.classList.contains('seq-scroll')){sc.classList.remove('seq-scroll');sc.style.maxHeight='';}};
+  // sideways phone / desktop DAW mode: the whole sequencer area scrolls and the rows grow to fill it
+  if(document.body.classList.contains('phone-land')||document.body.classList.contains('daw-wide')){off();if(typeof fitWideSeq==='function')fitWideSeq();return;}
   // PHONE LAYOUT: the track list fills whatever vertical space the drum pads leave over
   // (few pads = more rows visible, 8 pads = fewer), scrolling when there are more tracks than fit.
   if(!document.body.classList.contains('desktop-mode')&&document.body.classList.contains('seq-on')&&rows.length&&c.offsetParent!==null){

@@ -19,7 +19,7 @@ function gameViewCenter(){
 function doTap(coords){
   // Pad taps feed the DRUMPAD tracker (left). Sequencer steps are scored separately in scoreSeqStep().
   const mult=totalMultiplier();const cpt=clicksPerTap();
-  score+=mult*cpt;
+  score+=mult*cpt;if(typeof _rateAdd==='function')_rateAdd(mult*cpt);
   const anims=[];for(let c=0;c<cpt;c++)addDotToTier(0,anims);
   scoreEl.classList.add('flash');setTimeout(()=>scoreEl.classList.remove('flash'),85);
   requestRender(anims[anims.length-1]);
@@ -126,7 +126,7 @@ function seqEarningsPerSec(){return seqStepsPerSec()*seqStepScale()*seqStepMulti
 function scoreSeqStep(quiet){
   const cpt=clicksPerTap()*seqClicksPerStep(),sc=seqStepScale();
   const gain=seqStepMultiplier()*cpt*sc;
-  score+=gain;
+  score+=gain;if(typeof _rateAdd==='function')_rateAdd(gain);
   // dots advance by the same BPM-scaled amount so tier progress per second is BPM-independent too
   _seqDotAccum+=cpt*sc;
   const anims=[];

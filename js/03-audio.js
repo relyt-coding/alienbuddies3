@@ -581,7 +581,7 @@ function playSound(id,velMult,when,trackIdx){
   runSoundFn(id,t,gv,trackIdx);
   if(SC_TRIGGERS.includes(id))sidechainHit(t,fxChannelOf(trackIdx));
   if(_exporting)return; // no party flashes for notes being rendered to a file
-  if(t>now+.008)setTimeout(partyPulseOnBeat,(t-now)*1000);else partyPulseOnBeat();
+  if(t>now+.008)setTimeout(()=>partyPulseOnBeat(id,trackIdx,velMult),(t-now)*1000);else partyPulseOnBeat(id,trackIdx,velMult);
 }
 
 // ══════════════════════════════════════════════

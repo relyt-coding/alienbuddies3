@@ -199,6 +199,8 @@ addEventListener('resize',()=>{_bbCache=null;});
   requestAnimationFrame(tickBouncers);
   if(document.hidden||!bouncers.length||!showBouncers)return;
   const bounds=cachedBouncerBounds(now||performance.now());
+  // party styles (js/36-party-modes.js) choreograph the aliens instead of free bouncing
+  if(partyMode&&typeof partyChoreo==='function'&&partyChoreo(now||performance.now(),bounds))return;
   const minX=bounds.x,minY=bounds.y,maxX=bounds.x+bounds.w,maxY=bounds.y+bounds.h;
   for(const b of bouncers){
     b.x+=b.vx;b.y+=b.vy;
@@ -217,8 +219,10 @@ let partyBeat=0;
 const partyOverlay=document.getElementById('partyOverlay');
 const partyBtn=document.getElementById('partyBtn');
 function startParty(){partyMode=true;partyBtn.classList.add('active');partyBtn.textContent='STOP PARTY';
+  if(typeof partyStyleOn==='function')partyStyleOn();
   if(typeof bouncerMode!=='undefined'&&bouncerMode!=='all'){setBouncerMode('all');showToast('👽 Aliens are back for the party!');}} // hidden buddies come back out for a party
 function stopParty(){
+  if(typeof partyStyleOff==='function')partyStyleOff(); // settle aliens where the dance left them
   partyMode=false;partyBtn.classList.remove('active');partyBtn.textContent='ALIEN PARTY';
   // Reset all bouncers to their base filter/transform
   bouncers.forEach(b=>{b.el.style.filter=b._baseFilter;b._scale=1;b.el.style.transform=`translate(${b.x}px,${b.y}px) scale(1)`;if(b._partyTimeout){clearTimeout(b._partyTimeout);b._partyTimeout=null;}});
@@ -227,8 +231,9 @@ function stopParty(){
 function toggleParty(){if(partyMode)stopParty();else startParty();}
 
 // Called every time any sound fires — pulses 2 random bouncers
-function partyPulseOnBeat(){
+function partyPulseOnBeat(id,trackIdx,vel){
   if(!partyMode||bouncers.length===0)return;
+  if(typeof partyHit==='function')partyHit(id,trackIdx,vel);
   const pool=[...Array(bouncers.length).keys()];
   const count=Math.min(3,bouncers.length);
   const picked=[];

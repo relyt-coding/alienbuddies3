@@ -1803,3 +1803,11 @@ body.phone-land .bunker-grid{max-width:480px;margin:0 auto;}
 #skillTreeModal.st-3d .st-line{height:3px;}
 /* phone/tablet: the ACTIVATE hint arrow belongs to the main screen — never float it over the shop or bunker */
 body.store-open:not(.desktop-mode) #arrowActivate,body.bunker-open:not(.desktop-mode) #arrowActivate{display:none !important;}
+
+/* ══ ALIEN PARTY STYLES ══ */
+#partyStyleBtn{position:fixed;z-index:53;display:none;font-family:'Bebas Neue',sans-serif;font-size:.85rem;letter-spacing:.1em;padding:.32rem .75rem;border-radius:50px;border:1px solid #ff66ff;background:rgba(26,0,26,.9);color:#ff99ff;cursor:pointer;touch-action:manipulation;white-space:nowrap;box-shadow:0 0 12px -3px rgba(255,0,204,.6);}
+#partyStyleBtn.show{display:block;}
+#partyStyleBtn:active{transform:scale(.96);}
+body.phone-land #partyStyleBtn{font-size:.62rem;padding:.2rem .5rem;}
+body.store-open:not(.desktop-mode) #partyStyleBtn,body.bunker-open:not(.desktop-mode) #partyStyleBtn{display:none !important;}
+.party-eqbar{position:absolute;transform-origin:50% 100%;border-radius:4px 4px 1px 1px;pointer-events:none;background:var(--c);background:linear-gradient(to top,color-mix(in srgb,var(--c) 15%,transparent),var(--c));box-shadow:0 0 10px -2px var(--c);opacity:.55;will-change:transform;}

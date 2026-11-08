@@ -5,7 +5,6 @@
 //  GLOW is the original (aliens light up to the beat while bouncing around). Every other style
 //  takes over the aliens' positions and choreographs them to the music:
 //   EQ BARS       line up on the sequencer and rise and fall with the real audio spectrum
-//   STADIUM WAVE  a row that does "the wave" — every hit sends a wave across
 //   DISCO ORBIT   ring(s) spinning around the score, swelling with the music
 //   CONGA LINE    a figure-8 conga line, hopping on the beat
 //   BOUNCE HOUSE  each instrument gets its own aliens, who jump when it plays
@@ -14,7 +13,6 @@
 const PARTY_STYLES=[
   {id:'glow',  icon:'✨',name:'GLOW'},
   {id:'eq',    icon:'📊',name:'EQ BARS'},
-  {id:'wave',  icon:'🌊',name:'STADIUM WAVE'},
   {id:'orbit', icon:'🪩',name:'DISCO ORBIT'},
   {id:'conga', icon:'🐍',name:'CONGA LINE'},
   {id:'bounce',icon:'🤸',name:'BOUNCE HOUSE'},
@@ -34,9 +32,11 @@ try{const v=localStorage.getItem('ab2_party_style');if(PARTY_STYLES.some(s=>s.id
   document.body.appendChild(chip);
   function styleObj(){return PARTY_STYLES.find(s=>s.id===partyStyle)||PARTY_STYLES[0];}
   function paintChip(){const s=styleObj();chip.textContent=s.icon+' '+s.name+' ▸';chip.title='Change how the aliens party';}
+  function owned(){return typeof partyOwnedStyles==='function'?partyOwnedStyles():PARTY_STYLES.map(s=>s.id);}
   function placeChip(){
     const pb=$('partyBtn');
-    const show=partyMode&&pb&&getComputedStyle(pb).display!=='none';
+    if(!owned().includes(partyStyle)){partyStyle='glow';paintChip();}
+    const show=partyMode&&pb&&getComputedStyle(pb).display!=='none'&&owned().length>1;
     chip.classList.toggle('show',!!show);
     if(!show)return;
     const r=pb.getBoundingClientRect();
@@ -52,12 +52,16 @@ try{const v=localStorage.getItem('ab2_party_style');if(PARTY_STYLES.some(s=>s.id
   }
   chip.addEventListener('click',e=>{
     e.stopPropagation();
-    const i=PARTY_STYLES.findIndex(s=>s.id===partyStyle);
-    const nx=PARTY_STYLES[(i+1)%PARTY_STYLES.length];
+    const list=PARTY_STYLES.filter(s=>owned().includes(s.id));
+    if(list.length<2)return;
+    const i=list.findIndex(s=>s.id===partyStyle);
+    const nx=list[(i+1)%list.length];
     setStyle(nx.id);
     if(typeof showToast==='function')showToast(nx.icon+' '+nx.name);
   });
   paintChip();
+  window.setPartyStyle=function(id){setStyle(id);placeChip();};
+  window.refreshPartyAccess=function(){placeChip();};
   setInterval(()=>{placeChip();},300);
   addEventListener('resize',placeChip);
 
@@ -92,15 +96,13 @@ try{const v=localStorage.getItem('ab2_party_style');if(PARTY_STYLES.some(s=>s.id
   }
 
   // ── hits from the sound engine ──
-  let lastHit=-1e9,fronts=[],frontDir=1;
+  let lastHit=-1e9;
   const soundOrder=[];
   window.partyHit=function(id,trackIdx,vel){
     const t=performance.now();
     lastHit=t;
     const v=Math.max(.35,Math.min(1.2,vel===undefined?1:vel));
-    if(partyStyle==='wave'){
-      if(!fronts.length||t-fronts[fronts.length-1].t0>170){fronts.push({t0:t,dir:frontDir,amp:v});frontDir=-frontDir;}
-    }else if(partyStyle==='bounce'&&id){
+    if(partyStyle==='bounce'&&id){
       let k=soundOrder.indexOf(id);
       if(k<0){soundOrder.push(id);if(soundOrder.length>12)soundOrder.shift();k=soundOrder.indexOf(id);}
       const L=soundOrder.length;
@@ -122,10 +124,9 @@ try{const v=localStorage.getItem('ab2_party_style');if(PARTY_STYLES.some(s=>s.id
   let eqBars=[],t0=0,lastT=0;
   function clearFx(){eqBars.forEach(e=>e.remove());eqBars=[];}
   function enterStyle(){
-    t0=performance.now();fronts=[];soundOrder.length=0;
+    t0=performance.now();soundOrder.length=0;
     bouncers.forEach(b=>{b._pp={};});
     if(partyStyle!=='glow')analyserOn();
-    if(partyStyle!=='glow'&&typeof showToast==='function'&&!enterStyle._quiet){} // (toast comes from the chip)
   }
   function leaveStyle(){
     // keep every alien exactly where it is, so normal bouncing (or the next style) carries on from there
@@ -173,19 +174,6 @@ try{const v=localStorage.getItem('ab2_party_style');if(PARTY_STYLES.some(s=>s.id
         T.push({x:cx-sz/2,y:base-sz,ox:0,oy:-lift-3*Math.sin(now/420+i*.7)*(p.lift<.05?1:0),s:1+p.lift*.25});
         const d=eqBars[i];
         d.style.cssText=`left:${(cx-bw/2).toFixed(1)}px;top:${(base-maxLift).toFixed(1)}px;width:${bw.toFixed(1)}px;height:${maxLift.toFixed(0)}px;transform:scaleY(${Math.max(.01,p.lift).toFixed(3)});--c:${b._col||'#0f8'};`;
-      });
-    }else if(st==='wave'){
-      let y=B.y+B.h*.42;
-      if(lm.score&&lm.seq&&lm.seq.top-lm.score.bottom>110)y=(lm.score.bottom+lm.seq.top)/2-sz/2;
-      else if(lm.seq&&lm.seq.top-B.y>150)y=lm.seq.top-sz-16;
-      fronts=fronts.filter(f=>now-f.t0<1600);
-      const A=Math.min(110,Math.max(50,(y-B.y)*.6));
-      bouncers.forEach((b,i)=>{
-        const xn=N>1?i/(N-1):.5;
-        let bump=0;
-        fronts.forEach(f=>{const pos=(now-f.t0)/1000*1.5;const d=(f.dir>0?xn:1-xn)-pos+.1;bump+=f.amp*Math.exp(-(d*d)/(2*.06*.06));});
-        bump=Math.min(1.3,bump);
-        T.push({x:B.x+24+xn*(B.w-48-sz),y,ox:0,oy:-A*bump-6*Math.sin(beat*Math.PI-i*.55),s:1+.35*bump});
       });
     }else if(st==='orbit'){
       let cx=B.x+B.w/2,cy=B.y+B.h*.45;

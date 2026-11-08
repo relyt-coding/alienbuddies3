@@ -11,9 +11,10 @@ const FX_NODE_IDS=['mt_reverb','mt_echo','mt_pingpong','mt_filter','mt_distortio
   'mt_autotune','mt_voicefx','mt_harmonizer','mt_vocoder'];
 function _muShow(id,on){const el=document.getElementById(id);if(el)el.style.display=on?'':'none';}
 
-function applyMusicUnlocks(justBoughtId){
-  // ── loop length ──
-  const lvl=musicHas('mt_steps64')?2:(musicHas('mt_steps32')?1:0);
+function applyMusicUnlocks(justBoughtId,quiet){
+  // ── loop length (store: SEQUENCER UPGRADES) ──
+  const _sf=id=>typeof seqFeatHas==='function'&&seqFeatHas(id);
+  const lvl=_sf('steps64')?2:(_sf('steps32')?1:0);
   shop.seqStepsLevel=lvl;
   if(justBoughtId==='mt_steps32'||justBoughtId==='mt_steps64'){
     STEPS=justBoughtId==='mt_steps64'?64:32;applyStepCount(); // switch to the new length straight away
@@ -21,6 +22,12 @@ function applyMusicUnlocks(justBoughtId){
     STEPS=16;applyStepCount();
   }
   if(typeof updateStepsBtn==='function')updateStepsBtn();
+
+  // ── BPM (store: SEQUENCER UPGRADES) — locked at 100 until bought (BPM never changes points per second) ──
+  const bpmOn=_sf('bpm');
+  _muShow('seqBpmDown',bpmOn);_muShow('seqBpmUp',bpmOn);
+  const bpmEl=document.getElementById('seqBpmDisplay');if(bpmEl){bpmEl.style.cursor=bpmOn?'pointer':'default';bpmEl.title=bpmOn?'Double-click to enter BPM':'BPM control unlocks in the store';}
+  if(!bpmOn&&typeof seqBpm!=='undefined'&&seqBpm!==100){seqBpm=100;if(typeof updateBpmDisplay==='function')updateBpmDisplay();if(seqPlaying){stopSeq();startSeq();}}
 
   // ── key: the KEY hub turns it on in C major; packs add more keys ──
   if(musicHas('mt_key')){
@@ -40,7 +47,7 @@ function applyMusicUnlocks(justBoughtId){
   if(!vel&&typeof levelAdjMode!=='undefined'&&levelAdjMode&&typeof setLevelAdjMode==='function')setLevelAdjMode(false);
 
   // ── pattern / arrangement / song switch ──
-  const arr=musicHas('mt_arrange'),song=musicHas('mt_song');
+  const arr=_sf('arrange'),song=_sf('song');
   const pills=document.querySelector('.seq-mode-pills');if(pills)pills.style.display=arr?'':'none';
   _muShow('seqModeSongBtn',song);
   if((seqMode==='arrange'&&!arr)||(seqMode==='song'&&!song)){if(typeof setSeqMode==='function')setSeqMode('pattern');}
@@ -83,7 +90,7 @@ function applyMusicUnlocks(justBoughtId){
     mt_vox4:'🎙 4 vocal layers: open VOX to use them.',mt_vox7:'🎶 7 vocal layers: open VOX to use them.',mt_vox10:'👥 10 vocal layers: a whole choir of you.',
     mt_panning:'↔ Panning unlocked in EFFECTS.',mt_sidechain:'💓 Sidechain unlocked: tracks with it on duck every time a kick plays.',
   }[justBoughtId];
-  if(where&&typeof showToast==='function')setTimeout(()=>showToast(where),1600);
+  if(where&&!quiet&&typeof showToast==='function')setTimeout(()=>showToast(where),1600);
   if(justBoughtId&&/^mt_piano\d$/.test(justBoughtId)&&typeof showToast==='function')
     setTimeout(()=>showToast('🎹 Piano roll layer '+justBoughtId.slice(8)+' unlocked: tap ROLL to pick a layer.'),1600);
   if(justBoughtId&&/^mt_keys\d$/.test(justBoughtId)&&typeof showToast==='function'){

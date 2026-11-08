@@ -105,21 +105,18 @@ const MUSIC_TREE_NODES=(function(){
   }
 
   // GROOVE
-  const gr=hub('mt_groove','🥁','Groove','The rhythm hub: unlock Velocity and longer loops (32 / 64 steps) from here. ×1.5 Alien Gems.',
+  const gr=hub('mt_groove','🥁','Groove','The rhythm hub: unlock Velocity from here. (Longer loops — 32 / 64 steps — are in the store, under the Sequencer.) ×1.5 Alien Gems.',
     'Groove is the feel that makes music move: tiny differences in timing and loudness between notes. Two drummers can play the same pattern and sound totally different because of it.',
     16200,'mt_piano',along(pr,420),{mult:1.5,seqBoost:1.5});
   br('mt_velocity','📶','Velocity','Unlocks the VELOCITY button: set how hard each step and each piano roll note hits. ×1.2 Alien Gems.',6000,'mt_groove',side(gr,-170),
     {fact:'Velocity comes from MIDI keyboards: it measures how fast a key is pressed, which is why harder hits play louder.'});
-  // 32 / 64 STEPS (longer loops come later, once the player has the basics)
-  const s32=br('mt_steps32','🔢','32 Steps','Doubles the sequencer loop to 32 steps (2 bars). Switch lengths with the STEPS button. ×1.2 Alien Gems.',8000,'mt_groove',side(gr,170),
-    {fact:'One sequencer step is a 16th note, so 16 steps make one bar of 4/4 time. 32 steps = 2 bars.'});
-  br('mt_steps64','🔢','64 Steps','Four bars in one loop: 64 steps. ×1.2 Alien Gems.',12000,'mt_steps32',rel(s32,280,150),
-    {fact:'Most dance music is built in 4, 8 and 16 bar phrases. 64 steps is a full 4-bar phrase.'});
+  // (32 / 64 steps moved to the store, under the Sequencer — this spot just anchors Mastering)
+  const s32=side(gr,170);
 
   // MASTERING — mixing tools for each track, plus EQ / compression on the whole song (the MASTER channel)
   const ms=hub('mt_mastering','💽','Mastering','Opens the mixing and mastering tools: EQ, Compression, Panning and Sidechain. EQ and Compression also work on the MASTER channel (the whole song). ×1.5 Alien Gems, ×1.5 points.',
     'Mixing is balancing every track against the others. Mastering is the final polish on the whole song, so it sounds good everywhere, from phone speakers to club systems.',
-    24000,'mt_steps32',side(s32,380),{mult:1.5});
+    24000,'mt_groove',side(s32,380),{mult:1.5});
   br('mt_eq','📊','EQ','Unlocks EQ: turn the lows, mids and highs of a track (or the whole song) up or down. ×1.2 Alien Gems.',9000,'mt_mastering',rel(ms,-60,210),
     {fact:'EQ (equalization) turns certain frequencies up or down. Cutting a little low end from everything except the kick and bass is one of the oldest mixing tricks.'});
   br('mt_compression','🗜','Compression','Unlocks COMPRESSION: evens out loud and quiet moments so a track sits steady and punchy. ×1.2 Alien Gems.',10000,'mt_mastering',rel(ms,-15,210),
@@ -130,13 +127,9 @@ const MUSIC_TREE_NODES=(function(){
     {fact:'Sidechain makes other sounds duck every time the kick hits, creating the "pumping" feel of dance music. Stardust\'s "Music Sounds Better With You" (1998) made it famous.'});
 
   // ARRANGEMENT
-  const ar=hub('mt_arrangement','🎬','Arrangement','The art of building a whole track out of patterns. Unlock Arrangement and Song mode from here. ×1.5 Alien Gems, ×2 points.',
+  const ar=hub('mt_arrangement','🎬','Arrangement','The art of building a whole track out of patterns, and the road to Vocals. (The Arrangement and Song tabs are unlocked in the store, under the Sequencer.) ×1.5 Alien Gems.',
     'Arrangement is deciding what plays when: intro, verse, chorus, drop, outro. Most pop songs reuse only a handful of patterns, just in a smart order.',
     48600,'mt_groove',along(gr,420),{mult:2});
-  const am=br('mt_arrange','🧩','Arrangement Mode','Unlocks the PAT / ARR switch: chain saved patterns into an arrangement. ×1.2 Alien Gems.',15000,'mt_arrangement',side(ar,170),
-    {fact:'Producers often loop one 8-bar section for hours, then build the full arrangement once the loop feels right.'});
-  br('mt_song','💿','Song Mode','Unlocks SONG mode: line up whole arrangements into a song. ×1.2 Alien Gems.',20000,'mt_arrange',side(am,130),
-    {fact:'A typical pop song is about 3 minutes long, which at 100 BPM is roughly 75 bars.'});
 
   // VOCALS — record your own voice on layers, then arrange the takes on the song timeline
   const vx=hub('mt_vocals','🎤','Vocals','Unlocks the VOX button: record your voice with your phone\'s or computer\'s mic (or one you plug in) on 2 vocal layers. Drag, trim, split and copy takes anywhere on the song. Every layer has its own effects rack, and vocal effects (Autotune, Voice Changer, Harmonizer, Vocoder) unlock from here. ×1.5 Alien Gems, ×1.5 points.',

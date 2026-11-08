@@ -64,9 +64,12 @@ const DOT_COSTS=[5e10,5e17,5e24,5e31,5e38,5e45,5e52]; // v0.2.80: first upgrade 
 // v0.2.80: TIER 3 — Sequencer Multi-Click (costs more than the dot upgrades, and more to unlock)
 const SEQ_MC_UNLOCK_COST=1e12;
 const SEQ_MC_MAX_LEVEL=6; // level 6 = 8 clicks per step
-function seqMultiClickCost(lvl){return _disc(5e12*Math.pow(1e8,lvl));}
+// v0.2.92: Tier 2, the dot multipliers and Tier 3 cost +75% per level, stacking (1st level ×1.75, 2nd ×3.06, 3rd ×5.36…)
+// so buys stop landing back to back. (One-time unlock gates keep their price.)
+function _p75(lvl){return Math.pow(1.75,Math.max(0,lvl)+1);}
+function seqMultiClickCost(lvl){return Math.round(_disc(5e12*Math.pow(1e8,lvl))*_p75(lvl));}
 function seqMultiClickUpgradeAt(lvl){const clicks=lvl+2;return{effectMain:`${clicks}× CLICKS`,effectSub:`Each sequencer step counts as ${clicks} clicks`,cost:seqMultiClickCost(lvl)};}
-function dotUpgradeCost(n){return _disc(DOT_COSTS[Math.min(n,DOT_COSTS.length-1)]);}
+function dotUpgradeCost(n){return Math.round(_disc(DOT_COSTS[Math.min(n,DOT_COSTS.length-1)])*_p75(n));}
 function alienCost(n){
   if(n===0)return 1000;       // alien 1: 1,000
   if(n===1)return 100000;     // alien 2: 100,000
@@ -86,10 +89,12 @@ function alienCost(n){
   return Math.max(1,Math.round(bump30(c)*(n>20?Math.pow(1.5,n-20):1)/d));
 }
 // Alien Power: each level makes EVERY alien worth more, so it snowballs with alien count. Levels after 4 cost ×1000 extra each.
-function alienBoostUpgradeCost(lvl){if(lvl===0)return _disc(60000000);let c=60000000;for(let i=1;i<=lvl;i++){c=Math.round(c*(100+i*40));if(i>=2)c=Math.round(c*3);}return _disc(lvl>4?c*Math.pow(1000,lvl-4):c);}
+function alienBoostUpgradeCost(lvl){return Math.round(_alienBoostBase(lvl)*_p75(lvl));}
+function _alienBoostBase(lvl){if(lvl===0)return _disc(60000000);let c=60000000;for(let i=1;i<=lvl;i++){c=Math.round(c*(100+i*40));if(i>=2)c=Math.round(c*3);}return _disc(lvl>4?c*Math.pow(1000,lvl-4):c);}
 function alienBoostUpgradeAt(lvl){const cost=alienBoostUpgradeCost(lvl);const perAlien=(1.1+(lvl+1)*0.3).toFixed(1);const perAlienNext=(1.1+(lvl+2)*0.3).toFixed(1);return{effectMain:`ALIEN POWER ×${perAlienNext}/ALIEN`,effectSub:`Per-alien base: ×${perAlien} → ×${perAlienNext}`,cost};}
 // Multi-Click: levels after 5 cost ×100 extra each
-function multiClickUpgradeCost(lvl){if(lvl===0)return _disc(15000000);let c=15000000;for(let i=1;i<=lvl;i++){c=Math.round(c*(100+i*40));if(i>=2)c=Math.round(c*3);}return _disc(lvl>5?c*Math.pow(100,lvl-5):c);}
+function multiClickUpgradeCost(lvl){return Math.round(_multiClickBase(lvl)*_p75(lvl));}
+function _multiClickBase(lvl){if(lvl===0)return _disc(15000000);let c=15000000;for(let i=1;i<=lvl;i++){c=Math.round(c*(100+i*40));if(i>=2)c=Math.round(c*3);}return _disc(lvl>5?c*Math.pow(100,lvl-5):c);}
 function multiClickUpgradeAt(lvl){const clicks=lvl+2;return{effectMain:`${clicks}× CLICKS`,effectSub:`Each tap counts as ${clicks} clicks`,cost:multiClickUpgradeCost(lvl)};}
 
 // Pad button costs: 1 free, 2=5 (kick), 3=100 (snare), 4=3K, 5=2.5M ...

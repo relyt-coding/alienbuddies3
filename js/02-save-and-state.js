@@ -10,7 +10,7 @@ let activeSlot=-1;
 function defaultSave(){
   return{
     score:0,tiers:[],
-    shop:{seqMultLevel:-1,multLevel:-1,alienBoostLevel:-1,multiClickLevel:-1,seqMultiClickLevel:-1,seqMultiClickUnlocked:false,dismissed:[],alienBoostUnlocked:false,multiClickUnlocked:false,drumDotsUnlocked:false,seqDotsUnlocked:false,seqStepsLevel:0},
+    shop:{seqMultLevel:-1,multLevel:-1,alienBoostLevel:-1,multiClickLevel:-1,seqMultiClickLevel:-1,seqMultiClickUnlocked:false,dismissed:[],alienBoostUnlocked:false,multiClickUnlocked:false,drumDotsUnlocked:false,seqDotsUnlocked:false,seqStepsLevel:0,partyLevel:0,partySeen:false,seqFeat:0},
     totalAliens:0,
     drum:{pads:1,extraSounds:0,seqTracks:0},
     ts:Date.now()
@@ -35,7 +35,7 @@ function autoSave(){
   const seqLayersSnap=seqLayers.map(l=>({soundId:l.soundId,steps:[...l.steps],vols:[...l.vols],muted:l.muted}));
   writeSlot(activeSlot,{
     score,tiers,autoTiers,
-    shop:{seqMultLevel:shop.seqMultLevel,multLevel:shop.multLevel,alienBoostLevel:shop.alienBoostLevel,multiClickLevel:shop.multiClickLevel,seqMultiClickLevel:shop.seqMultiClickLevel,seqMultiClickUnlocked:shop.seqMultiClickUnlocked,dismissed:shop.dismissed||[],alienBoostUnlocked:shop.alienBoostUnlocked,multiClickUnlocked:shop.multiClickUnlocked,drumDotsUnlocked:shop.drumDotsUnlocked,seqDotsUnlocked:shop.seqDotsUnlocked,seqStepsLevel:shop.seqStepsLevel||0},
+    shop:{seqMultLevel:shop.seqMultLevel,multLevel:shop.multLevel,alienBoostLevel:shop.alienBoostLevel,multiClickLevel:shop.multiClickLevel,seqMultiClickLevel:shop.seqMultiClickLevel,seqMultiClickUnlocked:shop.seqMultiClickUnlocked,dismissed:shop.dismissed||[],alienBoostUnlocked:shop.alienBoostUnlocked,multiClickUnlocked:shop.multiClickUnlocked,drumDotsUnlocked:shop.drumDotsUnlocked,seqDotsUnlocked:shop.seqDotsUnlocked,seqStepsLevel:shop.seqStepsLevel||0,partyLevel:shop.partyLevel||0,partySeen:!!shop.partySeen,seqFeat:shop.seqFeat||0},
     totalAliens,alienData,
     drum:{pads:drum.pads,extraSounds:drum.extraSounds,seqTracks:drum.seqTracks},
     matchLevelsCompleted,matchingMultiplier,matchSavedState,tipsOwned,tipsMult,drumTrackerActive,shopOpenCount,hasSeenSeqHint,
@@ -70,7 +70,7 @@ function autoSave(){
 // ══════════════════════════════════════════════
 let score=0,tiers=[],autoTiers=[];
 // multLevel = DRUMPAD ×4 dots (-1 / 0), seqMultLevel = SEQUENCER ×4 dots (-1 / 0)
-const shop={seqMultLevel:-1,multLevel:-1,alienBoostLevel:-1,multiClickLevel:-1,seqMultiClickLevel:-1,seqMultiClickUnlocked:false,dismissed:[],alienBoostUnlocked:false,multiClickUnlocked:false,drumDotsUnlocked:false,seqDotsUnlocked:false,seqStepsLevel:0};
+const shop={seqMultLevel:-1,multLevel:-1,alienBoostLevel:-1,multiClickLevel:-1,seqMultiClickLevel:-1,seqMultiClickUnlocked:false,dismissed:[],alienBoostUnlocked:false,multiClickUnlocked:false,drumDotsUnlocked:false,seqDotsUnlocked:false,seqStepsLevel:0,partyLevel:0,partySeen:false,seqFeat:0};
 let totalAliens=0,viewingBunker=0;
 let matchingLevel=0; // highest level unlocked (0=none, 1=level1 available, etc)
 let matchingMultiplier=1; // permanent multiplier from wins
@@ -183,8 +183,17 @@ function loadFromSave(data){
   unlockedSkills=data.unlockedSkills?Object.assign({},data.unlockedSkills):{};
   // Tucana Core used to be free: anyone who already unlocked skills keeps the core
   if(Object.keys(unlockedSkills).length&&!unlockedSkills.core)unlockedSkills.core=true;
-  // 32 / 64 steps now come from the skill tree (Musical Toolkit), not the shop
-  shop.seqStepsLevel=unlockedSkills.mt_steps64?2:(unlockedSkills.mt_steps32?1:0);
+  // Store ladders (v0.2.92): Alien Party + Sequencer Upgrades
+  shop.partyLevel=data.shop?.partyLevel||0;shop.partySeen=!!data.shop?.partySeen;shop.seqFeat=data.shop?.seqFeat||0;
+  // 32 / 64 steps, Arrangement and Song moved from the skill tree to the store: anyone who bought them keeps them
+  // (the store ladder is filled up to the furthest one they owned, BPM included) and gets those gems back
+  {const OLD={mt_steps32:[2,8000],mt_steps64:[3,12000],mt_arrange:[4,15000],mt_song:[5,20000]};let lv=0,refund=0;
+   // refund at roughly what they cost (music node prices grow ×1.2 per music node owned)
+   const _owned=typeof musicOwnedCount==='function'?musicOwnedCount():0,_g=n=>Math.round(n*Math.pow(1.2,Math.max(0,_owned-1)));
+   for(const k in OLD)if(unlockedSkills[k]){lv=Math.max(lv,OLD[k][0]);refund+=_g(OLD[k][1]);delete unlockedSkills[k];}
+   if(lv>shop.seqFeat)shop.seqFeat=lv;
+   if(refund){alienGems+=refund;setTimeout(()=>{if(typeof showToast==='function')showToast('🔢 Loop lengths, Arrangement and Song moved to the store (under the Sequencer). You keep them, and got '+refund.toLocaleString()+' gems back!');},2500);}}
+  shop.seqStepsLevel=shop.seqFeat>=3?2:(shop.seqFeat>=2?1:0);
   // Re-add every skill-tree sound the player has bought (the unlocked flag lives in memory only, so it used to be lost on reload)
   if(typeof PLANET_SOUND_DEFS!=='undefined')PLANET_SOUND_DEFS.forEach(ps=>{if(SOUND_MAP[ps.id])SOUND_MAP[ps.id].locked=true;});
   if(typeof SKILL_TREE_NODES!=='undefined')SKILL_TREE_NODES.forEach(n=>{if(n.soundUnlock&&unlockedSkills[n.id]&&typeof unlockPlanetSound==='function')unlockPlanetSound(n.soundUnlock);});

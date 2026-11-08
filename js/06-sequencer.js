@@ -492,6 +492,7 @@ function updateBpmDisplay(){
   if(l)l.textContent=`pattern · ${seqBpm} bpm`;
 }
 function changeBpm(delta){
+  if(typeof bpmLocked==='function'&&bpmLocked())return;
   seqBpm=Math.min(250,Math.max(50,seqBpm+delta));
   updateBpmDisplay();
   if(seqPlaying){stopSeq();startSeq();}
@@ -507,6 +508,7 @@ document.getElementById('seqBpmUp')&&document.getElementById('seqBpmUp').addEven
   bpmEl.title='Double-click to enter BPM';
 
   function openBpmInput(){
+    if(typeof bpmLocked==='function'&&bpmLocked())return; // BPM control is a store upgrade
     if(bpmEl.querySelector('input'))return; // already open
     const input=document.createElement('input');
     input.type='number';input.min=50;input.max=250;input.value=seqBpm;

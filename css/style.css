@@ -1905,3 +1905,29 @@ body.store-open:not(.desktop-mode) #partyStyleBtn,body.bunker-open:not(.desktop-
 .mg-diff{font-family:'Bebas Neue',sans-serif;font-size:.95rem;letter-spacing:.14em;padding:.4rem .9rem;border-radius:10px;border:1px solid #2a2a4a;background:#0e0e1a;color:#8890b8;cursor:pointer;touch-action:manipulation;}
 .mg-diff.sel{border-color:#e8ff00;color:#e8ff00;background:#141600;}
 .mg-src .nm{text-align:left;}
+
+/* Planet Hop buttons: icon, action, the drum they play, beat lights, a glow that builds toward your next press */
+.ph-pads .ph-pad{flex-direction:row;justify-content:flex-start;gap:clamp(8px,2vw,18px);padding:10px clamp(12px,3vw,26px) 10px;overflow:hidden;
+  background:radial-gradient(120% 140% at 0% 100%,color-mix(in srgb,var(--c) calc(18% + var(--cue,0)*30%),transparent),transparent 70%),linear-gradient(180deg,#141428,#0a0a16);
+  box-shadow:inset 0 0 calc(18px + var(--cue,0)*26px) -8px var(--c),0 0 calc(8px + var(--cue,0)*22px) -6px var(--c),inset 0 -3px 0 color-mix(in srgb,var(--c) 45%,transparent);
+  border-color:color-mix(in srgb,var(--c) calc(55% + var(--cue,0)*45%),#223);}
+.ph-pads .ph-pad:active,.ph-pads .ph-pad.lit{transform:translateY(2px) scale(.985);}
+.ph-pad .ph-ico{flex:0 0 auto;width:clamp(40px,8.5vh,76px);height:clamp(40px,8.5vh,76px);border-radius:50%;display:grid;place-items:center;border:2px solid var(--c);background:color-mix(in srgb,var(--c) 16%,#070710);box-shadow:0 0 14px -4px var(--c);}
+.ph-pad .ph-ico svg{width:58%;height:58%;fill:none;stroke:var(--c);stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round;}
+.ph-pad .ph-ico svg circle{fill:var(--c);stroke:none;}
+.ph-pad.lit .ph-ico{background:var(--c);}.ph-pad.lit .ph-ico svg{stroke:#0a0a16;}.ph-pad.lit .ph-ico svg circle{fill:#0a0a16;}
+.ph-pad .ph-txt{display:flex;flex-direction:column;align-items:flex-start;gap:3px;min-width:0;text-align:left;}
+.ph-pad .ph-act{font-size:clamp(1.5rem,5vh,2.8rem);line-height:1;letter-spacing:.08em;color:#fff;text-shadow:0 0 12px var(--c);}
+.ph-pad .ph-snd{font-size:clamp(.9rem,2.6vh,1.35rem);letter-spacing:.12em;color:var(--sc,#fff);padding:2px 9px;border-radius:999px;border:1px solid color-mix(in srgb,var(--sc,#fff) 55%,transparent);background:rgba(0,0,0,.35);white-space:nowrap;}
+.ph-pad.lit .ph-snd{background:var(--sc,#fff);color:#0a0a16;}
+.ph-pad .ph-tip{font-family:system-ui,sans-serif;font-size:clamp(.75rem,1.9vh,1rem);color:#aab;letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;}
+.ph-pad .ph-keys{position:absolute;right:12px;bottom:8px;font-size:1rem;letter-spacing:.14em;color:color-mix(in srgb,var(--c) 70%,#fff);opacity:.85;}
+.ph-pad .ph-beat{position:absolute;top:8px;right:12px;display:flex;gap:5px;}
+.ph-pad .ph-beat i{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.14);transition:background .08s;}
+.ph-pad .ph-beat i.on{background:var(--c);box-shadow:0 0 8px var(--c);}
+.ph-pad .ph-beat i.hit{transform:scale(1.35);}
+.ph-pads.solo{grid-template-columns:1fr;}
+.ph-pads.solo #phBounce{display:none;}
+.ph-pads.solo .ph-pad{justify-content:center;}
+@media (max-height:520px) and (orientation:landscape){.ph-pad .ph-tip{display:none;}.ph-pad .ph-act{font-size:1.3rem;}.ph-pad .ph-ico{width:36px;height:36px;}}
+@media (max-width:480px){.ph-pad .ph-tip{display:none;}.ph-pads .ph-pad{gap:8px;padding:8px 10px;}.ph-pad .ph-keys{display:none;}}

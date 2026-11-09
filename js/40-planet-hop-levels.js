@@ -41,9 +41,9 @@ function phPatterns(){
     gap1:   {len:4,from:1,make:R=>R()<.5?{o:[PIT(.3,.7)],a:[[0,'j']]}:{o:[PIT(.3,.7),PIT(2.3,2.7)],a:[[0,'j'],[2,'j']]}},
     block:  {len:4,from:2,make:()=>({o:[BL(.5,2.2,.8)],a:[[0,'j']]})},
     gap2:   {len:4,from:3,make:()=>({o:[PIT(.3,1.7)],a:[[0,'j'],[1,'j']]})},
-    bounce2:{len:8,from:4,make:()=>({o:[PIT(.3,6.6),{k:'pad',s:1,w:.5,next:3},{k:'pad',s:3,w:.5,next:5},{k:'pad',s:5,w:.5,next:7}],a:[[0,'j'],[1,'b'],[3,'b'],[5,'b']]})},
+    bounce2:{len:8,from:6,make:()=>({o:[PIT(.3,6.6),{k:'pad',s:1,w:.5,next:3},{k:'pad',s:3,w:.5,next:5},{k:'pad',s:5,w:.5,next:7}],a:[[0,'j'],[1,'b'],[3,'b'],[5,'b']]})},
     blockUp:{len:4,from:5,make:()=>({o:[BL(.5,1.6,.8),BL(1.5,3.0,1.6)],a:[[0,'j'],[1,'j']]})},
-    lowgrav:{len:8,from:6,make:()=>({o:[{k:'zone',a:0,b:8,g:4},S(1,.45,.6),S(3,.45,.6),S(5,.45,.6)],a:[[0,'j'],[2,'j'],[4,'j']]})},
+    lowgrav:{len:8,from:4,make:()=>({o:[{k:'zone',a:0,b:8,g:4},S(1,.45,.6),S(3,.45,.6),S(5,.45,.6)],a:[[0,'j'],[2,'j'],[4,'j']]})},
     bounce1:{len:8,from:7,make:()=>({o:[PIT(.3,6.6),...[1,2,3,4,5,6].map(s=>({k:'pad',s,w:.5,next:s+1}))],a:[[0,'j'],[1,'b'],[2,'b'],[3,'b'],[4,'b'],[5,'b'],[6,'b']]})},
     float:  {len:4,from:8,make:()=>({o:[PIT(.3,3.6),BL(.55,2.2,.8,true),BL(2.6,3.3,.8,true)],a:[[0,'j'],[2,'j']]})},
     spikeQ: {len:4,from:9,make:()=>({o:[S(.5),S(1.5),S(2.5)],a:[[0,'j'],[1,'j'],[2,'j']]})},
@@ -98,7 +98,7 @@ function phTokens(){
 }
 // where each idea debuts, and the sign that teaches it
 const PH_DEBUT={s:[1,'JUMP ON THE BEAT'],p:[1,'HOP THE GAP'],k:[2,'ROCK — LAND ON TOP'],rE:[3,'TAP JUMP TWICE = DOUBLE JUMP'],P:[3,'WIDE PIT — DOUBLE JUMP'],
-  Bf:[4,'PRESS BOUNCE ON EACH PAD'],B2:[4,'BOUNCE ACROSS THE PIT'],kk:[5,'CLIMB!'],Lr:[6,'LOW GRAVITY — 2-BEAT JUMPS'],Lg:[6,'LEAP THE CRATERS'],
+  Bf:[6,'NEW BUTTON: PRESS BOUNCE ON EACH PAD'],B2:[6,'BOUNCE ACROSS THE PIT'],kk:[5,'CLIMB!'],Lr:[4,'LOW GRAVITY — 2-BEAT JUMPS'],Lg:[4,'LEAP THE CRATERS'],
   B1:[7,'ONE PAD PER BEAT'],f:[8,'FLOATING ICE'],s3:[9,'JUMP ON EVERY BEAT'],Pm:[9,'PIT, THEN SPIKE'],d:[11,'JUMP + DOUBLE ON THE "AND"'],
   rO:[12,'JUMP ON THE "AND"'],so:[12,'OFF-BEAT SPIKES'],dk:[13,'DOUBLE JUMP UP HIGH']};
 // the 15 courses (| marks the song's 8-bar sections; boss levels end with an 8-bar comet chase)
@@ -106,9 +106,9 @@ const PH_COURSE=[
   /* 1 First Steps   */ 'rA rA s rD s s2 rB s2 | C p rD p s p2 s2 rA',
   /* 2 Crater Skipper*/ 'rB s2 k rD k s k p2 | C k s2 k p k rC rA',
   /* 3 Moonbeam      */ 'rA rE rA P rD P s2 rE | C P k P p2 rF P rA',
-  /* 4 Lunar Leap    */ 'rA s Bf rD p2 B2 | C s2 B2 k P B2 | rE s2 P rA',
-  /* 5 Comet (boss)  */ 'rA s2 k P B2 p2 rE | kk rD kk P C s2 B2 | s2 p2 s2 P s s2 B2',
-  /* 6 Glacia Glide  */ 'rA s Lr p2 k L | C P Lg s2 Lg rA',
+  /* 4 Lunar Leap    */ 'rA s Lr rD p2 L | C k Lg s2 P L | rE s2 P rA',
+  /* 5 Comet (boss)  */ 'rA s2 k P Lg p2 rE | kk rD kk P C s2 Lg | s2 p2 s2 P s s2 Lg',
+  /* 6 Glacia Glide  */ 'rA s Bf rD p2 B2 | C s2 B2 k Lg rA',
   /* 7 Frostbite Funk*/ 'rB s2 B2 rD P B1 | C k B1 p2 s2 Lg | rE P s2 rA',
   /* 8 Ice Spire Hop */ 'rA k f rD f s2 B2 | C f kk f L P f | s2 f p2 rA',
   /* 9 Aurora Drift  */ 'rB s2 s3 rD s3 P Lg | Pm rE Pm s3 C f B1 | s3 kk Pm s3 L s3 rA',

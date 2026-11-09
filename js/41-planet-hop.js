@@ -24,8 +24,8 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
     </div>
     <div class="ww-arena"><canvas id="phCanvas"></canvas></div>
     <div class="ww-pads ph-pads" id="phPads">
-      <button class="ww-pad" id="phJump" style="--c:#00e5ff"><span class="k" id="phJumpK"></span><span class="nm">JUMP · tap again in the air to double jump</span></button>
-      <button class="ww-pad" id="phBounce" style="--c:#ff4dff"><span class="k" id="phBounceK"></span><span class="nm">BOUNCE · on the glowing pads</span></button>
+      <button class="ww-pad ph-pad" id="phJump" style="--c:#00e5ff"><span class="ph-beat"><i></i><i></i><i></i><i></i></span><span class="ph-ico"><svg viewBox="0 0 24 24"><path d="M5 13l7-7 7 7M5 19l7-7 7 7"/></svg></span><span class="ph-txt"><span class="ph-act">JUMP</span><span class="ph-snd" id="phJumpSnd"></span><span class="ph-tip">tap again in the air = double jump</span></span><span class="ph-keys" id="phJumpK"></span></button>
+      <button class="ww-pad ph-pad" id="phBounce" style="--c:#ff4dff"><span class="ph-beat"><i></i><i></i><i></i><i></i></span><span class="ph-ico"><svg viewBox="0 0 24 24"><path d="M4 20h16M7 16l10-2.5L7 11l10-2.5L7 6M12 3v0"/><circle cx="12" cy="3.2" r="1.6"/></svg></span><span class="ph-txt"><span class="ph-act">BOUNCE</span><span class="ph-snd" id="phBounceSnd"></span><span class="ph-tip">on the glowing pads</span></span><span class="ph-keys" id="phBounceK"></span></button>
     </div>
     <div class="ww-panel" id="phSelect"><div class="ww-panel-inner" style="box-shadow:0 0 40px -10px #7fe8ff">
       <div class="ww-sel-head"><div><div class="ww-big" style="color:#7fe8ff">PLANET HOP</div><div class="ww-sub">Run round the planet to the beat · JUMP, double jump, and BOUNCE across the glowing pads · a hit sends you back to the start, or to the checkpoint flag once you pass it</div></div><div style="display:flex;gap:6px"><button class="ww-btn mg-sync-btn" id="phSync" title="Calibrate your timing">⏱ SYNC</button><button class="ww-x" id="phClose" title="Close">✕</button></div></div>
@@ -54,7 +54,7 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
   $('phSync').addEventListener('click',()=>{if(typeof mgOpenSync==='function')mgOpenSync(()=>{});});
   $('phQuit').addEventListener('click',()=>{if(R&&R.state!=='done'){stop();showSelect();}else close();});
 
-  const NEWS={1:'Jump on the beat — follow the glowing markers',2:'NEW: rocks — land on top',3:'NEW: double jump — practise on flat ground, then clear wide pits',4:'NEW: bounce pads — press BOUNCE as you land on each one',5:'BOSS: a comet chases you round Luna · NEW: climbing rocks',6:'NEW: low gravity — floaty two-beat jumps',7:'NEW: fast bounce chains, one pad per beat',8:'NEW: floating ice platforms',9:'NEW: spike runs — jump on every beat',10:'BOSS: the frozen comet',11:'NEW: triple spikes — jump, then double jump on the "and"',12:'NEW: off-beat spikes — jump on the "and"',13:'NEW: tall rocks — double jump up onto them',14:'REMIX: everything you know, at speed',15:'FINAL BOSS: the supernova comet'};
+  const NEWS={1:'Jump on the beat — follow the glowing markers',2:'NEW: rocks — land on top',3:'NEW: double jump — practise on flat ground, then clear wide pits',4:'NEW: low gravity on the moon — floaty two-beat jumps',5:'BOSS: a comet chases you round Luna · NEW: climbing rocks',6:'NEW BUTTON: BOUNCE — press it as you land on each glowing pad',7:'NEW: fast bounce chains, one pad per beat',8:'NEW: floating ice platforms',9:'NEW: spike runs — jump on every beat',10:'BOSS: the frozen comet',11:'NEW: triple spikes — jump, then double jump on the "and"',12:'NEW: off-beat spikes — jump on the "and"',13:'NEW: tall rocks — double jump up onto them',14:'REMIX: everything you know, at speed',15:'FINAL BOSS: the supernova comet'};
   let tab='lv';const PH_DIFF_L={easy:3,normal:8,hard:13};
   const mineOpts={id:'phMine',note:'obstacles land on your beat',playStyle:'border-color:#7fe8ff;color:#7fe8ff;background:#071420',onPlay:song=>{const d=Object.keys(MG_DIFFS).find(k=>song.P.custom.endsWith('|'+k))||'normal';song.P.planet=MG_DIFFS[d].planet;start({song,L:PH_DIFF_L[d]});}};
   function showTab(t){tab=t;$('phTabLv').classList.toggle('sel',t==='lv');$('phTabMine').classList.toggle('sel',t==='mine');$('phLvPane').style.display=t==='lv'?'':'none';$('phMinePane').style.display=t==='mine'?'':'none';
@@ -84,6 +84,18 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
   // ── run ──
   function stop(){if(!R)return;clearInterval(R.sched);cancelAnimationFrame(R.raf);clearTimeout(R.rt);R.state='stopped';R=null;}
   function lat(){const c=getCtx();return(c.outputLatency||0)+(c.baseLatency||0)*.5;}
+  // JUMP plays your kick pad, BOUNCE your snare/clap pad (a plain kick / snare if you haven't got one)
+  function phPadSound(w){const ps=(typeof padSounds!=='undefined'?padSounds:[]).filter(id=>id&&SOUND_MAP[id]);
+    const re=w==='j'?/kick|808|thud|boom|sub/i:/snare|clap|rim|stomp/i,hit=ps.find(id=>re.test(id)||re.test(SOUND_MAP[id].name||''));
+    return hit||(w==='j'?'kick':'snare');}
+  // the buttons breathe with the music: 4 beat lights, and a glow that builds toward the next press
+  function padHud(tt){
+    const bi=((Math.floor(tt)%4)+4)%4,ph=tt-Math.floor(tt);
+    document.querySelectorAll('#phPads .ph-beat').forEach(el=>[...el.children].forEach((d,i)=>d.className=(tt>=-4&&i===bi)?(ph<.25?'on hit':'on'):''));
+    const A=R.lv.acts;while(R.cueI<A.length&&A[R.cueI].t<tt-.15)R.cueI++;if(R.cueI>0&&A[R.cueI-1].t>tt)R.cueI=0;
+    const nx={j:null,b:null};for(let i=R.cueI;i<A.length&&i<R.cueI+6;i++){const w=R.solo?'j':A[i].w;if(nx[w]==null)nx[w]=A[i].t;}
+    [['phJump','j'],['phBounce','b']].forEach(([id,w])=>{const d=nx[w]==null?9:nx[w]-tt;$(id).style.setProperty('--cue',d>1||d<-.15?0:(1-Math.max(0,d)).toFixed(2));});
+  }
   // (mgOffset = the player's SYNC calibration: shifts judging and visuals to match what they hear)
   function tau(){return(getCtx().currentTime-lat()-R.T0-(typeof mgOffset==='function'?mgOffset():0))/R.beat;}
   function start(L){ // a level number, or {song, L} from YOUR BEATS
@@ -95,8 +107,13 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
     $('phTitle').textContent=custom?lv.P.name+' · '+lv.P.diff:L+'. '+lv.P.name;
     // left-hand pad keys jump, right-hand pad keys bounce (matches the two pads on screen)
     const lb=i=>(typeof padBindings!=='undefined'&&padBindings[i]&&padBindings[i].label)||'';
-    $('phJumpK').textContent='JUMP'+(IS_DESKTOP?' · '+[[lb(0),lb(1)].filter(Boolean).join(''),'SPACE'].filter(Boolean).join(' / '):'');
-    $('phBounceK').textContent='BOUNCE'+(IS_DESKTOP?' · '+[[lb(2),lb(3)].filter(Boolean).join(''),'SHIFT'].filter(Boolean).join(' / '):'');
+    // levels 1-5 are jump-only: the BOUNCE button arrives as a new mechanic on level 6
+    R.solo=!lv.acts.some(a=>a.w==='b');$('phPads').classList.toggle('solo',R.solo);
+    $('phJumpK').textContent=IS_DESKTOP?[[lb(0),lb(1)].concat(R.solo?[lb(2),lb(3)]:[]).filter(Boolean).join(' '),'SPACE'].filter(Boolean).join(' · '):'';
+    $('phBounceK').textContent=IS_DESKTOP?[[lb(2),lb(3)].filter(Boolean).join(' '),'SHIFT'].filter(Boolean).join(' · '):'';
+    // each button names the drum it plays on the beat (your pad sounds)
+    [['phJumpSnd','j'],['phBounceSnd','b']].forEach(([id,w])=>{const sd=SOUND_MAP[phPadSound(w)]||{};const el=$(id);el.textContent='♪ '+(sd.name||phPadSound(w)).toUpperCase();el.style.setProperty('--sc',sd.color||'#fff');});
+    R.cueI=0;
     resize();attempt(true);
     R.raf=requestAnimationFrame(frame);
   }
@@ -142,8 +159,9 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
       if(gr==='perfect'){burst(S.s,S.h+.2,'#00ff99',8,.8);R.rings.push({s:S.s,h:S.h,life:1});}
       if(R.combo>0&&R.combo%10===0){R.texts.push({s:S.s+.9,h:S.h+2.3,txt:'ON-BEAT ×'+R.combo+'!',col:'#e8ff00',life:1.3,sz:1.35});try{playSound('spaceperc',.35);}catch(e){}}
     }
+    if(R.solo)w='j';
     const pad=$(w==='j'?'phJump':'phBounce');pad.classList.remove('lit');void pad.offsetWidth;pad.classList.add('lit');
-    try{const id=(typeof padSounds!=='undefined'&&padSounds[w==='j'?0:2])||(w==='j'?'kick':'snare');playSound(SOUND_MAP[id]?id:(w==='j'?'kick':'snare'),.55);}catch(e){}
+    try{playSound(phPadSound(w),.55);}catch(e){}
   }
   ['phJump','phBounce'].forEach((id,i)=>{const b=$(id);const w=i?'b':'j';
     b.addEventListener('pointerdown',e=>{e.preventDefault();input(w,e);});b.addEventListener('contextmenu',e=>e.preventDefault());});
@@ -164,6 +182,7 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
     const now=performance.now(),dt=Math.min(.05,(now-(R.lp||now))/1000);R.lp=now;
     const lv=R.lv,S=R.S;
     if(R.state==='play'&&!R.dead&&!R.won){
+      try{padHud(tau());}catch(e){}
       const target=Math.min(tau(),lv.end+.01);
       R.inputs.sort((a,b)=>a.t-b.t);
       let guard=0;

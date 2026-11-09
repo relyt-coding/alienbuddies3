@@ -299,8 +299,8 @@ const SKILL_TREE_NODES = [
   {id:'sun_minigames', icon:'☀', name:'Quad Sun III', desc:'The third Quad Sun. Opens the Minigame Nexus path. Grants ×2 points.', cost:150, requires:['core'], x:-200, y:200, branch:'minigames', mult:2},
   {id:'memory_boost', icon:'🃏', name:'Memory Boost', desc:'Enhances cognitive resonance. Adds 2 extra levels to the Matching Game. ×1.5 points.', cost:250, requires:['sun_minigames'], x:-340, y:300, branch:'minigames', mult:1.5, placeholder:true},
   {id:'worm_whack', icon:'🪱', name:'Worm Whack', desc:'Unlocks WORM WHACK (in the bunker): whack space worms on a rocky moon to the beat, across 30 songs. Every level you clear gives a permanent points bonus.', cost:500, requires:['memory_boost'], x:-480, y:360, branch:'minigames', mult:1.5},
-  {id:'chaos_mode', icon:'🎲', name:'Chaos Mode', desc:'Coming soon — random bonus event minigame.', cost:750, requires:['worm_whack'], x:-580, y:460, branch:'minigames', mult:1.5, placeholder:true},
-  {id:'grand_tournament', icon:'🏆', name:'Grand Tournament', desc:'Coming soon — weekly challenge mode.', cost:1000, requires:['chaos_mode'], x:-680, y:540, branch:'minigames', mult:1.5, placeholder:true},
+  {id:'planet_hop', icon:'🪐', name:'Planet Hop', desc:'Unlocks PLANET HOP (in the bunker): a rhythm platformer around a spinning planet — jump, double jump and bounce to the beat across 15 levels. Every level you clear gives a permanent points bonus.', cost:750, requires:['worm_whack'], x:-580, y:460, branch:'minigames', mult:1.5},
+  {id:'grand_tournament', icon:'🏆', name:'Grand Tournament', desc:'Coming soon — weekly challenge mode.', cost:1000, requires:['planet_hop'], x:-680, y:540, branch:'minigames', mult:1.5, placeholder:true},
 
   // ── QUAD SUN 4 — Alien Evolution (↘) ──
   {id:'sun_aliens', icon:'☀', name:'Quad Sun IV', desc:'The fourth Quad Sun. Opens the Alien Evolution path. Grants ×2 points.', cost:150, requires:['core'], x:200, y:200, branch:'aliens', mult:2},

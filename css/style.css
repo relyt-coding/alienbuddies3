@@ -1817,8 +1817,8 @@ body.store-open:not(.desktop-mode) #partyStyleBtn,body.bunker-open:not(.desktop-
    ══════════════════════════════════════════════ */
 #wormGameBtn{width:100%;margin-top:.35rem;font-family:'Bebas Neue',sans-serif;font-size:.85rem;letter-spacing:.15em;padding:.55rem .8rem;border-radius:12px;border:1px solid #6a3a20;background:#140904;color:#ff9966;cursor:pointer;touch-action:manipulation;transition:all .2s;box-shadow:0 0 14px -6px #ff6644;}
 #wormGameBtn:hover{border-color:#ff9966;box-shadow:0 0 18px -4px #ff6644;}
-#wwOverlay{position:fixed;inset:0;z-index:9500;display:none;flex-direction:column;background:#05060c;color:#e8e8f0;font-family:'Bebas Neue',sans-serif;user-select:none;-webkit-user-select:none;touch-action:none;padding:env(safe-area-inset-top,0) env(safe-area-inset-right,0) env(safe-area-inset-bottom,0) env(safe-area-inset-left,0);}
-#wwOverlay.open{display:flex;}
+#wwOverlay,#phOverlay{position:fixed;inset:0;z-index:9500;display:none;flex-direction:column;background:#05060c;color:#e8e8f0;font-family:'Bebas Neue',sans-serif;user-select:none;-webkit-user-select:none;touch-action:none;padding:env(safe-area-inset-top,0) env(safe-area-inset-right,0) env(safe-area-inset-bottom,0) env(safe-area-inset-left,0);}
+#wwOverlay.open,#phOverlay.open{display:flex;}
 .ww-hud{flex:0 0 auto;display:flex;align-items:center;gap:.9rem;padding:.4rem .7rem;border-bottom:1px solid #1a1a2a;position:relative;background:#080810;}
 .ww-title{flex:1;min-width:0;font-size:1.05rem;letter-spacing:.12em;color:#ff9966;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .ww-stat{display:flex;flex-direction:column;align-items:center;line-height:1;}
@@ -1874,3 +1874,12 @@ body.store-open:not(.desktop-mode) #partyStyleBtn,body.bunker-open:not(.desktop-
 .ww-res-grid small{font-size:.55rem;letter-spacing:.2em;color:#778;}
 .ww-reward{font-size:1.05rem;letter-spacing:.1em;color:#e8ff00;margin:6px 0;}
 .ww-res-btns{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;}
+
+/* PLANET HOP */
+#planetHopBtn{width:100%;margin-top:.35rem;font-family:'Bebas Neue',sans-serif;font-size:.85rem;letter-spacing:.15em;padding:.55rem .8rem;border-radius:12px;border:1px solid #1f5a6a;background:#03121a;color:#7fe8ff;cursor:pointer;touch-action:manipulation;box-shadow:0 0 14px -6px #00e5ff;}
+#planetHopBtn:hover{border-color:#7fe8ff;box-shadow:0 0 18px -4px #00e5ff;}
+.ph-pads{grid-template-columns:1fr 1fr;grid-template-rows:1fr;height:clamp(96px,22vh,170px);}
+.ph-pads .ww-pad .k{font-size:1.5rem;}
+.ph-pads .ww-pad .nm{font-size:.6rem;text-align:center;padding:0 6px;}
+@media (max-height:520px) and (orientation:landscape){.ph-pads{height:clamp(64px,22vh,110px);}}
+.ph-grid{grid-template-columns:repeat(5,1fr) !important;}

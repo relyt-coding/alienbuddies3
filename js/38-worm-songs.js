@@ -23,6 +23,12 @@ const WW_STYLES={
   trap:     {k:'x.....x...x.....',s:'........x.......',h:'x.x.x.x.x.xxx.x.',sId:'clap',hId:'hihat',kId:'trapkick',bass:'sub',bassR:'x.....x...x.....',lead:['bell','pluck'],pad:true},
   funk:     {k:'x..x..x...x..x..',s:'....x..o....x...',h:'xoxoxoxoxoxoxoxo',sId:'snare',hId:'hihat',kId:'kick',bass:'basenote',bassR:'x..x..x.x.x..x.x',lead:['marimba','rs_lead'],pad:false},
   dub:      {k:'....x.......x...',s:'....x.......x...',h:'x.x.x.x.x.x.x.x.',sId:'rimshot',hId:'shaker',kId:'kick',bass:'sub',bassR:'x...x.x.....x.x.',lead:['stab','bell'],pad:false,offChord:true},
+  // extra beats for Planet Hop
+  breakbeat:{k:'x.........x.x...',s:'....x.......x..o',h:'x.x.x.x.x.x.x.x.',sId:'junglesnare',hId:'hihat',kId:'kick',bass:'basenote',bassR:'x.........x.x...',lead:['rs_lead','pluck'],pad:true},
+  afro:     {k:'x..x....x..x....',s:'......x.......x.',h:'x.xxx.xxx.xxx.xx',sId:'rimshot',hId:'shaker',kId:'kick',bass:'basenote',bassR:'x..x..x...x..x..',lead:['marimba','pluck'],pad:false},
+  twostep:  {k:'x.........x.....',s:'....x.......x...',h:'..x..x....x..x..',sId:'clap',hId:'hihat',kId:'kick',bass:'sub',bassR:'x.....x...x..x..',lead:['rs_keys','bell'],pad:true},
+  halftime: {k:'x.....x.........',s:'........x.......',h:'x.x.x.x.x.x.x.x.',sId:'snare',hId:'hihat',kId:'trapkick',bass:'wobble',bassR:'x.......x.x.x...',lead:['rs_lead','stab'],pad:true},
+  reggaeton:{k:'x...x...x...x...',s:'...x..x....x..x.',h:'x.x.x.x.x.x.x.x.',sId:'snare',hId:'hihat',kId:'kick',bass:'basenote',bassR:'x..x..x.x..x..x.',lead:['pluck','marimba'],pad:false},
   dnb:      {k:'x.........x.....',s:'....x.......x...',h:'x.x.x.x.x.x.x.x.',sId:'snare',hId:'hihat',kId:'kick',bass:'wobble',bassR:'x.......x.x.....',lead:['rs_lead','pluck'],pad:true},
 };
 const WW_STYLE_ORDER=['house','boombap','synthwave','funk','dub','trap','house','synthwave','boombap','dnb'];
@@ -50,8 +56,9 @@ function wwLevel(lvl){
 }
 
 // ── compose a song: returns {bpm, step(sec), bars, events:[{t,kind,id,midi,dur,vel}], drumBars:[{k:[],s:[],h:[]}], sections:[]}
-function wwCompose(lvl){
-  const P=wwLevel(lvl),R=wwRng(9173*lvl+31),pick=a=>a[Math.floor(R()*a.length)];
+// (Planet Hop passes its own level settings `Pin` — same composer, its own seeds and styles)
+function wwCompose(lvl,Pin){
+  const P=Pin||wwLevel(lvl),R=wwRng(9173*(P.seed||lvl)+31),pick=a=>a[Math.floor(R()*a.length)];
   const st=WW_STYLES[P.style];
   const scaleName=pick(P.style==='house'||P.style==='funk'?['dorian','minor','mixo']:P.style==='synthwave'?['minor','major']:P.style==='dub'?['minor','dorian']:['minor','phryg','dorian']);
   const scale=WW_SCALES[scaleName];

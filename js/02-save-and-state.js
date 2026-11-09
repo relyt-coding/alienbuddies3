@@ -38,7 +38,7 @@ function autoSave(){
     shop:{seqMultLevel:shop.seqMultLevel,multLevel:shop.multLevel,alienBoostLevel:shop.alienBoostLevel,multiClickLevel:shop.multiClickLevel,seqMultiClickLevel:shop.seqMultiClickLevel,seqMultiClickUnlocked:shop.seqMultiClickUnlocked,dismissed:shop.dismissed||[],alienBoostUnlocked:shop.alienBoostUnlocked,multiClickUnlocked:shop.multiClickUnlocked,drumDotsUnlocked:shop.drumDotsUnlocked,seqDotsUnlocked:shop.seqDotsUnlocked,seqStepsLevel:shop.seqStepsLevel||0,partyLevel:shop.partyLevel||0,partySeen:!!shop.partySeen,seqFeat:shop.seqFeat||0},
     totalAliens,alienData,
     drum:{pads:drum.pads,extraSounds:drum.extraSounds,seqTracks:drum.seqTracks},
-    matchLevelsCompleted,matchingMultiplier,matchSavedState,wormMultiplier,wormProgress,tipsOwned,tipsMult,drumTrackerActive,shopOpenCount,hasSeenSeqHint,
+    matchLevelsCompleted,matchingMultiplier,matchSavedState,wormMultiplier,wormProgress,phMultiplier,phProgress,tipsOwned,tipsMult,drumTrackerActive,shopOpenCount,hasSeenSeqHint,
     savedPatterns,savedArrangements,songSlots,
     padSounds:[...padSounds],
     soundVols:{...soundVols},
@@ -120,7 +120,7 @@ function drumMultiplier(){
 // Shared boosts (aliens, drum upgrades, matching game, tips) apply to BOTH earning sources.
 // (The skill tree only boosts Alien Gems, not points.)
 function sharedMultiplier(){
-  return alienMultiplier()*drumMultiplier()*matchingMultiplier*tipsMult*(typeof wormMultiplier==='number'?wormMultiplier:1);
+  return alienMultiplier()*drumMultiplier()*matchingMultiplier*tipsMult*(typeof wormMultiplier==='number'?wormMultiplier:1)*(typeof phMultiplier==='number'?phMultiplier:1);
 }
 // Each tracker keeps its own tier multipliers: DRUMPAD (left) for pad taps, SEQUENCER (right) for sequencer steps.
 function drumTierProduct(){return tiers.reduce((m,t,i)=>t.multiplierActive?m*tierMultValueFor('drum',i):m,1);}
@@ -200,6 +200,7 @@ function loadFromSave(data){
   if(matchLevelsCompleted>=0){shownHints.matchingIntro=true;shownHints.matchingGame=true;}
   matchingMultiplier=data.matchingMultiplier||1;
   if(typeof wormMultiplier!=='undefined'){wormMultiplier=data.wormMultiplier||1;wormProgress=(data.wormProgress&&data.wormProgress.best)?data.wormProgress:{best:{}};}
+  if(typeof phMultiplier!=='undefined'){phMultiplier=data.phMultiplier||1;phProgress=(data.phProgress&&data.phProgress.best)?data.phProgress:{best:{}};}
   matchSavedState=data.matchSavedState||null;
   tipsOwned=data.tipsOwned||0;
   tipsMult=data.tipsMult||1;

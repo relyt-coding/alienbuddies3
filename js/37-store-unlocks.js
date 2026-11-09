@@ -1,18 +1,18 @@
 
 // ══════════════════════════════════════════════
 //  STORE UNLOCK LADDERS
-//  🎉 ALIEN PARTY  — appears in the store once you first reach 5M points. Buying it adds the ALIEN PARTY
+//  ALIEN PARTY     — appears in the store once you first reach 5M points. Buying it adds the ALIEN PARTY
 //                    button (Glow); every next level adds a party style, each ×10 the price.
 //  🎚 SEQUENCER UPGRADES — under the Sequencer card once it's unlocked: BPM control → 32 steps → 64 steps
 //                    → Arrangement tab → Song tab. (These used to be skill-tree nodes.)
 // ══════════════════════════════════════════════
 const PARTY_LADDER=[
   {style:'glow',  cost:5e6,  main:'ALIEN PARTY',        sub:'Adds the ALIEN PARTY button: your aliens glow and bounce to the beat'},
-  {style:'orbit', cost:5e7,  main:'🪩 DISCO ORBIT',      sub:'New party style: aliens spin in a ring around your score'},
-  {style:'conga', cost:5e8,  main:'🐍 CONGA LINE',       sub:'New party style: a figure-8 conga line, hopping on the beat'},
-  {style:'eq',    cost:5e9,  main:'📊 EQ BARS',          sub:'New party style: aliens line up as a live EQ meter for your music'},
-  {style:'bounce',cost:5e10, main:'🤸 BOUNCE HOUSE',     sub:'New party style: each instrument gets its own aliens, who jump when it plays'},
-  {style:'galaxy',cost:5e11, main:'🌌 GALAXY',           sub:'New party style: a spinning spiral galaxy that breathes with the bar'},
+  {style:'orbit', cost:5e7,  main:'DISCO ORBIT',      sub:'New party style: aliens spin in a ring around your score'},
+  {style:'conga', cost:5e8,  main:'CONGA LINE',       sub:'New party style: a figure-8 conga line, hopping on the beat'},
+  {style:'eq',    cost:5e9,  main:'EQ BARS',          sub:'New party style: aliens line up as a live EQ meter for your music'},
+  {style:'bounce',cost:5e10, main:'BOUNCE HOUSE',     sub:'New party style: each instrument gets its own aliens, who jump when it plays'},
+  {style:'galaxy',cost:5e11, main:'GALAXY',           sub:'New party style: a spinning spiral galaxy that breathes with the bar'},
 ];
 const PARTY_REVEAL_AT=5e6;
 const SEQ_FEATS=[
@@ -37,7 +37,7 @@ function partyOwnedStyles(){return PARTY_LADDER.slice(0,Math.max(0,shop.partyLev
     return d;
   }
   // party card goes right under PET ALIEN BUDDY; sequencer upgrades right under the Sequencer card
-  const partyCard=card('partyStoreCard','🎉 ALIEN PARTY','Party modes for your aliens');
+  const partyCard=card('partyStoreCard','ALIEN PARTY','Party modes for your aliens');
   const ab=$('alienBuyBtn');if(ab)ab.after(partyCard);
   const seqUpCard=card('seqUpCard','🎚 SEQUENCER UPGRADES','New controls for your sequencer');
   const sc=$('seqCard');if(sc)sc.after(seqUpCard);
@@ -70,7 +70,7 @@ function partyOwnedStyles(){return PARTY_LADDER.slice(0,Math.max(0,shop.partyLev
     const pl=shop.partyLevel||0,next=PARTY_LADDER[pl];if(!next||score<next.cost)return;
     score-=next.cost;shop.partyLevel=pl+1;
     if(typeof playSfxPurchase==='function')playSfxPurchase();if(typeof flashBuy==='function')flashBuy('#ff00cc');
-    if(pl===0)showToast('🎉 ALIEN PARTY unlocked! Tap the button to get your aliens dancing.');
+    if(pl===0)showToast('ALIEN PARTY unlocked! Tap the button to get your aliens dancing.');
     else{showToast(next.main+' unlocked! Tap the style chip during a party to switch.');if(typeof setPartyStyle==='function'&&partyMode)setPartyStyle(next.style);}
     if(typeof refreshPartyAccess==='function')refreshPartyAccess();
     if(typeof renderUI==='function')renderUI();else renderStoreUnlocks();

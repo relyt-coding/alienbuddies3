@@ -99,7 +99,7 @@ function renderUI(newlyLit){
   }else autoInfo.classList.remove('visible');
   if(totalAliens>0){alienMultInfo.classList.add('visible');alienMultDisplay.textContent=`×${formatMult(alienMultiplier())}`;}
   else alienMultInfo.classList.remove('visible');
-  // ALIEN PARTY is a store upgrade now (🎉 ALIEN PARTY card, appears at 5M points)
+  // ALIEN PARTY is a store upgrade now (ALIEN PARTY card, appears at 5M points)
   if((shop.partyLevel||0)>=1)partyBtn.classList.add('visible');else{partyBtn.classList.remove('visible');if(partyMode&&typeof stopParty==='function')stopParty();}
   renderTiers(newlyLit);
   renderStore();

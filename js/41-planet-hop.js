@@ -8,7 +8,7 @@
 // ══════════════════════════════════════════════
 let phMultiplier=1;               // permanent points × from first clears (saved)
 let phProgress={best:{}};         // best[L] = {stars, dust, pct, cleared}
-function phLevelOpen(L){return L===1||!!(phProgress.best[L-1]||{}).cleared;}
+function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===1||!!(phProgress.best[L-1]||{}).cleared;}
 
 (function(){
   const $=id=>document.getElementById(id);
@@ -307,7 +307,7 @@ function phLevelOpen(L){return L===1||!!(phProgress.best[L-1]||{}).cleared;}
   const after=$('wormGameBtn')||$('matchingGameLock')||$('matchingGameBtn');if(after)after.after(eb);
   eb.addEventListener('click',open);
   let had=null;
-  setInterval(()=>{const has=typeof unlockedSkills!=='undefined'&&!!unlockedSkills.planet_hop;eb.style.display=has?'':'none';if(had===false&&has)showToast('🪐 PLANET HOP unlocked! Find it in the bunker, under Worm Whack.');had=has;},800);
+  setInterval(()=>{const has=(typeof TEST_MODE!=='undefined'&&TEST_MODE)||(typeof unlockedSkills!=='undefined'&&!!unlockedSkills.planet_hop);eb.style.display=has?'':'none';if(had===false&&has)showToast('🪐 PLANET HOP unlocked! Find it in the bunker, under Worm Whack.');had=has;},800);
   document.addEventListener('visibilitychange',()=>{if(document.hidden&&R&&R.state==='play'){stop();showSelect();}});
   window._phDebug={state:()=>R,start,input,tau:()=>R?tau():0};
 })();

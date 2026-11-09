@@ -2,6 +2,13 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.93 - 2026-11-08 20:50
+
+- New minigame WORM WHACK (skill tree → Minigames): rhythm whack-a-mole on a rocky moon, 30 composed songs/levels, pads = craters, gold/armored/hold worms, mines, Wyrm bosses on 10/20/30, stars + permanent points bonus
+- New minigame PLANET HOP (after Worm Whack): rhythm platformer around a spinning planet, 15 levels/songs, jump + double jump + bounce-pad chains, low gravity, Luna/Glacia/Magmora, comet-chase bosses, stardust stars, restart on hit
+- Test mode: both minigames open instantly with every level unlocked (TEST panel → MINIGAMES)
+- Alien Party store card: no emojis
+
 ## v0.2.92 - 2026-11-08 16:30
 
 - Alien Party is a store upgrade (appears at 5M points): Glow, then Disco Orbit, Conga Line, EQ Bars, Bounce House, Galaxy (each ×10 the price)

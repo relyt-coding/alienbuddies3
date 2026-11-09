@@ -10,7 +10,7 @@ let wormMultiplier=1;               // permanent points × from first clears (sa
 let wormProgress={best:{}};         // best[lvl] = {stars, acc, score}
 
 function wwStarsFor(acc){return acc>=.95?3:acc>=.85?2:acc>=.7?1:0;}
-function wwLevelOpen(l){return l===1||((wormProgress.best[l-1]||{}).stars||0)>=1;}
+function wwLevelOpen(l){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||l===1||((wormProgress.best[l-1]||{}).stars||0)>=1;}
 
 (function(){
   const $=id=>document.getElementById(id);
@@ -468,7 +468,7 @@ function wwLevelOpen(l){return l===1||((wormProgress.best[l-1]||{}).stars||0)>=1
   eb.addEventListener('click',open);
   let _wwHad=null;
   function syncEntry(){
-    const has=typeof unlockedSkills!=='undefined'&&!!unlockedSkills.worm_whack;
+    const has=(typeof TEST_MODE!=='undefined'&&TEST_MODE)||(typeof unlockedSkills!=='undefined'&&!!unlockedSkills.worm_whack);
     eb.style.display=has?'':'none';
     if(_wwHad===false&&has)showToast('🪱 WORM WHACK unlocked! Find it in the bunker, under the Matching Game.');
     _wwHad=has;

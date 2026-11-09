@@ -479,6 +479,7 @@ function viewCheats(){
   <h4>GEMS</h4><div class="tm-row"><button class="tm-b" data-cheat="gems100">+100 💎</button><button class="tm-b" data-cheat="gems10k">+10K 💎</button><button class="tm-b" data-cheat="gemsx10">×10 💎</button></div>
   <h4>JUMP AHEAD (runs the bot at MAX speed until…)</h4><div class="tm-row"><button class="tm-b" data-cheat="jump20">20 aliens (2nd half)</button><button class="tm-b" data-cheat="jump40">40 aliens</button><button class="tm-b" data-cheat="jumpM5">match level 5</button></div>
   <h4>UNLOCKS</h4><div class="tm-row"><button class="tm-b" data-cheat="music">Unlock whole Musical Toolkit</button><button class="tm-b" data-cheat="tree">Unlock whole skill tree</button><button class="tm-b" data-cheat="tracks">6 tracks + all sounds</button></div>
+  <h4>MINIGAMES (every level open in test mode)</h4><div class="tm-row"><button class="tm-b" data-cheat="playWorm">🪱 Play Worm Whack</button><button class="tm-b" data-cheat="playHop">🪐 Play Planet Hop</button></div>
   <h4>MISC</h4><div class="tm-row"><button class="tm-b" data-cheat="energy">Fill sequencer energy</button><button class="tm-b" data-cheat="wipeRuns">Delete saved runs</button></div>`;
 }
 const perfLiveHtml=()=>{const p=perfNow();return `<div class="tm-cards">${[['FPS',p.fps],['Frame p95',p.p95+' ms'],['Worst frame',p.longest+' ms'],['Late steps',p.late+(p.late?' ('+p.maxLate+'ms)':'')],['Voices/sec',p.voices],['FX channels',p.buses]].map(([i,b])=>`<div class="tm-card"><i>${i}</i><b>${b}</b></div>`).join('')}</div><div class="tm-sub" style="margin-top:6px">Audio: ${esc(p.audio)} · JS heap ${p.heap}</div>`;};
@@ -518,6 +519,8 @@ function cheat(k){
     music:()=>{skillTreeUnlocked=true;for(let p=0;p<20;p++)SKILL_TREE_NODES.forEach(n=>{if(n.id.startsWith('mt_')||['core','sun_points','neural_tap_1'].includes(n.id))if(!unlockedSkills[n.id]&&n.requires.every(r=>unlockedSkills[r])){unlockedSkills[n.id]=true;}});applyMusicUnlocks();note('unlock Musical Toolkit');},
     tree:()=>{skillTreeUnlocked=true;for(let p=0;p<25;p++)SKILL_TREE_NODES.forEach(n=>{if(!n.placeholder&&!unlockedSkills[n.id]&&n.requires.every(r=>unlockedSkills[r])){unlockedSkills[n.id]=true;if(n.soundUnlock)unlockPlanetSound(n.soundUnlock);}});applyMusicUnlocks();note('unlock whole skill tree');},
     tracks:()=>{quietly(()=>{while(drum.seqTracks<MAX_SEQ_TRACKS){score+=seqTrackCost(drum.seqTracks);buySeqTrack();}while(drum.extraSounds<EXTRA_SOUNDS_ORDER.length){score+=soundLibCost(drum.extraSounds);buyNextSound();}while(drum.pads<8){score+=PAD_COSTS[drum.pads];buyNextPad();}});if(!seqPlaying){seqEnergy=SEQ_ENERGY_MAX;startSeq();}note('6 tracks + all sounds');},
+    playWorm:()=>{panel.classList.remove('open');if(typeof openWormWhack==='function')setTimeout(openWormWhack,50);},
+    playHop:()=>{panel.classList.remove('open');if(typeof openPlanetHop==='function')setTimeout(openPlanetHop,50);},
     energy:()=>{seqEnergy=SEQ_ENERGY_MAX;try{updateEnergyUI();}catch(e){}if(!seqPlaying&&drum.seqTracks)startSeq();},
     wipeRuns:()=>{if(confirm('Delete all saved runs?'))lsSet(LS.runs,[]);}}[k]||(()=>{}))();
   run.snap=snap(); // cheats don't show up as purchases

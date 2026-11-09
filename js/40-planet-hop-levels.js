@@ -9,18 +9,22 @@
 //  pattern the bot can't survive would be caught by the tests.
 // ══════════════════════════════════════════════
 const PH_G=8,PH_V0=4,PH_DT=1/240;
-const PH_NAMES=['First Steps on Luna','Crater Skipper','Moonbeam Bounce','Lunar Leap','Comet Over Luna',
-  'Glacia Glide','Frostbite Funk','Ice Spire Hop','Aurora Drift','Frozen Comet Escape',
+const PH_NAMES=['First Steps on Luna','Under the Crater','Moonbeam Bounce','Lunar Leap','Comet Over Luna',
+  'Glacia Glide','Frostbite Funk','Ice Spire Hop','Crystal Grotto','Frozen Comet Escape',
   'Magmora Dash','Lava Lamp Groove','Ember Leap','Volcano Two-Step','Supernova Sprint'];
 const PH_STYLES=['house','reggaeton','afro','twostep','breakbeat','synthwave','funk','afro','twostep','halftime','breakbeat','reggaeton','dnb','twostep','dnb'];
 const PH_PLANETS=[{name:'LUNA',ground:['#9a9aa8','#5b5b68'],pit:'#07070c',spike:'#c9ccd6',block:'#7c7c8c',sky:['#05061a','#1a1240'],glow:'#a0a8ff'},
                   {name:'GLACIA',ground:['#bfe6ff','#5b8fb8'],pit:'#06142a',spike:'#e8fbff',block:'#8cc4e8',sky:['#020c1c','#0b3a52'],glow:'#7fe8ff'},
                   {name:'MAGMORA',ground:['#6a3a2a','#2a1410'],pit:'#ff5a1a',spike:'#ffb066',block:'#4a2a20',sky:['#120404','#3a0a14'],glow:'#ff7a33'}];
 
+// the journey: each surface level ends by diving into a crater (the next level is underground),
+// each cave level ends at a cave mouth back out into daylight, and each boss ends at a warp portal to the next world
+const PH_SCENE=[0,1,0,1,0, 0,1,0,1,0, 0,1,0,1,0];
+function phFinish(L){return L%5===0?'portal':PH_SCENE[L-1]?'exit':'dive';}
 function phLevel(L){
   L=Math.max(1,Math.min(15,L));
   return{lvl:L,seed:500+L*13,name:PH_NAMES[L-1],style:PH_STYLES[L-1],
-    bpm:L===1?80:Math.round(88+(L-1)*4.3),bodyBars:phCourseBars(L),boss:L%5===0,planet:L<=5?0:L<=10?1:2,
+    bpm:L===1?80:Math.round(88+(L-1)*4.3),bodyBars:phCourseBars(L),boss:L%5===0,planet:L<=5?0:L<=10?1:2,cave:!!PH_SCENE[L-1],finish:phFinish(L),
     reward:Math.round((1.6+(L-1)*.1)*(L%5===0?1.25:1)*100)/100};
 }
 

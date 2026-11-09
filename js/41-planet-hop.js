@@ -54,7 +54,7 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
   $('phSync').addEventListener('click',()=>{if(typeof mgOpenSync==='function')mgOpenSync(()=>{});});
   $('phQuit').addEventListener('click',()=>{if(R&&R.state!=='done'){stop();showSelect();}else close();});
 
-  const NEWS={1:'Jump on the beat — follow the glowing markers',2:'NEW: rocks — land on top',3:'NEW: double jump — practise on flat ground, then clear wide pits',4:'NEW: low gravity on the moon — floaty two-beat jumps',5:'BOSS: a comet chases you round Luna · NEW: climbing rocks',6:'NEW BUTTON: BOUNCE — press it as you land on each glowing pad',7:'NEW: fast bounce chains, one pad per beat',8:'NEW: floating ice platforms',9:'NEW: spike runs — jump on every beat',10:'BOSS: the frozen comet',11:'NEW: triple spikes — jump, then double jump on the "and"',12:'NEW: off-beat spikes — jump on the "and"',13:'NEW: tall rocks — double jump up onto them',14:'REMIX: everything you know, at speed',15:'FINAL BOSS: the supernova comet'};
+  const NEWS={1:'Jump on the beat — follow the glowing markers · then dive into the crater!',2:'Underground! NEW: rocks — land on top, then find the way out',3:'NEW: double jump — practise on flat ground, then clear wide pits',4:'NEW: low gravity on the moon — floaty two-beat jumps',5:'BOSS: a comet chases you round Luna · NEW: climbing rocks',6:'NEW BUTTON: BOUNCE — press it as you land on each glowing pad',7:'NEW: fast bounce chains, one pad per beat',8:'NEW: floating ice platforms',9:'NEW: spike runs — jump on every beat',10:'BOSS: the frozen comet',11:'NEW: triple spikes — jump, then double jump on the "and"',12:'NEW: off-beat spikes — jump on the "and"',13:'NEW: tall rocks — double jump up onto them',14:'REMIX: everything you know, at speed',15:'FINAL BOSS: the supernova comet'};
   let tab='lv';const PH_DIFF_L={easy:3,normal:8,hard:13};
   const mineOpts={id:'phMine',note:'obstacles land on your beat',playStyle:'border-color:#7fe8ff;color:#7fe8ff;background:#071420',onPlay:song=>{const d=Object.keys(MG_DIFFS).find(k=>song.P.custom.endsWith('|'+k))||'normal';song.P.planet=MG_DIFFS[d].planet;start({song,L:PH_DIFF_L[d]});}};
   function showTab(t){tab=t;$('phTabLv').classList.toggle('sel',t==='lv');$('phTabMine').classList.toggle('sel',t==='mine');$('phLvPane').style.display=t==='lv'?'':'none';$('phMinePane').style.display=t==='mine'?'':'none';
@@ -219,7 +219,7 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
     if(first)phMultiplier*=P.reward;
     if(R.lv.bossS<Infinity){R.shake=16;for(let k=0;k<4;k++)burst(R.S.s-2.2,2.4,['#ffd166','#ff66ff','#7fe8ff','#ffffff'][k],30,2);}
     if(typeof autoSave==='function')autoSave();if(typeof renderUI==='function')renderUI();
-    setTimeout(()=>results(stars,dust,first),R.lv.bossS<Infinity?1300:700);
+    R.finFx=0;setTimeout(()=>results(stars,dust,first),R.lv.bossS<Infinity?1900:1700);
   }
   function results(stars,dust,first){
     if(!R)return;R.state='done';
@@ -255,9 +255,17 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
   function P(s,h){const f=(s-R.S.s)*BP/RP,r=RP+h*UP;return[AX+r*Math.sin(f),GY+RP-r*Math.cos(f),f];}
 
   function makeBg(){
-    const pl=PH_PLANETS[R.lv.P.planet],key=W+'x'+H+':'+R.lv.P.planet;if(bg&&bgKey===key)return;bgKey=key;
+    const pl=PH_PLANETS[R.lv.P.planet],key=W+'x'+H+':'+R.lv.P.planet+':'+(R.lv.P.cave?1:0);if(bg&&bgKey===key)return;bgKey=key;
     bg=document.createElement('canvas');bg.width=cv.width;bg.height=cv.height;const b=bg.getContext('2d');b.scale(DPR,DPR);
     const rnd=wwRng(99+R.lv.P.planet);
+    if(R.lv.P.cave){
+      // underground: the rock of this world, deep shadows, and glowing crystals in the far wall
+      const C=PH_CAVE[R.lv.P.planet],cg=b.createLinearGradient(0,0,0,H);cg.addColorStop(0,C.wall[0]);cg.addColorStop(1,C.wall[1]);b.fillStyle=cg;b.fillRect(0,0,W,H);
+      for(let i=0;i<14;i++){const x=rnd()*W,y=rnd()*H*.8,rx=60+rnd()*200,ry=40+rnd()*120;b.fillStyle=C.blob;b.beginPath();b.ellipse(x,y,rx,ry,rnd()*3,0,Math.PI*2);b.fill();}
+      for(let i=0;i<9;i++){const x=rnd()*W,y=H*.15+rnd()*H*.55,r=30+rnd()*90,gg=b.createRadialGradient(x,y,0,x,y,r);gg.addColorStop(0,C.glow+'40');gg.addColorStop(1,C.glow+'00');b.fillStyle=gg;b.fillRect(x-r,y-r,r*2,r*2);
+        b.fillStyle=C.glow;b.globalAlpha=.55;for(let k=0;k<4;k++){const a=-1.2+rnd()*2.4,l=6+rnd()*16;b.save();b.translate(x+(rnd()-.5)*20,y+(rnd()-.5)*12);b.rotate(a);b.beginPath();b.moveTo(-2.5,0);b.lineTo(0,-l);b.lineTo(2.5,0);b.fill();b.restore();}b.globalAlpha=1;}
+      return;
+    }
     const sky=b.createLinearGradient(0,0,0,H);sky.addColorStop(0,pl.sky[0]);sky.addColorStop(1,pl.sky[1]);b.fillStyle=sky;b.fillRect(0,0,W,H);
     // nebula
     for(let i=0;i<5;i++){const x=rnd()*W,y=rnd()*H*.6,r=80+rnd()*220,ng=b.createRadialGradient(x,y,0,x,y,r);ng.addColorStop(0,pl.glow+'33');ng.addColorStop(1,'rgba(0,0,0,0)');b.fillStyle=ng;b.fillRect(0,0,W,H);}
@@ -280,10 +288,48 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
   }
 
   // ── art: themes + detail painters ──
+  const PH_CAVE=[
+    {wall:['#0b0a16','#1d1a30'],blob:'rgba(0,0,0,.28)',glow:'#9d8cff',ceil:['#2c2942','#121022'],tip:'#4a4668',mote:'rgba(170,160,255,.6)'},
+    {wall:['#03101e','#0c2c44'],blob:'rgba(0,10,25,.35)',glow:'#7fe8ff',ceil:['#1d4d70','#0a2033'],tip:'#bfeaff',mote:'rgba(200,245,255,.7)'},
+    {wall:['#120403','#2e0c06'],blob:'rgba(0,0,0,.35)',glow:'#ff6a1a',ceil:['#3a1a12','#140605'],tip:'#5a2a1a',mote:'rgba(255,150,60,.75)'}];
+  // the cave roof: a band of this world's rock overhead with stalactites and glowing crystals
+  function drawCeiling(lv,S,CX,CY,ang,s0,s1,t,stopAt){
+    const C=PH_CAVE[lv.P.planet],CH=4.9,r0=RP+CH*UP,r1=RP+40*UP,a0=ang(s0-1),a1=ang(Math.min(s1+1,stopAt));if(a1<=a0)return;
+    const cg=g.createRadialGradient(CX,CY,r0,CX,CY,r0+UP*3);cg.addColorStop(0,C.ceil[0]);cg.addColorStop(1,C.ceil[1]);
+    g.fillStyle=cg;g.beginPath();g.arc(CX,CY,r0,a0,a1);g.arc(CX,CY,r1,a1,a0,true);g.closePath();g.fill();
+    g.strokeStyle=C.glow+'55';g.lineWidth=2;g.beginPath();g.arc(CX,CY,r0,a0,a1);g.stroke();
+    for(let k=Math.floor((s0-1)/.7);k<=(s1+1)/.7;k++){const ss=k*.7+hsh(k,11)*.35;if(ss>stopAt-.2)continue;
+      const len=.35+hsh(k,12)*1.05,w=.12+hsh(k,13)*.14,[ax,ay]=P(ss-w,CH+.05),[bx,by]=P(ss+w,CH+.05),[cx,cy]=P(ss,CH-len);
+      g.fillStyle=C.ceil[0];g.beginPath();g.moveTo(ax,ay);g.lineTo(cx,cy);g.lineTo(bx,by);g.fill();
+      g.strokeStyle=C.tip;g.lineWidth=1.2;g.beginPath();g.moveTo(ax,ay);g.lineTo(cx,cy);g.stroke();
+      if(hsh(k,14)<.3){const gl=.5+.5*Math.sin(t*2+k),[gx,gy]=P(ss+.25,CH-.15),gg=g.createRadialGradient(gx,gy,0,gx,gy,UP*.6);gg.addColorStop(0,C.glow+'88');gg.addColorStop(1,C.glow+'00');
+        g.globalAlpha=.5+.5*gl;g.fillStyle=gg;g.beginPath();g.arc(gx,gy,UP*.6,0,Math.PI*2);g.fill();g.fillStyle=C.glow;g.beginPath();g.moveTo(gx-3,gy-2);g.lineTo(gx,gy+UP*.28);g.lineTo(gx+3,gy-2);g.fill();g.globalAlpha=1;}}
+  }
+  // finish line scenery: a crater to dive into, a cave mouth out to daylight, or a warp portal
+  function drawFinish(lv,S,CX,CY,ang,s0,s1,t){
+    const e=lv.end,f=lv.P.finish,pl=lv.P.planet,C=PH_CAVE[pl];
+    if(e>s1+4||e<s0-6)return;
+    if(f==='dive'){const a=e+1,b=e+2.8,A0=ang(a),A1=ang(b);
+      const hg=g.createRadialGradient(CX,CY,RP-3.2*UP,CX,CY,RP);hg.addColorStop(0,C.glow+'66');hg.addColorStop(.35,C.wall[1]);hg.addColorStop(1,'#020208');
+      g.fillStyle=hg;g.beginPath();g.arc(CX,CY,RP+1,A0,A1);g.arc(CX,CY,RP-3.2*UP,A1,A0,true);g.closePath();g.fill();
+      const T=PH_THEME[pl];[[a-.45,a+.05],[b-.05,b+.45]].forEach(([u,v])=>{const pts=[];for(let i=0;i<=8;i++){const ss=u+(v-u)*i/8;pts.push(P(ss,Math.sin(i/8*Math.PI)*.38));}pts.push(P(v,0),P(u,0));g.fillStyle=T.crust;poly(pts.map(q=>[q[0],q[1]]));g.fill();g.strokeStyle=T.top;g.lineWidth=2;g.stroke();});
+      const gl=.5+.5*Math.sin(t*3),[gx,gy]=P((a+b)/2,-.6),gg=g.createRadialGradient(gx,gy,0,gx,gy,UP*1.6);gg.addColorStop(0,C.glow+'55');gg.addColorStop(1,C.glow+'00');g.globalAlpha=.6+.4*gl;g.fillStyle=gg;g.beginPath();g.arc(gx,gy,UP*1.6,0,Math.PI*2);g.fill();g.globalAlpha=1;
+    }else if(f==='exit'){
+      // daylight beyond the cave mouth
+      const pp=PH_PLANETS[pl],A0=ang(e+1),A1=ang(s1+8);if(A1>A0){
+        const sg=g.createRadialGradient(CX,CY,RP,CX,CY,RP+14*UP);sg.addColorStop(0,'#fffbe8');sg.addColorStop(.25,pp.glow);sg.addColorStop(1,pp.sky[1]);
+        g.fillStyle=sg;g.beginPath();g.arc(CX,CY,RP-2,A0,A1);g.arc(CX,CY,RP+40*UP,A1,A0,true);g.closePath();g.fill();}
+      const [mx,my]=P(e+1.2,2.2),lg=g.createRadialGradient(mx,my,0,mx,my,UP*4.5);lg.addColorStop(0,'rgba(255,250,225,.75)');lg.addColorStop(1,'rgba(255,250,225,0)');g.fillStyle=lg;g.beginPath();g.arc(mx,my,UP*4.5,0,Math.PI*2);g.fill();
+    }else{
+      const nxt=pl===0?'#7fe8ff':pl===1?'#ff7a33':'#ffd166',[px,py,pf]=P(e+1.6,1.4),rr=UP*1.25;g.save();g.translate(px,py);g.rotate(pf);
+      const vg=g.createRadialGradient(0,0,0,0,0,rr);vg.addColorStop(0,'#ffffff');vg.addColorStop(.35,nxt+'cc');vg.addColorStop(1,nxt+'22');g.fillStyle=vg;g.beginPath();g.ellipse(0,0,rr*.6,rr,0,0,Math.PI*2);g.fill();
+      g.shadowColor=nxt;g.shadowBlur=18;g.strokeStyle=nxt;g.lineWidth=4;for(let k=0;k<2;k++){g.beginPath();g.ellipse(0,0,rr*.6+k*5,rr+k*7,0,t*2*(k?-1:1),t*2*(k?-1:1)+Math.PI*1.6);g.stroke();}g.shadowBlur=0;g.restore();
+    }
+  }
   const PH_THEME=[
-    {body:'#3e3e4c',deep:'#1c1c26',crust:'#8d8d9c',top:'#cfcfdc',strata:'rgba(0,0,0,.16)',rock:['#e8a85c','#9a4f24'],spike:['#e4e6ee','#8a8d9c'],chasm:['#16161f','#010104'],ridge:['#2c2a44','#15142a']},
-    {body:'#27597e',deep:'#0d2440',crust:'#9fd4f2',top:'#f4fcff',strata:'rgba(20,60,100,.22)',rock:['#d6f1ff','#5f9bc6'],spike:['#f6feff','#8cc9ea'],chasm:['#0f3354','#01060f'],ridge:['#173a5a','#0a1d33']},
-    {body:'#2a1410',deep:'#120706',crust:'#4e2a20',top:'#6e3d2c',strata:'rgba(255,120,40,.10)',rock:['#3d2722','#140a08'],spike:['#3a2a30','#0e0608'],chasm:['#ff6a1a','#7a1500'],ridge:['#300c0c','#160505']}];
+    {body:'#3e3e4c',deep:'#1c1c26',crust:'#8d8d9c',top:'#cfcfdc',strata:'rgba(0,0,0,.16)',rock:['#c7c2ea','#5a5682'],spike:['#e4e6ee','#8a8d9c'],bglow:'#b9a8ff',chasm:['#16161f','#010104'],ridge:['#2c2a44','#15142a']},
+    {body:'#27597e',deep:'#0d2440',crust:'#9fd4f2',top:'#f4fcff',strata:'rgba(20,60,100,.22)',rock:['#d6f1ff','#5f9bc6'],spike:['#f6feff','#8cc9ea'],bglow:'#7fe8ff',chasm:['#0f3354','#01060f'],ridge:['#173a5a','#0a1d33']},
+    {body:'#2a1410',deep:'#120706',crust:'#4e2a20',top:'#6e3d2c',strata:'rgba(255,120,40,.10)',rock:['#4a2c26','#160a08'],spike:['#3a2a30','#0e0608'],bglow:'#ff7a33',chasm:['#ff6a1a','#7a1500'],ridge:['#300c0c','#160505']}];
   const hsh=(k,n)=>{const x=Math.sin(k*127.1+n*311.7)*43758.5453;return x-Math.floor(x);};
   function poly(pts){g.beginPath();pts.forEach((q,i)=>i?g.lineTo(q[0],q[1]):g.moveTo(q[0],q[1]));g.closePath();}
   // a far-off mountain ridge behind the horizon, turning at under half the planet's speed
@@ -342,18 +388,18 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
     const outline=top.concat(bot).map(q=>[q[0],q[1]]);
     const [mx,my]=P((b.a+b.b)/2,b.h),[nx,ny]=P((b.a+b.b)/2,b.fl?under-.6:under);
     const gr=g.createLinearGradient(mx,my,nx,ny);gr.addColorStop(0,T.rock[0]);gr.addColorStop(1,T.rock[1]);
-    g.fillStyle=gr;poly(outline);g.fill();g.strokeStyle='rgba(0,0,0,.35)';g.lineWidth=1.5;g.stroke();
+    g.save();g.shadowColor=T.bglow;g.shadowBlur=9;g.fillStyle=gr;poly(outline);g.fill();g.restore();g.strokeStyle=T.bglow+'8c';g.lineWidth=1.6;poly(outline);g.stroke();
     // strata / glowing cracks / ice facets inside
     g.save();poly(outline);g.clip();
-    g.strokeStyle=pl===2?'rgba(255,110,30,.55)':pl===1?'rgba(255,255,255,.35)':'rgba(90,40,15,.45)';g.lineWidth=pl===2?1.6:1.2;
+    g.strokeStyle=pl===2?'rgba(255,110,30,.55)':pl===1?'rgba(255,255,255,.35)':'rgba(40,34,80,.22)';g.lineWidth=pl===2?1.6:1.2;
     for(let k=1;k<=3;k++){const hh=b.h-k*(b.fl?.18:b.h/4);g.beginPath();for(let i=0;i<=n;i++){const ss=b.a+(b.b-b.a)*i/n,[x,y]=P(ss,hh+(pl===2?(hsh(ss*7+k,3)-.5)*.12:0));i?g.lineTo(x,y):g.moveTo(x,y);}
       if(pl===2)g.globalAlpha=.5+.5*Math.sin(t*2+k);g.stroke();g.globalAlpha=1;}
-    if(pl===0){g.strokeStyle='rgba(90,40,15,.45)';g.lineWidth=1.2;const rows=Math.max(1,Math.round((b.fl?.36:b.h)/.2)),bot0=b.fl?b.h-.36:0;
-      for(let r=0;r<rows;r++){const h0=bot0+(b.h-bot0)*r/rows,h1=bot0+(b.h-bot0)*(r+1)/rows;for(let ss=b.a+(r%2?.18:.36);ss<b.b-.05;ss+=.36){const [x0,y0]=P(ss,h0),[x1,y1]=P(ss,h1);g.beginPath();g.moveTo(x0,y0);g.lineTo(x1,y1);g.stroke();}}}
+    if(pl===0){for(let k=0;k<Math.ceil((b.b-b.a)*2.2);k++){const ss=b.a+(k+.5)/2.2+(hsh(b.a*13+k,2)-.5)*.2,hh=(b.fl?b.h-.18:b.h*(.25+hsh(b.a*7+k,4)*.55)),[x,y]=P(ss,hh),r=UP*(.06+hsh(b.a+k,6)*.08);
+      g.fillStyle='rgba(40,34,80,.35)';g.beginPath();g.ellipse(x,y,r*1.4,r,0,0,Math.PI*2);g.fill();g.fillStyle='rgba(255,255,255,.18)';g.beginPath();g.ellipse(x,y+r*.35,r*1.1,r*.45,0,0,Math.PI);g.fill();}}
     if(pl===1){g.fillStyle='rgba(255,255,255,.18)';const [q1x,q1y]=P(b.a+(b.b-b.a)*.15,b.h),[q2x,q2y]=P(b.a+(b.b-b.a)*.35,b.h),[q3x,q3y]=P(b.a+(b.b-b.a)*.1,under);g.beginPath();g.moveTo(q1x,q1y);g.lineTo(q2x,q2y);g.lineTo(q3x,q3y);g.fill();}
     g.restore();
     // top: lit edge, snow cap or ember crust
-    g.lineWidth=pl===1?UP*.12:pl===0?3:2.5;g.strokeStyle=pl===1?'#ffffff':pl===2?'rgba(255,130,50,.8)':'#ffe3a8';
+    g.lineWidth=pl===1?UP*.12:2.5;g.strokeStyle=pl===1?'#ffffff':pl===2?'rgba(255,130,50,.8)':'#ece8ff';
     g.beginPath();top.forEach((q,i)=>i?g.lineTo(q[0],q[1]):g.moveTo(q[0],q[1]));g.stroke();
     if(pl===1)for(let k=0;k<3;k++){const [x,y]=P(b.a+(b.b-b.a)*(.2+.3*k),b.h-.08);g.fillStyle='#ffffff';g.beginPath();g.ellipse(x,y+UP*.05,UP*.05,UP*.11,0,0,Math.PI*2);g.fill();}
     if(b.fl&&pl!==2){const [gx,gy]=P((b.a+b.b)/2,under-.9);g.fillStyle=pl===1?'rgba(127,232,255,.18)':'rgba(160,168,255,.14)';g.beginPath();g.ellipse(gx,gy,BP*(b.b-b.a)*.4,UP*.12,0,0,Math.PI*2);g.fill();}
@@ -378,6 +424,7 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
   // the living sky: asteroid belt (Luna), aurora + snow (Glacia), embers (Magmora), shooting stars everywhere
   function drawSky(lv,S,t){
     const pl=lv.P.planet;
+    if(lv.P.cave){const C=PH_CAVE[pl];g.fillStyle=C.mote;for(let i=0;i<34;i++){const x=((hsh(i,4)*W-S.s*BP*.12+Math.sin(t*.4+i)*20)%W+W)%W,y=((hsh(i,6)*H*.75+(pl===2?-1:1)*t*(6+hsh(i,7)*10))%(H*.75)+H*.75)%(H*.75);g.globalAlpha=.4+.6*Math.abs(Math.sin(t+i));g.beginPath();g.arc(x,y,1+hsh(i,8)*1.8,0,Math.PI*2);g.fill();}g.globalAlpha=1;return;}
     if(pl===0){for(let i=0;i<46;i++){const u=((hsh(i,1)+t*.006+S.s*.002)%1),x=u*(W+60)-30,y=H*.1+u*H*.18+Math.sin(i)*H*.05,z=1+hsh(i,2)*2.6;g.fillStyle=`rgba(170,165,190,${.35+hsh(i,3)*.4})`;g.beginPath();g.ellipse(x,y,z,z*.7,i,0,Math.PI*2);g.fill();}}
     if(pl===1){for(let k=0;k<3;k++){g.beginPath();const y0=H*(.12+k*.08),amp=H*.05;for(let i=0;i<=24;i++){const x=i/24*W,y=y0+Math.sin(i*.45+t*.5+k*2)*amp;i?g.lineTo(x,y):g.moveTo(x,y);}
         for(let i=24;i>=0;i--){const x=i/24*W,y=y0+Math.sin(i*.45+t*.5+k*2)*amp+H*(.06+.03*Math.sin(i*.3+t+k));g.lineTo(x,y);}g.closePath();
@@ -404,6 +451,7 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
     const CX=AX,CY=GY+RP,ang=s=>(s-S.s)*BP/RP-Math.PI/2;
     // ── distant ridge (turns slower than the planet = depth) ──
     drawRidge(lv,S,CX,CY,t);
+    if(lv.P.finish==='exit')drawFinish(lv,S,CX,CY,ang,s0,s1,t);   // daylight sits behind the ground
     // ── planet body + crust ──
     const T=PH_THEME[lv.P.planet];
     const pg=g.createRadialGradient(CX,CY,RP*.82,CX,CY,RP);pg.addColorStop(0,T.deep);pg.addColorStop(1,T.body);
@@ -422,6 +470,8 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
       g.fillStyle=zg;g.beginPath();g.arc(CX,CY,RP+3*UP,ang(z.a),ang(z.b));g.arc(CX,CY,RP,ang(z.b),ang(z.a),true);g.fill();
       g.fillStyle='rgba(190,235,255,.55)';for(let k=0;k<14;k++){const ms=z.a+(z.b-z.a)*hsh(k,7),mh=((t*.35+hsh(k,9))%1)*2.8;const [mx,my]=P(ms,mh);g.beginPath();g.arc(mx,my,1.6+hsh(k,3)*1.6,0,Math.PI*2);g.fill();}
       const [x,y,f]=P(Math.max(z.a+.6,Math.min(z.b-.6,S.s+2)),2.4);g.save();g.translate(x,y);g.rotate(f);g.fillStyle='rgba(170,225,255,.75)';g.font=`${Math.round(UP*.38)}px 'Bebas Neue',sans-serif`;g.textAlign='center';g.fillText('LOW GRAVITY',0,0);g.restore();});
+    if(lv.P.finish==='dive'||lv.P.finish==='portal')drawFinish(lv,S,CX,CY,ang,s0,s1,t);
+    if(lv.P.cave)drawCeiling(lv,S,CX,CY,ang,s0,s1,t,lv.P.finish==='exit'?lv.end+1:Infinity);
     // ── pits: real chasms ──
     lv.pits.forEach(p=>{if(p.b<s0-.2||p.a>s1+.2)return;drawPit(lv,p,t,CX,CY,ang);});
     // ── blocks + floating platforms ──
@@ -454,13 +504,6 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
       g.fillStyle='rgba(8,10,24,.88)';g.strokeStyle=pl.glow;g.lineWidth=2;g.shadowColor=pl.glow;g.shadowBlur=8+6*pulse;
       g.beginPath();if(g.roundRect)g.roundRect(-tw/2,by,tw,bh,6);else g.rect(-tw/2,by,tw,bh);g.fill();g.stroke();g.shadowBlur=0;
       g.fillStyle='#fff';g.textAlign='center';g.textBaseline='middle';g.fillText(sg.txt,0,by+bh/2+1);g.restore();});
-    // ── goal pole at the finish ──
-    if(lv.end>s0-1&&lv.end<s1+2){const [x,y,f]=P(lv.end+.6,0);g.save();g.translate(x,y);g.rotate(f);
-      const ph=UP*3.2;g.fillStyle='#8a6a48';g.fillRect(-UP*.22,-UP*.18,UP*.44,UP*.18);
-      g.fillStyle='#e8ecf4';g.fillRect(-2.5,-ph,5,ph-UP*.18);g.fillStyle='#ffd166';g.shadowColor='#ffd166';g.shadowBlur=12;g.beginPath();g.arc(0,-ph,UP*.13,0,Math.PI*2);g.fill();g.shadowBlur=0;
-      const fw=UP*.9,fh=UP*.55,wv=Math.sin(t*5)*UP*.05,cs=fh/3;
-      for(let r=0;r<3;r++)for(let c=0;c<5;c++){g.fillStyle=(r+c)%2?'#111':'#fff';g.fillRect(3+c*fw/5,-ph+UP*.12+r*cs+wv*(c/5),fw/5+.5,cs+.5);}
-      g.restore();}
     // ── checkpoint flag ──
     if(lv.cp!=null&&lv.cp>s0-1&&lv.cp<s1+1){const [x,y,f]=P(lv.cp,0),on=R.cpHit;g.save();g.translate(x,y);g.rotate(f);
       const ph=UP*1.9;g.fillStyle='#c8ccd8';g.fillRect(-2,-ph,4,ph);g.fillStyle=on?'#00ff99':'#7a7f90';g.beginPath();g.arc(0,-ph,4,0,Math.PI*2);g.fill();
@@ -484,15 +527,21 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
         g.fillStyle=cg;g.shadowColor='#ff8a3a';g.shadowBlur=30;g.beginPath();g.arc(cx,cy,cr,0,Math.PI*2);g.fill();g.shadowBlur=0;}
     }
     // trail + alien
-    const [ax,ay]=P(S.s,S.h);
-    if(!R.dead){R.trail.push([ax,ay]);if(R.trail.length>10)R.trail.shift();
+    let es=S.s,eh=S.h,ea=1,esc=1;
+    if(R.won){const u=(performance.now()-R.won)/1000/R.beat,e=lv.end,f=lv.P.finish;
+      if(f==='dive'){es=e+Math.min(u,1.15)*1.6;eh=Math.max(-4.5,4*u-4*u*u);ea=eh<-.4?Math.max(0,1+(eh+.4)/2.2):1;
+        if(u>1.25&&!R.finFx){R.finFx=1;burst(e+1.9,-.2,PH_CAVE[lv.P.planet].glow,22,1.2);}}
+      else if(f==='exit'){es=e+u*1.7;eh=Math.abs(Math.sin(u*Math.PI))*.45;ea=Math.max(0,1-Math.max(0,u-1.1)/.8);}
+      else{const k=Math.min(1,u/1.1);es=e+k*1.6;eh=Math.sin(k*Math.PI*.5)*1.4;esc=Math.max(0,1-Math.max(0,u-.9)/.5);if(u>1.3&&!R.finFx){R.finFx=1;burst(e+1.6,1.4,'#ffffff',26,1.4);}}}
+    const [ax,ay]=P(es,eh);
+    if(!R.dead&&ea>0&&esc>0){R.trail.push([ax,ay]);if(R.trail.length>10)R.trail.shift();
       R.trail.forEach((p,i)=>{g.fillStyle=`rgba(0,255,136,${i/R.trail.length*.25})`;g.beginPath();g.arc(p[0]-(R.trail.length-i)*BP*.035,p[1]-UP*.35,UP*.12*(i/R.trail.length),0,Math.PI*2);g.fill();});
       const as=Math.max(26,UP*.85),col=(typeof getAlienColor==='function')?getAlienColor(0):'#00ff88';
       // shadow on the ground
-      const [shx,shy]=P(S.s,phSupport(lv,S,S.s,S.h).top??-1);if(!phInPit(lv,S.s)||S.h>-0.1){g.fillStyle='rgba(0,0,0,.3)';g.beginPath();g.ellipse(shx,shy,as*.4*(1/(1+S.h*.4)),as*.1,0,0,Math.PI*2);g.fill();}
+      const [shx,shy]=P(S.s,phSupport(lv,S,S.s,S.h).top??-1);if(!R.won&&(!phInPit(lv,S.s)||S.h>-0.1)){g.fillStyle='rgba(0,0,0,.3)';g.beginPath();g.ellipse(shx,shy,as*.4*(1/(1+S.h*.4)),as*.1,0,0,Math.PI*2);g.fill();}
       const land=Math.max(0,1-(S.s-S.landT)*5);
-      g.save();g.translate(ax,ay-as*.48);g.rotate(-S.flip*Math.PI*2);g.scale(1+land*.18,1-land*.18);
-      g.shadowColor=col;g.shadowBlur=14;g.font=`${Math.round(as)}px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif`;g.textAlign='center';g.textBaseline='middle';g.fillText('👽',0,0);g.shadowBlur=0;g.restore();
+      g.save();g.globalAlpha=ea;g.translate(ax,ay-as*.48);g.rotate(-S.flip*Math.PI*2+(R.won&&lv.P.finish==='portal'?(1-esc)*6:0));g.scale((1+land*.18)*esc,(1-land*.18)*esc);
+      g.shadowColor=col;g.shadowBlur=14;g.font=`${Math.round(as)}px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif`;g.textAlign='center';g.textBaseline='middle';g.fillText('👽',0,0);g.shadowBlur=0;g.globalAlpha=1;g.restore();
     }
     // perfect rings, on-beat pulse at the alien's feet, floating timing words, the early/late meter
     const fp=Math.pow(1-((S.s%1)+1)%1,4);if(!R.dead&&S.grounded){const [fx,fy,ff]=P(S.s,0);g.save();g.translate(fx,fy);g.rotate(ff);g.strokeStyle=`rgba(255,255,255,${.12+.4*fp})`;g.lineWidth=2;g.beginPath();g.ellipse(0,0,BP*(.18+.12*fp),UP*.08,0,0,Math.PI*2);g.stroke();g.restore();}

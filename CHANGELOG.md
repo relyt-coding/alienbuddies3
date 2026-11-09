@@ -2,6 +2,12 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.98 - 2026-11-09 14:39
+- Planet Hop: a journey through each world. Surface levels end by diving into a crater, cave levels end at a cave mouth back into daylight, and bosses end at a warp portal to the next planet
+- Planet Hop: underground levels (2, 4, 7, 9, 12, 14) with a rock roof, stalactites and glowing crystals in each planet's own rock
+- Planet Hop: rock platforms match each world (lavender moonstone, ice, volcanic basalt) with a soft glow; replaces the goal pole and the sandstone bricks
+- Planet Hop: level 2 renamed Under the Crater, level 9 renamed Crystal Grotto
+
 ## v0.2.97 - 2026-11-09 12:41
 - Planet Hop: spikes glow (red on Luna, pink on Glacia, amber on Magmora) so they stand out from the ground
 - Planet Hop: Luna's rock platforms are now warm sandstone bricks instead of gray

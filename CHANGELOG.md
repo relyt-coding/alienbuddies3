@@ -2,6 +2,12 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.97 - 2026-11-09 12:41
+- Planet Hop: spikes glow (red on Luna, pink on Glacia, amber on Magmora) so they stand out from the ground
+- Planet Hop: Luna's rock platforms are now warm sandstone bricks instead of gray
+- Planet Hop: level 1 ends with a three-step staircase and a big leap off the top
+- Planet Hop: every level finishes at a checkered goal pole
+
 ## v0.2.96 - 2026-11-09 12:14
 - Planet Hop: levels 1 and 2 are half as long (8 bars), with a checkpoint flag halfway
 - Planet Hop: level 1 is gentler: slower tempo (80 BPM), spikes spaced out with rests, one small gap, and a press marker on every jump

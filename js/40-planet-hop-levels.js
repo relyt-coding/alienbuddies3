@@ -83,6 +83,8 @@ function phTokens(){
     Pm:{len:4,o:[PIT(.3,1.7),S(2.5)],a:[[0,'j'],[1,'j'],[2,'j']]},
     // rock
     k: {len:4,o:[BL(.5,2.2,.8)],a:[[0,'j']]},
+    // the end-of-level staircase: three steps up, then a big leap off the top
+    st:{len:8,o:[BL(.5,1.6,.8),BL(1.5,2.6,1.6),BL(2.5,4.4,2.4)],a:[[0,'j'],[1,'j'],[2,'j'],[4,'j']]},
     kk:{len:4,o:[BL(.5,1.6,.8),BL(1.5,3.0,1.6)],a:[[0,'j'],[1,'j']]},
     dk:{len:4,o:[BL(.9,3,1.6)],a:[[0,'j'],[.4,'j']]},          // double jump up onto a tall rock
     f: {len:4,o:[PIT(.3,3.6),BL(.55,2.2,.8,true),BL(2.6,3.3,.8,true)],a:[[0,'j'],[2,'j']]},
@@ -97,13 +99,13 @@ function phTokens(){
   };
 }
 // where each idea debuts, and the sign that teaches it
-const PH_DEBUT={s:[1,'JUMP ON THE BEAT'],p:[1,'HOP THE GAP'],k:[2,'ROCK — LAND ON TOP'],rE:[3,'TAP JUMP TWICE = DOUBLE JUMP'],P:[3,'WIDE PIT — DOUBLE JUMP'],
+const PH_DEBUT={s:[1,'JUMP ON THE BEAT'],p:[1,'HOP THE GAP'],st:[1,'CLIMB TO THE TOP!'],k:[2,'ROCK — LAND ON TOP'],rE:[3,'TAP JUMP TWICE = DOUBLE JUMP'],P:[3,'WIDE PIT — DOUBLE JUMP'],
   Bf:[6,'NEW BUTTON: PRESS BOUNCE ON EACH PAD'],B2:[6,'BOUNCE ACROSS THE PIT'],kk:[5,'CLIMB!'],Lr:[4,'LOW GRAVITY — 2-BEAT JUMPS'],Lg:[4,'LEAP THE CRATERS'],
   B1:[7,'ONE PAD PER BEAT'],f:[8,'FLOATING ICE'],s3:[9,'JUMP ON EVERY BEAT'],Pm:[9,'PIT, THEN SPIKE'],d:[11,'JUMP + DOUBLE ON THE "AND"'],
   rO:[12,'JUMP ON THE "AND"'],so:[12,'OFF-BEAT SPIKES'],dk:[13,'DOUBLE JUMP UP HIGH']};
 // the 15 courses (| marks the song's 8-bar sections; boss levels end with an 8-bar comet chase)
 const PH_COURSE=[
-  /* 1 First Steps   */ 'rA rA s rA | C s p rA',
+  /* 1 First Steps   */ 'rA rA s rA | C p st',
   /* 2 Crater Skipper*/ 'rA k s2 k | C p2 k rA',
   /* 3 Moonbeam      */ 'rA rE rA P rD P s2 rE | C P k P p2 rF P rA',
   /* 4 Lunar Leap    */ 'rA s Lr rD p2 L | C k Lg s2 P L | rE s2 P rA',

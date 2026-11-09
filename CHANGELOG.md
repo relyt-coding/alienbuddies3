@@ -2,6 +2,17 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.92 - 2026-11-08 16:30
+
+- Alien Party is a store upgrade (appears at 5M points): Glow, then Disco Orbit, Conga Line, EQ Bars, Bounce House, Galaxy (each ×10 the price)
+- Sequencer Upgrades in the store: BPM 10M, 32 steps 32M, 64 steps 64M, Arrangement tab 10B, Song tab 10T (off the skill tree; old saves keep them + get gems back)
+- Click ×, Alien Power, dot multipliers and Tier 3 cost +75% per level, stacking
+- Party styles: aliens choreograph to the music (EQ bars use the real audio spectrum)
+- Sideways phone layout, desktop DAW mode with opt-in FILL
+- 3D solar-system skill tree (suns orbit the core; 3D / FLAT toggle)
+- Gems-only skill tree (Core ×2, Quad Suns ×4), 3-mode alien toggle, Name for me, sound previews on purchase
+- Device fixes: tablet pads, big-monitor steps, onboarding arrow over the shop
+
 ## v0.2.91 - 2026-10-28 09:24
 
 - Skill tree popup always stays on screen next to its bubble (phones slide the map)

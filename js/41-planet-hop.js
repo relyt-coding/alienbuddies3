@@ -242,6 +242,117 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
     b.strokeStyle='rgba(220,200,255,.45)';b.lineWidth=pr*.12;b.beginPath();b.ellipse(0,0,pr*1.9,pr*.45,0,Math.PI,Math.PI*2);b.stroke();
     const pg=b.createRadialGradient(-pr*.4,-pr*.4,pr*.1,0,0,pr);pg.addColorStop(0,'#c8b8ff');pg.addColorStop(1,'#3a2a6a');b.fillStyle=pg;b.beginPath();b.arc(0,0,pr,0,Math.PI*2);b.fill();
     b.beginPath();b.ellipse(0,0,pr*1.9,pr*.45,0,0,Math.PI);b.stroke();b.restore();
+    // a second world in each sky: a blue home planet over Luna, a pale moon over Glacia, a red giant over Magmora
+    const pn=R.lv.P.planet,qx=W*(pn===2?.62:.5),qy=H*(pn===2?.2:.1),qr=Math.min(W,H)*(pn===2?.16:.04);
+    const qg=b.createRadialGradient(qx-qr*.35,qy-qr*.35,qr*.1,qx,qy,qr);
+    if(pn===0){qg.addColorStop(0,'#bfe8ff');qg.addColorStop(.5,'#3a8ad8');qg.addColorStop(1,'#0c2a5a');}
+    else if(pn===1){qg.addColorStop(0,'#fff2f6');qg.addColorStop(1,'#a88ca0');}
+    else{qg.addColorStop(0,'rgba(255,200,120,.9)');qg.addColorStop(.6,'rgba(220,60,30,.55)');qg.addColorStop(1,'rgba(120,10,10,0)');}
+    b.fillStyle=qg;b.beginPath();b.arc(qx,qy,qr,0,Math.PI*2);b.fill();
+    if(pn===0){b.fillStyle='rgba(90,170,90,.55)';b.beginPath();b.ellipse(qx+qr*.15,qy-qr*.1,qr*.35,qr*.22,.4,0,Math.PI*2);b.fill();}
+  }
+
+  // ── art: themes + detail painters ──
+  const PH_THEME=[
+    {body:'#3e3e4c',deep:'#1c1c26',crust:'#8d8d9c',top:'#cfcfdc',strata:'rgba(0,0,0,.16)',rock:['#a4a4b4','#55556a'],spike:['#d6d9e2','#7c7f8e'],chasm:['#16161f','#010104'],ridge:['#2c2a44','#15142a']},
+    {body:'#27597e',deep:'#0d2440',crust:'#9fd4f2',top:'#f4fcff',strata:'rgba(20,60,100,.22)',rock:['#d6f1ff','#5f9bc6'],spike:['#f6feff','#8cc9ea'],chasm:['#0f3354','#01060f'],ridge:['#173a5a','#0a1d33']},
+    {body:'#2a1410',deep:'#120706',crust:'#4e2a20',top:'#6e3d2c',strata:'rgba(255,120,40,.10)',rock:['#3d2722','#140a08'],spike:['#3a2a30','#0e0608'],chasm:['#ff6a1a','#7a1500'],ridge:['#300c0c','#160505']}];
+  const hsh=(k,n)=>{const x=Math.sin(k*127.1+n*311.7)*43758.5453;return x-Math.floor(x);};
+  function poly(pts){g.beginPath();pts.forEach((q,i)=>i?g.lineTo(q[0],q[1]):g.moveTo(q[0],q[1]));g.closePath();}
+  // a far-off mountain ridge behind the horizon, turning at under half the planet's speed
+  function drawRidge(lv,S,CX,CY,t){
+    const T=PH_THEME[lv.P.planet],pl=lv.P.planet,N=48,f0=-(AX+40)/RP,f1=(W-AX+40)/RP,pts=[];
+    for(let i=0;i<=N;i++){const f=f0+(f1-f0)*i/N,q=f*RP/BP+S.s*.45;
+      const hgt=pl===1?Math.abs(Math.sin(q*.9))*1.1+Math.abs(Math.sin(q*2.3+1))*.6:pl===2?Math.max(0,1-Math.abs(((q*.35)%2+2)%2-1)*2.4)*1.05+Math.sin(q*1.7)*.15+.3:.55+Math.sin(q*.7)*.35+Math.sin(q*1.9+2)*.2;
+      const r=RP+(.25+hgt)*UP*1.25;pts.push([CX+r*Math.sin(f),CY-r*Math.cos(f),f,q,hgt]);}
+    const base=[...pts].reverse().map(p=>[CX+(RP-4)*Math.sin(p[2]),CY-(RP-4)*Math.cos(p[2])]);
+    const rg=g.createLinearGradient(0,GY-UP*3,0,GY);rg.addColorStop(0,T.ridge[0]);rg.addColorStop(1,T.ridge[1]);
+    g.fillStyle=rg;poly(pts.map(p=>[p[0],p[1]]).concat(base));g.fill();
+    if(pl===1){g.strokeStyle='rgba(220,245,255,.35)';g.lineWidth=2;g.beginPath();pts.forEach((p,i)=>i?g.lineTo(p[0],p[1]):g.moveTo(p[0],p[1]));g.stroke();}  // snowy edge
+    if(pl===2)pts.forEach(p=>{if(p[4]>1.25){const gl=.5+.5*Math.sin(t*3+p[3]);g.fillStyle=`rgba(255,120,30,${.35+.4*gl})`;g.beginPath();g.arc(p[0],p[1],3+3*gl,0,Math.PI*2);g.fill();}}); // volcano glow
+  }
+  // pebbles, craters, snow drifts, ice cracks, lava veins…
+  function drawDecor(pl,k,sx,t){
+    const r1=hsh(k,2),r2=hsh(k,3),[x,y,f]=P(sx,0);g.save();g.translate(x,y);g.rotate(f);
+    if(pl===0){
+      if(r1<.45){const w=BP*(.08+r2*.12);g.fillStyle='rgba(0,0,0,.25)';g.beginPath();g.ellipse(0,UP*.06,w,w*.32,0,0,Math.PI*2);g.fill();g.strokeStyle='rgba(255,255,255,.22)';g.lineWidth=1.5;g.beginPath();g.ellipse(0,UP*.06,w,w*.32,0,.1,Math.PI-.1);g.stroke();}
+      else{const w=BP*(.03+r2*.05);g.fillStyle='#6a6a7a';g.beginPath();g.ellipse(0,-w*.35,w,w*.7,0,0,Math.PI*2);g.fill();g.fillStyle='rgba(255,255,255,.35)';g.beginPath();g.ellipse(-w*.3,-w*.6,w*.4,w*.22,0,0,Math.PI*2);g.fill();}
+    }else if(pl===1){
+      if(r1<.4){const w=BP*(.12+r2*.18);g.fillStyle='#f6fdff';g.beginPath();g.ellipse(0,0,w,UP*(.07+r2*.08),0,Math.PI,Math.PI*2);g.fill();}
+      else if(r1<.75){g.strokeStyle='rgba(30,90,140,.45)';g.lineWidth=1.4;g.beginPath();g.moveTo(0,0);g.lineTo(BP*.03,UP*.18);g.lineTo(-BP*.02,UP*.32);g.lineTo(BP*.04,UP*.5);g.stroke();}
+      else{const tw=.5+.5*Math.sin(t*4+k);g.fillStyle=`rgba(255,255,255,${.3+.6*tw})`;const z=2+2*tw;g.beginPath();g.moveTo(0,-UP*.1-z);g.lineTo(z*.3,-UP*.1);g.lineTo(0,-UP*.1+z);g.lineTo(-z*.3,-UP*.1);g.fill();}
+    }else{
+      if(r1<.5){const gl=.5+.5*Math.sin(t*2.4+k*1.3);g.strokeStyle=`rgba(255,${110+60*gl|0},30,${.45+.45*gl})`;g.lineWidth=2;g.beginPath();g.moveTo(0,UP*.05);g.lineTo(BP*.05,UP*.2);g.lineTo(-BP*.03,UP*.36);g.lineTo(BP*.06,UP*.55);g.stroke();}
+      else{const w=BP*(.04+r2*.06);g.fillStyle='#1a0c0a';g.beginPath();g.moveTo(-w,0);g.lineTo(-w*.4,-w*1.1);g.lineTo(w*.5,-w*.8);g.lineTo(w,0);g.fill();g.strokeStyle='rgba(255,110,40,.5)';g.lineWidth=1;g.stroke();}
+    }
+    g.restore();
+  }
+  // a chasm with jagged walls (+ void stars on Luna, icicles on Glacia, a lava pool on Magmora)
+  function drawPit(lv,p,t,CX,CY,ang){
+    const T=PH_THEME[lv.P.planet],pl=lv.P.planet,D=2.4,steps=7,L=[],Rr=[];
+    for(let i=0;i<=steps;i++){const d=i/steps*D;L.push(P(p.a+(hsh(p.a*13+i,4)-.5)*.07+d*.02,-d));Rr.push(P(p.b+(hsh(p.b*13+i,5)-.5)*.07-d*.02,-d));}
+    const outline=L.map(q=>[q[0],q[1]]).concat([...Rr].reverse().map(q=>[q[0],q[1]]));
+    const gr=g.createRadialGradient(CX,CY,RP-D*UP,CX,CY,RP);
+    if(pl===2){gr.addColorStop(0,'#ffd23a');gr.addColorStop(.35,'#ff5a1a');gr.addColorStop(.75,'#3a0e06');gr.addColorStop(1,'#1a0806');}
+    else{gr.addColorStop(0,T.chasm[1]);gr.addColorStop(.7,T.chasm[0]);gr.addColorStop(1,T.body);}
+    g.fillStyle=gr;poly(outline);g.fill();
+    // lit wall edges
+    g.strokeStyle=pl===2?'rgba(255,120,40,.55)':pl===1?'rgba(200,240,255,.5)':'rgba(255,255,255,.18)';g.lineWidth=2;
+    [L,Rr].forEach(side=>{g.beginPath();side.slice(0,5).forEach((q,i)=>i?g.lineTo(q[0],q[1]):g.moveTo(q[0],q[1]));g.stroke();});
+    if(pl===0){g.save();poly(outline);g.clip();
+      for(let k=0;k<8;k++){const ss=p.a+(p.b-p.a)*hsh(p.a+k,6),dd=-.8-hsh(p.a+k,8)*1.4,[x,y]=P(ss,dd);g.fillStyle=`rgba(200,200,255,${.3+.5*(.5+.5*Math.sin(t*2+k))})`;g.fillRect(x,y,1.5,1.5);}g.restore();}
+    if(pl===1){[[p.a,1],[p.b,-1]].forEach(([e,dir])=>{for(let k=0;k<3;k++){const ss=e+dir*(.04+k*.07),len=.25+hsh(e+k,2)*.35;const [x1,y1]=P(ss-.025,-.02),[x2,y2]=P(ss+.025,-.02),[x3,y3]=P(ss,-len);
+      g.fillStyle='rgba(225,248,255,.9)';g.beginPath();g.moveTo(x1,y1);g.lineTo(x3,y3);g.lineTo(x2,y2);g.fill();}});}
+    if(pl===2){g.fillStyle='rgba(255,225,130,.85)';for(let k=0;k<4;k++){const ss=p.a+(p.b-p.a)*((k+.5)/4),bub=(t*1.2+k*.31+p.a)%1;const [x,y]=P(ss,-1.25+bub*.8);g.globalAlpha=1-bub;g.beginPath();g.arc(x,y,2.5+bub*4,0,Math.PI*2);g.fill();}g.globalAlpha=1;
+      const [hx,hy]=P((p.a+p.b)/2,.2),hr=Math.min(BP*1.6,BP*(p.b-p.a)*.5+20),hg=g.createRadialGradient(hx,hy,2,hx,hy,hr);hg.addColorStop(0,'rgba(255,120,30,.25)');hg.addColorStop(1,'rgba(255,80,20,0)');g.fillStyle=hg;g.beginPath();g.arc(hx,hy,hr,0,Math.PI*2);g.fill();}
+  }
+  // rock pillars / ice blocks / basalt — and floating asteroid chunks
+  function drawBlock(pl,b,t){
+    const T=PH_THEME[pl],n=10,top=[],bot=[],under=b.fl?b.h-.32:-.05;
+    for(let i=0;i<=n;i++)top.push(P(b.a+(b.b-b.a)*i/n,b.h));
+    if(b.fl){for(let i=n;i>=0;i--){const ss=b.a+(b.b-b.a)*i/n,mid=1-Math.abs(i/n-.5)*2;bot.push(P(ss,under-mid*.55-hsh(ss*9,1)*.12));}}
+    else for(let i=n;i>=0;i--)bot.push(P(b.a+(b.b-b.a)*i/n,under));
+    const outline=top.concat(bot).map(q=>[q[0],q[1]]);
+    const [mx,my]=P((b.a+b.b)/2,b.h),[nx,ny]=P((b.a+b.b)/2,b.fl?under-.6:under);
+    const gr=g.createLinearGradient(mx,my,nx,ny);gr.addColorStop(0,T.rock[0]);gr.addColorStop(1,T.rock[1]);
+    g.fillStyle=gr;poly(outline);g.fill();g.strokeStyle='rgba(0,0,0,.35)';g.lineWidth=1.5;g.stroke();
+    // strata / glowing cracks / ice facets inside
+    g.save();poly(outline);g.clip();
+    g.strokeStyle=pl===2?'rgba(255,110,30,.55)':pl===1?'rgba(255,255,255,.35)':'rgba(0,0,0,.18)';g.lineWidth=pl===2?1.6:1.2;
+    for(let k=1;k<=3;k++){const hh=b.h-k*(b.fl?.18:b.h/4);g.beginPath();for(let i=0;i<=n;i++){const ss=b.a+(b.b-b.a)*i/n,[x,y]=P(ss,hh+(pl===2?(hsh(ss*7+k,3)-.5)*.12:0));i?g.lineTo(x,y):g.moveTo(x,y);}
+      if(pl===2)g.globalAlpha=.5+.5*Math.sin(t*2+k);g.stroke();g.globalAlpha=1;}
+    if(pl===1){g.fillStyle='rgba(255,255,255,.18)';const [q1x,q1y]=P(b.a+(b.b-b.a)*.15,b.h),[q2x,q2y]=P(b.a+(b.b-b.a)*.35,b.h),[q3x,q3y]=P(b.a+(b.b-b.a)*.1,under);g.beginPath();g.moveTo(q1x,q1y);g.lineTo(q2x,q2y);g.lineTo(q3x,q3y);g.fill();}
+    g.restore();
+    // top: lit edge, snow cap or ember crust
+    g.lineWidth=pl===1?UP*.12:2.5;g.strokeStyle=pl===1?'#ffffff':pl===2?'rgba(255,130,50,.8)':'rgba(255,255,255,.45)';
+    g.beginPath();top.forEach((q,i)=>i?g.lineTo(q[0],q[1]):g.moveTo(q[0],q[1]));g.stroke();
+    if(pl===1)for(let k=0;k<3;k++){const [x,y]=P(b.a+(b.b-b.a)*(.2+.3*k),b.h-.08);g.fillStyle='#ffffff';g.beginPath();g.ellipse(x,y+UP*.05,UP*.05,UP*.11,0,0,Math.PI*2);g.fill();}
+    if(b.fl&&pl!==2){const [gx,gy]=P((b.a+b.b)/2,under-.9);g.fillStyle=pl===1?'rgba(127,232,255,.18)':'rgba(160,168,255,.14)';g.beginPath();g.ellipse(gx,gy,BP*(b.b-b.a)*.4,UP*.12,0,0,Math.PI*2);g.fill();}
+  }
+  // faceted crystal spikes: rock shards, icicles, glowing obsidian
+  function drawSpike(pl,sp,t){
+    const T=PH_THEME[pl],[ax,ay]=P(sp.s-sp.w/2,0),[bx,by]=P(sp.s+sp.w/2,0),[cx,cy]=P(sp.s,sp.h),[mx,my]=P(sp.s+sp.w*.06,0);
+    g.fillStyle=T.spike[1];g.beginPath();g.moveTo(ax,ay);g.lineTo(cx,cy);g.lineTo(mx,my);g.fill();
+    g.fillStyle=T.spike[0];g.beginPath();g.moveTo(mx,my);g.lineTo(cx,cy);g.lineTo(bx,by);g.fill();
+    const [sx1,sy1]=P(sp.s-sp.w*.42,0),[sx2,sy2]=P(sp.s-sp.w*.18,0),[st,stt]=P(sp.s-sp.w*.32,sp.h*.45);   // a small companion shard
+    g.fillStyle=T.spike[1];g.beginPath();g.moveTo(sx1,sy1);g.lineTo(st,stt);g.lineTo(sx2,sy2);g.fill();
+    g.strokeStyle=pl===1?'rgba(255,255,255,.9)':'rgba(255,255,255,.35)';g.lineWidth=1.2;g.beginPath();g.moveTo(mx,my);g.lineTo(cx,cy);g.stroke();
+    if(pl===1){const tw=.5+.5*Math.sin(t*5+sp.s*3);g.fillStyle=`rgba(255,255,255,${.4+.6*tw})`;g.beginPath();g.arc(cx,cy,1.5+2*tw,0,Math.PI*2);g.fill();}
+    if(pl===2){const gl=.6+.4*Math.sin(t*6+sp.s*5),tg=g.createRadialGradient(cx,cy,0,cx,cy,UP*.3);tg.addColorStop(0,`rgba(255,200,80,${gl})`);tg.addColorStop(1,'rgba(255,80,20,0)');g.fillStyle=tg;g.beginPath();g.arc(cx,cy,UP*.3,0,Math.PI*2);g.fill();}
+  }
+  // the living sky: asteroid belt (Luna), aurora + snow (Glacia), embers (Magmora), shooting stars everywhere
+  function drawSky(lv,S,t){
+    const pl=lv.P.planet;
+    if(pl===0){for(let i=0;i<46;i++){const u=((hsh(i,1)+t*.006+S.s*.002)%1),x=u*(W+60)-30,y=H*.1+u*H*.18+Math.sin(i)*H*.05,z=1+hsh(i,2)*2.6;g.fillStyle=`rgba(170,165,190,${.35+hsh(i,3)*.4})`;g.beginPath();g.ellipse(x,y,z,z*.7,i,0,Math.PI*2);g.fill();}}
+    if(pl===1){for(let k=0;k<3;k++){g.beginPath();const y0=H*(.12+k*.08),amp=H*.05;for(let i=0;i<=24;i++){const x=i/24*W,y=y0+Math.sin(i*.45+t*.5+k*2)*amp;i?g.lineTo(x,y):g.moveTo(x,y);}
+        for(let i=24;i>=0;i--){const x=i/24*W,y=y0+Math.sin(i*.45+t*.5+k*2)*amp+H*(.06+.03*Math.sin(i*.3+t+k));g.lineTo(x,y);}g.closePath();
+        const ag=g.createLinearGradient(0,y0-amp,0,y0+amp+H*.09);ag.addColorStop(0,'rgba(80,255,190,0)');ag.addColorStop(.5,k===1?'rgba(140,120,255,.14)':'rgba(80,255,190,.14)');ag.addColorStop(1,'rgba(80,255,190,0)');g.fillStyle=ag;g.fill();}
+      g.fillStyle='rgba(255,255,255,.7)';for(let i=0;i<40;i++){const x=((hsh(i,4)*W-S.s*BP*.15-t*12*hsh(i,5))%W+W)%W,y=((hsh(i,6)*H+t*(18+hsh(i,7)*26))%(H*.75));g.beginPath();g.arc(x,y,1+hsh(i,8)*1.4,0,Math.PI*2);g.fill();}}
+    if(pl===2){for(let i=0;i<36;i++){const life=(t*(.12+hsh(i,4)*.18)+hsh(i,5))%1,x=((hsh(i,6)*W-S.s*BP*.1+Math.sin(t+i)*12)%W+W)%W,y=GY-life*H*.7;g.fillStyle=`rgba(255,${120+hsh(i,7)*90|0},40,${(1-life)*.8})`;g.beginPath();g.arc(x,y,1+hsh(i,8)*2,0,Math.PI*2);g.fill();}
+      const hz=g.createLinearGradient(0,GY-H*.35,0,GY);hz.addColorStop(0,'rgba(255,60,20,0)');hz.addColorStop(1,'rgba(255,70,20,.18)');g.fillStyle=hz;g.fillRect(0,GY-H*.35,W,H*.35);}
+    // a shooting star every few seconds
+    const per=5.5,ph=(t%per)/per,seed=Math.floor(t/per);if(ph<.12){const k=ph/.12,x0=W*(.15+hsh(seed,1)*.6),y0=H*(.05+hsh(seed,2)*.2),x=x0+k*W*.22,y=y0+k*H*.1;
+      const sg=g.createLinearGradient(x,y,x-W*.08,y-H*.035);sg.addColorStop(0,`rgba(255,255,255,${1-k})`);sg.addColorStop(1,'rgba(255,255,255,0)');g.strokeStyle=sg;g.lineWidth=2;g.beginPath();g.moveTo(x,y);g.lineTo(x-W*.08,y-H*.035);g.stroke();}
   }
 
   // ── draw ──
@@ -253,49 +364,54 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
     const sh=R.shake;R.shake*=Math.pow(.002,dt);
     g.save();if(sh>.3)g.translate((Math.random()-.5)*sh,(Math.random()-.5)*sh);
     g.drawImage(bg,0,0,W,H);
-    // drifting foreground stars (parallax)
-    g.fillStyle='rgba(255,255,255,.55)';for(let i=0;i<24;i++){const x=((i*137.5-S.s*BP*.08)%W+W)%W,y=(i*53)%(H*.55);g.fillRect(x,y,1.5,1.5);}
+    drawSky(lv,S,t);
     const s0=S.s-(AX+60)/BP,s1=S.s+(W-AX+60)/BP;
     const CX=AX,CY=GY+RP,ang=s=>(s-S.s)*BP/RP-Math.PI/2;
-    // planet body
-    const pg=g.createRadialGradient(CX,CY-RP*.2,RP*.6,CX,CY,RP);pg.addColorStop(0,pl.ground[1]);pg.addColorStop(1,pl.ground[0]);
+    // ── distant ridge (turns slower than the planet = depth) ──
+    drawRidge(lv,S,CX,CY,t);
+    // ── planet body + crust ──
+    const T=PH_THEME[lv.P.planet];
+    const pg=g.createRadialGradient(CX,CY,RP*.82,CX,CY,RP);pg.addColorStop(0,T.deep);pg.addColorStop(1,T.body);
     g.fillStyle=pg;g.beginPath();g.arc(CX,CY,RP,0,Math.PI*2);g.fill();
-    // surface craters / rocks (fixed to the planet so it visibly rotates)
-    for(let k=Math.floor(s0/1.37);k<=s1/1.37;k++){const s=k*1.37+((k*7919)%100)/180,sz=.08+((k*31)%10)/60;if(lv.pits.some(p=>s>p.a-.2&&s<p.b+.2))continue;
-      const [x,y,f]=P(s,-.18-((k*13)%5)/20);g.save();g.translate(x,y);g.rotate(f);g.fillStyle='rgba(0,0,0,.18)';g.beginPath();g.ellipse(0,0,sz*BP,sz*BP*.35,0,0,Math.PI*2);g.fill();g.restore();}
+    const a0=ang(s0)-.02,a1=ang(s1)+.02;
+    const cg=g.createRadialGradient(CX,CY,RP-.75*UP,CX,CY,RP);cg.addColorStop(0,T.body);cg.addColorStop(.55,T.crust);cg.addColorStop(1,T.top);
+    g.fillStyle=cg;g.beginPath();g.arc(CX,CY,RP,a0,a1);g.arc(CX,CY,RP-.75*UP,a1,a0,true);g.closePath();g.fill();
+    g.strokeStyle=T.strata;g.lineWidth=1.5;[.28,.52,.9,1.4].forEach(d=>{g.beginPath();g.arc(CX,CY,RP-d*UP,a0,a1);g.stroke();});
+    // surface details, fixed to the planet so it visibly rotates
+    for(let k=Math.floor(s0/.55);k<=s1/.55;k++){const sx=k*.55+hsh(k,1)*.3;if(lv.pits.some(p=>sx>p.a-.15&&sx<p.b+.15))continue;drawDecor(lv.P.planet,k,sx,t);}
     // rim glow pulses on the beat
-    g.strokeStyle=pl.glow;g.globalAlpha=.25+.45*pulse;g.lineWidth=2+3*pulse;g.beginPath();g.arc(CX,CY,RP,ang(s0),ang(s1));g.stroke();g.globalAlpha=1;
-    // low-gravity zones
-    lv.zones.forEach(z=>{if(z.b<s0||z.a>s1)return;g.fillStyle='rgba(120,200,255,.12)';g.beginPath();g.arc(CX,CY,RP+2.6*UP,ang(z.a),ang(z.b));g.arc(CX,CY,RP,ang(z.b),ang(z.a),true);g.fill();
-      const [x,y,f]=P(Math.max(z.a+.6,Math.min(z.b-.6,S.s+2)),2.3);g.save();g.translate(x,y);g.rotate(f);g.fillStyle='rgba(160,220,255,.7)';g.font=`${Math.round(UP*.38)}px 'Bebas Neue',sans-serif`;g.textAlign='center';g.fillText('LOW GRAVITY',0,0);g.restore();});
-    // pits
-    lv.pits.forEach(p=>{if(p.b<s0||p.a>s1)return;
-      const lava=lv.P.planet===2,grd=g.createRadialGradient(CX,CY,RP-1.6*UP,CX,CY,RP);
-      if(lava){grd.addColorStop(0,'#ffd23a');grd.addColorStop(.6,'#ff5a1a');grd.addColorStop(1,'#7a1a00');}else{grd.addColorStop(0,'#000');grd.addColorStop(1,pl.pit);}
-      g.fillStyle=grd;g.beginPath();g.arc(CX,CY,RP+1,ang(p.a),ang(p.b));g.arc(CX,CY,RP-1.6*UP,ang(p.b),ang(p.a),true);g.closePath();g.fill();
-      if(lava){g.fillStyle='rgba(255,220,120,.8)';for(let k=0;k<3;k++){const s=p.a+(p.b-p.a)*((k+.5)/3),bub=(t*1.3+k*.37)%1;const [x,y]=P(s,-.1+bub*.5);g.globalAlpha=1-bub;g.beginPath();g.arc(x,y,3+bub*3,0,Math.PI*2);g.fill();}g.globalAlpha=1;}
-    });
-    // blocks (rock / ice / basalt), drawn along the curve
-    lv.blocks.forEach(b=>{if(b.b<s0||b.a>s1)return;const bot=b.fl?b.h-.3:-.05,n=8;g.beginPath();
-      for(let i=0;i<=n;i++){const [x,y]=P(b.a+(b.b-b.a)*i/n,b.h);i?g.lineTo(x,y):g.moveTo(x,y);}
-      for(let i=n;i>=0;i--){const [x,y]=P(b.a+(b.b-b.a)*i/n,bot);g.lineTo(x,y);}
-      g.closePath();g.fillStyle=pl.block;g.fill();g.strokeStyle=pl.glow+'88';g.lineWidth=2;g.stroke();
-      const [x1,y1]=P(b.a,b.h),[x2,y2]=P(b.b,b.h);g.strokeStyle='rgba(255,255,255,.35)';g.lineWidth=2;g.beginPath();g.moveTo(x1,y1);g.lineTo(x2,y2);g.stroke();});
-    // spikes (meteors drop in during comet chases)
+    g.strokeStyle=pl.glow;g.globalAlpha=.2+.4*pulse;g.lineWidth=2+3*pulse;g.beginPath();g.arc(CX,CY,RP,ang(s0),ang(s1));g.stroke();g.globalAlpha=1;
+    // low-gravity zones: a shimmering bubble with motes drifting up
+    lv.zones.forEach(z=>{if(z.b<s0||z.a>s1)return;
+      const zg=g.createRadialGradient(CX,CY,RP,CX,CY,RP+3*UP);zg.addColorStop(0,'rgba(120,200,255,.18)');zg.addColorStop(1,'rgba(120,200,255,0)');
+      g.fillStyle=zg;g.beginPath();g.arc(CX,CY,RP+3*UP,ang(z.a),ang(z.b));g.arc(CX,CY,RP,ang(z.b),ang(z.a),true);g.fill();
+      g.fillStyle='rgba(190,235,255,.55)';for(let k=0;k<14;k++){const ms=z.a+(z.b-z.a)*hsh(k,7),mh=((t*.35+hsh(k,9))%1)*2.8;const [mx,my]=P(ms,mh);g.beginPath();g.arc(mx,my,1.6+hsh(k,3)*1.6,0,Math.PI*2);g.fill();}
+      const [x,y,f]=P(Math.max(z.a+.6,Math.min(z.b-.6,S.s+2)),2.4);g.save();g.translate(x,y);g.rotate(f);g.fillStyle='rgba(170,225,255,.75)';g.font=`${Math.round(UP*.38)}px 'Bebas Neue',sans-serif`;g.textAlign='center';g.fillText('LOW GRAVITY',0,0);g.restore();});
+    // ── pits: real chasms ──
+    lv.pits.forEach(p=>{if(p.b<s0-.2||p.a>s1+.2)return;drawPit(lv,p,t,CX,CY,ang);});
+    // ── blocks + floating platforms ──
+    lv.blocks.forEach(b=>{if(b.b<s0-.2||b.a>s1+.2)return;drawBlock(lv.P.planet,b,t);});
+    // ── spikes: faceted crystals (meteors drop in during comet chases) ──
     lv.spikes.forEach(sp=>{if(sp.s<s0-1||sp.s>s1+1)return;
       let drop=0;if(sp.meteor){drop=Math.max(0,(sp.s-S.s-1.3)*2.2);}
-      if(drop>0){const [x,y]=P(sp.s,sp.h*.5+drop);g.fillStyle='#ffb84d';g.shadowColor='#ff6a00';g.shadowBlur=18;g.beginPath();g.arc(x,y,BP*.13,0,Math.PI*2);g.fill();g.shadowBlur=0;
-        g.strokeStyle='rgba(255,140,40,.5)';g.lineWidth=BP*.12;g.beginPath();g.moveTo(x,y);const [tx,ty]=P(sp.s+.8,sp.h*.5+drop+1.6);g.lineTo(tx,ty);g.stroke();return;}
-      const [ax,ay]=P(sp.s-sp.w/2,0),[bx,by]=P(sp.s+sp.w/2,0),[cx,cy]=P(sp.s,sp.h);
-      g.fillStyle=sp.meteor?'#6a3a2a':pl.spike;g.strokeStyle=sp.meteor?'#ff8a3a':pl.glow;g.lineWidth=1.5;g.beginPath();g.moveTo(ax,ay);g.lineTo(cx,cy);g.lineTo(bx,by);g.closePath();g.fill();g.stroke();
-      if(lv.P.planet===1){g.fillStyle='rgba(255,255,255,.55)';g.beginPath();g.moveTo(ax,ay);g.lineTo(cx,cy);g.lineTo((ax+bx)/2,(ay+by)/2);g.fill();}});
-    // bounce pads
+      if(drop>0){const [x,y]=P(sp.s,sp.h*.5+drop);const [tx,ty]=P(sp.s+.9,sp.h*.5+drop+1.8);
+        const tg=g.createLinearGradient(x,y,tx,ty);tg.addColorStop(0,'rgba(255,170,60,.85)');tg.addColorStop(1,'rgba(255,60,20,0)');g.strokeStyle=tg;g.lineWidth=BP*.16;g.lineCap='round';g.beginPath();g.moveTo(x,y);g.lineTo(tx,ty);g.stroke();g.lineCap='butt';
+        const mg=g.createRadialGradient(x-BP*.04,y-BP*.04,1,x,y,BP*.14);mg.addColorStop(0,'#fff4c0');mg.addColorStop(.4,'#ffb84d');mg.addColorStop(1,'#a03a10');g.fillStyle=mg;g.beginPath();g.arc(x,y,BP*.14,0,Math.PI*2);g.fill();return;}
+      drawSpike(sp.meteor?2:lv.P.planet,sp,t);});
+    // ── bounce pads: little hover pads with thrusters ──
     lv.pads.forEach(p=>{if(p.s<s0-1||p.s>s1+1)return;const gone=S.padsDropped.has(p);
       const fall=gone?Math.min(3,(S.s-p.s)*2):0,[x,y,f]=P(p.s,-fall*.6);g.save();g.translate(x,y);g.rotate(f);g.globalAlpha=gone?Math.max(0,1-fall/2):1;
-      g.shadowColor='#ff4dff';g.shadowBlur=14+10*pulse;g.fillStyle='#ff4dff';g.beginPath();g.ellipse(0,0,p.w/2*BP,UP*.13+UP*.05*pulse,0,0,Math.PI*2);g.fill();g.shadowBlur=0;
-      g.fillStyle='#fff';g.globalAlpha*=.8;g.beginPath();g.ellipse(0,-UP*.04,p.w/2*BP*.6,UP*.05,0,0,Math.PI*2);g.fill();g.restore();
+      const w=p.w/2*BP,fl=UP*(.35+.12*Math.sin(t*30+p.s*7));
+      const th=g.createLinearGradient(0,UP*.08,0,UP*.08+fl);th.addColorStop(0,'rgba(255,170,255,.9)');th.addColorStop(1,'rgba(255,77,255,0)');
+      g.fillStyle=th;g.beginPath();g.moveTo(-w*.35,UP*.08);g.lineTo(0,UP*.08+fl);g.lineTo(w*.35,UP*.08);g.fill();
+      const rim=g.createLinearGradient(0,-UP*.06,0,UP*.12);rim.addColorStop(0,'#d8dbe6');rim.addColorStop(1,'#5a5e6e');
+      g.fillStyle=rim;g.beginPath();g.ellipse(0,UP*.03,w,UP*.11,0,0,Math.PI*2);g.fill();
+      g.shadowColor='#ff4dff';g.shadowBlur=10+10*pulse;g.fillStyle='#ff4dff';g.beginPath();g.ellipse(0,-UP*.01,w*.82,UP*.07+UP*.03*pulse,0,0,Math.PI*2);g.fill();g.shadowBlur=0;
+      g.fillStyle='rgba(255,255,255,.75)';g.beginPath();g.ellipse(-w*.15,-UP*.03,w*.35,UP*.025,0,0,Math.PI*2);g.fill();
+      if(!gone){g.strokeStyle=`rgba(255,77,255,${.5*(1-pulse)})`;g.lineWidth=2;g.beginPath();g.ellipse(0,0,w*(1+pulse*.8),UP*.11*(1+pulse*.8),0,0,Math.PI*2);g.stroke();}
+      g.restore();
       // faint arc to where it will throw you
-      if(!gone&&p.s>S.s-.3&&p.s<S.s+5){g.strokeStyle='rgba(255,77,255,.22)';g.setLineDash([4,6]);g.lineWidth=2;g.beginPath();const T=p.next-p.s,gz=phZoneG(lv,p.s);for(let i=0;i<=12;i++){const u=i/12*T,hh=gz*T/2*u-gz*u*u/2;const [qx,qy]=P(p.s+u,hh);i?g.lineTo(qx,qy):g.moveTo(qx,qy);}g.stroke();g.setLineDash([]);}});
+      if(!gone&&p.s>S.s-.3&&p.s<S.s+5){g.strokeStyle='rgba(255,77,255,.22)';g.setLineDash([4,6]);g.lineWidth=2;g.beginPath();const T2=p.next-p.s,gz=phZoneG(lv,p.s);for(let i=0;i<=12;i++){const u=i/12*T2,hh=gz*T2/2*u-gz*u*u/2;const [qx,qy]=P(p.s+u,hh);i?g.lineTo(qx,qy):g.moveTo(qx,qy);}g.stroke();g.setLineDash([]);}});
     // stardust
     lv.dust.forEach((d,i)=>{if(R.got.has(i)||d.s<s0||d.s>s1)return;const [x,y]=P(d.s,d.h),z=BP*.06*(1+.3*Math.sin(t*6+i));
       g.fillStyle='#ffe680';g.shadowColor='#ffd23a';g.shadowBlur=8;g.beginPath();for(let k=0;k<8;k++){const r=k%2?z*.4:z,a=k/8*Math.PI*2+t;g.lineTo(x+Math.cos(a)*r,y+Math.sin(a)*r);}g.closePath();g.fill();g.shadowBlur=0;});

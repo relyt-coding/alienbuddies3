@@ -28,7 +28,15 @@ function phLevel(L){
 function phPatterns(){
   const S=(s,w,h)=>({k:'spike',s,w:w||.42,h:h||.55}),PIT=(a,b)=>({k:'pit',a,b}),BL=(a,b,h,fl)=>({k:'block',a,b,h,fl:!!fl});
   return{
-    rest:   {len:4,from:1,make:()=>({o:[],a:[]})},
+    // flat stretches: no obstacles, just stardust arcs to hop for on the beat (skipping them never kills you, it costs stars)
+    rest:   {len:4,from:1,make:(R,L)=>{
+      const v=[[[0,'j'],[2,'j']],                       // two big hops on beats 1 and 3
+               [[0,'j'],[1,'j'],[2,'j']],               // three quick hops
+               [[0,'j'],[1.5,'j']],                     // hop, then an off-beat hop
+               [[1,'j'],[3,'j']]];                      // hops on the backbeat (2 and 4)
+      if(L>=3)v.push([[0,'j'],[.5,'j'],[2,'j']],        // double jump up to the high dust, then a hop
+                     [[0,'j'],[.5,'j'],[2,'j'],[2.5,'j']]); // two double jumps
+      return{o:[],a:v[Math.floor(R()*v.length)]};}},
     spike1: {len:4,from:1,make:R=>R()<.5?{o:[S(.5)],a:[[0,'j']]}:{o:[S(.5),S(2.5)],a:[[0,'j'],[2,'j']]}},
     gap1:   {len:4,from:1,make:R=>R()<.5?{o:[PIT(.3,.7)],a:[[0,'j']]}:{o:[PIT(.3,.7),PIT(2.3,2.7)],a:[[0,'j'],[2,'j']]}},
     block:  {len:4,from:2,make:()=>({o:[BL(.5,2.2,.8)],a:[[0,'j']]})},
@@ -60,7 +68,7 @@ function phBuild(L,songIn){
     else if(!boss&&R()<restP)name='rest';
     else name=pool[Math.floor(R()*pool.length)];
     if(k+PAT[name].len>end-4)name='rest';
-    const m=PAT[name].make(R);
+    const m=PAT[name].make(R,L);
     m.o.forEach(o=>{const c=Object.assign({},o);['s','a','b','next'].forEach(f=>{if(c[f]!=null)c[f]+=k;});if(boss&&c.k==='spike')c.meteor=true;objs.push(c);});
     m.a.forEach(([t,w])=>acts.push({t:k+t,w}));
     k+=PAT[name].len;seg++;
@@ -71,7 +79,7 @@ function phBuild(L,songIn){
   // run the perfect bot and lay stardust on its path
   const bot=phRunBot(lv,true);
   lv.botOk=bot.ok;lv.botDeath=bot.death;
-  lv.dust=bot.path.filter((p,i)=>i%2===0).map(p=>({s:p.s,h:p.h+.5}));
+  lv.dust=bot.path.filter(p=>p.air).filter((p,i,a)=>i===0||p.s-a[i-1].s>=.24).map(p=>({s:p.s,h:p.h+.5}));
   return lv;
 }
 
@@ -137,7 +145,7 @@ function phRunBot(lv,record){
   while(S.s<lv.end&&!S.dead){
     while(ai<lv.acts.length&&S.s>=lv.acts[ai].t){const a=lv.acts[ai++];if(a.w==='j')phJump(lv,S);else phBounce(lv,S);}
     phStep(lv,S,PH_DT);
-    if(record&&S.s>=nextRec){path.push({s:S.s,h:S.h});nextRec+=.5;}
+    if(record&&S.s>=nextRec){path.push({s:S.s,h:S.h,air:!S.grounded&&S.h>.2});nextRec+=.25;}
   }
   return{ok:!S.dead,death:S.dead?{why:S.dead,at:+S.s.toFixed(2)}:null,path};
 }

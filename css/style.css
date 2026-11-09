@@ -1889,3 +1889,19 @@ body.store-open:not(.desktop-mode) #partyStyleBtn,body.bunker-open:not(.desktop-
 .mg-tap{display:block;width:100%;height:clamp(140px,32vh,240px);margin:6px 0;border-radius:18px;border:2px solid #e8ff00;background:#141600;color:#e8ff00;font-family:'Bebas Neue',sans-serif;font-size:2.4rem;letter-spacing:.12em;cursor:pointer;touch-action:none;-webkit-tap-highlight-color:transparent;transition:transform .05s;}
 .mg-off{min-width:5.5em;align-self:center;font-size:1.3rem;color:#fff;margin-top:10px;}
 .mg-sync-btn{margin-top:0;padding:.35rem .7rem;font-size:.85rem;border-color:#5a5a10;color:#e8ff00;background:#141600;}
+
+/* minigame tabs + YOUR BEATS picker */
+.mg-tabs{display:flex;gap:6px;margin:10px 0 2px;}
+.mg-tab{flex:1;font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:.15em;padding:.45rem;border-radius:10px;border:1px solid #2a2a4a;background:#0e0e1a;color:#8890b8;cursor:pointer;touch-action:manipulation;}
+.mg-tab.sel{border-color:#ff9966;color:#ffbb88;background:#2a1208;}
+#phSelect .mg-tab.sel{border-color:#7fe8ff;color:#7fe8ff;background:#071420;}
+.mg-src-list{display:flex;flex-direction:column;gap:6px;max-height:min(42vh,320px);overflow-y:auto;text-align:left;}
+.mg-src{display:flex;align-items:center;gap:10px;padding:.5rem .7rem;border-radius:10px;border:1px solid #23233a;border-left:4px solid var(--c);background:#0b0b16;color:#e8e8f0;cursor:pointer;touch-action:manipulation;font-family:'Bebas Neue',sans-serif;}
+.mg-src.sel{border-color:var(--c);box-shadow:0 0 12px -4px var(--c);}
+.mg-src .kd{font-size:.6rem;letter-spacing:.18em;color:#778;min-width:7.5em;}
+.mg-src .nm{flex:1;font-size:1.05rem;letter-spacing:.06em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.mg-src .bs{font-size:.8rem;color:#ffd166;}
+.mg-diffs{display:flex;gap:6px;justify-content:center;margin:10px 0 4px;}
+.mg-diff{font-family:'Bebas Neue',sans-serif;font-size:.95rem;letter-spacing:.14em;padding:.4rem .9rem;border-radius:10px;border:1px solid #2a2a4a;background:#0e0e1a;color:#8890b8;cursor:pointer;touch-action:manipulation;}
+.mg-diff.sel{border-color:#e8ff00;color:#e8ff00;background:#141600;}
+.mg-src .nm{text-align:left;}

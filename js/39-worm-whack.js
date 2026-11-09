@@ -40,9 +40,11 @@ function wwLevelOpen(l){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||l===
     <div class="ww-panel" id="wwSelect">
       <div class="ww-panel-inner">
         <div class="ww-sel-head"><div><div class="ww-big">WORM WHACK</div><div class="ww-sub">Whack the space worms on the beat · each pad hits the crater in the same spot</div></div><div style="display:flex;gap:6px"><button class="ww-btn mg-sync-btn" id="wwSync" title="Calibrate your timing">⏱ SYNC</button><button class="ww-x" id="wwClose" title="Close">✕</button></div></div>
-        <div class="ww-sel-bonus" id="wwBonus"></div>
+        <div class="mg-tabs"><button class="mg-tab sel" id="wwTabLv">LEVELS</button><button class="mg-tab" id="wwTabMine">YOUR BEATS</button></div>
+        <div id="wwLvPane"><div class="ww-sel-bonus" id="wwBonus"></div>
         <div class="ww-grid" id="wwGrid"></div>
-        <div class="ww-detail" id="wwDetail"></div>
+        <div class="ww-detail" id="wwDetail"></div></div>
+        <div id="wwMinePane" class="ww-detail" style="display:none"></div>
       </div>
     </div>
     <div class="ww-panel" id="wwResults"><div class="ww-panel-inner ww-res" id="wwResInner"></div></div>`;
@@ -64,12 +66,16 @@ function wwLevelOpen(l){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||l===
   function close(){stopRun();ov.classList.remove('open');document.body.classList.remove('ww-open');if(typeof autoSave==='function')autoSave();}
   window.openWormWhack=open;window.closeWormWhack=close;
   $('wwClose').addEventListener('click',close);
+  $('wwTabLv').addEventListener('click',()=>showTab('lv'));$('wwTabMine').addEventListener('click',()=>showTab('mine'));
   $('wwSync').addEventListener('click',()=>{if(typeof mgOpenSync==='function')mgOpenSync(()=>{});});
   $('wwQuit').addEventListener('click',()=>{if(G&&G.state==='play'){stopRun();showSelect();}else close();});
 
   // ── level select ──
+  let tab='lv';const mineOpts={id:'wwMine',onPlay:song=>start(song)};
+  function showTab(t){tab=t;$('wwTabLv').classList.toggle('sel',t==='lv');$('wwTabMine').classList.toggle('sel',t==='mine');$('wwLvPane').style.display=t==='lv'?'':'none';$('wwMinePane').style.display=t==='mine'?'':'none';
+    if(t==='mine'){mineOpts.best=wormProgress.custom||{};mgRenderCustom($('wwMinePane'),mineOpts);}}
   function showSelect(){
-    $('wwResults').classList.remove('open');$('wwSelect').classList.add('open');
+    $('wwResults').classList.remove('open');$('wwSelect').classList.add('open');showTab(tab);
     $('wwBonus').innerHTML=`Worm bonus: <b>×${typeof formatStore==='function'?formatStore(wormMultiplier):wormMultiplier.toFixed(2)}</b> points forever · ${Object.values(wormProgress.best).reduce((a,b)=>a+(b.stars||0),0)} / 90 ★`;
     const g=$('wwGrid');g.innerHTML='';
     for(let l=1;l<=30;l++){
@@ -127,10 +133,13 @@ function wwLevelOpen(l){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||l===
 
   // ── run ──
   function stopRun(){if(!G)return;clearInterval(G.sched);cancelAnimationFrame(G.raf);G.state='stopped';G=null;}
-  function start(lvl){
+  function start(lvl){ // a level number, or a song object from YOUR BEATS
     stopRun();
     $('wwSelect').classList.remove('open');$('wwResults').classList.remove('open');
-    const song=wwCompose(lvl),chart=wwChart(song).map(n=>Object.assign({hits:0,done:false,res:null,resT:0,credit:0},n));
+    const song=typeof lvl==='object'?lvl:wwCompose(lvl),chart=wwChart(song).map(n=>Object.assign({hits:0,done:false,res:null,resT:0,credit:0},n));
+    // YOUR PADS PLAY THE SONG: the drum hits under each worm leave the backing track and only sound when you whack it
+    {const byT=new Map();song.events.forEach(e=>{e.owned=false;e.played=false;if(e.kind!=='drum')return;const k=Math.round(e.t*1000);if(!byT.has(k))byT.set(k,[]);byT.get(k).push(e);});
+     chart.forEach(n=>{if(n.type==='decoy')return;const k=Math.round(n.t*1000);n.own=[...(byT.get(k-1)||[]),...(byT.get(k)||[]),...(byT.get(k+1)||[])];n.own.forEach(e=>e.owned=true);});}
     const c=getCtx();
     G={state:'play',P:song.P,song,chart,ei:0,score:0,combo:0,maxCombo:0,hitVal:0,
        total:chart.filter(n=>n.type!=='decoy').length,judged:0,
@@ -142,7 +151,7 @@ function wwLevelOpen(l){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||l===
     const lead=4*G.beat+.35;G.T0=c.currentTime+lead;
     // count-in clicks
     for(let i=0;i<4;i++)playSound(i===0?'rimshot':'rimshot',i===0?.9:.55,G.T0-(4-i)*G.beat);
-    $('wwTitle').textContent=lvl+'. '+song.P.name;
+    $('wwTitle').textContent=song.custom?song.P.name+' · '+song.P.diff:lvl+'. '+song.P.name;
     buildPads();resize(); // pads first: they decide how much room the moon gets
     G.alien.x=G.alien.tx=W/2;G.alien.y=G.alien.ty=H*.5;
     G.sched=setInterval(schedule,25);schedule();
@@ -157,9 +166,10 @@ function wwLevelOpen(l){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||l===
     const c=getCtx(),ahead=c.currentTime+.18,ev=G.song.events;
     while(G.ei<ev.length&&G.T0+ev[G.ei].t<ahead){
       const e=ev[G.ei++],at=Math.max(c.currentTime,G.T0+e.t);
+      if(e.owned)continue; // a worm's drum hit: it plays when (if) you whack that worm
       try{
-        if(e.kind==='drum')playSound(e.id,e.vel,at);
-        else if(typeof playRollNote==='function'&&SOUND_MAP[e.id])playRollNote(e.id,e.midi,at,e.dur,e.vel,-1);
+        if(e.kind==='drum')playSound(e.id,e.vel,at,e.ch);
+        else if(typeof playRollNote==='function'&&SOUND_MAP[e.id])playRollNote(e.id,e.midi,at,e.dur,e.vel,e.layer==null?-1:e.layer);
       }catch(err){}
     }
   }
@@ -170,14 +180,14 @@ function wwLevelOpen(l){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||l===
   function press(i,ev){
     if(!G||G.state!=='play')return;
     const t=evT(ev);
-    try{playSound(padSound(padOf(i)),.7);}catch(e){}
+    let sounded=false;const padHit=()=>{if(!sounded){sounded=true;try{playSound(padSound(padOf(i)),.55);}catch(e){}}};
     const pe=G.padEls[i];if(pe){pe.classList.remove('lit');void pe.offsetWidth;pe.classList.add('lit');}
     G.held[i]=true;
     const cr=G.craters[i];if(!cr)return;
     G.alien.tx=cr.x-G.r*.95;G.alien.ty=cr.y-G.r*.55;G.alien.swing=1;G.alien.face=cr.x<W/2?1:-1;
     // armored worm waiting for its second hit
     let n=G.chart.find(o=>o.c===i&&!o.done&&o.type==='armor'&&o.hits===1&&t<=o.t+G.armorSpan+WIN.o);
-    if(n){n.hits=2;resolve(n,t,n.grade,1);burst(cr.x,cr.y,'#b8c4d6',16);text(cr,'CRACK!','#d8e4ff');return;}
+    if(n){n.hits=2;padHit();resolve(n,t,n.grade,1);burst(cr.x,cr.y,'#b8c4d6',16);text(cr,'CRACK!','#d8e4ff');return;}
     // the closest worm in this crater inside the timing window
     let best=null,bd=9;
     G.chart.forEach(o=>{if(o.c!==i||o.done||o.type==='decoy'||o.holding)return;const d=Math.abs(t-o.t);if(d<=WIN.o&&d<bd){bd=d;best=o;}});
@@ -185,6 +195,7 @@ function wwLevelOpen(l){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||l===
       const grade=bd<=WIN.p?'perfect':bd<=WIN.g?'good':'ok';
       best.tag=grade==='perfect'?'':(t<best.t?'EARLY':'LATE');
       if(best.type!=='armor'||best.hits===0)G.timing.push({d:t-best.t,at:performance.now()});
+      if(best.type!=='armor'||best.hits===0){if(!playOwn(best))padHit();}else padHit();
       if(best.type==='armor'&&best.hits===0){best.hits=1;best.grade=grade;text(cr,'HIT AGAIN!','#d8e4ff');burst(cr.x,cr.y,'#9aa6ba',8);G.shake=Math.max(G.shake,3);cr.flash=1;return;}
       if(best.type==='hold'){best.holding=true;best.grade=grade;text(cr,'HOLD!','#ffd166');cr.flash=1;G.alien.swing=1;return;}
       resolve(best,t,grade,1);return;
@@ -194,6 +205,7 @@ function wwLevelOpen(l){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||l===
     if(mine){mine.done=true;mine.res='boom';mine.resT=t;G.stats.mine++;G.combo=0;G.score=Math.max(0,G.score-500);
       burst(cr.x,cr.y,'#ff5533',26,1.6);burst(cr.x,cr.y,'#ffcc33',14,1.2);text(cr,'BOOM! −500','#ff6644');G.shake=10;try{playSound('zap',.7);}catch(e){}updHud();return;}
     // swing at nothing
+    padHit();
     G.stats.whiff++;G.combo=0;G.score=Math.max(0,G.score-25);text(cr,'whiff','#777',.7);burst(cr.x,cr.y,'#888',5,.6);updHud();
   }
   function release(i,ev){
@@ -210,6 +222,13 @@ function wwLevelOpen(l){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||l===
     }
   }
 
+  // the worm's drum hits: snapped onto the beat if you were early, right away if late
+  function playOwn(n){
+    if(!n||!n.own||!n.own.length)return false;
+    const c=getCtx(),at=Math.max(c.currentTime,G.T0+n.t);
+    n.own.forEach(e=>{if(e.played)return;e.played=true;try{playSound(e.id,e.vel,at,e.ch);}catch(err){}});
+    return true;
+  }
   function resolve(n,t,grade,credit,holdDone){
     n.done=true;n.resT=t;n.credit=credit;n.res=credit>0?'hit':'miss';G.judged++;
     const cr=G.craters[n.c];
@@ -426,18 +445,19 @@ function wwLevelOpen(l){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||l===
   function finish(){
     if(!G||G.state!=='play')return;
     G.state='done';clearInterval(G.sched);cancelAnimationFrame(G.raf);
-    const acc=G.total?G.hitVal/G.total:1,stars=wwStarsFor(acc),L=G.P.lvl;
-    const prev=wormProgress.best[L],first=stars>=1&&!(prev&&prev.stars>=1);
-    if(!prev||acc>prev.acc||G.score>prev.score)wormProgress.best[L]={stars:Math.max(stars,prev?prev.stars:0),acc:Math.max(acc,prev?prev.acc:0),score:Math.max(G.score,prev?prev.score:0)};
+    const acc=G.total?G.hitVal/G.total:1,stars=wwStarsFor(acc),custom=G.song.custom,L=custom?0:G.P.lvl;
+    const store=custom?(wormProgress.custom||(wormProgress.custom={})):wormProgress.best,K=custom?G.P.custom:L;
+    const prev=store[K],first=!custom&&stars>=1&&!(prev&&prev.stars>=1);
+    if(!prev||acc>prev.acc||G.score>prev.score)store[K]={stars:Math.max(stars,prev?prev.stars:0),acc:Math.max(acc,prev?prev.acc:0),score:Math.max(G.score,prev?prev.score:0)};
     if(first){wormMultiplier*=G.P.reward;try{playSfxTierUnlock&&playSfxTierUnlock(3);}catch(e){}}
     if(typeof autoSave==='function')autoSave();
     if(typeof renderUI==='function')renderUI();
     const s=G.stats,pass=stars>=1;
     $('wwResInner').innerHTML=`
       <div class="ww-big ${pass?'win':'lose'}">${pass?(G.bossMax&&!G.bossHp?'BOSS DOWN!':'LEVEL CLEAR!'):'SO CLOSE!'}</div>
-      <div class="ww-d-name">${L}. ${G.P.name}</div>
+      <div class="ww-d-name">${custom?G.P.name+' · '+G.P.diff:L+'. '+G.P.name}</div>
       <div class="ww-stars">${[1,2,3].map(k=>`<span class="${k<=stars?'on':''}">★</span>`).join('')}</div>
-      <div class="ww-res-acc">${Math.round(acc*100)}%<small>${pass?'worms whacked':'need 70% to clear'}</small></div>
+      <div class="ww-res-acc">${Math.round(acc*100)}%<small>${custom?'worms whacked · your beat':pass?'worms whacked':'need 70% to clear'}</small></div>
       <div class="ww-res-grid">
         <div><b>${G.score.toLocaleString()}</b><small>SCORE</small></div><div><b>${G.maxCombo}</b><small>BEST COMBO</small></div>
         <div><b style="color:#00ff99">${s.perfect||0}</b><small>PERFECT</small></div><div><b style="color:#7fd4ff">${s.good||0}</b><small>GOOD</small></div>
@@ -448,13 +468,13 @@ function wwLevelOpen(l){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||l===
       ${first?`<div class="ww-reward">Permanent bonus: ×${G.P.reward} points!${L<30?' · Level '+(L+1)+' unlocked':''}</div>`:''}
       <div class="ww-res-btns">
         <button class="ww-btn" id="wwRetry">RETRY</button>
-        ${pass&&L<30?'<button class="ww-btn ww-play" id="wwNext">NEXT LEVEL</button>':''}
+        ${!custom&&pass&&L<30?'<button class="ww-btn ww-play" id="wwNext">NEXT LEVEL</button>':''}
         <button class="ww-btn" id="wwLevels">LEVELS</button>
       </div>`;
     $('wwResults').classList.add('open');
-    $('wwRetry').addEventListener('click',()=>start(L));
+    const again=G.song;$('wwRetry').addEventListener('click',()=>start(custom?again:L));
     const nx=$('wwNext');if(nx)nx.addEventListener('click',()=>{selLvl=L+1;start(L+1);});
-    $('wwLevels').addEventListener('click',()=>{selLvl=pass&&L<30?L+1:L;G=null;showSelect();});
+    $('wwLevels').addEventListener('click',()=>{if(!custom)selLvl=pass&&L<30?L+1:L;G=null;showSelect();});
   }
 
   // ── keyboard / mouse buttons / gamepad: the pad bindings drive the craters while the game is open ──

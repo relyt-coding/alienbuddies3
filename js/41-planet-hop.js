@@ -29,9 +29,11 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
     </div>
     <div class="ww-panel" id="phSelect"><div class="ww-panel-inner" style="box-shadow:0 0 40px -10px #7fe8ff">
       <div class="ww-sel-head"><div><div class="ww-big" style="color:#7fe8ff">PLANET HOP</div><div class="ww-sub">Run round the planet to the beat · JUMP, double jump, and BOUNCE across the glowing pads · any hit restarts</div></div><div style="display:flex;gap:6px"><button class="ww-btn mg-sync-btn" id="phSync" title="Calibrate your timing">⏱ SYNC</button><button class="ww-x" id="phClose" title="Close">✕</button></div></div>
-      <div class="ww-sel-bonus" id="phBonus"></div>
+      <div class="mg-tabs"><button class="mg-tab sel" id="phTabLv">LEVELS</button><button class="mg-tab" id="phTabMine">YOUR BEATS</button></div>
+      <div id="phLvPane"><div class="ww-sel-bonus" id="phBonus"></div>
       <div class="ww-grid ph-grid" id="phGrid"></div>
-      <div class="ww-detail" id="phDetail"></div>
+      <div class="ww-detail" id="phDetail"></div></div>
+      <div id="phMinePane" class="ww-detail" style="display:none"></div>
     </div></div>
     <div class="ww-panel" id="phResults"><div class="ww-panel-inner ww-res" id="phResInner" style="box-shadow:0 0 40px -10px #7fe8ff"></div></div>`;
   document.body.appendChild(ov);
@@ -48,12 +50,17 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
   function close(){stop();ov.classList.remove('open');document.body.classList.remove('ww-open');if(typeof autoSave==='function')autoSave();}
   window.openPlanetHop=open;window.closePlanetHop=close;
   $('phClose').addEventListener('click',close);
+  $('phTabLv').addEventListener('click',()=>showTab('lv'));$('phTabMine').addEventListener('click',()=>showTab('mine'));
   $('phSync').addEventListener('click',()=>{if(typeof mgOpenSync==='function')mgOpenSync(()=>{});});
   $('phQuit').addEventListener('click',()=>{if(R&&R.state!=='done'){stop();showSelect();}else close();});
 
   const NEWS={2:'NEW: rock blocks — land on top',3:'NEW: wide pits — tap JUMP again in the air to double jump',4:'NEW: bounce pads — press BOUNCE as you land on each one',5:'BOSS: a comet chases you round Luna',6:'NEW: low gravity — floaty two-beat jumps',7:'NEW: fast bounce chains, one pad per beat',8:'NEW: floating ice platforms',9:'NEW: spike runs — jump on every beat',10:'BOSS: the frozen comet',11:'NEW: triple spikes — jump, then double jump half a beat later',15:'FINAL BOSS: the supernova comet'};
+  let tab='lv';const PH_DIFF_L={easy:3,normal:8,hard:13};
+  const mineOpts={id:'phMine',note:'obstacles land on your beat',playStyle:'border-color:#7fe8ff;color:#7fe8ff;background:#071420',onPlay:song=>{const d=Object.keys(MG_DIFFS).find(k=>song.P.custom.endsWith('|'+k))||'normal';song.P.planet=MG_DIFFS[d].planet;start({song,L:PH_DIFF_L[d]});}};
+  function showTab(t){tab=t;$('phTabLv').classList.toggle('sel',t==='lv');$('phTabMine').classList.toggle('sel',t==='mine');$('phLvPane').style.display=t==='lv'?'':'none';$('phMinePane').style.display=t==='mine'?'':'none';
+    if(t==='mine'){mineOpts.best=phProgress.custom||{};mgRenderCustom($('phMinePane'),mineOpts);}}
   function showSelect(){
-    $('phResults').classList.remove('open');$('phSelect').classList.add('open');
+    $('phResults').classList.remove('open');$('phSelect').classList.add('open');showTab(tab);
     const stars=Object.values(phProgress.best).reduce((a,b)=>a+(b.stars||0),0);
     $('phBonus').innerHTML=`Planet Hop bonus: <b>×${typeof formatStore==='function'?formatStore(phMultiplier):phMultiplier.toFixed(2)}</b> points forever · ${stars} / 45 ★`;
     const gr=$('phGrid');gr.innerHTML='';
@@ -79,12 +86,13 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
   function lat(){const c=getCtx();return(c.outputLatency||0)+(c.baseLatency||0)*.5;}
   // (mgOffset = the player's SYNC calibration: shifts judging and visuals to match what they hear)
   function tau(){return(getCtx().currentTime-lat()-R.T0-(typeof mgOffset==='function'?mgOffset():0))/R.beat;}
-  function start(L){
+  function start(L){ // a level number, or {song, L} from YOUR BEATS
+    const custom=typeof L==='object'?L:null;if(custom)L=custom.L;
     stop();
     $('phSelect').classList.remove('open');$('phResults').classList.remove('open');
-    const lv=phBuild(L);
-    R={state:'play',lv,L,beat:60/lv.P.bpm,attempt:0,fx:[],texts:[],shake:0,trail:[]};
-    $('phTitle').textContent=L+'. '+lv.P.name;
+    const lv=phBuild(L,custom&&custom.song);
+    R={state:'play',lv,L,custom,beat:60/lv.P.bpm,attempt:0,fx:[],texts:[],shake:0,trail:[]};
+    $('phTitle').textContent=custom?lv.P.name+' · '+lv.P.diff:L+'. '+lv.P.name;
     // left-hand pad keys jump, right-hand pad keys bounce (matches the two pads on screen)
     const lb=i=>(typeof padBindings!=='undefined'&&padBindings[i]&&padBindings[i].label)||'';
     $('phJumpK').textContent='JUMP'+(IS_DESKTOP?' · '+[[lb(0),lb(1)].filter(Boolean).join(''),'SPACE'].filter(Boolean).join(' / '):'');
@@ -107,7 +115,7 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
     const c=getCtx(),ahead=c.currentTime+.18,ev=R.lv.song.events;
     while(R.ei<ev.length&&R.T0+ev[R.ei].t<ahead){
       const e=ev[R.ei++],at=Math.max(c.currentTime,R.T0+e.t);
-      try{if(e.kind==='drum')playSound(e.id,e.vel,at);else if(typeof playRollNote==='function'&&SOUND_MAP[e.id])playRollNote(e.id,e.midi,at,e.dur,e.vel,-1);}catch(err){}
+      try{if(e.kind==='drum')playSound(e.id,e.vel,at,e.ch);else if(typeof playRollNote==='function'&&SOUND_MAP[e.id])playRollNote(e.id,e.midi,at,e.dur,e.vel,e.layer==null?-1:e.layer);}catch(err){}
     }
   }
 
@@ -169,7 +177,8 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
   }
   function die(){
     const S=R.S,pct=Math.max(0,Math.min(1,S.s/R.lv.end));R.dead={t:performance.now(),pct};clearInterval(R.sched);
-    const b=phProgress.best[R.L]||{};if(!b.cleared&&pct>(b.pct||0)){phProgress.best[R.L]=Object.assign(b,{pct});}
+    const st=R.custom?(phProgress.custom||(phProgress.custom={})):phProgress.best,K=R.custom?R.lv.P.custom:R.L;
+    const b=st[K]||{};if(!b.cleared&&pct>(b.pct||0)){st[K]=Object.assign(b,{pct});}
     burst(S.s,S.h+.3,'#00ff88',30,1.6);burst(S.s,S.h+.3,'#ffffff',12,1);R.shake=12;
     try{playSound('zap',.6);}catch(e){}
     R.rt=setTimeout(()=>{if(R&&R.state==='play')attempt(false);},900);
@@ -177,8 +186,9 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
   function win(){
     R.won=performance.now();clearInterval(R.sched);
     const L=R.L,P=R.lv.P,dust=R.lv.dust.length?R.got.size/R.lv.dust.length:1,stars=dust>=.9?3:dust>=.6?2:1;
-    const prev=phProgress.best[L]||{},first=!prev.cleared;
-    phProgress.best[L]={cleared:true,pct:1,stars:Math.max(stars,prev.stars||0),dust:Math.max(dust,prev.dust||0)};
+    const st=R.custom?(phProgress.custom||(phProgress.custom={})):phProgress.best,K=R.custom?P.custom:L;
+    const prev=st[K]||{},first=!R.custom&&!prev.cleared;
+    st[K]={cleared:true,pct:1,stars:Math.max(stars,prev.stars||0),dust:Math.max(dust,prev.dust||0)};
     if(first)phMultiplier*=P.reward;
     if(R.lv.bossS<Infinity){R.shake=16;for(let k=0;k<4;k++)burst(R.S.s-2.2,2.4,['#ffd166','#ff66ff','#7fe8ff','#ffffff'][k],30,2);}
     if(typeof autoSave==='function')autoSave();if(typeof renderUI==='function')renderUI();
@@ -189,18 +199,18 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
     const L=R.L,P=R.lv.P;
     $('phResInner').innerHTML=`
       <div class="ww-big win">${P.boss?'COMET ESCAPED!':'LEVEL CLEAR!'}</div>
-      <div class="ww-d-name">${L}. ${P.name}</div>
+      <div class="ww-d-name">${R.custom?P.name+' · '+P.diff:L+'. '+P.name}</div>
       <div class="ww-stars">${[1,2,3].map(k=>`<span class="${k<=stars?'on':''}">★</span>`).join('')}</div>
       <div class="ww-res-acc">${Math.round(dust*100)}%<small>stardust collected (60% ★★ · 90% ★★★)</small></div>
       <div class="ww-res-grid"><div><b>${R.got.size} / ${R.lv.dust.length}</b><small>STARDUST</small></div><div><b>${R.attempt}</b><small>ATTEMPTS</small></div>
         <div><b style="color:#00ff99">${R.onBeat.perfect}</b><small>PERFECT BEATS</small></div><div><b>${R.maxCombo}</b><small>BEST ON-BEAT STREAK</small></div></div>
       <div class="ww-d-meta">${typeof mgTimingSummary==='function'?mgTimingSummary(R.timing):''}</div>
       ${first?`<div class="ww-reward">Permanent bonus: ×${P.reward} points!${L<15?' · Level '+(L+1)+' unlocked':''}</div>`:''}
-      <div class="ww-res-btns"><button class="ww-btn" id="phRetry">RETRY</button>${L<15?'<button class="ww-btn ww-play" id="phNext">NEXT LEVEL</button>':''}<button class="ww-btn" id="phLevels">LEVELS</button></div>`;
+      <div class="ww-res-btns"><button class="ww-btn" id="phRetry">RETRY</button>${!R.custom&&L<15?'<button class="ww-btn ww-play" id="phNext">NEXT LEVEL</button>':''}<button class="ww-btn" id="phLevels">LEVELS</button></div>`;
     $('phResults').classList.add('open');
-    $('phRetry').addEventListener('click',()=>start(L));
+    const again=R.custom;$('phRetry').addEventListener('click',()=>start(again||L));
     const nx=$('phNext');if(nx)nx.addEventListener('click',()=>{sel=L+1;start(L+1);});
-    $('phLevels').addEventListener('click',()=>{sel=L<15?L+1:L;stop();showSelect();});
+    $('phLevels').addEventListener('click',()=>{if(!again)sel=L<15?L+1:L;stop();showSelect();});
   }
 
   // ── effects ──

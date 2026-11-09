@@ -45,8 +45,9 @@ function phPatterns(){
 }
 
 // ── build a level: song + objects + perfect actions + stardust ──
-function phBuild(L){
-  const P=phLevel(L),song=wwCompose(0,P),R=wwRng(P.seed*7+1),PAT=phPatterns();
+// songIn (optional) = a YOUR BEATS song; L then picks which obstacles are in play (EASY 3 · NORMAL 8 · HARD 13)
+function phBuild(L,songIn){
+  const P=songIn?songIn.P:phLevel(L),song=songIn||wwCompose(0,P),R=wwRng(P.seed*7+1),PAT=phPatterns();
   const end=(song.bars-1)*4,bossS=P.boss?(song.intro+P.bodyBars-8)*4:Infinity;
   const pool=Object.keys(PAT).filter(n=>PAT[n].from<=L&&n!=='rest');
   const fresh=pool.filter(n=>PAT[n].from===L);           // patterns that debut on this level show up for sure

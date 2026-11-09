@@ -2,6 +2,18 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.95 - 2026-11-09 11:48
+- Planet Hop: all 15 levels hand-built to their songs: teach, develop, twist, victory lap
+- Planet Hop: teaching signs, glowing press markers and a mid-level checkpoint flag
+- Planet Hop: levels 1-5 are jump only; the BOUNCE button arrives on level 6
+- Planet Hop: redesigned buttons that show the drum they play, plus beat lights and a next-press glow
+- Planet Hop: detailed level art (layered terrain, chasms, crystal spikes, hover pads, per-world skies)
+- Planet Hop: hops for stardust on flat stretches
+- Worm Whack: charts built from musical phrases; kicks on the bottom row, snares on the top
+- Worm Whack: boss Wyrms attack in four phases
+- Both games: pads play the song, YOUR BEATS levels from your own patterns, arrangements and song
+- Both games: SYNC timing calibration and an early/late timing meter
+
 ## v0.2.94 - 2026-11-08 21:10
 
 - Drum pad keys now follow the pad grid: top row D F J K, bottom row C V N M (old default keys switch over automatically; custom keys are kept)

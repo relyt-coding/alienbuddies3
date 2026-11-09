@@ -16,6 +16,12 @@ function wwLevelOpen(l){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||l===
   const $=id=>document.getElementById(id);
   const WIN={p:.06,g:.12,o:.18};
   const FALLBACK_KIT=['kick','snare','hihat','clap','rimshot','floortom','shaker','cowbell'];
+  // which drum pad each crater uses, so craters sit where their pads (and keys) sit:
+  //   8 craters = all pads (D F J K / C V N M) · 6 = D F J / C V N · 4 = F J / V N
+  const CR_MAP={4:[1,2,5,6],6:[0,1,2,4,5,6],8:[0,1,2,3,4,5,6,7]};
+  const padOf=i=>G&&G.map?G.map[i]:i;
+  const craterOf=pi=>G&&G.map?G.map.indexOf(pi):pi;
+  const keyLbl=i=>(typeof padBindings!=='undefined'&&padBindings[padOf(i)]&&padBindings[padOf(i)].label)||'';
   const BAND_TINTS=[[1,'#80808c','#5d5d68'],[7,'#8f7262','#6a5246'],[17,'#6f8299','#4f6074'],[27,'#7f6f9c','#5c4f76']];
 
   // ── DOM ──
@@ -108,10 +114,9 @@ function wwLevelOpen(l){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||l===
     box.style.gridTemplateColumns=`repeat(${cols},1fr)`;box.style.gridTemplateRows=`repeat(${rows},1fr)`;box.classList.toggle('one-row',rows===1);
     box.innerHTML='';G.padEls=[];
     for(let i=0;i<n;i++){
-      const b=document.createElement('button');b.className='ww-pad';const col=padColor(i);
+      const b=document.createElement('button');b.className='ww-pad';const col=padColor(padOf(i));
       b.style.setProperty('--c',col);
-      const key=(typeof padBindings!=='undefined'&&padBindings[i]&&padBindings[i].label)||'';
-      b.innerHTML=`<span class="k">${key}</span><span class="nm">${(SOUND_MAP[padSound(i)]||{}).name||''}</span>`;
+      b.innerHTML=`<span class="k">${keyLbl(i)}</span><span class="nm">${(SOUND_MAP[padSound(padOf(i))]||{}).name||''}</span>`;
       const down=e=>{e.preventDefault();press(i,e);};const up=e=>{e.preventDefault();release(i,e);};
       b.addEventListener('pointerdown',down);b.addEventListener('pointerup',up);b.addEventListener('pointercancel',up);b.addEventListener('pointerleave',e=>{if(e.buttons||e.pointerType!=='mouse')up(e);});
       b.addEventListener('contextmenu',e=>e.preventDefault());
@@ -131,6 +136,7 @@ function wwLevelOpen(l){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||l===
        stats:{perfect:0,good:0,ok:0,miss:0,whiff:0,mine:0},fx:[],texts:[],shake:0,held:{},
        alien:{x:0,y:0,tx:0,ty:0,swing:0,face:1},bossMax:chart.filter(n=>n.boss).length,bossHp:0,bossDead:0,
        beat:60/song.bpm,armorSpan:Math.max(.36,4*song.step)};
+    G.map=CR_MAP[song.P.craters]||CR_MAP[8];
     G.bossHp=G.bossMax;G.bossStart=G.bossMax?chart.find(n=>n.boss).t-song.bar*1.2:1e9;
     const lead=4*G.beat+.35;G.T0=c.currentTime+lead;
     // count-in clicks
@@ -162,7 +168,7 @@ function wwLevelOpen(l){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||l===
   function press(i,ev){
     if(!G||G.state!=='play')return;
     const t=evT(ev);
-    try{playSound(padSound(i),.7);}catch(e){}
+    try{playSound(padSound(padOf(i)),.7);}catch(e){}
     const pe=G.padEls[i];if(pe){pe.classList.remove('lit');void pe.offsetWidth;pe.classList.add('lit');}
     G.held[i]=true;
     const cr=G.craters[i];if(!cr)return;
@@ -240,7 +246,7 @@ function wwLevelOpen(l){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||l===
     const t=tNow(),dt=Math.min(.05,(performance.now()-(G.lastPerf||performance.now()))/1000);G.lastPerf=performance.now();
     // gamepad: keep hold worms alive while the mapped button stays down
     if(typeof gpButtonFor==='function'&&navigator.getGamepads){const gp=[...navigator.getGamepads()].find(Boolean);
-      if(gp)G.chart.forEach(o=>{if(o.holding&&!o.done&&o.viaPad){const bi=gpButtonFor(o.c);if(bi!=null&&gp.buttons[bi]&&!gp.buttons[bi].pressed)release(o.c);}});}
+      if(gp)G.chart.forEach(o=>{if(o.holding&&!o.done&&o.viaPad){const bi=gpButtonFor(padOf(o.c));if(bi!=null&&gp.buttons[bi]&&!gp.buttons[bi].pressed)release(o.c);}});}
     // judge worms that got away
     G.chart.forEach(n=>{
       if(n.done)return;
@@ -348,10 +354,10 @@ function wwLevelOpen(l){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||l===
     // crater flashes + approach rings + key labels
     G.craters.forEach((c,i)=>{
       if(c.flash>0){g2.strokeStyle=`rgba(255,255,255,${c.flash*.7})`;g2.lineWidth=3;g2.beginPath();g2.ellipse(c.x,c.y,G.r*(1.3+(1-c.flash)*.4),G.r*(1.2+(1-c.flash)*.4),0,0,Math.PI*2);g2.stroke();c.flash=Math.max(0,c.flash-dt*4);}
-      const col=padColor(i);
+      const col=padColor(padOf(i));
       G.chart.forEach(n=>{if(n.c!==i||n.done||n.type==='decoy'||n.holding)return;const k=(n.t-t)/G.P.approach;if(k<0||k>1)return;
         g2.strokeStyle=col;g2.globalAlpha=.25+.6*(1-k);g2.lineWidth=2.5;g2.beginPath();g2.ellipse(c.x,c.y,G.r*(1.05+k*1.1),G.r*(.95+k*1.0),0,0,Math.PI*2);g2.stroke();g2.globalAlpha=1;});
-      const key=(typeof padBindings!=='undefined'&&padBindings[i]&&padBindings[i].label)||'';
+      const key=keyLbl(i);
       g2.fillStyle='rgba(255,255,255,.35)';g2.font=`${Math.round(Math.max(10,G.r*.26))}px 'Bebas Neue',sans-serif`;g2.textAlign='center';
       g2.fillText((i+1)+(key&&IS_DESKTOP?' · '+key:''),c.x,c.y+G.r*1.45);
     });
@@ -443,19 +449,19 @@ function wwLevelOpen(l){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||l===
     if(e.code==='Escape'){e.preventDefault();e.stopImmediatePropagation();if(G&&G.state==='play'){stopRun();showSelect();}else close();return;}
     if(!G||G.state!=='play')return;
     for(const [idx,b] of Object.entries(typeof padBindings!=='undefined'?padBindings:{})){
-      if(b.key&&e.code===b.key){e.preventDefault();e.stopImmediatePropagation();if(!e.repeat&&+idx<G.P.craters)press(+idx,e);return;}
+      if(b.key&&e.code===b.key){e.preventDefault();e.stopImmediatePropagation();const c=craterOf(+idx);if(!e.repeat&&c>=0)press(c,e);return;}
     }
   },true);
   addEventListener('keyup',e=>{
     if(!G||!ov.classList.contains('open'))return;
-    for(const [idx,b] of Object.entries(typeof padBindings!=='undefined'?padBindings:{}))if(b.key&&e.code===b.key){release(+idx,e);return;}
+    for(const [idx,b] of Object.entries(typeof padBindings!=='undefined'?padBindings:{}))if(b.key&&e.code===b.key){const c=craterOf(+idx);if(c>=0)release(c,e);return;}
   },true);
-  addEventListener('mouseup',e=>{if(!G||!ov.classList.contains('open')||e.button===0)return;for(const [idx,b] of Object.entries(padBindings||{}))if(b.mouse===e.button)release(+idx);},true);
+  addEventListener('mouseup',e=>{if(!G||!ov.classList.contains('open')||e.button===0)return;for(const [idx,b] of Object.entries(padBindings||{}))if(b.mouse===e.button){const c=craterOf(+idx);if(c>=0)release(c);}},true);
   // the main game's firePad (keys, mouse buttons, gamepad) → whack instead, while Worm Whack is open
   if(typeof firePad==='function'){
     const _fire=firePad;
     firePad=function(idx){
-      if(ov.classList.contains('open')){if(G&&G.state==='play'&&idx<G.P.craters){press(idx);const n=G.chart.find(o=>o.c===idx&&o.holding&&!o.done);if(n)n.viaPad=true;}return;}
+      if(ov.classList.contains('open')){const c=craterOf(idx);if(G&&G.state==='play'&&c>=0){press(c);const n=G.chart.find(o=>o.c===c&&o.holding&&!o.done);if(n)n.viaPad=true;}return;}
       return _fire.apply(this,arguments);
     };
   }

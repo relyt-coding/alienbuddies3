@@ -2,6 +2,13 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.94 - 2026-11-08 21:10
+
+- Drum pad keys now follow the pad grid: top row D F J K, bottom row C V N M (old default keys switch over automatically; custom keys are kept)
+- Worm Whack: craters mirror the pads and their keys (4 craters = F J / V N, 6 = D F J / C V N, 8 = all), using your pad sounds
+- Planet Hop: left-hand keys (D F) jump, right-hand keys (J K) bounce
+- Minigame songs are pure beats now: melodies removed, richer percussion layers, 808 booms and section accents
+
 ## v0.2.93 - 2026-11-08 20:50
 
 - New minigame WORM WHACK (skill tree → Minigames): rhythm whack-a-mole on a rocky moon, 30 composed songs/levels, pads = craters, gold/armored/hold worms, mines, Wyrm bosses on 10/20/30, stars + permanent points bonus

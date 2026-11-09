@@ -2,7 +2,7 @@
 // ══════════════════════════════════════════════
 //  WORM WHACK — the 30 songs and their charts
 //  Every song is composed here from the game's own instruments (no audio files): a seeded composer
-//  picks a style (drum groove), key, scale, chord progression, bassline and melody motif, then lays
+//  picks a style (drum groove) and percussion layers — pure beats, no melodies — then lays
 //  out intro → verse/chorus sections (and a boss section on levels 10 / 20 / 30).
 //  The chart (where and when worms pop up) is built from that same song, so worms land on the kicks,
 //  snares and hats you hear.
@@ -30,6 +30,21 @@ const WW_STYLES={
   halftime: {k:'x.....x.........',s:'........x.......',h:'x.x.x.x.x.x.x.x.',sId:'snare',hId:'hihat',kId:'trapkick',bass:'wobble',bassR:'x.......x.x.x...',lead:['rs_lead','stab'],pad:true},
   reggaeton:{k:'x...x...x...x...',s:'...x..x....x..x.',h:'x.x.x.x.x.x.x.x.',sId:'snare',hId:'hihat',kId:'kick',bass:'basenote',bassR:'x..x..x.x..x..x.',lead:['pluck','marimba'],pad:false},
   dnb:      {k:'x.........x.....',s:'....x.......x...',h:'x.x.x.x.x.x.x.x.',sId:'snare',hId:'hihat',kId:'kick',bass:'wobble',bassR:'x.......x.x.....',lead:['rs_lead','pluck'],pad:true},
+};
+// percussion layers per style: [sound, 16-step pattern, volume]; A = verses, B = added in choruses
+const WW_PERC={
+  house:    {A:[['shaker','oooooooooooooooo',.32]],B:[['rimshot','...x.......x..x.',.45],['clap','....x.......x...',.35]]},
+  boombap:  {A:[['rimshot','..x.......x.....',.4]],B:[['shaker','x.x.x.x.x.x.x.x.',.3],['vinyl','x...............',.25]]},
+  synthwave:{A:[['shaker','..x...x...x...x.',.3]],B:[['clap','....x.......x...',.4],['floortom','..............xx',.45]]},
+  funk:     {A:[['rimshot','..x..x....x..x..',.35]],B:[['cowbell','x...x...x.x.x...',.35],['shaker','oxoxoxoxoxoxoxox',.25]]},
+  dub:      {A:[['shaker','..x...x...x...x.',.3]],B:[['spaceperc','......x.........',.4],['floortom','x...........x...',.4]]},
+  trap:     {A:[['rimshot','......x.......x.',.35]],B:[['shaker','oooooooooooooooo',.25],['clap','........x.......',.35]],boom:true},
+  dnb:      {A:[['shaker','oooooooooooooooo',.3]],B:[['rimshot','..x.......x...x.',.4],['glitch','...............x',.3]],boom:true},
+  breakbeat:{A:[['rimshot','.......x.....x..',.35]],B:[['cowbell','x.....x.....x...',.3],['shaker','x.x.x.x.x.x.x.x.',.28]]},
+  afro:     {A:[['cowbell','x.x.xx.x.x.xx.x.',.3]],B:[['floortom','x.....x...x.....',.45],['clap','....x.......x...',.3]]},
+  twostep:  {A:[['shaker','x.x.x.x.x.x.x.x.',.3]],B:[['rimshot','...x..x....x..x.',.4],['spaceperc','..........x.....',.35]],boom:true},
+  halftime: {A:[['rimshot','....x.......x...',.35]],B:[['glitch','...........x....',.35],['shaker','oooooooooooooooo',.25]],boom:true},
+  reggaeton:{A:[['shaker','x.x.x.x.x.x.x.x.',.3]],B:[['rimshot','x..x..x.x..x..x.',.35],['cowbell','x.......x.......',.3]]},
 };
 const WW_STYLE_ORDER=['house','boombap','synthwave','funk','dub','trap','house','synthwave','boombap','dnb'];
 const WW_SCALES={minor:[0,2,3,5,7,8,10],dorian:[0,2,3,5,7,9,10],major:[0,2,4,5,7,9,11],mixo:[0,2,4,5,7,9,10],phryg:[0,1,3,5,7,8,10]};
@@ -64,15 +79,9 @@ function wwCompose(lvl,Pin){
   const scale=WW_SCALES[scaleName];
   const root=36+Math.floor(R()*8);                  // C2..G2
   const progA=pick(WW_PROGS),progB=pick(WW_PROGS);
-  const leadId=pick(st.lead);
   const step=60/P.bpm/4,bar=step*16;
   const intro=1,outro=1,bars=intro+P.bodyBars+outro;
   const deg=(d,oct)=>root+12*(oct||0)+scale[((d%7)+7)%7]+12*Math.floor(d/7);
-  // melody motif: 2 bars of rhythm + scale steps (relative), reused with variation
-  const motif=[];{
-    const rhythms=['x..x..x.x...x...','x.x...x.x.x.....','..x.x...x..x.x..','x...x.x...x.x.x.','x..x...xx..x....','.x.x.x...x.x....'];
-    for(let b=0;b<2;b++){const r=pick(rhythms);for(let s=0;s<16;s++)if(r[s]==='x')motif.push({s:b*16+s,d:Math.floor(R()*5)-1,l:R()<.3?2:1});}
-  }
   const ev=[],drumBars=[],sections=[];
   const push=(t,kind,id,vel,midi,dur)=>ev.push({t,kind,id,vel,midi,dur});
   const pat=(str,s)=>str[s]==='x'?1:str[s]==='o'?.55:0;
@@ -81,7 +90,6 @@ function wwCompose(lvl,Pin){
     const sec=isIntro?'intro':isOutro?'outro':(P.boss&&body>=P.bodyBars-8)?'boss':(Math.floor(body/8)%2===0?'A':'B');
     sections.push(sec);
     const t0=b*bar;
-    const prog=sec==='B'||sec==='boss'?progB:progA,chord=prog[b%4];
     const db={k:[],s:[],h:[]};
     const fill=(sec!=='intro'&&sec!=='outro'&&(body%8===7));
     for(let s=0;s<16;s++){
@@ -97,30 +105,21 @@ function wwCompose(lvl,Pin){
       if(sec==='boss'&&s%4===2)push(t,'drum','floortom',.55);
     }
     drumBars.push(db);
-    if(isOutro){push(t0,'note',st.pad?'rs_pad':leadId,.5,deg(0,2),bar*1.5);continue;}
-    // bass
-    if(!isIntro)for(let s=0;s<16;s++)if(st.bassR[s]==='x'){
-      const fifth=(s===10&&R()<.4)?4:0;
-      push(t0+s*step,'note',st.bass,.85,deg(chord+fifth,0),step*(st.bass==='sub'?3.5:1.6));
-    }
-    // pads / off-beat chords
-    if(st.pad&&!isIntro)[0,2,4].forEach(o=>push(t0,'note','rs_pad',.22,deg(chord+o,2),bar*.98));
-    if(st.offChord&&!isIntro)for(let s=2;s<16;s+=4)[0,2,4].forEach(o=>push(t0+s*step,'note','stab',.18,deg(chord+o,2),step*1.2));
-    // melody: verses play the motif, choruses an octave up with a variation, boss doubles it
-    if(sec==='A'||sec==='B'||sec==='boss'){
-      const half=(body%2);
-      motif.filter(m=>Math.floor(m.s/16)===half).forEach(m=>{
-        let d=chord+m.d+2; // a scale step around the chord's third
-        if(sec==='B'&&body%4>=2)d+=2;
-        const oct=sec==='A'?3:4;
-        push(t0+(m.s%16)*step,'note',leadId,sec==='A'?.5:.6,deg(d,oct)-(sec==='B'||sec==='boss'?12:0),step*m.l*1.8);
-      });
-    }
+    if(isOutro){push(t0,'drum','spaceperc',.7);push(t0,'drum','downlift',.4);continue;}
+    if(isIntro)continue;
+    // percussion layers (all unpitched — the songs are pure beats): verses get the light layer,
+    // choruses add the heavy one, the boss gets everything
+    const lay=WW_PERC[P.style]||WW_PERC.house,layers=sec==='A'?lay.A:lay.A.concat(lay.B);
+    layers.forEach(([id,str,v])=>{for(let s=0;s<16;s++){const x=pat(str,s);if(x&&!(fill&&s>=12))push(t0+s*step,'drum',id,v*x);}});
+    // 808 boom under the kicks (one fixed note, so nothing can clash)
+    if(lay.boom&&sec!=='A')db.k.forEach(s=>push(t0+s*step,'drum','sub',.5));
+    // a crash-style accent on the first beat of every section
+    if(body>0&&body%8===0)push(t0,'drum',sec==='boss'?'zap':'spaceperc',.55);
     // risers into choruses
     if(sec!=='intro'&&body%8===7&&b<bars-2)push(t0+8*step,'drum','riser',.45);
   }
   ev.sort((a,b)=>a.t-b.t);
-  return{P,bpm:P.bpm,step,bar,bars,intro,events:ev,drumBars,sections,scaleName,root,leadId,style:P.style,length:bars*bar};
+  return{P,bpm:P.bpm,step,bar,bars,intro,events:ev,drumBars,sections,scaleName,root,style:P.style,length:bars*bar};
 }
 
 // ── chart: worms to whack, built from the song ──

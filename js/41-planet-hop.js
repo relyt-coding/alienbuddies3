@@ -83,9 +83,10 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
     const lv=phBuild(L);
     R={state:'play',lv,L,beat:60/lv.P.bpm,attempt:0,fx:[],texts:[],shake:0,trail:[]};
     $('phTitle').textContent=L+'. '+lv.P.name;
-    const kj=(typeof padBindings!=='undefined'&&padBindings[0]&&padBindings[0].label)||'',kb=(typeof padBindings!=='undefined'&&padBindings[1]&&padBindings[1].label)||'';
-    $('phJumpK').textContent='JUMP'+(IS_DESKTOP?' · '+[kj,'SPACE'].filter(Boolean).join(' / '):'');
-    $('phBounceK').textContent='BOUNCE'+(IS_DESKTOP?' · '+[kb,'SHIFT'].filter(Boolean).join(' / '):'');
+    // left-hand pad keys jump, right-hand pad keys bounce (matches the two pads on screen)
+    const lb=i=>(typeof padBindings!=='undefined'&&padBindings[i]&&padBindings[i].label)||'';
+    $('phJumpK').textContent='JUMP'+(IS_DESKTOP?' · '+[[lb(0),lb(1)].filter(Boolean).join(''),'SPACE'].filter(Boolean).join(' / '):'');
+    $('phBounceK').textContent='BOUNCE'+(IS_DESKTOP?' · '+[[lb(2),lb(3)].filter(Boolean).join(''),'SHIFT'].filter(Boolean).join(' / '):'');
     resize();attempt(true);
     R.raf=requestAnimationFrame(frame);
   }
@@ -114,7 +115,7 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
     if(t<-.2)return;
     R.inputs.push({t:Math.max(R.S.s,t),w});
     const pad=$(w==='j'?'phJump':'phBounce');pad.classList.remove('lit');void pad.offsetWidth;pad.classList.add('lit');
-    try{const id=(typeof padSounds!=='undefined'&&padSounds[w==='j'?0:1])||(w==='j'?'kick':'snare');playSound(SOUND_MAP[id]?id:(w==='j'?'kick':'snare'),.55);}catch(e){}
+    try{const id=(typeof padSounds!=='undefined'&&padSounds[w==='j'?0:2])||(w==='j'?'kick':'snare');playSound(SOUND_MAP[id]?id:(w==='j'?'kick':'snare'),.55);}catch(e){}
   }
   ['phJump','phBounce'].forEach((id,i)=>{const b=$(id);const w=i?'b':'j';
     b.addEventListener('pointerdown',e=>{e.preventDefault();input(w,e);});b.addEventListener('contextmenu',e=>e.preventDefault());});
@@ -124,10 +125,10 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
     if(!R||R.state!=='play')return;
     let w=null;
     if(['Space','ArrowUp','KeyW'].includes(e.code))w='j';else if(['ShiftLeft','ShiftRight','ArrowDown','KeyS'].includes(e.code))w='b';
-    else for(const [idx,b] of Object.entries(typeof padBindings!=='undefined'?padBindings:{}))if(b.key&&e.code===b.key){w=(+idx)%2?'b':'j';break;}
+    else for(const [idx,b] of Object.entries(typeof padBindings!=='undefined'?padBindings:{}))if(b.key&&e.code===b.key){w=(+idx)%4<2?'j':'b';break;}
     if(w){e.preventDefault();e.stopImmediatePropagation();if(!e.repeat)input(w,e);}
   },true);
-  if(typeof firePad==='function'){const _fire=firePad;firePad=function(idx){if(ov.classList.contains('open')){input(idx%2?'b':'j');return;}return _fire.apply(this,arguments);};}
+  if(typeof firePad==='function'){const _fire=firePad;firePad=function(idx){if(ov.classList.contains('open')){input(idx%4<2?'j':'b');return;}return _fire.apply(this,arguments);};}
 
   // ── frame: advance physics to the music, then draw ──
   function frame(){

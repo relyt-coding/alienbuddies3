@@ -335,12 +335,15 @@ let bindingForPad = null;
 function loadPadBindings(){
   let saved=null;
   try{ saved=localStorage.getItem('ab2_pad_bindings'); if(saved) padBindings=JSON.parse(saved); }catch(e){}
-  // Defaults (all changeable): pads 1-8 = J F D K R E U I
-  const DEFAULT_KEYS=['J','F','D','K','R','E','U','I'];
+  // Defaults (all changeable) follow the pad grid's shape (4 across × 2 rows):
+  //   top row    D F J K   (pads 1-4)
+  //   bottom row C V N M   (pads 5-8)   → left hand D F C V, right hand J K N M
+  const DEFAULT_KEYS=['D','F','J','K','C','V','N','M'];
   const defaults={};DEFAULT_KEYS.forEach((k,i)=>defaults[i]={key:'Key'+k,label:k});
-  const OLD3=JSON.stringify({0:{key:'KeyJ',label:'J'},1:{key:'KeyF',label:'F'},2:{key:'KeyD',label:'D'}});
-  // First run, or still on the earlier 3-key defaults (never customised) -> use the full 8-key set
-  if(!saved||JSON.stringify(padBindings)===OLD3){padBindings=defaults;}
+  const mk=keys=>{const o={};keys.forEach((k,i)=>o[i]={key:'Key'+k,label:k});return JSON.stringify(o);};
+  const OLD3=mk(['J','F','D']),OLD8=mk(['J','F','D','K','R','E','U','I']);
+  // First run, or still on an earlier default set (never customised) -> use the current defaults
+  if(!saved||[OLD3,OLD8].includes(JSON.stringify(padBindings))){padBindings=defaults;savePadBindings();}
 }
 function savePadBindings(){
   try{ localStorage.setItem('ab2_pad_bindings',JSON.stringify(padBindings)); }catch(e){}

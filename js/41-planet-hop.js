@@ -28,7 +28,7 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
       <button class="ww-pad" id="phBounce" style="--c:#ff4dff"><span class="k" id="phBounceK"></span><span class="nm">BOUNCE · on the glowing pads</span></button>
     </div>
     <div class="ww-panel" id="phSelect"><div class="ww-panel-inner" style="box-shadow:0 0 40px -10px #7fe8ff">
-      <div class="ww-sel-head"><div><div class="ww-big" style="color:#7fe8ff">PLANET HOP</div><div class="ww-sub">Run round the planet to the beat · JUMP, double jump, and BOUNCE across the glowing pads · any hit restarts</div></div><button class="ww-x" id="phClose" title="Close">✕</button></div>
+      <div class="ww-sel-head"><div><div class="ww-big" style="color:#7fe8ff">PLANET HOP</div><div class="ww-sub">Run round the planet to the beat · JUMP, double jump, and BOUNCE across the glowing pads · any hit restarts</div></div><div style="display:flex;gap:6px"><button class="ww-btn mg-sync-btn" id="phSync" title="Calibrate your timing">⏱ SYNC</button><button class="ww-x" id="phClose" title="Close">✕</button></div></div>
       <div class="ww-sel-bonus" id="phBonus"></div>
       <div class="ww-grid ph-grid" id="phGrid"></div>
       <div class="ww-detail" id="phDetail"></div>
@@ -48,6 +48,7 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
   function close(){stop();ov.classList.remove('open');document.body.classList.remove('ww-open');if(typeof autoSave==='function')autoSave();}
   window.openPlanetHop=open;window.closePlanetHop=close;
   $('phClose').addEventListener('click',close);
+  $('phSync').addEventListener('click',()=>{if(typeof mgOpenSync==='function')mgOpenSync(()=>{});});
   $('phQuit').addEventListener('click',()=>{if(R&&R.state!=='done'){stop();showSelect();}else close();});
 
   const NEWS={2:'NEW: rock blocks — land on top',3:'NEW: wide pits — tap JUMP again in the air to double jump',4:'NEW: bounce pads — press BOUNCE as you land on each one',5:'BOSS: a comet chases you round Luna',6:'NEW: low gravity — floaty two-beat jumps',7:'NEW: fast bounce chains, one pad per beat',8:'NEW: floating ice platforms',9:'NEW: spike runs — jump on every beat',10:'BOSS: the frozen comet',11:'NEW: triple spikes — jump, then double jump half a beat later',15:'FINAL BOSS: the supernova comet'};
@@ -76,7 +77,8 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
   // ── run ──
   function stop(){if(!R)return;clearInterval(R.sched);cancelAnimationFrame(R.raf);clearTimeout(R.rt);R.state='stopped';R=null;}
   function lat(){const c=getCtx();return(c.outputLatency||0)+(c.baseLatency||0)*.5;}
-  function tau(){return(getCtx().currentTime-lat()-R.T0)/R.beat;}
+  // (mgOffset = the player's SYNC calibration: shifts judging and visuals to match what they hear)
+  function tau(){return(getCtx().currentTime-lat()-R.T0-(typeof mgOffset==='function'?mgOffset():0))/R.beat;}
   function start(L){
     stop();
     $('phSelect').classList.remove('open');$('phResults').classList.remove('open');
@@ -94,6 +96,7 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
     const c=getCtx();
     clearInterval(R.sched);
     R.attempt++;R.S=phNewState();R.ei=0;R.inputs=[];R.got=new Set();R.dead=null;R.won=0;R.trail=[];
+    R.graded=new Set();R.combo=0;R.maxCombo=0;R.timing=[];R.onBeat={perfect:0,good:0,off:0};R.rings=[];
     R.T0=c.currentTime+(first?4*R.beat+.3:.25);
     if(first)for(let i=0;i<4;i++)playSound('rimshot',i?.5:.85,R.T0-(4-i)*R.beat);
     R.sched=setInterval(schedule,25);schedule();
@@ -114,6 +117,17 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
     let t=tau();if(ev&&ev.timeStamp){const lag=(performance.now()-ev.timeStamp)/1000;if(lag>0&&lag<.25)t-=lag/R.beat;}
     if(t<-.2)return;
     R.inputs.push({t:Math.max(R.S.s,t),w});
+    // how close was that press to the beat it was meant for? (the level's planned presses)
+    let best=-1,bd=.32;R.lv.acts.forEach((a,i)=>{if(a.w!==w||R.graded.has(i))return;const d=Math.abs(t-a.t);if(d<bd){bd=d;best=i;}});
+    if(best>=0){
+      R.graded.add(best);const ds=(t-R.lv.acts[best].t)*R.beat,ad=Math.abs(ds);
+      const gr=ad<=.06?'perfect':ad<=.12?'good':'off';R.onBeat[gr]++;R.timing.push({d:ds,at:performance.now()});
+      if(gr==='off')R.combo=0;else{R.combo++;R.maxCombo=Math.max(R.maxCombo,R.combo);}
+      const S=R.S,tag=gr==='perfect'?'PERFECT':gr==='good'?'GOOD · '+(ds<0?'EARLY':'LATE'):(ds<0?'EARLY':'LATE');
+      R.texts.push({s:S.s+.15,h:S.h+1.55,txt:tag,col:gr==='perfect'?'#00ff99':gr==='good'?'#7fd4ff':'#ffaa66',life:1,sz:gr==='perfect'?1.1:.9});
+      if(gr==='perfect'){burst(S.s,S.h+.2,'#00ff99',8,.8);R.rings.push({s:S.s,h:S.h,life:1});}
+      if(R.combo>0&&R.combo%10===0){R.texts.push({s:S.s+.9,h:S.h+2.3,txt:'ON-BEAT ×'+R.combo+'!',col:'#e8ff00',life:1.3,sz:1.35});try{playSound('spaceperc',.35);}catch(e){}}
+    }
     const pad=$(w==='j'?'phJump':'phBounce');pad.classList.remove('lit');void pad.offsetWidth;pad.classList.add('lit');
     try{const id=(typeof padSounds!=='undefined'&&padSounds[w==='j'?0:2])||(w==='j'?'kick':'snare');playSound(SOUND_MAP[id]?id:(w==='j'?'kick':'snare'),.55);}catch(e){}
   }
@@ -178,7 +192,9 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
       <div class="ww-d-name">${L}. ${P.name}</div>
       <div class="ww-stars">${[1,2,3].map(k=>`<span class="${k<=stars?'on':''}">★</span>`).join('')}</div>
       <div class="ww-res-acc">${Math.round(dust*100)}%<small>stardust collected (60% ★★ · 90% ★★★)</small></div>
-      <div class="ww-res-grid"><div><b>${R.got.size} / ${R.lv.dust.length}</b><small>STARDUST</small></div><div><b>${R.attempt}</b><small>ATTEMPTS</small></div></div>
+      <div class="ww-res-grid"><div><b>${R.got.size} / ${R.lv.dust.length}</b><small>STARDUST</small></div><div><b>${R.attempt}</b><small>ATTEMPTS</small></div>
+        <div><b style="color:#00ff99">${R.onBeat.perfect}</b><small>PERFECT BEATS</small></div><div><b>${R.maxCombo}</b><small>BEST ON-BEAT STREAK</small></div></div>
+      <div class="ww-d-meta">${typeof mgTimingSummary==='function'?mgTimingSummary(R.timing):''}</div>
       ${first?`<div class="ww-reward">Permanent bonus: ×${P.reward} points!${L<15?' · Level '+(L+1)+' unlocked':''}</div>`:''}
       <div class="ww-res-btns"><button class="ww-btn" id="phRetry">RETRY</button>${L<15?'<button class="ww-btn ww-play" id="phNext">NEXT LEVEL</button>':''}<button class="ww-btn" id="phLevels">LEVELS</button></div>`;
     $('phResults').classList.add('open');
@@ -293,6 +309,11 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
       g.save();g.translate(ax,ay-as*.48);g.rotate(-S.flip*Math.PI*2);g.scale(1+land*.18,1-land*.18);
       g.shadowColor=col;g.shadowBlur=14;g.font=`${Math.round(as)}px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif`;g.textAlign='center';g.textBaseline='middle';g.fillText('👽',0,0);g.shadowBlur=0;g.restore();
     }
+    // perfect rings, on-beat pulse at the alien's feet, floating timing words, the early/late meter
+    const fp=Math.pow(1-((S.s%1)+1)%1,4);if(!R.dead&&S.grounded){const [fx,fy,ff]=P(S.s,0);g.save();g.translate(fx,fy);g.rotate(ff);g.strokeStyle=`rgba(255,255,255,${.12+.4*fp})`;g.lineWidth=2;g.beginPath();g.ellipse(0,0,BP*(.18+.12*fp),UP*.08,0,0,Math.PI*2);g.stroke();g.restore();}
+    R.rings=(R.rings||[]).filter(r=>(r.life-=dt*2.6)>0);R.rings.forEach(r=>{const [rx,ry]=P(r.s,r.h+.4),rr=UP*(.5+1.4*(1-r.life));g.strokeStyle=`rgba(0,255,153,${r.life*.8})`;g.lineWidth=3;g.beginPath();g.arc(rx,ry,rr,0,Math.PI*2);g.stroke();});
+    R.texts=R.texts.filter(x=>(x.life-=dt*1.3)>0);R.texts.forEach(x=>{const [tx,ty]=P(x.s,x.h+(1-x.life)*.6);g.globalAlpha=Math.min(1,x.life*1.6);g.font=`${Math.round(Math.max(14,UP*.42)*(x.sz||1))}px 'Bebas Neue',sans-serif`;g.textAlign='center';g.strokeStyle='rgba(0,0,0,.6)';g.lineWidth=3;g.strokeText(x.txt,tx,ty);g.fillStyle=x.col;g.fillText(x.txt,tx,ty);});g.globalAlpha=1;
+    if(typeof mgMeter==='function'&&R.timing)mgMeter(g,W/2,H-14,Math.min(260,W*.5),R.timing,performance.now());
     // particles
     R.fx=R.fx.filter(p=>(p.life-=dt*1.4)>0);
     R.fx.forEach(p=>{p.s+=p.vs*dt;p.h+=p.vh*dt;p.vh-=6*dt;const [x,y]=P(p.s,p.h+.35);g.globalAlpha=p.life;g.fillStyle=p.col;g.beginPath();g.arc(x,y,p.z,0,Math.PI*2);g.fill();});g.globalAlpha=1;

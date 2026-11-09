@@ -1883,3 +1883,9 @@ body.store-open:not(.desktop-mode) #partyStyleBtn,body.bunker-open:not(.desktop-
 .ph-pads .ww-pad .nm{font-size:.6rem;text-align:center;padding:0 6px;}
 @media (max-height:520px) and (orientation:landscape){.ph-pads{height:clamp(64px,22vh,110px);}}
 .ph-grid{grid-template-columns:repeat(5,1fr) !important;}
+
+/* minigame SYNC calibration */
+#mgSync{position:fixed;z-index:9800;}
+.mg-tap{display:block;width:100%;height:clamp(140px,32vh,240px);margin:6px 0;border-radius:18px;border:2px solid #e8ff00;background:#141600;color:#e8ff00;font-family:'Bebas Neue',sans-serif;font-size:2.4rem;letter-spacing:.12em;cursor:pointer;touch-action:none;-webkit-tap-highlight-color:transparent;transition:transform .05s;}
+.mg-off{min-width:5.5em;align-self:center;font-size:1.3rem;color:#fff;margin-top:10px;}
+.mg-sync-btn{margin-top:0;padding:.35rem .7rem;font-size:.85rem;border-color:#5a5a10;color:#e8ff00;background:#141600;}

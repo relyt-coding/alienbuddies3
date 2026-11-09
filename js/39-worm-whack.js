@@ -39,7 +39,7 @@ function wwLevelOpen(l){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||l===
     <div class="ww-pads" id="wwPads"></div>
     <div class="ww-panel" id="wwSelect">
       <div class="ww-panel-inner">
-        <div class="ww-sel-head"><div><div class="ww-big">WORM WHACK</div><div class="ww-sub">Whack the space worms on the beat · each pad hits the crater in the same spot</div></div><button class="ww-x" id="wwClose" title="Close">✕</button></div>
+        <div class="ww-sel-head"><div><div class="ww-big">WORM WHACK</div><div class="ww-sub">Whack the space worms on the beat · each pad hits the crater in the same spot</div></div><div style="display:flex;gap:6px"><button class="ww-btn mg-sync-btn" id="wwSync" title="Calibrate your timing">⏱ SYNC</button><button class="ww-x" id="wwClose" title="Close">✕</button></div></div>
         <div class="ww-sel-bonus" id="wwBonus"></div>
         <div class="ww-grid" id="wwGrid"></div>
         <div class="ww-detail" id="wwDetail"></div>
@@ -64,6 +64,7 @@ function wwLevelOpen(l){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||l===
   function close(){stopRun();ov.classList.remove('open');document.body.classList.remove('ww-open');if(typeof autoSave==='function')autoSave();}
   window.openWormWhack=open;window.closeWormWhack=close;
   $('wwClose').addEventListener('click',close);
+  $('wwSync').addEventListener('click',()=>{if(typeof mgOpenSync==='function')mgOpenSync(()=>{});});
   $('wwQuit').addEventListener('click',()=>{if(G&&G.state==='play'){stopRun();showSelect();}else close();});
 
   // ── level select ──
@@ -133,7 +134,7 @@ function wwLevelOpen(l){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||l===
     const c=getCtx();
     G={state:'play',P:song.P,song,chart,ei:0,score:0,combo:0,maxCombo:0,hitVal:0,
        total:chart.filter(n=>n.type!=='decoy').length,judged:0,
-       stats:{perfect:0,good:0,ok:0,miss:0,whiff:0,mine:0},fx:[],texts:[],shake:0,held:{},
+       stats:{perfect:0,good:0,ok:0,miss:0,whiff:0,mine:0},fx:[],texts:[],rings:[],timing:[],pflash:0,shake:0,held:{},
        alien:{x:0,y:0,tx:0,ty:0,swing:0,face:1},bossMax:chart.filter(n=>n.boss).length,bossHp:0,bossDead:0,
        beat:60/song.bpm,armorSpan:Math.max(.36,4*song.step)};
     G.map=CR_MAP[song.P.craters]||CR_MAP[8];
@@ -149,7 +150,8 @@ function wwLevelOpen(l){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||l===
     updHud();
   }
   function lat(){const c=getCtx();return (c.outputLatency||0)+(c.baseLatency||0)*.5;}
-  function tNow(){return getCtx().currentTime-lat()-G.T0;}
+  // (mgOffset = the player's SYNC calibration: shifts judging and visuals to match what they hear)
+  function tNow(){return getCtx().currentTime-lat()-G.T0-(typeof mgOffset==='function'?mgOffset():0);}
   function schedule(){
     if(!G||G.state!=='play')return;
     const c=getCtx(),ahead=c.currentTime+.18,ev=G.song.events;
@@ -181,6 +183,8 @@ function wwLevelOpen(l){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||l===
     G.chart.forEach(o=>{if(o.c!==i||o.done||o.type==='decoy'||o.holding)return;const d=Math.abs(t-o.t);if(d<=WIN.o&&d<bd){bd=d;best=o;}});
     if(best){
       const grade=bd<=WIN.p?'perfect':bd<=WIN.g?'good':'ok';
+      best.tag=grade==='perfect'?'':(t<best.t?'EARLY':'LATE');
+      if(best.type!=='armor'||best.hits===0)G.timing.push({d:t-best.t,at:performance.now()});
       if(best.type==='armor'&&best.hits===0){best.hits=1;best.grade=grade;text(cr,'HIT AGAIN!','#d8e4ff');burst(cr.x,cr.y,'#9aa6ba',8);G.shake=Math.max(G.shake,3);cr.flash=1;return;}
       if(best.type==='hold'){best.holding=true;best.grade=grade;text(cr,'HOLD!','#ffd166');cr.flash=1;G.alien.swing=1;return;}
       resolve(best,t,grade,1);return;
@@ -218,7 +222,9 @@ function wwLevelOpen(l){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||l===
       let pts=base*mult*(n.type==='gold'?3:1)*(n.boss?1.5:1)*(holdDone?1.5:1)*credit;
       G.score+=Math.round(pts);
       const col=n.type==='gold'?'#ffd700':grade==='perfect'?'#00ff99':grade==='good'?'#7fd4ff':'#c8c8c8';
-      text(cr,(n.type==='gold'?'GOLD! ':'')+(holdDone?'HELD! ':'')+grade.toUpperCase(),col);
+      text(cr,(n.type==='gold'?'GOLD! ':'')+(holdDone?'HELD! ':'')+grade.toUpperCase()+(n.tag&&grade!=='perfect'?' · '+n.tag:''),col,grade==='perfect'?1.15:1);
+      if(grade==='perfect'){G.rings.push({x:cr.x,y:cr.y,life:1});G.pflash=Math.min(1,(G.pflash||0)+.5);}
+      if(credit>=1&&G.combo>0&&G.combo%10===0){text({x:W/2,y:H*.42},'COMBO '+G.combo+'!','#e8ff00',1.5);try{playSound('spaceperc',.4);}catch(e){}G.rings.push({x:W/2,y:H*.45,life:1,big:1});}
       burst(cr.x,cr.y,n.type==='gold'?'#ffd700':n.boss?'#ff4466':'#c86bd8',grade==='perfect'?18:12);
       burst(cr.x,cr.y,'#9a9aa4',8,.8);
       G.shake=Math.max(G.shake,grade==='perfect'?6:4);cr.flash=1;
@@ -352,7 +358,9 @@ function wwLevelOpen(l){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||l===
     g2.save();if(sh>.3)g2.translate((Math.random()-.5)*sh,(Math.random()-.5)*sh);
     g2.drawImage(bg,0,0,W,H);
     // crater flashes + approach rings + key labels
+    const bp=t>=0?Math.pow(1-(((t/G.beat)%1)+1)%1,4):0;
     G.craters.forEach((c,i)=>{
+      if(bp>.02){g2.strokeStyle=padColor(padOf(i));g2.globalAlpha=.12+.4*bp;g2.lineWidth=2+2*bp;g2.beginPath();g2.ellipse(c.x,c.y,G.r*1.3,G.r*1.2,0,0,Math.PI*2);g2.stroke();g2.globalAlpha=1;}
       if(c.flash>0){g2.strokeStyle=`rgba(255,255,255,${c.flash*.7})`;g2.lineWidth=3;g2.beginPath();g2.ellipse(c.x,c.y,G.r*(1.3+(1-c.flash)*.4),G.r*(1.2+(1-c.flash)*.4),0,0,Math.PI*2);g2.stroke();c.flash=Math.max(0,c.flash-dt*4);}
       const col=padColor(padOf(i));
       G.chart.forEach(n=>{if(n.c!==i||n.done||n.type==='decoy'||n.holding)return;const k=(n.t-t)/G.P.approach;if(k<0||k>1)return;
@@ -403,6 +411,11 @@ function wwLevelOpen(l){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||l===
     G.texts.forEach(x=>{g2.globalAlpha=Math.min(1,x.life*1.6);g2.fillStyle=x.col;g2.font=`${Math.round(Math.max(14,G.r*.42)*x.sz)}px 'Bebas Neue',sans-serif`;g2.textAlign='center';g2.strokeStyle='rgba(0,0,0,.6)';g2.lineWidth=3;
       const y=x.y-(1-x.life)*24;g2.strokeText(x.txt,x.x,y);g2.fillText(x.txt,x.x,y);});
     g2.globalAlpha=1;
+    // perfect-hit rings, a soft flash, and the early/late meter
+    G.rings=G.rings.filter(r=>(r.life-=dt*2.4)>0);
+    G.rings.forEach(r=>{const rr=(r.big?Math.min(W,H)*.35:G.r*2.2)*(1-r.life*.7);g2.strokeStyle=`rgba(255,255,255,${r.life*.8})`;g2.lineWidth=r.big?4:3;g2.beginPath();g2.ellipse(r.x,r.y,rr,rr*.92,0,0,Math.PI*2);g2.stroke();});
+    if(G.pflash>0){g2.fillStyle=`rgba(255,255,255,${G.pflash*.10})`;g2.fillRect(0,0,W,H);G.pflash=Math.max(0,G.pflash-dt*4);}
+    if(typeof mgMeter==='function')mgMeter(g2,W/2,H-14,Math.min(260,W*.5),G.timing,performance.now());
     // count-in
     if(t<0){const beatsLeft=Math.ceil(-t/G.beat);g2.fillStyle='rgba(0,0,0,.35)';g2.fillRect(0,0,W,H);g2.fillStyle='#fff';g2.font=`${Math.round(Math.min(W,H)*.22)}px 'Bebas Neue',sans-serif`;g2.textAlign='center';g2.textBaseline='middle';g2.fillText(beatsLeft>3?'READY':String(beatsLeft),W/2,H/2);g2.textBaseline='alphabetic';}
     else if(t<G.beat*1.2){g2.fillStyle=`rgba(255,255,255,${1-t/(G.beat*1.2)})`;g2.font=`${Math.round(Math.min(W,H)*.18)}px 'Bebas Neue',sans-serif`;g2.textAlign='center';g2.textBaseline='middle';g2.fillText('WHACK!',W/2,H/2);g2.textBaseline='alphabetic';}
@@ -431,6 +444,7 @@ function wwLevelOpen(l){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||l===
         <div><b>${s.ok||0}</b><small>OK</small></div><div><b style="color:#ff5566">${s.miss||0}</b><small>MISSED</small></div>
         ${s.mine?`<div><b style="color:#ff6644">${s.mine}</b><small>MINES HIT</small></div>`:''}
       </div>
+      <div class="ww-d-meta">${typeof mgTimingSummary==='function'?mgTimingSummary(G.timing):''}</div>
       ${first?`<div class="ww-reward">Permanent bonus: ×${G.P.reward} points!${L<30?' · Level '+(L+1)+' unlocked':''}</div>`:''}
       <div class="ww-res-btns">
         <button class="ww-btn" id="wwRetry">RETRY</button>

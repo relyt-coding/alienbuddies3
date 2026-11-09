@@ -28,7 +28,7 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
       <button class="ww-pad" id="phBounce" style="--c:#ff4dff"><span class="k" id="phBounceK"></span><span class="nm">BOUNCE · on the glowing pads</span></button>
     </div>
     <div class="ww-panel" id="phSelect"><div class="ww-panel-inner" style="box-shadow:0 0 40px -10px #7fe8ff">
-      <div class="ww-sel-head"><div><div class="ww-big" style="color:#7fe8ff">PLANET HOP</div><div class="ww-sub">Run round the planet to the beat · JUMP, double jump, and BOUNCE across the glowing pads · any hit restarts</div></div><div style="display:flex;gap:6px"><button class="ww-btn mg-sync-btn" id="phSync" title="Calibrate your timing">⏱ SYNC</button><button class="ww-x" id="phClose" title="Close">✕</button></div></div>
+      <div class="ww-sel-head"><div><div class="ww-big" style="color:#7fe8ff">PLANET HOP</div><div class="ww-sub">Run round the planet to the beat · JUMP, double jump, and BOUNCE across the glowing pads · a hit sends you back to the start, or to the checkpoint flag once you pass it</div></div><div style="display:flex;gap:6px"><button class="ww-btn mg-sync-btn" id="phSync" title="Calibrate your timing">⏱ SYNC</button><button class="ww-x" id="phClose" title="Close">✕</button></div></div>
       <div class="mg-tabs"><button class="mg-tab sel" id="phTabLv">LEVELS</button><button class="mg-tab" id="phTabMine">YOUR BEATS</button></div>
       <div id="phLvPane"><div class="ww-sel-bonus" id="phBonus"></div>
       <div class="ww-grid ph-grid" id="phGrid"></div>
@@ -54,7 +54,7 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
   $('phSync').addEventListener('click',()=>{if(typeof mgOpenSync==='function')mgOpenSync(()=>{});});
   $('phQuit').addEventListener('click',()=>{if(R&&R.state!=='done'){stop();showSelect();}else close();});
 
-  const NEWS={2:'NEW: rock blocks — land on top',3:'NEW: wide pits — tap JUMP again in the air to double jump',4:'NEW: bounce pads — press BOUNCE as you land on each one',5:'BOSS: a comet chases you round Luna',6:'NEW: low gravity — floaty two-beat jumps',7:'NEW: fast bounce chains, one pad per beat',8:'NEW: floating ice platforms',9:'NEW: spike runs — jump on every beat',10:'BOSS: the frozen comet',11:'NEW: triple spikes — jump, then double jump half a beat later',15:'FINAL BOSS: the supernova comet'};
+  const NEWS={1:'Jump on the beat — follow the glowing markers',2:'NEW: rocks — land on top',3:'NEW: double jump — practise on flat ground, then clear wide pits',4:'NEW: bounce pads — press BOUNCE as you land on each one',5:'BOSS: a comet chases you round Luna · NEW: climbing rocks',6:'NEW: low gravity — floaty two-beat jumps',7:'NEW: fast bounce chains, one pad per beat',8:'NEW: floating ice platforms',9:'NEW: spike runs — jump on every beat',10:'BOSS: the frozen comet',11:'NEW: triple spikes — jump, then double jump on the "and"',12:'NEW: off-beat spikes — jump on the "and"',13:'NEW: tall rocks — double jump up onto them',14:'REMIX: everything you know, at speed',15:'FINAL BOSS: the supernova comet'};
   let tab='lv';const PH_DIFF_L={easy:3,normal:8,hard:13};
   const mineOpts={id:'phMine',note:'obstacles land on your beat',playStyle:'border-color:#7fe8ff;color:#7fe8ff;background:#071420',onPlay:song=>{const d=Object.keys(MG_DIFFS).find(k=>song.P.custom.endsWith('|'+k))||'normal';song.P.planet=MG_DIFFS[d].planet;start({song,L:PH_DIFF_L[d]});}};
   function showTab(t){tab=t;$('phTabLv').classList.toggle('sel',t==='lv');$('phTabMine').classList.toggle('sel',t==='mine');$('phLvPane').style.display=t==='lv'?'':'none';$('phMinePane').style.display=t==='mine'?'':'none';
@@ -100,12 +100,18 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
     resize();attempt(true);
     R.raf=requestAnimationFrame(frame);
   }
-  function attempt(first){
-    const c=getCtx();
+  function attempt(first,fromCp){
+    const c=getCtx(),cp=fromCp?R.lv.cp:0;
     clearInterval(R.sched);
-    R.attempt++;R.S=phNewState();R.ei=0;R.inputs=[];R.got=new Set();R.dead=null;R.won=0;R.trail=[];
-    R.graded=new Set();R.combo=0;R.maxCombo=0;R.timing=[];R.onBeat={perfect:0,good:0,off:0};R.rings=[];
-    R.T0=c.currentTime+(first?4*R.beat+.3:.25);
+    R.attempt++;R.S=phNewState();R.ei=0;R.inputs=[];R.dead=null;R.won=0;R.trail=[];R.rings=[];
+    if(fromCp){const k=R.cpSnap;R.S.s=cp;R.got=new Set(k.got);R.graded=new Set(k.graded);R.combo=0;R.maxCombo=k.maxCombo;R.timing=R.timing.slice(0,k.timing);R.onBeat=Object.assign({},k.onBeat);
+      // restart the music from the flag, with a two-click count-in while the alien waits at the pole
+      R.T0=c.currentTime+.25+2*R.beat-cp*R.beat;const at=cp*R.beat-1e-6;while(R.ei<R.lv.song.events.length&&R.lv.song.events[R.ei].t<at)R.ei++;
+      for(let i=0;i<2;i++)playSound('rimshot',i?.5:.85,R.T0+(cp-2+i)*R.beat);
+      R.texts.push({s:cp+.4,h:2.2,txt:'FROM THE FLAG',col:'#00ff99',life:1.4,sz:1});
+    }else{R.got=new Set();R.cpHit=false;R.cpSnap=null;
+    R.graded=new Set();R.combo=0;R.maxCombo=0;R.timing=[];R.onBeat={perfect:0,good:0,off:0};
+    R.T0=c.currentTime+(first?4*R.beat+.3:.25);}
     if(first)for(let i=0;i<4;i++)playSound('rimshot',i?.5:.85,R.T0-(4-i)*R.beat);
     R.sched=setInterval(schedule,25);schedule();
     $('phAtt').textContent=R.attempt;$('phDust').textContent='0';
@@ -123,7 +129,7 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
   function input(w,ev){
     if(!R||R.state!=='play'||R.dead)return;
     let t=tau();if(ev&&ev.timeStamp){const lag=(performance.now()-ev.timeStamp)/1000;if(lag>0&&lag<.25)t-=lag/R.beat;}
-    if(t<-.2)return;
+    if(t<R.S.s-.2)return;
     R.inputs.push({t:Math.max(R.S.s,t),w});
     // how close was that press to the beat it was meant for? (the level's planned presses)
     let best=-1,bd=.32;R.lv.acts.forEach((a,i)=>{if(a.w!==w||R.graded.has(i))return;const d=Math.abs(t-a.t);if(d<bd){bd=d;best=i;}});
@@ -168,6 +174,8 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
       }
       // stardust
       lv.dust.forEach((d,i)=>{if(!R.got.has(i)&&Math.abs(d.s-S.s)<.24&&Math.abs(d.h-(S.h+.45))<.55){R.got.add(i);burst(d.s,d.h,'#ffe680',6,.5);try{if(R.got.size%4===0)playSound('bell',.18);}catch(e){}}});
+      if(lv.cp!=null&&!R.cpHit&&S.s>=lv.cp){R.cpHit=true;R.cpSnap={got:new Set(R.got),graded:new Set([...R.graded].filter(i=>lv.acts[i].t<lv.cp)),maxCombo:R.maxCombo,timing:R.timing.length,onBeat:Object.assign({},R.onBeat)};
+        R.texts.push({s:lv.cp+.6,h:2.4,txt:'CHECKPOINT!',col:'#00ff99',life:1.5,sz:1.2});burst(lv.cp,1.6,'#00ff99',18,1.2);try{playSound('bell',.35);}catch(e){}}
       $('phDust').textContent=R.got.size;
       const pct=Math.max(0,Math.min(1,S.s/lv.end));$('phPct').textContent=Math.floor(pct*100)+'%';$('phProg').style.width=(pct*100)+'%';
       if(S.dead)die();
@@ -181,7 +189,7 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
     const b=st[K]||{};if(!b.cleared&&pct>(b.pct||0)){st[K]=Object.assign(b,{pct});}
     burst(S.s,S.h+.3,'#00ff88',30,1.6);burst(S.s,S.h+.3,'#ffffff',12,1);R.shake=12;
     try{playSound('zap',.6);}catch(e){}
-    R.rt=setTimeout(()=>{if(R&&R.state==='play')attempt(false);},900);
+    R.rt=setTimeout(()=>{if(R&&R.state==='play')attempt(false,!!R.cpHit);},900);
   }
   function win(){
     R.won=performance.now();clearInterval(R.sched);
@@ -412,6 +420,23 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
       g.restore();
       // faint arc to where it will throw you
       if(!gone&&p.s>S.s-.3&&p.s<S.s+5){g.strokeStyle='rgba(255,77,255,.22)';g.setLineDash([4,6]);g.lineWidth=2;g.beginPath();const T2=p.next-p.s,gz=phZoneG(lv,p.s);for(let i=0;i<=12;i++){const u=i/12*T2,hh=gz*T2/2*u-gz*u*u/2;const [qx,qy]=P(p.s+u,hh);i?g.lineTo(qx,qy):g.moveTo(qx,qy);}g.stroke();g.setLineDash([]);}});
+    // ── teaching signs: a little post before each new idea ──
+    (lv.signs||[]).forEach(sg=>{if(sg.s<s0-4||sg.s>s1+1)return;const [x,y,f]=P(sg.s,0);g.save();g.translate(x,y);g.rotate(f);
+      const fs=Math.round(Math.max(14,UP*.34));g.font=`${fs}px 'Bebas Neue',sans-serif`;const tw=g.measureText(sg.txt).width+fs*1.1,bh=fs*1.5,by=-UP*1.25-bh;
+      g.fillStyle='#5a4a3a';g.fillRect(-2.5,by+bh-2,5,-by-bh+2);
+      g.fillStyle='rgba(8,10,24,.88)';g.strokeStyle=pl.glow;g.lineWidth=2;g.shadowColor=pl.glow;g.shadowBlur=8+6*pulse;
+      g.beginPath();if(g.roundRect)g.roundRect(-tw/2,by,tw,bh,6);else g.rect(-tw/2,by,tw,bh);g.fill();g.stroke();g.shadowBlur=0;
+      g.fillStyle='#fff';g.textAlign='center';g.textBaseline='middle';g.fillText(sg.txt,0,by+bh/2+1);g.restore();});
+    // ── checkpoint flag ──
+    if(lv.cp!=null&&lv.cp>s0-1&&lv.cp<s1+1){const [x,y,f]=P(lv.cp,0),on=R.cpHit;g.save();g.translate(x,y);g.rotate(f);
+      const ph=UP*1.9;g.fillStyle='#c8ccd8';g.fillRect(-2,-ph,4,ph);g.fillStyle=on?'#00ff99':'#7a7f90';g.beginPath();g.arc(0,-ph,4,0,Math.PI*2);g.fill();
+      const wv=Math.sin(t*6)*UP*.06;g.fillStyle=on?'#00ff99':'#8a8fa0';if(on){g.shadowColor='#00ff99';g.shadowBlur=14;}
+      g.beginPath();g.moveTo(2,-ph+2);g.quadraticCurveTo(UP*.45,-ph+UP*.18+wv,UP*.85,-ph+UP*.25);g.quadraticCurveTo(UP*.45,-ph+UP*.38-wv,2,-ph+UP*.5);g.fill();g.shadowBlur=0;g.restore();}
+    // ── glowing press markers on the first few of each new idea (where perfect play presses) ──
+    lv.acts.forEach(a=>{if(!a.tut||a.t<S.s-.4||a.t>s1)return;const near=Math.max(0,1-Math.abs(a.t-S.s)/3),[x,y]=P(a.t,(a.h||0)+.45);
+      const r=Math.max(14,UP*.3)*(1+.15*pulse),col=a.w==='j'?'#00e5ff':'#ff4dff';g.globalAlpha=Math.min(1,.6+near)*(a.t<S.s?Math.max(0,1+(a.t-S.s)/.4):1);
+      g.strokeStyle=col;g.lineWidth=2.5;g.fillStyle='rgba(5,8,20,.7)';g.beginPath();g.arc(x,y,r,0,Math.PI*2);g.fill();g.stroke();
+      g.fillStyle=col;g.font=`${Math.round(r*1.2)}px 'Bebas Neue',sans-serif`;g.textAlign='center';g.textBaseline='middle';g.fillText(a.w==='j'?'J':'B',x,y+1);g.globalAlpha=1;});
     // stardust
     lv.dust.forEach((d,i)=>{if(R.got.has(i)||d.s<s0||d.s>s1)return;const [x,y]=P(d.s,d.h),z=BP*.06*(1+.3*Math.sin(t*6+i));
       g.fillStyle='#ffe680';g.shadowColor='#ffd23a';g.shadowBlur=8;g.beginPath();for(let k=0;k<8;k++){const r=k%2?z*.4:z,a=k/8*Math.PI*2+t;g.lineTo(x+Math.cos(a)*r,y+Math.sin(a)*r);}g.closePath();g.fill();g.shadowBlur=0;});

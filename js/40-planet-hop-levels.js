@@ -20,7 +20,7 @@ const PH_PLANETS=[{name:'LUNA',ground:['#9a9aa8','#5b5b68'],pit:'#07070c',spike:
 function phLevel(L){
   L=Math.max(1,Math.min(15,L));
   return{lvl:L,seed:500+L*13,name:PH_NAMES[L-1],style:PH_STYLES[L-1],
-    bpm:Math.round(88+(L-1)*4.3),bodyBars:12+L,boss:L%5===0,planet:L<=5?0:L<=10?1:2,
+    bpm:Math.round(88+(L-1)*4.3),bodyBars:phCourseBars(L),boss:L%5===0,planet:L<=5?0:L<=10?1:2,
     reward:Math.round((1.6+(L-1)*.1)*(L%5===0?1.25:1)*100)/100};
 }
 
@@ -52,28 +52,106 @@ function phPatterns(){
   };
 }
 
+// ══ THE COURSE — every level is hand-built, bar by bar, to its song ══
+// Each level follows the same arc: TEACH the level's one new idea where a mistake can't hurt
+// (a sign, glowing press markers and practice on flat ground first), DEVELOP it alongside things you
+// already know, TWIST it in the second half (after the checkpoint flag), then FINISH with a victory lap.
+// One token = one bar (4 beats) unless noted; obstacles sit on the beat so you jump on the music.
+function phTokens(){
+  const S=(s,w,h)=>({k:'spike',s,w:w||.42,h:h||.55}),PIT=(a,b)=>({k:'pit',a,b}),BL=(a,b,h,fl)=>({k:'block',a,b,h,fl:!!fl}),Z=(g)=>({k:'zone',a:0,b:8,g});
+  const pads=(list)=>list.map(([s,n])=>({k:'pad',s,w:.5,next:n}));
+  return{
+    // flat ground — stardust arcs to hop for (skipping costs stars, never a life)
+    rA:{len:4,o:[],a:[[0,'j'],[2,'j']]},                     // hop on 1 and 3
+    rB:{len:4,o:[],a:[[0,'j'],[1,'j'],[2,'j']]},             // hop every beat
+    rC:{len:4,o:[],a:[[0,'j'],[1.5,'j']]},                   // hop, then off-beat hop
+    rD:{len:4,o:[],a:[[1,'j'],[3,'j']]},                     // backbeat hops (2 and 4)
+    rE:{len:4,o:[],a:[[0,'j'],[.5,'j'],[2,'j']]},            // double jump practice
+    rF:{len:4,o:[],a:[[0,'j'],[.5,'j'],[2,'j'],[2.5,'j']]},  // two double jumps
+    rO:{len:4,o:[],a:[[.5,'j'],[2.5,'j']]},                  // hops on the "and" (practice for so)
+    C: {len:4,o:[{k:'flag',s:0}],a:[[0,'j'],[2,'j']]},       // checkpoint flag
+    // spikes
+    s: {len:4,o:[S(.5)],a:[[0,'j']]},
+    s2:{len:4,o:[S(.5),S(2.5)],a:[[0,'j'],[2,'j']]},
+    s3:{len:4,o:[S(.5),S(1.5),S(2.5)],a:[[0,'j'],[1,'j'],[2,'j']]},
+    so:{len:4,o:[S(1),S(3)],a:[[.5,'j'],[2.5,'j']]},          // syncopated: jump on the "and"
+    d: {len:4,o:[S(.5,.42,.5),S(.82,.42,.5),S(1.14,.42,.5)],a:[[0,'j'],[.5,'j']]},
+    // pits
+    p: {len:4,o:[PIT(.3,.7)],a:[[0,'j']]},
+    p2:{len:4,o:[PIT(.3,.7),PIT(2.3,2.7)],a:[[0,'j'],[2,'j']]},
+    P: {len:4,o:[PIT(.3,1.7)],a:[[0,'j'],[1,'j']]},
+    Pm:{len:4,o:[PIT(.3,1.7),S(2.5)],a:[[0,'j'],[1,'j'],[2,'j']]},
+    // rock
+    k: {len:4,o:[BL(.5,2.2,.8)],a:[[0,'j']]},
+    kk:{len:4,o:[BL(.5,1.6,.8),BL(1.5,3.0,1.6)],a:[[0,'j'],[1,'j']]},
+    dk:{len:4,o:[BL(.9,3,1.6)],a:[[0,'j'],[.4,'j']]},          // double jump up onto a tall rock
+    f: {len:4,o:[PIT(.3,3.6),BL(.55,2.2,.8,true),BL(2.6,3.3,.8,true)],a:[[0,'j'],[2,'j']]},
+    // bounce pads (8 beats)
+    Bf:{len:8,o:pads([[1,3],[3,5],[5,7]]),a:[[0,'j'],[1,'b'],[3,'b'],[5,'b']]},              // practice: solid ground under the pads
+    B2:{len:8,o:[PIT(.3,6.6),...pads([[1,3],[3,5],[5,7]])],a:[[0,'j'],[1,'b'],[3,'b'],[5,'b']]},
+    B1:{len:8,o:[PIT(.3,6.6),...pads([[1,2],[2,3],[3,4],[4,5],[5,6],[6,7]])],a:[[0,'j'],[1,'b'],[2,'b'],[3,'b'],[4,'b'],[5,'b'],[6,'b']]},
+    // low gravity (8 beats): every jump lasts two beats
+    Lr:{len:8,o:[Z(4)],a:[[0,'j'],[2,'j'],[4,'j'],[6,'j']]},                                  // practice: nothing to hit
+    L: {len:8,o:[Z(4),S(1,.45,.6),S(3,.45,.6),S(5,.45,.6)],a:[[0,'j'],[2,'j'],[4,'j']]},
+    Lg:{len:8,o:[Z(4),PIT(.3,1.7),PIT(2.3,3.7),PIT(4.3,5.7)],a:[[0,'j'],[2,'j'],[4,'j']]},   // moon leaps over craters
+  };
+}
+// where each idea debuts, and the sign that teaches it
+const PH_DEBUT={s:[1,'JUMP ON THE BEAT'],p:[1,'HOP THE GAP'],k:[2,'ROCK — LAND ON TOP'],rE:[3,'TAP JUMP TWICE = DOUBLE JUMP'],P:[3,'WIDE PIT — DOUBLE JUMP'],
+  Bf:[4,'PRESS BOUNCE ON EACH PAD'],B2:[4,'BOUNCE ACROSS THE PIT'],kk:[5,'CLIMB!'],Lr:[6,'LOW GRAVITY — 2-BEAT JUMPS'],Lg:[6,'LEAP THE CRATERS'],
+  B1:[7,'ONE PAD PER BEAT'],f:[8,'FLOATING ICE'],s3:[9,'JUMP ON EVERY BEAT'],Pm:[9,'PIT, THEN SPIKE'],d:[11,'JUMP + DOUBLE ON THE "AND"'],
+  rO:[12,'JUMP ON THE "AND"'],so:[12,'OFF-BEAT SPIKES'],dk:[13,'DOUBLE JUMP UP HIGH']};
+// the 15 courses (| marks the song's 8-bar sections; boss levels end with an 8-bar comet chase)
+const PH_COURSE=[
+  /* 1 First Steps   */ 'rA rA s rD s s2 rB s2 | C p rD p s p2 s2 rA',
+  /* 2 Crater Skipper*/ 'rB s2 k rD k s k p2 | C k s2 k p k rC rA',
+  /* 3 Moonbeam      */ 'rA rE rA P rD P s2 rE | C P k P p2 rF P rA',
+  /* 4 Lunar Leap    */ 'rA s Bf rD p2 B2 | C s2 B2 k P B2 | rE s2 P rA',
+  /* 5 Comet (boss)  */ 'rA s2 k P B2 p2 rE | kk rD kk P C s2 B2 | s2 p2 s2 P s s2 B2',
+  /* 6 Glacia Glide  */ 'rA s Lr p2 k L | C P Lg s2 Lg rA',
+  /* 7 Frostbite Funk*/ 'rB s2 B2 rD P B1 | C k B1 p2 s2 Lg | rE P s2 rA',
+  /* 8 Ice Spire Hop */ 'rA k f rD f s2 B2 | C f kk f L P f | s2 f p2 rA',
+  /* 9 Aurora Drift  */ 'rB s2 s3 rD s3 P Lg | Pm rE Pm s3 C f B1 | s3 kk Pm s3 L s3 rA',
+  /*10 Frozen Comet  */ 'rA s3 f Pm B1 kk rE | s3 P Lg C s2 B2 | s3 p2 Pm s2 s3 P B1',
+  /*11 Magmora Dash  */ 'rA rE d rD d s3 B2 | C d Pm d B1 f d | s3 kk d rA',
+  /*12 Lava Lamp     */ 'rB rO so rD so s3 Lg | so d Pm so C f B1 | so s3 d so L so rA',
+  /*13 Ember Leap    */ 'rA rE dk rD dk s3 B2 | kk dk so d C Pm B1 | dk s3 f dk Lg d rA',
+  /*14 Volcano 2-Step*/ 'rB so d Pm B1 dk rE | so s3 f d C kk B2 | so d dk s3 B1 so rA',
+  /*15 Supernova     */ 'rA s3 d so B1 dk rE | Pm so f d Lg kk rD | C s3 so dk B2 d rE | s3 so d Pm s3 so B1'];
+function phCourseBars(L){const T=phTokens();return PH_COURSE[L-1].split(/\s+/).filter(x=>x&&x!=='|').reduce((n,t)=>n+T[t].len/4,0);}
+
 // ── build a level: song + objects + perfect actions + stardust ──
 // songIn (optional) = a YOUR BEATS song; L then picks which obstacles are in play (EASY 3 · NORMAL 8 · HARD 13)
 function phBuild(L,songIn){
   const P=songIn?songIn.P:phLevel(L),song=songIn||wwCompose(0,P),R=wwRng(P.seed*7+1),PAT=phPatterns();
   const end=(song.bars-1)*4,bossS=P.boss?(song.intro+P.bodyBars-8)*4:Infinity;
-  const pool=Object.keys(PAT).filter(n=>PAT[n].from<=L&&n!=='rest');
-  const fresh=pool.filter(n=>PAT[n].from===L);           // patterns that debut on this level show up for sure
-  const restP=Math.max(.08,.5-(L-1)*.04);
-  const objs=[],acts=[];let k=4,seg=0;
-  while(k<end-4){
-    const boss=k>=bossS;
-    let name;
-    if(!boss&&fresh.length&&(seg===1||seg===4||seg===8))name=fresh[seg%fresh.length];
-    else if(!boss&&R()<restP)name='rest';
-    else name=pool[Math.floor(R()*pool.length)];
-    if(k+PAT[name].len>end-4)name='rest';
-    const m=PAT[name].make(R,L);
+  const objs=[],acts=[];let k=4;
+  const place=(m,boss,tag)=>{
     m.o.forEach(o=>{const c=Object.assign({},o);['s','a','b','next'].forEach(f=>{if(c[f]!=null)c[f]+=k;});if(boss&&c.k==='spike')c.meteor=true;objs.push(c);});
-    m.a.forEach(([t,w])=>acts.push({t:k+t,w}));
-    k+=PAT[name].len;seg++;
+    m.a.forEach(([t,w])=>acts.push(Object.assign({t:k+t,w},tag?{tut:true}:{})));
+  };
+  if(!songIn){
+    // hand-built course
+    const T=phTokens(),seen={};
+    PH_COURSE[L-1].split(/\s+/).filter(x=>x&&x!=='|').forEach(tok=>{
+      const m=T[tok],deb=PH_DEBUT[tok],n=(seen[tok]=(seen[tok]||0)+1);
+      const teach=deb&&deb[0]===L&&n<=2;               // first two of a new idea get glowing press markers
+      if(deb&&deb[0]===L&&n===1)objs.push({k:'sign',s:k-1.6,txt:deb[1]});
+      place(m,k>=bossS,teach);k+=m.len;
+    });
+  }else{
+    // YOUR BEATS: random patterns from the pool (L sets which obstacles are in play)
+    const pool=Object.keys(PAT).filter(n=>PAT[n].from<=L&&n!=='rest');
+    const restP=Math.max(.08,.5-(L-1)*.04);
+    while(k<end-4){
+      const boss=k>=bossS;
+      let name=(!boss&&R()<restP)?'rest':pool[Math.floor(R()*pool.length)];
+      if(k+PAT[name].len>end-4)name='rest';
+      place(PAT[name].make(R,L),boss,false);k+=PAT[name].len;
+    }
   }
   const lv={P,song,end,bossS,objs,acts,dust:[]};
+  const fl=objs.find(o=>o.k==='flag');lv.cp=fl?fl.s:null;lv.signs=objs.filter(o=>o.k==='sign');
   lv.pits=objs.filter(o=>o.k==='pit');lv.blocks=objs.filter(o=>o.k==='block');lv.spikes=objs.filter(o=>o.k==='spike');
   lv.pads=objs.filter(o=>o.k==='pad');lv.zones=objs.filter(o=>o.k==='zone');
   // run the perfect bot and lay stardust on its path
@@ -101,7 +179,7 @@ function phJump(lv,S){
   // about to land? buffer it as a normal jump instead of spending the double jump
   // (when the double jump is already used, a press up to ~1/3 beat early still counts — no wasted taps)
   if(S.vy<0){const sp=phSupport(lv,S,S.s,S.h);if(sp.top!==null){const g=phZoneG(lv,S.s),d=S.h-sp.top,tl=(S.vy+Math.sqrt(S.vy*S.vy+2*g*Math.max(0,d)))/g;
-    if(tl<(S.air>0?.12:.34)){S.bufJ=S.s;return 'buffer';}}}
+    if(tl<(S.air>0?.22:.34)){S.bufJ=S.s;return 'buffer';}}}
   if(S.air>0){S.vy=PH_V0;S.air=0;S.flip=1;return 'double';}
   return null;
 }
@@ -143,7 +221,7 @@ function phStep(lv,S,dt){
 function phRunBot(lv,record){
   const S=phNewState(),path=[];let ai=0,nextRec=0;
   while(S.s<lv.end&&!S.dead){
-    while(ai<lv.acts.length&&S.s>=lv.acts[ai].t){const a=lv.acts[ai++];if(a.w==='j')phJump(lv,S);else phBounce(lv,S);}
+    while(ai<lv.acts.length&&S.s>=lv.acts[ai].t){const a=lv.acts[ai++];if(record)a.h=S.h;if(a.w==='j')phJump(lv,S);else phBounce(lv,S);}
     phStep(lv,S,PH_DT);
     if(record&&S.s>=nextRec){path.push({s:S.s,h:S.h,air:!S.grounded&&S.h>.2});nextRec+=.25;}
   }

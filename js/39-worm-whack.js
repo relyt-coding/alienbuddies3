@@ -39,7 +39,7 @@ function wwLevelOpen(l){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||l===
     <div class="ww-pads" id="wwPads"></div>
     <div class="ww-panel" id="wwSelect">
       <div class="ww-panel-inner">
-        <div class="ww-sel-head"><div><div class="ww-big">WORM WHACK</div><div class="ww-sub">Whack the space worms on the beat · each pad hits the crater in the same spot</div></div><div style="display:flex;gap:6px"><button class="ww-btn mg-sync-btn" id="wwSync" title="Calibrate your timing">⏱ SYNC</button><button class="ww-x" id="wwClose" title="Close">✕</button></div></div>
+        <div class="ww-sel-head"><div><div class="ww-big">WORM WHACK</div><div class="ww-sub">Whack the space worms on the beat · each pad hits the crater in the same spot · kicks pop up on the bottom row, snares on the top</div></div><div style="display:flex;gap:6px"><button class="ww-btn mg-sync-btn" id="wwSync" title="Calibrate your timing">⏱ SYNC</button><button class="ww-x" id="wwClose" title="Close">✕</button></div></div>
         <div class="mg-tabs"><button class="mg-tab sel" id="wwTabLv">LEVELS</button><button class="mg-tab" id="wwTabMine">YOUR BEATS</button></div>
         <div id="wwLvPane"><div class="ww-sel-bonus" id="wwBonus"></div>
         <div class="ww-grid" id="wwGrid"></div>
@@ -87,7 +87,7 @@ function wwLevelOpen(l){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||l===
     }
     const P=wwLevel(selLvl),best=wormProgress.best[selLvl];
     const feats=[P.gold&&'gold worms',P.armor&&'armored',P.decoy&&'mines',P.hold&&'hold worms',P.chords&&'double hits',P.boss&&'BOSS'].filter(Boolean);
-    const newF={2:'NEW: golden worms (×3 score)',4:'NEW: armored worms — hit twice',7:'NEW: space mines — DON\'T hit them',9:'NEW: hold worms — keep the pad down',10:'BOSS: the Moon Wyrm',12:'NEW: two worms at once',20:'BOSS: the Eclipse Wyrm',30:'FINAL BOSS: the Wyrm King'}[selLvl];
+    const newF={1:'Listen: kicks pop up on the bottom row, snares on the top',2:'NEW: golden worms (×3 score) — one waits at the end of every phrase',4:'NEW: armored worms — hit twice',6:'NEW: worms on the off-beat "and"',7:'NEW: six craters · space mines sit in the silence — DON\'T hit them',9:'NEW: hold worms — keep the pad down',10:'BOSS: the Moon Wyrm — four attack phases',12:'NEW: two worms at once on the crash',14:'Armored worms on every chorus',15:'NEW: sixteenth-note runs on the drum fills',17:'NEW: all eight craters',20:'BOSS: the Eclipse Wyrm',30:'FINAL BOSS: the Wyrm King'}[selLvl];
     $('wwDetail').innerHTML=`<div class="ww-d-name">${selLvl}. ${P.name}</div>
       <div class="ww-d-meta">${P.bpm} BPM · ${P.style.toUpperCase()} · ${P.craters} craters${feats.length?' · '+feats.join(', '):''}</div>
       ${newF?`<div class="ww-d-new">${newF}</div>`:''}

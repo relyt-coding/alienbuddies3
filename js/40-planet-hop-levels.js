@@ -20,7 +20,7 @@ const PH_PLANETS=[{name:'LUNA',ground:['#9a9aa8','#5b5b68'],pit:'#07070c',spike:
 function phLevel(L){
   L=Math.max(1,Math.min(15,L));
   return{lvl:L,seed:500+L*13,name:PH_NAMES[L-1],style:PH_STYLES[L-1],
-    bpm:Math.round(88+(L-1)*4.3),bodyBars:phCourseBars(L),boss:L%5===0,planet:L<=5?0:L<=10?1:2,
+    bpm:L===1?80:Math.round(88+(L-1)*4.3),bodyBars:phCourseBars(L),boss:L%5===0,planet:L<=5?0:L<=10?1:2,
     reward:Math.round((1.6+(L-1)*.1)*(L%5===0?1.25:1)*100)/100};
 }
 
@@ -103,8 +103,8 @@ const PH_DEBUT={s:[1,'JUMP ON THE BEAT'],p:[1,'HOP THE GAP'],k:[2,'ROCK — LAND
   rO:[12,'JUMP ON THE "AND"'],so:[12,'OFF-BEAT SPIKES'],dk:[13,'DOUBLE JUMP UP HIGH']};
 // the 15 courses (| marks the song's 8-bar sections; boss levels end with an 8-bar comet chase)
 const PH_COURSE=[
-  /* 1 First Steps   */ 'rA rA s rD s s2 rB s2 | C p rD p s p2 s2 rA',
-  /* 2 Crater Skipper*/ 'rB s2 k rD k s k p2 | C k s2 k p k rC rA',
+  /* 1 First Steps   */ 'rA rA s rA | C s p rA',
+  /* 2 Crater Skipper*/ 'rA k s2 k | C p2 k rA',
   /* 3 Moonbeam      */ 'rA rE rA P rD P s2 rE | C P k P p2 rF P rA',
   /* 4 Lunar Leap    */ 'rA s Lr rD p2 L | C k Lg s2 P L | rE s2 P rA',
   /* 5 Comet (boss)  */ 'rA s2 k P Lg p2 rE | kk rD kk P C s2 Lg | s2 p2 s2 P s s2 Lg',
@@ -135,7 +135,7 @@ function phBuild(L,songIn){
     const T=phTokens(),seen={};
     PH_COURSE[L-1].split(/\s+/).filter(x=>x&&x!=='|').forEach(tok=>{
       const m=T[tok],deb=PH_DEBUT[tok],n=(seen[tok]=(seen[tok]||0)+1);
-      const teach=deb&&deb[0]===L&&n<=2;               // first two of a new idea get glowing press markers
+      const teach=L===1||(deb&&deb[0]===L&&n<=2);   // level 1: every press is marked               // first two of a new idea get glowing press markers
       if(deb&&deb[0]===L&&n===1)objs.push({k:'sign',s:k-1.6,txt:deb[1]});
       place(m,k>=bossS,teach);k+=m.len;
     });

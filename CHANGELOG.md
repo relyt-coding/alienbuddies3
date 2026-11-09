@@ -2,6 +2,10 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.96 - 2026-11-09 12:14
+- Planet Hop: levels 1 and 2 are half as long (8 bars), with a checkpoint flag halfway
+- Planet Hop: level 1 is gentler: slower tempo (80 BPM), spikes spaced out with rests, one small gap, and a press marker on every jump
+
 ## v0.2.95 - 2026-11-09 11:48
 - Planet Hop: all 15 levels hand-built to their songs: teach, develop, twist, victory lap
 - Planet Hop: teaching signs, glowing press markers and a mid-level checkpoint flag

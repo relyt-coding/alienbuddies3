@@ -105,7 +105,7 @@ function phTokens(){
 // where each idea debuts, and the sign that teaches it
 const PH_DEBUT={s:[1,'JUMP ON THE BEAT'],p:[1,'HOP THE GAP'],st:[1,'CLIMB TO THE TOP!'],k:[2,'ROCK — LAND ON TOP'],rE:[3,'TAP JUMP TWICE = DOUBLE JUMP'],P:[3,'WIDE PIT — DOUBLE JUMP'],
   Bf:[6,'NEW BUTTON: PRESS BOUNCE ON EACH PAD'],B2:[6,'BOUNCE ACROSS THE PIT'],kk:[5,'CLIMB!'],Lr:[4,'LOW GRAVITY — 2-BEAT JUMPS'],Lg:[4,'LEAP THE CRATERS'],
-  B1:[7,'ONE PAD PER BEAT'],f:[8,'FLOATING ICE'],s3:[9,'JUMP ON EVERY BEAT'],Pm:[9,'PIT, THEN SPIKE'],d:[11,'JUMP + DOUBLE ON THE "AND"'],
+  B1:[7,'ONE PAD PER BEAT'],f:[8,''],s3:[9,'JUMP ON EVERY BEAT'],Pm:[9,'PIT, THEN SPIKE'],d:[11,'JUMP + DOUBLE ON THE "AND"'],
   rO:[12,'JUMP ON THE "AND"'],so:[12,'OFF-BEAT SPIKES'],dk:[13,'DOUBLE JUMP UP HIGH']};
 // the 15 courses (| marks the song's 8-bar sections; boss levels end with an 8-bar comet chase)
 const PH_COURSE=[
@@ -142,7 +142,7 @@ function phBuild(L,songIn){
     PH_COURSE[L-1].split(/\s+/).filter(x=>x&&x!=='|').forEach(tok=>{
       const m=T[tok],deb=PH_DEBUT[tok],n=(seen[tok]=(seen[tok]||0)+1);
       const teach=L===1||(deb&&deb[0]===L&&n<=2);   // level 1: every press is marked               // first two of a new idea get glowing press markers
-      if(deb&&deb[0]===L&&n===1)objs.push({k:'sign',s:k-1.6,txt:deb[1]});
+      if(deb&&deb[0]===L&&n===1&&deb[1])objs.push({k:'sign',s:k-1.6,txt:deb[1]});
       place(m,k>=bossS,teach);k+=m.len;
     });
   }else{

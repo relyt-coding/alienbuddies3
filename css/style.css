@@ -1931,3 +1931,13 @@ body.store-open:not(.desktop-mode) #partyStyleBtn,body.bunker-open:not(.desktop-
 .ph-pads.solo .ph-pad{justify-content:center;}
 @media (max-height:520px) and (orientation:landscape){.ph-pad .ph-tip{display:none;}.ph-pad .ph-act{font-size:1.3rem;}.ph-pad .ph-ico{width:36px;height:36px;}}
 @media (max-width:480px){.ph-pad .ph-tip{display:none;}.ph-pads .ph-pad{gap:8px;padding:8px 10px;}.ph-pad .ph-keys{display:none;}}
+/* narrow phones: stack the icon over the words so BOUNCE and the drum chip always fit */
+@media (max-width:600px) and (orientation:portrait){
+  .ph-pads{height:clamp(118px,21vh,176px);}
+  .ph-pads:not(.solo) .ph-pad{flex-direction:column;justify-content:center;align-items:center;gap:4px;padding:16px 6px 6px;}
+  .ph-pads:not(.solo) .ph-pad .ph-txt{align-items:center;text-align:center;gap:4px;max-width:100%;}
+  .ph-pads:not(.solo) .ph-pad .ph-ico{width:clamp(34px,6.2vh,54px);height:clamp(34px,6.2vh,54px);}
+  .ph-pads:not(.solo) .ph-pad .ph-act{font-size:clamp(1.3rem,8vw,2.3rem);letter-spacing:.06em;}
+  .ph-pads:not(.solo) .ph-pad .ph-snd{font-size:clamp(.8rem,3.6vw,1.05rem);padding:1px 8px;max-width:100%;overflow:hidden;text-overflow:ellipsis;}
+  .ph-pads:not(.solo) .ph-pad .ph-beat{top:6px;right:50%;transform:translateX(50%);}
+}

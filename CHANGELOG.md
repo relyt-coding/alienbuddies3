@@ -2,6 +2,13 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.100 - 2026-11-09 16:50
+- Planet Hop: buttons stack the icon over the word on narrow phones, so BOUNCE and the drum label always fit
+- Planet Hop: cave exits are a rocky arch with sunlight, hills and light rays streaming in (moonstone crystals on Luna, icicles on Glacia, lava drips on Magmora)
+- Planet Hop: the end-of-level crater is a deep rocky funnel with ledges, glowing crystals and a lit hole into the cave below, with arrows pointing in
+- Planet Hop: pits have rock layers, ledges and loose stones at the edges
+- Planet Hop: removed the FLOATING ICE sign on level 8
+
 ## v0.2.99 - 2026-11-09 16:20
 - Planet Hop: removed the bell that rang while collecting stardust and at the checkpoint, and the combo chime
 - Planet Hop: removed the READY / 3-2-1 countdown overlay (the count-in clicks still play)

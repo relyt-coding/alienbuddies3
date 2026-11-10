@@ -309,16 +309,57 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
   function drawFinish(lv,S,CX,CY,ang,s0,s1,t){
     const e=lv.end,f=lv.P.finish,pl=lv.P.planet,C=PH_CAVE[pl];
     if(e>s1+4||e<s0-6)return;
-    if(f==='dive'){const a=e+1,b=e+2.8,A0=ang(a),A1=ang(b);
-      const hg=g.createRadialGradient(CX,CY,RP-3.2*UP,CX,CY,RP);hg.addColorStop(0,C.glow+'66');hg.addColorStop(.35,C.wall[1]);hg.addColorStop(1,'#020208');
-      g.fillStyle=hg;g.beginPath();g.arc(CX,CY,RP+1,A0,A1);g.arc(CX,CY,RP-3.2*UP,A1,A0,true);g.closePath();g.fill();
-      const T=PH_THEME[pl];[[a-.45,a+.05],[b-.05,b+.45]].forEach(([u,v])=>{const pts=[];for(let i=0;i<=8;i++){const ss=u+(v-u)*i/8;pts.push(P(ss,Math.sin(i/8*Math.PI)*.38));}pts.push(P(v,0),P(u,0));g.fillStyle=T.crust;poly(pts.map(q=>[q[0],q[1]]));g.fill();g.strokeStyle=T.top;g.lineWidth=2;g.stroke();});
-      const gl=.5+.5*Math.sin(t*3),[gx,gy]=P((a+b)/2,-.6),gg=g.createRadialGradient(gx,gy,0,gx,gy,UP*1.6);gg.addColorStop(0,C.glow+'55');gg.addColorStop(1,C.glow+'00');g.globalAlpha=.6+.4*gl;g.fillStyle=gg;g.beginPath();g.arc(gx,gy,UP*1.6,0,Math.PI*2);g.fill();g.globalAlpha=1;
+    if(f==='dive'){
+      // a deep crater: rocky funnel walls with ledges and crystals, a glowing hole into the cave below
+      const a=e+1,b=e+2.8,m=(a+b)/2,T=PH_THEME[pl],D=2.7,N=8,sL=[],sR=[],dd=[];
+      for(let i=0;i<=N;i++){const u=i/N,ins=Math.pow(u,1.5)*.6;dd.push(u*D);sL.push(a+ins+(i?(hsh(a*7+i,4)-.5)*.09:0));sR.push(b-ins+(i?(hsh(b*7+i,5)-.5)*.09:0));}
+      const out=sL.map((x,i)=>P(x,-dd[i])).concat(sR.map((x,i)=>P(x,-dd[i])).reverse()).map(q=>[q[0],q[1]]);
+      const wg=g.createRadialGradient(CX,CY,RP-D*UP,CX,CY,RP);wg.addColorStop(0,'#020208');wg.addColorStop(.5,T.deep);wg.addColorStop(1,T.body);
+      g.fillStyle=wg;poly(out);g.fill();
+      g.save();poly(out);g.clip();
+      // rock layers following the curve of the world
+      g.lineWidth=2;[.3,.75,1.25,1.8].forEach((d,k)=>{g.strokeStyle=k%2?T.strata:'rgba(255,255,255,.07)';g.beginPath();for(let i=0;i<=14;i++){const ss=a+(b-a)*i/14,[x,y]=P(ss,-d+(hsh(ss*5+k,7)-.5)*.14);i?g.lineTo(x,y):g.moveTo(x,y);}g.stroke();});
+      // ledges sticking out of both walls
+      [[sL,1],[sR,-1]].forEach(([side,dir])=>[2,4,6].forEach(i=>{const x=side[i],d=dd[i]+(hsh(x*3+i,6)-.5)*.15,w=.16+hsh(x+i,7)*.14,
+        pts=[P(x-dir*.05,-d),P(x+dir*w,-d-.04),P(x+dir*w*.6,-d-.2),P(x-dir*.05,-d-.24)];g.fillStyle=T.crust;poly(pts);g.fill();
+        g.strokeStyle=T.top;g.globalAlpha=.6;g.lineWidth=1.5;g.beginPath();g.moveTo(pts[0][0],pts[0][1]);g.lineTo(pts[1][0],pts[1][1]);g.stroke();g.globalAlpha=1;}));
+      // glowing crystals poking out of the walls
+      [[sL,1],[sR,-1]].forEach(([side,dir],j)=>[3,5,7].forEach((i,q)=>{const x=side[i],d=dd[i],gl=.55+.45*Math.sin(t*2.2+i+j*2);
+        const [ax,ay]=P(x,-d+.07),[bx,by]=P(x,-d-.09),[cx,cy]=P(x+dir*(.22+q*.05),-d+.15+q*.04);
+        const hg=g.createRadialGradient(cx,cy,0,cx,cy,UP*.5);hg.addColorStop(0,C.glow+'66');hg.addColorStop(1,C.glow+'00');g.globalAlpha=gl;g.fillStyle=hg;g.beginPath();g.arc(cx,cy,UP*.5,0,Math.PI*2);g.fill();g.globalAlpha=1;
+        g.fillStyle=C.glow;g.beginPath();g.moveTo(ax,ay);g.lineTo(cx,cy);g.lineTo(bx,by);g.fill();g.fillStyle='rgba(255,255,255,.55)';g.beginPath();g.moveTo(ax,ay);g.lineTo(cx,cy);g.lineTo((ax+bx)/2,(ay+by)/2);g.fill();}));
+      g.restore();
+      // the hole at the bottom: light from the cave below
+      const pu=.5+.5*Math.sin(t*3),[hx,hy,hf]=P(m,-D),hw=Math.max(8,(sR[N]-sL[N])*BP*.5);
+      const hg=g.createRadialGradient(hx,hy,0,hx,hy,UP*1.5);hg.addColorStop(0,C.glow+'aa');hg.addColorStop(1,C.glow+'00');g.globalAlpha=.65+.35*pu;g.fillStyle=hg;g.beginPath();g.arc(hx,hy,UP*1.5,0,Math.PI*2);g.fill();g.globalAlpha=1;
+      g.save();g.translate(hx,hy);g.rotate(hf);const og=g.createRadialGradient(0,0,0,0,0,hw);og.addColorStop(0,'#ffffff');og.addColorStop(.35,C.glow);og.addColorStop(1,C.wall[1]);
+      g.fillStyle=og;g.beginPath();g.ellipse(0,0,hw,UP*.22,0,0,Math.PI*2);g.fill();g.strokeStyle=C.tip;g.lineWidth=2;g.stroke();g.restore();
+      // a soft shaft of light rising out of the crater, with motes drifting up it
+      const s1p=P(sL[N],-D),s2p=P(sR[N],-D),s3p=P(b-.15,1.8),s4p=P(a+.15,1.8),[tx,ty]=P(m,1.8),lg=g.createLinearGradient(hx,hy,tx,ty);
+      lg.addColorStop(0,C.glow+'55');lg.addColorStop(1,C.glow+'00');g.fillStyle=lg;g.beginPath();g.moveTo(s1p[0],s1p[1]);g.lineTo(s2p[0],s2p[1]);g.lineTo(s3p[0],s3p[1]);g.lineTo(s4p[0],s4p[1]);g.closePath();g.fill();
+      g.fillStyle=C.glow;for(let k=0;k<10;k++){const u=(t*.35+hsh(k,3))%1,[mx,my]=P(m+(hsh(k,4)-.5)*(b-a)*(.3+u*.5),-D+u*(D+1.2));g.globalAlpha=Math.sin(u*Math.PI)*.8;g.beginPath();g.arc(mx,my,1.2+hsh(k,5)*1.6,0,Math.PI*2);g.fill();}g.globalAlpha=1;
+      // raised rocky rims with boulders, lit on the inside by the glow
+      [[a-.55,a+.08,1],[b-.08,b+.55,-1]].forEach(([u,v,dir])=>{const pts=[];for(let i=0;i<=10;i++){const ss=u+(v-u)*i/10;pts.push(P(ss,Math.pow(Math.sin(i/10*Math.PI),.8)*.48+(hsh(ss*9,2)-.5)*.05));}pts.push(P(v,-.1),P(u,-.1));
+        const rg=g.createLinearGradient(0,pts[5][1],0,pts[5][1]+UP*.6);rg.addColorStop(0,T.top);rg.addColorStop(.3,T.crust);rg.addColorStop(1,T.body);g.fillStyle=rg;poly(pts.map(q=>[q[0],q[1]]));g.fill();
+        g.strokeStyle=T.top;g.lineWidth=2;g.beginPath();pts.slice(0,11).forEach((q,i)=>i?g.lineTo(q[0],q[1]):g.moveTo(q[0],q[1]));g.stroke();
+        const inner=dir>0?pts.slice(6,11):pts.slice(0,5);g.strokeStyle=C.glow;g.globalAlpha=.45+.3*pu;g.lineWidth=2.5;g.beginPath();inner.forEach((q,i)=>i?g.lineTo(q[0],q[1]):g.moveTo(q[0],q[1]));g.stroke();g.globalAlpha=1;
+        [.2,.45].forEach((k,i)=>{const ss=dir>0?u+(v-u)*k*.8:v-(v-u)*k*.8,r=UP*(.13+.06*i),[bx,by,bf]=P(ss-dir*.15,.05+i*.04);g.save();g.translate(bx,by);g.rotate(bf);
+          const bg2=g.createRadialGradient(-r*.3,-r*.4,1,0,0,r*1.2);bg2.addColorStop(0,T.rock[0]);bg2.addColorStop(1,T.rock[1]);g.fillStyle=bg2;g.beginPath();g.ellipse(0,-r*.6,r*1.25,r,0,0,Math.PI*2);g.fill();g.restore();});});
+      // bobbing arrows: dive in here
+      const bob=Math.sin(t*4)*.12;g.strokeStyle=C.glow;g.lineWidth=3;g.lineCap='round';g.lineJoin='round';
+      for(let k=0;k<2;k++){const hh=1.25+bob-k*.32,[l1x,l1y]=P(m-.22,hh+.16),[cx2,cy2]=P(m,hh),[r1x,r1y]=P(m+.22,hh+.16);g.globalAlpha=.85-k*.3;g.beginPath();g.moveTo(l1x,l1y);g.lineTo(cx2,cy2);g.lineTo(r1x,r1y);g.stroke();}
+      g.globalAlpha=1;g.lineCap='butt';g.lineJoin='miter';
     }else if(f==='exit'){
-      // daylight beyond the cave mouth
-      const pp=PH_PLANETS[pl],A0=ang(e+1),A1=ang(s1+8);if(A1>A0){
-        const sg=g.createRadialGradient(CX,CY,RP,CX,CY,RP+14*UP);sg.addColorStop(0,'#fffbe8');sg.addColorStop(.25,pp.glow);sg.addColorStop(1,pp.sky[1]);
-        g.fillStyle=sg;g.beginPath();g.arc(CX,CY,RP-2,A0,A1);g.arc(CX,CY,RP+40*UP,A1,A0,true);g.closePath();g.fill();}
+      // the world outside the cave mouth: sky, a sun low on the horizon, and lit hills
+      const pp=PH_PLANETS[pl],T=PH_THEME[pl],A0=ang(e+1),A1=ang(s1+8);if(A1>A0){
+        const sg=g.createRadialGradient(CX,CY,RP,CX,CY,RP+14*UP);sg.addColorStop(0,`rgb(${PH_DAY[pl]})`);sg.addColorStop(.16,pp.glow);sg.addColorStop(.55,pp.sky[1]);sg.addColorStop(1,pp.sky[0]);
+        g.fillStyle=sg;g.beginPath();g.arc(CX,CY,RP-2,A0,A1);g.arc(CX,CY,RP+40*UP,A1,A0,true);g.closePath();g.fill();
+        g.save();g.beginPath();g.arc(CX,CY,RP-2,A0,A1);g.arc(CX,CY,RP+40*UP,A1,A0,true);g.closePath();g.clip();
+        const [sx,sy]=P(e+2.6,1.7),sr=UP*.7,sun=g.createRadialGradient(sx,sy,0,sx,sy,sr*3.2);sun.addColorStop(0,'#ffffff');sun.addColorStop(.28,'rgba(255,248,220,.95)');sun.addColorStop(.32,'rgba(255,236,190,.45)');sun.addColorStop(1,'rgba(255,236,190,0)');
+        g.fillStyle=sun;g.beginPath();g.arc(sx,sy,sr*3.2,0,Math.PI*2);g.fill();
+        [[.55,1.1,'ridge',.55],[.2,.7,'near',.8]].forEach(([base,amp,_,al],j)=>{g.beginPath();for(let i=0;i<=30;i++){const ss=e+1+i*.4,hh=base+amp*(.5+.5*Math.sin(ss*(.9+j*.7)+j*2))*(.6+.4*Math.sin(ss*2.3+j));const [x,y]=P(ss,hh);i?g.lineTo(x,y):g.moveTo(x,y);}
+          for(let i=30;i>=0;i--){const [x,y]=P(e+1+i*.4,-.2);g.lineTo(x,y);}g.closePath();g.globalAlpha=al;g.fillStyle=j?T.ridge[0]:pp.glow+'66';g.fill();g.globalAlpha=1;});
+        g.restore();}
       const [mx,my]=P(e+1.2,2.2),lg=g.createRadialGradient(mx,my,0,mx,my,UP*4.5);lg.addColorStop(0,'rgba(255,250,225,.75)');lg.addColorStop(1,'rgba(255,250,225,0)');g.fillStyle=lg;g.beginPath();g.arc(mx,my,UP*4.5,0,Math.PI*2);g.fill();
     }else{
       const nxt=pl===0?'#7fe8ff':pl===1?'#ff7a33':'#ffd166',[px,py,pf]=P(e+1.6,1.4),rr=UP*1.25;g.save();g.translate(px,py);g.rotate(pf);
@@ -326,6 +367,41 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
       g.shadowColor=nxt;g.shadowBlur=18;g.strokeStyle=nxt;g.lineWidth=4;for(let k=0;k<2;k++){g.beginPath();g.ellipse(0,0,rr*.6+k*5,rr+k*7,0,t*2*(k?-1:1),t*2*(k?-1:1)+Math.PI*1.6);g.stroke();}g.shadowBlur=0;g.restore();
     }
   }
+  // the cave mouth itself (drawn over the ceiling): god rays into the cave, a lit floor, a craggy rock lip
+  const PH_DAY=['255,244,215','215,246,255','255,196,130'];
+  function drawExitFront(lv,S,CX,CY,ang,s0,s1,t){
+    const e=lv.end,m=e+1,pl=lv.P.planet,C=PH_CAVE[pl],T=PH_THEME[pl],L=PH_DAY[pl],CH=4.9;
+    if(m<s0-4||m>s1+7)return;
+    // daylight on the ground outside and spilling through the mouth
+    const [fx,fy]=P(m+1.5,0),fg=g.createRadialGradient(fx,fy,0,fx,fy,BP*4);fg.addColorStop(0,`rgba(${L},.55)`);fg.addColorStop(1,`rgba(${L},0)`);
+    g.fillStyle=fg;g.beginPath();g.arc(CX,CY,RP+2,ang(m-3),ang(s1+3));g.arc(CX,CY,RP-.8*UP,ang(s1+3),ang(m-3),true);g.closePath();g.fill();
+    // god rays slanting in from the opening
+    const [ox,oy]=P(m+.7,CH*.8);g.save();g.beginPath();g.arc(CX,CY,RP,ang(s0-3),ang(m+.15));g.arc(CX,CY,RP+CH*UP,ang(m+.15),ang(s0-3),true);g.closePath();g.clip();g.globalCompositeOperation='lighter';
+    for(let i=0;i<4;i++){const u=m-.3-i*.75,w=.3+hsh(i,3)*.25,al=(.12+.06*Math.sin(t*.9+i*1.7))*(1-i*.18),[p1x,p1y]=P(u-w,0),[p2x,p2y]=P(u+w,0),rg=g.createLinearGradient(ox,oy,(p1x+p2x)/2,(p1y+p2y)/2);
+      rg.addColorStop(0,`rgba(${L},${al*1.6})`);rg.addColorStop(1,`rgba(${L},0)`);g.fillStyle=rg;g.beginPath();g.moveTo(ox,oy);g.lineTo(p1x,p1y);g.lineTo(p2x,p2y);g.closePath();g.fill();}
+    for(let k=0;k<16;k++){const u=(t*.05+hsh(k,1))%1,[x,y]=P(m-.4-hsh(k,2)*3.6,.3+u*3.4+Math.sin(t+k)*.1);g.fillStyle=`rgba(${L},${.5*Math.sin(u*Math.PI)})`;g.beginPath();g.arc(x,y,1+hsh(k,4)*1.5,0,Math.PI*2);g.fill();}
+    g.restore();
+    // the craggy rock lip where the roof ends
+    const lip=[[-.7,CH+.3],[-.55,CH-.35],[-.3,CH-.55],[-.12,CH-1.05],[.08,CH-.75],[.26,CH-1.25],[.45,CH-.6],[.62,CH-.8],[.85,CH-.15],[1.0,CH+.5],[.95,CH+1.3],[.7,CH+2.2],[.45,CH+3.4],[.05,CH+4.6],[-.5,CH+6.5],[-1.2,CH+9],[-2.4,40],[-2.4,CH+.3]];
+    const pts=lip.map(([ds,h])=>P(m+ds,h)),r0=RP+CH*UP,lg=g.createRadialGradient(CX,CY,r0-1.3*UP,CX,CY,r0+3*UP);lg.addColorStop(0,C.tip);lg.addColorStop(.3,C.ceil[0]);lg.addColorStop(1,C.ceil[1]);
+    g.fillStyle=lg;poly(pts.map(q=>[q[0],q[1]]));g.fill();
+    g.save();poly(pts.map(q=>[q[0],q[1]]));g.clip();g.strokeStyle='rgba(0,0,0,.25)';g.lineWidth=2;
+    for(let k=0;k<4;k++){g.beginPath();for(let i=0;i<=6;i++){const [x,y]=P(m-.9+i*.3-k*.25,CH+.2+k*.9+(hsh(i+k*7,3)-.5)*.25);i?g.lineTo(x,y):g.moveTo(x,y);}g.stroke();}g.restore();
+    // daylight rim on the outer edge, cave glow on the inner one
+    g.lineWidth=2.5;g.strokeStyle=`rgba(${L},.85)`;g.beginPath();pts.slice(5,17).forEach((q,i)=>i?g.lineTo(q[0],q[1]):g.moveTo(q[0],q[1]));g.stroke();
+    g.strokeStyle=C.glow+'77';g.lineWidth=1.5;g.beginPath();pts.slice(0,6).forEach((q,i)=>i?g.lineTo(q[0],q[1]):g.moveTo(q[0],q[1]));g.stroke();
+    // each world dresses its doorway: glowing moonstone crystals, icicles + snow, or dripping lava
+    if(pl===0){[[-.3,-.55,-.2],[.26,-1.25,.15],[.6,-.8,.4]].forEach(([ds,h,tl],k)=>{const gl=.6+.4*Math.sin(t*2+k*2),[x,y,f]=P(m+ds,CH+h);g.save();g.translate(x,y);g.rotate(f+Math.PI+tl);
+        const r=UP*(.32+k*.06),hg=g.createRadialGradient(0,-r*.5,0,0,-r*.5,r*1.8);hg.addColorStop(0,C.glow+'88');hg.addColorStop(1,C.glow+'00');g.globalAlpha=gl;g.fillStyle=hg;g.beginPath();g.arc(0,-r*.5,r*1.8,0,Math.PI*2);g.fill();g.globalAlpha=1;
+        [[-r*.35,.7],[0,1],[r*.35,.6]].forEach(([dx,sc])=>{g.fillStyle=C.glow;g.beginPath();g.moveTo(dx-r*.14,0);g.lineTo(dx,-r*sc);g.lineTo(dx+r*.14,0);g.fill();g.fillStyle='rgba(255,255,255,.6)';g.beginPath();g.moveTo(dx-r*.05,0);g.lineTo(dx,-r*sc*.9);g.lineTo(dx+r*.02,0);g.fill();});g.restore();});}
+    if(pl===1){for(let k=0;k<11;k++){const ds=-.55+k*.15,h0=lipH(lip,ds)-.02,len=.18+hsh(k,9)*.45,[x1,y1]=P(m+ds-.035,h0),[x2,y2]=P(m+ds+.035,h0),[x3,y3]=P(m+ds,h0-len);
+        g.fillStyle='rgba(230,250,255,.92)';g.beginPath();g.moveTo(x1,y1);g.lineTo(x3,y3);g.lineTo(x2,y2);g.fill();if(hsh(k,10)<.35){const tw=.5+.5*Math.sin(t*5+k);g.fillStyle=`rgba(255,255,255,${tw})`;g.beginPath();g.arc(x3,y3,1.5+tw,0,Math.PI*2);g.fill();}}
+      g.strokeStyle='#ffffff';g.lineWidth=UP*.12;g.lineCap='round';g.beginPath();pts.slice(8,11).forEach((q,i)=>i?g.lineTo(q[0],q[1]):g.moveTo(q[0],q[1]));g.stroke();g.lineCap='butt';}
+    if(pl===2){[-.12,.26,.62].forEach((ds,k)=>{const h0=lipH(lip,ds),[x,y]=P(m+ds,h0),gl=.6+.4*Math.sin(t*3+k);const dg=g.createRadialGradient(x,y,0,x,y,UP*.45);dg.addColorStop(0,`rgba(255,170,60,${.7*gl})`);dg.addColorStop(1,'rgba(255,80,20,0)');g.fillStyle=dg;g.beginPath();g.arc(x,y,UP*.45,0,Math.PI*2);g.fill();
+        const u=(t*.7+k*.37)%1,[dx,dy]=P(m+ds,h0-.1-u*u*CH*.9);g.fillStyle=`rgba(255,${150+60*(1-u)|0},40,${1-u*.6})`;g.beginPath();g.ellipse(dx,dy,2.2,3.4,0,0,Math.PI*2);g.fill();});
+      g.strokeStyle='rgba(255,120,40,.75)';g.lineWidth=2;g.beginPath();pts.slice(1,9).forEach((q,i)=>i?g.lineTo(q[0],q[1]):g.moveTo(q[0],q[1]));g.stroke();}
+  }
+  function lipH(lip,ds){for(let i=1;i<lip.length;i++){const [a,ha]=lip[i-1],[b,hb]=lip[i];if(ds>=a&&ds<=b)return ha+(hb-ha)*(ds-a)/(b-a||1);}return 4.9;}
   const PH_THEME=[
     {body:'#3e3e4c',deep:'#1c1c26',crust:'#8d8d9c',top:'#cfcfdc',strata:'rgba(0,0,0,.16)',rock:['#c7c2ea','#5a5682'],spike:['#e4e6ee','#8a8d9c'],bglow:'#b9a8ff',chasm:['#16161f','#010104'],ridge:['#2c2a44','#15142a']},
     {body:'#27597e',deep:'#0d2440',crust:'#9fd4f2',top:'#f4fcff',strata:'rgba(20,60,100,.22)',rock:['#d6f1ff','#5f9bc6'],spike:['#f6feff','#8cc9ea'],bglow:'#7fe8ff',chasm:['#0f3354','#01060f'],ridge:['#173a5a','#0a1d33']},
@@ -372,6 +448,16 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
     // lit wall edges
     g.strokeStyle=pl===2?'rgba(255,120,40,.55)':pl===1?'rgba(200,240,255,.5)':'rgba(255,255,255,.18)';g.lineWidth=2;
     [L,Rr].forEach(side=>{g.beginPath();side.slice(0,5).forEach((q,i)=>i?g.lineTo(q[0],q[1]):g.moveTo(q[0],q[1]));g.stroke();});
+    // rock layers in the walls, ledges jutting out, and loose stones at the lip
+    g.save();poly(outline);g.clip();g.lineWidth=1.5;
+    [.35,.75,1.2].forEach((d,k)=>{g.strokeStyle=pl===2?`rgba(255,140,60,${.28-k*.07})`:k%2?T.strata:'rgba(255,255,255,.08)';g.beginPath();for(let i=0;i<=8;i++){const [x,y]=P(p.a+(p.b-p.a)*i/8,-d+(hsh(p.a*3+i+k*9,7)-.5)*.1);i?g.lineTo(x,y):g.moveTo(x,y);}g.stroke();});
+    [[p.a,1,4],[p.b,-1,5]].forEach(([e0,dir,hn])=>[2,4].forEach(i=>{const d=i/steps*D,x=e0+dir*((hsh(e0*13+i,hn)-.5)*.07+d*.02),w=.1+hsh(e0+i,8)*.12,
+      pts=[P(x-dir*.04,-d),P(x+dir*w,-d-.03),P(x+dir*w*.5,-d-.16),P(x-dir*.04,-d-.2)];g.fillStyle=T.crust;poly(pts);g.fill();
+      g.strokeStyle=pl===1?'rgba(240,252,255,.8)':T.top;g.globalAlpha=.55;g.lineWidth=1.4;g.beginPath();g.moveTo(pts[0][0],pts[0][1]);g.lineTo(pts[1][0],pts[1][1]);g.stroke();g.globalAlpha=1;}));
+    if(pl!==2){const fg=g.createRadialGradient(CX,CY,RP-D*UP,CX,CY,RP-D*UP*.45);fg.addColorStop(0,'rgba(0,0,0,.65)');fg.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=fg;poly(outline);g.fill();}
+    g.restore();
+    [[p.a,-1],[p.b,1]].forEach(([e0,dir])=>[.1,.24].forEach((o,i)=>{const r=UP*(.09+hsh(e0+i,9)*.06),[x,y,f]=P(e0+dir*o,0);g.save();g.translate(x,y);g.rotate(f);
+      g.fillStyle=T.crust;g.beginPath();g.ellipse(0,-r*.45,r*1.3,r*.8,0,0,Math.PI*2);g.fill();g.fillStyle=pl===2?'rgba(255,120,40,.45)':T.top;g.globalAlpha=.7;g.beginPath();g.ellipse(-r*.3,-r*.8,r*.6,r*.25,0,0,Math.PI*2);g.fill();g.globalAlpha=1;g.restore();}));
     if(pl===0){g.save();poly(outline);g.clip();
       for(let k=0;k<8;k++){const ss=p.a+(p.b-p.a)*hsh(p.a+k,6),dd=-.8-hsh(p.a+k,8)*1.4,[x,y]=P(ss,dd);g.fillStyle=`rgba(200,200,255,${.3+.5*(.5+.5*Math.sin(t*2+k))})`;g.fillRect(x,y,1.5,1.5);}g.restore();}
     if(pl===1){[[p.a,1],[p.b,-1]].forEach(([e,dir])=>{for(let k=0;k<3;k++){const ss=e+dir*(.04+k*.07),len=.25+hsh(e+k,2)*.35;const [x1,y1]=P(ss-.025,-.02),[x2,y2]=P(ss+.025,-.02),[x3,y3]=P(ss,-len);
@@ -472,6 +558,7 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
       const [x,y,f]=P(Math.max(z.a+.6,Math.min(z.b-.6,S.s+2)),2.4);g.save();g.translate(x,y);g.rotate(f);g.fillStyle='rgba(170,225,255,.75)';g.font=`${Math.round(UP*.38)}px 'Bebas Neue',sans-serif`;g.textAlign='center';g.fillText('LOW GRAVITY',0,0);g.restore();});
     if(lv.P.finish==='dive'||lv.P.finish==='portal')drawFinish(lv,S,CX,CY,ang,s0,s1,t);
     if(lv.P.cave)drawCeiling(lv,S,CX,CY,ang,s0,s1,t,lv.P.finish==='exit'?lv.end+1:Infinity);
+    if(lv.P.cave&&lv.P.finish==='exit')drawExitFront(lv,S,CX,CY,ang,s0,s1,t);
     // ── pits: real chasms ──
     lv.pits.forEach(p=>{if(p.b<s0-.2||p.a>s1+.2)return;drawPit(lv,p,t,CX,CY,ang);});
     // ── blocks + floating platforms ──

@@ -54,7 +54,7 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
   $('phSync').addEventListener('click',()=>{if(typeof mgOpenSync==='function')mgOpenSync(()=>{});});
   $('phQuit').addEventListener('click',()=>{if(R&&R.state!=='done'){stop();showSelect();}else close();});
 
-  const NEWS={1:'Jump on the beat — follow the glowing markers · then dive into the crater!',2:'Underground! NEW: rocks — land on top, then find the way out',3:'NEW: double jump — practise on flat ground, then clear wide pits',4:'NEW: low gravity on the moon — floaty two-beat jumps',5:'BOSS: a comet chases you round Luna · NEW: climbing rocks',6:'NEW BUTTON: BOUNCE — press it as you land on each glowing pad',7:'NEW: fast bounce chains, one pad per beat',8:'NEW: floating ice platforms',9:'NEW: spike runs — jump on every beat',10:'BOSS: the frozen comet',11:'NEW: triple spikes — jump, then double jump on the "and"',12:'NEW: off-beat spikes — jump on the "and"',13:'NEW: tall rocks — double jump up onto them',14:'REMIX: everything you know, at speed',15:'FINAL BOSS: the supernova comet'};
+  const NEWS={1:'Jump on the beat — follow the glowing markers · then dive into the crater!',2:'Underground! NEW: rocks — land on top, then find the way out',3:'NEW: double jump — practise on flat ground, then clear wide pits',4:'NEW: low gravity on the moon — floaty two-beat jumps',5:'BOSS: a comet chases you round Luna · NEW: climbing rocks',6:'NEW BUTTON: BOUNCE — press it as you land on each glowing pad',7:'NEW: fast bounce chains · falling icicles · crystal bells you ring with BOUNCE',8:'NEW: floating ice platforms',9:'NEW: spike runs — jump on every beat',10:'BOSS: the frozen comet',11:'NEW: triple spikes — jump, then double jump on the "and"',12:'NEW: off-beat spikes — jump on the "and"',13:'NEW: tall rocks — double jump up onto them',14:'REMIX: everything you know, at speed',15:'FINAL BOSS: the supernova comet'};
   let tab='lv';const PH_DIFF_L={easy:3,normal:8,hard:13};
   const mineOpts={id:'phMine',note:'obstacles land on your beat',playStyle:'border-color:#7fe8ff;color:#7fe8ff;background:#071420',onPlay:song=>{const d=Object.keys(MG_DIFFS).find(k=>song.P.custom.endsWith('|'+k))||'normal';song.P.planet=MG_DIFFS[d].planet;start({song,L:PH_DIFF_L[d]});}};
   function showTab(t){tab=t;$('phTabLv').classList.toggle('sel',t==='lv');$('phTabMine').classList.toggle('sel',t==='mine');$('phLvPane').style.display=t==='lv'?'':'none';$('phMinePane').style.display=t==='mine'?'':'none';
@@ -117,13 +117,49 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
     if(lowG!==B.lg){B.lg=lowG;
       B.lp.frequency.setTargetAtTime(lowG?1500:20000,now,lowG?tc:tc*1.5);B.lp.Q.setTargetAtTime(lowG?4.5:.7,now,tc);
       B.lfoG.gain.setTargetAtTime(lowG?(B.lfoHz?800:1100):0,now,tc);B.dry.gain.setTargetAtTime(lowG?.82:1,now,tc);}   // a touch quieter so the resonance never jumps out
-    const wet=cave?1:lowG?.35:0;
-    if(B._wet!==wet){B._wet=wet;B.send.gain.setTargetAtTime(wet,now,cave?.3:tc*2);B.roomG.gain.setTargetAtTime(cave?.42:.3,now,.1);B.dlG.gain.setTargetAtTime(cave?.24:0,now,.1);}
+    // cave = how open the cave is right now (0 = a tight tunnel, 1 = a huge cavern): the room and echo grow with it
+    const cv=cave===false||cave==null?-1:Math.max(0,Math.min(1,+cave)),wet=cv>=0?.1+.9*Math.pow(cv,1.3):lowG?.35:0;
+    if(B._wet==null||Math.abs(B._wet-wet)>.015){B._wet=wet;B.send.gain.setTargetAtTime(wet,now,.35);B.roomG.gain.setTargetAtTime(cv>=0?.42:.3,now,.2);B.dlG.gain.setTargetAtTime(cv>=0?.26*cv:0,now,.35);}
   }
   // play a note through the bus (any track effects on a channel still take over, as everywhere else)
   function phSnd(id,vel,at,ch){const B=phBus(),d=drumMasterGain,r=rvbNode;drumMasterGain=B.in;rvbNode=B.rvIn;try{playSound(id,vel,at,ch);}finally{drumMasterGain=d;rvbNode=r;}}
+  // ── Planet Hop's own sounds (all through the bus, so caves echo them too) ──
+  const MV=()=>typeof masterVol!=='undefined'?masterVol:1,mtof=m=>440*Math.pow(2,(m-69)/12);
+  function nbuf(c){if(!FXB._nb||FXB._nb.sampleRate!==c.sampleRate){const L=c.sampleRate*2,b=c.createBuffer(1,L,c.sampleRate),d=b.getChannelData(0);for(let i=0;i<L;i++)d[i]=Math.random()*2-1;FXB._nb=b;}return FXB._nb;}
+  function env(c,at,peak,att,dec){const g=c.createGain();g.gain.setValueAtTime(0,at);g.gain.linearRampToValueAtTime(peak,at+att);g.gain.exponentialRampToValueAtTime(.0005,at+att+dec);return g;}
+  // a struck crystal: sine + a glassy inharmonic partial + a soft triangle body
+  function sChime(midi,at,vel,len){const B=phBus(),c=B.c,f=mtof(midi),L=len||1.6,v=vel*MV();
+    [[1,'sine',.22],[2.76,'sine',.07],[1,'triangle',.06],[5.4,'sine',.025]].forEach(([r,ty,a],i)=>{const o=c.createOscillator();o.type=ty;o.frequency.value=f*r;const e=env(c,at,a*v,.004,L/(1+i*.8));o.connect(e);e.connect(B.in);o.start(at);o.stop(at+L+.1);});}
+  function sNoise(at,dur,vel,type,f0,f1,q){const B=phBus(),c=B.c,n=c.createBufferSource();n.buffer=nbuf(c);const fl=c.createBiquadFilter();fl.type=type;fl.Q.value=q||1;
+    fl.frequency.setValueAtTime(f0,at);fl.frequency.exponentialRampToValueAtTime(f1,at+dur);const e=c.createGain();e.gain.setValueAtTime(0,at);e.gain.linearRampToValueAtTime(vel*MV(),at+dur*.6);e.gain.exponentialRampToValueAtTime(.0005,at+dur);
+    n.connect(fl);fl.connect(e);e.connect(B.in);n.start(at,Math.random());n.stop(at+dur+.05);}
+  // meteor: a falling whoosh for the beat before it lands, then a deep thud + crunch right on the 16th
+  function sMeteor(land,beat,vel){const B=phBus(),c=B.c,v=vel*MV();
+    sNoise(Math.max(c.currentTime,land-beat),Math.min(beat,land-c.currentTime),.09*vel,'bandpass',3200,380,2.2);
+    const o=c.createOscillator();o.type='sine';o.frequency.setValueAtTime(150,land);o.frequency.exponentialRampToValueAtTime(36,land+.3);const e=env(c,land,.75*v,.003,.42);o.connect(e);e.connect(B.in);o.start(land);o.stop(land+.5);
+    sNoise(land,.28,.32*vel,'lowpass',2400,300,.7);}
+  // icicle: a crack as it breaks free, then a glassy shatter as it lands
+  function sIcicle(brk,land,vel){sNoise(brk,.07,.18*vel,'highpass',3500,5000,.8);
+    sNoise(land,.22,.22*vel,'bandpass',6000,2500,1.5);[96,101,103,108].forEach((m,i)=>sChime(m+(i%2?0:-12),land+i*.012,.22*vel,.35));
+    const B=phBus(),c=B.c,o=c.createOscillator();o.type='sine';o.frequency.setValueAtTime(110,land);o.frequency.exponentialRampToValueAtTime(45,land+.18);const e=env(c,land,.35*vel*MV(),.003,.25);o.connect(e);e.connect(B.in);o.start(land);o.stop(land+.3);}
+  // checkpoint: a rising crystal arpeggio in the song's key, on the next 8th note
+  function sCheckpoint(){if(!R)return;const c=getCtx(),sg=R.lv.song,bn=(c.currentTime-R.T0)/R.beat,at=R.T0+Math.ceil(bn*2+.1)/2*R.beat,sp=R.beat/4;
+    [0,2,4,7].forEach((d,i)=>sChime(phDegMidi(sg,d)+36,at+i*sp,.55-i*.05,1.8));sChime(phDegMidi(sg,7)+48,at+4*sp,.3,2.4);}
+  // warp portal: a hum that swells as you get close, then a rising warp when you jump in
+  function sHumStart(){const B=phBus(),c=B.c,now=c.currentTime,f=mtof(R.lv.song.root+24),out=c.createGain();out.gain.setValueAtTime(0,now);out.gain.linearRampToValueAtTime(.05*MV(),now+R.beat*6);
+    const lp=c.createBiquadFilter();lp.type='lowpass';lp.frequency.value=900;lp.Q.value=3;const lfo=c.createOscillator(),lg=c.createGain();lfo.frequency.value=2/R.beat;lg.gain.value=500;lfo.connect(lg);lg.connect(lp.frequency);
+    const os=[1,1.006,1.5].map((r,i)=>{const o=c.createOscillator();o.type=i<2?'sawtooth':'triangle';o.frequency.value=f*r;o.connect(lp);o.start(now);return o;});lfo.start(now);lp.connect(out);out.connect(B.in);
+    return{stop(fade){const t=c.currentTime,fd=fade||.3;out.gain.cancelScheduledValues(t);out.gain.setValueAtTime(out.gain.value,t);out.gain.linearRampToValueAtTime(0,t+fd);os.concat([lfo]).forEach(o=>{try{o.stop(t+fd+.05);}catch(e){}});}};}
+  function sWarp(at){const B=phBus(),c=B.c,o=c.createOscillator();o.type='sine';o.frequency.setValueAtTime(160,at);o.frequency.exponentialRampToValueAtTime(1500,at+.9);const e=env(c,at,.18*MV(),.25,.9);o.connect(e);e.connect(B.in);o.start(at);o.stop(at+1.3);
+    sNoise(at,1,.14,'bandpass',300,5000,3);const sg=R.lv.song;[0,4,7,11].forEach((d,i)=>sChime(phDegMidi(sg,d)+48,at+.9+i*.06,.35,2));}
+  // the ice world's wind: soft filtered noise that drifts with the music
+  function sWindStart(at){const B=phBus(),c=B.c,n=c.createBufferSource();n.buffer=nbuf(c);n.loop=true;const bp=c.createBiquadFilter();bp.type='bandpass';bp.frequency.value=800;bp.Q.value=1.8;
+    const lfo=c.createOscillator(),lg=c.createGain();lfo.frequency.value=1/(8*R.beat);lg.gain.value=450;lfo.connect(lg);lg.connect(bp.frequency);const out=c.createGain();out.gain.setValueAtTime(0,at);out.gain.linearRampToValueAtTime(.05*MV(),at+R.beat*4);
+    n.connect(bp);bp.connect(out);out.connect(B.in);n.start(at);lfo.start(at);
+    return{stop(){const t=c.currentTime;out.gain.cancelScheduledValues(t);out.gain.setValueAtTime(out.gain.value,t);out.gain.linearRampToValueAtTime(0,t+.6);try{n.stop(t+.7);lfo.stop(t+.7);}catch(e){}}};}
+  function phLoopsOff(){if(!R)return;if(R.hum){R.hum.stop();R.hum=null;}if(R.wind){R.wind.stop();R.wind=null;}}
   function phRoll(id,midi,at,dur,vel,layer){const B=phBus(),d=drumMasterGain,r=rvbNode;drumMasterGain=B.in;rvbNode=B.rvIn;try{playRollNote(id,midi,at,dur,vel,layer);}finally{drumMasterGain=d;rvbNode=r;}}
-  function stop(){if(!R)return;clearInterval(R.sched);cancelAnimationFrame(R.raf);clearTimeout(R.rt);R.state='stopped';R=null;try{phFx(false,false);}catch(e){}}
+  function stop(){if(!R)return;clearInterval(R.sched);cancelAnimationFrame(R.raf);clearTimeout(R.rt);try{phLoopsOff();}catch(e){}R.state='stopped';R=null;try{phFx(false,false);}catch(e){}}
   function lat(){const c=getCtx();return(c.outputLatency||0)+(c.baseLatency||0)*.5;}
   // JUMP plays your kick pad, BOUNCE your snare/clap pad (a plain kick / snare if you haven't got one)
   function phPadSound(w){const ps=(typeof padSounds!=='undefined'?padSounds:[]).filter(id=>id&&SOUND_MAP[id]);
@@ -171,6 +207,8 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
     R.graded=new Set();R.combo=0;R.maxCombo=0;R.timing=[];R.onBeat={perfect:0,good:0,off:0};
     R.T0=c.currentTime+(first?4*R.beat+.3:.25);}
     if(first)for(let i=0;i<4;i++)phSnd('rimshot',i?.5:.85,R.T0-(4-i)*R.beat);
+    R.lv.falls=R.lv.falls||R.lv.spikes.filter(sp=>sp.lt!=null).sort((a,b)=>a.lt-b.lt);R.fi=0;while(R.fi<R.lv.falls.length&&R.lv.falls[R.fi].lt<cp+.01)R.fi++;R.landed=new Set();
+    phLoopsOff();if(R.lv.P.planet===1)R.wind=sWindStart(R.T0-(fromCp?2:first?4:0)*R.beat);
     R.sched=setInterval(schedule,25);schedule();
     $('phAtt').textContent=R.attempt;$('phDust').textContent='0';
   }
@@ -179,8 +217,11 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
     const c=getCtx(),ahead=c.currentTime+.18,ev=R.lv.song.events;
     while(R.ei<ev.length&&R.T0+ev[R.ei].t<ahead){
       const e=ev[R.ei++],at=Math.max(c.currentTime,R.T0+e.t);
-      try{if(e.kind==='drum')phSnd(e.id,e.vel,at,e.ch);else if(typeof playRollNote==='function'&&SOUND_MAP[e.id])phRoll(e.id,e.midi,at,e.dur,e.vel,e.layer==null?-1:e.layer);}catch(err){}
+      try{if(e.kind==='drum')phSnd(e.id,e.vel,at,e.ch);else if(e.kind==='ice')sChime(e.midi,at,e.vel,2.2);else if(typeof playRollNote==='function'&&SOUND_MAP[e.id])phRoll(e.id,e.midi,at,e.dur,e.vel,e.layer==null?-1:e.layer);}catch(err){}
     }
+    // meteors and icicles make their sound on the beat they land
+    const F=R.lv.falls;while(R.fi<F.length&&R.T0+(F[R.fi].lt-1)*R.beat<ahead){const sp=F[R.fi++],land=R.T0+sp.lt*R.beat;if(land<c.currentTime)continue;
+      try{if(sp.icicle)sIcicle(Math.max(c.currentTime,land-.3*R.beat),land,.8);else sMeteor(land,R.beat,.8);}catch(err){}}
   }
 
   // ── input (timestamped, applied inside the physics at the exact beat it happened) ──
@@ -198,6 +239,9 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
       if(gr==='off')R.combo=0;else{R.combo++;R.maxCombo=Math.max(R.maxCombo,R.combo);}
       // (judged quietly for the stats only: no PERFECT / EARLY / LATE text, your ears are the judge)
     }
+    // a crystal bell nearby? BOUNCE rings it, snapped onto its beat like any instrument
+    if(w==='b'&&!R.solo)R.lv.dust.forEach((d,i)=>{if(!d.bell||R.got.has(i)||Math.abs(t-d.s)>.4)return;R.got.add(i);d.bell.rung=performance.now();
+      const c=getCtx();try{sChime(d.bell.midi,Math.max(c.currentTime,R.T0+d.s*R.beat),.75,2.6);sChime(d.bell.midi+12,Math.max(c.currentTime,R.T0+d.s*R.beat),.2,1.6);}catch(e){}burst(d.s,d.h,'#ff9dff',12,.9);burst(d.s,d.h,'#ffffff',6,.6);});
     if(R.solo)w='j';
     const pad=$(w==='j'?'phJump':'phBounce');pad.classList.remove('lit');void pad.offsetWidth;pad.classList.add('lit');
     try{phSnd(phPadSound(w),.55);}catch(e){}
@@ -224,7 +268,7 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
     const lv=R.lv,S=R.S;
     // music environment: low-gravity filter while you're inside a zone, cave room underground (fades as you walk out into daylight)
     try{const lowG=R.state==='play'&&!R.dead&&!R.won&&lv.zones.some(z=>S.s>=z.a&&S.s<z.b),outside=R.won&&lv.P.finish==='exit'&&now-R.won>R.beat*600;
-      phFx(lowG,!!lv.P.cave&&!outside);}catch(e){}
+      phFx(lowG,lv.P.cave&&!outside?(phCaveH(lv,S.s)-3.6)/3.6:false);}catch(e){}
     if(R.state==='play'&&!R.dead&&!R.won){
       try{padHud(tau());}catch(e){}
       // count-in hops (with double jump) run on their own little physics; if you're still in the air when the
@@ -239,10 +283,14 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
         const wasG=S.grounded;phStep(lv,S,PH_DT);
         if(!wasG&&S.grounded&&S.s>1)burst(S.s,S.h,'#ccccdd',5,.5);
       }
+      // the portal starts humming as it comes into view
+      if(lv.P.finish==='portal'&&!R.hum&&S.s>lv.end-7)try{R.hum=sHumStart();}catch(e){}
+      // meteors / icicles hitting the ground
+      (lv.falls||[]).forEach(sp=>{if(!R.landed.has(sp)&&S.s>=sp.lt&&S.s<sp.lt+1){R.landed.add(sp);burst(sp.s,.1,sp.icicle?'#e8fbff':'#ffb84d',sp.icicle?14:18,1.2);burst(sp.s,.05,sp.icicle?'#9fd4f2':'#8d8d9c',10,.8);R.shake=Math.max(R.shake,sp.icicle?3:6);}});
       // stardust
-      lv.dust.forEach((d,i)=>{if(!R.got.has(i)&&Math.abs(d.s-S.s)<.24&&Math.abs(d.h-(S.h+.45))<.55){R.got.add(i);burst(d.s,d.h,'#ffe680',6,.5);}});
+      lv.dust.forEach((d,i)=>{if(!d.bell&&!R.got.has(i)&&Math.abs(d.s-S.s)<.24&&Math.abs(d.h-(S.h+.45))<.55){R.got.add(i);burst(d.s,d.h,'#ffe680',6,.5);}});
       if(lv.cp!=null&&!R.cpHit&&S.s>=lv.cp){R.cpHit=true;R.cpSnap={got:new Set(R.got),graded:new Set([...R.graded].filter(i=>lv.acts[i].t<lv.cp)),maxCombo:R.maxCombo,timing:R.timing.length,onBeat:Object.assign({},R.onBeat)};
-        R.texts.push({s:lv.cp+.6,h:2.4,txt:'CHECKPOINT!',col:'#bfe9ff',life:1.5,sz:1.2});burst(lv.cp,1.1,'#ffffff',14,1.1);burst(lv.cp,1.1,'#7cc8ff',22,1.3);}
+        try{sCheckpoint();}catch(e){}R.texts.push({s:lv.cp+.6,h:2.4,txt:'CHECKPOINT!',col:'#bfe9ff',life:1.5,sz:1.2});burst(lv.cp,1.1,'#ffffff',14,1.1);burst(lv.cp,1.1,'#7cc8ff',22,1.3);}
       $('phDust').textContent=R.got.size;
       const pct=Math.max(0,Math.min(1,S.s/lv.end));$('phPct').textContent=Math.floor(pct*100)+'%';$('phProg').style.width=(pct*100)+'%';
       if(S.dead)die();
@@ -251,7 +299,7 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
     draw(dt);
   }
   function die(){
-    const S=R.S,pct=Math.max(0,Math.min(1,S.s/R.lv.end));R.dead={t:performance.now(),pct};clearInterval(R.sched);
+    const S=R.S,pct=Math.max(0,Math.min(1,S.s/R.lv.end));R.dead={t:performance.now(),pct};clearInterval(R.sched);phLoopsOff();
     const st=R.custom?(phProgress.custom||(phProgress.custom={})):phProgress.best,K=R.custom?R.lv.P.custom:R.L;
     const b=st[K]||{};if(!b.cleared&&pct>(b.pct||0)){st[K]=Object.assign(b,{pct});}
     burst(S.s,S.h+.3,'#00ff88',30,1.6);burst(S.s,S.h+.3,'#ffffff',12,1);R.shake=12;
@@ -260,6 +308,8 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
   }
   function win(){
     R.won=performance.now();clearInterval(R.sched);
+    if(R.lv.P.finish==='portal'){try{sWarp(getCtx().currentTime+R.beat*.5);}catch(e){}if(R.hum)R.hum.stop(R.beat*2.5);R.hum=null;}
+    if(R.wind){R.wind.stop();R.wind=null;}
     const L=R.L,P=R.lv.P,dust=R.lv.dust.length?R.got.size/R.lv.dust.length:1,stars=dust>=.9?3:dust>=.6?2:1;
     const st=R.custom?(phProgress.custom||(phProgress.custom={})):phProgress.best,K=R.custom?P.custom:L;
     const prev=st[K]||{},first=!R.custom&&!prev.cleared;
@@ -270,7 +320,7 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
     R.finFx=0;setTimeout(()=>results(stars,dust,first),R.lv.bossS<Infinity?1900:1700);
   }
   function results(stars,dust,first){
-    if(!R)return;R.state='done';
+    if(!R)return;R.state='done';phLoopsOff();
     const L=R.L,P=R.lv.P;
     $('phResInner').innerHTML=`
       <div class="ww-big win">${P.boss?'COMET ESCAPED!':'LEVEL CLEAR!'}</div>
@@ -341,16 +391,36 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
     {wall:['#120403','#2e0c06'],blob:'rgba(0,0,0,.35)',glow:'#ff6a1a',ceil:['#3a1a12','#140605'],tip:'#5a2a1a',mote:'rgba(255,150,60,.75)'}];
   // the cave roof: a band of this world's rock overhead with stalactites and glowing crystals
   function drawCeiling(lv,S,CX,CY,ang,s0,s1,t,stopAt){
-    const C=PH_CAVE[lv.P.planet],CH=4.9,r0=RP+CH*UP,r1=RP+40*UP,a0=ang(s0-1),a1=ang(Math.min(s1+1,stopAt));if(a1<=a0)return;
-    const cg=g.createRadialGradient(CX,CY,r0,CX,CY,r0+UP*3);cg.addColorStop(0,C.ceil[0]);cg.addColorStop(1,C.ceil[1]);
-    g.fillStyle=cg;g.beginPath();g.arc(CX,CY,r0,a0,a1);g.arc(CX,CY,r1,a1,a0,true);g.closePath();g.fill();
-    g.strokeStyle=C.glow+'55';g.lineWidth=2;g.beginPath();g.arc(CX,CY,r0,a0,a1);g.stroke();
+    const C=PH_CAVE[lv.P.planet],r1=RP+40*UP,sa=s0-1,sb=Math.min(s1+1,stopAt);if(sb<=sa)return;
+    // the roof rises into caverns and dips into tunnels (its height comes from the level, so it never gets in a jump's way)
+    const edge=[];for(let ss=sa;ss<sb;ss+=.25)edge.push(P(ss,phCaveH(lv,ss)));edge.push(P(sb,phCaveH(lv,sb)));
+    let lo=99;edge.forEach((q,i)=>{const h=phCaveH(lv,sa+i*.25);if(h<lo)lo=h;});const r0=RP+lo*UP;
+    const cg=g.createRadialGradient(CX,CY,r0,CX,CY,r0+UP*3.5);cg.addColorStop(0,C.ceil[0]);cg.addColorStop(1,C.ceil[1]);
+    g.fillStyle=cg;g.beginPath();edge.forEach((q,i)=>i?g.lineTo(q[0],q[1]):g.moveTo(q[0],q[1]));g.arc(CX,CY,r1,ang(sb),ang(sa),true);g.closePath();g.fill();
+    g.strokeStyle=C.glow+'55';g.lineWidth=2;g.beginPath();edge.forEach((q,i)=>i?g.lineTo(q[0],q[1]):g.moveTo(q[0],q[1]));g.stroke();
     for(let k=Math.floor((s0-1)/.7);k<=(s1+1)/.7;k++){const ss=k*.7+hsh(k,11)*.35;if(ss>stopAt-.2)continue;
-      const len=.35+hsh(k,12)*1.05,w=.12+hsh(k,13)*.14,[ax,ay]=P(ss-w,CH+.05),[bx,by]=P(ss+w,CH+.05),[cx,cy]=P(ss,CH-len);
+      if((lv.falls||[]).some(sp=>sp.icicle&&Math.abs(sp.s-ss)<.5))continue;   // leave room for the icicles that will fall
+      const CH=phCaveH(lv,ss),len=(.35+hsh(k,12)*1.05)*Math.min(1.4,.75+(CH-3.3)*.15),w=.12+hsh(k,13)*.14,[ax,ay]=P(ss-w,CH+.05),[bx,by]=P(ss+w,CH+.05),[cx,cy]=P(ss,CH-len);
       g.fillStyle=C.ceil[0];g.beginPath();g.moveTo(ax,ay);g.lineTo(cx,cy);g.lineTo(bx,by);g.fill();
       g.strokeStyle=C.tip;g.lineWidth=1.2;g.beginPath();g.moveTo(ax,ay);g.lineTo(cx,cy);g.stroke();
       if(hsh(k,14)<.3){const gl=.5+.5*Math.sin(t*2+k),[gx,gy]=P(ss+.25,CH-.15),gg=g.createRadialGradient(gx,gy,0,gx,gy,UP*.6);gg.addColorStop(0,C.glow+'88');gg.addColorStop(1,C.glow+'00');
         g.globalAlpha=.5+.5*gl;g.fillStyle=gg;g.beginPath();g.arc(gx,gy,UP*.6,0,Math.PI*2);g.fill();g.fillStyle=C.glow;g.beginPath();g.moveTo(gx-3,gy-2);g.lineTo(gx,gy+UP*.28);g.lineTo(gx+3,gy-2);g.fill();g.globalAlpha=1;}}
+  }
+  // an icicle: hangs from the roof, shakes, snaps off a quarter-beat before it lands, then sticks in the ground as an ice shard
+  function drawIcicle(lv,sp,S,t){
+    const CH=phCaveH(lv,sp.s),len=Math.min(1.5,CH*.32),dropT=.25,k=(S.s-(sp.lt-dropT))/dropT;
+    if(k<1){const shake=S.s>sp.lt-1.1?Math.sin(t*60)*.03*Math.min(1,(S.s-(sp.lt-1.1))/.8):0,fall=k>0?(CH-len)*k*k:0,top=CH-fall,ss=sp.s+shake,
+        [ax,ay]=P(ss-.17,top),[bx,by]=P(ss+.17,top),[mx,my]=P(ss+.03,top),[cx,cy]=P(ss,top-len);
+      g.fillStyle='rgba(200,240,255,.9)';g.beginPath();g.moveTo(ax,ay);g.lineTo(cx,cy);g.lineTo(mx,my);g.fill();
+      g.fillStyle='rgba(255,255,255,.95)';g.beginPath();g.moveTo(mx,my);g.lineTo(cx,cy);g.lineTo(bx,by);g.fill();
+      g.strokeStyle='rgba(127,232,255,.8)';g.lineWidth=1.2;g.beginPath();g.moveTo(ax,ay);g.lineTo(cx,cy);g.lineTo(bx,by);g.stroke();
+      if(shake&&k<=0){g.fillStyle='rgba(220,245,255,.7)';for(let q=0;q<3;q++){const u=(t*2.2+q*.33)%1,[px,py]=P(sp.s+(hsh(q,5)-.5)*.3,CH-u*CH*.7);g.beginPath();g.arc(px,py,1.3,0,Math.PI*2);g.fill();}}
+      return;}
+    // landed: a faceted ice shard with broken bits around it
+    const w=sp.w*.42,[ax,ay]=P(sp.s-w,0),[bx,by]=P(sp.s+w,0),[cx,cy]=P(sp.s+.04,sp.h*.92),[mx,my]=P(sp.s-.05,0);
+    const hz='#7fe8ff';g.save();g.shadowColor=hz;g.shadowBlur=12;g.strokeStyle=hz;g.lineWidth=2.4;g.beginPath();g.moveTo(ax,ay);g.lineTo(cx,cy);g.lineTo(bx,by);g.stroke();g.restore();
+    g.fillStyle='#bfe9ff';g.beginPath();g.moveTo(ax,ay);g.lineTo(cx,cy);g.lineTo(mx,my);g.fill();g.fillStyle='#f4fdff';g.beginPath();g.moveTo(mx,my);g.lineTo(cx,cy);g.lineTo(bx,by);g.fill();
+    [[-.3,.12],[.28,.09],[.4,.06]].forEach(([d,hh],q)=>{const [x1,y1]=P(sp.s+d-.05,0),[x2,y2]=P(sp.s+d+.05,0),[x3,y3]=P(sp.s+d+(q-1)*.03,hh);g.fillStyle='rgba(230,250,255,.9)';g.beginPath();g.moveTo(x1,y1);g.lineTo(x3,y3);g.lineTo(x2,y2);g.fill();});
   }
   // finish line scenery: a crater to dive into, a cave mouth out to daylight, or a warp portal
   function drawFinish(lv,S,CX,CY,ang,s0,s1,t){
@@ -460,6 +530,67 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
     if(pl===1){g.strokeStyle='rgba(220,245,255,.35)';g.lineWidth=2;g.beginPath();pts.forEach((p,i)=>i?g.lineTo(p[0],p[1]):g.moveTo(p[0],p[1]));g.stroke();}  // snowy edge
     if(pl===2)pts.forEach(p=>{if(p[4]>1.25){const gl=.5+.5*Math.sin(t*3+p[3]);g.fillStyle=`rgba(255,120,30,${.35+.4*gl})`;g.beginPath();g.arc(p[0],p[1],3+3*gl,0,Math.PI*2);g.fill();}}); // volcano glow
   }
+  // ── the midground: landmarks between the far ridge and the ground, turning at ⅔ of the planet's speed ──
+  // each world has its own set and each level picks three of them, so every course has its own skyline
+  const PH_MID={0:['lander','dish','arch','crys','mast'],1:['spire','pine','geyser','dome','iarch'],2:['volc','basalt','deadtree','lavafall','vent'],
+    c0:['mite','shroom','crys'],c1:['icecol','crys','mite'],c2:['mite','lpool','obsid']};
+  function drawMid(lv,S,CX,CY,t){
+    const pl=lv.P.planet,cave=lv.P.cave,set=PH_MID[cave?'c'+pl:pl],Lk=lv.P.lvl||lv.P.seed||1,K=.66,SP=2.3;
+    const kinds=[0,1,2].map(i=>set[Math.floor(hsh(Lk*3+i,41)*set.length)]);
+    const T=PH_THEME[pl],C=PH_CAVE[pl],pp=PH_PLANETS[pl],f0=-(AX+120)/RP,f1=(W-AX+120)/RP,q0=f0*RP/BP+S.s*K,q1=f1*RP/BP+S.s*K;
+    for(let k=Math.floor(q0/SP)-1;k<=q1/SP+1;k++){
+      if(hsh(k+Lk*17,43)<.3)continue;
+      const q=k*SP+hsh(k,44)*SP*.6,f=(q-S.s*K)*BP/RP,r=RP-UP*.2,sc=(1+hsh(k,45)*.6)*UP*(lv.P.cave?.85:1),kind=kinds[Math.floor(hsh(k,46)*3)];
+      g.save();g.translate(CX+r*Math.sin(f),CY-r*Math.cos(f));g.rotate(f);g.globalAlpha=.75;
+      midPaint(kind,sc,t,k,pl,T,C,pp);g.restore();
+    }
+    g.globalAlpha=1;
+  }
+  function midPaint(kind,U,t,k,pl,T,C,pp){
+    const dark=T.ridge[0],dk2=T.ridge[1],gl=pp.glow,blink=(Math.sin(t*3+k)>.6)?1:.25,v=hsh(k,47);
+    const tri=(x1,y1,x2,y2,x3,y3)=>{g.beginPath();g.moveTo(x1,y1);g.lineTo(x2,y2);g.lineTo(x3,y3);g.closePath();g.fill();};
+    switch(kind){
+      case 'lander':{g.strokeStyle=dark;g.lineWidth=U*.07;[[-1],[1]].forEach(([d])=>{g.beginPath();g.moveTo(d*U*.35,-U*.75);g.lineTo(d*U*.75,0);g.stroke();g.fillStyle=dark;g.fillRect(d*U*.75-U*.12,-U*.04,U*.24,U*.06);});
+        g.fillStyle='#4a4766';g.fillRect(-U*.45,-U*1.15,U*.9,U*.5);g.fillStyle='#8a7a3a';g.fillRect(-U*.4,-U*.7,U*.8,U*.15);
+        g.fillStyle='#55527a';g.beginPath();g.moveTo(-U*.3,-U*1.15);g.lineTo(-U*.2,-U*1.45);g.lineTo(U*.25,-U*1.45);g.lineTo(U*.35,-U*1.15);g.fill();
+        g.strokeStyle=dark;g.lineWidth=U*.03;g.beginPath();g.moveTo(U*.15,-U*1.45);g.lineTo(U*.15,-U*1.85);g.stroke();g.fillStyle=`rgba(255,80,90,${blink})`;g.beginPath();g.arc(U*.15,-U*1.88,U*.05,0,Math.PI*2);g.fill();
+        g.fillStyle=gl+'99';g.fillRect(-U*.12,-U*1.38,U*.18,U*.12);break;}
+      case 'dish':{g.strokeStyle=dark;g.lineWidth=U*.06;g.beginPath();g.moveTo(-U*.35,0);g.lineTo(0,-U*.9);g.lineTo(U*.35,0);g.moveTo(0,-U*.9);g.lineTo(0,0);g.stroke();
+        g.save();g.translate(0,-U*1.0);g.rotate(-.6+Math.sin(t*.3+k)*.25);g.fillStyle='#5a5780';g.beginPath();g.ellipse(0,0,U*.75,U*.28,0,Math.PI,Math.PI*2);g.fill();g.fillStyle='#3c3a5c';g.beginPath();g.ellipse(0,0,U*.75,U*.1,0,0,Math.PI*2);g.fill();
+        g.strokeStyle=dark;g.lineWidth=U*.03;g.beginPath();g.moveTo(0,0);g.lineTo(0,-U*.55);g.stroke();g.fillStyle=`rgba(127,232,255,${blink})`;g.beginPath();g.arc(0,-U*.58,U*.05,0,Math.PI*2);g.fill();g.restore();break;}
+      case 'arch':case 'iarch':{const c1=kind==='iarch'?'#2f6a92':dark,c2=kind==='iarch'?'#bfe9ff':'#3d3a60';g.fillStyle=c1;g.beginPath();g.moveTo(-U*1.1,0);g.quadraticCurveTo(-U*1.2,-U*1.6,-U*.2,-U*1.9);g.quadraticCurveTo(U*1.1,-U*2,U*1.15,0);g.lineTo(U*.7,0);g.quadraticCurveTo(U*.6,-U*1.25,0,-U*1.35);g.quadraticCurveTo(-U*.62,-U*1.2,-U*.65,0);g.closePath();g.fill();
+        g.strokeStyle=c2;g.globalAlpha=.5;g.lineWidth=U*.05;g.beginPath();g.moveTo(-U*1.1,-U*.2);g.quadraticCurveTo(-U*1.2,-U*1.6,-U*.2,-U*1.9);g.quadraticCurveTo(U*.8,-U*1.98,U*1.0,-U*1.2);g.stroke();g.globalAlpha=.75;break;}
+      case 'crys':{const cc=C.glow;const gg=g.createRadialGradient(0,-U*.4,0,0,-U*.4,U*1.3);gg.addColorStop(0,cc+'44');gg.addColorStop(1,cc+'00');g.fillStyle=gg;g.beginPath();g.arc(0,-U*.4,U*1.3,0,Math.PI*2);g.fill();
+        [[-.35,1,-.25],[0,1.5,0],[.32,1.1,.22],[.6,.6,.45]].forEach(([x,hh,a])=>{g.save();g.translate(x*U,0);g.rotate(a);g.fillStyle=cc;g.globalAlpha=.55+.25*Math.sin(t*2+k+x*5);tri(-U*.14,0,0,-U*hh,U*.14,0);g.fillStyle='rgba(255,255,255,.5)';tri(-U*.03,0,0,-U*hh*.9,U*.05,0);g.restore();});g.globalAlpha=.75;break;}
+      case 'mast':{g.strokeStyle=dark;g.lineWidth=U*.05;g.beginPath();g.moveTo(-U*.25,0);g.lineTo(0,-U*2.4);g.lineTo(U*.25,0);g.stroke();for(let i=1;i<5;i++){const y=-U*.48*i,w=U*.25*(1-i/5.2);g.beginPath();g.moveTo(-w,y);g.lineTo(w,y-U*.24);g.stroke();}
+        g.fillStyle=`rgba(255,80,90,${blink})`;g.beginPath();g.arc(0,-U*2.45,U*.07,0,Math.PI*2);g.fill();break;}
+      case 'spire':{const gg=g.createLinearGradient(-U*.4,0,U*.4,0);gg.addColorStop(0,'#183f5e');gg.addColorStop(.5,'#4f86ad');gg.addColorStop(1,'#244f72');g.fillStyle=gg;tri(-U*.45,0,U*.05,-U*(2.4+v),U*.4,0);g.fillStyle='#173a5a';tri(-U*.75,0,-U*.45,-U*1.2,-U*.15,0);tri(U*.25,0,U*.55,-U*1,U*.8,0);
+        g.fillStyle='rgba(220,240,255,.3)';tri(U*.02,-U*(2.3+v),-U*.05,-U*1.2,U*.08,-U*1.4);break;}
+      case 'pine':{g.fillStyle='#173a5a';g.fillRect(-U*.06,-U*.4,U*.12,U*.4);for(let i=0;i<3;i++){const y=-U*(.3+i*.42),w=U*(.6-i*.15);g.fillStyle='#1d4d70';tri(-w,y,0,y-U*.7,w,y);g.fillStyle='rgba(240,250,255,.8)';tri(-w*.6,y-U*.25,0,y-U*.7,w*.5,y-U*.3);}break;}
+      case 'geyser':{g.fillStyle='#2f6a92';g.beginPath();g.ellipse(0,0,U*.8,U*.45,0,Math.PI,Math.PI*2);g.fill();g.fillStyle='#bfe9ff';g.beginPath();g.ellipse(0,-U*.42,U*.22,U*.07,0,0,Math.PI*2);g.fill();
+        const ph=(t*.35+v)%1;if(ph<.55){for(let i=0;i<6;i++){const u=ph/.55,yy=-U*(.45+u*2.2*(i+1)/6),a=Math.sin(u*Math.PI)*.55;g.fillStyle=`rgba(230,248,255,${a*(1-i/7)})`;g.beginPath();g.arc(Math.sin(i*1.7+t)*U*.12*(i/2),yy,U*(.12+i*.06)*(.6+u),0,Math.PI*2);g.fill();}}break;}
+      case 'dome':{g.fillStyle='#24557a';g.beginPath();g.ellipse(0,0,U*.85,U*.8,0,Math.PI,Math.PI*2);g.fill();g.strokeStyle='rgba(200,240,255,.5)';g.lineWidth=U*.03;g.beginPath();g.ellipse(0,0,U*.85,U*.8,0,Math.PI,Math.PI*2);g.stroke();
+        for(let i=-1;i<=1;i++){g.fillStyle=`rgba(255,220,140,${.5+.3*Math.sin(t*1.5+i+k)})`;g.fillRect(i*U*.3-U*.07,-U*.38,U*.14,U*.12);}g.fillStyle='#1a4060';g.fillRect(-U*.15,-U*.25,U*.3,U*.25);break;}
+      case 'icecol':{g.fillStyle='#1d4d70';g.fillRect(-U*.18,-U*1.8,U*.36,U*1.8);g.fillStyle='rgba(191,233,255,.45)';g.fillRect(-U*.1,-U*1.8,U*.08,U*1.8);
+        for(let i=0;i<3;i++){g.fillStyle=`rgba(127,232,255,${.35+.25*Math.sin(t*2+i+k)})`;g.beginPath();g.arc(U*.02,-U*(.4+i*.5),U*.06,0,Math.PI*2);g.fill();}g.fillStyle='#2f6a92';tri(-U*.4,0,0,-U*.5,U*.4,0);break;}
+      case 'volc':{const vg=g.createLinearGradient(0,-U*1.6,0,0);vg.addColorStop(0,'#3a1612');vg.addColorStop(1,'#1a0806');g.fillStyle=vg;g.beginPath();g.moveTo(-U*1.5,0);g.lineTo(-U*.3,-U*1.5);g.lineTo(U*.3,-U*1.5);g.lineTo(U*1.5,0);g.fill();
+        const gw=.6+.4*Math.sin(t*2+k);g.fillStyle=`rgba(255,120,30,${gw})`;g.beginPath();g.ellipse(0,-U*1.5,U*.3,U*.08,0,0,Math.PI*2);g.fill();g.strokeStyle=`rgba(255,110,30,${.5*gw})`;g.lineWidth=U*.06;g.beginPath();g.moveTo(-U*.1,-U*1.47);g.quadraticCurveTo(-U*.4,-U*.8,-U*.7,-U*.1);g.stroke();
+        for(let i=0;i<4;i++){const u=(t*.18+i/4+v)%1;g.fillStyle=`rgba(70,50,50,${.45*(1-u)})`;g.beginPath();g.arc(Math.sin(u*4+i)*U*.3+u*U*.6,-U*(1.6+u*2.2),U*(.2+u*.55),0,Math.PI*2);g.fill();}break;}
+      case 'basalt':{for(let i=0;i<5;i++){const x=(i-2)*U*.26,hh=U*(.6+hsh(k*5+i,48)*1.1);g.fillStyle=i%2?'#2a100c':'#38160f';g.fillRect(x-U*.13,-hh,U*.26,hh);g.fillStyle='#4e2a20';g.fillRect(x-U*.13,-hh,U*.26,U*.05);}break;}
+      case 'deadtree':{g.strokeStyle='#1f0a07';g.lineCap='round';g.lineWidth=U*.12;g.beginPath();g.moveTo(0,0);g.quadraticCurveTo(U*.1,-U*.7,-U*.05,-U*1.4);g.stroke();g.lineWidth=U*.06;
+        [[-.05,-1.0,-.5,-1.5],[0,-1.25,.45,-1.7],[-.05,-1.4,-.25,-1.9],[.05,-.7,.4,-1.0]].forEach(([a,b,c,d])=>{g.beginPath();g.moveTo(a*U,b*U);g.lineTo(c*U,d*U);g.stroke();g.fillStyle=`rgba(255,${120+60*Math.sin(t*3+a*9+k)|0},40,.8)`;g.beginPath();g.arc(c*U,d*U,U*.05,0,Math.PI*2);g.fill();});g.lineCap='butt';break;}
+      case 'lavafall':{g.fillStyle='#2a0f0b';g.beginPath();g.moveTo(-U*.9,0);g.lineTo(-U*.7,-U*1.9);g.lineTo(U*.6,-U*2.1);g.lineTo(U*.9,0);g.fill();
+        const lg=g.createLinearGradient(0,-U*1.9,0,0);lg.addColorStop(0,'#ffd23a');lg.addColorStop(1,'#ff4a10');g.fillStyle=lg;g.fillRect(-U*.12,-U*1.95,U*.24,U*1.95);
+        g.fillStyle='rgba(255,240,180,.7)';for(let i=0;i<4;i++){const u=(t*1.2+i/4)%1;g.fillRect(-U*.06,-U*1.95+u*U*1.9,U*.04,U*.18);}g.fillStyle='rgba(255,120,30,.5)';g.beginPath();g.ellipse(0,0,U*.5,U*.12,0,0,Math.PI*2);g.fill();break;}
+      case 'vent':{g.fillStyle='#2a100c';g.beginPath();g.ellipse(0,0,U*.6,U*.3,0,Math.PI,Math.PI*2);g.fill();for(let i=0;i<8;i++){const u=(t*.6+i/8+v)%1;g.fillStyle=`rgba(255,${150-u*90|0},40,${.8*(1-u)})`;g.beginPath();g.arc(Math.sin(i*2.3+u*3)*U*.25,-U*(.25+u*1.8),U*.05*(1-u*.5),0,Math.PI*2);g.fill();}break;}
+      case 'mite':{const c1=pl===1?'#1d4d70':pl===2?'#2e0c06':'#24213a',c2=C.tip;[[-.45,.7],[0,1.25],[.38,.85]].forEach(([x,hh])=>{g.fillStyle=c1;tri(x*U-U*.22,0,x*U,-U*hh,x*U+U*.22,0);g.fillStyle=c2;g.globalAlpha=.5;tri(x*U-U*.03,0,x*U,-U*hh*.95,x*U+U*.08,0);g.globalAlpha=.75;});break;}
+      case 'shroom':{[[-.4,.55,.28],[.1,.9,.4],[.5,.45,.22]].forEach(([x,hh,cr],i)=>{g.fillStyle='#3a3656';g.fillRect(x*U-U*.04,-hh*U,U*.08,hh*U);const gw=.6+.4*Math.sin(t*1.7+i+k),cg=g.createRadialGradient(x*U,-hh*U,0,x*U,-hh*U,cr*U*2);cg.addColorStop(0,C.glow+'66');cg.addColorStop(1,C.glow+'00');
+          g.globalAlpha=gw;g.fillStyle=cg;g.beginPath();g.arc(x*U,-hh*U,cr*U*2,0,Math.PI*2);g.fill();g.globalAlpha=.75;g.fillStyle=C.glow;g.beginPath();g.ellipse(x*U,-hh*U,cr*U,cr*U*.55,0,Math.PI,Math.PI*2);g.fill();});break;}
+      case 'lpool':{const gw=.6+.4*Math.sin(t*2+k),pg=g.createRadialGradient(0,0,0,0,0,U*1.2);pg.addColorStop(0,`rgba(255,150,40,${.6*gw})`);pg.addColorStop(1,'rgba(255,60,10,0)');g.fillStyle=pg;g.beginPath();g.arc(0,-U*.1,U*1.2,0,Math.PI*2);g.fill();
+        g.fillStyle='#ff7a1a';g.beginPath();g.ellipse(0,-U*.05,U*.7,U*.12,0,0,Math.PI*2);g.fill();g.fillStyle='#2a0f0b';tri(-U*1.1,0,-U*.75,-U*.5,-U*.5,0);tri(U*.55,0,U*.85,-U*.65,U*1.15,0);break;}
+      case 'obsid':{g.fillStyle='#120606';tri(-U*.3,0,-U*.05,-U*1.6,U*.25,0);tri(U*.1,0,U*.4,-U*1.0,U*.6,0);g.strokeStyle=`rgba(255,110,30,${.4+.3*Math.sin(t*2.5+k)})`;g.lineWidth=U*.03;g.beginPath();g.moveTo(-U*.05,-U*1.6);g.lineTo(-U*.12,-U*.5);g.stroke();break;}
+    }
+  }
   // pebbles, craters, snow drifts, ice cracks, lava veins…
   function drawDecor(pl,k,sx,t){
     const r1=hsh(k,2),r2=hsh(k,3),[x,y,f]=P(sx,0);g.save();g.translate(x,y);g.rotate(f);
@@ -549,11 +680,13 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
     if(sp.meteor)return sp._k='molten';
     const L=R.custom?(R.custom.L||3):R.L;if(L<=1)return sp._k=hsh(sp.s*3.1,17)<.5?'trap':'rock';
     const lone=!lv.spikes.some(o=>o!==sp&&Math.abs(o.s-sp.s)<1.1)&&!lv.pits.some(p=>p.b>sp.s-1&&p.a<sp.s+1.8)&&!lv.blocks.some(b=>b.b>sp.s-1&&b.a<sp.s+1.8);
-    const r=hsh(sp.s*3.1+L,17);return sp._k=(lone&&r<.34)?'lizard':r<.67?'trap':'rock';
+    const r=hsh(sp.s*3.1+L,17),ice=lv.P.planet===1;
+    if(ice)return sp._k=(lone&&r<.5)?'scorp':r<.72?'trap':'rock';   // the ice world's walker is an ice scorpion
+    return sp._k=(lone&&r<.34)?'lizard':r<.67?'trap':'rock';
   }
   function drawObstacle(lv,sp,t,S){
     const pl=lv.P.planet,k=obsKind(lv,sp),O=PH_OBS[pl];
-    let ss=sp.s;if(k==='lizard')ss=sp.s+Math.max(-.9,Math.min(1.5,(sp.s-S.s)*.45));
+    let ss=sp.s;if(k==='lizard'||k==='scorp')ss=sp.s+Math.max(-.9,Math.min(1.5,(sp.s-S.s)*.45));
     const [x,y,f]=P(ss,0),w=Math.max(7,sp.w*BP*.4),h=Math.max(UP*.45,sp.h*UP*.9);g.save();g.translate(x,y);g.rotate(f);   // drawn a little inside the hit box, so a near miss never looks like a hit
     // a soft warning glow on the ground so hazards still read at a glance
     const hz=k==='molten'?'#ff8a2a':O.tip,hg=g.createRadialGradient(0,-h*.3,0,0,-h*.3,Math.max(w*2.4,UP*.7));hg.addColorStop(0,hz+'44');hg.addColorStop(1,hz+'00');g.fillStyle=hg;g.beginPath();g.arc(0,-h*.3,Math.max(w*2.4,UP*.7),0,Math.PI*2);g.fill();
@@ -592,19 +725,60 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
       g.beginPath();g.ellipse(-L*1.05,-h*.33+bob,L*.42,h*.17,-.15,0,Math.PI*2);g.fill();
       g.fillStyle=O.lizEye;g.shadowColor=O.lizEye;g.shadowBlur=6;g.beginPath();g.arc(-L*1.15,-h*.4+bob,Math.max(1.6,h*.06),0,Math.PI*2);g.fill();g.shadowBlur=0;
       if(pl===2){g.fillStyle=`rgba(255,140,40,${.6+.3*Math.sin(t*4+sp.s)})`;[[-.4,-.3],[.1,-.25],[.5,-.32]].forEach(([dx,dy])=>{g.beginPath();g.arc(dx*L,dy*h+bob,Math.max(1.5,h*.05),0,Math.PI*2);g.fill();});}
+    }else if(k==='scorp'){
+      // an ice scorpion scuttling toward you (facing left): clear crystal shell, snapping claws, tail curled over with a glowing stinger
+      const ph=t*11+sp.s*3,L=w*1.15,bob=Math.sin(ph*2)*1,bt=((R.state==='play'&&!R.dead?tau():t)%1+1)%1,strike=Math.pow(1-bt,4);
+      g.strokeStyle='#5f9bc6';g.lineWidth=Math.max(1.6,h*.06);g.lineCap='round';
+      for(let i=0;i<4;i++){const lx=-L*.45+i*L*.32,sw=Math.sin(ph+i*1.6)*L*.12;[-1,1].forEach(d=>{g.beginPath();g.moveTo(lx,-h*.2+bob);g.lineTo(lx+sw+d*L*.08,-h*.34+bob*.5);g.lineTo(lx+sw+d*L*.16,0);g.stroke();});}
+      // tail: six beads curling up from the back and over, stinger pointing forward; it cocks back on each beat
+      const tp=[[L*.8,-h*.28],[L*1.35,-h*(.95+.1*strike)],[L*.95,-h*(1.5+.15*strike)],[L*.25,-h*(1.4+.1*strike)]];
+      const bz=u=>{const m=1-u;return[m*m*m*tp[0][0]+3*m*m*u*tp[1][0]+3*m*u*u*tp[2][0]+u*u*u*tp[3][0],m*m*m*tp[0][1]+3*m*m*u*tp[1][1]+3*m*u*u*tp[2][1]+u*u*u*tp[3][1]+bob];};
+      for(let i=0;i<=6;i++){const [x,y]=bz(i/6);g.fillStyle=i%2?'#bfe9ff':'#8cc9ea';g.beginPath();g.ellipse(x,y,Math.max(2.5,h*(.15-i*.012)),Math.max(2.2,h*(.13-i*.01)),0,0,Math.PI*2);g.fill();}
+      const [sx,sy]=bz(1);g.fillStyle='#ff3d9a';g.shadowColor='#ff3d9a';g.shadowBlur=8+10*strike;g.beginPath();g.moveTo(sx+h*.06,sy-h*.08);g.lineTo(sx-L*.3,sy+h*.18);g.lineTo(sx+h*.04,sy+h*.1);g.fill();g.shadowBlur=0;
+      // body: segmented crystal shell
+      const bg=g.createLinearGradient(0,-h*.48,0,-h*.05);bg.addColorStop(0,'#f4fdff');bg.addColorStop(1,'#6aa6cc');g.fillStyle=bg;
+      g.beginPath();g.ellipse(0,-h*.24+bob,L*.85,h*.17,0,0,Math.PI*2);g.fill();g.strokeStyle='rgba(60,110,150,.55)';g.lineWidth=1.2;for(let i=1;i<4;i++){const x=-L*.5+i*L*.3;g.beginPath();g.moveTo(x,-h*.38+bob);g.lineTo(x,-h*.1+bob);g.stroke();}
+      g.fillStyle='rgba(255,255,255,.55)';g.beginPath();g.ellipse(-L*.15,-h*.33+bob,L*.4,h*.04,0,0,Math.PI*2);g.fill();
+      // claws, snapping on the beat
+      [[-1,.0],[1,.12]].forEach(([d,o])=>{const cx2=-L*1.15,cy2=-h*.24+d*h*.12+bob,op=.25+.5*strike;g.strokeStyle='#8cc9ea';g.lineWidth=Math.max(2,h*.08);g.beginPath();g.moveTo(-L*.7,-h*.24+bob);g.lineTo(cx2+L*.2,cy2);g.stroke();
+        g.fillStyle='#d6f1ff';g.save();g.translate(cx2,cy2);[op,-op].forEach(a=>{g.save();g.rotate(a*d);g.beginPath();g.ellipse(-L*.12,0,L*.2,h*.06,0,0,Math.PI*2);g.fill();g.restore();});g.restore();});
+      g.fillStyle='#ff3d9a';[-1,1].forEach(d=>{g.beginPath();g.arc(-L*.72,-h*.3+d*h*.04+bob,Math.max(1.4,h*.035),0,Math.PI*2);g.fill();});
+      g.lineCap='butt';
     }else{
-      // a meteor that landed: a molten sphere, cracked crust, glowing and smoking
-      const r=Math.max(UP*.3,Math.min(w*1.15,h*.6)),cy=-r*.92;
-      const hg2=g.createRadialGradient(0,cy,r*.5,0,cy,r*2.6);hg2.addColorStop(0,'rgba(255,140,40,.45)');hg2.addColorStop(1,'rgba(255,80,20,0)');g.fillStyle=hg2;g.beginPath();g.arc(0,cy,r*2.6,0,Math.PI*2);g.fill();
-      g.fillStyle='rgba(0,0,0,.35)';g.beginPath();g.ellipse(0,0,r*1.3,r*.2,0,0,Math.PI*2);g.fill();
-      const mg=g.createRadialGradient(-r*.3,cy-r*.3,1,0,cy,r);mg.addColorStop(0,'#fff4b0');mg.addColorStop(.4,'#ffa030');mg.addColorStop(1,'#c2340a');g.fillStyle=mg;g.beginPath();g.arc(0,cy,r,0,Math.PI*2);g.fill();
-      // a cooling dark crust on top, split by glowing cracks
-      g.save();g.beginPath();g.arc(0,cy,r,0,Math.PI*2);g.clip();const cg2=g.createLinearGradient(0,cy-r,0,cy+r*.6);cg2.addColorStop(0,'rgba(45,14,8,.9)');cg2.addColorStop(.6,'rgba(70,20,10,.55)');cg2.addColorStop(1,'rgba(70,20,10,0)');g.fillStyle=cg2;g.fillRect(-r,cy-r,r*2,r*2);
-      const gl=.65+.35*Math.sin(t*4+sp.s);g.strokeStyle=`rgba(255,${190+40*gl|0},90,${gl})`;g.lineWidth=Math.max(1.2,r*.08);g.lineCap='round';
-      [[[-.7,-.5],[-.25,-.2],[.05,-.55],[.5,-.3]],[[-.25,-.2],[-.15,.25]],[[.05,-.55],[.2,-.9]],[[.5,-.3],[.75,.05]]].forEach(c=>{g.beginPath();c.forEach(([dx,dy],q)=>q?g.lineTo(dx*r,cy+dy*r):g.moveTo(dx*r,cy+dy*r));g.stroke();});g.lineCap='butt';g.restore();
-      for(let i=0;i<3;i++){const u=(t*.45+i/3+sp.s*.1)%1;g.fillStyle=`rgba(90,80,80,${.35*(1-u)})`;g.beginPath();g.arc(Math.sin(u*5+i)*r*.4,cy-r-u*r*3,r*(.25+u*.5),0,Math.PI*2);g.fill();}
+      // a meteor that landed: smashed half into the ground — a squashed molten lump in a crater, a rim of thrown-up dirt,
+      // glowing cracks spreading through the ground around it, and smoke
+      const T=PH_THEME[pl],r=Math.max(UP*.34,Math.min(w*1.4,h*.8)),cy=-r*.32,ry=r*.72;
+      const hg2=g.createRadialGradient(0,cy,r*.4,0,cy,r*2.8);hg2.addColorStop(0,'rgba(255,140,40,.45)');hg2.addColorStop(1,'rgba(255,80,20,0)');g.fillStyle=hg2;g.beginPath();g.arc(0,cy,r*2.8,0,Math.PI*2);g.fill();
+      // cracks in the ground, glowing
+      const gl=.65+.35*Math.sin(t*4+sp.s);g.strokeStyle=`rgba(255,${150+60*gl|0},60,${.55+.35*gl})`;g.lineWidth=Math.max(1.2,r*.07);g.lineCap='round';
+      [[-1,-.02,-1.9,.02,-2.4,-.03],[1,-.02,1.7,.03,2.3,-.02],[-.8,0,-1.3,.05,-1.5,.04],[.9,0,1.25,.06,1.6,.05]].forEach(c=>{g.beginPath();g.moveTo(c[0]*r,c[1]*r);g.lineTo(c[2]*r,c[3]*r);g.lineTo(c[4]*r,c[5]*r);g.stroke();});g.lineCap='butt';
+      // the lump: only its top shows above the ground
+      g.save();g.beginPath();g.rect(-r*3,-r*3,r*6,r*3+1);g.clip();
+      const mg=g.createRadialGradient(-r*.3,cy-ry*.5,1,0,cy,r);mg.addColorStop(0,'#fff4b0');mg.addColorStop(.4,'#ffa030');mg.addColorStop(1,'#c2340a');g.fillStyle=mg;g.beginPath();g.ellipse(0,cy,r*1.08,ry,0,0,Math.PI*2);g.fill();
+      g.beginPath();g.ellipse(0,cy,r*1.08,ry,0,0,Math.PI*2);g.clip();const cg2=g.createLinearGradient(0,cy-ry,0,cy+ry*.6);cg2.addColorStop(0,'rgba(45,14,8,.9)');cg2.addColorStop(.6,'rgba(70,20,10,.5)');cg2.addColorStop(1,'rgba(70,20,10,0)');g.fillStyle=cg2;g.fillRect(-r*1.1,cy-ry,r*2.2,ry*2);
+      g.strokeStyle=`rgba(255,${190+40*gl|0},90,${gl})`;g.lineWidth=Math.max(1.2,r*.08);g.lineCap='round';
+      [[[-.75,-.25],[-.3,-.05],[.05,-.45],[.55,-.2]],[[-.3,-.05],[-.2,.3]],[[.05,-.45],[.15,-.85]],[[.55,-.2],[.8,.1]]].forEach(c=>{g.beginPath();c.forEach(([dx,dy],q)=>q?g.lineTo(dx*r,cy+dy*ry):g.moveTo(dx*r,cy+dy*ry));g.stroke();});g.lineCap='butt';g.restore();
+      // crater rim: dirt pushed up on both sides, overlapping the lump's base
+      [-1,1].forEach(sd=>{const rg=g.createLinearGradient(0,-r*.35,0,r*.05);rg.addColorStop(0,T.top);rg.addColorStop(1,T.crust);g.fillStyle=rg;g.beginPath();g.ellipse(sd*r*1.05,0,r*.62,r*.26,sd*.18,Math.PI,Math.PI*2);g.fill();
+        g.fillStyle=T.crust;for(let q=0;q<3;q++){g.beginPath();g.arc(sd*r*(1.5+q*.32),-r*.05,r*(.1-q*.02),0,Math.PI*2);g.fill();}});
+      for(let i=0;i<3;i++){const u=(t*.45+i/3+sp.s*.1)%1;g.fillStyle=`rgba(90,80,80,${.35*(1-u)})`;g.beginPath();g.arc(Math.sin(u*5+i)*r*.4,cy-ry-u*r*3,r*(.25+u*.5),0,Math.PI*2);g.fill();}
     }
     g.restore();
+  }
+  // a floating crystal bell (ring it with BOUNCE): bounce-pink glass, bobbing; rung bells swing and send out rings
+  function drawBell(d,rung,t,pulse,S){
+    const b=d.bell,age=rung&&b.rung?(performance.now()-b.rung)/1000:9,sw=rung?Math.sin(age*14)*Math.exp(-age*3)*.5:0,bob=Math.sin(t*2.4+d.s)*.06;
+    const [x,y,f]=P(d.s,d.h+bob),r=Math.max(10,UP*.3),passed=!rung&&d.s<S.s-.5;g.save();g.translate(x,y);g.rotate(f+sw);g.globalAlpha=passed?.35:1;
+    const near=Math.max(0,1-Math.abs(d.s-S.s)/2.5);
+    if(!rung&&!passed){g.strokeStyle=`rgba(255,77,255,${.25+.45*pulse*near})`;g.lineWidth=2;g.beginPath();g.arc(0,-r*.1,r*(1.35+.25*pulse),0,Math.PI*2);g.stroke();}
+    g.strokeStyle='rgba(220,240,255,.5)';g.lineWidth=1;g.beginPath();g.moveTo(0,-r*.95);g.lineTo(0,-r*1.6);g.stroke();
+    const bg=g.createLinearGradient(-r,0,r,0);bg.addColorStop(0,'#ff4dff');bg.addColorStop(.45,'#ffe0ff');bg.addColorStop(1,'#c04dff');
+    if(rung){g.shadowColor='#ff9dff';g.shadowBlur=20*Math.exp(-age*1.5);}g.fillStyle=bg;
+    g.beginPath();g.moveTo(-r*.8,r*.45);g.quadraticCurveTo(-r*.7,-r*.1,-r*.45,-r*.65);g.quadraticCurveTo(0,-r*1.05,r*.45,-r*.65);g.quadraticCurveTo(r*.7,-r*.1,r*.8,r*.45);g.closePath();g.fill();g.shadowBlur=0;
+    g.fillStyle='rgba(255,255,255,.6)';g.beginPath();g.ellipse(-r*.3,-r*.3,r*.1,r*.3,.3,0,Math.PI*2);g.fill();
+    g.fillStyle='#ffe0ff';g.beginPath();g.arc(sw*r*.6,r*.55,r*.14,0,Math.PI*2);g.fill();
+    g.restore();
+    if(rung&&age<1.2){for(let q=0;q<2;q++){const a2=age-q*.15;if(a2<0)continue;g.strokeStyle=`rgba(255,157,255,${Math.max(0,.7-a2*.6)})`;g.lineWidth=2;g.beginPath();g.arc(x,y,r*(1+a2*3.5),0,Math.PI*2);g.stroke();}}
   }
   // faceted crystal spikes: rock shards, icicles, glowing obsidian
   function drawSpike(pl,sp,t){
@@ -653,6 +827,7 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
     const CX=AX,CY=GY+RP,ang=s=>(s-S.s)*BP/RP-Math.PI/2;
     // ── distant ridge (turns slower than the planet = depth) ──
     drawRidge(lv,S,CX,CY,t);
+    drawMid(lv,S,CX,CY,t);
     if(lv.P.finish==='exit')drawFinish(lv,S,CX,CY,ang,s0,s1,t);   // daylight sits behind the ground
     // ── planet body + crust ──
     const T=PH_THEME[lv.P.planet];
@@ -679,12 +854,13 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
     // ── blocks + floating platforms ──
     lv.blocks.forEach(b=>{if(b.b<s0-.2||b.a>s1+.2)return;drawBlock(lv.P.planet,b,t);});
     // ── spikes: faceted crystals (meteors drop in during comet chases) ──
-    lv.spikes.forEach(sp=>{if(sp.s<s0-1||sp.s>s1+(sp.meteor?14:1))return;
+    lv.spikes.forEach(sp=>{if(sp.s<s0-1||sp.s>s1+(sp.meteor?14:sp.icicle?2:1))return;
       // a falling meteor: u = beats until it lands (it touches down 1.3 beats ahead of you). It also drifts forward a little
       // while it falls, so on screen it dives steeply into the ground; the tail is drawn along the exact path it came from,
       // so it always trails straight behind the head
-      const u=sp.meteor?sp.s-S.s-1.3:0;
-      if(u>0){const DR=.45,FALL=2.6,mp=uu=>P(S.s+1.3+(1-DR)*uu,sp.h*.5+FALL*uu),[x,y]=mp(u);
+      if(sp.icicle){drawIcicle(lv,sp,S,t);return;}
+      const u=sp.meteor?sp.lt-S.s:0,lead=sp.s-(sp.lt==null?sp.s:sp.lt);
+      if(u>0){const DR=.45,FALL=2.6,mp=uu=>P(S.s+lead+(1-DR)*uu,sp.h*.5+FALL*uu),[x,y]=mp(u);
         if(y<-BP||x>W+BP*2)return;
         const TL=.75,pts=[];for(let i=0;i<=6;i++)pts.push(mp(u+TL*i/6));const [tx,ty]=pts[6];
         const tg=g.createLinearGradient(x,y,tx,ty);tg.addColorStop(0,'rgba(255,190,80,.9)');tg.addColorStop(.45,'rgba(255,120,40,.45)');tg.addColorStop(1,'rgba(255,60,20,0)');
@@ -737,7 +913,8 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
       // the same icon as the button it means
       g.save();g.translate(x-r*.62,y-r*.62);g.scale(r*1.24/24,r*1.24/24);g.strokeStyle='#0a0a16';g.fillStyle='#0a0a16';g.lineWidth=2.8;g.lineCap='round';g.lineJoin='round';g.stroke(a.w==='j'?PH_ICO_J:PH_ICO_B);if(a.w!=='j'){g.beginPath();g.arc(12,3.2,1.6,0,Math.PI*2);g.fill();}g.restore();g.globalAlpha=1;});
     // stardust
-    lv.dust.forEach((d,i)=>{if(R.got.has(i)||d.s<s0||d.s>s1)return;const [x,y]=P(d.s,d.h),z=BP*.06*(1+.3*Math.sin(t*6+i));
+    lv.dust.forEach((d,i)=>{if(!d.bell)return;if(d.s<s0-1||d.s>s1+1)return;drawBell(d,R.got.has(i),t,pulse,S);});
+    lv.dust.forEach((d,i)=>{if(d.bell||R.got.has(i)||d.s<s0||d.s>s1)return;const [x,y]=P(d.s,d.h),z=BP*.06*(1+.3*Math.sin(t*6+i));
       g.fillStyle='#ffe680';g.shadowColor='#ffd23a';g.shadowBlur=8;g.beginPath();for(let k=0;k<8;k++){const r=k%2?z*.4:z,a=k/8*Math.PI*2+t;g.lineTo(x+Math.cos(a)*r,y+Math.sin(a)*r);}g.closePath();g.fill();g.shadowBlur=0;});
     // comet chasing you
     if(lv.bossS<Infinity&&S.s>lv.bossS-3){

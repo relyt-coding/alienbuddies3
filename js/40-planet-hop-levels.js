@@ -92,6 +92,13 @@ function phTokens(){
     st:{len:8,o:[BL(.5,1.6,.8),BL(1.5,2.6,1.6),BL(2.5,4.4,2.4)],a:[[0,'j'],[1,'j'],[2,'j'],[4,'j']]},
     kk:{len:4,o:[BL(.5,1.6,.8),BL(1.5,3.0,1.6)],a:[[0,'j'],[1,'j']]},
     dk:{len:4,o:[BL(.9,3,1.6)],a:[[0,'j'],[.4,'j']]},          // double jump up onto a tall rock
+    D2:{len:4,o:[S(.5),S(1.1)],a:[[0,'j'],[.5,'j']]},           // two spikes close together: double jump over both
+    DD:{len:4,o:[S(.5),S(1.1),S(2.5),S(3.1)],a:[[0,'j'],[.5,'j'],[2,'j'],[2.5,'j']]},   // two double jumps in a bar
+    // ice caves: icicles shake loose from the roof and land just ahead of you, on the beat
+    i: {len:4,o:[Object.assign(S(.5,.4,.6),{icicle:true})],a:[[0,'j']]},
+    i2:{len:4,o:[Object.assign(S(.5,.4,.6),{icicle:true}),Object.assign(S(2.5,.4,.6),{icicle:true})],a:[[0,'j'],[2,'j']]},
+    // crystal bells (ice world): the band drops out and you play the tune — BOUNCE as you pass each bell. Bonus stardust, never a life
+    Bb:{len:8,o:[1,2,3,4.5,5,6,6.5].map((s,i)=>({k:'bell',s,n:i})),a:[1,2,3,4.5,5,6,6.5].map(s=>[s,'b'])},
     f: {len:4,o:[PIT(.3,3.6),BL(.55,2.2,.8,true),BL(2.6,3.3,.8,true)],a:[[0,'j'],[2,'j']]},
     // bounce pads (8 beats)
     Bf:{len:8,o:pads([[1,3],[3,5],[5,7]]),a:[[0,'j'],[1,'b'],[3,'b'],[5,'b']]},              // practice: solid ground under the pads
@@ -107,19 +114,19 @@ function phTokens(){
 const PH_DEBUT={s:[1,''],p:[1,''],st:[1,''],k:[2,''],rE:[3,''],P:[3,''],
   Bf:[6,''],B2:[6,''],kk:[5,''],Lr:[4,'LOW GRAVITY'],Lg:[4,''],
   B1:[7,''],f:[8,''],s3:[9,''],Pm:[9,''],d:[11,''],
-  rO:[12,''],so:[12,''],dk:[13,'']};   // only low gravity gets a sign; every new idea still gets glowing press markers
+  rO:[12,''],so:[12,''],dk:[5,''],D2:[3,''],DD:[4,''],i:[7,''],i2:[7,''],Bb:[7,'']};   // only low gravity gets a sign; every new idea still gets glowing press markers
 // the 15 courses (| marks the song's 8-bar sections; boss levels end with an 8-bar comet chase)
 const PH_COURSE=[
   /* 1 First Steps   */ 'rA rE s rE | C p st',
   /* 2 Crater Skipper*/ 'rE k s2 k | C p2 k rE',
-  /* 3 Moonbeam      */ 'rA rE rA P rD P s2 rE | C P k P p2 rF P rA',
-  /* 4 Lunar Leap    */ 'rA s Lr rD p2 L | C k Lg s2 P L | rE s2 P rA',
-  /* 5 Comet (boss)  */ 'rA s2 k P Lg p2 rE | kk rD kk P C s2 Lg | s2 p2 s2 P s s2 Lg',
-  /* 6 Glacia Glide  */ 'rA s Bf rD p2 B2 | C s2 B2 k Lg rA',
-  /* 7 Frostbite Funk*/ 'rB s2 B2 rD P B1 | C k B1 p2 s2 Lg | rE P s2 rA',
-  /* 8 Ice Spire Hop */ 'rA k f rD f s2 B2 | C f kk f L P f | s2 f p2 rA',
-  /* 9 Aurora Drift  */ 'rB s2 s3 rD s3 P Lg | Pm rE Pm s3 C f B1 | s3 kk Pm s3 L s3 rA',
-  /*10 Frozen Comet  */ 'rA s3 f Pm B1 kk rE | s3 P Lg C s2 B2 | s3 p2 Pm s2 s3 P B1',
+  /* 3 Moonbeam      */ 'rA rE rA P rF P D2 rE | C P k D2 p2 rF D2 rA',
+  /* 4 Lunar Leap    */ 'rA s Lr D2 p2 L | C k Lg DD P L | rE D2 P rA',
+  /* 5 Comet (boss)  */ 'rA s2 dk P Lg D2 rE | kk rF kk P C DD Lg | s2 p2 s2 P s s2 Lg',
+  /* 6 Glacia Glide  */ 'rA s Bf rF p2 B2 | C D2 B2 k Lg rA',
+  /* 7 Frostbite Funk*/ 'rB i2 B2 rD P B1 | Bb C k i B1 D2 Lg | rE P i2 rA',
+  /* 8 Ice Spire Hop */ 'rA k f DD f s2 B2 | C f kk f Bb P f | D2 f p2 rA',
+  /* 9 Aurora Drift  */ 'rB s2 i2 rF s3 P Lg | Pm rE Pm i C f B1 | Bb s3 kk Pm i2 DD s3 rA',
+  /*10 Frozen Comet  */ 'rA s3 f Pm B1 dk rE | s3 P Lg C DD B2 | s3 p2 Pm D2 s3 P B1',
   /*11 Magmora Dash  */ 'rA rE d rD d s3 B2 | C d Pm d B1 f d | s3 kk d rA',
   /*12 Lava Lamp     */ 'rB rO so rD so s3 Lg | so d Pm so C f B1 | so s3 d so L so rA',
   /*13 Ember Leap    */ 'rA rE dk rD dk s3 B2 | kk dk so d C Pm B1 | dk s3 f dk Lg d rA',
@@ -165,8 +172,52 @@ function phBuild(L,songIn){
   const bot=phRunBot(lv,true);
   lv.botOk=bot.ok;lv.botDeath=bot.death;
   lv.dust=bot.path.filter(p=>p.air).filter((p,i,a)=>i===0||p.s-a[i-1].s>=.24).map(p=>({s:p.s,h:p.h+.5}));
+  phDress(lv,bot,!!songIn);
   return lv;
 }
+
+// ── after the course is built: bells, landing beats, the cave's shape and the ice world's chimes ──
+const PH_BELL_TUNE=[0,2,4,7,4,2,4];   // scale steps the crystal bells play, in order
+function phDegMidi(song,d){const sc=WW_SCALES[song.scaleName]||WW_SCALES.minor;return song.root+sc[((d%7)+7)%7]+12*Math.floor(d/7);}
+function phDress(lv,bot,custom){
+  const P=lv.P,song=lv.song,beat=60/P.bpm;
+  // things that fall from the sky (meteors) or the roof (icicles) land on a 16th, about 1½ beats ahead of you
+  lv.spikes.forEach(sp=>{if(sp.meteor||sp.icicle)sp.lt=Math.round((sp.s-1.5)*4)/4;});
+  // crystal bells: each is bonus stardust you ring with BOUNCE; the band thins out so the bells are the lead voice
+  lv.bells=lv.objs.filter(o=>o.k==='bell');
+  lv.bells.forEach(b=>{b.midi=phDegMidi(song,PH_BELL_TUNE[b.n%PH_BELL_TUNE.length])+36;lv.dust.push({s:b.s,h:1.05,bell:b});});
+  const ranges=[];lv.bells.forEach(b=>{if(b.n===0)ranges.push([b.s-1,b.s+7]);});
+  if(ranges.length){const st=WW_STYLES[P.style]||{};
+    song.events=song.events.filter(e=>{const b=e.t/beat;if(!ranges.some(([a,z])=>b>=a&&b<z))return true;
+      if(e.id===st.kId){e.vel*=.5;return (b%2)<.01;}             // just a soft kick on 1 and 3
+      if(e.id===st.hId){e.vel*=.45;return true;}                 // and a whisper of hats
+      return false;});}
+  // the cave's shape: a tight tunnel to start, opening into big caverns later. It never closes in on any jump you could make
+  if(P.cave){
+    const N=Math.ceil((lv.end+14)/.25),need=new Float32Array(N),tgt=new Float32Array(N);
+    bot.path.forEach(p=>{const i=Math.round(p.s/.25);if(i>=0&&i<N)need[i]=Math.max(need[i],p.h);});
+    for(let i=0;i<N;i++){const s=i*.25;let top=0;lv.blocks.forEach(b=>{if(s>=b.a-.6&&s<=b.b+.6)top=Math.max(top,b.h);});
+      const z=lv.zones.some(z=>s>=z.a-1&&s<z.b+1),pad=lv.pads.some(p=>s>=p.s-.5&&s<=p.next+.5);
+      need[i]=Math.max(need[i],top+(z?4:2),pad?4.2:0)+1.05;
+      const sec=Math.floor((s-4)/32),wig=Math.sin(s*.43)*.45+Math.sin(s*1.21+1)*.25;
+      tgt[i]=(s<4+24?3.6:sec%2?7.2:4.9)+wig;                  // first section: a narrow tunnel; then caverns and passages take turns
+      if(s>lv.end-6)tgt[i]=4.9;}                               // back to the cave mouth's height for the exit
+    const maxF=(a,r)=>{const o=new Float32Array(N);for(let i=0;i<N;i++){let m=0;for(let j=Math.max(0,i-r);j<=Math.min(N-1,i+r);j++)m=Math.max(m,a[j]);o[i]=m;}return o;};
+    const avg=(a,r)=>{const o=new Float32Array(N);for(let i=0;i<N;i++){let m=0,n=0;for(let j=Math.max(0,i-r);j<=Math.min(N-1,i+r);j++){m+=a[j];n++;}o[i]=m/n;}return o;};
+    const floor=avg(maxF(need,6),4),shape=avg(tgt,10);
+    lv.caveH=new Float32Array(N);for(let i=0;i<N;i++)lv.caveH[i]=Math.max(3.3,shape[i],floor[i]);
+  }
+  // the ice world's soundscape: sparse crystal chimes from the song's scale ring over the beat
+  if(P.planet===1&&!custom){
+    const R=wwRng(P.seed*31+7),bars=song.bars,ev=song.events,deg=[0,2,4,7,9,11];
+    for(let b=song.intro;b<bars-1;b++){const b0=b*4;if(ranges.some(([a,z])=>b0>=a-.01&&b0<z))continue;
+      const n=1+Math.floor(R()*2.2);
+      for(let k=0;k<n;k++){const st=Math.floor(R()*8)*.5,d=deg[Math.floor(R()*deg.length)];
+        ev.push({t:(b0+st)*beat,kind:'ice',midi:phDegMidi(song,d)+36+(R()<.25?12:0),vel:.18+R()*.3});}}
+    ev.sort((a,b)=>a.t-b.t);
+  }
+}
+function phCaveH(lv,s){const a=lv.caveH;if(!a)return 4.9;const x=Math.max(0,s/.25),i=Math.floor(x),f=x-i;if(i>=a.length-1)return a[a.length-1];return a[i]+(a[i+1]-a[i])*f;}
 
 // ── physics (shared by the game and the bot) ──
 function phNewState(){return{s:0,h:0,vy:0,grounded:true,air:1,onPad:null,padT:0,bufJ:-9,bufB:-9,dead:null,flip:0,landT:-9,padsDropped:new Set(),bounces:0};}

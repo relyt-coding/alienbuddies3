@@ -50,6 +50,16 @@ const WW_STYLE_ORDER=['house','boombap','synthwave','funk','dub','trap','house',
 const WW_SCALES={minor:[0,2,3,5,7,8,10],dorian:[0,2,3,5,7,9,10],major:[0,2,4,5,7,9,11],mixo:[0,2,4,5,7,9,10],phryg:[0,1,3,5,7,8,10]};
 const WW_PROGS=[[0,5,3,4],[0,3,4,0],[0,6,5,6],[0,4,5,3],[0,2,3,4],[5,3,0,4],[0,5,2,6],[3,4,0,0]];
 
+// ── velocity grooves: the busy, bright sounds (shakers, hats, cowbells, rims, glitches) never hit every note at the same
+// volume. Each 16th position has its own weight (beat > "and" > "e"/"a"), each sound gets its own accent shape, phrases
+// swell over 8 bars, and a little human wobble keeps repeats from sounding like a machine.
+const WW_GROOVE_IDS={shaker:[1,.45,.72,.4],hihat:[1,.5,.78,.45],cowbell:[1,.55,.62,.5],rimshot:[1,.7,.8,.6],glitch:[.9,.55,.7,.5],spaceperc:[1,.7,.75,.6],vinyl:[1,.8,.85,.8],floortom:[1,.75,.85,.7]};
+function wwGroove(id,s,bodyBar,rnd){
+  const w=WW_GROOVE_IDS[id];if(!w)return 1;
+  const pos=w[s%4]*(s%8===4?.92:1)*(s===0?1.08:1);           // beat 2/4 a touch lighter than 1/3, the downbeat leans in
+  const phrase=.8+.2*Math.sin(Math.PI*((bodyBar%8)+.5)/8);  // softer at the edges of a phrase, fuller in the middle
+  return Math.min(1.15,pos*phrase*(.9+rnd()*.2));
+}
 function wwRng(seed){let a=seed>>>0;return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
 
 // level settings (difficulty curve)
@@ -85,6 +95,7 @@ function wwCompose(lvl,Pin){
   const ev=[],drumBars=[],sections=[];
   const push=(t,kind,id,vel,midi,dur)=>ev.push({t,kind,id,vel,midi,dur});
   const pat=(str,s)=>str[s]==='x'?1:str[s]==='o'?.55:0;
+  const hum=wwRng(9173*(P.seed||lvl)+7777);   // separate dice for the groove, so the song itself doesn't change
   for(let b=0;b<bars;b++){
     const body=b-intro,isIntro=b<intro,isOutro=b>=bars-outro;
     const sec=isIntro?'intro':isOutro?'outro':(P.boss&&body>=P.bodyBars-8)?'boss':(Math.floor(body/8)%2===0?'A':'B');
@@ -101,7 +112,7 @@ function wwCompose(lvl,Pin){
       if(P.style==='trap'&&sec!=='intro'&&body%4===3&&s>=12)h=.6; // hat rolls
       if(k){push(t,'drum',st.kId,.95*k);db.k.push(s);}
       if(sn){push(t,'drum',st.sId,.8*sn);db.s.push(s);}
-      if(h){push(t,'drum',st.hId,(sec==='A'?.4:.5)*h);db.h.push(s);}
+      if(h){push(t,'drum',st.hId,(sec==='A'?.4:.5)*h*wwGroove(st.hId,s,Math.max(0,body),hum));db.h.push(s);}
       if(sec==='boss'&&s%4===2)push(t,'drum','floortom',.55);
     }
     drumBars.push(db);
@@ -113,7 +124,7 @@ function wwCompose(lvl,Pin){
     layers.forEach(([id,str,v])=>{
       // a level can hold a layer back until late in the song (P.late = {sound:[from fraction, volume ×]})
       const lt=P.late&&P.late[id];if(lt){if(b<Math.floor(bars*lt[0]))return;v*=lt[1];}
-      for(let s=0;s<16;s++){const x=pat(str,s);if(x&&!(fill&&s>=12))push(t0+s*step,'drum',id,v*x);}});
+      for(let s=0;s<16;s++){const x=pat(str,s);if(x&&!(fill&&s>=12))push(t0+s*step,'drum',id,v*x*wwGroove(id,s,body,hum));}});
     // 808 boom under the kicks (one fixed note, so nothing can clash)
     if(lay.boom&&sec!=='A')db.k.forEach(s=>push(t0+s*step,'drum','sub',.5));
     // a crash-style accent on the first beat of every section

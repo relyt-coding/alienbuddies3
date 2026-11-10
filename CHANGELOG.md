@@ -2,6 +2,17 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.109 - 2026-11-09 21:10
+- Planet Hop: checkpoint crystals play a rising crystal chime in the song's key
+- Planet Hop: caves change shape: a tight tunnel to start, opening into big caverns later; the echo and reverb grow and shrink with the space
+- Planet Hop: warp portals hum as you get close and play a rising warp when you jump in
+- Planet Hop: comets whoosh in and land with a thud on the beat; landed comets are smashed half into the ground with a dirt rim and glowing cracks
+- Planet Hop: midground landmarks on every level (landers, dishes, arches, ice spires, frosted pines, geysers, volcanoes, lava falls, cave crystals and more)
+- Planet Hop: more double jumps from level 3 on (new close spike pairs and double-double bars)
+- Planet Hop ice world: icicles shake loose from cave roofs and land on the beat; ice scorpions; crystal chimes and wind in the music
+- Planet Hop ice world: crystal bells: the band drops out and you play the tune by pressing BOUNCE at each bell (bonus stardust)
+- Worm Whack + Planet Hop: shakers, hats, cowbells, rims and other busy sounds now have velocity grooves (accents, ghost notes, phrase swells)
+
 ## v0.2.108 - 2026-11-09 20:15
 - Planet Hop: falling comet meteors dive steeply into the ground, with the tail trailing exactly along the path they came from
 - Planet Hop: level 3's cowbell holds off until the last quarter of the song, and sits lower in the mix

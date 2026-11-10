@@ -2,6 +2,16 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.111 - 2026-11-09 22:20
+- Minigames reworked: Planet Hop is in the bunker from the start for 1 Alien Gem (levels 1-5); the Matching Game sits under it for 10 gems
+- Matching Game: no intro; level 1 is the 4-card board and is free, each level after needs 4 more Alien Buddies
+- Skill tree minigame path: Ice Planet (Planet Hop 6-10) -> Minigame Cockpit -> Worm Whack (1-5) -> Magmora (Planet Hop 11-15) -> Beat Defense; the Wyrm Moon and its trail open Worm Whack 5 levels at a time
+- Planet Hop, Worm Whack and Beat Defense now boost Alien Gems: +0.5x per level cleared, +1x for a perfect clear (all stardust / 3 stars / no damage); only the Matching Game gives point multipliers
+- New COCKPIT page left of the bunker (5 pages to swipe); on desktop a GAMES button in the bunker opens it
+- Worm Whack: 6 pads from level 3
+- NEW MINIGAME: Beat Defense: build drum towers around your ship; the radar sweeps once a bar and each tower fires on the beat of the slice it sits in (kick, snare, hi-hat, clap); lizards and scorpions attack across 10 levels
+- Old saves keep everything they had (old Planet Hop / Worm Whack nodes become the new ones; Memory Boost refunded)
+
 ## v0.2.110 - 2026-11-09 21:00
 - Worm Whack: the beat never drops out on a miss; the whole song always plays
 - Worm Whack: every squish lands a punchy thump plus a mallet note in the song's key, climbing a melody as your combo grows (gold, boss and held worms play a chord)

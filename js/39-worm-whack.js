@@ -6,11 +6,12 @@
 //  Worms: normal · GOLD (×3 score) · ARMORED (2 hits) · HOLD (keep the pad down) · MINES (don't hit!)
 //  Levels 10 / 20 / 30 end with the Wyrm boss bursting out of several craters at once.
 // ══════════════════════════════════════════════
-let wormMultiplier=1;               // permanent points × from first clears (saved)
+let wormMultiplier=1;               // (old saves only: Worm Whack now boosts Alien Gems, see 44-minigame-hub.js)
 let wormProgress={best:{}};         // best[lvl] = {stars, acc, score}
 
 function wwStarsFor(acc){return acc>=.95?3:acc>=.85?2:acc>=.7?1:0;}
-function wwLevelOpen(l){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||l===1||((wormProgress.best[l-1]||{}).stars||0)>=1;}
+function wwLevelOpen(l){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||((typeof mgWwAccess!=='function'||mgWwAccess(l))&&(l===1||((wormProgress.best[l-1]||{}).stars||0)>=1));}
+function wwGemVal(b){return b&&(b.stars||0)>=1?(b.stars>=3?1:.5):0;}
 
 (function(){
   const $=id=>document.getElementById(id);
@@ -77,13 +78,13 @@ function wwLevelOpen(l){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||l===
     if(t==='mine'){mineOpts.best=wormProgress.custom||{};mgRenderCustom($('wwMinePane'),mineOpts);}}
   function showSelect(){
     $('wwResults').classList.remove('open');$('wwSelect').classList.add('open');showTab(tab);
-    $('wwBonus').innerHTML=`Worm bonus: <b>×${typeof formatStore==='function'?formatStore(wormMultiplier):wormMultiplier.toFixed(2)}</b> points forever · ${Object.values(wormProgress.best).reduce((a,b)=>a+(b.stars||0),0)} / 90 ★`;
+    $('wwBonus').innerHTML=`Worm Whack gem bonus: <b>+${Object.values(wormProgress.best).reduce((a,b)=>a+wwGemVal(b),0)}×</b> Alien Gems · ${Object.values(wormProgress.best).reduce((a,b)=>a+(b.stars||0),0)} / 90 ★`;
     const g=$('wwGrid');g.innerHTML='';
     for(let l=1;l<=30;l++){
       const b=document.createElement('button');b.className='ww-tile';const best=wormProgress.best[l]||{},openL=wwLevelOpen(l);
       if(!openL)b.classList.add('locked');if(l===selLvl)b.classList.add('sel');if(l%10===0)b.classList.add('boss');
       b.innerHTML=`<span class="n">${openL?l:'🔒'}</span><span class="st">${'★'.repeat(best.stars||0)}<i>${'★'.repeat(3-(best.stars||0))}</i></span>`;
-      b.addEventListener('click',()=>{if(!openL){showToast('Clear level '+(l-1)+' first');return;}selLvl=l;showSelect();});
+      b.addEventListener('click',()=>{if(!openL){showToast(typeof mgWwAccess==='function'&&!mgWwAccess(l)?'🔒 '+mgWwLockMsg(l):'Clear level '+(l-1)+' first');return;}selLvl=l;showSelect();});
       g.appendChild(b);
     }
     const P=wwLevel(selLvl),best=wormProgress.best[selLvl];
@@ -92,7 +93,7 @@ function wwLevelOpen(l){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||l===
     $('wwDetail').innerHTML=`<div class="ww-d-name">${selLvl}. ${P.name}</div>
       <div class="ww-d-meta">${P.bpm} BPM · ${P.style.toUpperCase()} · ${P.craters} craters${feats.length?' · '+feats.join(', '):''}</div>
       ${newF?`<div class="ww-d-new">${newF}</div>`:''}
-      <div class="ww-d-meta">${best?`Best: ${Math.round(best.acc*100)}% · ${'★'.repeat(best.stars)}${'☆'.repeat(3-best.stars)}`:`First clear: <b>×${P.reward}</b> points forever`}</div>
+      <div class="ww-d-meta">${best?`Best: ${Math.round(best.acc*100)}% · ${'★'.repeat(best.stars)}${'☆'.repeat(3-best.stars)}`:`Clear it: <b>+0.5×</b> Alien Gems · ★★★: <b>+1×</b>`}</div>
       <button class="ww-play" id="wwPlay">PLAY</button>`;
     $('wwPlay').addEventListener('click',()=>start(selLvl));
   }
@@ -535,9 +536,10 @@ function wwLevelOpen(l){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||l===
     G.state='done';clearInterval(G.sched);cancelAnimationFrame(G.raf);
     const acc=G.total?G.hitVal/G.total:1,stars=wwStarsFor(acc),custom=G.song.custom,L=custom?0:G.P.lvl;
     const store=custom?(wormProgress.custom||(wormProgress.custom={})):wormProgress.best,K=custom?G.P.custom:L;
-    const prev=store[K],first=!custom&&stars>=1&&!(prev&&prev.stars>=1);
+    const prev=store[K],first=!custom&&stars>=1&&!(prev&&prev.stars>=1),gv0=custom?0:wwGemVal(prev);
     if(!prev||acc>prev.acc||G.score>prev.score)store[K]={stars:Math.max(stars,prev?prev.stars:0),acc:Math.max(acc,prev?prev.acc:0),score:Math.max(G.score,prev?prev.score:0)};
-    if(first){wormMultiplier*=G.P.reward;try{playSfxTierUnlock&&playSfxTierUnlock(3);}catch(e){}}
+    const gemGain=custom?0:wwGemVal(store[K])-gv0;   // +0.5× Alien Gems for a clear, +1× in total for 3 stars
+    if(first){try{playSfxTierUnlock&&playSfxTierUnlock(3);}catch(e){}}
     if(typeof autoSave==='function')autoSave();
     if(typeof renderUI==='function')renderUI();
     const s=G.stats,pass=stars>=1;
@@ -551,7 +553,7 @@ function wwLevelOpen(l){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||l===
         <div><b>${(s.perfect||0)+(s.good||0)+(s.ok||0)}</b><small>WHACKED</small></div><div><b style="color:#ff5566">${s.miss||0}</b><small>MISSED</small></div>
         ${s.mine?`<div><b style="color:#ff6644">${s.mine}</b><small>MINES HIT</small></div>`:''}
       </div>
-      ${first?`<div class="ww-reward">Permanent bonus: ×${G.P.reward} points!${L<30?' · Level '+(L+1)+' unlocked':''}</div>`:''}
+      ${gemGain>0?`<div class="ww-reward">💎 +${gemGain}× Alien Gems forever!${first&&L<30&&wwLevelOpen(L+1)?' · Level '+(L+1)+' unlocked':''}</div>`:first&&L<30&&!wwLevelOpen(L+1)?`<div class="ww-reward">🔒 Next: ${mgWwLockMsg(L+1)}</div>`:''}
       <div class="ww-res-btns">
         <button class="ww-btn" id="wwRetry">RETRY</button>
         ${!custom&&pass&&L<30?'<button class="ww-btn ww-play" id="wwNext">NEXT LEVEL</button>':''}
@@ -594,10 +596,10 @@ function wwLevelOpen(l){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||l===
   eb.addEventListener('click',open);
   let _wwHad=null;
   function syncEntry(){
-    const has=(typeof TEST_MODE!=='undefined'&&TEST_MODE)||(typeof unlockedSkills!=='undefined'&&!!unlockedSkills.worm_whack);
+    const has=(typeof TEST_MODE!=='undefined'&&TEST_MODE)||(typeof unlockedSkills!=='undefined'&&!!unlockedSkills.ww_moon)||(typeof mgBought!=='undefined'&&mgBought.wwAll);
     eb.style.display=has?'':'none';
-    if(_wwHad===false&&has)showToast('🪱 WORM WHACK unlocked! Find it in the bunker, under the Matching Game.');
-    _wwHad=has;
+    if(_wwHad===false&&has)showToast('🪱 WORM WHACK unlocked! Find it in the cockpit.');
+    _wwHad=document.body.classList.contains('game-active')?has:null;   // no toast for what a save already had
   }
   setInterval(syncEntry,800);syncEntry();
   // leaving the tab mid-song stops the level (the music can't pause)

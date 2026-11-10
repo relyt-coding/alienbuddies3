@@ -42,6 +42,12 @@ function updateMatchingBtn(){
   if(!btn||!lck)return;
   const nextLvl=matchLevelsCompleted+1;
   const needed=aliensNeededForLevel(nextLvl);
+  // (levels are shown from 1: the first board is 4 cards and free, then each level needs 4 more Alien Buddies)
+  if(typeof mgBought!=='undefined'&&!mgBought.match&&!(typeof TEST_MODE!=='undefined'&&TEST_MODE)){
+    btn.style.opacity='1';btn.style.borderColor='#1f6a3a';btn.style.color='#66cc88';btn.style.background='#03120a';btn.style.cursor='pointer';btn.style.boxShadow='none';btn.classList.remove('match-glow');
+    btn.innerHTML='🃏 MATCHING GAME <span class="mg-price">UNLOCK · 💎 10</span>';lck.textContent='';
+    btn.onclick=()=>mgBuy('match');return;
+  }
   if(nextLvl>0&&totalAliens<needed){
     btn.style.opacity='.5';
     btn.style.borderColor='#1a3a2a';
@@ -51,7 +57,7 @@ function updateMatchingBtn(){
     btn.style.boxShadow='none';
     btn.classList.remove('match-glow');
     const left=needed-totalAliens;
-    btn.textContent='🃏 MATCHING GAME · '+left+' MORE ALIEN'+(left===1?'':'S')+' TO UNLOCK LVL '+nextLvl;
+    btn.textContent='🃏 MATCHING GAME · '+left+' MORE ALIEN'+(left===1?'':'S')+' TO UNLOCK LVL '+(nextLvl+1);
     lck.textContent='UNLOCKS AT '+needed+' ALIEN BUDDIES';
     btn.onclick=null;
   } else {
@@ -66,7 +72,7 @@ function updateMatchingBtn(){
       btn.textContent='🃏 MATCHING GAME · ALL COMPLETE 🏆';
       lck.textContent='';
     } else {
-      btn.textContent=nextLvl===0?'🃏 MATCHING GAME · INTRO':'🃏 MATCHING GAME · LVL '+nextLvl;
+      btn.textContent='🃏 MATCHING GAME · LVL '+(nextLvl+1);
       lck.textContent='';
     }
     btn.onclick=openMatchingGame;
@@ -75,9 +81,10 @@ function updateMatchingBtn(){
 
 function openMatchingGame(){
   const nextLvl=matchLevelsCompleted+1;
-  if(nextLvl>25){showToast('All 25 levels complete!');return;}
+  if(nextLvl>25){showToast('All 26 levels complete!');return;}
   const needed=aliensNeededForLevel(nextLvl);
-  if(nextLvl>0&&totalAliens<needed){showToast('Need '+needed+' aliens for level '+nextLvl);return;}
+  if(typeof mgBought!=='undefined'&&!mgBought.match&&!(typeof TEST_MODE!=='undefined'&&TEST_MODE)){mgBuy('match');return;}
+  if(nextLvl>0&&totalAliens<needed){showToast('Need '+needed+' aliens for level '+(nextLvl+1));return;}
   const modal=document.getElementById('matchingModal');
   modal.style.display='flex';
   document.getElementById('matchTitle').textContent='🃏 MATCHING GAME';
@@ -85,25 +92,17 @@ function openMatchingGame(){
   initMatchStars();
   matchIntroInfoStage=false;
   // Intro won but the 'how it works' card wasn't finished: show that card again
-  if(matchSavedState&&matchSavedState.level===nextLvl&&matchSavedState.infoStage){
-    matchCurrentLevel=nextLvl;
-    matchTotalPairs=matchPairsForLevel(nextLvl);
-    document.getElementById('matchSubtitle').textContent='INTRO · FLIP THE CARD';
-    document.getElementById('matchVictoryReward').textContent='PERMANENT ×'+matchRewardForLevel(0)+' MULTIPLIER EARNED!';
-    buildLevel0Grid();
-    return;
-  }
   if(matchSavedState&&matchSavedState.level===nextLvl&&matchSavedState.pairs<matchSavedState.totalPairs){
     matchCurrentLevel=nextLvl;
     matchTotalPairs=matchSavedState.totalPairs;
-    const lbl=nextLvl===0?'INTRO':'LEVEL '+matchCurrentLevel;
+    const lbl='LEVEL '+(matchCurrentLevel+1);
     document.getElementById('matchSubtitle').textContent=lbl+' · RESUMING — '+matchSavedState.pairs+'/'+matchTotalPairs+' PAIRS FOUND';
     document.getElementById('matchVictoryReward').textContent='PERMANENT ×'+matchRewardForLevel(matchCurrentLevel)+' MULTIPLIER EARNED';
     resumeMatchGrid(matchSavedState);
   } else {
     matchCurrentLevel=nextLvl;
     matchTotalPairs=matchPairsForLevel(matchCurrentLevel);
-    const lbl=nextLvl===0?'INTRO':'LEVEL '+matchCurrentLevel;
+    const lbl='LEVEL '+(matchCurrentLevel+1);
     document.getElementById('matchSubtitle').textContent=lbl+' · FIND '+matchTotalPairs+' PAIRS ('+matchTotalPairs*2+' CARDS)';
     document.getElementById('matchVictoryReward').textContent='PERMANENT ×'+matchRewardForLevel(matchCurrentLevel)+' MULTIPLIER EARNED';
     buildMatchGrid();
@@ -331,13 +330,6 @@ function onMatchCardClick(idx){
 }
 
 function showMatchVictory(){
-  if(matchCurrentLevel===0&&!matchIntroInfoStage){
-    // Intro won: hand over the card that explains how the alien matching game works
-    matchSavedState=null;
-    playMatchFanfare();
-    buildLevel0Grid();
-    return;
-  }
   const rewardMult=matchRewardForLevel(matchCurrentLevel);
   document.getElementById('matchVictoryReward').textContent='PERMANENT ×'+rewardMult+' MULTIPLIER EARNED!';
   document.getElementById('matchVictory').style.display='flex';

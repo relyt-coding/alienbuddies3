@@ -69,7 +69,7 @@ function wwLevel(lvl){
     lvl:L,name:WW_NAMES[L-1],
     style:L===30?'dnb':L===20?'trap':L===10?'synthwave':WW_STYLE_ORDER[(L-1)%WW_STYLE_ORDER.length],
     bpm:Math.round(84+(L-1)*2.9+((L*7)%5-2)),
-    craters:L<=6?4:L<=16?6:8,
+    craters:L<=2?4:L<=16?6:8,   // 6 pads from level 3
     bodyBars:16+Math.floor(L/5)*4,
     density:2+(L-1)*.24,              // worms per bar (before section shaping)
     approach:Math.max(.57,1.15-(L-1)*.02), // seconds a worm takes to rise

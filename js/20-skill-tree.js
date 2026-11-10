@@ -297,10 +297,19 @@ const SKILL_TREE_NODES = [
 
   // ── QUAD SUN 3 — Minigames (↙) ──
   {id:'sun_minigames', icon:'☀', name:'Quad Sun III', desc:'The third Quad Sun. Opens the Minigame Nexus path. Grants ×2 points.', cost:150, requires:['core'], x:-200, y:200, branch:'minigames', mult:2},
-  {id:'memory_boost', icon:'🃏', name:'Memory Boost', desc:'Enhances cognitive resonance. Adds 2 extra levels to the Matching Game. ×1.5 points.', cost:250, requires:['sun_minigames'], x:-340, y:300, branch:'minigames', mult:1.5, placeholder:true},
-  {id:'worm_whack', icon:'🪱', name:'Worm Whack', desc:'Unlocks WORM WHACK (in the bunker): whack space worms on a rocky moon to the beat, across 30 songs. Every level you clear gives a permanent points bonus.', cost:500, requires:['memory_boost'], x:-480, y:360, branch:'minigames', mult:1.5},
-  {id:'planet_hop', icon:'🪐', name:'Planet Hop', desc:'Unlocks PLANET HOP (in the bunker): a rhythm platformer around a spinning planet — jump, double jump and bounce to the beat across 15 levels. Every level you clear gives a permanent points bonus.', cost:750, requires:['worm_whack'], x:-580, y:460, branch:'minigames', mult:1.5},
-  {id:'grand_tournament', icon:'🏆', name:'Grand Tournament', desc:'Coming soon — weekly challenge mode.', cost:1000, requires:['planet_hop'], x:-680, y:540, branch:'minigames', mult:1.5, placeholder:true},
+  // (Planet Hop 1–5 and the Matching Game are bought in the bunker; this path opens everything after them)
+  {id:'ph_ice', icon:'❄️', name:'Ice Planet', desc:'Opens GLACIA in Planet Hop: levels 6–10 — bounce pads, falling icicles, ice scorpions and crystal bells you ring with BOUNCE.', cost:300, requires:['sun_minigames'], x:-340, y:300, branch:'minigames', mult:1.5},
+  {id:'mg_cockpit', icon:'🚀', name:'Minigame Cockpit', desc:'Builds the COCKPIT: a new page left of the bunker (swipe right from the bunker, or press GAMES) where all your minigames live.', cost:450, requires:['ph_ice'], x:-480, y:370, branch:'minigames', mult:1.5},
+  {id:'ww_moon', icon:'🪱', name:'Worm Whack', desc:'Unlocks WORM WHACK levels 1–5: whack space worms on a rocky moon to the beat. Every win boosts your Alien Gems.', cost:650, requires:['mg_cockpit'], x:-600, y:470, branch:'minigames', mult:1.5},
+  {id:'ph_magma', icon:'🌋', name:'Magmora', desc:'Opens MAGMORA in Planet Hop: levels 11–15, ending with the supernova comet.', cost:900, requires:['ww_moon'], x:-720, y:560, branch:'minigames', mult:1.5},
+  {id:'beat_defense', icon:'🛸', name:'Beat Defense', desc:'Unlocks BEAT DEFENSE: guard your ship from lizards and scorpions with drum towers. Where you build a tower decides which beat it fires on — your defense is your beat.', cost:1300, requires:['ph_magma'], x:-860, y:650, branch:'minigames', mult:1.5},
+  {id:'grand_tournament', icon:'🏆', name:'Grand Tournament', desc:'Coming soon — weekly challenge mode.', cost:5000, requires:['beat_defense'], x:-990, y:740, branch:'minigames', mult:1.5, placeholder:true},
+  // the Wyrm Moon: a later planet with a side trail that opens Worm Whack five levels at a time
+  {id:'ww_deep', icon:'🌒', name:'Wyrm Moon', desc:'A later world for WORM WHACK: opens levels 6–10, and a trail of upgrades that opens five more levels each.', cost:1100, requires:['ph_magma'], x:-640, y:700, branch:'minigames', mult:1.5},
+  {id:'ww_t1', icon:'🪱', name:'Wyrm Trail I', desc:'Worm Whack levels 11–15.', cost:1500, requires:['ww_deep'], x:-560, y:820, branch:'minigames', mult:1.5},
+  {id:'ww_t2', icon:'🪱', name:'Wyrm Trail II', desc:'Worm Whack levels 16–20.', cost:2000, requires:['ww_t1'], x:-470, y:925, branch:'minigames', mult:1.5},
+  {id:'ww_t3', icon:'🪱', name:'Wyrm Trail III', desc:'Worm Whack levels 21–25.', cost:2600, requires:['ww_t2'], x:-380, y:1030, branch:'minigames', mult:1.5},
+  {id:'ww_t4', icon:'👑', name:'Wyrm Trail IV', desc:'Worm Whack levels 26–30 and the Wyrm King.', cost:3300, requires:['ww_t3'], x:-290, y:1135, branch:'minigames', mult:1.5},
 
   // ── QUAD SUN 4 — Alien Evolution (↘) ──
   {id:'sun_aliens', icon:'☀', name:'Quad Sun IV', desc:'The fourth Quad Sun. Opens the Alien Evolution path. Grants ×2 points.', cost:150, requires:['core'], x:200, y:200, branch:'aliens', mult:2},
@@ -361,6 +370,7 @@ function gemsPerMinute(){
   if(unlockedSkills['gem_harvester_2']) rate *= 2;
   else if(unlockedSkills['gem_harvester_1']) rate *= 1.5;
   rate *= skillGemMultiplier();
+  if(typeof mgGemBonus==='function')rate*=mgGemBonus();   // minigame wins
   return rate;
 }
 // every skill node with a gem bonus multiplies the gem rate (Core ×2, Quad Suns ×4, music hubs ×1.5, branches ×1.2, …)
@@ -1088,14 +1098,9 @@ function checkContextualHints(){
     showHintModal('💡',"Click on 'TIPS' in the Bunker to read helpful hints and earn Point Multipliers!");
     return;
   }
-  if(score>=4000000&&!shownHints.matchingIntro&&matchLevelsCompleted<0){
-    shownHints.matchingIntro=true;autoSave();
-    showHintModal('🃏','Play the Matching Game in the Bunker to gain Point Multipliers!');
-    return;
-  }
-  if(totalAliens>=6&&matchLevelsCompleted<0&&!shownHints.matchingGame){
-    shownHints.matchingGame=true;autoSave();
-    showHintModal('🃏','Play the Matching Game in the Bunker to gain Point Multipliers!');
+  if(typeof mgBought!=='undefined'&&!mgBought.match&&mgBought.ph&&alienGems>=10&&!shownHints.matchingIntro&&matchLevelsCompleted<0){
+    shownHints.matchingIntro=true;shownHints.matchingGame=true;autoSave();
+    showHintModal('🃏','Unlock the Matching Game in the Bunker for 10 Alien Gems to gain Point Multipliers!');
     return;
   }
 }

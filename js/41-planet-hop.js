@@ -6,9 +6,10 @@
 //  Any hit restarts the level (you see how far you got). Stars come from the stardust you collect.
 //  Levels 1–5 Luna · 6–10 Glacia (ice) · 11–15 Magmora (lava). Levels 5 / 10 / 15 end in a comet chase.
 // ══════════════════════════════════════════════
-let phMultiplier=1;               // permanent points × from first clears (saved)
+let phMultiplier=1;               // (old saves only: Planet Hop now boosts Alien Gems, see 44-minigame-hub.js)
 let phProgress={best:{}};         // best[L] = {stars, dust, pct, cleared}
-function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===1||!!(phProgress.best[L-1]||{}).cleared;}
+function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||((typeof mgPhAccess!=='function'||mgPhAccess(L))&&(L===1||!!(phProgress.best[L-1]||{}).cleared));}
+function phGemVal(b){return b&&b.cleared?((b.dust||0)>=.999?1:.5):0;}
 
 (function(){
   const $=id=>document.getElementById(id);
@@ -62,21 +63,22 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
   function showSelect(){
     $('phResults').classList.remove('open');$('phSelect').classList.add('open');showTab(tab);
     const stars=Object.values(phProgress.best).reduce((a,b)=>a+(b.stars||0),0);
-    $('phBonus').innerHTML=`Planet Hop bonus: <b>×${typeof formatStore==='function'?formatStore(phMultiplier):phMultiplier.toFixed(2)}</b> points forever · ${stars} / 45 ★`;
+    const gb=Object.values(phProgress.best).reduce((a,b)=>a+phGemVal(b),0);
+    $('phBonus').innerHTML=`Planet Hop gem bonus: <b>+${gb}×</b> Alien Gems · ${stars} / 45 ★`;
     const gr=$('phGrid');gr.innerHTML='';
     for(let L=1;L<=15;L++){
       const b=document.createElement('button');b.className='ww-tile';const best=phProgress.best[L]||{},op=phLevelOpen(L);
       if(!op)b.classList.add('locked');if(L===sel)b.classList.add('sel');if(L%5===0)b.classList.add('boss');
       b.style.borderColor=L===sel?'':PH_PLANETS[phLevel(L).planet].glow+'55';
       b.innerHTML=`<span class="n">${op?L:'🔒'}</span><span class="st">${best.cleared?'★'.repeat(best.stars||1)+'<i>'+'★'.repeat(3-(best.stars||1))+'</i>':best.pct?Math.round(best.pct*100)+'%':'<i>★★★</i>'}</span>`;
-      b.addEventListener('click',()=>{if(!op){showToast('Clear level '+(L-1)+' first');return;}sel=L;showSelect();});
+      b.addEventListener('click',()=>{if(!op){showToast(typeof mgPhAccess==='function'&&!mgPhAccess(L)?'🔒 '+mgPhLockMsg(L):'Clear level '+(L-1)+' first');return;}sel=L;showSelect();});
       gr.appendChild(b);
     }
     const P=phLevel(sel),best=phProgress.best[sel],pl=PH_PLANETS[P.planet];
     $('phDetail').innerHTML=`<div class="ww-d-name">${sel}. ${P.name}</div>
       <div class="ww-d-meta">${pl.name} · ${P.bpm} BPM · ${P.style.toUpperCase()}</div>
       ${NEWS[sel]?`<div class="ww-d-new" style="color:${pl.glow}">${NEWS[sel]}</div>`:''}
-      <div class="ww-d-meta">${best&&best.cleared?`Best: ${'★'.repeat(best.stars)}${'☆'.repeat(3-best.stars)} · stardust ${Math.round(best.dust*100)}%`:best&&best.pct?`Best run: ${Math.round(best.pct*100)}% · first clear: <b>×${P.reward}</b> points forever`:`First clear: <b>×${P.reward}</b> points forever`}</div>
+      <div class="ww-d-meta">${best&&best.cleared?`Best: ${'★'.repeat(best.stars)}${'☆'.repeat(3-best.stars)} · stardust ${Math.round(best.dust*100)}%`:best&&best.pct?`Best run: ${Math.round(best.pct*100)}% · clear it: <b>+0.5×</b> Alien Gems (+1× with all stardust)`:`Clear it: <b>+0.5×</b> Alien Gems · all stardust: <b>+1×</b>`}</div>
       <button class="ww-play" id="phPlay" style="border-color:${pl.glow};color:${pl.glow};background:#071420">PLAY</button>`;
     $('phPlay').addEventListener('click',()=>start(sel));
   }
@@ -314,7 +316,7 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
     const st=R.custom?(phProgress.custom||(phProgress.custom={})):phProgress.best,K=R.custom?P.custom:L;
     const prev=st[K]||{},first=!R.custom&&!prev.cleared;
     st[K]={cleared:true,pct:1,stars:Math.max(stars,prev.stars||0),dust:Math.max(dust,prev.dust||0)};
-    if(first)phMultiplier*=P.reward;
+    R.gemGain=R.custom?0:phGemVal(st[K])-phGemVal(prev);   // +0.5× gems for a clear, +1× in total with all the stardust
     if(R.lv.bossS<Infinity){R.shake=16;for(let k=0;k<4;k++)burst(R.S.s-2.2,2.4,['#ffd166','#ff66ff','#7fe8ff','#ffffff'][k],30,2);}
     if(typeof autoSave==='function')autoSave();if(typeof renderUI==='function')renderUI();
     R.finFx=0;setTimeout(()=>results(stars,dust,first),R.lv.bossS<Infinity?1900:1700);
@@ -329,7 +331,7 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
       <div class="ww-res-acc">${Math.round(dust*100)}%<small>stardust collected (60% ★★ · 90% ★★★)</small></div>
       <div class="ww-res-grid"><div><b>${R.got.size} / ${R.lv.dust.length}</b><small>STARDUST</small></div><div><b>${R.attempt}</b><small>ATTEMPTS</small></div>
 </div>
-      ${first?`<div class="ww-reward">Permanent bonus: ×${P.reward} points!${L<15?' · Level '+(L+1)+' unlocked':''}</div>`:''}
+      ${R.gemGain>0?`<div class="ww-reward">💎 +${R.gemGain}× Alien Gems forever!${first&&L<15&&phLevelOpen(L+1)?' · Level '+(L+1)+' unlocked':''}</div>`:first&&L<15&&!phLevelOpen(L+1)?`<div class="ww-reward">🔒 Next: ${mgPhLockMsg(L+1)}</div>`:''}
       <div class="ww-res-btns"><button class="ww-btn" id="phRetry">RETRY</button>${!R.custom&&L<15?'<button class="ww-btn ww-play" id="phNext">NEXT LEVEL</button>':''}<button class="ww-btn" id="phLevels">LEVELS</button></div>`;
     $('phResults').classList.add('open');
     const again=R.custom;$('phRetry').addEventListener('click',()=>start(again||L));
@@ -961,11 +963,10 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
   }
 
   // ── entry button in the bunker (after Worm Whack) ──
+  // ── entry button: first in the minigame list, bought for 1 Alien Gem ──
   const eb=document.createElement('button');eb.id='planetHopBtn';eb.type='button';eb.textContent='🪐 PLANET HOP';
-  const after=$('wormGameBtn')||$('matchingGameLock')||$('matchingGameBtn');if(after)after.after(eb);
-  eb.addEventListener('click',open);
-  let had=null;
-  setInterval(()=>{const has=(typeof TEST_MODE!=='undefined'&&TEST_MODE)||(typeof unlockedSkills!=='undefined'&&!!unlockedSkills.planet_hop);eb.style.display=has?'':'none';if(had===false&&has)showToast('🪐 PLANET HOP unlocked! Find it in the bunker, under Worm Whack.');had=has;},800);
+  const mbtn=$('matchingGameBtn');if(mbtn)mbtn.before(eb);
+  eb.addEventListener('click',()=>{if(typeof mgBought!=='undefined'&&!mgBought.ph&&!(typeof TEST_MODE!=='undefined'&&TEST_MODE)){mgBuy('ph');return;}open();});
   document.addEventListener('visibilitychange',()=>{if(document.hidden&&R&&R.state==='play'){stop();showSelect();}});
   window._phDebug={state:()=>R,start,input,tau:()=>R?tau():0,kind:sp=>R&&obsKind(R.lv,sp)};
 })();

@@ -2,6 +2,11 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.103 - 2026-11-09 17:25
+- Planet Hop: no more text magnifier, selection or zoom when tapping the buttons fast
+- Planet Hop: pits redrawn: rounded edges, shaded walls dropping into darkness, icy depths on Glacia and a lava river on Magmora
+- Planet Hop: press markers show the same icons as the JUMP and BOUNCE buttons instead of J and B
+
 ## v0.2.102 - 2026-11-09 17:12
 - Planet Hop: teaching signs removed; only LOW GRAVITY gets a sign, the first time you meet it (press markers still show new moves)
 - Planet Hop: in low gravity your alien floats inside a shimmering bubble (the floating LOW GRAVITY text is gone)

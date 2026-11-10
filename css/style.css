@@ -1941,3 +1941,6 @@ body.store-open:not(.desktop-mode) #partyStyleBtn,body.bunker-open:not(.desktop-
   .ph-pads:not(.solo) .ph-pad .ph-snd{font-size:clamp(.8rem,3.6vw,1.05rem);padding:1px 8px;max-width:100%;overflow:hidden;text-overflow:ellipsis;}
   .ph-pads:not(.solo) .ph-pad .ph-beat{top:6px;right:50%;transform:translateX(50%);}
 }
+/* Planet Hop: no text selection, callout or magnifier when tapping fast */
+#phOverlay,#phOverlay *{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;}
+#phPads,#phPads .ph-pad{touch-action:none;-webkit-tap-highlight-color:transparent;}

@@ -164,7 +164,9 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
     try{playSound(phPadSound(w),.55);}catch(e){}
   }
   ['phJump','phBounce'].forEach((id,i)=>{const b=$(id);const w=i?'b':'j';
-    b.addEventListener('pointerdown',e=>{e.preventDefault();input(w,e);});b.addEventListener('contextmenu',e=>e.preventDefault());});
+    b.addEventListener('pointerdown',e=>{e.preventDefault();input(w,e);});b.addEventListener('contextmenu',e=>e.preventDefault());
+    // stop iOS's double-tap zoom / text magnifier on the buttons
+    ['touchstart','touchend','dblclick','selectstart'].forEach(ev=>b.addEventListener(ev,e=>{if(e.cancelable)e.preventDefault();},{passive:false}));});
   addEventListener('keydown',e=>{
     if(!ov.classList.contains('open'))return;
     if(e.code==='Escape'){e.preventDefault();e.stopImmediatePropagation();if(R&&R.state==='play'){stop();showSelect();}else close();return;}
@@ -435,34 +437,41 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
     }
     g.restore();
   }
-  // a chasm with jagged walls (+ void stars on Luna, icicles on Glacia, a lava pool on Magmora)
+  const PH_ICO_J=typeof Path2D!=='undefined'?new Path2D('M5 13l7-7 7 7M5 19l7-7 7 7'):null,PH_ICO_B=typeof Path2D!=='undefined'?new Path2D('M4 20h16M7 16l10-2.5L7 11l10-2.5L7 6'):null;
+  // a chasm: rounded lips, softly shaded walls that drop out of sight, and each world's depths
+  // (a faint starry void on Luna, glowing ice on Glacia, a lava river on Magmora)
   function drawPit(lv,p,t,CX,CY,ang){
-    const T=PH_THEME[lv.P.planet],pl=lv.P.planet,D=2.4,steps=7,L=[],Rr=[];
-    for(let i=0;i<=steps;i++){const d=i/steps*D;L.push(P(p.a+(hsh(p.a*13+i,4)-.5)*.07+d*.02,-d));Rr.push(P(p.b+(hsh(p.b*13+i,5)-.5)*.07-d*.02,-d));}
-    const outline=L.map(q=>[q[0],q[1]]).concat([...Rr].reverse().map(q=>[q[0],q[1]]));
+    const T=PH_THEME[lv.P.planet],pl=lv.P.planet,D=Math.max(2.6,(H-GY)/UP+.8),N=10,L=[],Rr=[],sl=[],sr=[];
+    for(let i=0;i<=N;i++){const u=i/N,d=u*D,ins=.1*Math.sin(Math.min(1,u*2.2)*Math.PI*.5);sl.push(p.a+ins+(hsh(p.a*13+i,4)-.5)*.025);sr.push(p.b-ins+(hsh(p.b*13+i,5)-.5)*.025);L.push(P(sl[i],-d));Rr.push(P(sr[i],-d));}
+    const top=[];for(let i=1;i<12;i++){const q=P(sr[0]-(sr[0]-sl[0])*i/12,.02);top.push([q[0],q[1]]);}   // follow the curve across the top
+    const outline=L.map(q=>[q[0],q[1]]).concat([...Rr].reverse().map(q=>[q[0],q[1]])).concat(top);
     const gr=g.createRadialGradient(CX,CY,RP-D*UP,CX,CY,RP);
-    if(pl===2){gr.addColorStop(0,'#ffd23a');gr.addColorStop(.35,'#ff5a1a');gr.addColorStop(.75,'#3a0e06');gr.addColorStop(1,'#1a0806');}
-    else{gr.addColorStop(0,T.chasm[1]);gr.addColorStop(.7,T.chasm[0]);gr.addColorStop(1,T.body);}
+    if(pl===2){gr.addColorStop(0,'#2a0804');gr.addColorStop(.6,'#1a0705');gr.addColorStop(1,'#2a1210');}
+    else if(pl===1){gr.addColorStop(0,'#00040a');gr.addColorStop(.7,'#020c1a');gr.addColorStop(.92,'#06203a');gr.addColorStop(1,'#2a6890');}
+    else{gr.addColorStop(0,'#05050c');gr.addColorStop(.7,T.chasm[1]);gr.addColorStop(.92,T.chasm[0]);gr.addColorStop(1,'#2a2a38');}
     g.fillStyle=gr;poly(outline);g.fill();
-    // lit wall edges
-    g.strokeStyle=pl===2?'rgba(255,120,40,.55)':pl===1?'rgba(200,240,255,.5)':'rgba(255,255,255,.18)';g.lineWidth=2;
-    [L,Rr].forEach(side=>{g.beginPath();side.slice(0,5).forEach((q,i)=>i?g.lineTo(q[0],q[1]):g.moveTo(q[0],q[1]));g.stroke();});
-    // rock layers in the walls, ledges jutting out, and loose stones at the lip
-    g.save();poly(outline);g.clip();g.lineWidth=1.5;
-    [.35,.75,1.2].forEach((d,k)=>{g.strokeStyle=pl===2?`rgba(255,140,60,${.28-k*.07})`:k%2?T.strata:'rgba(255,255,255,.08)';g.beginPath();for(let i=0;i<=8;i++){const [x,y]=P(p.a+(p.b-p.a)*i/8,-d+(hsh(p.a*3+i+k*9,7)-.5)*.1);i?g.lineTo(x,y):g.moveTo(x,y);}g.stroke();});
-    [[p.a,1,4],[p.b,-1,5]].forEach(([e0,dir,hn])=>[2,4].forEach(i=>{const d=i/steps*D,x=e0+dir*((hsh(e0*13+i,hn)-.5)*.07+d*.02),w=.1+hsh(e0+i,8)*.12,
-      pts=[P(x-dir*.04,-d),P(x+dir*w,-d-.03),P(x+dir*w*.5,-d-.16),P(x-dir*.04,-d-.2)];g.fillStyle=T.crust;poly(pts);g.fill();
-      g.strokeStyle=pl===1?'rgba(240,252,255,.8)':T.top;g.globalAlpha=.55;g.lineWidth=1.4;g.beginPath();g.moveTo(pts[0][0],pts[0][1]);g.lineTo(pts[1][0],pts[1][1]);g.stroke();g.globalAlpha=1;}));
-    if(pl!==2){const fg=g.createRadialGradient(CX,CY,RP-D*UP,CX,CY,RP-D*UP*.45);fg.addColorStop(0,'rgba(0,0,0,.65)');fg.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=fg;poly(outline);g.fill();}
+    g.save();poly(outline);g.clip();
+    // the wall faces: a band of this world's rock down each side, fading into the dark
+    const wall=(pts,dir)=>{for(let k=0;k<3;k++){g.beginPath();pts.forEach((q,i)=>i?g.lineTo(q[0],q[1]):g.moveTo(q[0],q[1]));g.lineWidth=BP*(.22-k*.07);g.strokeStyle=k===2?(pl===1?'rgba(220,245,255,.35)':pl===2?'rgba(255,140,60,.35)':'rgba(255,255,255,.12)'):k?T.crust:T.body;g.globalAlpha=k?.55:.8;g.stroke();}g.globalAlpha=1;};
+    wall(L,1);wall(Rr,-1);
+    // fade the walls into darkness further down
+    const fd=g.createRadialGradient(CX,CY,RP-D*UP,CX,CY,RP-.4*UP);fd.addColorStop(0,pl===2?'rgba(20,4,2,.95)':'rgba(2,2,8,.95)');fd.addColorStop(.75,'rgba(2,2,8,.35)');fd.addColorStop(1,'rgba(2,2,8,0)');g.fillStyle=fd;poly(outline);g.fill();
+    if(pl===0){for(let k=0;k<10;k++){const ss=p.a+(p.b-p.a)*(.15+.7*hsh(p.a+k,6)),dd=-1-hsh(p.a+k,8)*1.6,[x,y]=P(ss,dd),tw=.5+.5*Math.sin(t*2+k);g.fillStyle=`rgba(200,195,255,${.25+.45*tw})`;g.beginPath();g.arc(x,y,.8+tw,0,Math.PI*2);g.fill();}
+      const [gx,gy]=P((p.a+p.b)/2,-D*.8),gg=g.createRadialGradient(gx,gy,0,gx,gy,BP*(p.b-p.a)*.6+20);gg.addColorStop(0,'rgba(140,120,255,.18)');gg.addColorStop(1,'rgba(140,120,255,0)');g.fillStyle=gg;g.fillRect(gx-BP*3,gy-BP*3,BP*6,BP*6);}
+    if(pl===1){const [gx,gy]=P((p.a+p.b)/2,-2.2),gg=g.createRadialGradient(gx,gy,0,gx,gy,Math.min(BP*1.2,BP*(p.b-p.a)*.4+20));gg.addColorStop(0,'rgba(127,232,255,.22)');gg.addColorStop(1,'rgba(127,232,255,0)');g.fillStyle=gg;g.fillRect(gx-BP*3,gy-BP*3,BP*6,BP*6);}
+    if(pl===2){// a lava river a little way down, glowing up the walls
+      const lv0=1.5,lg=g.createRadialGradient(CX,CY,RP-(lv0+.5)*UP,CX,CY,RP-lv0*UP);lg.addColorStop(0,'#ff5a1a');lg.addColorStop(.7,'#ffb02e');lg.addColorStop(1,'#ffe27a');
+      g.fillStyle=lg;g.beginPath();g.arc(CX,CY,RP-lv0*UP+Math.sin(t*2+p.a)*2,ang(p.a-.5),ang(p.b+.5));g.arc(CX,CY,RP-D*UP,ang(p.b+.5),ang(p.a-.5),true);g.closePath();g.fill();
+      const hg=g.createRadialGradient(CX,CY,RP-lv0*UP,CX,CY,RP);hg.addColorStop(0,'rgba(255,140,40,.55)');hg.addColorStop(1,'rgba(255,90,20,0)');g.fillStyle=hg;poly(outline);g.fill();
+      g.fillStyle='rgba(255,235,150,.9)';for(let k=0;k<4;k++){const ss=p.a+(p.b-p.a)*((k+.5)/4),bub=(t*1.2+k*.31+p.a)%1;const [x,y]=P(ss,-lv0+bub*.6);g.globalAlpha=1-bub;g.beginPath();g.arc(x,y,2+bub*3.5,0,Math.PI*2);g.fill();}g.globalAlpha=1;}
     g.restore();
-    [[p.a,-1],[p.b,1]].forEach(([e0,dir])=>[.1,.24].forEach((o,i)=>{const r=UP*(.09+hsh(e0+i,9)*.06),[x,y,f]=P(e0+dir*o,0);g.save();g.translate(x,y);g.rotate(f);
-      g.fillStyle=T.crust;g.beginPath();g.ellipse(0,-r*.45,r*1.3,r*.8,0,0,Math.PI*2);g.fill();g.fillStyle=pl===2?'rgba(255,120,40,.45)':T.top;g.globalAlpha=.7;g.beginPath();g.ellipse(-r*.3,-r*.8,r*.6,r*.25,0,0,Math.PI*2);g.fill();g.globalAlpha=1;g.restore();}));
-    if(pl===0){g.save();poly(outline);g.clip();
-      for(let k=0;k<8;k++){const ss=p.a+(p.b-p.a)*hsh(p.a+k,6),dd=-.8-hsh(p.a+k,8)*1.4,[x,y]=P(ss,dd);g.fillStyle=`rgba(200,200,255,${.3+.5*(.5+.5*Math.sin(t*2+k))})`;g.fillRect(x,y,1.5,1.5);}g.restore();}
-    if(pl===1){[[p.a,1],[p.b,-1]].forEach(([e,dir])=>{for(let k=0;k<3;k++){const ss=e+dir*(.04+k*.07),len=.25+hsh(e+k,2)*.35;const [x1,y1]=P(ss-.025,-.02),[x2,y2]=P(ss+.025,-.02),[x3,y3]=P(ss,-len);
-      g.fillStyle='rgba(225,248,255,.9)';g.beginPath();g.moveTo(x1,y1);g.lineTo(x3,y3);g.lineTo(x2,y2);g.fill();}});}
-    if(pl===2){g.fillStyle='rgba(255,225,130,.85)';for(let k=0;k<4;k++){const ss=p.a+(p.b-p.a)*((k+.5)/4),bub=(t*1.2+k*.31+p.a)%1;const [x,y]=P(ss,-1.25+bub*.8);g.globalAlpha=1-bub;g.beginPath();g.arc(x,y,2.5+bub*4,0,Math.PI*2);g.fill();}g.globalAlpha=1;
-      const [hx,hy]=P((p.a+p.b)/2,.2),hr=Math.min(BP*1.6,BP*(p.b-p.a)*.5+20),hg=g.createRadialGradient(hx,hy,2,hx,hy,hr);hg.addColorStop(0,'rgba(255,120,30,.25)');hg.addColorStop(1,'rgba(255,80,20,0)');g.fillStyle=hg;g.beginPath();g.arc(hx,hy,hr,0,Math.PI*2);g.fill();}
+    // rounded lips on both edges so the ground curls over into the pit
+    [[p.a,-1],[p.b,1]].forEach(([e0,dir])=>{const [x,y,f]=P(e0,0);g.save();g.translate(x,y);g.rotate(f);const rw=BP*.13,rh=UP*.16;
+      const lg2=g.createLinearGradient(0,-rh,0,rh*1.6);lg2.addColorStop(0,T.top);lg2.addColorStop(.45,T.crust);lg2.addColorStop(1,T.body);g.fillStyle=lg2;g.beginPath();g.ellipse(dir*rw*.15,rh*.2,rw,rh*1.2,0,0,Math.PI*2);g.fill();
+      g.strokeStyle=pl===1?'rgba(240,252,255,.9)':pl===2?'rgba(255,130,50,.6)':'rgba(255,255,255,.35)';g.lineWidth=1.6;g.beginPath();g.ellipse(dir*rw*.15,rh*.2,rw,rh*1.2,0,Math.PI*1.05,Math.PI*1.95);g.stroke();g.restore();
+      if(pl===1)for(let k=0;k<3;k++){const ss=e0-dir*(.03+k*.06),len=.18+hsh(e0+k,2)*.22,[x1,y1]=P(ss-.022,-.12),[x2,y2]=P(ss+.022,-.12),[x3,y3]=P(ss,-.12-len);
+        g.fillStyle='rgba(225,248,255,.9)';g.beginPath();g.moveTo(x1,y1);g.quadraticCurveTo(x3,y3,x2,y2);g.fill();}});
+    if(pl===2){const [hx,hy]=P((p.a+p.b)/2,.2),hr=Math.min(BP*1.6,BP*(p.b-p.a)*.5+20),hg=g.createRadialGradient(hx,hy,2,hx,hy,hr);hg.addColorStop(0,'rgba(255,120,30,.22)');hg.addColorStop(1,'rgba(255,80,20,0)');g.fillStyle=hg;g.beginPath();g.arc(hx,hy,hr,0,Math.PI*2);g.fill();}
   }
   // rock pillars / ice blocks / basalt — and floating asteroid chunks
   function drawBlock(pl,b,t){
@@ -607,8 +616,9 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
     // ── glowing press markers on the first few of each new idea (where perfect play presses) ──
     lv.acts.forEach(a=>{if(!a.tut||a.t<S.s-.4||a.t>s1)return;const near=Math.max(0,1-Math.abs(a.t-S.s)/3),[x,y]=P(a.t,(a.h||0)+.45);
       const r=Math.max(14,UP*.3)*(1+.15*pulse),col=a.w==='j'?'#00e5ff':'#ff4dff';g.globalAlpha=Math.min(1,.6+near)*(a.t<S.s?Math.max(0,1+(a.t-S.s)/.4):1);
-      g.strokeStyle=col;g.lineWidth=2.5;g.fillStyle='rgba(5,8,20,.7)';g.beginPath();g.arc(x,y,r,0,Math.PI*2);g.fill();g.stroke();
-      g.fillStyle=col;g.font=`${Math.round(r*1.2)}px 'Bebas Neue',sans-serif`;g.textAlign='center';g.textBaseline='middle';g.fillText(a.w==='j'?'J':'B',x,y+1);g.globalAlpha=1;});
+      g.save();g.shadowColor=col;g.shadowBlur=10+8*pulse;g.fillStyle=col;g.beginPath();g.arc(x,y,r,0,Math.PI*2);g.fill();g.restore();
+      // the same icon as the button it means
+      g.save();g.translate(x-r*.62,y-r*.62);g.scale(r*1.24/24,r*1.24/24);g.strokeStyle='#0a0a16';g.fillStyle='#0a0a16';g.lineWidth=2.8;g.lineCap='round';g.lineJoin='round';g.stroke(a.w==='j'?PH_ICO_J:PH_ICO_B);if(a.w!=='j'){g.beginPath();g.arc(12,3.2,1.6,0,Math.PI*2);g.fill();}g.restore();g.globalAlpha=1;});
     // stardust
     lv.dust.forEach((d,i)=>{if(R.got.has(i)||d.s<s0||d.s>s1)return;const [x,y]=P(d.s,d.h),z=BP*.06*(1+.3*Math.sin(t*6+i));
       g.fillStyle='#ffe680';g.shadowColor='#ffd23a';g.shadowBlur=8;g.beginPath();for(let k=0;k<8;k++){const r=k%2?z*.4:z,a=k/8*Math.PI*2+t;g.lineTo(x+Math.cos(a)*r,y+Math.sin(a)*r);}g.closePath();g.fill();g.shadowBlur=0;});

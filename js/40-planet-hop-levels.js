@@ -25,7 +25,8 @@ function phLevel(L){
   L=Math.max(1,Math.min(15,L));
   return{lvl:L,seed:500+L*13,name:PH_NAMES[L-1],style:PH_STYLES[L-1],
     bpm:L===1?80:Math.round(88+(L-1)*4.3),bodyBars:phCourseBars(L),boss:L%5===0,planet:L<=5?0:L<=10?1:2,cave:!!PH_SCENE[L-1],finish:phFinish(L),
-    reward:Math.round((1.6+(L-1)*.1)*(L%5===0?1.25:1)*100)/100};
+    reward:Math.round((1.6+(L-1)*.1)*(L%5===0?1.25:1)*100)/100,
+    late:L===3?{cowbell:[.75,.6]}:null};   // level 3: the cowbell waits for the last quarter of the song, and sits a little lower
 }
 
 // ── patterns (positions in beats relative to the pattern start; acts = what perfect play presses) ──

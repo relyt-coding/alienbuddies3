@@ -110,7 +110,10 @@ function wwCompose(lvl,Pin){
     // percussion layers (all unpitched — the songs are pure beats): verses get the light layer,
     // choruses add the heavy one, the boss gets everything
     const lay=WW_PERC[P.style]||WW_PERC.house,layers=sec==='A'?lay.A:lay.A.concat(lay.B);
-    layers.forEach(([id,str,v])=>{for(let s=0;s<16;s++){const x=pat(str,s);if(x&&!(fill&&s>=12))push(t0+s*step,'drum',id,v*x);}});
+    layers.forEach(([id,str,v])=>{
+      // a level can hold a layer back until late in the song (P.late = {sound:[from fraction, volume ×]})
+      const lt=P.late&&P.late[id];if(lt){if(b<Math.floor(bars*lt[0]))return;v*=lt[1];}
+      for(let s=0;s<16;s++){const x=pat(str,s);if(x&&!(fill&&s>=12))push(t0+s*step,'drum',id,v*x);}});
     // 808 boom under the kicks (one fixed note, so nothing can clash)
     if(lay.boom&&sec!=='A')db.k.forEach(s=>push(t0+s*step,'drum','sub',.5));
     // a crash-style accent on the first beat of every section

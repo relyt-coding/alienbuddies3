@@ -82,7 +82,48 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
   }
 
   // ── run ──
-  function stop(){if(!R)return;clearInterval(R.sched);cancelAnimationFrame(R.raf);clearTimeout(R.rt);R.state='stopped';R=null;}
+  // ── where you are changes how the music sounds ──
+  // Every Planet Hop note (the song, the count-in and your pads) runs through this small bus. On open ground it's
+  // transparent; LOW GRAVITY sweeps a resonant filter once per floaty two-beat jump; CAVES add a big dark room and a
+  // dotted-eighth echo (lows cut from both, so the kick stays tight and the cave never gets muddy).
+  let FXB=null;
+  function caveIR(c){
+    const sr=c.sampleRate,L=Math.round(sr*2.6),ir=c.createBuffer(2,L,sr),taps=[[.011,.55],[.023,.42],[.037,.36],[.052,.3],[.071,.24],[.094,.18]];
+    for(let ch=0;ch<2;ch++){const d=ir.getChannelData(ch);let lp=0;
+      for(let i=0;i<L;i++){const x=i/L;lp+=(Math.random()*2-1-lp)*(.18+.5*(1-x));d[i]=lp*Math.pow(1-x,2.6)*.9;}  // darker as it decays, like stone soaking up the highs
+      taps.forEach(([tm,g2],k)=>{const i=Math.round((tm+(ch?.004*k:0))*sr);if(i<L)d[i]+=g2*(ch^(k&1)?1:-1);});}   // early reflections off the cave walls
+    return ir;
+  }
+  function phBus(){
+    const c=getCtx();if(FXB&&FXB.c===c)return FXB;
+    const B={c},G=v=>{const n=c.createGain();n.gain.value=v;return n;},F=(type,f,q)=>{const n=c.createBiquadFilter();n.type=type;n.frequency.value=f;if(q!=null)n.Q.value=q;return n;};
+    B.in=G(1);B.dry=G(1);const dest=drumMasterReal||drumMasterGain;
+    // low gravity: resonant low-pass that breathes with an LFO (parked wide open when off)
+    B.lp=F('lowpass',20000,.7);B.lfo=c.createOscillator();B.lfo.type='sine';B.lfo.frequency.value=.5;B.lfoG=G(0);B.lfo.connect(B.lfoG);B.lfoHz=!B.lp.detune;B.lfoG.connect(B.lp.detune||B.lp.frequency);B.lfo.start();
+    B.in.connect(B.lp);B.lp.connect(B.dry);B.dry.connect(dest);
+    // the game's normal reverb send, copied here so reverb tails get the same colouring
+    if(rvbReal&&rvbReal.buffer){B.rvIn=c.createConvolver();B.rvIn.buffer=rvbReal.buffer;const rg=G(rvbGainNode?rvbGainNode.gain.value:.22);B.rvIn.connect(rg);rg.connect(B.in);}else B.rvIn=rvbNode;
+    // shared wet path: high-passed, then into the cave room and the echo
+    B.send=G(0);B.lp.connect(B.send);const hp=F('highpass',260,.7),top=F('lowpass',6500,.5);B.send.connect(hp);hp.connect(top);
+    B.room=c.createConvolver();B.room.buffer=caveIR(c);B.roomG=G(0);top.connect(B.room);B.room.connect(B.roomG);B.roomG.connect(dest);
+    B.dl=c.createDelay(2);B.dl.delayTime.value=.4;B.fb=G(.34);const fbf=F('lowpass',2400,.5);B.dlG=G(0);
+    top.connect(B.dl);B.dl.connect(fbf);fbf.connect(B.fb);B.fb.connect(B.dl);B.dl.connect(B.dlG);B.dlG.connect(B.room);B.dlG.connect(dest);   // echoes also bloom into the room
+    B.lg=false;B.cave=false;
+    return FXB=B;
+  }
+  function phFx(lowG,cave){
+    const B=phBus(),now=B.c.currentTime,tc=.06;
+    if(R&&B._beat!==R.beat){B._beat=R.beat;B.lfo.frequency.setTargetAtTime(1/(2*R.beat),now,.01);B.dl.delayTime.setTargetAtTime(Math.min(1.9,R.beat*.75),now,.01);}
+    if(lowG!==B.lg){B.lg=lowG;
+      B.lp.frequency.setTargetAtTime(lowG?1500:20000,now,lowG?tc:tc*1.5);B.lp.Q.setTargetAtTime(lowG?4.5:.7,now,tc);
+      B.lfoG.gain.setTargetAtTime(lowG?(B.lfoHz?800:1100):0,now,tc);B.dry.gain.setTargetAtTime(lowG?.82:1,now,tc);}   // a touch quieter so the resonance never jumps out
+    const wet=cave?1:lowG?.35:0;
+    if(B._wet!==wet){B._wet=wet;B.send.gain.setTargetAtTime(wet,now,cave?.3:tc*2);B.roomG.gain.setTargetAtTime(cave?.42:.3,now,.1);B.dlG.gain.setTargetAtTime(cave?.24:0,now,.1);}
+  }
+  // play a note through the bus (any track effects on a channel still take over, as everywhere else)
+  function phSnd(id,vel,at,ch){const B=phBus(),d=drumMasterGain,r=rvbNode;drumMasterGain=B.in;rvbNode=B.rvIn;try{playSound(id,vel,at,ch);}finally{drumMasterGain=d;rvbNode=r;}}
+  function phRoll(id,midi,at,dur,vel,layer){const B=phBus(),d=drumMasterGain,r=rvbNode;drumMasterGain=B.in;rvbNode=B.rvIn;try{playRollNote(id,midi,at,dur,vel,layer);}finally{drumMasterGain=d;rvbNode=r;}}
+  function stop(){if(!R)return;clearInterval(R.sched);cancelAnimationFrame(R.raf);clearTimeout(R.rt);R.state='stopped';R=null;try{phFx(false,false);}catch(e){}}
   function lat(){const c=getCtx();return(c.outputLatency||0)+(c.baseLatency||0)*.5;}
   // JUMP plays your kick pad, BOUNCE your snare/clap pad (a plain kick / snare if you haven't got one)
   function phPadSound(w){const ps=(typeof padSounds!=='undefined'?padSounds:[]).filter(id=>id&&SOUND_MAP[id]);
@@ -124,12 +165,12 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
     if(fromCp){const k=R.cpSnap;R.S.s=cp;R.got=new Set(k.got);R.graded=new Set(k.graded);R.combo=0;R.maxCombo=k.maxCombo;R.timing=R.timing.slice(0,k.timing);R.onBeat=Object.assign({},k.onBeat);
       // restart the music from the checkpoint crystal, with a two-click count-in
       R.T0=c.currentTime+.25+2*R.beat-cp*R.beat;const at=cp*R.beat-1e-6;while(R.ei<R.lv.song.events.length&&R.lv.song.events[R.ei].t<at)R.ei++;
-      for(let i=0;i<2;i++)playSound('rimshot',i?.5:.85,R.T0+(cp-2+i)*R.beat);
+      for(let i=0;i<2;i++)phSnd('rimshot',i?.5:.85,R.T0+(cp-2+i)*R.beat);
       R.texts.push({s:cp+.4,h:2.2,txt:'FROM THE CRYSTAL',col:'#bfe9ff',life:1.4,sz:1});
     }else{R.got=new Set();R.cpHit=false;R.cpSnap=null;
     R.graded=new Set();R.combo=0;R.maxCombo=0;R.timing=[];R.onBeat={perfect:0,good:0,off:0};
     R.T0=c.currentTime+(first?4*R.beat+.3:.25);}
-    if(first)for(let i=0;i<4;i++)playSound('rimshot',i?.5:.85,R.T0-(4-i)*R.beat);
+    if(first)for(let i=0;i<4;i++)phSnd('rimshot',i?.5:.85,R.T0-(4-i)*R.beat);
     R.sched=setInterval(schedule,25);schedule();
     $('phAtt').textContent=R.attempt;$('phDust').textContent='0';
   }
@@ -138,7 +179,7 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
     const c=getCtx(),ahead=c.currentTime+.18,ev=R.lv.song.events;
     while(R.ei<ev.length&&R.T0+ev[R.ei].t<ahead){
       const e=ev[R.ei++],at=Math.max(c.currentTime,R.T0+e.t);
-      try{if(e.kind==='drum')playSound(e.id,e.vel,at,e.ch);else if(typeof playRollNote==='function'&&SOUND_MAP[e.id])playRollNote(e.id,e.midi,at,e.dur,e.vel,e.layer==null?-1:e.layer);}catch(err){}
+      try{if(e.kind==='drum')phSnd(e.id,e.vel,at,e.ch);else if(typeof playRollNote==='function'&&SOUND_MAP[e.id])phRoll(e.id,e.midi,at,e.dur,e.vel,e.layer==null?-1:e.layer);}catch(err){}
     }
   }
 
@@ -147,7 +188,7 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
     if(!R||R.state!=='play'||R.dead)return;
     let t=tau();if(ev&&ev.timeStamp){const lag=(performance.now()-ev.timeStamp)/1000;if(lag>0&&lag<.25)t-=lag/R.beat;}
     // during the count-in (or the checkpoint count-in) you can hop on the spot for fun: nothing is judged
-    if(t<R.S.s-.15){const I=R.idleS||(R.idleS={h:0,vy:0,air:1});if(I.h<=0&&I.vy<=0){I.vy=PH_V0;I.air=1;}else if(I.air>0){I.vy=PH_V0;I.air=0;}const pd=$(w==='j'||R.solo?'phJump':'phBounce');pd.classList.remove('lit');void pd.offsetWidth;pd.classList.add('lit');try{playSound(phPadSound(R.solo?'j':w),.55);}catch(e){}return;}
+    if(t<R.S.s-.15){const I=R.idleS||(R.idleS={h:0,vy:0,air:1});if(I.h<=0&&I.vy<=0){I.vy=PH_V0;I.air=1;}else if(I.air>0){I.vy=PH_V0;I.air=0;}const pd=$(w==='j'||R.solo?'phJump':'phBounce');pd.classList.remove('lit');void pd.offsetWidth;pd.classList.add('lit');try{phSnd(phPadSound(R.solo?'j':w),.55);}catch(e){}return;}
     R.inputs.push({t:Math.max(R.S.s,t),w});
     // how close was that press to the beat it was meant for? (the level's planned presses)
     let best=-1,bd=.32;R.lv.acts.forEach((a,i)=>{if(a.w!==w||R.graded.has(i))return;const d=Math.abs(t-a.t);if(d<bd){bd=d;best=i;}});
@@ -159,7 +200,7 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
     }
     if(R.solo)w='j';
     const pad=$(w==='j'?'phJump':'phBounce');pad.classList.remove('lit');void pad.offsetWidth;pad.classList.add('lit');
-    try{playSound(phPadSound(w),.55);}catch(e){}
+    try{phSnd(phPadSound(w),.55);}catch(e){}
   }
   ['phJump','phBounce'].forEach((id,i)=>{const b=$(id);const w=i?'b':'j';
     b.addEventListener('pointerdown',e=>{e.preventDefault();input(w,e);});b.addEventListener('contextmenu',e=>e.preventDefault());
@@ -181,6 +222,9 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
     if(!R)return;R.raf=requestAnimationFrame(frame);
     const now=performance.now(),dt=Math.min(.05,(now-(R.lp||now))/1000);R.lp=now;
     const lv=R.lv,S=R.S;
+    // music environment: low-gravity filter while you're inside a zone, cave room underground (fades as you walk out into daylight)
+    try{const lowG=R.state==='play'&&!R.dead&&!R.won&&lv.zones.some(z=>S.s>=z.a&&S.s<z.b),outside=R.won&&lv.P.finish==='exit'&&now-R.won>R.beat*600;
+      phFx(lowG,!!lv.P.cave&&!outside);}catch(e){}
     if(R.state==='play'&&!R.dead&&!R.won){
       try{padHud(tau());}catch(e){}
       // count-in hops (with double jump) run on their own little physics; if you're still in the air when the
@@ -635,11 +679,20 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
     // ── blocks + floating platforms ──
     lv.blocks.forEach(b=>{if(b.b<s0-.2||b.a>s1+.2)return;drawBlock(lv.P.planet,b,t);});
     // ── spikes: faceted crystals (meteors drop in during comet chases) ──
-    lv.spikes.forEach(sp=>{if(sp.s<s0-1||sp.s>s1+1)return;
-      let drop=0;if(sp.meteor){drop=Math.max(0,(sp.s-S.s-1.3)*2.2);}
-      if(drop>0){const [x,y]=P(sp.s,sp.h*.5+drop);const [tx,ty]=P(sp.s+.9,sp.h*.5+drop+1.8);
-        const tg=g.createLinearGradient(x,y,tx,ty);tg.addColorStop(0,'rgba(255,170,60,.85)');tg.addColorStop(1,'rgba(255,60,20,0)');g.strokeStyle=tg;g.lineWidth=BP*.16;g.lineCap='round';g.beginPath();g.moveTo(x,y);g.lineTo(tx,ty);g.stroke();g.lineCap='butt';
+    lv.spikes.forEach(sp=>{if(sp.s<s0-1||sp.s>s1+(sp.meteor?14:1))return;
+      // a falling meteor: u = beats until it lands (it touches down 1.3 beats ahead of you). It also drifts forward a little
+      // while it falls, so on screen it dives steeply into the ground; the tail is drawn along the exact path it came from,
+      // so it always trails straight behind the head
+      const u=sp.meteor?sp.s-S.s-1.3:0;
+      if(u>0){const DR=.45,FALL=2.6,mp=uu=>P(S.s+1.3+(1-DR)*uu,sp.h*.5+FALL*uu),[x,y]=mp(u);
+        if(y<-BP||x>W+BP*2)return;
+        const TL=.75,pts=[];for(let i=0;i<=6;i++)pts.push(mp(u+TL*i/6));const [tx,ty]=pts[6];
+        const tg=g.createLinearGradient(x,y,tx,ty);tg.addColorStop(0,'rgba(255,190,80,.9)');tg.addColorStop(.45,'rgba(255,120,40,.45)');tg.addColorStop(1,'rgba(255,60,20,0)');
+        g.fillStyle=tg;const nx=-(ty-y),ny=tx-x,nl=Math.hypot(nx,ny)||1,hw=BP*.13;   // a tapered tail, widest at the head
+        g.beginPath();pts.forEach(([px,py],i)=>{const w=hw*(1-i/6);i?g.lineTo(px+nx/nl*w,py+ny/nl*w):g.moveTo(px+nx/nl*w,py+ny/nl*w);});
+        for(let i=6;i>=0;i--){const [px,py]=pts[i],w=hw*(1-i/6);g.lineTo(px-nx/nl*w,py-ny/nl*w);}g.closePath();g.fill();
         const mg=g.createRadialGradient(x-BP*.04,y-BP*.04,1,x,y,BP*.14);mg.addColorStop(0,'#fff4c0');mg.addColorStop(.4,'#ffb84d');mg.addColorStop(1,'#a03a10');g.fillStyle=mg;g.beginPath();g.arc(x,y,BP*.14,0,Math.PI*2);g.fill();return;}
+      if(sp.s>s1+1)return;
       drawObstacle(lv,sp,t,S);});
     // ── bounce pads: little hover pads with thrusters ──
     lv.pads.forEach(p=>{if(p.s<s0-1||p.s>s1+1)return;const gone=S.padsDropped.has(p),small=(p.next-p.s)<1.75,pc=small?'#4d8bff':'#ff4dff',pr=small?'77,139,255':'255,77,255',pt=small?'170,200,255':'255,170,255';   // pink = big launch, blue = small hop
@@ -690,8 +743,8 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
     if(lv.bossS<Infinity&&S.s>lv.bossS-3){
       const k=Math.min(1,(S.s-(lv.bossS-3))/3),won=R.won?Math.min(1,(performance.now()-R.won)/900):0;
       const cx=AX-BP*(3.4-1.2*k)-won*BP*0,cy=GY-UP*(2.8-won*2.8)+Math.sin(t*3)*UP*.15,cr=BP*.32;
-      if(won<1){const tg=g.createLinearGradient(cx,cy,cx-BP*3,cy-UP*2.5);tg.addColorStop(0,'rgba(255,220,140,.8)');tg.addColorStop(1,'rgba(255,80,40,0)');
-        g.fillStyle=tg;g.beginPath();g.moveTo(cx,cy-cr);g.lineTo(cx-BP*3,cy-UP*2.5);g.lineTo(cx,cy+cr);g.fill();
+      if(won<1){const tg=g.createLinearGradient(cx,cy,cx-BP*3,cy-UP*.7);tg.addColorStop(0,'rgba(255,220,140,.8)');tg.addColorStop(1,'rgba(255,80,40,0)');
+        g.fillStyle=tg;g.beginPath();g.moveTo(cx,cy-cr);g.lineTo(cx-BP*3,cy-UP*.7+Math.sin(t*5)*UP*.12);g.lineTo(cx,cy+cr);g.fill();
         const cg=g.createRadialGradient(cx-cr*.3,cy-cr*.3,1,cx,cy,cr);cg.addColorStop(0,'#fff');cg.addColorStop(.4,lv.P.planet===1?'#9ff':'#ffd166');cg.addColorStop(1,lv.P.planet===2?'#ff3a1a':'#ff8a3a');
         g.fillStyle=cg;g.shadowColor='#ff8a3a';g.shadowBlur=30;g.beginPath();g.arc(cx,cy,cr,0,Math.PI*2);g.fill();g.shadowBlur=0;}
     }

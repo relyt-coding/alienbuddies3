@@ -2,6 +2,14 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.108 - 2026-11-09 20:15
+- Planet Hop: falling comet meteors dive steeply into the ground, with the tail trailing exactly along the path they came from
+- Planet Hop: level 3's cowbell holds off until the last quarter of the song, and sits lower in the mix
+- Planet Hop: low gravity gives the music a floaty filter sweep (one sweep per two-beat jump)
+- Planet Hop: cave levels get a big cave room and a dotted-eighth echo on the beat (lows kept clean)
+- Worm Whack: hits splat the worm flat with dizzy stars, a comic impact burst (BONK! POW! ...), flying dirt and the crater lighting up in the pad's colour
+- Worm Whack: misses flash the crater red with a bigger MISS
+
 ## v0.2.107 - 2026-11-09 19:02
 - Planet Hop: pink bounce pads are always the big launches; small one-beat hops are blue
 - Worm Whack + Planet Hop: no more PERFECT / GOOD / EARLY / LATE text or early/late meter; let your ears judge (every in-time Worm Whack hit scores the same)

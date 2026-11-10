@@ -28,7 +28,7 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
       <button class="ww-pad ph-pad" id="phBounce" style="--c:#ff4dff"><span class="ph-beat"><i></i><i></i><i></i><i></i></span><span class="ph-ico"><svg viewBox="0 0 24 24"><path d="M4 20h16M7 16l10-2.5L7 11l10-2.5L7 6M12 3v0"/><circle cx="12" cy="3.2" r="1.6"/></svg></span><span class="ph-txt"><span class="ph-act">BOUNCE</span><span class="ph-snd" id="phBounceSnd"></span><span class="ph-tip">on the glowing pads</span></span><span class="ph-keys" id="phBounceK"></span></button>
     </div>
     <div class="ww-panel" id="phSelect"><div class="ww-panel-inner" style="box-shadow:0 0 40px -10px #7fe8ff">
-      <div class="ww-sel-head"><div><div class="ww-big" style="color:#7fe8ff">PLANET HOP</div><div class="ww-sub">Run round the planet to the beat · JUMP, double jump, and BOUNCE across the glowing pads · a hit sends you back to the start, or to the checkpoint flag once you pass it</div></div><div style="display:flex;gap:6px"><button class="ww-btn mg-sync-btn" id="phSync" title="Calibrate your timing">⏱ SYNC</button><button class="ww-x" id="phClose" title="Close">✕</button></div></div>
+      <div class="ww-sel-head"><div><div class="ww-big" style="color:#7fe8ff">PLANET HOP</div><div class="ww-sub">Run round the planet to the beat · JUMP, double jump, and BOUNCE across the glowing pads · a hit sends you back to the start, or to the checkpoint crystal once you light it</div></div><div style="display:flex;gap:6px"><button class="ww-btn mg-sync-btn" id="phSync" title="Calibrate your timing">⏱ SYNC</button><button class="ww-x" id="phClose" title="Close">✕</button></div></div>
       <div class="mg-tabs"><button class="mg-tab sel" id="phTabLv">LEVELS</button><button class="mg-tab" id="phTabMine">YOUR BEATS</button></div>
       <div id="phLvPane"><div class="ww-sel-bonus" id="phBonus"></div>
       <div class="ww-grid ph-grid" id="phGrid"></div>
@@ -122,10 +122,10 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
     clearInterval(R.sched);
     R.attempt++;R.S=phNewState();R.ei=0;R.inputs=[];R.dead=null;R.won=0;R.trail=[];R.rings=[];
     if(fromCp){const k=R.cpSnap;R.S.s=cp;R.got=new Set(k.got);R.graded=new Set(k.graded);R.combo=0;R.maxCombo=k.maxCombo;R.timing=R.timing.slice(0,k.timing);R.onBeat=Object.assign({},k.onBeat);
-      // restart the music from the flag, with a two-click count-in while the alien waits at the pole
+      // restart the music from the checkpoint crystal, with a two-click count-in
       R.T0=c.currentTime+.25+2*R.beat-cp*R.beat;const at=cp*R.beat-1e-6;while(R.ei<R.lv.song.events.length&&R.lv.song.events[R.ei].t<at)R.ei++;
       for(let i=0;i<2;i++)playSound('rimshot',i?.5:.85,R.T0+(cp-2+i)*R.beat);
-      R.texts.push({s:cp+.4,h:2.2,txt:'FROM THE FLAG',col:'#00ff99',life:1.4,sz:1});
+      R.texts.push({s:cp+.4,h:2.2,txt:'FROM THE CRYSTAL',col:'#5dffc8',life:1.4,sz:1});
     }else{R.got=new Set();R.cpHit=false;R.cpSnap=null;
     R.graded=new Set();R.combo=0;R.maxCombo=0;R.timing=[];R.onBeat={perfect:0,good:0,off:0};
     R.T0=c.currentTime+(first?4*R.beat+.3:.25);}
@@ -194,7 +194,7 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
       // stardust
       lv.dust.forEach((d,i)=>{if(!R.got.has(i)&&Math.abs(d.s-S.s)<.24&&Math.abs(d.h-(S.h+.45))<.55){R.got.add(i);burst(d.s,d.h,'#ffe680',6,.5);}});
       if(lv.cp!=null&&!R.cpHit&&S.s>=lv.cp){R.cpHit=true;R.cpSnap={got:new Set(R.got),graded:new Set([...R.graded].filter(i=>lv.acts[i].t<lv.cp)),maxCombo:R.maxCombo,timing:R.timing.length,onBeat:Object.assign({},R.onBeat)};
-        R.texts.push({s:lv.cp+.6,h:2.4,txt:'CHECKPOINT!',col:'#00ff99',life:1.5,sz:1.2});burst(lv.cp,1.6,'#00ff99',18,1.2);}
+        R.texts.push({s:lv.cp+.6,h:2.4,txt:'CHECKPOINT!',col:'#5dffc8',life:1.5,sz:1.2});burst(lv.cp,1.2,'#5dffc8',22,1.2);}
       $('phDust').textContent=R.got.size;
       const pct=Math.max(0,Math.min(1,S.s/lv.end));$('phPct').textContent=Math.floor(pct*100)+'%';$('phProg').style.width=(pct*100)+'%';
       if(S.dead)die();
@@ -310,24 +310,23 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
     const e=lv.end,f=lv.P.finish,pl=lv.P.planet,C=PH_CAVE[pl];
     if(e>s1+4||e<s0-6)return;
     if(f==='dive'){
-      // a deep crater: rocky funnel walls with ledges and crystals, a glowing hole into the cave below
+      // a welcoming crater: smooth funnel walls with soft shelves and glowing orbs, a lit hole into the cave below
       const a=e+1,b=e+2.8,m=(a+b)/2,T=PH_THEME[pl],D=2.7,N=8,sL=[],sR=[],dd=[];
-      for(let i=0;i<=N;i++){const u=i/N,ins=Math.pow(u,1.5)*.6;dd.push(u*D);sL.push(a+ins+(i?(hsh(a*7+i,4)-.5)*.09:0));sR.push(b-ins+(i?(hsh(b*7+i,5)-.5)*.09:0));}
+      for(let i=0;i<=N;i++){const u=i/N,ins=Math.pow(u,1.5)*.6;dd.push(u*D);sL.push(a+ins+(i?(hsh(a*7+i,4)-.5)*.03:0));sR.push(b-ins+(i?(hsh(b*7+i,5)-.5)*.03:0));}
       const out=sL.map((x,i)=>P(x,-dd[i])).concat(sR.map((x,i)=>P(x,-dd[i])).reverse()).map(q=>[q[0],q[1]]);
       const wg=g.createRadialGradient(CX,CY,RP-D*UP,CX,CY,RP);wg.addColorStop(0,'#020208');wg.addColorStop(.5,T.deep);wg.addColorStop(1,T.body);
       g.fillStyle=wg;poly(out);g.fill();
       g.save();poly(out);g.clip();
       // rock layers following the curve of the world
       g.lineWidth=2;[.3,.75,1.25,1.8].forEach((d,k)=>{g.strokeStyle=k%2?T.strata:'rgba(255,255,255,.07)';g.beginPath();for(let i=0;i<=14;i++){const ss=a+(b-a)*i/14,[x,y]=P(ss,-d+(hsh(ss*5+k,7)-.5)*.14);i?g.lineTo(x,y):g.moveTo(x,y);}g.stroke();});
-      // ledges sticking out of both walls
-      [[sL,1],[sR,-1]].forEach(([side,dir])=>[2,4,6].forEach(i=>{const x=side[i],d=dd[i]+(hsh(x*3+i,6)-.5)*.15,w=.16+hsh(x+i,7)*.14,
-        pts=[P(x-dir*.05,-d),P(x+dir*w,-d-.04),P(x+dir*w*.6,-d-.2),P(x-dir*.05,-d-.24)];g.fillStyle=T.crust;poly(pts);g.fill();
-        g.strokeStyle=T.top;g.globalAlpha=.6;g.lineWidth=1.5;g.beginPath();g.moveTo(pts[0][0],pts[0][1]);g.lineTo(pts[1][0],pts[1][1]);g.stroke();g.globalAlpha=1;}));
-      // glowing crystals poking out of the walls
-      [[sL,1],[sR,-1]].forEach(([side,dir],j)=>[3,5,7].forEach((i,q)=>{const x=side[i],d=dd[i],gl=.55+.45*Math.sin(t*2.2+i+j*2);
-        const [ax,ay]=P(x,-d+.07),[bx,by]=P(x,-d-.09),[cx,cy]=P(x+dir*(.22+q*.05),-d+.15+q*.04);
-        const hg=g.createRadialGradient(cx,cy,0,cx,cy,UP*.5);hg.addColorStop(0,C.glow+'66');hg.addColorStop(1,C.glow+'00');g.globalAlpha=gl;g.fillStyle=hg;g.beginPath();g.arc(cx,cy,UP*.5,0,Math.PI*2);g.fill();g.globalAlpha=1;
-        g.fillStyle=C.glow;g.beginPath();g.moveTo(ax,ay);g.lineTo(cx,cy);g.lineTo(bx,by);g.fill();g.fillStyle='rgba(255,255,255,.55)';g.beginPath();g.moveTo(ax,ay);g.lineTo(cx,cy);g.lineTo((ax+bx)/2,(ay+by)/2);g.fill();}));
+      // soft rounded shelves on both walls
+      [[sL,1],[sR,-1]].forEach(([side,dir])=>[3,6].forEach(i=>{const x=side[i],d=dd[i]+(hsh(x*3+i,6)-.5)*.12,w=.18+hsh(x+i,7)*.1,[lx,ly,lf]=P(x+dir*w*.35,-d-.06);
+        g.save();g.translate(lx,ly);g.rotate(lf);g.fillStyle=T.crust;g.beginPath();g.ellipse(0,0,w*BP*.55,UP*.1,0,0,Math.PI*2);g.fill();
+        g.strokeStyle=T.top;g.globalAlpha=.5;g.lineWidth=1.5;g.beginPath();g.ellipse(0,0,w*BP*.55,UP*.1,0,Math.PI*1.1,Math.PI*1.9);g.stroke();g.globalAlpha=1;g.restore();}));
+      // friendly glowing orbs dotted down the walls, lighting the way in
+      [[sL,1],[sR,-1]].forEach(([side,dir],j)=>[2,4,5,7].forEach((i,q)=>{const x=side[i]+dir*(.08+hsh(i+j,3)*.08),d=dd[i]+(hsh(i*5+j,4)-.5)*.2,gl=.55+.45*Math.sin(t*2.2+i+j*2),[ox,oy]=P(x,-d),r=UP*(.07+hsh(i+j*9,6)*.05);
+        const hg=g.createRadialGradient(ox,oy,0,ox,oy,r*5);hg.addColorStop(0,C.glow+'77');hg.addColorStop(1,C.glow+'00');g.globalAlpha=gl;g.fillStyle=hg;g.beginPath();g.arc(ox,oy,r*5,0,Math.PI*2);g.fill();
+        g.globalAlpha=.7+.3*gl;g.fillStyle=C.glow;g.beginPath();g.arc(ox,oy,r,0,Math.PI*2);g.fill();g.fillStyle='rgba(255,255,255,.8)';g.beginPath();g.arc(ox-r*.3,oy-r*.3,r*.4,0,Math.PI*2);g.fill();g.globalAlpha=1;}));
       g.restore();
       // the hole at the bottom: light from the cave below
       const pu=.5+.5*Math.sin(t*3),[hx,hy,hf]=P(m,-D),hw=Math.max(8,(sR[N]-sL[N])*BP*.5);
@@ -591,11 +590,20 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
       g.fillStyle='rgba(8,10,24,.88)';g.strokeStyle=pl.glow;g.lineWidth=2;g.shadowColor=pl.glow;g.shadowBlur=8+6*pulse;
       g.beginPath();if(g.roundRect)g.roundRect(-tw/2,by,tw,bh,6);else g.rect(-tw/2,by,tw,bh);g.fill();g.stroke();g.shadowBlur=0;
       g.fillStyle='#fff';g.textAlign='center';g.textBaseline='middle';g.fillText(sg.txt,0,by+bh/2+1);g.restore();});
-    // ── checkpoint flag ──
-    if(lv.cp!=null&&lv.cp>s0-1&&lv.cp<s1+1){const [x,y,f]=P(lv.cp,0),on=R.cpHit;g.save();g.translate(x,y);g.rotate(f);
-      const ph=UP*1.9;g.fillStyle='#c8ccd8';g.fillRect(-2,-ph,4,ph);g.fillStyle=on?'#00ff99':'#7a7f90';g.beginPath();g.arc(0,-ph,4,0,Math.PI*2);g.fill();
-      const wv=Math.sin(t*6)*UP*.06;g.fillStyle=on?'#00ff99':'#8a8fa0';if(on){g.shadowColor='#00ff99';g.shadowBlur=14;}
-      g.beginPath();g.moveTo(2,-ph+2);g.quadraticCurveTo(UP*.45,-ph+UP*.18+wv,UP*.85,-ph+UP*.25);g.quadraticCurveTo(UP*.45,-ph+UP*.38-wv,2,-ph+UP*.5);g.fill();g.shadowBlur=0;g.restore();}
+    // ── checkpoint crystal: dim until you pass it, then it lights up ──
+    if(lv.cp!=null&&lv.cp>s0-1&&lv.cp<s1+1){const [x,y,f]=P(lv.cp,0),on=R.cpHit,ck='#5dffc8',pu=.5+.5*Math.sin(t*3);g.save();g.translate(x,y);g.rotate(f);
+      const hU=UP*1.5,base=UP*.32;
+      if(on){const bg3=g.createLinearGradient(0,0,0,-hU*3.2);bg3.addColorStop(0,'rgba(93,255,200,.35)');bg3.addColorStop(1,'rgba(93,255,200,0)');g.fillStyle=bg3;g.beginPath();g.moveTo(-base*.9,0);g.lineTo(-base*.3,-hU*3.2);g.lineTo(base*.3,-hU*3.2);g.lineTo(base*.9,0);g.fill();
+        const hg=g.createRadialGradient(0,-hU*.5,0,0,-hU*.5,hU*1.3);hg.addColorStop(0,`rgba(93,255,200,${.35+.2*pu})`);hg.addColorStop(1,'rgba(93,255,200,0)');g.fillStyle=hg;g.beginPath();g.arc(0,-hU*.5,hU*1.3,0,Math.PI*2);g.fill();}
+      // rock base
+      g.fillStyle=PH_THEME[lv.P.planet].crust;g.beginPath();g.ellipse(0,-UP*.04,base*1.5,UP*.16,0,Math.PI,Math.PI*2);g.fill();
+      // three hexagonal crystals: tall one in the middle, two leaning out
+      [[-base*.55,.55,-.35],[base*.55,.62,.3],[0,1,0]].forEach(([dx,sc,tilt])=>{const h=hU*sc,w=base*.42*(.7+.3*sc);g.save();g.translate(dx,-UP*.06);g.rotate(tilt);
+        const cg=g.createLinearGradient(-w,0,w,0);if(on){cg.addColorStop(0,'#1fbf8f');cg.addColorStop(.5,'#c8fff0');cg.addColorStop(1,'#2ee0a8');}else{cg.addColorStop(0,'rgba(120,130,160,.75)');cg.addColorStop(.5,'rgba(210,220,240,.7)');cg.addColorStop(1,'rgba(140,150,180,.75)');}
+        if(on){g.shadowColor=ck;g.shadowBlur=12+10*pu;}g.fillStyle=cg;g.beginPath();g.moveTo(-w,0);g.lineTo(-w,-h*.72);g.lineTo(0,-h);g.lineTo(w,-h*.72);g.lineTo(w,0);g.closePath();g.fill();g.shadowBlur=0;
+        g.strokeStyle=on?'rgba(255,255,255,.85)':'rgba(255,255,255,.45)';g.lineWidth=1.2;g.stroke();g.beginPath();g.moveTo(0,-h);g.lineTo(0,0);g.stroke();g.restore();});
+      if(on)for(let k=0;k<4;k++){const a2=t*1.6+k*Math.PI/2,rx=Math.cos(a2)*base*1.8,ry=-hU*.55+Math.sin(a2)*hU*.25;g.fillStyle=`rgba(200,255,240,${.5+.5*Math.sin(t*4+k)})`;g.beginPath();g.arc(rx,ry,1.6,0,Math.PI*2);g.fill();}
+      g.restore();}
     // ── glowing press markers on the first few of each new idea (where perfect play presses) ──
     lv.acts.forEach(a=>{if(!a.tut||a.t<S.s-.4||a.t>s1)return;const near=Math.max(0,1-Math.abs(a.t-S.s)/3),[x,y]=P(a.t,(a.h||0)+.45);
       const r=Math.max(14,UP*.3)*(1+.15*pulse),col=a.w==='j'?'#00e5ff':'#ff4dff';g.globalAlpha=Math.min(1,.6+near)*(a.t<S.s?Math.max(0,1+(a.t-S.s)/.4):1);

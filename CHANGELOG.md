@@ -2,6 +2,11 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.101 - 2026-11-09 16:57
+- Planet Hop: checkpoint flags are now crystals that light up when you pass them
+- Planet Hop: the crater into the underground is friendlier: smooth walls, rounded ledges and glowing orbs instead of sharp crystals
+- Planet Hop: removed the ROCK — LAND ON TOP sign on level 2 (the jump markers stay)
+
 ## v0.2.100 - 2026-11-09 16:50
 - Planet Hop: buttons stack the icon over the word on narrow phones, so BOUNCE and the drum label always fit
 - Planet Hop: cave exits are a rocky arch with sunlight, hills and light rays streaming in (moonstone crystals on Luna, icicles on Glacia, lava drips on Magmora)

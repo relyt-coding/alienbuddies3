@@ -103,7 +103,7 @@ function phTokens(){
   };
 }
 // where each idea debuts, and the sign that teaches it
-const PH_DEBUT={s:[1,'JUMP ON THE BEAT'],p:[1,'HOP THE GAP'],st:[1,'CLIMB TO THE TOP!'],k:[2,'ROCK — LAND ON TOP'],rE:[3,'TAP JUMP TWICE = DOUBLE JUMP'],P:[3,'WIDE PIT — DOUBLE JUMP'],
+const PH_DEBUT={s:[1,'JUMP ON THE BEAT'],p:[1,'HOP THE GAP'],st:[1,'CLIMB TO THE TOP!'],k:[2,''],rE:[3,'TAP JUMP TWICE = DOUBLE JUMP'],P:[3,'WIDE PIT — DOUBLE JUMP'],
   Bf:[6,'NEW BUTTON: PRESS BOUNCE ON EACH PAD'],B2:[6,'BOUNCE ACROSS THE PIT'],kk:[5,'CLIMB!'],Lr:[4,'LOW GRAVITY — 2-BEAT JUMPS'],Lg:[4,'LEAP THE CRATERS'],
   B1:[7,'ONE PAD PER BEAT'],f:[8,''],s3:[9,'JUMP ON EVERY BEAT'],Pm:[9,'PIT, THEN SPIKE'],d:[11,'JUMP + DOUBLE ON THE "AND"'],
   rO:[12,'JUMP ON THE "AND"'],so:[12,'OFF-BEAT SPIKES'],dk:[13,'DOUBLE JUMP UP HIGH']};

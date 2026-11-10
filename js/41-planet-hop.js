@@ -312,40 +312,34 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
     const e=lv.end,f=lv.P.finish,pl=lv.P.planet,C=PH_CAVE[pl];
     if(e>s1+4||e<s0-6)return;
     if(f==='dive'){
-      // a welcoming crater: smooth funnel walls with soft shelves and glowing orbs, a lit hole into the cave below
-      const a=e+1,b=e+2.8,m=(a+b)/2,T=PH_THEME[pl],D=2.7,N=8,sL=[],sR=[],dd=[];
-      for(let i=0;i<=N;i++){const u=i/N,ins=Math.pow(u,1.5)*.6;dd.push(u*D);sL.push(a+ins+(i?(hsh(a*7+i,4)-.5)*.03:0));sR.push(b-ins+(i?(hsh(b*7+i,5)-.5)*.03:0));}
-      const out=sL.map((x,i)=>P(x,-dd[i])).concat(sR.map((x,i)=>P(x,-dd[i])).reverse()).map(q=>[q[0],q[1]]);
-      const wg=g.createRadialGradient(CX,CY,RP-D*UP,CX,CY,RP);wg.addColorStop(0,'#020208');wg.addColorStop(.5,T.deep);wg.addColorStop(1,T.body);
+      // a clean crater: a smooth bowl with shaded walls, low rounded rims and a lit hole into the cave below
+      const a=e+1,b=e+2.8,m=(a+b)/2,T=PH_THEME[pl],D=2.7,N=14,sL=[],sR=[],dd=[];
+      for(let i=0;i<=N;i++){const u=i/N,ins=(1-Math.cos(u*Math.PI*.5))*.62;dd.push(u*D);sL.push(a+ins);sR.push(b-ins);}
+      const top=[];for(let i=1;i<14;i++){const q=P(b-(b-a)*i/14,.02);top.push([q[0],q[1]]);}
+      const wallL=sL.map((x,i)=>P(x,-dd[i])),wallR=sR.map((x,i)=>P(x,-dd[i]));
+      const out=wallL.concat([...wallR].reverse()).map(q=>[q[0],q[1]]).concat(top);
+      const wg=g.createRadialGradient(CX,CY,RP-D*UP,CX,CY,RP);wg.addColorStop(0,'#020208');wg.addColorStop(.6,pl===2?'#160604':'#0b0b18');wg.addColorStop(1,T.deep);
       g.fillStyle=wg;poly(out);g.fill();
       g.save();poly(out);g.clip();
-      // rock layers following the curve of the world
-      g.lineWidth=2;[.3,.75,1.25,1.8].forEach((d,k)=>{g.strokeStyle=k%2?T.strata:'rgba(255,255,255,.07)';g.beginPath();for(let i=0;i<=14;i++){const ss=a+(b-a)*i/14,[x,y]=P(ss,-d+(hsh(ss*5+k,7)-.5)*.14);i?g.lineTo(x,y):g.moveTo(x,y);}g.stroke();});
-      // soft rounded shelves on both walls
-      [[sL,1],[sR,-1]].forEach(([side,dir])=>[3,6].forEach(i=>{const x=side[i],d=dd[i]+(hsh(x*3+i,6)-.5)*.12,w=.18+hsh(x+i,7)*.1,[lx,ly,lf]=P(x+dir*w*.35,-d-.06);
-        g.save();g.translate(lx,ly);g.rotate(lf);g.fillStyle=T.crust;g.beginPath();g.ellipse(0,0,w*BP*.55,UP*.1,0,0,Math.PI*2);g.fill();
-        g.strokeStyle=T.top;g.globalAlpha=.5;g.lineWidth=1.5;g.beginPath();g.ellipse(0,0,w*BP*.55,UP*.1,0,Math.PI*1.1,Math.PI*1.9);g.stroke();g.globalAlpha=1;g.restore();}));
-      // friendly glowing orbs dotted down the walls, lighting the way in
-      [[sL,1],[sR,-1]].forEach(([side,dir],j)=>[2,4,5,7].forEach((i,q)=>{const x=side[i]+dir*(.08+hsh(i+j,3)*.08),d=dd[i]+(hsh(i*5+j,4)-.5)*.2,gl=.55+.45*Math.sin(t*2.2+i+j*2),[ox,oy]=P(x,-d),r=UP*(.07+hsh(i+j*9,6)*.05);
-        const hg=g.createRadialGradient(ox,oy,0,ox,oy,r*5);hg.addColorStop(0,C.glow+'77');hg.addColorStop(1,C.glow+'00');g.globalAlpha=gl;g.fillStyle=hg;g.beginPath();g.arc(ox,oy,r*5,0,Math.PI*2);g.fill();
-        g.globalAlpha=.7+.3*gl;g.fillStyle=C.glow;g.beginPath();g.arc(ox,oy,r,0,Math.PI*2);g.fill();g.fillStyle='rgba(255,255,255,.8)';g.beginPath();g.arc(ox-r*.3,oy-r*.3,r*.4,0,Math.PI*2);g.fill();g.globalAlpha=1;}));
+      // shaded wall faces down both sides
+      [wallL,wallR].forEach(pts=>{for(let k=0;k<3;k++){g.beginPath();pts.forEach((q,i)=>i?g.lineTo(q[0],q[1]):g.moveTo(q[0],q[1]));g.lineWidth=BP*(.26-k*.08);g.strokeStyle=k===2?'rgba(255,255,255,.14)':k?T.crust:T.body;g.globalAlpha=k?.5:.75;g.stroke();}g.globalAlpha=1;});
+      // a few faint rock layers following the bowl
+      g.lineWidth=1.5;g.strokeStyle=T.strata;[.5,1.1,1.7].forEach(d=>{const i0=Math.round(d/D*N),[x0,y0]=P(sL[i0],-d),[x1,y1]=P(m,-d-.12),[x2,y2]=P(sR[i0],-d);g.beginPath();g.moveTo(x0,y0);g.quadraticCurveTo(x1,y1,x2,y2);g.stroke();});
+      // glow from the cave below washing up the walls
+      const [wx,wy]=P(m,-D),wgl=g.createRadialGradient(wx,wy,0,wx,wy,UP*2.6);wgl.addColorStop(0,C.glow+'66');wgl.addColorStop(1,C.glow+'00');g.fillStyle=wgl;g.fillRect(wx-UP*3,wy-UP*3,UP*6,UP*6);
       g.restore();
-      // the hole at the bottom: light from the cave below
+      // the hole at the bottom
       const pu=.5+.5*Math.sin(t*3),[hx,hy,hf]=P(m,-D),hw=Math.max(8,(sR[N]-sL[N])*BP*.5);
-      const hg=g.createRadialGradient(hx,hy,0,hx,hy,UP*1.5);hg.addColorStop(0,C.glow+'aa');hg.addColorStop(1,C.glow+'00');g.globalAlpha=.65+.35*pu;g.fillStyle=hg;g.beginPath();g.arc(hx,hy,UP*1.5,0,Math.PI*2);g.fill();g.globalAlpha=1;
-      g.save();g.translate(hx,hy);g.rotate(hf);const og=g.createRadialGradient(0,0,0,0,0,hw);og.addColorStop(0,'#ffffff');og.addColorStop(.35,C.glow);og.addColorStop(1,C.wall[1]);
-      g.fillStyle=og;g.beginPath();g.ellipse(0,0,hw,UP*.22,0,0,Math.PI*2);g.fill();g.strokeStyle=C.tip;g.lineWidth=2;g.stroke();g.restore();
-      // a soft shaft of light rising out of the crater, with motes drifting up it
-      const s1p=P(sL[N],-D),s2p=P(sR[N],-D),s3p=P(b-.15,1.8),s4p=P(a+.15,1.8),[tx,ty]=P(m,1.8),lg=g.createLinearGradient(hx,hy,tx,ty);
-      lg.addColorStop(0,C.glow+'55');lg.addColorStop(1,C.glow+'00');g.fillStyle=lg;g.beginPath();g.moveTo(s1p[0],s1p[1]);g.lineTo(s2p[0],s2p[1]);g.lineTo(s3p[0],s3p[1]);g.lineTo(s4p[0],s4p[1]);g.closePath();g.fill();
-      g.fillStyle=C.glow;for(let k=0;k<10;k++){const u=(t*.35+hsh(k,3))%1,[mx,my]=P(m+(hsh(k,4)-.5)*(b-a)*(.3+u*.5),-D+u*(D+1.2));g.globalAlpha=Math.sin(u*Math.PI)*.8;g.beginPath();g.arc(mx,my,1.2+hsh(k,5)*1.6,0,Math.PI*2);g.fill();}g.globalAlpha=1;
-      // raised rocky rims with boulders, lit on the inside by the glow
-      [[a-.55,a+.08,1],[b-.08,b+.55,-1]].forEach(([u,v,dir])=>{const pts=[];for(let i=0;i<=10;i++){const ss=u+(v-u)*i/10;pts.push(P(ss,Math.pow(Math.sin(i/10*Math.PI),.8)*.48+(hsh(ss*9,2)-.5)*.05));}pts.push(P(v,-.1),P(u,-.1));
-        const rg=g.createLinearGradient(0,pts[5][1],0,pts[5][1]+UP*.6);rg.addColorStop(0,T.top);rg.addColorStop(.3,T.crust);rg.addColorStop(1,T.body);g.fillStyle=rg;poly(pts.map(q=>[q[0],q[1]]));g.fill();
-        g.strokeStyle=T.top;g.lineWidth=2;g.beginPath();pts.slice(0,11).forEach((q,i)=>i?g.lineTo(q[0],q[1]):g.moveTo(q[0],q[1]));g.stroke();
-        const inner=dir>0?pts.slice(6,11):pts.slice(0,5);g.strokeStyle=C.glow;g.globalAlpha=.45+.3*pu;g.lineWidth=2.5;g.beginPath();inner.forEach((q,i)=>i?g.lineTo(q[0],q[1]):g.moveTo(q[0],q[1]));g.stroke();g.globalAlpha=1;
-        [.2,.45].forEach((k,i)=>{const ss=dir>0?u+(v-u)*k*.8:v-(v-u)*k*.8,r=UP*(.13+.06*i),[bx,by,bf]=P(ss-dir*.15,.05+i*.04);g.save();g.translate(bx,by);g.rotate(bf);
-          const bg2=g.createRadialGradient(-r*.3,-r*.4,1,0,0,r*1.2);bg2.addColorStop(0,T.rock[0]);bg2.addColorStop(1,T.rock[1]);g.fillStyle=bg2;g.beginPath();g.ellipse(0,-r*.6,r*1.25,r,0,0,Math.PI*2);g.fill();g.restore();});});
+      const hg=g.createRadialGradient(hx,hy,0,hx,hy,UP*1.3);hg.addColorStop(0,C.glow+'99');hg.addColorStop(1,C.glow+'00');g.globalAlpha=.6+.4*pu;g.fillStyle=hg;g.beginPath();g.arc(hx,hy,UP*1.3,0,Math.PI*2);g.fill();g.globalAlpha=1;
+      g.save();g.translate(hx,hy);g.rotate(hf);const og=g.createRadialGradient(0,0,0,0,0,hw);og.addColorStop(0,'#ffffff');og.addColorStop(.4,C.glow);og.addColorStop(1,C.glow+'00');
+      g.fillStyle=og;g.beginPath();g.ellipse(0,0,hw*1.1,UP*.2,0,0,Math.PI*2);g.fill();g.restore();
+      // a soft column of light rising out of it
+      const [tx,ty]=P(m,.9),lg=g.createLinearGradient(hx,hy,tx,ty);lg.addColorStop(0,C.glow+'38');lg.addColorStop(1,C.glow+'00');g.fillStyle=lg;
+      const c1=P(m-.25,-D),c2=P(m+.25,-D),c3=P(m+.55,.9),c4=P(m-.55,.9);g.beginPath();g.moveTo(c1[0],c1[1]);g.lineTo(c2[0],c2[1]);g.lineTo(c3[0],c3[1]);g.lineTo(c4[0],c4[1]);g.closePath();g.fill();
+      // low, smooth rims curling over the edge
+      [[a-.5,a+.06],[b-.06,b+.5]].forEach(([u,v])=>{const pts=[];for(let i=0;i<=16;i++){const ss=u+(v-u)*i/16;pts.push(P(ss,Math.pow(Math.sin(i/16*Math.PI),1.3)*.28));}pts.push(P(v,-.12),P(u,-.12));
+        const rg=g.createLinearGradient(0,pts[8][1],0,pts[8][1]+UP*.45);rg.addColorStop(0,T.top);rg.addColorStop(.4,T.crust);rg.addColorStop(1,T.body);g.fillStyle=rg;poly(pts.map(q=>[q[0],q[1]]));g.fill();
+        g.strokeStyle=T.top;g.globalAlpha=.8;g.lineWidth=1.8;g.beginPath();pts.slice(0,17).forEach((q,i)=>i?g.lineTo(q[0],q[1]):g.moveTo(q[0],q[1]));g.stroke();g.globalAlpha=1;});
       // bobbing arrows: dive in here
       const bob=Math.sin(t*4)*.12;g.strokeStyle=C.glow;g.lineWidth=3;g.lineCap='round';g.lineJoin='round';
       for(let k=0;k<2;k++){const hh=1.25+bob-k*.32,[l1x,l1y]=P(m-.22,hh+.16),[cx2,cy2]=P(m,hh),[r1x,r1y]=P(m+.22,hh+.16);g.globalAlpha=.85-k*.3;g.beginPath();g.moveTo(l1x,l1y);g.lineTo(cx2,cy2);g.lineTo(r1x,r1y);g.stroke();}

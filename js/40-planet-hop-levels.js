@@ -141,7 +141,7 @@ function phBuild(L,songIn){
     const T=phTokens(),seen={};
     PH_COURSE[L-1].split(/\s+/).filter(x=>x&&x!=='|').forEach(tok=>{
       const m=T[tok],deb=PH_DEBUT[tok],n=(seen[tok]=(seen[tok]||0)+1);
-      const teach=L===1||(deb&&deb[0]===L&&n<=2);   // level 1: every press is marked               // first two of a new idea get glowing press markers
+      const teach=!!(deb&&deb[0]===L&&n<=2);   // only the first two of a new idea get press markers (teach, don't hand-hold)
       if(deb&&deb[0]===L&&n===1&&deb[1])objs.push({k:'sign',s:k-1.6,txt:deb[1]});
       place(m,k>=bossS,teach);k+=m.len;
     });

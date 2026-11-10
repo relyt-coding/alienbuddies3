@@ -2,6 +2,10 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.104 - 2026-11-09 17:50
+- Planet Hop: press markers only show on the first two tries of each new move (level 1 no longer marks every jump)
+- Planet Hop: the end-of-level crater is a clean, smooth bowl with a glowing hole (no more stones, boulders or bubbles)
+
 ## v0.2.103 - 2026-11-09 17:25
 - Planet Hop: no more text magnifier, selection or zoom when tapping the buttons fast
 - Planet Hop: pits redrawn: rounded edges, shaded walls dropping into darkness, icy depths on Glacia and a lava river on Magmora

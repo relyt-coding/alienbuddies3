@@ -109,7 +109,7 @@ function rebuildPadGrid(){
         // In edit mode: always open picker regardless of whether sound assigned
         openPadPicker(idx);
       } else if(sndId){
-        firePad(idx);
+        firePad(idx,e);
       } else {
         openPadPicker(idx);
       }
@@ -451,7 +451,7 @@ window.addEventListener('keydown',e=>{
   Object.entries(padBindings).forEach(([idx,b])=>{
     if(b.key&&e.code===b.key){
       e.preventDefault();
-      firePad(parseInt(idx));
+      firePad(parseInt(idx),e);
     }
   });
 },false);
@@ -465,14 +465,27 @@ window.addEventListener('mousedown',e=>{
   Object.entries(padBindings).forEach(([idx,b])=>{
     if(b.mouse!==undefined&&e.button===b.mouse){
       e.preventDefault();
-      firePad(parseInt(idx));
+      firePad(parseInt(idx),e);
     }
   });
 },false);
 
-function firePad(idx){
+// Fast rolls (1/16 hats) must never lose or merge hits. If the page is busy, several taps can arrive in one go and
+// would all sound at the same instant (two hats at once = one hat you hear). Each tap's real time (the event's
+// timestamp) keeps its spacing on the audio clock (at most 60 ms late, easing back right away), so every tap is heard.
+let _padLastTap=null;
+function padTapTime(ev){
+  const c=getCtx(),now=c.currentTime;let t=now;
+  const ts=ev&&ev.timeStamp?ev.timeStamp:performance.now();
+  if(_padLastTap){const gap=(ts-_padLastTap.ts)/1000;
+    if(gap>0&&gap<.5){const lead=_padLastTap.at+gap-now;
+      if(lead>0)t=now+Math.min(.06,lead*.75);                        // keep the real spacing, easing back toward "now" each tap
+      t=Math.max(t,_padLastTap.at+Math.min(gap*.5,.015));}}           // never two taps on the same instant
+  _padLastTap={ts,at:t};return t;
+}
+function firePad(idx,ev){
   const sndId=padSounds[idx];if(!sndId)return;
-  getCtx();playSound(sndId);
+  getCtx();playSound(sndId,undefined,padTapTime(ev));
   if(typeof addSeqEnergy==='function')addSeqEnergy(SEQ_ENERGY_PER_TAP); // every pad hit recharges the sequencer energy meter
   const el=padEls[idx];
   el.classList.remove('lit');void el.offsetWidth;el.classList.add('lit');
@@ -485,3 +498,7 @@ function firePad(idx){
   const _snd=SOUND_MAP[sndId];
   doTap({x:_px,y:_py,hex:_snd&&_snd.color}); // score popup takes the pressed pad's colour
 }
+
+// iOS: stop double-tap zoom, the text magnifier and selection from swallowing quick repeated taps on the pads
+// (pointerdown still fires first, so every tap is played)
+if(padGridEl)['touchstart','touchend','dblclick','selectstart'].forEach(n=>padGridEl.addEventListener(n,e=>{if(e.cancelable&&!padEditMode)e.preventDefault();},{passive:false}));

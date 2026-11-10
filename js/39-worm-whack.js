@@ -139,7 +139,8 @@ function wwLevelOpen(l){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||l===
     stopRun();
     $('wwSelect').classList.remove('open');$('wwResults').classList.remove('open');
     const song=typeof lvl==='object'?lvl:wwCompose(lvl),chart=wwChart(song).map(n=>Object.assign({hits:0,done:false,res:null,resT:0,credit:0},n));
-    // YOUR PADS PLAY THE SONG: the drum hits under each worm leave the backing track and only sound when you whack it
+    // the backing track always plays every drum (a miss never leaves a hole in the beat); each worm still knows the
+    // drum hits under it, so a whack can land a musical reward right on that beat
     {const byT=new Map();song.events.forEach(e=>{e.owned=false;e.played=false;if(e.kind!=='drum')return;const k=Math.round(e.t*1000);if(!byT.has(k))byT.set(k,[]);byT.get(k).push(e);});
      chart.forEach(n=>{if(n.type==='decoy')return;const k=Math.round(n.t*1000);n.own=[...(byT.get(k-1)||[]),...(byT.get(k)||[]),...(byT.get(k+1)||[])];n.own.forEach(e=>e.owned=true);});}
     const c=getCtx();
@@ -168,7 +169,6 @@ function wwLevelOpen(l){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||l===
     const c=getCtx(),ahead=c.currentTime+.18,ev=G.song.events;
     while(G.ei<ev.length&&G.T0+ev[G.ei].t<ahead){
       const e=ev[G.ei++],at=Math.max(c.currentTime,G.T0+e.t);
-      if(e.owned)continue; // a worm's drum hit: it plays when (if) you whack that worm
       try{
         if(e.kind==='drum')playSound(e.id,e.vel,at,e.ch);
         else if(typeof playRollNote==='function'&&SOUND_MAP[e.id])playRollNote(e.id,e.midi,at,e.dur,e.vel,e.layer==null?-1:e.layer);
@@ -189,7 +189,7 @@ function wwLevelOpen(l){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||l===
     G.alien.tx=cr.x-G.r*.95;G.alien.ty=cr.y-G.r*.55;G.alien.swing=1;G.alien.face=cr.x<W/2?1:-1;
     // armored worm waiting for its second hit
     let n=G.chart.find(o=>o.c===i&&!o.done&&o.type==='armor'&&o.hits===1&&t<=o.t+G.armorSpan+WIN.o);
-    if(n){n.hits=2;padHit();resolve(n,t,n.grade,1);burst(cr.x,cr.y,'#b8c4d6',16);text(cr,'CRACK!','#d8e4ff');return;}
+    if(n){n.hits=2;resolve(n,t,n.grade,1);burst(cr.x,cr.y,'#b8c4d6',16);text(cr,'CRACK!','#d8e4ff');return;}
     // the closest worm in this crater inside the timing window
     let best=null,bd=9;
     G.chart.forEach(o=>{if(o.c!==i||o.done||o.type==='decoy'||o.holding)return;const d=Math.abs(t-o.t);if(d<=WIN.o&&d<bd){bd=d;best=o;}});
@@ -197,9 +197,8 @@ function wwLevelOpen(l){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||l===
       const grade=bd<=WIN.p?'perfect':bd<=WIN.g?'good':'ok';
       best.tag=grade==='perfect'?'':(t<best.t?'EARLY':'LATE');
       if(best.type!=='armor'||best.hits===0)G.timing.push({d:t-best.t,at:performance.now()});
-      if(best.type!=='armor'||best.hits===0){if(!playOwn(best))padHit();}else padHit();
-      if(best.type==='armor'&&best.hits===0){best.hits=1;G.pows.push({x:cr.x,y:cr.y-G.r*.25,col:'#d8e4ff',life:.8,rot:Math.random()*.6-.3,word:''});best.grade=grade;text(cr,'HIT AGAIN!','#d8e4ff');burst(cr.x,cr.y,'#9aa6ba',8);G.shake=Math.max(G.shake,3);cr.flash=1;return;}
-      if(best.type==='hold'){best.holding=true;best.grade=grade;text(cr,'HOLD!','#ffd166');cr.flash=1;G.alien.swing=1;return;}
+      if(best.type==='armor'&&best.hits===0){best.hits=1;try{punch(Math.max(getCtx().currentTime,G.T0+best.t),.6);mallet(ladder(G.song,Math.max(0,G.combo)),Math.max(getCtx().currentTime,G.T0+best.t),.45);}catch(e){}G.pows.push({x:cr.x,y:cr.y-G.r*.25,col:'#d8e4ff',life:.8,rot:Math.random()*.6-.3,word:''});best.grade=grade;text(cr,'HIT AGAIN!','#d8e4ff');burst(cr.x,cr.y,'#9aa6ba',8);G.shake=Math.max(G.shake,3);cr.flash=1;return;}
+      if(best.type==='hold'){try{mallet(ladder(G.song,Math.max(0,G.combo)),Math.max(getCtx().currentTime,G.T0+best.t),.6);}catch(e){}best.holding=true;best.grade=grade;text(cr,'HOLD!','#ffd166');cr.flash=1;G.alien.swing=1;return;}
       resolve(best,t,grade,1);return;
     }
     // a mine?
@@ -224,12 +223,26 @@ function wwLevelOpen(l){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||l===
     }
   }
 
-  // the worm's drum hits: snapped onto the beat if you were early, right away if late
-  function playOwn(n){
-    if(!n||!n.own||!n.own.length)return false;
-    const c=getCtx(),at=Math.max(c.currentTime,G.T0+n.t);
-    n.own.forEach(e=>{if(e.played)return;e.played=true;try{playSound(e.id,e.vel,at,e.ch);}catch(err){}});
-    return true;
+  // ── the squish reward: every whack adds a punch under the beat and a mallet note from the song's key.
+  // The notes climb a pentatonic ladder as your combo grows (so a streak plays a little melody), snapped onto the
+  // worm's beat if you were early. Pentatonic notes can't clash with anything, so it always sounds good.
+  const MV=()=>typeof masterVol!=='undefined'?masterVol:1,mtof=m=>440*Math.pow(2,(m-69)/12);
+  function pent(song){const sc=WW_SCALES[song.scaleName]||WW_SCALES.minor;return sc[2]===3?[0,3,5,7,10]:[0,2,4,7,9];}
+  function ladder(song,i){const p=pent(song);return song.root+24+p[((i%p.length)+p.length)%p.length]+12*Math.floor(i/p.length);}
+  function voice(at,f,type,peak,dec,out){const c=getCtx(),o=c.createOscillator(),g=c.createGain();o.type=type;o.frequency.value=f;g.gain.setValueAtTime(0,at);g.gain.linearRampToValueAtTime(peak,at+.003);g.gain.exponentialRampToValueAtTime(.0005,at+dec);o.connect(g);g.connect(out||drumMasterGain);o.start(at);o.stop(at+dec+.05);return g;}
+  function mallet(midi,at,vel){const f=mtof(midi),v=vel*MV();voice(at,f,'sine',.2*v,.5);voice(at,f*4,'sine',.05*v,.08);const g=voice(at,f*2,'triangle',.035*v,.25);try{g.connect(rvbNode);}catch(e){}}
+  function punch(at,vel){const c=getCtx(),v=vel*MV(),o=c.createOscillator(),g=c.createGain();o.type='sine';o.frequency.setValueAtTime(110,at);o.frequency.exponentialRampToValueAtTime(48,at+.12);
+    g.gain.setValueAtTime(0,at);g.gain.linearRampToValueAtTime(.55*v,at+.002);g.gain.exponentialRampToValueAtTime(.0005,at+.2);o.connect(g);g.connect(drumMasterGain);o.start(at);o.stop(at+.25);}
+  function squishSound(n,special){
+    if(!G)return;const c=getCtx(),at=Math.max(c.currentTime,G.T0+n.t),song=G.song;
+    try{punch(at,n.boss?1:.8);const q=Math.max(0,G.combo-1)%16,i=q<9?q:16-q;   // up the ladder two octaves, back down, againmallet(ladder(song,i),at,.85);
+      if(special){mallet(ladder(song,i+2),at,.5);mallet(ladder(song,i+4),at+.002,.4);}   // gold / boss / held: a full chord
+    }catch(e){}
+  }
+  // combo milestones: a quick rising arpeggio on the next 16th, topped with a shimmering octave
+  function comboSound(){
+    if(!G)return;const c=getCtx(),st=G.song.step,bt=(c.currentTime-G.T0)/st,at=G.T0+Math.ceil(bt+.2)*st,song=G.song;
+    try{[0,1,2,3,5].forEach((d,i)=>mallet(ladder(song,d+5),at+i*st*.5,.6+i*.06));mallet(ladder(song,10),at+2.5*st,.5);mallet(ladder(song,12),at+2.5*st,.35);}catch(e){}
   }
   function resolve(n,t,grade,credit,holdDone){
     n.done=true;n.resT=t;n.credit=credit;n.res=credit>0?'hit':'miss';G.judged++;
@@ -245,15 +258,19 @@ function wwLevelOpen(l){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||l===
       // no PERFECT / GOOD / EARLY / LATE words: just the hit (and GOLD / HELD for the special worms)
       if(n.type==='gold'||holdDone)text(cr,(n.type==='gold'?'GOLD!':'')+(n.type==='gold'&&holdDone?' ':'')+(holdDone?'HELD!':''),n.type==='gold'?'#ffd700':'#ffd166',1.1);
       G.rings.push({x:cr.x,y:cr.y,life:1});
+      squishSound(n,n.type==='gold'||n.boss||holdDone);
+      // rock the screen: a zoom punch toward the crater, a quick flash, slime flying
+      G.punch={x:cr.x,y:cr.y,life:1};G.pflash=Math.max(G.pflash,.6);
+      {const wc=n.type==='gold'?'#ffd34d':n.boss?'#d0314f':'#d276d8';for(let k=0;k<10;k++){const a=-Math.PI*(.1+.8*Math.random()),v=180+Math.random()*220;G.fx.push({x:cr.x,y:cr.y-G.r*.3,vx:Math.cos(a)*v,vy:Math.sin(a)*v,life:1,col:wc,s:3+Math.random()*4,grav:1});}}
       // the BONK: a comic impact star where the hammer lands, a word inside it, dirt flying, the crater lighting up
       const pc=n.type==='gold'?'#ffd700':n.boss?'#ff4466':padColor(padOf(n.c)),special=n.type==='gold'||holdDone;
       G.pows.push({x:cr.x,y:cr.y-G.r*.6,col:pc,life:1,rot:Math.random()*.6-.3,word:special?'':WW_BONKS[(G.bonkI=(G.bonkI||0)+1+(Math.random()*2|0))%WW_BONKS.length]});
       for(let k=0;k<7;k++){const a=-Math.PI*(.15+.7*Math.random()),v=140+Math.random()*160;G.fx.push({x:cr.x,y:cr.y-G.r*.1,vx:Math.cos(a)*v,vy:Math.sin(a)*v,life:1,col:k%2?'#6b6a78':'#8e8c9c',s:2.5+Math.random()*3,grav:1});}
       cr.hit=1;cr.hitCol=hex6(pc);
-      if(credit>=1&&G.combo>0&&G.combo%10===0){text({x:W/2,y:H*.42},'COMBO '+G.combo+'!','#e8ff00',1.5);try{playSound('spaceperc',.4);}catch(e){}G.rings.push({x:W/2,y:H*.45,life:1,big:1});}
+      if(credit>=1&&G.combo>0&&G.combo%10===0){text({x:W/2,y:H*.42},'COMBO '+G.combo+'!','#e8ff00',1.5);comboSound();G.rings.push({x:W/2,y:H*.45,life:1,big:1});}
       burst(cr.x,cr.y,n.type==='gold'?'#ffd700':n.boss?'#ff4466':'#c86bd8',16);
       burst(cr.x,cr.y,'#9a9aa4',8,.8);
-      G.shake=Math.max(G.shake,5);cr.flash=1;
+      G.shake=Math.max(G.shake,n.boss?12:9);cr.flash=1;if(n.boss)G.bossHitT=t;
       if(n.boss&&credit>=1){G.bossHp=Math.max(0,G.bossHp-1);if(!G.bossHp&&!G.bossDead){G.bossDead=t;G.shake=18;for(let k=0;k<5;k++)burst(W/2,H*.08,['#ff4466','#ffd166','#c86bd8'][k%3],30,2.2);text({x:W/2,y:H*.3},'WYRM DEFEATED!','#ffd166',1.6);G.score+=5000;}}
     }else{
       G.combo=0;G.stats.miss++;text(cr,'MISS','#ff5566',1.25);cr.miss=1;
@@ -335,7 +352,7 @@ function wwLevelOpen(l){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||l===
     g2.save();
     // clip to the hole so it really comes out of the crater
     g2.beginPath();g2.ellipse(c.x,c.y-r*.1,r*1.05,r*1.25,0,0,Math.PI*2);g2.clip();
-    if(sq>0){const by=c.y+r*.35,wob=Math.sin(hk*40)*Math.max(0,1-hk*3)*.12;g2.translate(c.x,by);g2.scale(1+.38*sq+wob,1-.48*sq-wob);g2.translate(-c.x,-by);}
+    if(sq>0){const by=c.y+r*.35,wob=Math.sin(hk*46)*Math.max(0,1-hk*2.5)*.16;g2.translate(c.x,by);g2.scale(1+.55*sq+wob*1.5,1-.62*sq-wob*1.5);g2.translate(-c.x,-by);}
     if(n.type==='decoy'){ // space mine
       const s=r*.62*back(Math.min(1,up)),x=c.x,y=c.y+(1-up)*r;
       g2.fillStyle='#3c3f48';for(let k=0;k<8;k++){const a=k/8*Math.PI*2+t*.6;g2.beginPath();g2.moveTo(x+Math.cos(a)*s*.7,y+Math.sin(a)*s*.7);g2.lineTo(x+Math.cos(a+.18)*s*1.25,y+Math.sin(a+.18)*s*1.25);g2.lineTo(x+Math.cos(a+.36)*s*.7,y+Math.sin(a+.36)*s*.7);g2.fill();}
@@ -382,12 +399,66 @@ function wwLevelOpen(l){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||l===
       if(!n.holding&&up>.5){g2.fillStyle='#7fd46b';g2.font=`bold ${Math.round(r*.32)}px 'Bebas Neue',sans-serif`;g2.textAlign='center';g2.fillText('HOLD',c.x,c.y+r*1.75);}
     }
   }
+  // ── the boss: an armored wyrm rising over the moon. Its body coils across the sky behind it, its jaws snap on the beat,
+  // its eyes follow your alien, it flinches white when you land a hit, and its armor cracks as its health drops ──
+  const BOSS_LOOK={10:{pl:['#8a3a74','#3a0f2e','#1c0616'],glow:'#ff4d8a',eye:'#ffe066',horn:['#f4e2c8','#7a5a3c']},
+                   20:{pl:['#3a3456','#16122a','#08060f'],glow:'#ffb02e',eye:'#ffffff',horn:['#c8c2e6','#2a2440']},
+                   30:{pl:['#a01c3a','#4a0818','#1c0208'],glow:'#ffd166',eye:'#7fffd4',horn:['#ffe9a8','#8a5a10'],crown:true}};
+  function drawBoss(t,bx,by,bs,dead){
+    const L=BOSS_LOOK[G.P.lvl]||BOSS_LOOK[10],bp=t>=0?Math.pow(1-(((t/G.beat)%1)+1)%1,3):0,hpF=G.bossMax?G.bossHp/G.bossMax:1;
+    const hf=G.bossHitT!=null?Math.max(0,1-(t-G.bossHitT)/.2):0;by-=hf*bs*.12;
+    g2.save();g2.globalAlpha=1-dead;g2.translate(bx,by);g2.rotate(Math.sin(t*1.3)*.04+dead*.4);
+    // aura
+    const au=g2.createRadialGradient(0,0,bs*.3,0,0,bs*2.2);au.addColorStop(0,L.glow+'55');au.addColorStop(1,L.glow+'00');g2.globalAlpha=(1-dead)*(.6+.4*bp);g2.fillStyle=au;g2.beginPath();g2.arc(0,0,bs*2.2,0,Math.PI*2);g2.fill();g2.globalAlpha=1-dead;
+    // the coiling body: plated segments behind the head, shrinking with distance
+    for(const sd of [-1,1])for(let i=9;i>=1;i--){const u=i/9,x=sd*(bs*.6+u*W*.62),y=-bs*.35+Math.sin(u*5.2+t*1.6+(sd>0?1.3:0))*bs*.42-u*bs*.15,r=bs*(.62-u*.34);
+      const sg=g2.createRadialGradient(x-r*.3,y-r*.4,r*.1,x,y,r);sg.addColorStop(0,L.pl[0]);sg.addColorStop(.7,L.pl[1]);sg.addColorStop(1,L.pl[2]);g2.fillStyle=sg;g2.beginPath();g2.ellipse(x,y,r*1.05,r*.85,sd*.3,0,Math.PI*2);g2.fill();
+      g2.strokeStyle=L.glow+'66';g2.lineWidth=Math.max(1,r*.06);g2.beginPath();g2.ellipse(x,y,r*.7,r*.5,sd*.3,Math.PI*1.1,Math.PI*1.9);g2.stroke();
+      g2.fillStyle=L.pl[2];g2.beginPath();g2.moveTo(x-r*.25,y-r*.7);g2.lineTo(x+sd*r*.15,y-r*1.25);g2.lineTo(x+r*.25,y-r*.7);g2.fill();}
+    // horns
+    for(const sd of [-1,1]){const hg=g2.createLinearGradient(sd*bs*.6,-bs*.5,sd*bs*1.4,-bs*1.5);hg.addColorStop(0,L.horn[1]);hg.addColorStop(1,L.horn[0]);g2.fillStyle=hg;
+      g2.beginPath();g2.moveTo(sd*bs*.45,-bs*.62);g2.quadraticCurveTo(sd*bs*1.5,-bs*.9,sd*bs*1.35,-bs*1.75);g2.quadraticCurveTo(sd*bs*1.2,-bs*1.05,sd*bs*.75,-bs*.38);g2.closePath();g2.fill();
+      g2.strokeStyle='rgba(0,0,0,.25)';g2.lineWidth=bs*.03;for(let q=1;q<4;q++){const u=q/4;g2.beginPath();g2.moveTo(sd*bs*(.55+u*.75),-bs*(.62+u*.6));g2.lineTo(sd*bs*(.8+u*.55),-bs*(.4+u*.85));g2.stroke();}}
+    // mandibles, snapping open on every beat
+    const open=.18+.42*bp;
+    for(const sd of [-1,1]){g2.save();g2.translate(sd*bs*.6,bs*.35);g2.rotate(sd*open);const mg=g2.createLinearGradient(0,0,0,bs*.9);mg.addColorStop(0,L.pl[1]);mg.addColorStop(1,L.horn[0]);g2.fillStyle=mg;
+      g2.beginPath();g2.moveTo(-sd*bs*.05,-bs*.1);g2.quadraticCurveTo(sd*bs*.35,bs*.35,sd*bs*.05-sd*bs*.35,bs*.95);g2.quadraticCurveTo(sd*bs*.05,bs*.45,-sd*bs*.25,bs*.05);g2.closePath();g2.fill();g2.restore();}
+    // the glowing maw
+    const mw=g2.createRadialGradient(0,bs*.55,0,0,bs*.55,bs*.5);mw.addColorStop(0,'#ffffff');mw.addColorStop(.25,L.glow);mw.addColorStop(1,L.glow+'00');g2.fillStyle=mw;g2.globalAlpha=(1-dead)*(.5+.5*bp);g2.beginPath();g2.ellipse(0,bs*.58,bs*.42,bs*(.18+.14*bp),0,0,Math.PI*2);g2.fill();g2.globalAlpha=1-dead;
+    // armored head
+    const hd=[[-1.05,-.35],[-.78,-.72],[-.3,-.86],[0,-.8],[.3,-.86],[.78,-.72],[1.05,-.35],[.88,.22],[.5,.62],[0,.78],[-.5,.62],[-.88,.22]];
+    const hgd=g2.createRadialGradient(-bs*.3,-bs*.45,bs*.1,0,0,bs*1.1);hgd.addColorStop(0,L.pl[0]);hgd.addColorStop(.6,L.pl[1]);hgd.addColorStop(1,L.pl[2]);
+    g2.fillStyle=hgd;g2.beginPath();hd.forEach(([x,y],i)=>i?g2.lineTo(x*bs,y*bs):g2.moveTo(x*bs,y*bs));g2.closePath();g2.fill();
+    g2.strokeStyle=L.glow+'aa';g2.lineWidth=Math.max(1.5,bs*.03);g2.stroke();
+    // plates: brow band, snout plates, a glowing crest down the middle
+    g2.fillStyle='rgba(0,0,0,.28)';g2.beginPath();g2.moveTo(-bs*.95,-bs*.3);g2.lineTo(0,-bs*.5);g2.lineTo(bs*.95,-bs*.3);g2.lineTo(bs*.8,-bs*.12);g2.lineTo(0,-bs*.28);g2.lineTo(-bs*.8,-bs*.12);g2.closePath();g2.fill();
+    g2.strokeStyle='rgba(255,255,255,.12)';g2.lineWidth=bs*.025;[[.25,.35],[.45,.55]].forEach(([y1,w])=>{g2.beginPath();g2.moveTo(-bs*w,bs*y1);g2.quadraticCurveTo(0,bs*(y1+.1),bs*w,bs*y1);g2.stroke();});
+    g2.fillStyle=L.glow;g2.shadowColor=L.glow;g2.shadowBlur=8+10*bp;g2.beginPath();g2.moveTo(0,-bs*.8);g2.lineTo(bs*.08,-bs*.64);g2.lineTo(0,-bs*.48);g2.lineTo(-bs*.08,-bs*.64);g2.closePath();g2.fill();g2.shadowBlur=0;   // a glowing gem in its brow
+    // armor cracks as it weakens
+    if(hpF<.67){g2.strokeStyle=L.glow;g2.shadowColor=L.glow;g2.shadowBlur=6;g2.lineWidth=bs*.025;
+      const cracks=[[[-.7,-.5],[-.5,-.2],[-.62,.05],[-.45,.25]],[[.55,-.62],[.4,-.35],[.58,-.1]],[[-.2,.3],[0,.15],[.25,.42]],[[.85,.1],[.6,.25],[.7,.45]]];
+      cracks.slice(0,hpF<.34?4:2).forEach(c=>{g2.beginPath();c.forEach(([x,y],i)=>i?g2.lineTo(x*bs,y*bs):g2.moveTo(x*bs,y*bs));g2.stroke();});g2.shadowBlur=0;}
+    // eyes: angled slits whose pupils follow your alien
+    const look=Math.max(-1,Math.min(1,((G.alien.x||bx)-bx)/(W*.4))),blink=(t%4.7)<.12?.15:1;
+    for(const sd of [-1,1]){g2.save();g2.translate(sd*bs*.42,-bs*.1);g2.rotate(sd*.32);
+      g2.fillStyle=L.eye;g2.shadowColor=L.eye;g2.shadowBlur=14+10*bp;g2.beginPath();g2.ellipse(0,0,bs*.2,bs*.085*blink,0,0,Math.PI*2);g2.fill();g2.shadowBlur=0;
+      g2.fillStyle='#120008';g2.beginPath();g2.ellipse(look*bs*.08,0,bs*.03,bs*.07*blink,0,0,Math.PI*2);g2.fill();g2.restore();}
+    // teeth along the jaw
+    g2.fillStyle=L.horn[0];for(let q=-3;q<=3;q++){const x=q*bs*.1,y=bs*(.6-Math.abs(q)*.03);g2.beginPath();g2.moveTo(x-bs*.035,y);g2.lineTo(x,y+bs*(.1+.05*bp));g2.lineTo(x+bs*.035,y);g2.fill();}
+    // the Wyrm King's crown
+    if(L.crown){g2.fillStyle='#ffd166';g2.strokeStyle='#8a5a10';g2.lineWidth=bs*.02;g2.beginPath();g2.moveTo(-bs*.5,-bs*.78);[[-.42,-1.15],[-.25,-.88],[0,-1.3],[.25,-.88],[.42,-1.15],[.5,-.78]].forEach(([x,y])=>g2.lineTo(x*bs,y*bs));g2.lineTo(0,-bs*.84);g2.closePath();g2.fill();g2.stroke();
+      [[-.42,-1.1],[0,-1.22],[.42,-1.1]].forEach(([x,y],i)=>{g2.fillStyle=i===1?'#7fffd4':'#ff4466';g2.shadowColor=g2.fillStyle;g2.shadowBlur=8;g2.beginPath();g2.arc(x*bs,y*bs,bs*.045,0,Math.PI*2);g2.fill();g2.shadowBlur=0;});}
+    // flinch: a white flash over the head when you land a hit
+    if(hf>0){g2.globalAlpha=(1-dead)*hf*.65;g2.fillStyle='#ffffff';g2.beginPath();hd.forEach(([x,y],i)=>i?g2.lineTo(x*bs,y*bs):g2.moveTo(x*bs,y*bs));g2.closePath();g2.fill();}
+    g2.restore();
+  }
   let g2=ctx2;
   function draw(t,dt){
     makeBg();
     const sh=G.shake;G.shake*=Math.pow(.0015,dt);
     g2.setTransform(DPR,0,0,DPR,0,0);g2.clearRect(0,0,W,H);
     g2.save();if(sh>.3)g2.translate((Math.random()-.5)*sh,(Math.random()-.5)*sh);
+    if(G.punch&&G.punch.life>0){const pk=Math.pow(G.punch.life,2),z=1+.045*pk;g2.translate(G.punch.x,G.punch.y);g2.scale(z,z);g2.translate(-G.punch.x,-G.punch.y);G.punch.life-=dt*5;}
     g2.drawImage(bg,0,0,W,H);
     // crater flashes + approach rings + key labels
     const bp=t>=0?Math.pow(1-(((t/G.beat)%1)+1)%1,4):0;
@@ -407,18 +478,12 @@ function wwLevelOpen(l){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||l===
     // boss head looming over the top of the moon
     if(G.bossMax&&t>G.bossStart){
       const k=Math.min(1,(t-G.bossStart)/1.2),dead=G.bossDead?Math.min(1,(t-G.bossDead)/1.2):0;
-      const bx=W/2,by=-H*.05+H*.12*ease(k)-dead*H*.2,bs=Math.min(W*.22,H*.2);
-      if(dead<1){g2.save();g2.globalAlpha=1-dead;
-        const bg2=g2.createRadialGradient(bx-bs*.3,by-bs*.2,bs*.1,bx,by,bs*1.1);bg2.addColorStop(0,'#ff8aa0');bg2.addColorStop(.3,'#d0314f');bg2.addColorStop(1,'#5a0c22');
-        g2.fillStyle=bg2;g2.beginPath();g2.ellipse(bx,by,bs*1.3,bs,0,0,Math.PI*2);g2.fill();
-        [-1,1].forEach(sd=>{g2.fillStyle='#ffe066';g2.beginPath();g2.ellipse(bx+sd*bs*.45,by+bs*.15,bs*.18,bs*.12,0,0,Math.PI*2);g2.fill();g2.fillStyle='#200';g2.beginPath();g2.arc(bx+sd*bs*.45,by+bs*.17,bs*.06,0,Math.PI*2);g2.fill();});
-        g2.fillStyle='#2a0010';g2.beginPath();g2.ellipse(bx,by+bs*.55,bs*.45,bs*.16+Math.abs(Math.sin(t*6))*bs*.08,0,0,Math.PI*2);g2.fill();
-        g2.fillStyle='#fff';for(let k2=-3;k2<=3;k2++){g2.beginPath();g2.moveTo(bx+k2*bs*.12-bs*.05,by+bs*.45);g2.lineTo(bx+k2*bs*.12+bs*.05,by+bs*.45);g2.lineTo(bx+k2*bs*.12,by+bs*.58);g2.fill();}
-        g2.restore();
+      const bs=Math.min(W*.18,H*.15),bx=W/2,by=-bs*1.6+(bs*2.75)*ease(k)-dead*H*.2;
+      if(dead<1){drawBoss(t,bx,by,bs,dead);
         // HP bar
-        const bw=Math.min(W*.6,420),bxx=W/2-bw/2,byy=8;g2.fillStyle='rgba(0,0,0,.55)';g2.fillRect(bxx,byy,bw,10);
-        g2.fillStyle='#ff4466';g2.fillRect(bxx,byy,bw*(G.bossHp/G.bossMax),10);g2.strokeStyle='#ffd166';g2.lineWidth=1;g2.strokeRect(bxx,byy,bw,10);
-        g2.fillStyle='#ffd166';g2.font="12px 'Bebas Neue',sans-serif";g2.textAlign='center';g2.fillText(G.P.lvl===30?'THE WYRM KING':G.P.lvl===20?'THE ECLIPSE WYRM':'THE MOON WYRM',W/2,byy+24);
+        const bw=Math.min(W*.6,420),bxx=W/2-bw/2,byy=6;g2.fillStyle='rgba(0,0,0,.55)';g2.fillRect(bxx,byy,bw,12);
+        g2.fillStyle='#ff4466';g2.fillRect(bxx,byy,bw*(G.bossHp/G.bossMax),12);g2.strokeStyle='#ffd166';g2.lineWidth=1;g2.strokeRect(bxx,byy,bw,12);
+        g2.font="12px 'Bebas Neue',sans-serif";g2.textAlign='center';g2.textBaseline='middle';g2.strokeStyle='rgba(0,0,0,.8)';g2.lineWidth=3;const bn=G.P.lvl===30?'THE WYRM KING':G.P.lvl===20?'THE ECLIPSE WYRM':'THE MOON WYRM';g2.strokeText(bn,W/2,byy+6.5);g2.fillStyle='#ffd166';g2.fillText(bn,W/2,byy+6.5);g2.textBaseline='alphabetic';
       }
     }
     // worms (draw those lower on screen last)
@@ -443,7 +508,7 @@ function wwLevelOpen(l){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||l===
     g2.globalAlpha=1;
     // impact stars: pop big fast, then shrink away
     G.pows=G.pows.filter(p=>(p.life-=dt*2.6)>0);
-    G.pows.forEach(p=>{const age=1-p.life,sc=(age<.25?.55+1.9*age:1.03-.25*(age-.25))*G.r*.9;g2.save();g2.translate(p.x,p.y);g2.rotate(p.rot);g2.globalAlpha=Math.min(1,p.life*2.2);
+    G.pows.forEach(p=>{const age=1-p.life,sc=(age<.2?.6+2.6*age:1.12-.3*(age-.2))*G.r*1.05;g2.save();g2.translate(p.x,p.y);g2.rotate(p.rot);g2.globalAlpha=Math.min(1,p.life*2.2);
       const star=(R2,inn)=>{g2.beginPath();for(let q=0;q<16;q++){const rr=q%2?R2*inn:R2*(q%4?1:.82),aa=q/16*Math.PI*2;g2.lineTo(Math.cos(aa)*rr*1.15,Math.sin(aa)*rr*.95);}g2.closePath();};
       g2.fillStyle=p.col;g2.shadowColor=p.col;g2.shadowBlur=18;star(sc,.55);g2.fill();g2.shadowBlur=0;
       g2.fillStyle='#fff';star(sc*.62,.6);g2.fill();
@@ -457,7 +522,7 @@ function wwLevelOpen(l){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||l===
     // hit rings and a soft flash
     G.rings=G.rings.filter(r=>(r.life-=dt*2.4)>0);
     G.rings.forEach(r=>{const rr=(r.big?Math.min(W,H)*.35:G.r*2.2)*(1-r.life*.7);g2.strokeStyle=`rgba(255,255,255,${r.life*.8})`;g2.lineWidth=r.big?4:3;g2.beginPath();g2.ellipse(r.x,r.y,rr,rr*.92,0,0,Math.PI*2);g2.stroke();});
-    if(G.pflash>0){g2.fillStyle=`rgba(255,255,255,${G.pflash*.10})`;g2.fillRect(0,0,W,H);G.pflash=Math.max(0,G.pflash-dt*4);}
+    if(G.pflash>0){g2.fillStyle=`rgba(255,255,255,${G.pflash*.13})`;g2.fillRect(0,0,W,H);G.pflash=Math.max(0,G.pflash-dt*4);}
     // count-in
     if(t<0){const beatsLeft=Math.ceil(-t/G.beat);g2.fillStyle='rgba(0,0,0,.35)';g2.fillRect(0,0,W,H);g2.fillStyle='#fff';g2.font=`${Math.round(Math.min(W,H)*.22)}px 'Bebas Neue',sans-serif`;g2.textAlign='center';g2.textBaseline='middle';g2.fillText(beatsLeft>3?'READY':String(beatsLeft),W/2,H/2);g2.textBaseline='alphabetic';}
     else if(t<G.beat*1.2){g2.fillStyle=`rgba(255,255,255,${1-t/(G.beat*1.2)})`;g2.font=`${Math.round(Math.min(W,H)*.18)}px 'Bebas Neue',sans-serif`;g2.textAlign='center';g2.textBaseline='middle';g2.fillText('WHACK!',W/2,H/2);g2.textBaseline='alphabetic';}

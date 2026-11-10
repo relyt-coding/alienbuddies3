@@ -2,6 +2,14 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.110 - 2026-11-09 21:00
+- Worm Whack: the beat never drops out on a miss; the whole song always plays
+- Worm Whack: every squish lands a punchy thump plus a mallet note in the song's key, climbing a melody as your combo grows (gold, boss and held worms play a chord)
+- Worm Whack: hits rock harder: zoom punch, flash, slime splatter, bigger impact burst and a squishier worm
+- Worm Whack: new combo sound: a rising arpeggio on the beat
+- Worm Whack: bosses redesigned as armored wyrms: coiling plated body, horns, snapping mandibles on the beat, eyes that follow you, cracks as they weaken, a white flinch when hit; the Wyrm King wears a crown
+- Drum pads: fast rolls (1/16 hats) no longer lose or merge taps; iOS double-tap/magnifier can't swallow quick taps
+
 ## v0.2.109 - 2026-11-09 21:10
 - Planet Hop: checkpoint crystals play a rising crystal chime in the song's key
 - Planet Hop: caves change shape: a tight tunnel to start, opening into big caverns later; the echo and reverb grow and shrink with the space

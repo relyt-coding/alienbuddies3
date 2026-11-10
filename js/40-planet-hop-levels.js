@@ -109,8 +109,8 @@ const PH_DEBUT={s:[1,''],p:[1,''],st:[1,''],k:[2,''],rE:[3,''],P:[3,''],
   rO:[12,''],so:[12,''],dk:[13,'']};   // only low gravity gets a sign; every new idea still gets glowing press markers
 // the 15 courses (| marks the song's 8-bar sections; boss levels end with an 8-bar comet chase)
 const PH_COURSE=[
-  /* 1 First Steps   */ 'rA rA s rA | C p st',
-  /* 2 Crater Skipper*/ 'rA k s2 k | C p2 k rA',
+  /* 1 First Steps   */ 'rA rE s rE | C p st',
+  /* 2 Crater Skipper*/ 'rE k s2 k | C p2 k rE',
   /* 3 Moonbeam      */ 'rA rE rA P rD P s2 rE | C P k P p2 rF P rA',
   /* 4 Lunar Leap    */ 'rA s Lr rD p2 L | C k Lg s2 P L | rE s2 P rA',
   /* 5 Comet (boss)  */ 'rA s2 k P Lg p2 rE | kk rD kk P C s2 Lg | s2 p2 s2 P s s2 Lg',

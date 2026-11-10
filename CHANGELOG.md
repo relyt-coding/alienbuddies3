@@ -2,6 +2,11 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.106 - 2026-11-09 18:21
+- Planet Hop: double jump during the count-in; if you're still in the air when the music starts, the run carries on from there (no snapping to the ground)
+- Planet Hop: new faceted boulder with thick crystal spines; level 1 mixes boulders and flytraps
+- Planet Hop: levels 1 and 2 have high stardust arcs you reach with a double jump
+
 ## v0.2.105 - 2026-11-09 18:08
 - Planet Hop: hop on the spot during the count-in (nothing is judged)
 - Planet Hop: press marker icons removed; read the level yourself

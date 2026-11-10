@@ -120,7 +120,7 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
   function attempt(first,fromCp){
     const c=getCtx(),cp=fromCp?R.lv.cp:0;
     clearInterval(R.sched);
-    R.attempt++;R.S=phNewState();R.ei=0;R.inputs=[];R.dead=null;R.won=0;R.trail=[];R.rings=[];
+    R.attempt++;R.S=phNewState();R.idleS=null;R.ei=0;R.inputs=[];R.dead=null;R.won=0;R.trail=[];R.rings=[];
     if(fromCp){const k=R.cpSnap;R.S.s=cp;R.got=new Set(k.got);R.graded=new Set(k.graded);R.combo=0;R.maxCombo=k.maxCombo;R.timing=R.timing.slice(0,k.timing);R.onBeat=Object.assign({},k.onBeat);
       // restart the music from the checkpoint crystal, with a two-click count-in
       R.T0=c.currentTime+.25+2*R.beat-cp*R.beat;const at=cp*R.beat-1e-6;while(R.ei<R.lv.song.events.length&&R.lv.song.events[R.ei].t<at)R.ei++;
@@ -147,7 +147,7 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
     if(!R||R.state!=='play'||R.dead)return;
     let t=tau();if(ev&&ev.timeStamp){const lag=(performance.now()-ev.timeStamp)/1000;if(lag>0&&lag<.25)t-=lag/R.beat;}
     // during the count-in (or the checkpoint count-in) you can hop on the spot for fun: nothing is judged
-    if(t<R.S.s-.15){R.idle=performance.now();const pd=$(w==='j'||R.solo?'phJump':'phBounce');pd.classList.remove('lit');void pd.offsetWidth;pd.classList.add('lit');try{playSound(phPadSound(R.solo?'j':w),.55);}catch(e){}return;}
+    if(t<R.S.s-.15){const I=R.idleS||(R.idleS={h:0,vy:0,air:1});if(I.h<=0&&I.vy<=0){I.vy=PH_V0;I.air=1;}else if(I.air>0){I.vy=PH_V0;I.air=0;}const pd=$(w==='j'||R.solo?'phJump':'phBounce');pd.classList.remove('lit');void pd.offsetWidth;pd.classList.add('lit');try{playSound(phPadSound(R.solo?'j':w),.55);}catch(e){}return;}
     R.inputs.push({t:Math.max(R.S.s,t),w});
     // how close was that press to the beat it was meant for? (the level's planned presses)
     let best=-1,bd=.32;R.lv.acts.forEach((a,i)=>{if(a.w!==w||R.graded.has(i))return;const d=Math.abs(t-a.t);if(d<bd){bd=d;best=i;}});
@@ -186,6 +186,10 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
     const lv=R.lv,S=R.S;
     if(R.state==='play'&&!R.dead&&!R.won){
       try{padHud(tau());}catch(e){}
+      // count-in hops (with double jump) run on their own little physics; if you're still in the air when the
+      // music starts, the real run carries on from that height instead of snapping you to the ground
+      if(R.idleS){const I=R.idleS;if(tau()<S.s){const db=dt/R.beat;I.vy-=PH_G*db;I.h+=I.vy*db;if(I.h<=0){R.idleS=null;S.landT=S.s;}}
+        else{if(I.h>0){S.h=I.h;S.vy=I.vy;S.grounded=false;S.air=I.air;}R.idleS=null;}}
       const target=Math.min(tau(),lv.end+.01);
       R.inputs.sort((a,b)=>a.t-b.t);
       let guard=0;
@@ -503,7 +507,7 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
   function obsKind(lv,sp){
     if(sp._k)return sp._k;
     if(sp.meteor)return sp._k='molten';
-    const L=R.custom?(R.custom.L||3):R.L;if(L<=1)return sp._k='rock';
+    const L=R.custom?(R.custom.L||3):R.L;if(L<=1)return sp._k=hsh(sp.s*3.1,17)<.5?'trap':'rock';
     const lone=!lv.spikes.some(o=>o!==sp&&Math.abs(o.s-sp.s)<1.1)&&!lv.pits.some(p=>p.b>sp.s-1&&p.a<sp.s+1.8)&&!lv.blocks.some(b=>b.b>sp.s-1&&b.a<sp.s+1.8);
     const r=hsh(sp.s*3.1+L,17);return sp._k=(lone&&r<.34)?'lizard':r<.67?'trap':'rock';
   }
@@ -514,12 +518,18 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
     // a soft warning glow on the ground so hazards still read at a glance
     const hz=k==='molten'?'#ff8a2a':O.tip,hg=g.createRadialGradient(0,-h*.3,0,0,-h*.3,Math.max(w*2.4,UP*.7));hg.addColorStop(0,hz+'44');hg.addColorStop(1,hz+'00');g.fillStyle=hg;g.beginPath();g.arc(0,-h*.3,Math.max(w*2.4,UP*.7),0,Math.PI*2);g.fill();
     if(k==='rock'){
-      // a round boulder studded with short spines
-      for(let i=0;i<5;i++){const a=-Math.PI/2+(i-2)*.52,len=h*(.38+.14*hsh(sp.s+i,3)),bx=Math.cos(a)*w*.8,by=-h*.36+Math.sin(a)*h*.36,tx=bx+Math.cos(a)*len,ty=by+Math.sin(a)*len,px=-Math.sin(a)*w*.2,py=Math.cos(a)*w*.2;
-        const sg=g.createLinearGradient(bx,by,tx,ty);sg.addColorStop(0,O.rock[1]);sg.addColorStop(.7,O.rock[0]);sg.addColorStop(1,O.tip);g.fillStyle=sg;g.beginPath();g.moveTo(bx+px,by+py);g.lineTo(tx,ty);g.lineTo(bx-px,by-py);g.closePath();g.fill();}
-      const rg=g.createRadialGradient(-w*.3,-h*.55,1,0,-h*.3,w*1.2);rg.addColorStop(0,O.rock[0]);rg.addColorStop(1,O.rock[1]);g.fillStyle=rg;g.beginPath();g.ellipse(0,-h*.3,w*1.05,h*.4,0,Math.PI,Math.PI*2);g.lineTo(w*1.05,0);g.lineTo(-w*1.05,0);g.fill();
-      g.fillStyle='rgba(255,255,255,.22)';g.beginPath();g.ellipse(-w*.35,-h*.5,w*.3,h*.09,-.2,0,Math.PI*2);g.fill();
-      if(pl===2){g.strokeStyle=`rgba(255,140,40,${.5+.4*Math.sin(t*3+sp.s)})`;g.lineWidth=1.2;g.beginPath();g.moveTo(-w*.6,-h*.15);g.lineTo(-w*.1,-h*.4);g.lineTo(w*.4,-h*.2);g.stroke();}
+      // a chunky faceted boulder with a few thick crystal spines growing out of it
+      const sd=sp.s*7.3,pts=[];for(let q=0;q<9;q++){const a=Math.PI+q/8*Math.PI,rr=1+(hsh(sd+q,2)-.5)*.22;pts.push([Math.cos(a)*w*1.1*rr,-h*.04+Math.sin(a)*h*.68*rr]);}
+      const sp3=[[-.55,-.52,-.6,.5],[.05,-.66,0,.62],[.6,-.5,.6,.46]];
+      sp3.forEach(([dx,dy,tilt,len],q)=>{const bx=dx*w,by=dy*h,L2=h*len*(.9+.2*hsh(sd+q,4)),bw=w*.32;g.save();g.translate(bx,by);g.rotate(tilt);
+        g.fillStyle=O.rock[1];g.beginPath();g.moveTo(-bw,0);g.lineTo(0,-L2);g.lineTo(0,0);g.fill();
+        const cg=g.createLinearGradient(0,0,0,-L2);cg.addColorStop(0,O.rock[0]);cg.addColorStop(1,O.tip);g.fillStyle=cg;g.beginPath();g.moveTo(0,0);g.lineTo(0,-L2);g.lineTo(bw,0);g.fill();g.restore();});
+      const rg=g.createLinearGradient(-w,-h*.6,w*.8,0);rg.addColorStop(0,O.rock[0]);rg.addColorStop(1,O.rock[1]);g.fillStyle=rg;g.beginPath();pts.forEach((q,i)=>i?g.lineTo(q[0],q[1]):g.moveTo(q[0],q[1]));g.lineTo(w*1.15,0);g.lineTo(-w*1.15,0);g.closePath();g.fill();
+      // facets: a lit top face and a shaded side
+      g.fillStyle='rgba(255,255,255,.2)';g.beginPath();g.moveTo(pts[1][0],pts[1][1]);g.lineTo(pts[4][0],pts[4][1]);g.lineTo(pts[4][0]*.6,pts[4][1]*.45);g.lineTo(pts[1][0]*.7,pts[1][1]*.5);g.fill();
+      g.fillStyle='rgba(0,0,0,.22)';g.beginPath();g.moveTo(pts[5][0],pts[5][1]);g.lineTo(pts[8][0],pts[8][1]);g.lineTo(w*1.15,0);g.lineTo(w*.3,0);g.lineTo(pts[5][0]*.6,pts[5][1]*.5);g.fill();
+      g.fillStyle='rgba(0,0,0,.25)';g.beginPath();g.ellipse(0,0,w*1.25,h*.07,0,0,Math.PI*2);g.fill();
+      if(pl===2){g.strokeStyle=`rgba(255,140,40,${.5+.4*Math.sin(t*3+sp.s)})`;g.lineWidth=1.4;g.beginPath();g.moveTo(-w*.7,-h*.12);g.lineTo(-w*.2,-h*.35);g.lineTo(w*.15,-h*.18);g.lineTo(w*.55,-h*.32);g.stroke();}
     }else if(k==='trap'){
       // a little flytrap on a curled stem, jaws snapping in time with the music
       g.strokeStyle=O.stem;g.lineWidth=Math.max(2,w*.22);g.lineCap='round';g.beginPath();g.moveTo(0,0);g.quadraticCurveTo(w*.5,-h*.3,w*.05,-h*.55);g.stroke();g.lineCap='butt';
@@ -696,7 +706,7 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
         if(u>1.25&&!R.finFx){R.finFx=1;burst(e+1.9,-.2,PH_CAVE[lv.P.planet].glow,22,1.2);}}
       else if(f==='exit'){es=e+u*1.7;eh=Math.abs(Math.sin(u*Math.PI))*.45;ea=Math.max(0,1-Math.max(0,u-1.1)/.8);}
       else{const k=Math.min(1,u/1.1);es=e+k*1.6;eh=Math.sin(k*Math.PI*.5)*1.4;esc=Math.max(0,1-Math.max(0,u-.9)/.5);if(u>1.3&&!R.finFx){R.finFx=1;burst(e+1.6,1.4,'#ffffff',26,1.4);}}}
-    if(R.idle&&!R.won){const u=(performance.now()-R.idle)/(R.beat*850);if(u>=1||(R.state==='play'&&!R.dead&&tau()>=S.s-.02))R.idle=0;else eh+=4*u*(1-u)*.9;}
+    if(R.idleS&&!R.won)eh+=R.idleS.h;
     const [ax,ay]=P(es,eh);
     if(!R.dead&&ea>0&&esc>0){R.trail.push([ax,ay]);if(R.trail.length>10)R.trail.shift();
       R.trail.forEach((p,i)=>{g.fillStyle=`rgba(0,255,136,${i/R.trail.length*.25})`;g.beginPath();g.arc(p[0]-(R.trail.length-i)*BP*.035,p[1]-UP*.35,UP*.12*(i/R.trail.length),0,Math.PI*2);g.fill();});

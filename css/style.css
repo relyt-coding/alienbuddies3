@@ -1996,3 +1996,5 @@ body.desktop-mode.cockpit-open #cockpitView{display:flex;}
 .bd-tw.sel{opacity:1;box-shadow:0 0 16px -4px var(--c),inset 0 0 14px -6px var(--c);transform:translateY(-2px);}
 .bd-go{border:2px solid #9fffd8;background:#06201a;color:#9fffd8;font-size:1.2rem;letter-spacing:.12em;justify-content:center;}
 .bd-go:disabled{opacity:.35;}
+#bdOverlay .bd-spd{width:auto;padding:0 .55rem;font-family:'Bebas Neue',sans-serif;letter-spacing:.08em;font-size:1rem;}
+#bdOverlay .bd-spd.on{border-color:#9fffd8;color:#9fffd8;box-shadow:0 0 10px -2px #9fffd8;}

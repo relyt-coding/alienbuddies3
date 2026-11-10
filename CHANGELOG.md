@@ -2,6 +2,15 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.112 - 2026-11-10 08:30
+- Beat Defense: pause button (also P / Esc; switching apps pauses instead of quitting) and a x2 speed button that doubles the tempo so everything stays on the beat
+- Beat Defense: tap a tower for UPGRADE (up to level 3: more damage, more range, a little louder) or SELL (60% of everything spent)
+- Beat Defense: the towers are your first four drum pads and play the sounds on them (pad 1 rapid, pad 2 cannon, pad 3 blast, pad 4 slow)
+- Lite mode for older phones (iOS 15 and older, low-memory devices; ?lite=1 / ?lite=0 to force): minigames draw at 1x, skip glow blurs, fewer particles, no ice wind, shorter cave reverb, simpler chimes
+- The minigame gem boost now shows next to your gem rate (bunker, shop) and in the skill tree header
+- Planet Hop: crystal bells play a different tune on each level
+- Test mode: the bot buys Planet Hop and the Matching Game in the bunker and clears a minigame level every few minutes (option in RUN), so the time table includes the minigames
+
 ## v0.2.111 - 2026-11-09 22:20
 - Minigames reworked: Planet Hop is in the bunker from the start for 1 Alien Gem (levels 1-5); the Matching Game sits under it for 10 gems
 - Matching Game: no intro; level 1 is the 4-card board and is free, each level after needs 4 more Alien Buddies

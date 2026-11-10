@@ -23,7 +23,7 @@ const fmtN=v=>!isFinite(v)?'∞':(typeof formatStore==='function'?formatStore(v)
 console.log('%c🧪 Alien Buddies TEST MODE','font-size:16px;color:#00ff88','— separate saves, autoplay, logging. Open the 🧪 button.');
 
 // ── options (remembered) ──
-const opts=Object.assign({speed:100,buyShop:true,buySkills:true,buyTips:true,autoTap:true,tapRate:3,matchAuto:true,
+const opts=Object.assign({speed:100,buyShop:true,buySkills:true,buyTips:true,autoTap:true,tapRate:3,matchAuto:true,mgAuto:true,mgMins:4,
   matchBase:15,matchPerPair:6,stopAliens:'',stopMatch:'',stopHours:'',stallHours:12,overlay:false,manualAutoBuy:false},lsGet(LS.opts,{}));
 const saveOpts=()=>lsSet(LS.opts,opts);
 
@@ -143,7 +143,7 @@ function buyCheapestGems(){
 // Assumes an active player: taps a pad tapRate times a second (keeps the sequencer's energy up),
 // buys the cheapest thing as soon as it's affordable, and plays each matching level as soon as it unlocks
 // (taking matchBase + matchPerPair × pairs seconds of game time).
-let simAcc=0,dotAcc=0,match=null;
+let simAcc=0,dotAcc=0,match=null,mgT=0;
 function addRows(arr,ensure,n){let i=0;while(n>0){ensure(i+1);const tr=arr[i];const tot=tr.litDots+n;tr.litDots=tot%DOTS;const carry=Math.floor(tot/DOTS);if(carry>0&&!tr.multiplierActive){tr.multiplierActive=true;ensure(i+2);}n=carry;i++;}}
 function simStep(dt){
   const cpt=clicksPerTap();
@@ -153,7 +153,20 @@ function simStep(dt){
   if(!drumTrackerActive&&score>=25){score-=25;drumTrackerActive=true;}
   if(opts.buySkills)buyCheapestGems();
   if(opts.buyShop||opts.buyTips)buyCheapestPoints();
-  if(opts.matchAuto){
+  // minigames: buy Planet Hop (1 gem) and the Matching Game (10 gems) in the bunker as soon as possible, and assume a
+  // minigame level gets cleared every `mgMins` minutes of play (Planet Hop first, then Worm Whack, then Beat Defense)
+  if(typeof mgBought!=='undefined'){
+    if(!mgBought.ph&&alienGems>=1){alienGems-=1;mgBought.ph=true;logEvent('skill','🪐 Planet Hop (bunker)',1,'💎','mg_ph');run.lastBuyT=run.gameT;}
+    if(mgBought.ph&&!mgBought.match&&alienGems>=10){alienGems-=10;mgBought.match=true;logEvent('skill','🃏 Matching Game (bunker)',10,'💎','mg_match');run.lastBuyT=run.gameT;}
+    if(opts.mgAuto&&mgBought.ph){mgT=(mgT||0)+dt;
+      if(mgT>=opts.mgMins*60){mgT=0;const nextOf=(best,max,acc,ok)=>{for(let L=1;L<=max;L++){if(!ok(best[L])){return acc(L)?L:0;}}return 0;};
+        let L=nextOf(phProgress.best,15,L=>mgPhAccess(L,true),b=>b&&b.cleared);
+        if(L){phProgress.best[L]={cleared:true,pct:1,stars:2,dust:.9};logEvent('note','🪐 cleared Planet Hop '+L+' (sim)',null,'','mg_ph'+L);}
+        else if((L=nextOf(wormProgress.best,30,L=>mgWwAccess(L,true),b=>b&&b.stars>=1))){wormProgress.best[L]={stars:2,score:0};logEvent('note','🪱 cleared Worm Whack '+L+' (sim)',null,'','mg_ww'+L);}
+        else if(typeof bdProgress!=='undefined'&&unlockedSkills.beat_defense&&(L=nextOf(bdProgress.best,10,()=>true,b=>b&&b.cleared))){bdProgress.best[L]={cleared:true,flawless:false};logEvent('note','🛸 cleared Beat Defense '+L+' (sim)',null,'','mg_bd'+L);}
+      }}
+  }
+  if(opts.matchAuto&&(typeof mgBought==='undefined'||mgBought.match)){
     if(!match){const nl=matchLevelsCompleted+1;if(totalAliens>=aliensNeededForLevel(nl))match={lvl:nl,until:run.gameT+dt+opts.matchBase+opts.matchPerPair*matchPairsForLevel(nl)};}
     else if(run.gameT+dt>=match.until){matchingMultiplier*=matchRewardForLevel(match.lvl);matchLevelsCompleted=match.lvl;match=null;}
   }
@@ -407,6 +420,7 @@ function viewRun(){
   <h4>THE BOT / AUTO-BUY</h4>
   ${tog('buyShop','Buy cheapest shop item')} ${tog('buySkills','Buy cheapest skill tree node (gems)')} ${tog('buyTips','Buy tips')}
   ${tog('autoTap','Tap pads')} ${num('tapRate','taps per second',56)}
+  ${tog('mgAuto','Buy + clear minigame levels (one every few minutes)')} <div class="tm-row">${num('mgMins','one level every',44)}<span class="tm-sub">min</span></div>
   ${tog('matchAuto','Play matching levels automatically')} <div class="tm-row">${num('matchBase','takes',50)}<span class="tm-sub">s +</span>${num('matchPerPair','',44)}<span class="tm-sub">s per pair</span></div>
   ${tog('manualAutoBuy','Also auto-buy + auto-tap while I play myself (recording)')}
   <h4>STOP AUTOPLAY WHEN</h4><div class="tm-row">${num('stopAliens','aliens ≥',56)}${num('stopMatch','match lvl ≥',50)}${num('stopHours','game hours ≥',56)}</div>

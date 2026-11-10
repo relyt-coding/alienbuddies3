@@ -403,13 +403,16 @@ function updateGemDisplays(){
   // Show rate display
   const rate = gemsPerMinute();
   const rateEl = document.getElementById('gemRateDisplay');
+  // the minigame boost (Planet Hop / Worm Whack / Beat Defense wins) shown right where gems are earned
+  const mgB=typeof mgGemBonus==='function'?mgGemBonus():1,mgTxt=mgB>1?` · 🎮 ×${Math.round(mgB*100)/100} from minigames`:'';
   if(rateEl && totalAliens > 0){
-    rateEl.textContent = `(${totalAliens} aliens × ${fmtGemRate(rate/totalAliens)}💎/min = ${fmtGemRate(rate)}/min)`;
+    rateEl.textContent = `(${totalAliens} aliens × ${fmtGemRate(rate/totalAliens)}💎/min = ${fmtGemRate(rate)}/min${mgTxt})`;
   }
+  const tb=document.getElementById('treeMgBoost');if(tb){tb.textContent=mgB>1?'🎮 ×'+(Math.round(mgB*100)/100):'';tb.style.display=mgB>1?'':'none';}
   // Shop header copy of the gem info (under the balance)
   const sc=document.getElementById('gemCountShop'),sr=document.getElementById('gemRateShop'),sw=document.getElementById('gemInfoShop');
   if(sc)sc.textContent=disp.toLocaleString();
-  if(sr&&totalAliens>0)sr.textContent=`(${totalAliens} aliens × ${fmtGemRate(rate/totalAliens)}💎/min = ${fmtGemRate(rate)}/min)`;
+  if(sr&&totalAliens>0)sr.textContent=`(${totalAliens} aliens × ${fmtGemRate(rate/totalAliens)}💎/min = ${fmtGemRate(rate)}/min${mgTxt})`;
   if(sw)sw.style.display=totalAliens>0?'flex':'none';
   if(typeof updateSkillTreeBtn==='function')updateSkillTreeBtn();
   // Show gem counter in bunker once player has any aliens

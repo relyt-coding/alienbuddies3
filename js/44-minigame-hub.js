@@ -16,9 +16,10 @@ const _mgTest=()=>typeof TEST_MODE!=='undefined'&&TEST_MODE;
 const _mgHas=id=>typeof unlockedSkills!=='undefined'&&!!unlockedSkills[id];
 
 // which levels you have access to (you still clear them in order)
-function mgPhAccess(L){if(_mgTest())return true;return L<=5?!!mgBought.ph:L<=10?_mgHas('ph_ice'):_mgHas('ph_magma');}
+function mgPhAccess(L,real){if(!real&&_mgTest())return true;   // (real: the test-mode bot plays by the normal rules)
+  return L<=5?!!mgBought.ph:L<=10?_mgHas('ph_ice'):_mgHas('ph_magma');}
 function mgPhLockMsg(L){return L<=5?'Unlock Planet Hop in the bunker':L<=10?'Unlock the Ice Planet in the skill tree':'Unlock Magmora in the skill tree';}
-function mgWwAccess(L){if(_mgTest()||mgBought.wwAll)return true;const n=MG_WW_NODES.find(([top])=>L<=top);return !!n&&_mgHas(n[1]);}
+function mgWwAccess(L,real){if((!real&&_mgTest())||mgBought.wwAll)return true;const n=MG_WW_NODES.find(([top])=>L<=top);return !!n&&_mgHas(n[1]);}
 function mgWwLockMsg(L){const n=MG_WW_NODES.find(([top])=>L<=top);const nm={ww_moon:'Worm Whack',ww_deep:'the Wyrm Moon',ww_t1:'Wyrm Trail I',ww_t2:'Wyrm Trail II',ww_t3:'Wyrm Trail III',ww_t4:'Wyrm Trail IV'};return 'Unlock '+(n?nm[n[1]]:'it')+' in the skill tree';}
 function mgCockpitOn(){return _mgTest()||_mgHas('mg_cockpit');}
 

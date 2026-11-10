@@ -38,7 +38,7 @@ function phGemVal(b){return b&&b.cleared?((b.dust||0)>=.999?1:.5):0;}
     </div></div>
     <div class="ww-panel" id="phResults"><div class="ww-panel-inner ww-res" id="phResInner" style="box-shadow:0 0 40px -10px #7fe8ff"></div></div>`;
   document.body.appendChild(ov);
-  const cv=$('phCanvas'),g=cv.getContext('2d');
+  const cv=$('phCanvas'),g=mgLiteCtx(cv.getContext('2d'));
   let W=0,H=0,DPR=1,bg=null,bgKey='',sel=1,R=null;
 
   // ── open / close ──
@@ -90,7 +90,7 @@ function phGemVal(b){return b&&b.cleared?((b.dust||0)>=.999?1:.5):0;}
   // dotted-eighth echo (lows cut from both, so the kick stays tight and the cave never gets muddy).
   let FXB=null;
   function caveIR(c){
-    const sr=c.sampleRate,L=Math.round(sr*2.6),ir=c.createBuffer(2,L,sr),taps=[[.011,.55],[.023,.42],[.037,.36],[.052,.3],[.071,.24],[.094,.18]];
+    const sr=c.sampleRate,L=Math.round(sr*(MG_LITE?1.3:2.6)),ir=c.createBuffer(2,L,sr),taps=[[.011,.55],[.023,.42],[.037,.36],[.052,.3],[.071,.24],[.094,.18]];
     for(let ch=0;ch<2;ch++){const d=ir.getChannelData(ch);let lp=0;
       for(let i=0;i<L;i++){const x=i/L;lp+=(Math.random()*2-1-lp)*(.18+.5*(1-x));d[i]=lp*Math.pow(1-x,2.6)*.9;}  // darker as it decays, like stone soaking up the highs
       taps.forEach(([tm,g2],k)=>{const i=Math.round((tm+(ch?.004*k:0))*sr);if(i<L)d[i]+=g2*(ch^(k&1)?1:-1);});}   // early reflections off the cave walls
@@ -131,7 +131,7 @@ function phGemVal(b){return b&&b.cleared?((b.dust||0)>=.999?1:.5):0;}
   function env(c,at,peak,att,dec){const g=c.createGain();g.gain.setValueAtTime(0,at);g.gain.linearRampToValueAtTime(peak,at+att);g.gain.exponentialRampToValueAtTime(.0005,at+att+dec);return g;}
   // a struck crystal: sine + a glassy inharmonic partial + a soft triangle body
   function sChime(midi,at,vel,len){const B=phBus(),c=B.c,f=mtof(midi),L=len||1.6,v=vel*MV();
-    [[1,'sine',.22],[2.76,'sine',.07],[1,'triangle',.06],[5.4,'sine',.025]].forEach(([r,ty,a],i)=>{const o=c.createOscillator();o.type=ty;o.frequency.value=f*r;const e=env(c,at,a*v,.004,L/(1+i*.8));o.connect(e);e.connect(B.in);o.start(at);o.stop(at+L+.1);});}
+    (MG_LITE?[[1,'sine',.24],[2.76,'sine',.08]]:[[1,'sine',.22],[2.76,'sine',.07],[1,'triangle',.06],[5.4,'sine',.025]]).forEach(([r,ty,a],i)=>{const o=c.createOscillator();o.type=ty;o.frequency.value=f*r;const e=env(c,at,a*v,.004,L/(1+i*.8));o.connect(e);e.connect(B.in);o.start(at);o.stop(at+L+.1);});}
   function sNoise(at,dur,vel,type,f0,f1,q){const B=phBus(),c=B.c,n=c.createBufferSource();n.buffer=nbuf(c);const fl=c.createBiquadFilter();fl.type=type;fl.Q.value=q||1;
     fl.frequency.setValueAtTime(f0,at);fl.frequency.exponentialRampToValueAtTime(f1,at+dur);const e=c.createGain();e.gain.setValueAtTime(0,at);e.gain.linearRampToValueAtTime(vel*MV(),at+dur*.6);e.gain.exponentialRampToValueAtTime(.0005,at+dur);
     n.connect(fl);fl.connect(e);e.connect(B.in);n.start(at,Math.random());n.stop(at+dur+.05);}
@@ -210,7 +210,7 @@ function phGemVal(b){return b&&b.cleared?((b.dust||0)>=.999?1:.5):0;}
     R.T0=c.currentTime+(first?4*R.beat+.3:.25);}
     if(first)for(let i=0;i<4;i++)phSnd('rimshot',i?.5:.85,R.T0-(4-i)*R.beat);
     R.lv.falls=R.lv.falls||R.lv.spikes.filter(sp=>sp.lt!=null).sort((a,b)=>a.lt-b.lt);R.fi=0;while(R.fi<R.lv.falls.length&&R.lv.falls[R.fi].lt<cp+.01)R.fi++;R.landed=new Set();
-    phLoopsOff();if(R.lv.P.planet===1)R.wind=sWindStart(R.T0-(fromCp?2:first?4:0)*R.beat);
+    phLoopsOff();if(R.lv.P.planet===1&&!MG_LITE)R.wind=sWindStart(R.T0-(fromCp?2:first?4:0)*R.beat);
     R.sched=setInterval(schedule,25);schedule();
     $('phAtt').textContent=R.attempt;$('phDust').textContent='0';
   }
@@ -344,7 +344,7 @@ function phGemVal(b){return b&&b.cleared?((b.dust||0)>=.999?1:.5):0;}
 
   // ── layout / geometry ──
   function resize(){
-    const a=cv.parentElement.getBoundingClientRect();DPR=Math.min(2,devicePixelRatio||1);W=Math.max(10,a.width);H=Math.max(10,a.height);
+    const a=cv.parentElement.getBoundingClientRect();DPR=MG_DPR();W=Math.max(10,a.width);H=Math.max(10,a.height);
     cv.width=Math.round(W*DPR);cv.height=Math.round(H*DPR);cv.style.width=W+'px';cv.style.height=H+'px';bgKey='';
   }
   addEventListener('resize',()=>{if(ov.classList.contains('open')&&R)resize();});

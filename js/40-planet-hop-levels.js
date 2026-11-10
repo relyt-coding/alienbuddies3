@@ -177,7 +177,10 @@ function phBuild(L,songIn){
 }
 
 // ── after the course is built: bells, landing beats, the cave's shape and the ice world's chimes ──
-const PH_BELL_TUNE=[0,2,4,7,4,2,4];   // scale steps the crystal bells play, in order
+// the tunes the crystal bells play (scale steps; 7 = an octave up): each level has its own, and a level with two bell
+// sections plays a second phrase that answers the first
+const PH_BELL_TUNE=[0,2,4,7,4,2,4];
+const PH_BELL_TUNES={7:[[0,2,4,7,4,2,4]],8:[[4,2,0,2,4,5,7],[7,5,4,2,1,2,0]],9:[[0,4,7,9,7,4,5],[9,7,5,4,2,4,0]],10:[[7,4,5,2,4,0,2]]};
 function phDegMidi(song,d){const sc=WW_SCALES[song.scaleName]||WW_SCALES.minor;return song.root+sc[((d%7)+7)%7]+12*Math.floor(d/7);}
 function phDress(lv,bot,custom){
   const P=lv.P,song=lv.song,beat=60/P.bpm;
@@ -185,7 +188,8 @@ function phDress(lv,bot,custom){
   lv.spikes.forEach(sp=>{if(sp.meteor||sp.icicle)sp.lt=Math.round((sp.s-1.5)*4)/4;});
   // crystal bells: each is bonus stardust you ring with BOUNCE; the band thins out so the bells are the lead voice
   lv.bells=lv.objs.filter(o=>o.k==='bell');
-  lv.bells.forEach(b=>{b.midi=phDegMidi(song,PH_BELL_TUNE[b.n%PH_BELL_TUNE.length])+36;lv.dust.push({s:b.s,h:1.05,bell:b});});
+  let grp=-1;lv.bells.forEach(b=>{if(b.n===0)grp++;const tunes=PH_BELL_TUNES[P.lvl]||[PH_BELL_TUNE],tn=tunes[grp%tunes.length];
+    b.midi=phDegMidi(song,tn[b.n%tn.length])+36;lv.dust.push({s:b.s,h:1.05,bell:b});});
   const ranges=[];lv.bells.forEach(b=>{if(b.n===0)ranges.push([b.s-1,b.s+7]);});
   if(ranges.length){const st=WW_STYLES[P.style]||{};
     song.events=song.events.filter(e=>{const b=e.t/beat;if(!ranges.some(([a,z])=>b>=a&&b<z))return true;

@@ -51,7 +51,7 @@ function wwGemVal(b){return b&&(b.stars||0)>=1?(b.stars>=3?1:.5):0;}
     </div>
     <div class="ww-panel" id="wwResults"><div class="ww-panel-inner ww-res" id="wwResInner"></div></div>`;
   document.body.appendChild(ov);
-  const cv=$('wwCanvas'),ctx2=cv.getContext('2d');
+  const cv=$('wwCanvas'),ctx2=mgLiteCtx(cv.getContext('2d'));
 
   // ── state ──
   let G=null;            // current run
@@ -102,7 +102,7 @@ function wwGemVal(b){return b&&(b.stars||0)>=1?(b.stars>=3?1:.5):0;}
   function grid(n){const short=innerHeight<520&&innerWidth>innerHeight;return short?{rows:1,cols:n}:{rows:2,cols:n/2};}
   function resize(){
     const a=cv.parentElement.getBoundingClientRect();
-    DPR=Math.min(2,devicePixelRatio||1);W=Math.max(10,a.width);H=Math.max(10,a.height);
+    DPR=MG_DPR();W=Math.max(10,a.width);H=Math.max(10,a.height);
     cv.width=Math.round(W*DPR);cv.height=Math.round(H*DPR);cv.style.width=W+'px';cv.style.height=H+'px';
     if(G)layoutCraters();
   }
@@ -262,11 +262,11 @@ function wwGemVal(b){return b&&(b.stars||0)>=1?(b.stars>=3?1:.5):0;}
       squishSound(n,n.type==='gold'||n.boss||holdDone);
       // rock the screen: a zoom punch toward the crater, a quick flash, slime flying
       G.punch={x:cr.x,y:cr.y,life:1};G.pflash=Math.max(G.pflash,.6);
-      {const wc=n.type==='gold'?'#ffd34d':n.boss?'#d0314f':'#d276d8';for(let k=0;k<10;k++){const a=-Math.PI*(.1+.8*Math.random()),v=180+Math.random()*220;G.fx.push({x:cr.x,y:cr.y-G.r*.3,vx:Math.cos(a)*v,vy:Math.sin(a)*v,life:1,col:wc,s:3+Math.random()*4,grav:1});}}
+      {const wc=n.type==='gold'?'#ffd34d':n.boss?'#d0314f':'#d276d8';for(let k=0;k<(MG_LITE?4:10);k++){const a=-Math.PI*(.1+.8*Math.random()),v=180+Math.random()*220;G.fx.push({x:cr.x,y:cr.y-G.r*.3,vx:Math.cos(a)*v,vy:Math.sin(a)*v,life:1,col:wc,s:3+Math.random()*4,grav:1});}}
       // the BONK: a comic impact star where the hammer lands, a word inside it, dirt flying, the crater lighting up
       const pc=n.type==='gold'?'#ffd700':n.boss?'#ff4466':padColor(padOf(n.c)),special=n.type==='gold'||holdDone;
       G.pows.push({x:cr.x,y:cr.y-G.r*.6,col:pc,life:1,rot:Math.random()*.6-.3,word:special?'':WW_BONKS[(G.bonkI=(G.bonkI||0)+1+(Math.random()*2|0))%WW_BONKS.length]});
-      for(let k=0;k<7;k++){const a=-Math.PI*(.15+.7*Math.random()),v=140+Math.random()*160;G.fx.push({x:cr.x,y:cr.y-G.r*.1,vx:Math.cos(a)*v,vy:Math.sin(a)*v,life:1,col:k%2?'#6b6a78':'#8e8c9c',s:2.5+Math.random()*3,grav:1});}
+      for(let k=0;k<(MG_LITE?3:7);k++){const a=-Math.PI*(.15+.7*Math.random()),v=140+Math.random()*160;G.fx.push({x:cr.x,y:cr.y-G.r*.1,vx:Math.cos(a)*v,vy:Math.sin(a)*v,life:1,col:k%2?'#6b6a78':'#8e8c9c',s:2.5+Math.random()*3,grav:1});}
       cr.hit=1;cr.hitCol=hex6(pc);
       if(credit>=1&&G.combo>0&&G.combo%10===0){text({x:W/2,y:H*.42},'COMBO '+G.combo+'!','#e8ff00',1.5);comboSound();G.rings.push({x:W/2,y:H*.45,life:1,big:1});}
       burst(cr.x,cr.y,n.type==='gold'?'#ffd700':n.boss?'#ff4466':'#c86bd8',16);

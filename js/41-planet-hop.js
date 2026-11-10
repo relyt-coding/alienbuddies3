@@ -157,7 +157,7 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
       const S=R.S,tag=gr==='perfect'?'PERFECT':gr==='good'?'GOOD · '+(ds<0?'EARLY':'LATE'):(ds<0?'EARLY':'LATE');
       R.texts.push({s:S.s+.15,h:S.h+1.55,txt:tag,col:gr==='perfect'?'#00ff99':gr==='good'?'#7fd4ff':'#ffaa66',life:1,sz:gr==='perfect'?1.1:.9});
       if(gr==='perfect'){burst(S.s,S.h+.2,'#00ff99',8,.8);R.rings.push({s:S.s,h:S.h,life:1});}
-      if(R.combo>0&&R.combo%10===0){R.texts.push({s:S.s+.9,h:S.h+2.3,txt:'ON-BEAT ×'+R.combo+'!',col:'#e8ff00',life:1.3,sz:1.35});try{playSound('spaceperc',.35);}catch(e){}}
+      if(R.combo>0&&R.combo%10===0){R.texts.push({s:S.s+.9,h:S.h+2.3,txt:'ON-BEAT ×'+R.combo+'!',col:'#e8ff00',life:1.3,sz:1.35});}
     }
     if(R.solo)w='j';
     const pad=$(w==='j'?'phJump':'phBounce');pad.classList.remove('lit');void pad.offsetWidth;pad.classList.add('lit');
@@ -192,9 +192,9 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
         if(!wasG&&S.grounded&&S.s>1)burst(S.s,S.h,'#ccccdd',5,.5);
       }
       // stardust
-      lv.dust.forEach((d,i)=>{if(!R.got.has(i)&&Math.abs(d.s-S.s)<.24&&Math.abs(d.h-(S.h+.45))<.55){R.got.add(i);burst(d.s,d.h,'#ffe680',6,.5);try{if(R.got.size%4===0)playSound('bell',.18);}catch(e){}}});
+      lv.dust.forEach((d,i)=>{if(!R.got.has(i)&&Math.abs(d.s-S.s)<.24&&Math.abs(d.h-(S.h+.45))<.55){R.got.add(i);burst(d.s,d.h,'#ffe680',6,.5);}});
       if(lv.cp!=null&&!R.cpHit&&S.s>=lv.cp){R.cpHit=true;R.cpSnap={got:new Set(R.got),graded:new Set([...R.graded].filter(i=>lv.acts[i].t<lv.cp)),maxCombo:R.maxCombo,timing:R.timing.length,onBeat:Object.assign({},R.onBeat)};
-        R.texts.push({s:lv.cp+.6,h:2.4,txt:'CHECKPOINT!',col:'#00ff99',life:1.5,sz:1.2});burst(lv.cp,1.6,'#00ff99',18,1.2);try{playSound('bell',.35);}catch(e){}}
+        R.texts.push({s:lv.cp+.6,h:2.4,txt:'CHECKPOINT!',col:'#00ff99',life:1.5,sz:1.2});burst(lv.cp,1.6,'#00ff99',18,1.2);}
       $('phDust').textContent=R.got.size;
       const pct=Math.max(0,Math.min(1,S.s/lv.end));$('phPct').textContent=Math.floor(pct*100)+'%';$('phProg').style.width=(pct*100)+'%';
       if(S.dead)die();

@@ -2,6 +2,11 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.102 - 2026-11-09 17:12
+- Planet Hop: teaching signs removed; only LOW GRAVITY gets a sign, the first time you meet it (press markers still show new moves)
+- Planet Hop: in low gravity your alien floats inside a shimmering bubble (the floating LOW GRAVITY text is gone)
+- Planet Hop: checkpoint crystals are rounded gems that start green and turn bright blue-white with a big glow when you pass
+
 ## v0.2.101 - 2026-11-09 16:57
 - Planet Hop: checkpoint flags are now crystals that light up when you pass them
 - Planet Hop: the crater into the underground is friendlier: smooth walls, rounded ledges and glowing orbs instead of sharp crystals

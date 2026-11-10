@@ -102,11 +102,11 @@ function phTokens(){
     Lg:{len:8,o:[Z(4),PIT(.3,1.7),PIT(2.3,3.7),PIT(4.3,5.7)],a:[[0,'j'],[2,'j'],[4,'j']]},   // moon leaps over craters
   };
 }
-// where each idea debuts, and the sign that teaches it
-const PH_DEBUT={s:[1,'JUMP ON THE BEAT'],p:[1,'HOP THE GAP'],st:[1,'CLIMB TO THE TOP!'],k:[2,''],rE:[3,'TAP JUMP TWICE = DOUBLE JUMP'],P:[3,'WIDE PIT — DOUBLE JUMP'],
-  Bf:[6,'NEW BUTTON: PRESS BOUNCE ON EACH PAD'],B2:[6,'BOUNCE ACROSS THE PIT'],kk:[5,'CLIMB!'],Lr:[4,'LOW GRAVITY — 2-BEAT JUMPS'],Lg:[4,'LEAP THE CRATERS'],
-  B1:[7,'ONE PAD PER BEAT'],f:[8,''],s3:[9,'JUMP ON EVERY BEAT'],Pm:[9,'PIT, THEN SPIKE'],d:[11,'JUMP + DOUBLE ON THE "AND"'],
-  rO:[12,'JUMP ON THE "AND"'],so:[12,'OFF-BEAT SPIKES'],dk:[13,'DOUBLE JUMP UP HIGH']};
+// where each idea debuts (first two of each get press markers)
+const PH_DEBUT={s:[1,''],p:[1,''],st:[1,''],k:[2,''],rE:[3,''],P:[3,''],
+  Bf:[6,''],B2:[6,''],kk:[5,''],Lr:[4,'LOW GRAVITY'],Lg:[4,''],
+  B1:[7,''],f:[8,''],s3:[9,''],Pm:[9,''],d:[11,''],
+  rO:[12,''],so:[12,''],dk:[13,'']};   // only low gravity gets a sign; every new idea still gets glowing press markers
 // the 15 courses (| marks the song's 8-bar sections; boss levels end with an 8-bar comet chase)
 const PH_COURSE=[
   /* 1 First Steps   */ 'rA rA s rA | C p st',

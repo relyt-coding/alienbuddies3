@@ -236,17 +236,17 @@ function wwLevelOpen(l){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||l===
       G.hitVal+=credit;
       if(credit>=1){G.combo++;G.maxCombo=Math.max(G.maxCombo,G.combo);}else G.combo=0;
       G.stats[grade]=(G.stats[grade]||0)+1;
-      const base={perfect:300,good:200,ok:100}[grade]||100;
+      const base=grade==='ok'?150:300;   // any hit in time scores the same: the music is the judge, not the screen
       const mult=1+Math.min(3,G.combo/15);
       let pts=base*mult*(n.type==='gold'?3:1)*(n.boss?1.5:1)*(holdDone?1.5:1)*credit;
       G.score+=Math.round(pts);
-      const col=n.type==='gold'?'#ffd700':grade==='perfect'?'#00ff99':grade==='good'?'#7fd4ff':'#c8c8c8';
-      text(cr,(n.type==='gold'?'GOLD! ':'')+(holdDone?'HELD! ':'')+grade.toUpperCase()+(n.tag&&grade!=='perfect'?' · '+n.tag:''),col,grade==='perfect'?1.15:1);
-      if(grade==='perfect'){G.rings.push({x:cr.x,y:cr.y,life:1});G.pflash=Math.min(1,(G.pflash||0)+.5);}
+      // no PERFECT / GOOD / EARLY / LATE words: just the hit (and GOLD / HELD for the special worms)
+      if(n.type==='gold'||holdDone)text(cr,(n.type==='gold'?'GOLD!':'')+(n.type==='gold'&&holdDone?' ':'')+(holdDone?'HELD!':''),n.type==='gold'?'#ffd700':'#ffd166',1.1);
+      G.rings.push({x:cr.x,y:cr.y,life:1});
       if(credit>=1&&G.combo>0&&G.combo%10===0){text({x:W/2,y:H*.42},'COMBO '+G.combo+'!','#e8ff00',1.5);try{playSound('spaceperc',.4);}catch(e){}G.rings.push({x:W/2,y:H*.45,life:1,big:1});}
-      burst(cr.x,cr.y,n.type==='gold'?'#ffd700':n.boss?'#ff4466':'#c86bd8',grade==='perfect'?18:12);
+      burst(cr.x,cr.y,n.type==='gold'?'#ffd700':n.boss?'#ff4466':'#c86bd8',16);
       burst(cr.x,cr.y,'#9a9aa4',8,.8);
-      G.shake=Math.max(G.shake,grade==='perfect'?6:4);cr.flash=1;
+      G.shake=Math.max(G.shake,5);cr.flash=1;
       if(n.boss&&credit>=1){G.bossHp=Math.max(0,G.bossHp-1);if(!G.bossHp&&!G.bossDead){G.bossDead=t;G.shake=18;for(let k=0;k<5;k++)burst(W/2,H*.08,['#ff4466','#ffd166','#c86bd8'][k%3],30,2.2);text({x:W/2,y:H*.3},'WYRM DEFEATED!','#ffd166',1.6);G.score+=5000;}}
     }else{
       G.combo=0;G.stats.miss++;text(cr,'MISS','#ff5566');
@@ -430,11 +430,10 @@ function wwLevelOpen(l){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||l===
     G.texts.forEach(x=>{g2.globalAlpha=Math.min(1,x.life*1.6);g2.fillStyle=x.col;g2.font=`${Math.round(Math.max(14,G.r*.42)*x.sz)}px 'Bebas Neue',sans-serif`;g2.textAlign='center';g2.strokeStyle='rgba(0,0,0,.6)';g2.lineWidth=3;
       const y=x.y-(1-x.life)*24;g2.strokeText(x.txt,x.x,y);g2.fillText(x.txt,x.x,y);});
     g2.globalAlpha=1;
-    // perfect-hit rings, a soft flash, and the early/late meter
+    // hit rings and a soft flash
     G.rings=G.rings.filter(r=>(r.life-=dt*2.4)>0);
     G.rings.forEach(r=>{const rr=(r.big?Math.min(W,H)*.35:G.r*2.2)*(1-r.life*.7);g2.strokeStyle=`rgba(255,255,255,${r.life*.8})`;g2.lineWidth=r.big?4:3;g2.beginPath();g2.ellipse(r.x,r.y,rr,rr*.92,0,0,Math.PI*2);g2.stroke();});
     if(G.pflash>0){g2.fillStyle=`rgba(255,255,255,${G.pflash*.10})`;g2.fillRect(0,0,W,H);G.pflash=Math.max(0,G.pflash-dt*4);}
-    if(typeof mgMeter==='function')mgMeter(g2,W/2,H-14,Math.min(260,W*.5),G.timing,performance.now());
     // count-in
     if(t<0){const beatsLeft=Math.ceil(-t/G.beat);g2.fillStyle='rgba(0,0,0,.35)';g2.fillRect(0,0,W,H);g2.fillStyle='#fff';g2.font=`${Math.round(Math.min(W,H)*.22)}px 'Bebas Neue',sans-serif`;g2.textAlign='center';g2.textBaseline='middle';g2.fillText(beatsLeft>3?'READY':String(beatsLeft),W/2,H/2);g2.textBaseline='alphabetic';}
     else if(t<G.beat*1.2){g2.fillStyle=`rgba(255,255,255,${1-t/(G.beat*1.2)})`;g2.font=`${Math.round(Math.min(W,H)*.18)}px 'Bebas Neue',sans-serif`;g2.textAlign='center';g2.textBaseline='middle';g2.fillText('WHACK!',W/2,H/2);g2.textBaseline='alphabetic';}
@@ -460,11 +459,9 @@ function wwLevelOpen(l){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||l===
       <div class="ww-res-acc">${Math.round(acc*100)}%<small>${custom?'worms whacked · your beat':pass?'worms whacked':'need 70% to clear'}</small></div>
       <div class="ww-res-grid">
         <div><b>${G.score.toLocaleString()}</b><small>SCORE</small></div><div><b>${G.maxCombo}</b><small>BEST COMBO</small></div>
-        <div><b style="color:#00ff99">${s.perfect||0}</b><small>PERFECT</small></div><div><b style="color:#7fd4ff">${s.good||0}</b><small>GOOD</small></div>
-        <div><b>${s.ok||0}</b><small>OK</small></div><div><b style="color:#ff5566">${s.miss||0}</b><small>MISSED</small></div>
+        <div><b>${(s.perfect||0)+(s.good||0)+(s.ok||0)}</b><small>WHACKED</small></div><div><b style="color:#ff5566">${s.miss||0}</b><small>MISSED</small></div>
         ${s.mine?`<div><b style="color:#ff6644">${s.mine}</b><small>MINES HIT</small></div>`:''}
       </div>
-      <div class="ww-d-meta">${typeof mgTimingSummary==='function'?mgTimingSummary(G.timing):''}</div>
       ${first?`<div class="ww-reward">Permanent bonus: ×${G.P.reward} points!${L<30?' · Level '+(L+1)+' unlocked':''}</div>`:''}
       <div class="ww-res-btns">
         <button class="ww-btn" id="wwRetry">RETRY</button>

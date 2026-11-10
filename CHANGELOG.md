@@ -2,6 +2,12 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.107 - 2026-11-09 19:02
+- Planet Hop: pink bounce pads are always the big launches; small one-beat hops are blue
+- Worm Whack + Planet Hop: no more PERFECT / GOOD / EARLY / LATE text or early/late meter; let your ears judge (every in-time Worm Whack hit scores the same)
+- Results screens no longer show timing breakdowns
+- Planet Hop: obstacles drawn a little smaller than their hit area, so near misses never look like hits
+
 ## v0.2.106 - 2026-11-09 18:21
 - Planet Hop: double jump during the count-in; if you're still in the air when the music starts, the run carries on from there (no snapping to the ground)
 - Planet Hop: new faceted boulder with thick crystal spines; level 1 mixes boulders and flytraps

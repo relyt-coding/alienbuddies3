@@ -2,6 +2,10 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.99 - 2026-11-09 16:20
+- Planet Hop: removed the bell that rang while collecting stardust and at the checkpoint, and the combo chime
+- Planet Hop: removed the READY / 3-2-1 countdown overlay (the count-in clicks still play)
+
 ## v0.2.98 - 2026-11-09 14:39
 - Planet Hop: a journey through each world. Surface levels end by diving into a crater, cave levels end at a cave mouth back into daylight, and bosses end at a warp portal to the next planet
 - Planet Hop: underground levels (2, 4, 7, 9, 12, 14) with a rock roof, stalactites and glowing crystals in each planet's own rock

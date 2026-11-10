@@ -146,7 +146,8 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
   function input(w,ev){
     if(!R||R.state!=='play'||R.dead)return;
     let t=tau();if(ev&&ev.timeStamp){const lag=(performance.now()-ev.timeStamp)/1000;if(lag>0&&lag<.25)t-=lag/R.beat;}
-    if(t<R.S.s-.2)return;
+    // during the count-in (or the checkpoint count-in) you can hop on the spot for fun: nothing is judged
+    if(t<R.S.s-.15){R.idle=performance.now();const pd=$(w==='j'||R.solo?'phJump':'phBounce');pd.classList.remove('lit');void pd.offsetWidth;pd.classList.add('lit');try{playSound(phPadSound(R.solo?'j':w),.55);}catch(e){}return;}
     R.inputs.push({t:Math.max(R.S.s,t),w});
     // how close was that press to the beat it was meant for? (the level's planned presses)
     let best=-1,bd=.32;R.lv.acts.forEach((a,i)=>{if(a.w!==w||R.graded.has(i))return;const d=Math.abs(t-a.t);if(d<bd){bd=d;best=i;}});
@@ -492,6 +493,69 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
     if(pl===1)for(let k=0;k<3;k++){const [x,y]=P(b.a+(b.b-b.a)*(.2+.3*k),b.h-.08);g.fillStyle='#ffffff';g.beginPath();g.ellipse(x,y+UP*.05,UP*.05,UP*.11,0,0,Math.PI*2);g.fill();}
     if(b.fl&&pl!==2){const [gx,gy]=P((b.a+b.b)/2,under-.9);g.fillStyle=pl===1?'rgba(127,232,255,.18)':'rgba(160,168,255,.14)';g.beginPath();g.ellipse(gx,gy,BP*(b.b-b.a)*.4,UP*.12,0,0,Math.PI*2);g.fill();}
   }
+  // ── obstacles: each world's own creatures and rocks instead of plain triangles ──
+  // level 1 = spiky rocks; from level 2 a mix of spiky rocks, snapping flytraps and lizards that walk toward you
+  // (the lizard reaches its spot exactly as you do, so the timing stays the same); comet meteors leave molten spheres
+  const PH_OBS=[
+    {rock:['#c9c4e6','#5d5888'],tip:'#ff6b7a',trap:'#7a5cc8',trapIn:'#ff4d8a',stem:'#4fbf8a',liz:['#a99fd8','#5d5590'],lizEye:'#ffe14d',lizSpine:'#ff6b7a'},
+    {rock:['#e6f8ff','#6aa6cc'],tip:'#ff5fae',trap:'#4fa8cc',trapIn:'#ff3d9a',stem:'#8fd6e8',liz:['#e8f8ff','#7fb8d8'],lizEye:'#ff3d9a',lizSpine:'#4fd8ff'},
+    {rock:['#4a2c26','#140806'],tip:'#ffb02e',trap:'#2a1612',trapIn:'#ff8a2a',stem:'#3a2018',liz:['#2a1410','#0e0504'],lizEye:'#ffd23a',lizSpine:'#ff7a1a'}];
+  function obsKind(lv,sp){
+    if(sp._k)return sp._k;
+    if(sp.meteor)return sp._k='molten';
+    const L=R.custom?(R.custom.L||3):R.L;if(L<=1)return sp._k='rock';
+    const lone=!lv.spikes.some(o=>o!==sp&&Math.abs(o.s-sp.s)<1.1)&&!lv.pits.some(p=>p.b>sp.s-1&&p.a<sp.s+1.8)&&!lv.blocks.some(b=>b.b>sp.s-1&&b.a<sp.s+1.8);
+    const r=hsh(sp.s*3.1+L,17);return sp._k=(lone&&r<.34)?'lizard':r<.67?'trap':'rock';
+  }
+  function drawObstacle(lv,sp,t,S){
+    const pl=lv.P.planet,k=obsKind(lv,sp),O=PH_OBS[pl];
+    let ss=sp.s;if(k==='lizard')ss=sp.s+Math.max(-.9,Math.min(1.5,(sp.s-S.s)*.45));
+    const [x,y,f]=P(ss,0),w=Math.max(10,sp.w*BP*.72),h=Math.max(UP*.75,sp.h*UP*1.5);g.save();g.translate(x,y);g.rotate(f);   // drawn a touch bigger than the hit box, so it reads (and feels fair)
+    // a soft warning glow on the ground so hazards still read at a glance
+    const hz=k==='molten'?'#ff8a2a':O.tip,hg=g.createRadialGradient(0,-h*.3,0,0,-h*.3,Math.max(w*2.4,UP*.7));hg.addColorStop(0,hz+'44');hg.addColorStop(1,hz+'00');g.fillStyle=hg;g.beginPath();g.arc(0,-h*.3,Math.max(w*2.4,UP*.7),0,Math.PI*2);g.fill();
+    if(k==='rock'){
+      // a round boulder studded with short spines
+      for(let i=0;i<5;i++){const a=-Math.PI/2+(i-2)*.52,len=h*(.38+.14*hsh(sp.s+i,3)),bx=Math.cos(a)*w*.8,by=-h*.36+Math.sin(a)*h*.36,tx=bx+Math.cos(a)*len,ty=by+Math.sin(a)*len,px=-Math.sin(a)*w*.2,py=Math.cos(a)*w*.2;
+        const sg=g.createLinearGradient(bx,by,tx,ty);sg.addColorStop(0,O.rock[1]);sg.addColorStop(.7,O.rock[0]);sg.addColorStop(1,O.tip);g.fillStyle=sg;g.beginPath();g.moveTo(bx+px,by+py);g.lineTo(tx,ty);g.lineTo(bx-px,by-py);g.closePath();g.fill();}
+      const rg=g.createRadialGradient(-w*.3,-h*.55,1,0,-h*.3,w*1.2);rg.addColorStop(0,O.rock[0]);rg.addColorStop(1,O.rock[1]);g.fillStyle=rg;g.beginPath();g.ellipse(0,-h*.3,w*1.05,h*.4,0,Math.PI,Math.PI*2);g.lineTo(w*1.05,0);g.lineTo(-w*1.05,0);g.fill();
+      g.fillStyle='rgba(255,255,255,.22)';g.beginPath();g.ellipse(-w*.35,-h*.5,w*.3,h*.09,-.2,0,Math.PI*2);g.fill();
+      if(pl===2){g.strokeStyle=`rgba(255,140,40,${.5+.4*Math.sin(t*3+sp.s)})`;g.lineWidth=1.2;g.beginPath();g.moveTo(-w*.6,-h*.15);g.lineTo(-w*.1,-h*.4);g.lineTo(w*.4,-h*.2);g.stroke();}
+    }else if(k==='trap'){
+      // a little flytrap on a curled stem, jaws snapping in time with the music
+      g.strokeStyle=O.stem;g.lineWidth=Math.max(2,w*.22);g.lineCap='round';g.beginPath();g.moveTo(0,0);g.quadraticCurveTo(w*.5,-h*.3,w*.05,-h*.55);g.stroke();g.lineCap='butt';
+      g.fillStyle=O.stem;[[-1,-.5],[1,.5]].forEach(([d,r])=>{g.beginPath();g.ellipse(d*w*.55,-h*.06,w*.5,h*.1,r,0,Math.PI*2);g.fill();});
+      const bt=((R.state==='play'&&!R.dead?tau():t)%1+1)%1,op=.18+.5*Math.pow(1-bt,3),Rr=Math.max(w*1.15,h*.5),hx=w*.25,hy=-h*.62;
+      const tooth=(dir)=>{g.fillStyle='#fffbe8';for(let i=0;i<4;i++){const tx=-Rr*(.2+i*.2);g.beginPath();g.moveTo(tx-Rr*.06,0);g.lineTo(tx,dir*Rr*.16);g.lineTo(tx+Rr*.06,0);g.fill();}};
+      const ig=g.createRadialGradient(hx-Rr*.5,hy,0,hx-Rr*.5,hy,Rr*.7);ig.addColorStop(0,O.trapIn);ig.addColorStop(1,O.trapIn+'00');g.fillStyle=ig;g.beginPath();g.arc(hx-Rr*.5,hy,Rr*.7,0,Math.PI*2);g.fill();
+      [[-op,-1],[op*.55,1]].forEach(([rot,dir])=>{g.save();g.translate(hx,hy);g.rotate(rot);
+        g.fillStyle=O.trap;g.beginPath();g.ellipse(-Rr*.5,0,Rr*.5,Rr*.32,0,dir<0?Math.PI:0,dir<0?Math.PI*2:Math.PI);g.closePath();g.fill();
+        g.strokeStyle=O.trapIn;g.lineWidth=2;g.beginPath();g.moveTo(-Rr,0);g.lineTo(0,0);g.stroke();tooth(-dir);
+        g.fillStyle='rgba(255,255,255,.18)';g.beginPath();g.ellipse(-Rr*.55,dir*Rr*.14,Rr*.18,Rr*.06,0,0,Math.PI*2);g.fill();g.restore();});
+    }else if(k==='lizard'){
+      // a spiny lizard scuttling toward you (facing left)
+      const ph=t*10+sp.s*3,bob=Math.sin(ph*2)*1.2,L=w*1.1;
+      g.strokeStyle=O.liz[1];g.lineWidth=Math.max(2,h*.08);g.lineCap='round';
+      for(let i=0;i<4;i++){const lx=(i<2?-L*.45:L*.45)+(i%2?L*.12:-L*.12),sw=Math.sin(ph+(i%2?Math.PI:0)+(i<2?0:Math.PI))*L*.18;g.beginPath();g.moveTo(lx,-h*.22+bob);g.lineTo(lx+sw,-h*.04);g.lineTo(lx+sw-L*.1,0);g.stroke();}
+      g.strokeStyle=O.liz[1];g.lineWidth=Math.max(3,h*.14);g.beginPath();g.moveTo(L*.8,-h*.26+bob);g.quadraticCurveTo(L*1.5,-h*.3+Math.sin(ph)*h*.15,L*2,-h*.06);g.stroke();g.lineCap='butt';
+      g.fillStyle=O.lizSpine;for(let i=0;i<5;i++){const sx=-L*.55+i*L*.3,sh=h*(.32+.12*Math.sin(i*1.3));g.beginPath();g.moveTo(sx-L*.11,-h*.42+bob);g.lineTo(sx,-h*.42-sh+bob);g.lineTo(sx+L*.11,-h*.42+bob);g.fill();}
+      const bg=g.createLinearGradient(0,-h*.5,0,-h*.05);bg.addColorStop(0,O.liz[0]);bg.addColorStop(1,O.liz[1]);g.fillStyle=bg;g.beginPath();g.ellipse(0,-h*.27+bob,L,h*.2,0,0,Math.PI*2);g.fill();
+      g.beginPath();g.ellipse(-L*1.05,-h*.33+bob,L*.42,h*.17,-.15,0,Math.PI*2);g.fill();
+      g.fillStyle=O.lizEye;g.shadowColor=O.lizEye;g.shadowBlur=6;g.beginPath();g.arc(-L*1.15,-h*.4+bob,Math.max(1.6,h*.06),0,Math.PI*2);g.fill();g.shadowBlur=0;
+      if(pl===2){g.fillStyle=`rgba(255,140,40,${.6+.3*Math.sin(t*4+sp.s)})`;[[-.4,-.3],[.1,-.25],[.5,-.32]].forEach(([dx,dy])=>{g.beginPath();g.arc(dx*L,dy*h+bob,Math.max(1.5,h*.05),0,Math.PI*2);g.fill();});}
+    }else{
+      // a meteor that landed: a molten sphere, cracked crust, glowing and smoking
+      const r=Math.max(UP*.3,Math.min(w*1.15,h*.6)),cy=-r*.92;
+      const hg2=g.createRadialGradient(0,cy,r*.5,0,cy,r*2.6);hg2.addColorStop(0,'rgba(255,140,40,.45)');hg2.addColorStop(1,'rgba(255,80,20,0)');g.fillStyle=hg2;g.beginPath();g.arc(0,cy,r*2.6,0,Math.PI*2);g.fill();
+      g.fillStyle='rgba(0,0,0,.35)';g.beginPath();g.ellipse(0,0,r*1.3,r*.2,0,0,Math.PI*2);g.fill();
+      const mg=g.createRadialGradient(-r*.3,cy-r*.3,1,0,cy,r);mg.addColorStop(0,'#fff4b0');mg.addColorStop(.4,'#ffa030');mg.addColorStop(1,'#c2340a');g.fillStyle=mg;g.beginPath();g.arc(0,cy,r,0,Math.PI*2);g.fill();
+      // a cooling dark crust on top, split by glowing cracks
+      g.save();g.beginPath();g.arc(0,cy,r,0,Math.PI*2);g.clip();const cg2=g.createLinearGradient(0,cy-r,0,cy+r*.6);cg2.addColorStop(0,'rgba(45,14,8,.9)');cg2.addColorStop(.6,'rgba(70,20,10,.55)');cg2.addColorStop(1,'rgba(70,20,10,0)');g.fillStyle=cg2;g.fillRect(-r,cy-r,r*2,r*2);
+      const gl=.65+.35*Math.sin(t*4+sp.s);g.strokeStyle=`rgba(255,${190+40*gl|0},90,${gl})`;g.lineWidth=Math.max(1.2,r*.08);g.lineCap='round';
+      [[[-.7,-.5],[-.25,-.2],[.05,-.55],[.5,-.3]],[[-.25,-.2],[-.15,.25]],[[.05,-.55],[.2,-.9]],[[.5,-.3],[.75,.05]]].forEach(c=>{g.beginPath();c.forEach(([dx,dy],q)=>q?g.lineTo(dx*r,cy+dy*r):g.moveTo(dx*r,cy+dy*r));g.stroke();});g.lineCap='butt';g.restore();
+      for(let i=0;i<3;i++){const u=(t*.45+i/3+sp.s*.1)%1;g.fillStyle=`rgba(90,80,80,${.35*(1-u)})`;g.beginPath();g.arc(Math.sin(u*5+i)*r*.4,cy-r-u*r*3,r*(.25+u*.5),0,Math.PI*2);g.fill();}
+    }
+    g.restore();
+  }
   // faceted crystal spikes: rock shards, icicles, glowing obsidian
   function drawSpike(pl,sp,t){
     const T=PH_THEME[pl],[ax,ay]=P(sp.s-sp.w/2,0),[bx,by]=P(sp.s+sp.w/2,0),[cx,cy]=P(sp.s,sp.h),[mx,my]=P(sp.s+sp.w*.06,0);
@@ -570,7 +634,7 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
       if(drop>0){const [x,y]=P(sp.s,sp.h*.5+drop);const [tx,ty]=P(sp.s+.9,sp.h*.5+drop+1.8);
         const tg=g.createLinearGradient(x,y,tx,ty);tg.addColorStop(0,'rgba(255,170,60,.85)');tg.addColorStop(1,'rgba(255,60,20,0)');g.strokeStyle=tg;g.lineWidth=BP*.16;g.lineCap='round';g.beginPath();g.moveTo(x,y);g.lineTo(tx,ty);g.stroke();g.lineCap='butt';
         const mg=g.createRadialGradient(x-BP*.04,y-BP*.04,1,x,y,BP*.14);mg.addColorStop(0,'#fff4c0');mg.addColorStop(.4,'#ffb84d');mg.addColorStop(1,'#a03a10');g.fillStyle=mg;g.beginPath();g.arc(x,y,BP*.14,0,Math.PI*2);g.fill();return;}
-      drawSpike(sp.meteor?2:lv.P.planet,sp,t);});
+      drawObstacle(lv,sp,t,S);});
     // ── bounce pads: little hover pads with thrusters ──
     lv.pads.forEach(p=>{if(p.s<s0-1||p.s>s1+1)return;const gone=S.padsDropped.has(p);
       const fall=gone?Math.min(3,(S.s-p.s)*2):0,[x,y,f]=P(p.s,-fall*.6);g.save();g.translate(x,y);g.rotate(f);g.globalAlpha=gone?Math.max(0,1-fall/2):1;
@@ -632,6 +696,7 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
         if(u>1.25&&!R.finFx){R.finFx=1;burst(e+1.9,-.2,PH_CAVE[lv.P.planet].glow,22,1.2);}}
       else if(f==='exit'){es=e+u*1.7;eh=Math.abs(Math.sin(u*Math.PI))*.45;ea=Math.max(0,1-Math.max(0,u-1.1)/.8);}
       else{const k=Math.min(1,u/1.1);es=e+k*1.6;eh=Math.sin(k*Math.PI*.5)*1.4;esc=Math.max(0,1-Math.max(0,u-.9)/.5);if(u>1.3&&!R.finFx){R.finFx=1;burst(e+1.6,1.4,'#ffffff',26,1.4);}}}
+    if(R.idle&&!R.won){const u=(performance.now()-R.idle)/(R.beat*850);if(u>=1||(R.state==='play'&&!R.dead&&tau()>=S.s-.02))R.idle=0;else eh+=4*u*(1-u)*.9;}
     const [ax,ay]=P(es,eh);
     if(!R.dead&&ea>0&&esc>0){R.trail.push([ax,ay]);if(R.trail.length>10)R.trail.shift();
       R.trail.forEach((p,i)=>{g.fillStyle=`rgba(0,255,136,${i/R.trail.length*.25})`;g.beginPath();g.arc(p[0]-(R.trail.length-i)*BP*.035,p[1]-UP*.35,UP*.12*(i/R.trail.length),0,Math.PI*2);g.fill();});
@@ -667,5 +732,5 @@ function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||L===
   let had=null;
   setInterval(()=>{const has=(typeof TEST_MODE!=='undefined'&&TEST_MODE)||(typeof unlockedSkills!=='undefined'&&!!unlockedSkills.planet_hop);eb.style.display=has?'':'none';if(had===false&&has)showToast('🪐 PLANET HOP unlocked! Find it in the bunker, under Worm Whack.');had=has;},800);
   document.addEventListener('visibilitychange',()=>{if(document.hidden&&R&&R.state==='play'){stop();showSelect();}});
-  window._phDebug={state:()=>R,start,input,tau:()=>R?tau():0};
+  window._phDebug={state:()=>R,start,input,tau:()=>R?tau():0,kind:sp=>R&&obsKind(R.lv,sp)};
 })();

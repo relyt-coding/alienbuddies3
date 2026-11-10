@@ -2,6 +2,12 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.105 - 2026-11-09 18:08
+- Planet Hop: hop on the spot during the count-in (nothing is judged)
+- Planet Hop: press marker icons removed; read the level yourself
+- Planet Hop: triangle spikes replaced by each world's spiky boulders, snapping flytraps and lizards that walk toward you (level 1 has boulders only)
+- Planet Hop: comet meteors land as molten spheres with glowing cracks and smoke
+
 ## v0.2.104 - 2026-11-09 17:50
 - Planet Hop: press markers only show on the first two tries of each new move (level 1 no longer marks every jump)
 - Planet Hop: the end-of-level crater is a clean, smooth bowl with a glowing hole (no more stones, boulders or bubbles)

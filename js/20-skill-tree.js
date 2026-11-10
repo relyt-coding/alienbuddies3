@@ -320,21 +320,38 @@ const SKILL_TREE_NODES = [
   {id:'ascension', icon:'🌠', name:'Ascension', desc:'All alien effects ×3 and your egg begins to incubate.', cost:900, requires:['dna_splice'], x:760, y:460, branch:'aliens', mult:1.5},
 ];
 // ── The skill tree only boosts Alien Gems (no point bonuses) ──
-// Tucana Core ×2, each Quad Sun ×4. Nodes that gave a point bonus give a small gem bonus instead
-// (×1.5 points → ×1.05 gems, ×2 → ×1.1); nodes that already boosted gems just lose their point part.
+// Balance (v0.2.113): every gem bonus multiplies your gems PER MINUTE (never the gems you already have), and the bonuses
+// stack by multiplying — so they're kept small or the tree snowballs (the old ×2/×4 suns and ×1.05–×1.5 nodes added up
+// to ×1.4 billion, and the test bot bought all 136 nodes in about a minute).
+//   Tucana Core ×1.5 · each Quad Sun ×1.5 · music hubs ×1.1 · music branches ×1.02 · planet sounds ×1.01 · others ×1.02
+//   (Gem Harvester I / II keep their own ×1.5 / ×2.)  Whole tree together ≈ ×200.
 (function gemsOnly(){
   const fmt=v=>'×'+(+v.toFixed(2));
   SKILL_TREE_NODES.forEach(n=>{
     let gm=n.gemMult||1;
-    if(n.id==='core')gm=2;
-    else if(/^sun_/.test(n.id))gm=4;
-    else if(n.mult>0&&!n.gemMult)gm=+(1+(n.mult-1)*.1).toFixed(3);
+    if(n.id==='core')gm=1.5;
+    else if(/^sun_/.test(n.id))gm=1.5;
+    else if(n.hub)gm=1.1;
+    else if(n.gemMult)gm=1.02;
+    else if(n.mult>0)gm=n.branch==='planets'?1.01:1.02;
     n.mult=0;delete n.seqBoost;
     if(gm!==1)n.gemMult=gm;
     let d=(n.desc||'').replace(/\s*Grants ×[\d.]+ points\.?/i,'').replace(/,?\s*×[\d.]+ points\.?/gi,'').trim();
     if(gm!==1&&!/Alien Gems/.test(d))d=(d&&!/[.!?]$/.test(d)?d+'.':d)+' '+fmt(gm)+' Alien Gems.';
     d=d.trim();if(d&&!/[.!?]$/.test(d))d+='.';
     n.desc=d;
+  });
+})();
+// Prices (v0.2.113): tuned with the test-mode bot so the tree is a long road, not a shopping spree.
+// Minigame path ≈ Ice Planet ~45 min · Cockpit ~1h15 · Worm Whack ~1h45 · Magmora ~2h30 · Beat Defense ~3h30 · Wyrm trail after.
+(function costBalance(){
+  const MG={ph_ice:3000,mg_cockpit:12000,ww_moon:45000,ph_magma:150000,beat_defense:500000,ww_deep:300000,ww_t1:600000,ww_t2:1e6,ww_t3:1.6e6,ww_t4:2.5e6,grand_tournament:5e6};
+  const BR={planets:10,aliens:8,points:5};
+  SKILL_TREE_NODES.forEach(n=>{
+    if(n.id==='core')return;
+    if(/^sun_/.test(n.id)){n.cost=500;return;}
+    if(MG[n.id]!=null){n.cost=MG[n.id];return;}
+    if(!n.id.startsWith('mt_')&&BR[n.branch])n.cost=Math.round(n.cost*BR[n.branch]);
   });
 })();
 const SKILL_MAP = {};
@@ -373,7 +390,7 @@ function gemsPerMinute(){
   if(typeof mgGemBonus==='function')rate*=mgGemBonus();   // minigame wins
   return rate;
 }
-// every skill node with a gem bonus multiplies the gem rate (Core ×2, Quad Suns ×4, music hubs ×1.5, branches ×1.2, …)
+// every skill node with a gem bonus multiplies the gem rate per minute (see gemsOnly: Core and Quad Suns ×1.5, music hubs ×1.1, …)
 function skillGemMultiplier(){
   let m=1;
   SKILL_TREE_NODES.forEach(n=>{if(n.gemMult&&unlockedSkills[n.id])m*=n.gemMult;});

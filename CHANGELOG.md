@@ -2,6 +2,14 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.113 - 2026-11-10 09:00
+- Skill tree rebalance (tested with the test-mode bot): gem bonuses only ever multiply gems per minute, and they're much smaller now
+  - Tucana Core and each Quad Sun x1.5 (was x2 / x4); music hubs x1.1 (was x1.5); music branches x1.02 (was x1.2); planet sounds x1.01; other nodes x1.02 (was x1.05). Gem Harvester I / II unchanged
+  - The whole tree together is about x200 (was about x1.4 billion, which let the bot buy all 136 nodes in about a minute)
+- Skill tree prices: Quad Suns 500; planet path x10; alien path x8; Musical Toolkit unchanged
+- Minigame path prices: Ice Planet 3K, Cockpit 12K, Worm Whack 45K, Magmora 150K, Beat Defense 500K, Wyrm Moon 300K, Wyrm Trail 600K / 1M / 1.6M / 2.5M
+- Bot timeline (fast player, a minigame level every 4 min): suns 17-24 min, Ice Planet 50 min, Cockpit 1h12, Worm Whack 1h22, Magmora 1h48, Wyrm Moon 2h32, Beat Defense 2h53, Wyrm Trail IV 4h34, last music node ~23h
+
 ## v0.2.112 - 2026-11-10 08:30
 - Beat Defense: pause button (also P / Esc; switching apps pauses instead of quitting) and a x2 speed button that doubles the tempo so everything stays on the beat
 - Beat Defense: tap a tower for UPGRADE (up to level 3: more damage, more range, a little louder) or SELL (60% of everything spent)

@@ -94,13 +94,14 @@
     cancelAnimationFrame(raf);const cv=root.querySelector('#bdCanvas');
     const S=Math.min(300,Math.round(window.innerWidth*.72)),dpr=Math.min(2,window.devicePixelRatio||1);
     cv.width=S*dpr;cv.height=S*dpr;cv.style.width=S+'px';cv.style.height=S+'px';
-    const g=cv.getContext('2d');let last=performance.now();
+    const g=cv.getContext('2d');let last=performance.now(),slow=0;
     (function f(now){if(!root.classList.contains('open'))return;const dt=Math.min(.05,(now-last)/1000);last=now;
       if(!drag&&now>spinT)angle+=dt*14;                                  // slow showroom turn; drag to look around
       const t=now/1000,look=makeBuddyLook(spec);
       g.setTransform(dpr,0,0,dpr,0,0);g.clearRect(0,0,S,S);
       const bg=g.createRadialGradient(S/2,S*.45,S*.05,S/2,S*.5,S*.7);bg.addColorStop(0,'rgba(68,238,187,.10)');bg.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=bg;g.fillRect(0,0,S,S);
-      drawBuddy(g,S/2,S*.53,S*.55,{view:'turn',angle,look,t,pulse:Math.pow(1-((t/.6)%1),3)});
+      slow=dt>.035?Math.min(30,slow+1):Math.max(0,slow-1);   // old phones: lighter drawing while frames run slow
+      drawBuddy(g,S/2,S*.53,S*.55,{view:'turn',angle,look,t,lite:slow>8,pulse:Math.pow(1-((t/.6)%1),3)});
       raf=requestAnimationFrame(f);})(last);
   }
   function open(i){

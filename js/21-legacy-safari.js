@@ -67,7 +67,7 @@
     return 1.4;
   }
   function applyAspect(){
-    const rules=[['.pad',padRatio()],['.alien-cell',1],['.egg-cell',1],['.match-card',3/4],['.seq-arr-bar',1.6]];
+    const rules=[['.pad',padRatio()],['.alien-cell',1],['.egg-cell',1],['.match-card',3/4],['.seq-arr-bar',1.6],['.bd-sw',1],['.ww-tile',1]];
     rules.forEach(([sel,ratio])=>{
       document.querySelectorAll(sel).forEach(el=>{
         const w=el.getBoundingClientRect().width;

@@ -2,6 +2,14 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.118 - 2026-11-11 10:45
+
+- Enhanced alien buddy look: eyes 12% bigger with a second sparkle, mouth 20% bigger, face spaced out 15%, gentle breathing, springier antennae, faint pink cheeks, soft edge light
+- Shop: grid is the only layout (the layout setting is gone); bigger prices, especially the 25-gem skill tree unlock
+- BUNKER and MATCHING GAME buttons glow once your first gem can unlock the Matching Game
+- iPhone 7 / old Safari fixes: Worm Whack, Planet Hop and Beat Defense screens fill the screen (inset not supported on iOS 13); designer swatches and level tiles keep their shape
+- Performance on old phones: floating buddies glow with a cheap halo instead of a CSS filter, fewer tumble repaints per frame, party running poses are prepared a little at a time, floaters pause while the Buddy Designer is open
+
 ## v0.2.117 - 2026-11-11 08:52
 
 - Glow party: each buddy gets a coloured halo (soft all party long, flaring on the beat)

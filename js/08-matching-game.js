@@ -224,7 +224,7 @@ function resumeMatchGrid(saved){
     front.style.background=`linear-gradient(135deg,hsl(${hue},60%,8%),hsl(${hue+40},70%,12%))`;
     front.style.borderColor=`hsl(${hue},60%,30%)`;
     front.style.fontSize='var(--mcard-font,1.6rem)';
-    front.textContent=cardData.pattern;
+    fillMatchFace(front,cardData.pattern);
     card.appendChild(back);card.appendChild(front);
     if(cardData.matched){
       card.classList.add('flipped','matched');
@@ -236,9 +236,24 @@ function resumeMatchGrid(saved){
     frag.appendChild(card);
     matchCardEls.push(card);
   });
-  grid.appendChild(frag);
+  grid.appendChild(frag);paintMatchFaces();
 }
 
+// Half the pairs are space & science pictures, half are alien buddies from your bunker
+function matchDeck(n){
+  const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+  if(typeof MATCH_ICONS==='undefined')return shuffle([...new Set(MATCH_PATTERNS)]).slice(0,n);
+  const owned=shuffle([...Array(Math.max(0,totalAliens)).keys()]),nb=Math.min(Math.floor(n/2),owned.length);
+  const icons=shuffle(MATCH_ICONS.slice()).slice(0,n-nb).map(k=>'i:'+k);
+  while(icons.length<n-nb)icons.push('i:'+MATCH_ICONS[icons.length%MATCH_ICONS.length]+'#'+icons.length); // never runs short
+  return shuffle(owned.slice(0,nb).map(i=>'b:'+i).concat(icons));
+}
+// A card face: drawn picture for 'i:'/'b:' patterns, old emoji (saved boards from before) as text
+function fillMatchFace(front,pattern){
+  if(/^[ib]:/.test(pattern)&&typeof drawMatchFace==='function'){front.textContent='';const cv=document.createElement('canvas');cv.className='match-face-art';front.appendChild(cv);front._art=pattern.split('#')[0];}
+  else front.textContent=pattern;
+}
+function paintMatchFaces(){requestAnimationFrame(()=>matchCardEls.forEach(c=>{const f=c.querySelector('.match-card-front'),cv=f&&f.querySelector('canvas');if(cv)drawMatchFace(cv,f._art);}));}
 function buildMatchGrid(){
   const grid=document.getElementById('matchGrid');
   grid.innerHTML='';
@@ -247,7 +262,7 @@ function buildMatchGrid(){
   document.getElementById('matchProgressBar').style.width='0%';
 
   // Pick patterns for this level
-  const pool=[...new Set(MATCH_PATTERNS)].sort(()=>Math.random()-.5).slice(0,matchTotalPairs); // Set removes accidental duplicates
+  const pool=matchDeck(matchTotalPairs);
   const cards=[...pool,...pool].sort(()=>Math.random()-.5);
 
   // Grid cols: 4 pairs=8 cards=4×2, 5=10=5×2, 6=12=4×3, 7=14=7×2, 8=16=4×4...
@@ -271,7 +286,7 @@ function buildMatchGrid(){
     front.style.background=`linear-gradient(135deg,hsl(${hue},60%,8%),hsl(${hue+40},70%,12%))`;
     front.style.borderColor=`hsl(${hue},60%,30%)`;
     front.style.fontSize='var(--mcard-font,1.6rem)';
-    front.textContent=pattern;
+    fillMatchFace(front,pattern);
 
     card.appendChild(back);card.appendChild(front);
     card.addEventListener('click',()=>onMatchCardClick(idx));
@@ -280,7 +295,7 @@ function buildMatchGrid(){
     matchFlipped.push(false);
     matchMatched.push(false);
   });
-  grid.appendChild(frag);
+  grid.appendChild(frag);paintMatchFaces();
 }
 
 // A wrong pair stays visible until its timer ends, but tapping any card ends it right away (no waiting)
@@ -484,3 +499,6 @@ addEventListener('resize',()=>{if(matchResizeRAF)return;matchResizeRAF=requestAn
   };
   new MutationObserver(upd).observe(mm,{attributes:true,attributeFilter:['style']});
 })();
+
+// card sizes change with the window: repaint the drawn faces to stay crisp
+let _mfT=0;addEventListener('resize',()=>{clearTimeout(_mfT);_mfT=setTimeout(()=>{if(matchCardEls.length&&document.body.classList.contains('match-open'))paintMatchFaces();},200);});

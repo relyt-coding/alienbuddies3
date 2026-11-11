@@ -2028,3 +2028,6 @@ body.desktop-mode.cockpit-open #cockpitView{display:flex;}
 #buddyDesigner .bd-row button{flex:1;padding:0 6px;}
 #buddyDesigner .bd-actions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;width:100%;}
 #buddyDesigner .bd-actions .bd-done{background:linear-gradient(180deg,#19e48a,#0aa865);color:#06281a;border-color:#3dffa8;}
+
+/* matching game: drawn card art (space & science pictures + alien buddies) */
+.match-face-art{width:90%;height:90%;display:block;pointer-events:none;}

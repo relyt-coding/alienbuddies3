@@ -4,7 +4,8 @@
 // drawBuddy(ctx, x, y, size, opts) draws the buddy centred at (x,y), about `size` px tall (same box as the old 👽 emoji).
 //   opts.view : 'front' | 'side'      opts.face : 1 (right) | -1 (left)  (side view)
 //   opts.run  : run phase in cycles (one cycle = two steps)               opts.air : true while jumping
-//   opts.t    : seconds, for idle sway / blinking                         opts.speed: 0..1, how far the antennae sweep back
+//   opts.t    : seconds, for idle sway / blinking (about every 15 s)
+//   opts.antenna: antenna length (default 1.35; use 1 for small previews like the bunker list)                         opts.speed: 0..1, how far the antennae sweep back
 // The fuzzy body is pre-rendered once per size, so each frame is one drawImage plus a few small shapes (fine on old iPhones).
 (function(){
   const BUDDIES={
@@ -131,14 +132,16 @@
     g.fillStyle='rgba(26,10,32,.33)';g.beginPath();g.ellipse(0,u*41-bob,u*30,u*3.6,0,0,Math.PI*2);g.fill();
     const before=[],after=[];
     // antennae: pipe cleaners from the top, arcing out and leaning back; when running they stream further back
-    [-1,1].forEach(sd=>{const P=[[8,-24,0,0],[10,-48,-6,.3],[30,-54,-12,.7],[34,-36,-16,1]].map(([x,y,z,w])=>rot(sd*x*u,y*u+(w===1?fl*sd:0),z*u-sweep*w));
+    const AL=o.antenna==null?1.35:o.antenna;
+    [-1,1].forEach(sd=>{const P=[[8,-24,0,0],[10,-48,-6,.3],[30,-54,-12,.7],[34,-36,-16,1]].map(([x,y,z,w])=>rot(sd*(8+(x-8)*AL)*u,(-24+(y+24)*AL)*u+(w===1?fl*sd:0),z*AL*u-sweep*w));
       P.forEach(q=>q.y+=q.z*FK);const f=()=>{stem(g,[P[0].x,P[0].y,P[1].x,P[1].y,P[2].x,P[2].y,P[3].x,P[3].y],u,B);tip(g,P[3].x,P[3].y,u,B,pulse);};
       (P[3].z>-u*4?after:before).push({z:P[3].z,f});});
     // barrel pony beads: eyes level and mirror-symmetric, mouth centred below; all stick out the same amount
-    const bead=(lx,ly,r,len,hole,col)=>{const lat=Math.asin(ly/R),lon=Math.asin(lx/(R*Math.cos(lat)));
+    const bead=(lx,ly,r,len,hole,col,blink)=>{const lat=Math.asin(ly/R),lon=Math.asin(lx/(R*Math.cos(lat)));
       const nx=Math.sin(lon)*Math.cos(lat),ny=Math.sin(lat),nz=Math.cos(lon)*Math.cos(lat),n=rot(nx,ny,nz),p=rot(nx*R*.93,ny*R*.93,nz*R*.93);
-      if(n.z<-.2)return;after.push({z:p.z+R,f:()=>barrelBead(g,{x:p.x,y:CY+p.y},n,r,len,hole,col)});};
-    bead(-u*11,-u*4,u*7,u*6,u*2.8,B.eye);bead(u*11,-u*4,u*7,u*6,u*2.8,B.eye);bead(0,u*12,u*5.6,u*5,u*2.2,B.mouth);
+      if(n.z<-.2)return;after.push({z:p.z+R,f:()=>{const by=CY+p.y;if(blink&&blink<1){g.save();g.translate(0,by);g.scale(1,blink);g.translate(0,-by);}barrelBead(g,{x:p.x,y:by},n,r,len,hole,col);if(blink&&blink<1)g.restore();}});};
+    const bk=(t+3)%15,blink=bk<.16?Math.max(.08,Math.abs(bk-.08)/.08):1;
+    bead(-u*11,-u*4,u*7,u*6,u*2.8,B.eye,blink);bead(u*11,-u*4,u*7,u*6,u*2.8,B.eye,blink);bead(0,u*12,u*5.6,u*5,u*2.2,B.mouth);
     before.sort((a,b)=>a.z-b.z).forEach(d=>d.f());
     feet(g,u,B,th,step,1);
     g.save();g.translate(0,CY);g.rotate(lean);g.translate(0,-CY);

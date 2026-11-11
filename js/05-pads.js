@@ -486,6 +486,7 @@ function padTapTime(ev){
 function firePad(idx,ev){
   const sndId=padSounds[idx];if(!sndId)return;
   getCtx();playSound(sndId,undefined,padTapTime(ev));
+  window._lastPadHit=performance.now();   // floating buddies hold still while you drum
   if(typeof addSeqEnergy==='function')addSeqEnergy(SEQ_ENERGY_PER_TAP); // every pad hit recharges the sequencer energy meter
   const el=padEls[idx];
   el.classList.remove('lit');void el.offsetWidth;el.classList.add('lit');

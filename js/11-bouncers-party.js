@@ -8,7 +8,7 @@ const bouncers=[];
 
 // ── Adaptive bouncer cap based on device FPS ──
 const BOUNCER_CAP_MAX=IS_MOBILE_DEVICE?15:30;
-const BOUNCER_CAP_MIN=IS_MOBILE_DEVICE?3:5;
+const BOUNCER_CAP_MIN=BOUNCER_CAP_MAX;   // aliens are never removed for speed any more (see _buddyCalm)
 let adaptiveBouncerCap=BOUNCER_CAP_MAX;
 
 let _adaptiveFPSActive=false; // only measure after game starts
@@ -75,17 +75,9 @@ window.addEventListener('pagehide',()=>{if(activeSlot>=0)autoSave();});
         const avgDt=frameTimes.reduce((a,b)=>a+b,0)/frameTimes.length;
         const fps=1000/avgDt;
 
-        if(fps<FPS_DROP){
-          // Laggy — reduce cap and prune excess bouncers cleanly
-          adaptiveBouncerCap=Math.max(BOUNCER_CAP_MIN,adaptiveBouncerCap-REDUCE_BY);
-          while(!(v5Settings&&v5Settings.moreAliens)&&bouncers.length>adaptiveBouncerCap){
-            const b=bouncers.splice(bouncers.length-1,1)[0];
-            if(b&&b.el&&b.el.parentNode)b.el.parentNode.removeChild(b.el);
-          }
-        } else if(fps>FPS_GOOD&&adaptiveBouncerCap<BOUNCER_CAP_MAX){
-          // Running well — gradually restore cap
-          adaptiveBouncerCap=Math.min(BOUNCER_CAP_MAX,adaptiveBouncerCap+RESTORE_BY);
-        }
+        // Laggy: keep every alien, but stop redrawing their slow tumble until frames recover (they still float about)
+        if(fps<FPS_DROP)window._buddyCalm=true;
+        else if(fps>FPS_GOOD)window._buddyCalm=false;
       }
     } else {
       // Reset measurement state while idle so we start fresh
@@ -101,7 +93,7 @@ const alienLayer=document.getElementById('alienLayer');
 function getAlienColor(idx){if(typeof buddyLook==='function')return buddyLook(idx).accent;return ALIEN_OUTLINE_COLORS[idx%ALIEN_OUTLINE_COLORS.length];}
 // ── floating buddy sprites: each bouncer is a small canvas showing its 3D buddy, slowly turning while it floats ──
 // Zero gravity: each buddy tumbles slowly around its own random axis (any direction, not just turning on the spot)
-const BUDDY_W=78,BUDDY_H=78,BUDDY_SIZE=54,BUDDY_BOX=52,BUDDY_DPR=Math.min(2,window.devicePixelRatio||1);
+const BUDDY_W=78,BUDDY_H=78,BUDDY_SIZE=54,BUDDY_BOX=52,BUDDY_DPR=Math.min(IS_MOBILE_DEVICE?1.5:2,window.devicePixelRatio||1);
 const BUDDY_SPIN=[3,7];      // degrees per second (slow drift); each buddy gets its own speed and axis
 const BUDDY_STEP=2.5;        // redraw a buddy once it has turned this many degrees
 function paintBouncerBuddy(b){
@@ -256,11 +248,12 @@ addEventListener('resize',()=>{_bbCache=null;});
   if(document.getElementById('buddyDesigner')&&document.getElementById('buddyDesigner').classList.contains('open')){tickBouncers._t=now;return;}
   const bounds=cachedBouncerBounds(now||performance.now());
   const tnow=now||performance.now(),bdt=Math.min(.1,(tnow-(tickBouncers._t||tnow))/1000);tickBouncers._t=tnow;
+  const mv=bdt>0?Math.min(4,bdt*60):1;   // velocities are in px per 60fps-frame
   // party styles (js/36-party-modes.js) choreograph the aliens instead of free bouncing
   if(partyMode&&typeof partyChoreo==='function'&&partyChoreo(now||performance.now(),bounds)){genRunFrames(document.body.classList.contains('desktop-mode')?6:(bdt>.028?1:2));return;}
   const minX=bounds.x,minY=bounds.y,maxX=bounds.x+bounds.w,maxY=bounds.y+bounds.h;
   for(const b of bouncers){
-    b.x+=b.vx;b.y+=b.vy;
+    b.x+=b.vx*mv;b.y+=b.vy*mv;   // time-based: same speed whatever the frame rate
     if(b.x<=minX){b.x=minX;b.vx=Math.abs(b.vx);}
     if(b.y<=minY){b.y=minY;b.vy=Math.abs(b.vy);}
     if(b.x>=maxX-b.sz){b.x=maxX-b.sz;b.vx=-Math.abs(b.vx);}
@@ -271,6 +264,8 @@ addEventListener('resize',()=>{_bbCache=null;});
   }
   // repaint the buddies that have turned the furthest, a few per frame
   let budget=document.body.classList.contains('desktop-mode')?6:(bouncers.length>12?1:2);
+  // while you're drumming (or the game is lagging) the buddies keep floating but hold their pose
+  if(window._buddyCalm||tnow-(window._lastPadHit||0)<900)budget=0;
   if(bdt>.028&&(tickBouncers._slow=!tickBouncers._slow))budget=0;   // a slow frame: skip every other repaint
   let due=bouncers.filter(b=>{if(!b.m)return false;const d=b._drawnM?buddyTumble.diff(b.m,b._drawnM):999;b._due=d;return d>=BUDDY_STEP;});
   if(due.length>budget)due.sort((a,b)=>b._due-a._due).length=budget;
@@ -324,3 +319,24 @@ function partyPulseOnBeat(id,trackIdx,vel){
 }
 partyBtn.addEventListener('click',toggleParty);
 partyBtn.addEventListener('touchend',e=>{e.preventDefault();toggleParty();});
+
+// ── watchdog: every 5 seconds, put back any alien that should be on screen but isn't ──
+setInterval(()=>{
+  try{
+    if(document.hidden||typeof activeSlot==='undefined'||activeSlot<0||!showBouncers)return;
+    if(!document.body.classList.contains('game-active'))return;
+    syncBouncers();                                         // missing ones respawn, extra ones go
+    const B=getBouncerBounds();
+    bouncers.forEach(b=>{
+      if(!b.el.isConnected)alienLayer.appendChild(b.el);
+      if(b.el.style.display==='none')b.el.style.display='';
+      if(b.el.style.opacity==='0')b.el.style.opacity='';
+      // lost off-screen (or a broken position): bring it back inside
+      if(!isFinite(b.x)||!isFinite(b.y)||b.x<B.x-60||b.x>B.x+B.w+60||b.y<B.y-60||b.y>B.y+B.h+60){
+        b.x=B.x+Math.random()*Math.max(1,B.w-b.sz);b.y=B.y+Math.random()*Math.max(1,B.h-b.sz);}
+      if(!isFinite(b.vx)||!isFinite(b.vy)||(!partyMode&&Math.hypot(b.vx,b.vy)<.05)){const a=Math.random()*Math.PI*2;b.vx=Math.cos(a)*.5;b.vy=Math.sin(a)*.5;}
+      if(!b.m&&typeof buddyTumble!=='undefined')Object.assign(b,newTumble());
+      if(!b._pose&&!b._drawnM)paintBouncerBuddy(b);         // never drawn: draw it now
+    });
+  }catch(e){}
+},5000);

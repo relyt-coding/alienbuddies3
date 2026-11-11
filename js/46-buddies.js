@@ -32,30 +32,47 @@
     for(let i=0;i<40;i++){const a=i/40*Math.PI*2+r()*.15,d=R*(.86+r()*.08),tr=R*(.11+r()*.06),lit=Math.cos(a+2.3);   // tufts facing the light are lighter
       g.fillStyle=lit>.35?B.fur[1]:lit>-.4?B.fur[2]:B.fur[3];g.beginPath();g.arc(cx+Math.cos(a)*d,cy+Math.sin(a)*d,tr,0,Math.PI*2);g.fill();}
     g.fillStyle=bg;g.beginPath();g.arc(cx,cy,R*.84,0,Math.PI*2);g.fill();
-    // little fibres so it reads as fluffy, not a flat ball
+    // stray yarn fibres poking out all round the outline, so the edge reads as yarn rather than a bumpy ball
     g.lineCap='round';
-    for(let i=0;i<150;i++){const a=r()*Math.PI*2,d=Math.sqrt(r())*R*.95,x=cx+Math.cos(a)*d,y=cy+Math.sin(a)*d,l=R*(.05+r()*.06),aa=a+(r()-.5)*1.2,lit=(cx-x)+(cy-y)>R*.3;
-      g.strokeStyle=lit?(r()<.5?B.furLight:B.fur[1]):(r()<.5?B.fur[3]:B.furDark);g.globalAlpha=.55;g.lineWidth=Math.max(1,R*.025);
-      g.beginPath();g.moveTo(x,y);g.lineTo(x+Math.cos(aa)*l,y+Math.sin(aa)*l);g.stroke();}
+    for(let i=0;i<240;i++){const a=r()*Math.PI*2,d=R*(.9+r()*.12),l=R*(.06+r()*.13),aa=a+(r()-.5)*.9,bend=(r()-.5)*.6,lit=Math.cos(a+2.3);
+      const x=cx+Math.cos(a)*d,y=cy+Math.sin(a)*d,mx=x+Math.cos(aa)*l*.5+Math.cos(aa+1.57)*l*bend,my=y+Math.sin(aa)*l*.5+Math.sin(aa+1.57)*l*bend;
+      g.strokeStyle=lit>.4?(r()<.5?B.furLight:B.fur[1]):lit>-.3?B.fur[2]:(r()<.5?B.fur[3]:B.furDark);g.globalAlpha=.75;g.lineWidth=Math.max(.7,R*(.012+r()*.012));
+      g.beginPath();g.moveTo(x,y);g.quadraticCurveTo(mx,my,x+Math.cos(aa)*l,y+Math.sin(aa)*l);g.stroke();}
     g.globalAlpha=1;
     const sh=g.createRadialGradient(cx-R*.38,cy-R*.42,0,cx-R*.38,cy-R*.42,R*.45);sh.addColorStop(0,'rgba(255,255,255,.45)');sh.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=sh;g.beginPath();g.arc(cx-R*.38,cy-R*.42,R*.45,0,Math.PI*2);g.fill();
     cache[key]=c;return c;
   }
-  const grad=(g,x,y,r,col)=>{const k=g.createRadialGradient(x-r*.35,y-r*.4,r*.05,x,y,r);k.addColorStop(0,col[0]);k.addColorStop(.45,col[1]);k.addColorStop(1,col[2]);return k;};
-  // pipe cleaner: a fuzzy yellow wire (thick dark pass, light pass, little fluff dots)
-  function stem(g,pts,u,B){
-    g.lineCap='round';g.lineJoin='round';
-    const path=()=>{g.beginPath();g.moveTo(pts[0],pts[1]);g.bezierCurveTo(pts[2],pts[3],pts[4],pts[5],pts[6],pts[7]);};
-    g.strokeStyle=B.stem[2];g.lineWidth=u*5.2;path();g.stroke();
-    g.strokeStyle=B.stem[1];g.lineWidth=u*3.6;path();g.stroke();
-    g.setLineDash([u*1.2,u*2.2]);g.strokeStyle=B.stem[0];g.lineWidth=u*2;path();g.stroke();g.setLineDash([]);
+  const FIB=(()=>{const r=rnd(11),L=[];for(let i=0;i<260;i++){const zz=r()*2-1,a=r()*Math.PI*2,q=Math.sqrt(1-zz*zz),v=[q*Math.cos(a),zz,q*Math.sin(a)];
+      // random tangent direction at v
+      let t=[r()-.5,r()-.5,r()-.5],dt=t[0]*v[0]+t[1]*v[1]+t[2]*v[2];t=[t[0]-dt*v[0],t[1]-dt*v[1],t[2]-dt*v[2]];const tl=Math.hypot(...t)||1;
+      L.push({v,t:t.map(c=>c/tl),l:.035+r()*.05,k:r()});}return L;})();
+  const LIGHT=(()=>{const l=[-.5,-.6,.62],n=Math.hypot(...l);return l.map(c=>c/n);})();
+  function furFibres(g,B,R,CY,rot){
+    const bucket=[[],[],[],[]];
+    FIB.forEach(f=>{const p=rot(f.v[0],f.v[1],f.v[2]);if(p.z<.08)return;const tt=rot(f.t[0],f.t[1],f.t[2]);
+      const lit=p.x*LIGHT[0]+p.y*LIGHT[1]+p.z*LIGHT[2]+(f.k-.5)*.3,b=lit>.55?0:lit>.15?1:lit>-.2?2:3,rr=R*.93;
+      bucket[b].push([p.x*rr,CY+p.y*rr,(p.x+tt.x*f.l)*rr,CY+(p.y+tt.y*f.l)*rr]);});
+    const cols=[B.furLight,B.fur[1],B.fur[3],B.furDark];g.lineCap='round';g.lineWidth=Math.max(.6,R*.016);g.globalAlpha=.42;
+    bucket.forEach((L,i)=>{if(!L.length)return;g.strokeStyle=cols[i];g.beginPath();L.forEach(q=>{g.moveTo(q[0],q[1]);g.lineTo(q[2],q[3]);});g.stroke();});
+    g.globalAlpha=1;
   }
+  const grad=(g,x,y,r,col)=>{const k=g.createRadialGradient(x-r*.35,y-r*.4,r*.05,x,y,r);k.addColorStop(0,col[0]);k.addColorStop(.45,col[1]);k.addColorStop(1,col[2]);return k;};
   function stemRun(g,pts,u,B,off){
     g.lineCap='round';g.lineJoin='round';
     const path=()=>{g.beginPath();pts.forEach((q,i)=>i?g.lineTo(q.x,q.y):g.moveTo(q.x,q.y));};
     g.strokeStyle=B.stem[2];g.lineWidth=u*5.2;path();g.stroke();
     g.strokeStyle=B.stem[1];g.lineWidth=u*3.6;path();g.stroke();
-    g.setLineDash([u*1.2,u*2.2]);g.lineDashOffset=-off;g.strokeStyle=B.stem[0];g.lineWidth=u*2;path();g.stroke();g.setLineDash([]);g.lineDashOffset=0;
+    // twisted wire: diagonal bristle ticks spaced evenly along the whole length (off = length already drawn before this run)
+    const sp=u*2.1;g.strokeStyle=B.stem[0];g.lineWidth=Math.max(.6,u*1);g.beginPath();
+    for(let i=1;i<pts.length;i++){const A=pts[i-1],C=pts[i],dx=C.x-A.x,dy=C.y-A.y,L=Math.hypot(dx,dy)||1,tx=dx/L,ty=dy/L,nx=-ty,ny=tx;
+      for(let s0=Math.ceil(A.len/sp)*sp;s0<C.len;s0+=sp){const k=(s0-A.len)/(C.len-A.len||1),x=A.x+dx*k,y=A.y+dy*k;
+        g.moveTo(x-nx*u*1.7-tx*u*1,y-ny*u*1.7-ty*u*1);g.lineTo(x+nx*u*1.7+tx*u*1,y+ny*u*1.7+ty*u*1);}}
+    g.stroke();
+    // a few stray bristles catching the light along the outside
+    g.strokeStyle='rgba(255,250,200,.7)';g.lineWidth=Math.max(.5,u*.5);g.beginPath();
+    for(let i=1;i<pts.length;i+=2){const A=pts[i-1],C=pts[i],dx=C.x-A.x,dy=C.y-A.y,L=Math.hypot(dx,dy)||1,nx=-dy/L,ny=dx/L,sd=(i%4<2)?1:-1;
+      g.moveTo(C.x+nx*u*2.4*sd,C.y+ny*u*2.4*sd);g.lineTo(C.x+nx*u*3.6*sd+dx/L*u,C.y+ny*u*3.6*sd+dy/L*u);}
+    g.stroke();
   }
   function tip(g,x,y,u,B,pulse){
     const hr=u*(13+pulse*5),h=g.createRadialGradient(x,y,u*2,x,y,hr);h.addColorStop(0,'rgba(255,170,90,.75)');h.addColorStop(1,'rgba(255,138,61,0)');g.fillStyle=h;g.beginPath();g.arc(x,y,hr,0,Math.PI*2);g.fill();
@@ -72,28 +89,46 @@
     P.push([fw*.62,u*1]);
     for(let i=0;i<=10;i++){const f=i/10*Math.PI;P.push([fw*Math.cos(f),zf+(zt-zf)*Math.sin(f)]);}              // wide rounded front
     P.push([-fw*.62,u*1]);
-    const pr=P.map(([x,z])=>{const X=x*c+z*sn,Z=-x*sn+z*c;let px=X,py=Z*FK;
-      if(o.pitch){const cp=Math.cos(o.pitch),sp=Math.sin(o.pitch),q=px;px=q*cp-py*sp;py=q*sp+py*cp;}return[cx+px,cy+py];});
+    const proj=(x,z)=>{const X=x*c+z*sn,Z=-x*sn+z*c;let px=X,py=Z*FK;
+      if(o.pitch){const cp=Math.cos(o.pitch),sp=Math.sin(o.pitch),q=px;px=q*cp-py*sp;py=q*sp+py*cp;}return[cx+px,cy+py];};
+    const pr=P.map(([x,z])=>proj(x,z));
     const path=dy=>{g.beginPath();pr.forEach(([x,y],i)=>i?g.lineTo(x,y+dy):g.moveTo(x,y+dy));g.closePath();};
     // the stick's edge (thickness), then the lit top face with a soft rim highlight
     g.fillStyle=B.foot[2];for(let k=7;k>=1;k--){path(TH*k/7);g.fill();}
     const top=g.createLinearGradient(cx,cy-u*6,cx,cy+u*6);top.addColorStop(0,o.dark?B.foot[1]:B.foot[0]);top.addColorStop(1,o.dark?B.foot[2]:B.foot[1]);
     g.fillStyle=top;path(0);g.fill();
-    g.strokeStyle='rgba(255,255,255,'+(o.dark?.12:.35)+')';g.lineWidth=Math.max(.6,u*.9);path(0);g.stroke();
+    g.save();path(0);g.clip();
+    // faint wood grain under the paint, running along the stick
+    g.strokeStyle='rgba(8,40,80,.12)';g.lineWidth=Math.max(.5,u*.45);g.beginPath();
+    [-4.6,-.6,3.6].forEach((gx,j)=>{for(let z=zh-hw,i=0;z<=zt;z+=u*2.5,i++){const w=Math.sin(z/u*.32+j*1.7)*u*.7+(j===2?Math.sin(z/u*.9)*u*.6:0),q=proj(gx*u+w,z);i?g.lineTo(q[0],q[1]):g.moveTo(q[0],q[1]);}});
+    g.stroke();
+    // contact shadow: soft dark band where the pom presses down on the stick
+    if(o.contact){const k=g.createRadialGradient(o.contact.x,o.contact.y,u*4,o.contact.x,o.contact.y,u*21);k.addColorStop(0,'rgba(26,10,32,.6)');k.addColorStop(.6,'rgba(26,10,32,.3)');k.addColorStop(1,'rgba(26,10,32,0)');g.fillStyle=k;g.fillRect(cx-u*40,cy-u*20,u*80,u*40);}
+    g.restore();
+    // rounded top edge: a bright rim, plus a softer inner bevel
+    g.strokeStyle='rgba(255,255,255,'+(o.dark?.12:.4)+')';g.lineWidth=Math.max(.6,u*.9);path(0);g.stroke();
+    g.strokeStyle='rgba(255,255,255,'+(o.dark?.05:.15)+')';g.lineWidth=Math.max(.6,u*1.6);path(u*.9);g.stroke();
   }
   // barrel pony bead glued to the pom: a short glossy cylinder whose hole runs along the surface normal n (3D, view space).
   // p = screen point where the bead meets the fluff; it sticks out along n by `len`.
-  function barrelBead(g,p,n,r,len,hole,col){
+  function barrelBead(g,p,n,r,len,hole,col,B,mat,seed){
     const d=Math.hypot(n.x,n.y),ax=d>1e-4?n.x/d:0,ay=d>1e-4?n.y/d:0,mx=-ay,my=ax;   // screen axis + the end ellipse's long axis
     const sq=Math.max(.06,Math.abs(n.z)),ang=Math.atan2(my,mx);
     const c0={x:p.x,y:p.y},c1={x:p.x+n.x*len,y:p.y+n.y*len};                       // back and front end centres
     // barrel wall: the two end ellipses joined, shaded across its width (light from the top-left)
     const wall=g.createLinearGradient(c1.x+mx*r,c1.y+my*r,c1.x-mx*r,c1.y-my*r);
     const lit=(mx*-1+my*-1)>0;wall.addColorStop(0,lit?col[0]:col[2]);wall.addColorStop(.5,col[1]);wall.addColorStop(1,lit?col[2]:col[0]);
-    g.fillStyle='rgba(26,10,32,.35)';g.beginPath();g.ellipse(c0.x+u0*.6,c0.y+u0,r*1.05,r*1.05*sq,ang,0,Math.PI*2);g.fill();
+    // glue seat: a soft dark dip in the fluff around the bead's base
+    g.save();g.translate(c0.x,c0.y);g.rotate(ang);g.scale(1,sq);const gs=g.createRadialGradient(0,0,r*.6,0,0,r*1.55);gs.addColorStop(0,'rgba(26,10,32,.6)');gs.addColorStop(1,'rgba(26,10,32,0)');
+    g.fillStyle=gs;g.beginPath();g.arc(0,0,r*1.55,0,Math.PI*2);g.fill();g.restore();
     g.fillStyle=wall;g.beginPath();g.ellipse(c0.x,c0.y,r,r*sq,ang,0,Math.PI*2);g.fill();
     g.beginPath();g.moveTo(c0.x+mx*r,c0.y+my*r);g.lineTo(c1.x+mx*r,c1.y+my*r);g.lineTo(c1.x-mx*r,c1.y-my*r);g.lineTo(c0.x-mx*r,c0.y-my*r);g.closePath();g.fill();
-    if(d>.15){g.strokeStyle='rgba(255,255,255,.55)';g.lineCap='round';g.lineWidth=r*.18;const o=lit?.55:-.55;   // shine running along the barrel
+    // fluff tufts curling up over the base of the bead
+    {const rr=rnd(seed||3);g.lineCap='round';g.lineWidth=Math.max(.5,r*.07);
+      for(let i=0;i<26;i++){const a=i/26*Math.PI*2+rr()*.25,ca=Math.cos(a),sa=Math.sin(a),o1=1.08+rr()*.12,o2=.9+rr()*.06;
+        const ex=c0.x+(mx*ca*r+ax*sa*r*sq)*o1,ey=c0.y+(my*ca*r+ay*sa*r*sq)*o1,ix=c0.x+(mx*ca*r+ax*sa*r*sq)*o2+n.x*len*.08,iy=c0.y+(my*ca*r+ay*sa*r*sq)*o2+n.y*len*.08;
+        g.strokeStyle=ey<c0.y-r*.3?B.fur[1]:B.fur[2];g.globalAlpha=.55;g.beginPath();g.moveTo(ex,ey);g.lineTo(ix,iy);g.stroke();}g.globalAlpha=1;}
+    if(d>.15){g.strokeStyle='rgba(255,255,255,'+(mat==='glass'?.6:.4)+')';g.lineCap='round';g.lineWidth=r*.18;const o=lit?.55:-.55;   // shine running along the barrel
       g.beginPath();g.moveTo(c0.x+mx*r*o+ax*r*.15,c0.y+my*r*o+ay*r*.15);g.lineTo(c1.x+mx*r*o-ax*r*.1,c1.y+my*r*o-ay*r*.1);g.stroke();}
     if(n.z<-.02)return;                                                             // end face turned away
     // front end: glossy ring, black hole with a sliver of inner wall, iridescent sheen, highlight + sparkle
@@ -101,10 +136,14 @@
     const k=g.createRadialGradient(-r*.35,-r*.4,r*.05,0,0,r);k.addColorStop(0,col[0]);k.addColorStop(.55,col[1]);k.addColorStop(1,col[2]);
     g.fillStyle=k;g.beginPath();g.arc(0,0,r,0,Math.PI*2);g.fill();
     const ir=g.createLinearGradient(-r,-r,r,r);ir.addColorStop(0,'rgba(255,140,220,.22)');ir.addColorStop(.5,'rgba(255,255,255,0)');ir.addColorStop(1,'rgba(120,200,255,.2)');g.fillStyle=ir;g.beginPath();g.arc(0,0,r,0,Math.PI*2);g.fill();
+    if(mat==='glass'){   // translucent: light passes through and glows on the side away from the light, the middle reads deeper
+      const tl=g.createRadialGradient(r*.42,r*.45,0,r*.42,r*.45,r*.75);tl.addColorStop(0,'rgba(255,190,170,.75)');tl.addColorStop(1,'rgba(255,120,120,0)');g.fillStyle=tl;g.beginPath();g.arc(0,0,r,0,Math.PI*2);g.fill();
+      const dp=g.createRadialGradient(0,0,hole,0,0,r*.8);dp.addColorStop(0,'rgba(90,0,10,.55)');dp.addColorStop(1,'rgba(90,0,10,0)');g.fillStyle=dp;g.beginPath();g.arc(0,0,r,0,Math.PI*2);g.fill();}
     g.fillStyle='#000';g.beginPath();g.arc(0,0,hole,0,Math.PI*2);g.fill();
     g.save();g.beginPath();g.arc(0,0,hole,0,Math.PI*2);g.clip();g.fillStyle=col[2];g.globalAlpha=.8*(1-sq);g.beginPath();g.arc(-hole*1.1,0,hole,0,Math.PI*2);g.fill();g.restore();
-    g.strokeStyle='rgba(255,255,255,.85)';g.lineWidth=r*.15;g.lineCap='round';g.beginPath();g.arc(0,0,(r+hole)/2,Math.PI*1.08,Math.PI*1.45);g.stroke();
-    g.strokeStyle='rgba(255,255,255,.3)';g.lineWidth=r*.1;g.beginPath();g.arc(0,0,(r+hole)/2,Math.PI*.1,Math.PI*.38);g.stroke();
+    g.strokeStyle='rgba(255,255,255,'+(mat==='glass'?.9:.55)+')';g.lineWidth=r*(mat==='glass'?.15:.2);g.lineCap='round';g.beginPath();g.arc(0,0,(r+hole)/2,Math.PI*1.08,Math.PI*1.45);g.stroke();
+    if(mat==='glass'){g.fillStyle='#fff';g.beginPath();g.arc(-r*.2,-r*.72,Math.max(.6,r*.08),0,Math.PI*2);g.fill();}
+    g.strokeStyle='rgba(255,255,255,'+(mat==='glass'?.3:.18)+')';g.lineWidth=r*.1;g.beginPath();g.arc(0,0,(r+hole)/2,Math.PI*.1,Math.PI*.38);g.stroke();
     g.restore();
   }
   let u0=1;
@@ -120,7 +159,7 @@
     const c=Math.cos(th),sn=Math.sin(th),L=[];
     [-1,1].forEach(sd=>{const mx=sd*u*13,mz=u*2,X=mx*c+mz*sn,Z=-mx*sn+mz*c,st=step?step(sd):{x:0,y:0,a:0};
       L.push({z:Z,f:()=>{if(pass===2){g.save();frontClip(g,u,u*35+st.y);}
-        duckFoot(g,X+st.x,u*35+Z*FK+st.y,th+sd*.14,u,B,{pitch:st.a,dark:Math.abs(sn)>.2&&Z<0});
+        duckFoot(g,X+st.x,u*35+Z*FK+st.y,th+sd*.14,u,B,{pitch:st.a,dark:Math.abs(sn)>.2&&Z<0,contact:{x:0,y:u*33.5}});
         if(pass===2)g.restore();}});});
     L.sort((a,b)=>a.z-b.z).forEach(d=>d.f());
   }
@@ -137,7 +176,7 @@
     const sweep=run?u*(12+8*sp)+Math.sin(ph*2)*u*2*sp:0,fl=Math.sin(t*3)*u*(run?1:.5);
     g.save();g.translate(0,bob);
     g.fillStyle='rgba(26,10,32,.33)';g.beginPath();g.ellipse(0,u*41-bob,u*30,u*3.6,0,0,Math.PI*2);g.fill();
-    const before=[],after=[];
+    const before=[],after=[],tips=[];
     // antennae: pipe cleaners from the top, arcing out and leaning back; when running they stream further back
     const AL=o.antenna==null?1.35:o.antenna,RS=u*30;
     // is a 3D point (screen x,y + depth z) in front of the pom? outside its outline, or nearer than its surface there
@@ -153,20 +192,35 @@
       for(let i=1;i<S.length;i++){const A=S[i-1],C=S[i],f=inFront({x:(A.x+C.x)/2,y:(A.y+C.y)/2,z:(A.z+C.z)/2});
         if(!cur||cur.f!==f){cur={f,pts:[A]};const run=cur;(f?after:before).push({z:A.z,f:()=>stemRun(g,run.pts,u,B,run.pts[0].len)});}
         cur.pts.push(C);}
-      const T=S[S.length-1];(inFront(T)?after:before).push({z:T.z+1,f:()=>tip(g,T.x,T.y,u,B,pulse)});});
+      // the wire pushes into the bead: the bead sits a little past the wire's end, along its direction
+      const T=S[S.length-1],T2=S[S.length-3],tl=Math.hypot(T.x-T2.x,T.y-T2.y)||1,bx=T.x+(T.x-T2.x)/tl*u*3,by=T.y+(T.y-T2.y)/tl*u*3;
+      tips.push({x:bx,y:by,z:T.z});
+      (inFront(T)?after:before).push({z:T.z+1,f:()=>tip(g,bx,by,u,B,pulse)});
+      // root tuft: fluff hugging the pipe cleaner where it's pushed into the pom
+      const R0=S[0],R1=S[2],rf=inFront({x:(R0.x+R1.x)/2,y:(R0.y+R1.y)/2,z:(R0.z+R1.z)/2});
+      (rf?after:before).push({z:R0.z+.5,f:()=>{const rr=rnd(sd>0?21:23);g.fillStyle='rgba(26,10,32,.35)';g.beginPath();g.ellipse(R0.x,R0.y+u*.8,u*4.2,u*2,0,0,Math.PI*2);g.fill();
+        g.lineCap='round';g.lineWidth=Math.max(.6,u*.8);for(let i=0;i<11;i++){const a=Math.PI+i/10*Math.PI+(rr()-.5)*.3,l=u*(2.4+rr()*2.4);
+          g.strokeStyle=i<5?B.fur[1]:rr()<.5?B.fur[0]:B.fur[2];g.beginPath();g.moveTo(R0.x+Math.cos(a)*u*3.2,R0.y+u*1.4+Math.sin(a)*u*.8);g.lineTo(R0.x+Math.cos(a)*u*1.2,R0.y+u*1.2-l*.6);g.stroke();}}});});
     // barrel pony beads: eyes level and mirror-symmetric, mouth centred below; all stick out the same amount
-    const bead=(lx,ly,r,len,hole,col,blink)=>{const lat=Math.asin(ly/R),lon=Math.asin(lx/(R*Math.cos(lat)));
+    const bead=(lx,ly,r,len,hole,col,blink,mat,seed)=>{const lat=Math.asin(ly/R),lon=Math.asin(lx/(R*Math.cos(lat)));
       const nx=Math.sin(lon)*Math.cos(lat),ny=Math.sin(lat),nz=Math.cos(lon)*Math.cos(lat),n=rot(nx,ny,nz),p=rot(nx*R*.93,ny*R*.93,nz*R*.93);
-      if(n.z<-.75)return;(p.z>-u*2?after:before).push({z:p.z+R,f:()=>{const by=CY+p.y;if(blink&&blink<1){g.save();g.translate(0,by);g.scale(1,blink);g.translate(0,-by);}barrelBead(g,{x:p.x,y:by},n,r,len,hole,col);if(blink&&blink<1)g.restore();}});};
+      if(n.z<-.75)return;(p.z>-u*2?after:before).push({z:p.z+R,f:()=>{const by=CY+p.y;if(blink&&blink<1){g.save();g.translate(0,by);g.scale(1,blink);g.translate(0,-by);}barrelBead(g,{x:p.x,y:by},n,r,len,hole,col,B,mat,seed);if(blink&&blink<1)g.restore();}});};
     const bk=(t+3)%15,blink=bk<.16?Math.max(.08,Math.abs(bk-.08)/.08):1;
-    bead(-u*11,-u*4,u*7,u*6,u*2.8,B.eye,blink);bead(u*11,-u*4,u*7,u*6,u*2.8,B.eye,blink);bead(0,u*12,u*5.6,u*5,u*2.2,B.mouth);
+    bead(-u*11,-u*4,u*7,u*6,u*2.8,B.eye,blink,'glass',3);bead(u*11,-u*4,u*7,u*6,u*2.8,B.eye,blink,'glass',5);bead(0,u*12,u*5.6,u*5,u*2.2,B.mouth,1,'opaque',8);
     feet(g,u,B,th,step,1);
     g.save();g.translate(0,CY);g.rotate(lean);g.translate(0,-CY);
+    // squish: the pom flattens a little where it rests on its feet (anchored at the contact point)
+    const SQY=u*33;g.translate(0,SQY);g.scale(1.04,.95);g.translate(0,-SQY);
     before.sort((a,b)=>a.z-b.z).forEach(d=>d.f());
     const ball=furBall(B,Math.max(16,Math.round(u*50)));g.drawImage(ball,-u*50,-u*50+u*2,u*100,u*100);
+    furFibres(g,B,R,CY,rot);
+    // the glowing tip beads cast a warm light on the top of the fluff
+    g.save();g.beginPath();g.arc(0,CY,R*1.02,0,Math.PI*2);g.clip();g.globalCompositeOperation='lighter';
+    tips.forEach(T=>{if(T.z<-R*.5)return;const a=(.16+pulse*.1)*Math.min(1,(T.z+R*.5)/(R*.5)),k=g.createRadialGradient(T.x,T.y,u*4,T.x,T.y,u*34);k.addColorStop(0,'rgba(255,150,70,'+a+')');k.addColorStop(1,'rgba(255,150,70,0)');g.fillStyle=k;g.fillRect(T.x-u*34,T.y-u*34,u*68,u*68);});
+    g.restore();
     g.restore();
     feet(g,u,B,th,step,2);
-    g.save();g.translate(0,CY);g.rotate(lean);g.translate(0,-CY);
+    g.save();g.translate(0,CY);g.rotate(lean);g.translate(0,-CY);g.translate(0,SQY);g.scale(1.04,.95);g.translate(0,-SQY);
     after.sort((a,b)=>a.z-b.z).forEach(d=>d.f());
     g.restore();g.restore();
   }

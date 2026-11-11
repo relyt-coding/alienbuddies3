@@ -32,13 +32,6 @@
     for(let i=0;i<40;i++){const a=i/40*Math.PI*2+r()*.15,d=R*(.86+r()*.08),tr=R*(.11+r()*.06),lit=Math.cos(a+2.3);   // tufts facing the light are lighter
       g.fillStyle=lit>.35?B.fur[1]:lit>-.4?B.fur[2]:B.fur[3];g.beginPath();g.arc(cx+Math.cos(a)*d,cy+Math.sin(a)*d,tr,0,Math.PI*2);g.fill();}
     g.fillStyle=bg;g.beginPath();g.arc(cx,cy,R*.84,0,Math.PI*2);g.fill();
-    // stray yarn fibres poking out all round the outline, so the edge reads as yarn rather than a bumpy ball
-    g.lineCap='round';
-    for(let i=0;i<240;i++){const a=r()*Math.PI*2,d=R*(.9+r()*.12),l=R*(.06+r()*.13),aa=a+(r()-.5)*.9,bend=(r()-.5)*.6,lit=Math.cos(a+2.3);
-      const x=cx+Math.cos(a)*d,y=cy+Math.sin(a)*d,mx=x+Math.cos(aa)*l*.5+Math.cos(aa+1.57)*l*bend,my=y+Math.sin(aa)*l*.5+Math.sin(aa+1.57)*l*bend;
-      g.strokeStyle=lit>.4?(r()<.5?B.furLight:B.fur[1]):lit>-.3?B.fur[2]:(r()<.5?B.fur[3]:B.furDark);g.globalAlpha=.75;g.lineWidth=Math.max(.7,R*(.012+r()*.012));
-      g.beginPath();g.moveTo(x,y);g.quadraticCurveTo(mx,my,x+Math.cos(aa)*l,y+Math.sin(aa)*l);g.stroke();}
-    g.globalAlpha=1;
     const sh=g.createRadialGradient(cx-R*.38,cy-R*.42,0,cx-R*.38,cy-R*.42,R*.45);sh.addColorStop(0,'rgba(255,255,255,.45)');sh.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=sh;g.beginPath();g.arc(cx-R*.38,cy-R*.42,R*.45,0,Math.PI*2);g.fill();
     cache[key]=c;return c;
   }
@@ -46,6 +39,20 @@
       // random tangent direction at v
       let t=[r()-.5,r()-.5,r()-.5],dt=t[0]*v[0]+t[1]*v[1]+t[2]*v[2];t=[t[0]-dt*v[0],t[1]-dt*v[1],t[2]-dt*v[2]];const tl=Math.hypot(...t)||1;
       L.push({v,t:t.map(c=>c/tl),l:.035+r()*.05,k:r()});}return L;})();
+  const HAIR=(()=>{const r=rnd(29),L=[];for(let i=0;i<300;i++){const zz=r()*2-1,a=r()*Math.PI*2,q=Math.sqrt(1-zz*zz),v=[q*Math.cos(a),zz,q*Math.sin(a)];
+      let t=[r()-.5,r()-.5,r()-.5],dt=t[0]*v[0]+t[1]*v[1]+t[2]*v[2];t=[t[0]-dt*v[0],t[1]-dt*v[1],t[2]-dt*v[2]];const tl=Math.hypot(...t)||1,bend=.35+r()*.5;
+      const d=[v[0]+t[0]/tl*bend,v[1]+t[1]/tl*bend,v[2]+t[2]/tl*bend],dl=Math.hypot(...d);
+      L.push({v,d:d.map(c=>c/dl),l:.08+r()*.13,k:r(),w:r()});}return L;})();
+  function strayHairs(g,B,R,CY,rot,back){
+    const bucket=[[],[],[],[]],rr=R*.95;
+    HAIR.forEach(h=>{const p=rot(h.v[0],h.v[1],h.v[2]);if(back?(p.z>=0||p.z<-.35):(p.z<0||p.z>.42))return;
+      const dd=rot(h.d[0],h.d[1],h.d[2]),x0=p.x*rr,y0=CY+p.y*rr,x1=x0+dd.x*h.l*R,y1=y0+dd.y*h.l*R;
+      const lit=p.x*LIGHT[0]+p.y*LIGHT[1]+p.z*LIGHT[2]+(h.k-.5)*.3,b=lit>.45?0:lit>.05?1:lit>-.3?2:3;
+      bucket[b].push([x0,y0,(x0+x1)/2+dd.x*h.l*R*.1*(h.w-.5),(y0+y1)/2-h.l*R*.12*h.w,x1,y1]);});
+    const cols=[B.furLight,B.fur[1],B.fur[3],B.furDark];g.lineCap='round';g.lineWidth=Math.max(.6,R*.018);g.globalAlpha=.75;
+    bucket.forEach((L,i)=>{if(!L.length)return;g.strokeStyle=cols[i];g.beginPath();L.forEach(q=>{g.moveTo(q[0],q[1]);g.quadraticCurveTo(q[2],q[3],q[4],q[5]);});g.stroke();});
+    g.globalAlpha=1;
+  }
   const LIGHT=(()=>{const l=[-.5,-.6,.62],n=Math.hypot(...l);return l.map(c=>c/n);})();
   function furFibres(g,B,R,CY,rot){
     const bucket=[[],[],[],[]];
@@ -212,8 +219,10 @@
     // squish: the pom flattens a little where it rests on its feet (anchored at the contact point)
     const SQY=u*33;g.translate(0,SQY);g.scale(1.04,.95);g.translate(0,-SQY);
     before.sort((a,b)=>a.z-b.z).forEach(d=>d.f());
+    strayHairs(g,B,R,CY,rot,true);
     const ball=furBall(B,Math.max(16,Math.round(u*50)));g.drawImage(ball,-u*50,-u*50+u*2,u*100,u*100);
     furFibres(g,B,R,CY,rot);
+    strayHairs(g,B,R,CY,rot,false);
     // the glowing tip beads cast a warm light on the top of the fluff
     g.save();g.beginPath();g.arc(0,CY,R*1.02,0,Math.PI*2);g.clip();g.globalCompositeOperation='lighter';
     tips.forEach(T=>{if(T.z<-R*.5)return;const a=(.16+pulse*.1)*Math.min(1,(T.z+R*.5)/(R*.5)),k=g.createRadialGradient(T.x,T.y,u*4,T.x,T.y,u*34);k.addColorStop(0,'rgba(255,150,70,'+a+')');k.addColorStop(1,'rgba(255,150,70,0)');g.fillStyle=k;g.fillRect(T.x-u*34,T.y-u*34,u*68,u*68);});

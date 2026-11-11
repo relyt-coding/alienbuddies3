@@ -108,7 +108,7 @@
     const ball=furBall(B,Math.max(16,Math.round(u*50)));g.drawImage(ball,-u*50,-u*50+u*2,u*100,u*100);
     // the pom sits on two flat stick pieces; from the front you see their rounded ends peeking out under it
     g.fillStyle='rgba(26,10,32,.35)';g.beginPath();g.ellipse(0,u*36,u*26,u*3.5,0,0,Math.PI*2);g.fill();
-    stickEnd(g,-u*13,u*34,u*14,u*7,B.foot);stickEnd(g,u*13,u*34,u*14,u*7,B.foot);
+    stickEnd(g,-u*14.5,u*34,u*18.9,u*7,B.foot);stickEnd(g,u*14.5,u*34,u*18.9,u*7,B.foot);
     const blink=((t%3.7)<.12)?.15:1;
     beadFront(g,-u*11,-u*2,u*8,u*7,B.eye,blink);beadFront(g,u*11,-u*2,u*8,u*7,B.eye,blink);
     beadFront(g,0,u*14,u*7,u*5.2,B.mouth,1);
@@ -123,13 +123,12 @@
     const fA=step(ph+Math.PI),fB=step(ph);
     g.fillStyle='rgba(26,10,32,.3)';g.beginPath();g.ellipse(0,u*38.5-bob,u*24,u*3,0,0,Math.PI*2);g.fill();
     g.save();g.translate(0,bob);
-    plank(g,u*1+fA.x,u*33.5+fA.y,u*34,u*7,B.foot,fA.a,true);                 // far stick (darker, behind the pom)
     // far antenna, swept back a little more and drawn behind the body
     const sw=u*(10+8*sp)+Math.sin(ph*2)*u*2*sp,fl=Math.sin(t*3)*u;
     stem(g,[-u*6,-u*24, -u*4,-u*48, -u*22-sw*.6,-u*56, -u*30-sw,-u*40+fl],u,B);tip(g,-u*30-sw,-u*40+fl,u,B,pulse*.6);
     g.save();g.rotate(lean);
     const ball=furBall(B,Math.max(16,Math.round(u*50)));g.drawImage(ball,-u*50,-u*50+u*2,u*100,u*100);
-    g.restore();plank(g,u*2+fB.x,u*35+fB.y,u*34,u*7,B.foot,fB.a,false);g.save();g.rotate(lean);   // near stick, in front of the pom's bottom
+    g.restore();plank(g,u*1+fA.x,u*33.5+fA.y,u*34,u*7,B.foot,fA.a,true);plank(g,u*2+fB.x,u*35+fB.y,u*34,u*7,B.foot,fB.a,false);g.save();g.rotate(lean);   // near stick, in front of the pom's bottom
     // near eye: a glossy pony bead turned toward us, hole facing out
     const blink=((t%3.7)<.12)?.15:1;
     ponyBead(g,u*17,-u*3,u*7.5,B.eye,.72,blink,0);
@@ -150,13 +149,13 @@
     const rot=(x,y,z)=>({x:x*c+z*sn,y,z:-x*sn+z*c});
     const later=[],before=[];
     // ground shadow
-    g.fillStyle='rgba(26,10,32,.33)';g.beginPath();g.ellipse(0,u*37.5,u*27,u*3.6,0,0,Math.PI*2);g.fill();
+    g.fillStyle='rgba(26,10,32,.33)';g.beginPath();g.ellipse(0,u*37.5,u*30,u*3.6,0,0,Math.PI*2);g.fill();
     // feet: two flat 1-inch sticks under the pom, running front to back (rounded end forward, cut end back)
-    [-1,1].forEach(sd=>{const m=rot(sd*u*13,u*34,u*3),w=u*14*Math.abs(c)+u*34*Math.abs(sn);
-      const f=()=>{const k=g.createLinearGradient(0,m.y-u*3.5,0,m.y+u*3.5);k.addColorStop(0,B.foot[0]);k.addColorStop(.5,B.foot[1]);k.addColorStop(1,B.foot[2]);g.fillStyle=k;
+    [-1,1].forEach(sd=>{const m=rot(sd*u*14.5,u*34,u*3),w=u*18.9*Math.abs(c)+u*34*Math.abs(sn);
+      const f=()=>{const k=g.createLinearGradient(0,m.y-u*3.5,0,m.y+u*3.5);const far=Math.abs(sn)>.2&&m.z<0;k.addColorStop(0,far?B.foot[1]:B.foot[0]);k.addColorStop(.5,far?B.foot[2]:B.foot[1]);k.addColorStop(1,B.foot[2]);g.fillStyle=k;
         g.beginPath();if(g.roundRect)g.roundRect(m.x-w/2,m.y-u*3.5,w,u*7,u*3);else g.rect(m.x-w/2,m.y-u*3.5,w,u*7);g.fill();
         g.fillStyle='rgba(255,255,255,.45)';g.fillRect(m.x-w*.4,m.y-u*3.5,w*.8,u*1.3);};
-      (m.z>-u*6?later:before).push({z:m.z,f});});
+      later.push({z:m.z-R*2,f});   /* under the ball: drawn over its bottom fluff, far stick first */});
     // antennae: pipe cleaners rising from the top, arcing out to the sides and leaning slightly back
     [-1,1].forEach(sd=>{const P=[[8,-24,0],[10,-48,-6],[30,-54,-12],[34,-36,-16]].map(([x,y,z])=>rot(sd*x*u,y*u,z*u)),zz=P[3].z;
       const f=()=>{stem(g,[P[0].x,P[0].y,P[1].x,P[1].y,P[2].x,P[2].y,P[3].x,P[3].y],u,B);tip(g,P[3].x,P[3].y,u,B,pulse);};

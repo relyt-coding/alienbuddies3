@@ -2,6 +2,13 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.119 - 2026-11-11 14:32
+
+- Fix: aliens no longer go missing. Lag used to remove floating aliens and never bring them back; now they're never removed (they just hold still while the game is lagging)
+- Every 5 seconds a check puts back any alien that should be on screen but isn't (missing, hidden, lost off-screen or never drawn)
+- Fix: aliens no longer slow down while you drum; floating speed is time-based, the same at any frame rate
+- Floating buddies hold their pose while you're drumming (and about a second after), and use lighter sprites on phones
+
 ## v0.2.118 - 2026-11-11 10:45
 
 - Enhanced alien buddy look: eyes 12% bigger with a second sparkle, mouth 20% bigger, face spaced out 15%, gentle breathing, springier antennae, faint pink cheeks, soft edge light

@@ -100,14 +100,20 @@ window.addEventListener('pagehide',()=>{if(activeSlot>=0)autoSave();});
 const alienLayer=document.getElementById('alienLayer');
 function getAlienColor(idx){if(typeof buddyLook==='function')return buddyLook(idx).accent;return ALIEN_OUTLINE_COLORS[idx%ALIEN_OUTLINE_COLORS.length];}
 // ── floating buddy sprites: each bouncer is a small canvas showing its 3D buddy, slowly turning while it floats ──
-const BUDDY_W=54,BUDDY_H=58,BUDDY_SIZE=42,BUDDY_DPR=Math.min(2,window.devicePixelRatio||1);
-const BUDDY_SPIN=3;          // degrees per second: one full turn every 2 minutes
-const BUDDY_STEP=3;          // redraw a buddy once it has turned this many degrees
+// Zero gravity: each buddy tumbles slowly around its own random axis (any direction, not just turning on the spot)
+const BUDDY_W=78,BUDDY_H=78,BUDDY_SIZE=54,BUDDY_BOX=52,BUDDY_DPR=Math.min(2,window.devicePixelRatio||1);
+const BUDDY_SPIN=[3,7];      // degrees per second (slow drift); each buddy gets its own speed and axis
+const BUDDY_STEP=2.5;        // redraw a buddy once it has turned this many degrees
 function paintBouncerBuddy(b){
   if(!b._cv||typeof drawBuddy!=='function')return;
   const g=b._cv.getContext('2d');g.setTransform(BUDDY_DPR,0,0,BUDDY_DPR,0,0);g.clearRect(0,0,BUDDY_W,BUDDY_H);
-  drawBuddy(g,BUDDY_W/2,BUDDY_H*.5+1,BUDDY_SIZE,{view:'turn',angle:b.ang,idx:b.idx,lite:true,antenna:1.15,t:1});
-  b._drawnAng=b.ang;
+  if(b.m)drawBuddy(g,BUDDY_W/2,BUDDY_H/2,BUDDY_SIZE,{view:'float',m:b.m,idx:b.idx,lite:true,antenna:1.15});
+  b._drawnM=b.m;
+}
+function newTumble(){
+  if(typeof buddyTumble==='undefined')return{};
+  const a=[Math.random()-.5,Math.random()-.5,Math.random()-.5],l=Math.hypot(...a)||1,sp=(BUDDY_SPIN[0]+Math.random()*(BUDDY_SPIN[1]-BUDDY_SPIN[0]))*Math.PI/180;
+  return{m:buddyTumble.random(),w:a.map(v=>v/l*sp)};
 }
 function refreshBouncerBuddy(idx){bouncers.forEach(b=>{if(b.idx===idx){const c=getAlienColor(idx);b._col=c;b.el._col=c;if(b._nameEl)b._nameEl.style.color=c;paintBouncerBuddy(b);}});}
 // Snap all bouncers back inside current bounds (call after layout changes)
@@ -194,12 +200,12 @@ function spawnBouncer(animate=true,idx){
   el.style.filter=filter;el._baseFilter=filter;el._col=col;el._nameEl=nameSpan;el._emojiEl=emojiSpan;
   if(!animate)el.style.opacity='.85';
   if(!showBouncers)el.style.display='none';
-  const bounds=getBouncerBounds(),sz=41;
+  const bounds=getBouncerBounds(),sz=BUDDY_BOX;
   const x=bounds.x+Math.random()*Math.max(1,bounds.w-sz),y=bounds.y+Math.random()*Math.max(1,bounds.h-sz-BOUNCER_NAME_PAD);
   const spd=.9+Math.random()*1.3,ang=Math.random()*Math.PI*2;
   el.style.left='0';el.style.top='0';alienLayer.appendChild(el);
   const nb={el,x,y,vx:Math.cos(ang)*spd,vy:Math.sin(ang)*spd,sz,idx,_nameEl:nameSpan,_col:col,_cv:emojiSpan,
-    ang:Math.random()*360,spin:BUDDY_SPIN*(Math.random()<.5?-1:1)*(.8+Math.random()*.4)};
+    ...newTumble()};
   bouncers.push(nb);paintBouncerBuddy(nb); // _nameEl/_col live on the bouncer so renaming updates it instantly
 }
 // bounds are measured only now and then (every frame forced a layout read)
@@ -224,11 +230,12 @@ addEventListener('resize',()=>{_bbCache=null;});
     if(b.x>=maxX-b.sz){b.x=maxX-b.sz;b.vx=-Math.abs(b.vx);}
     if(b.y>=maxY-b.sz-BOUNCER_NAME_PAD){b.y=maxY-b.sz-BOUNCER_NAME_PAD;b.vy=-Math.abs(b.vy);}
     b.el.style.transform=`translate3d(${b.x.toFixed(1)}px,${b.y.toFixed(1)}px,0) scale(${b._scale||1})`;
-    b.ang=(b.ang+b.spin*bdt+360)%360;
+    if(!b.m&&typeof buddyTumble!=='undefined')Object.assign(b,newTumble());   // spawned before the buddy code loaded
+    if(b.m&&b.w)b.m=buddyTumble.step(b.m,b.w,bdt);
   }
   // repaint the buddies that have turned the furthest, a few per frame
   const budget=document.body.classList.contains('desktop-mode')?6:2;
-  let due=bouncers.filter(b=>{const d=Math.abs(((b.ang-(b._drawnAng||0))%360+540)%360-180);b._due=d;return d>=BUDDY_STEP;});
+  let due=bouncers.filter(b=>{if(!b.m)return false;const d=b._drawnM?buddyTumble.diff(b.m,b._drawnM):999;b._due=d;return d>=BUDDY_STEP;});
   if(due.length>budget)due.sort((a,b)=>b._due-a._due).length=budget;
   due.forEach(paintBouncerBuddy);
 })();

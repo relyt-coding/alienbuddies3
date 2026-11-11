@@ -284,9 +284,67 @@
     after.sort((a,b)=>a.z-b.z).forEach(d=>d.f());
     g.restore();g.restore();
   }
+
+  // ── ZERO-G: a buddy floating free, tumbling around any axis (floating sprites) ──
+  // o.m = 3×3 orientation matrix (row-major, model → view). The pom is a sphere lit from a fixed world light,
+  // so it's drawn upright; everything attached to it (beads, antennae, feet, fluff) turns with the matrix.
+  function drawFloat(g,B,u,o){
+    u0=u;LITE=o.lite!==false;const M=o.m,R=u*31,CY=0,RS=u*30,pulse=o.pulse||0;
+    const rot=(x,y,z)=>({x:M[0]*x+M[1]*y+M[2]*z,y:M[3]*x+M[4]*y+M[5]*z,z:M[6]*x+M[7]*y+M[8]*z});
+    const inFront=q=>{const dx=q.x,dy=q.y-CY,h=RS*RS-dx*dx-dy*dy;return h<=0||q.z>Math.sqrt(h);};
+    const before=[],after=[],tips=[],put=(z,front,f)=>(front?after:before).push({z,f});
+    // antennae (model points are relative to the pom's centre, which sits 2u below the old origin)
+    const AL=o.antenna==null?(B.ant||1.35):o.antenna;
+    [-1,1].forEach(sd=>{const P=[[8,-27,0],[10,-48,-6],[30,-54,-12],[34,-36,-16]].map(([x,y,z])=>rot(sd*(8+(x-8)*AL)*u,(-27+(y+27)*AL-2)*u,z*AL*u));
+      const S=[],NS=16;let len=0;
+      for(let i=0;i<=NS;i++){const k=i/NS,m=1-k,b0=m*m*m,b1=3*m*m*k,b2=3*m*k*k,b3=k*k*k;
+        const q={x:b0*P[0].x+b1*P[1].x+b2*P[2].x+b3*P[3].x,y:b0*P[0].y+b1*P[1].y+b2*P[2].y+b3*P[3].y,z:b0*P[0].z+b1*P[1].z+b2*P[2].z+b3*P[3].z};
+        if(i)len+=Math.hypot(q.x-S[i-1].x,q.y-S[i-1].y);q.len=len;S.push(q);}
+      let cur=null;
+      for(let i=1;i<S.length;i++){const A=S[i-1],C=S[i],f=inFront({x:(A.x+C.x)/2,y:(A.y+C.y)/2,z:(A.z+C.z)/2});
+        if(!cur||cur.f!==f){cur={f,pts:[A]};const run=cur;put(A.z,f,()=>stemRun(g,run.pts,u,B,run.pts[0].len));}cur.pts.push(C);}
+      const T=S[S.length-1],T2=S[S.length-3],tl=Math.hypot(T.x-T2.x,T.y-T2.y)||1,bx=T.x+(T.x-T2.x)/tl*u*3,by=T.y+(T.y-T2.y)/tl*u*3;
+      tips.push({x:bx,y:by,z:T.z});put(T.z+1,inFront(T),()=>tip(g,bx,by,u,B,pulse));});
+    // beads
+    const bead=(lx,ly,r,len,hole,col,mat,seed)=>{const yy=ly-2*u,lat=Math.asin(yy/R),lon=Math.asin(lx/(R*Math.cos(lat)));
+      const nx=Math.sin(lon)*Math.cos(lat),ny=Math.sin(lat),nz=Math.cos(lon)*Math.cos(lat),n=rot(nx,ny,nz),p=rot(nx*R*.93,ny*R*.93,nz*R*.93);
+      if(n.z<-.75)return;put(p.z+R,p.z>-u*2,()=>barrelBead(g,{x:p.x,y:p.y},n,r,len,hole,col,B,mat,seed));};
+    const ES=B.eyeSize||1;
+    bead(-u*11*(.85+ES*.15),-u*4,u*7*ES,u*6*ES,u*2.8*ES,B.eye,'glass',3);bead(u*11*(.85+ES*.15),-u*4,u*7*ES,u*6*ES,u*2.8*ES,B.eye,'glass',5);bead(0,u*12,u*5.6,u*5,u*2.2,B.mouth,'opaque',8);
+    // feet: the two flat duck-shaped sticks, as real 3D slabs under the pom (whichever face points at you is drawn last)
+    [-1,1].forEach(sd=>{const hw=u*5.5,fw=u*10.5,zh=-u*13,zf=u*13,zt=u*19.5,TH=u*4.2,cx=sd*u*13,cz=u*2,yTop=u*33,toe=sd*.14,ct=Math.cos(toe),st=Math.sin(toe),P=[];
+      for(let i=0;i<=6;i++){const f=Math.PI+i/6*Math.PI;P.push([hw*Math.cos(f),zh+hw*Math.sin(f)*.8]);}P.push([fw*.62,u]);
+      for(let i=0;i<=10;i++){const f=i/10*Math.PI;P.push([fw*Math.cos(f),zf+(zt-zf)*Math.sin(f)]);}P.push([-fw*.62,u]);
+      const at=(x,z,y)=>rot(cx+x*ct+z*st,y,cz-x*st+z*ct),C=at(0,0,yTop+TH/2),up=rot(0,-1,0);
+      put(C.z,C.z>-u*4,()=>{const layer=y=>{g.beginPath();P.forEach(([x,z],i)=>{const q=at(x,z,y);i?g.lineTo(q.x,q.y):g.moveTo(q.x,q.y);});g.closePath();};
+        const topFirst=up.z<0;g.fillStyle=B.foot[2];
+        for(let k=0;k<=6;k++){layer(topFirst?yTop+TH*k/6:yTop+TH*(1-k/6));g.fill();}
+        const face=topFirst?yTop+TH:yTop;layer(face);g.fillStyle=topFirst?B.foot[2]:B.foot[1];g.fill();
+        if(!topFirst){g.fillStyle=B.foot[0];g.globalAlpha=.55;layer(face);g.fill();g.globalAlpha=1;}
+        g.strokeStyle='rgba(255,255,255,.3)';g.lineWidth=Math.max(.6,u*.8);layer(face);g.stroke();});});
+    before.sort((a,b)=>a.z-b.z).forEach(d=>d.f());
+    strayHairs(g,B,R,CY,rot,true);
+    const ball=furBall(B,Math.max(16,Math.round(u*50)));g.drawImage(ball,-u*50,-u*50,u*100,u*100);
+    if(!LITE)furFibres(g,B,R,CY,rot);
+    strayHairs(g,B,R,CY,rot,false);
+    after.sort((a,b)=>a.z-b.z).forEach(d=>d.f());
+  }
+  // orientation helpers for floating buddies: a random orientation, a slow random spin, and stepping it
+  window.buddyTumble={
+    random(){const r=()=>Math.random()*Math.PI*2;return buddyTumble.mul(buddyTumble.axis([0,1,0],r()),buddyTumble.axis([1,0,0],(Math.random()-.5)*1.4));},
+    axis(a,t){const[x,y,z]=a,c=Math.cos(t),s=Math.sin(t),C=1-c;return[c+x*x*C,x*y*C-z*s,x*z*C+y*s, y*x*C+z*s,c+y*y*C,y*z*C-x*s, z*x*C-y*s,z*y*C+x*s,c+z*z*C];},
+    mul(A,B){const o=[];for(let i=0;i<3;i++)for(let j=0;j<3;j++)o[i*3+j]=A[i*3]*B[j]+A[i*3+1]*B[3+j]+A[i*3+2]*B[6+j];return o;},
+    // turn M by angular velocity w (radians/s around a view-space axis) for dt seconds, keeping it a clean rotation
+    step(M,w,dt){const a=Math.hypot(w[0],w[1],w[2])*dt;if(!a)return M;let N=buddyTumble.mul(buddyTumble.axis(w.map(v=>v/Math.hypot(w[0],w[1],w[2])),a),M);
+      const r0=[N[0],N[1],N[2]],l0=Math.hypot(...r0);r0.forEach((v,i)=>r0[i]=v/l0);let r1=[N[3],N[4],N[5]];const d=r1[0]*r0[0]+r1[1]*r0[1]+r1[2]*r0[2];r1=r1.map((v,i)=>v-d*r0[i]);const l1=Math.hypot(...r1);r1=r1.map(v=>v/l1);
+      const r2=[r0[1]*r1[2]-r0[2]*r1[1],r0[2]*r1[0]-r0[0]*r1[2],r0[0]*r1[1]-r0[1]*r1[0]];return r0.concat(r1,r2);},
+    // how far apart two orientations are, in degrees
+    diff(A,B){let tr=0;for(let i=0;i<9;i++)tr+=A[i]*B[i];return Math.acos(Math.max(-1,Math.min(1,(tr-1)/2)))*180/Math.PI;}
+  };
   window.drawBuddy=function(g,x,y,size,o){
     o=o||{};const B=o.look||(o.idx!=null?buddyLook(o.idx):BUDDIES[o.id||current]||BUDDIES.chloe),u=size/100;
     const angle=o.view==='turn'?(o.angle||0)*Math.PI/180:o.view==='side'?((o.face||1)<0?-Math.PI/2:Math.PI/2):0;
+    if(o.view==='float'){g.save();g.translate(x,y);drawFloat(g,B,u,o);g.restore();return;}
     g.save();g.translate(x,y+u*5.5);   // feet rest on the ground at the bottom of the box
     drawModel(g,B,u,Object.assign({},o,{angle}));
     g.restore();

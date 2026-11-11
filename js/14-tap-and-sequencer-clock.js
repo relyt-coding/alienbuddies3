@@ -38,16 +38,26 @@ function getElCenter(id){
 }
 
 // ── CHAIN ──
+// The tier-up chime only plays when you can see that tracker (not from the shop, bunker, cockpit or behind a popup)
+function trackerOnScreen(colId){
+  if(document.hidden)return false;
+  const el=document.getElementById(colId);if(!el)return false;
+  const r=el.getBoundingClientRect();if(r.width<2||r.height<2)return false;
+  const x=Math.min(innerWidth-1,Math.max(0,r.left+r.width/2)),y=Math.min(innerHeight-1,Math.max(0,r.top+Math.min(r.height/2,40)));
+  if(r.right<=0||r.bottom<=0||r.left>=innerWidth||r.top>=innerHeight)return false;
+  const hit=document.elementFromPoint(x,y);if(!hit)return false;
+  return el.contains(hit)||!!hit.closest('#alienLayer,.bouncer');   // a floating buddy passing over it doesn't count as covered
+}
 function addDotToTier(i,anims){
   if(!drumTrackerActive)return; // tracker not activated yet
   ensureTiers(i+1);const tier=tiers[i];tier.litDots++;
   anims.push({src:'manual',tier:i,dot:tier.litDots-1});
-  if(tier.litDots>=DOTS){tier.litDots=0;if(!tier.multiplierActive){tier.multiplierActive=true;flashBuy(color(i).hex);ensureTiers(i+2);playSfxTierUnlock(i,0.4);}addDotToTier(i+1,anims);}
+  if(tier.litDots>=DOTS){tier.litDots=0;if(!tier.multiplierActive){tier.multiplierActive=true;flashBuy(color(i).hex);ensureTiers(i+2);if(trackerOnScreen('manualTiersCol'))playSfxTierUnlock(i,0.4);}addDotToTier(i+1,anims);}
 }
 function addDotToAutoTier(i,anims){
   ensureAutoTiers(i+1);const tier=autoTiers[i];tier.litDots++;
   anims.push({src:'auto',tier:i,dot:tier.litDots-1});
-  if(tier.litDots>=DOTS){tier.litDots=0;if(!tier.multiplierActive){tier.multiplierActive=true;playSfxTierUnlock(i,0.4);ensureAutoTiers(i+2);}addDotToAutoTier(i+1,anims);}
+  if(tier.litDots>=DOTS){tier.litDots=0;if(!tier.multiplierActive){tier.multiplierActive=true;if(trackerOnScreen('autoTiersCol'))playSfxTierUnlock(i,0.4);ensureAutoTiers(i+2);}addDotToAutoTier(i+1,anims);}
 }
 
 // ══════════════════════════════════════════════

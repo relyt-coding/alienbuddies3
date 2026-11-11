@@ -177,6 +177,8 @@ function renderBunkerView(){
         cell._globalIdx=globalIdx;
         cell.onclick=()=>{if(bunkerPickMode)toggleBouncerPick(globalIdx);else openAlienNameModal(globalIdx);};
       } else {
+        // the buddy picture follows the cell size (it may have been drawn while the bunker was hidden)
+        const cv=cell.querySelector('.cell-buddy');if(cv&&cell.clientWidth&&Math.abs((cv._w||0)-cell.clientWidth)>2)paintCellBuddy(cv,globalIdx);
         // Update name visibility
         const nameDiv=cell.querySelector('.alien-cell-name');
         // names always visible in bunker grid
@@ -315,7 +317,7 @@ function renderAlienProfile(){
 // ── buddy pictures outside the playfield ──
 function paintCellBuddy(cv,idx){
   if(typeof drawBuddy!=='function')return;
-  const w=Math.max(18,(cv.parentNode&&cv.parentNode.clientWidth)||36)*.9,h=w*.8,dpr=Math.min(2,window.devicePixelRatio||1);
+  const cw=cv.parentNode&&cv.parentNode.clientWidth;cv._w=cw||0;const w=Math.max(18,cw||36)*.9,h=w*.8,dpr=Math.min(2,window.devicePixelRatio||1);
   cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);cv.style.width=w+'px';cv.style.height=h+'px';
   const g=cv.getContext('2d');g.setTransform(dpr,0,0,dpr,0,0);g.clearRect(0,0,w,h);
   drawBuddy(g,w/2,h*.56,w*.68,{view:'turn',angle:18,idx,lite:true,antenna:1,t:1});

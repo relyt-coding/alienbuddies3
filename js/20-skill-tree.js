@@ -344,9 +344,9 @@ const SKILL_TREE_NODES = [
   });
 })();
 // Prices (v0.2.113): tuned with the test-mode bot so the tree is a long road, not a shopping spree.
-// Minigame path ≈ Ice Planet ~45 min · Cockpit ~1h15 · Worm Whack ~1h45 · Magmora ~2h30 · Beat Defense ~3h30 · Wyrm trail after.
+// Minigame path ≈ Cockpit + Planet Hop 1–5 ~45 min · Ice Planet ~1h15 · Worm Whack ~1h45 · Magmora ~2h30 · Beat Defense ~3h30 · Wyrm trail after.
 (function costBalance(){
-  const MG={ph_ice:3000,mg_cockpit:12000,ww_moon:45000,ph_magma:150000,beat_defense:500000,ww_deep:300000,ww_t1:600000,ww_t2:1e6,ww_t3:1.6e6,ww_t4:2.5e6,grand_tournament:5e6};
+  const MG={mg_cockpit:3000,ph_ice:12000,ww_moon:45000,ph_magma:150000,beat_defense:500000,ww_deep:300000,ww_t1:600000,ww_t2:1e6,ww_t3:1.6e6,ww_t4:2.5e6,grand_tournament:5e6};
   const BR={planets:10,aliens:8,points:5};
   SKILL_TREE_NODES.forEach(n=>{
     if(n.id==='core')return;

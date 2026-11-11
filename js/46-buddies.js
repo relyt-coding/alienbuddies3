@@ -67,11 +67,11 @@
   window.buddyLookSpec=function(i){const ad=typeof alienData!=='undefined'&&alienData[i];return Object.assign({},VARIANTS[((i%100)+100)%100],ad&&ad.look||{});};
   window.buddyLook=function(i){const spec=buddyLookSpec(i);if(i%100===0&&!(typeof alienData!=='undefined'&&alienData[i]&&alienData[i].look))return BUDDIES.chloe;return lookFor(spec);};
   window.makeBuddyLook=lookFor;
-  const cache={};
+  const cache=new Map(),CACHE_MAX=140;
   function rnd(seed){let s=seed;return()=>{s=(s*9301+49297)%233280;return s/233280;};}
   // fuzzy pom-pom ball: layered tufts around the rim, soft shading, a white shine top-left
   function furBall(B,px){
-    const key=(B.key||current)+'_'+px;if(cache[key])return cache[key];
+    const key=(B.key||current)+'_'+px;if(cache.has(key))return cache.get(key);
     const c=document.createElement('canvas'),S=px*2;c.width=c.height=S;const g=c.getContext('2d'),R=px*.62,cx=px,cy=px,r=rnd(7);
     const halo=g.createRadialGradient(cx,cy,R*.8,cx,cy,R*1.5);const hc=h2r(B.fur[1]).join(',');halo.addColorStop(0,'rgba('+hc+',.35)');halo.addColorStop(1,'rgba('+hc+',0)');g.fillStyle=halo;g.fillRect(0,0,S,S);
     // outer tufts (dark), then the main ball, then lighter inner tufts
@@ -82,7 +82,7 @@
       g.fillStyle=lit>.35?B.fur[1]:lit>-.4?B.fur[2]:B.fur[3];g.beginPath();g.arc(cx+Math.cos(a)*d,cy+Math.sin(a)*d,tr,0,Math.PI*2);g.fill();}
     g.fillStyle=bg;g.beginPath();g.arc(cx,cy,R*.84,0,Math.PI*2);g.fill();
     const sh=g.createRadialGradient(cx-R*.38,cy-R*.42,0,cx-R*.38,cy-R*.42,R*.45);sh.addColorStop(0,'rgba(255,255,255,.45)');sh.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=sh;g.beginPath();g.arc(cx-R*.38,cy-R*.42,R*.45,0,Math.PI*2);g.fill();
-    cache[key]=c;return c;
+    cache.set(key,c);if(cache.size>CACHE_MAX)cache.delete(cache.keys().next().value);return c;
   }
   const FIB=(()=>{const r=rnd(11),L=[];for(let i=0;i<260;i++){const zz=r()*2-1,a=r()*Math.PI*2,q=Math.sqrt(1-zz*zz),v=[q*Math.cos(a),zz,q*Math.sin(a)];
       // random tangent direction at v

@@ -2,6 +2,17 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.114 - 2026-11-11 01:15
+
+- Alien buddies: the 👽 emoji is replaced by 3D craft buddies (pom-pom body, barrel pony-bead eyes and mouth, pipe-cleaner antennae with glowing tips, duck-shaped popsicle-stick feet). Buddy #1 is Chloe; all 100 buddies have their own colour combo
+- Floating buddies turn very slowly while free-floating (they hold still while a party style choreographs them); the bunker grid and the alien profile card show each buddy too
+- Buddy model: fluff and stray hairs turn with the body, depth-sorted antennae and beads, squish and contact shadow, glassy eyes, wood-grain feet, warm glow from the tips, blinks about every 15 s
+- New skill: BUDDY DESIGNER, the first node on Alien Evolution (after Quad Sun IV, before Gem Harvester I). Open an alien in the Bunker → DESIGN BUDDY: colours for body, eyes, mouth, antenna, tips and feet, plus antenna length and eye size, random and original buttons
+- Minigames use buddy #1 (with any redesign): Planet Hop runs in side profile with stepping feet, Worm Whack and Beat Defense show the front view
+- Matching game: half the pairs are 29 space & science pictures redrawn in the minigame art style, half are buddies from your bunker (boards saved mid-game with emojis still resume)
+- Matching game unlocks in the bunker for 1 gem; Planet Hop moves behind the Minigame Cockpit (levels 1–5). Skill path: Cockpit (3K gems) → Ice Planet (12K) → Worm Whack → Magmora. Saves that already bought Planet Hop keep it
+- Sequencer: shows "100 BPM" until BPM control is bought; the pattern label no longer repeats the BPM
+
 ## v0.2.113 - 2026-11-10 09:00
 - Skill tree rebalance (tested with the test-mode bot): gem bonuses only ever multiply gems per minute, and they're much smaller now
   - Tucana Core and each Quad Sun x1.5 (was x2 / x4); music hubs x1.1 (was x1.5); music branches x1.02 (was x1.2); planet sounds x1.01; other nodes x1.02 (was x1.05). Gem Harvester I / II unchanged

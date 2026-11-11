@@ -1998,3 +1998,33 @@ body.desktop-mode.cockpit-open #cockpitView{display:flex;}
 .bd-go:disabled{opacity:.35;}
 #bdOverlay .bd-spd{width:auto;padding:0 .55rem;font-family:'Bebas Neue',sans-serif;letter-spacing:.08em;font-size:1rem;}
 #bdOverlay .bd-spd.on{border-color:#9fffd8;color:#9fffd8;box-shadow:0 0 10px -2px #9fffd8;}
+
+/* ── alien buddies (3D craft buddies replace the 👽 emoji) ── */
+.bouncer-buddy{display:block;margin:-10px -7px -6px;pointer-events:none;}
+.cell-buddy{display:block;pointer-events:none;}
+#alienNamePreview canvas{display:block;}
+#anmDesignBtn{font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:.1em;padding:.55rem 1rem;border-radius:10px;border:1px solid #44eebb;background:linear-gradient(180deg,#0f3a2c,#0a1f17);color:#bfffe9;cursor:pointer;}
+#anmDesignBtn.locked{border-color:#1a3a2a;background:#0a1a0f;color:#4a7a66;}
+#buddyDesigner{position:fixed;top:0;right:0;bottom:0;left:0;z-index:240;background:rgba(2,6,10,.86);display:none;align-items:center;justify-content:center;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);padding:env(safe-area-inset-top) 8px env(safe-area-inset-bottom);}
+#buddyDesigner.open{display:flex;}
+#buddyDesigner .bd-box{width:min(440px,96vw);max-height:96vh;overflow-y:auto;background:#07140f;border:1px solid #44eebb;border-radius:20px;padding:12px 12px 14px;display:flex;flex-direction:column;align-items:center;gap:10px;box-shadow:0 0 50px rgba(68,238,187,.15);}
+#buddyDesigner .bd-top{display:flex;align-items:center;gap:8px;width:100%;}
+#buddyDesigner .bd-title{flex:1;text-align:center;}
+#buddyDesigner .bd-h{font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:.12em;color:#44eebb;line-height:1;}
+#buddyDesigner .bd-name{font-family:'Bebas Neue',sans-serif;font-size:1.05rem;letter-spacing:.08em;color:#cfeee2;opacity:.85;}
+#buddyDesigner .bd-nav,#buddyDesigner .bd-x{width:42px;height:42px;border-radius:12px;border:1px solid #1d4a3a;background:#0b231a;color:#bfffe9;font-size:1.4rem;cursor:pointer;}
+#buddyDesigner .bd-nav:disabled{opacity:.3;}
+#bdCanvas{touch-action:none;cursor:grab;border-radius:16px;background:radial-gradient(ellipse at 50% 40%,#123327,#06110c 70%);}
+#buddyDesigner .bd-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;width:100%;}
+#buddyDesigner .bd-tabs button,#buddyDesigner .bd-row button,#buddyDesigner .bd-actions button{font-family:'Bebas Neue',sans-serif;font-size:1.05rem;letter-spacing:.08em;min-height:42px;border-radius:12px;border:1px solid #1d4a3a;background:#0b231a;color:#cfeee2;cursor:pointer;}
+#buddyDesigner .bd-tabs button.on,#buddyDesigner .bd-row button.on{border-color:#44eebb;background:#124434;color:#fff;box-shadow:0 0 10px rgba(68,238,187,.35);}
+#buddyDesigner .bd-pick{font-family:'Bebas Neue',sans-serif;font-size:1.05rem;letter-spacing:.1em;color:#9fd9c4;}
+#buddyDesigner .bd-swatches{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;width:100%;}
+#buddyDesigner .bd-sw{aspect-ratio:1;border-radius:50%;border:3px solid rgba(255,255,255,.12);cursor:pointer;min-width:34px;}
+#buddyDesigner .bd-sw.on{border-color:#fff;box-shadow:0 0 0 2px #44eebb,0 0 12px #44eebb;}
+#buddyDesigner .bd-opts{width:100%;display:flex;flex-direction:column;gap:6px;}
+#buddyDesigner .bd-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+#buddyDesigner .bd-row span{font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:.1em;color:#9fd9c4;min-width:58px;}
+#buddyDesigner .bd-row button{flex:1;padding:0 6px;}
+#buddyDesigner .bd-actions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;width:100%;}
+#buddyDesigner .bd-actions .bd-done{background:linear-gradient(180deg,#19e48a,#0aa865);color:#06281a;border-color:#3dffa8;}

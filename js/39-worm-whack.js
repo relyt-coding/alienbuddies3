@@ -502,7 +502,7 @@ function wwGemVal(b){return b&&(b.stars||0)>=1?(b.stars>=3?1:.5):0;}
     g2.restore();
     g2.scale(squash,1/squash);
     const moving=Math.abs(al.tx-al.x)>as*.12;
-    if(typeof drawBuddy==='function')drawBuddy(g2,0,0,as*1.1,{view:moving?'side':'front',face:al.face,run:t*2.5,t,speed:1});
+    if(typeof drawBuddy==='function')drawBuddy(g2,0,0,as*1.1,{idx:0,view:moving?'side':'front',face:al.face,run:t*2.5,t,speed:1});
     else{g2.font=`${Math.round(as)}px sans-serif`;g2.textAlign='center';g2.textBaseline='middle';g2.fillText('👽',0,0);}g2.restore();
     // particles
     G.fx=G.fx.filter(p=>(p.life-=dt*1.6)>0);

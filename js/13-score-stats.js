@@ -22,7 +22,7 @@ document.getElementById('scoreSectionBtn')&&document.getElementById('scoreSectio
 
 function ssRow(icon,label,desc,val,isActive,colorClass){
   const row=document.createElement('div');row.className='ss-row'+(isActive?' active':'');
-  const ic=document.createElement('div');ic.className='ss-icon';ic.textContent=icon;
+  const ic=document.createElement('div');ic.className='ss-icon';if(icon==='BUDDY'&&typeof buddyIconEl==='function')ic.appendChild(buddyIconEl(24));else ic.textContent=icon==='BUDDY'?'🛸':icon;
   const info=document.createElement('div');info.className='ss-info';
   const lb=document.createElement('div');lb.className='ss-label'+(isActive?' active':'');lb.textContent=label;
   const ds=document.createElement('div');ds.className='ss-desc'+(isActive?' active':'');ds.textContent=desc;
@@ -86,12 +86,12 @@ function buildScoreStats(){
   // Alien multiplier
   if(totalAliens>0){
     const perAlien=1.1+(shop.alienBoostLevel>=0?(shop.alienBoostLevel+1)*0.3:0);
-    scoreStatsList.appendChild(ssRow('👽','ALIEN BOOST',`${totalAliens} alien${totalAliens>1?'s':''} · ×${perAlien.toFixed(1)}/alien`,`×${formatMult(alienMult)}`,true,'green'));
+    scoreStatsList.appendChild(ssRow('BUDDY','ALIEN BOOST',`${totalAliens} alien${totalAliens>1?'s':''} · ×${perAlien.toFixed(1)}/alien`,`×${formatMult(alienMult)}`,true,'green'));
     if(shop.alienBoostLevel>=0){
       scoreStatsList.appendChild(ssRow('💉','ALIEN POWER',`Boost level ${shop.alienBoostLevel+1} · ×${perAlien.toFixed(1)} per alien`,`+${(perAlien-1.1).toFixed(1)}/alien`,true));
     }
   } else {
-    scoreStatsList.appendChild(ssRow('👽','ALIEN BOOST','Buy aliens to multiply your score',`×1`,false));
+    scoreStatsList.appendChild(ssRow('BUDDY','ALIEN BOOST','Buy aliens to multiply your score',`×1`,false));
   }
 
   // ── TIPS ──

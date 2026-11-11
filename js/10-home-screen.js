@@ -15,7 +15,7 @@ function buildHomeScreen(){
   for(let i=0;i<3;i++){
     const data=readSlot(i);const sum=slotSummary(data);
     const card=document.createElement('div');card.className='slot-card '+(sum?'has-save':'empty-save');
-    const icon=document.createElement('div');icon.className='slot-icon';icon.textContent=sum?'👽':'🌑';
+    const icon=document.createElement('div');icon.className='slot-icon';if(sum&&typeof buddyIconEl==='function')icon.appendChild(buddyIconEl(34));else icon.textContent='🌑';
     const info=document.createElement('div');info.className='slot-info';
     const slotLabel=getSlotName(i)||(sum?`SLOT ${i+1}`:`SLOT ${i+1} — EMPTY`);
     const nameWrap=document.createElement('div');nameWrap.style.cssText='display:flex;align-items:center;gap:.4rem;';

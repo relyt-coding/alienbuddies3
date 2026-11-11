@@ -948,7 +948,7 @@ function phGemVal(b){return b&&b.cleared?((b.dust||0)>=.999?1:.5):0;}
         g.strokeStyle='rgba(200,240,255,.7)';g.lineWidth=1.5;g.beginPath();g.arc(bx,by,br,0,Math.PI*2);g.stroke();g.fillStyle='rgba(255,255,255,.8)';g.beginPath();g.ellipse(bx-br*.4,by-br*.45,br*.18,br*.09,-.6,0,Math.PI*2);g.fill();}
       g.save();g.globalAlpha=ea;g.translate(ax,ay-as*.48);g.rotate(-S.flip*Math.PI*2+(R.won&&lv.P.finish==='portal'?(1-esc)*6:0));g.scale((1+land*.18)*esc,(1-land*.18)*esc);
       if(typeof drawBuddy==='function')drawBuddy(g,0,0,as*1.15,{idx:0,view:'side',face:1,run:S.s,air:!S.grounded,t,speed:R.state==='play'||R.won?1:0,pulse});
-      else{g.font=`${Math.round(as)}px sans-serif`;g.textAlign='center';g.textBaseline='middle';g.fillText('👽',0,0);}g.globalAlpha=1;g.restore();
+      else{g.font=`${Math.round(as)}px sans-serif`;g.textAlign='center';g.textBaseline='middle';g.fillText('●',0,0);}g.globalAlpha=1;g.restore();
     }
     // perfect rings, on-beat pulse at the alien's feet, floating timing words, the early/late meter
     const fp=Math.pow(1-((S.s%1)+1)%1,4);if(!R.dead&&S.grounded){const [fx,fy,ff]=P(S.s,0);g.save();g.translate(fx,fy);g.rotate(ff);g.strokeStyle=`rgba(255,255,255,${.12+.4*fp})`;g.lineWidth=2;g.beginPath();g.ellipse(0,0,BP*(.18+.12*fp),UP*.08,0,0,Math.PI*2);g.stroke();g.restore();}

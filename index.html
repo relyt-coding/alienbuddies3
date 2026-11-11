@@ -73,7 +73,7 @@
       <div id="settingsVersion" style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:.12em;color:#44eebb;"></div>
     </div>
     <div class="settings-row">
-      <div><div class="settings-label">👽 MORE THAN 10 ALIENS ON SCREEN</div><div style="font-size:.6rem;color:#886644;letter-spacing:.06em;margin-top:2px;">May affect game performance</div></div>
+      <div><div class="settings-label"><span class="bi"></span> MORE THAN 10 ALIENS ON SCREEN</div><div style="font-size:.6rem;color:#886644;letter-spacing:.06em;margin-top:2px;">May affect game performance</div></div>
       <label class="settings-toggle">
         <input type="checkbox" id="settingsMoreAliens">
         <span class="settings-toggle-track"></span>
@@ -81,7 +81,7 @@
       </label>
     </div>
     <div class="settings-row" id="settingsAlienLimitRow" style="display:none;">
-      <div><div class="settings-label">👽 ALIENS ON SCREEN</div></div>
+      <div><div class="settings-label"><span class="bi"></span> ALIENS ON SCREEN</div></div>
       <div style="display:flex;gap:.4rem;align-items:center;">
         <button class="alien-step-btn" id="settingsAlienMinus">−</button>
         <input type="number" id="settingsAlienLimit" min="1" max="100" value="20" style="width:52px;font-family:'Bebas Neue',sans-serif;font-size:16px;text-align:center;background:#0d0d1c;border:1px solid #2a2a4a;border-radius:6px;color:#a0a8ff;padding:.25rem;">
@@ -103,12 +103,12 @@
 <button class="desktop-collapse-btn" id="collapseShopBtn" title="Toggle Shop">SHOP ▶</button>
 <button class="edit-mode-badge" id="editModeBadge" style="pointer-events:auto;">✏ EDIT MODE</button>
 
-<div id="tooSmallOverlay"><div class="ts-box"><div class="ts-emoji">👽</div><div class="ts-msg"></div><div class="ts-sub"></div></div></div>
+<div id="tooSmallOverlay"><div class="ts-box"><div class="ts-emoji"><span class="bi" data-scale="1"></span></div><div class="ts-msg"></div><div class="ts-sub"></div></div></div>
 
 <!-- ═══════ HOME SCREEN ═══════ -->
 <div class="screen" id="homeScreen">
   <div class="home-logo">
-    <div class="home-logo-emoji">👽</div>
+    <div class="home-logo-emoji"></div>
     <div class="home-logo-title">ALIEN BUDDIES</div>
     <div class="home-logo-sub">Published By Relyt Citrus</div>
     <div class="home-logo-sub" id="homeVersion" style="opacity:.6;margin-top:2px;"></div>
@@ -147,7 +147,7 @@
       <div class="header">
         <button class="nav-btn alien-btn btn-left" id="openBunkerBtn">BUNKER</button>
         <div>
-          <div class="game-title" id="titleEl"><span class="game-title-emoji">👽</span> ALIEN BUDDIES</div>
+          <div class="game-title" id="titleEl"><span class="game-title-emoji"><span class="bi" data-scale="1.1"></span></span> ALIEN BUDDIES</div>
           <div class="subtitle" id="slotSubtitle">SLOT 1</div>
         </div>
         <button class="nav-btn btn-right" id="openStoreBtn">SHOP</button>
@@ -167,7 +167,7 @@
           <div class="energy-segs" id="energySegs"></div>
           <div class="energy-label" id="energyLabel">ENERGY</div>
         </div>
-        <div class="alien-mult-info" id="alienMultInfo">👽 ALIEN BOOST: <span id="alienMultDisplay">×1</span></div>
+        <div class="alien-mult-info" id="alienMultInfo"><span class="bi"></span> ALIEN BOOST: <span id="alienMultDisplay">×1</span></div>
       </div>
 
       <!-- TIERS or SEQUENCER (toggle via JS) -->
@@ -336,9 +336,9 @@
       </div>
 
       <!-- DRUM PAD UPGRADES -->
-      <div class="store-section-label" style="border-top:none;margin-top:0;">👽 ALIEN BUDDIES</div>
+      <div class="store-section-label" style="border-top:none;margin-top:0;"><span class="bi"></span> ALIEN BUDDIES</div>
       <div class="alien-store-card" id="alienBuyBtn">
-        <div class="alien-card-icon">👽</div>
+        <div class="alien-card-icon"><span class="bi" data-scale="1"></span></div>
         <div class="alien-card-info">
           <div class="alien-card-name">PET ALIEN BUDDY</div>
           <div class="alien-card-stats" id="alienCardStats">
@@ -421,7 +421,7 @@
         </div>
         <div class="upgrade-card" style="border-color:#1a2a3a;position:relative;overflow:visible;">
           <div class="upgrade-card-header" style="border-bottom-color:#1a2a3a;">
-            <div class="upgrade-card-title" style="color:#00ccff;">👽 ALIEN POWER</div>
+            <div class="upgrade-card-title" style="color:#00ccff;"><span class="bi"></span> ALIEN POWER</div>
             <div class="upgrade-card-sub" id="alienBoostCardSub">Boost your alien buddy multiplier</div>
           </div>
           <div class="upgrade-buy-btn" id="alienBoostNextBtn">
@@ -548,7 +548,7 @@
         <div class="bunker-stat"><div class="bunker-stat-val" id="statCurrent">0</div><div class="bunker-stat-label">IN THIS BUNKER</div></div>
       </div>
       <div class="bunker-toggles">
-        <button class="bunker-toggle-btn active" id="toggleBouncersBtn" style="display:none;">👽 ALIENS</button>
+        <button class="bunker-toggle-btn active" id="toggleBouncersBtn" style="display:none;">🛸 ALIENS</button>
 
       </div>
       <div class="bunker-number-label" id="bunkerNumberLabel">BUNKER #1</div>
@@ -575,7 +575,7 @@
         <div class="bunker-progress-bar-bg"><div class="bunker-progress-bar" id="bunkerProgressBar" style="width:0%"></div></div>
         <div id="bunkerPickRow" style="display:none;align-items:center;justify-content:space-between;gap:.5rem;margin-top:.5rem;">
           <span id="bunkerOnScreenLabel" style="font-family:'Bebas Neue',sans-serif;font-size:.8rem;letter-spacing:.12em;color:#44eebb;">ON SCREEN 0 / 10</span>
-          <button id="bunkerPickBtn" style="font-family:'Bebas Neue',sans-serif;font-size:.75rem;letter-spacing:.1em;padding:.3rem .6rem;border-radius:8px;border:1px solid #1a3a2a;background:#0a1a0f;color:#44eebb;cursor:pointer;">👽 PICK ON-SCREEN ALIENS</button>
+          <button id="bunkerPickBtn" style="font-family:'Bebas Neue',sans-serif;font-size:.75rem;letter-spacing:.1em;padding:.3rem .6rem;border-radius:8px;border:1px solid #1a3a2a;background:#0a1a0f;color:#44eebb;cursor:pointer;">🛸 PICK ON-SCREEN ALIENS</button>
         </div>
       </div>
     </div>
@@ -614,7 +614,7 @@
       <!-- close -->
       <button id="alienNameClose">✕</button>
       <!-- profile -->
-      <div id="alienNamePreview">👽</div>
+      <div id="alienNamePreview"></div>
       <div id="anmName">—</div>
       <!-- edit section (hidden until edit tapped) -->
       <div id="anmEditSection" style="display:none;">

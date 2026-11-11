@@ -248,7 +248,7 @@ const partyOverlay=document.getElementById('partyOverlay');
 const partyBtn=document.getElementById('partyBtn');
 function startParty(){partyMode=true;partyBtn.classList.add('active');partyBtn.textContent='STOP PARTY';
   if(typeof partyStyleOn==='function')partyStyleOn();
-  if(typeof bouncerMode!=='undefined'&&bouncerMode!=='all'){setBouncerMode('all');showToast('👽 Aliens are back for the party!');}} // hidden buddies come back out for a party
+  if(typeof bouncerMode!=='undefined'&&bouncerMode!=='all'){setBouncerMode('all');showToast('🛸 Aliens are back for the party!');}} // hidden buddies come back out for a party
 function stopParty(){
   if(typeof partyStyleOff==='function')partyStyleOff(); // settle aliens where the dance left them
   partyMode=false;partyBtn.classList.remove('active');partyBtn.textContent='ALIEN PARTY';

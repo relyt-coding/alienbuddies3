@@ -1999,8 +1999,11 @@ body.desktop-mode.cockpit-open #cockpitView{display:flex;}
 #bdOverlay .bd-spd{width:auto;padding:0 .55rem;font-family:'Bebas Neue',sans-serif;letter-spacing:.08em;font-size:1rem;}
 #bdOverlay .bd-spd.on{border-color:#9fffd8;color:#9fffd8;box-shadow:0 0 10px -2px #9fffd8;}
 
-/* ── alien buddies (3D craft buddies replace the 👽 emoji) ── */
+/* ── alien buddies (3D craft buddies replace the old alien emoji) ── */
 .bouncer-buddy{display:block;margin:-13px;pointer-events:none;}
+.bi{display:inline-block;vertical-align:middle;line-height:0;}
+.bi canvas,.buddy-icon{display:inline-block;vertical-align:middle;}
+.home-logo-emoji canvas{margin:0 auto;}
 .cell-buddy{display:block;pointer-events:none;}
 #alienNamePreview canvas{display:block;}
 #anmDesignBtn{font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:.1em;padding:.55rem 1rem;border-radius:10px;border:1px solid #44eebb;background:linear-gradient(180deg,#0f3a2c,#0a1f17);color:#bfffe9;cursor:pointer;}

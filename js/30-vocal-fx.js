@@ -110,7 +110,7 @@ const VOX_HARMS={
   oct:{label:'OCTAVE DOWN',v:[{deg:0,semi:-12,oct:-1}]},chord:{label:'3RD + 5TH',v:[{deg:2,semi:4},{deg:4,semi:7}]},
 };
 const VOX_VOICES={ // voice changer presets: pitch (semitones) and formant (semitones of "throat size")
-  alien:{label:'👽 ALIEN',pitch:7,formant:-4},chip:{label:'🐿 CHIPMUNK',pitch:12,formant:7},giant:{label:'🗿 GIANT',pitch:-12,formant:-6},deep:{label:'DEEP',pitch:-5,formant:-2},
+  alien:{label:'🛸 ALIEN',pitch:7,formant:-4},chip:{label:'🐿 CHIPMUNK',pitch:12,formant:7},giant:{label:'🗿 GIANT',pitch:-12,formant:-6},deep:{label:'DEEP',pitch:-5,formant:-2},
 };
 function fxVoiceSummary(f){const n=[];if(!f)return n;if(f.tuneOn&&f.tuneAmt>0)n.push('AUTOTUNE');if(f.pitch||f.formant||f.robot)n.push(f.robot?'ROBOT':'VOICE');if(f.harm&&f.harm!=='none')n.push('HARMONY');if(f.vocOn)n.push('VOCODER');return n;}
 

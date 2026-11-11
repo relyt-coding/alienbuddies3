@@ -199,7 +199,7 @@ const toggleBouncersBtn=document.getElementById('toggleBouncersBtn');
 //   bunker = they only come out while the bunker is open
 //   off    = no bouncing buddies (ALIEN PARTY switches them back to all)
 let bouncerMode='all';
-const BOUNCER_MODES={all:'👽 ALIENS: ALL',bunker:'👽 ALIENS: BUNKER ONLY',off:'👽 ALIENS: OFF'};
+const BOUNCER_MODES={all:'🛸 ALIENS: ALL',bunker:'🛸 ALIENS: BUNKER ONLY',off:'🛸 ALIENS: OFF'};
 function applyBouncerMode(){
   if(!BOUNCER_MODES[bouncerMode])bouncerMode='all';
   const want=bouncerMode==='all'||(bouncerMode==='bunker'&&document.body.classList.contains('bunker-open'));
@@ -211,7 +211,7 @@ function applyBouncerMode(){
 function setBouncerMode(m){bouncerMode=m;applyBouncerMode();if(typeof autoSave==='function')autoSave();}
 toggleBouncersBtn&&toggleBouncersBtn.addEventListener('click',()=>{
   const order=['all','bunker','off'];setBouncerMode(order[(order.indexOf(bouncerMode)+1)%order.length]);
-  showToast({all:'👽 Aliens bounce everywhere',bunker:'👽 Aliens only come out in the bunker',off:'👽 Aliens are hidden (ALIEN PARTY brings them back)'}[bouncerMode]);
+  showToast({all:'🛸 Aliens bounce everywhere',bunker:'🛸 Aliens only come out in the bunker',off:'🛸 Aliens are hidden (ALIEN PARTY brings them back)'}[bouncerMode]);
   if(document.body.classList.contains('bunker-open'))renderBunkerView();
 });
 // opening / closing the bunker shows or hides them in BUNKER ONLY mode
@@ -230,7 +230,7 @@ function refreshBunkerMarks(){
   const lbl=document.getElementById('bunkerOnScreenLabel');
   if(lbl)lbl.textContent=`ON SCREEN ${on.size} / ${bouncerMax()}`;
   const btn=document.getElementById('bunkerPickBtn');
-  if(btn){btn.classList.toggle('active',bunkerPickMode);btn.textContent=bunkerPickMode?'✓ DONE PICKING':'👽 PICK ON-SCREEN ALIENS';}
+  if(btn){btn.classList.toggle('active',bunkerPickMode);btn.textContent=bunkerPickMode?'✓ DONE PICKING':'🛸 PICK ON-SCREEN ALIENS';}
   document.body.classList.toggle('pick-mode',bunkerPickMode);
   const pb=document.getElementById('anmOnScreenBtn');
   if(pb&&alienProfileIdx!==null)pb.textContent=on.has(alienProfileIdx)?'🛸 ON SCREEN — TAP TO REMOVE':'🛸 OFF SCREEN — TAP TO ADD';

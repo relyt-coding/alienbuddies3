@@ -170,7 +170,7 @@ const MUSIC_TREE_NODES=(function(){
     {fact:'Auto-Tune was invented by Andy Hildebrand, an engineer who used the same math to read oil-field seismic data. Cher\'s "Believe" (1998) made its instant, robotic setting famous.'});
   br('mt_harmonizer','🎼','Harmonizer','Unlocks HARMONIZER: adds a second voice singing a 3rd, 5th or octave away, always in key. ×1.2 Alien Gems.',30000,'mt_autotune',side(at,-130),
     {fact:'Eventide\'s H910 Harmonizer (1975) was one of the first digital pitch shifters. Studios used it to thicken voices and to make new harmonies from a single take.'});
-  br('mt_voicefx','👽','Voice Changer','Unlocks the VOICE CHANGER: Alien, Chipmunk, Giant and Robot voices, or set the pitch and "throat size" yourself. ×1.2 Alien Gems.',20000,'mt_vocals',rel(vx,60,190),
+  br('mt_voicefx','🎭','Voice Changer','Unlocks the VOICE CHANGER: Alien, Chipmunk, Giant and Robot voices, or set the pitch and "throat size" yourself. ×1.2 Alien Gems.',20000,'mt_vocals',rel(vx,60,190),
     {fact:'Formants are the resonances of your throat and mouth: they make a voice sound like you. Shift them up and a voice sounds tiny, shift them down and it sounds huge, even at the same pitch.'});
   br('mt_vocoder','🤖','Vocoder','Unlocks the VOCODER: your voice shapes a synth, so it sings the notes of a piano roll layer (or a drone in the song key). ×1.2 Alien Gems.',36000,'mt_vocals',rel(vx,120,190),
     {fact:'The vocoder was invented at Bell Labs in the 1930s by Homer Dudley, to squeeze speech down phone lines. Decades later, bands like Kraftwerk made it sing.'});
@@ -316,7 +316,7 @@ const SKILL_TREE_NODES = [
   {id:'buddy_designer', icon:'🎨', name:'Buddy Designer', desc:'Design your alien buddies: change the colours of their body, eyes, mouth, antennae, tips and feet, plus antenna length and eye size. Open any alien in the Bunker and tap DESIGN BUDDY.', cost:120, requires:['sun_aliens'], x:340, y:300, branch:'aliens', mult:1.5},
   {id:'gem_harvester_1', icon:'💎', name:'Gem Harvester I', desc:'Gem rate ×1.5 per alien per minute.', cost:200, requires:['buddy_designer'], x:460, y:360, branch:'aliens', mult:1.5},
   {id:'gem_harvester_2', icon:'💎', name:'Gem Harvester II', desc:'Gem rate ×2 per alien per minute.', cost:400, requires:['gem_harvester_1'], x:600, y:420, branch:'aliens', mult:1.5},
-  {id:'alien_awakening', icon:'👽', name:'Alien Awakening', desc:'Bouncers glow and leave energy trails.', cost:350, requires:['gem_harvester_1'], x:680, y:340, branch:'aliens', mult:1.5},
+  {id:'alien_awakening', icon:'🌟', name:'Alien Awakening', desc:'Bouncers glow and leave energy trails.', cost:350, requires:['gem_harvester_1'], x:680, y:340, branch:'aliens', mult:1.5},
   {id:'dna_splice', icon:'🧬', name:'DNA Splice', desc:'Aliens occasionally double-tap automatically.', cost:600, requires:['alien_awakening'], x:800, y:440, branch:'aliens', mult:1.5},
   {id:'ascension', icon:'🌠', name:'Ascension', desc:'All alien effects ×3 and your egg begins to incubate.', cost:900, requires:['dna_splice'], x:880, y:520, branch:'aliens', mult:1.5},
 ];
@@ -569,7 +569,7 @@ function renderSkillTree(){
     {text:'🪐 PLANET ATLAS', x:-250, y:-330, color:BRANCH_COLORS.planets},
     {text:'🎵 MUSICAL TOOLKIT', x:200, y:-80, color:BRANCH_COLORS.points},
     {text:'🃏 MINIGAMES', x:-340, y:60, color:BRANCH_COLORS.minigames},
-    {text:'👽 ALIEN EVO', x:200, y:60, color:BRANCH_COLORS.aliens},
+    {text:'🛸 ALIEN EVO', x:200, y:60, color:BRANCH_COLORS.aliens},
   ];
   branchLabels.forEach(bl=>{
     const lbl = document.createElement('div');

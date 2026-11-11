@@ -1,7 +1,7 @@
 // ── Alien buddy characters drawn in the minigame art style ──
 // Bright core → dark edge gradients with a white hotspot, ink-dark details, glowing accents, no emoji.
 // One 3D model for every view, so features line up at any angle.
-// drawBuddy(ctx, x, y, size, opts) draws the buddy centred at (x,y), about `size` px tall (same box as the old 👽 emoji).
+// drawBuddy(ctx, x, y, size, opts) draws the buddy centred at (x,y), about `size` px tall (same box as the old alien emoji).
 //   opts.view : 'front' | 'side'      opts.face : 1 (right) | -1 (left)  (side view)
 //   opts.run  : run phase in cycles (one cycle = two steps)               opts.air : true while jumping
 //   opts.t    : seconds, for idle sway / blinking (about every 15 s)
@@ -349,5 +349,32 @@
     drawModel(g,B,u,Object.assign({},o,{angle}));
     g.restore();
   };
+  // ── little buddy icons wherever the game used to show the alien emoji ──
+  // buddyIconEl(px): a canvas with Chloe in a 3/4 view, px tall. Spans with class "bi" become one, sized to their text.
+  window.buddyIconEl=function(px,opts){
+    opts=opts||{};const dpr=Math.min(2,window.devicePixelRatio||1),w=Math.round(px*1.15),h=Math.round(px);
+    const cv=document.createElement('canvas');cv.className='buddy-icon';cv.width=w*dpr;cv.height=h*dpr;cv.style.width=w+'px';cv.style.height=h+'px';
+    const g=cv.getContext('2d');g.setTransform(dpr,0,0,dpr,0,0);
+    drawBuddy(g,w/2,h*.56,h*.74,{view:'turn',angle:opts.angle==null?22:opts.angle,id:'chloe',lite:px<48,antenna:1.1,t:1});
+    return cv;
+  };
+  window.paintBuddyIcons=function(root){
+    (root||document).querySelectorAll('.bi:not(.bi-done)').forEach(el=>{
+      const fs=parseFloat(getComputedStyle(el).fontSize)||16,px=Math.max(12,Math.round(fs*(+el.dataset.scale||1.25)));
+      el.textContent='';el.appendChild(buddyIconEl(px));el.classList.add('bi-done');});
+  };
+  // the home-screen logo: a big Chloe slowly turning
+  function homeLogo(){
+    const el=document.querySelector('.home-logo-emoji');if(!el||el.querySelector('canvas'))return;
+    const S=Math.round(Math.min(150,Math.max(96,window.innerWidth*.3))),dpr=Math.min(2,window.devicePixelRatio||1);
+    el.textContent='';const cv=document.createElement('canvas');cv.width=S*dpr;cv.height=S*dpr;cv.style.width=S+'px';cv.style.height=S+'px';cv.style.display='block';el.appendChild(cv);
+    const g=cv.getContext('2d'),t0=performance.now();
+    (function f(now){requestAnimationFrame(f);if(!el.offsetParent||document.hidden)return;const t=(now-t0)/1000;
+      g.setTransform(dpr,0,0,dpr,0,0);g.clearRect(0,0,S,S);drawBuddy(g,S/2,S*.53,S*.6,{view:'turn',angle:20+Math.sin(t*.4)*35,id:'chloe',t,pulse:Math.pow(1-((t/.6)%1),3)});})(t0);
+  }
+  function initIcons(){try{paintBuddyIcons();homeLogo();
+    // the save slots were built before this file loaded: rebuild them so slots with aliens show a buddy
+    if(typeof buildHomeScreen==='function'&&document.querySelector('.slot-card'))buildHomeScreen();}catch(e){}}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initIcons);else setTimeout(initIcons,0);
   window.buddyInfo=function(id){return typeof id==='number'?buddyLook(id):BUDDIES[id||current]||BUDDIES.chloe;};
 })();

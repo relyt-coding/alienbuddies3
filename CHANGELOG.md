@@ -2,6 +2,15 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.117 - 2026-11-11 08:52
+
+- Glow party: each buddy gets a coloured halo (soft all party long, flaring on the beat)
+- Conga line: buddies run upright in side profile, all facing the way the line moves
+- New party style PLANET HOP (7th on the Alien Party ladder, 5T): buddies run along the sequencer, hopping every beat and double jumping on beat 4
+- Settings → SHOP LAYOUT: A Classic, B Grid, C Tabs, D Shelves (saved per device)
+- Tips can be bought in any order; buying a later tip opens it and leaves cheaper ones unread (older saves keep their tips)
+- Matching game: no emoji in its label, card pictures 20% smaller, buddies shown in eight different poses
+
 ## v0.2.116 - 2026-11-11 08:05
 
 - File select and game header are clean again: no buddy above the title, no icon on saved slots (empty slots keep the moon), no buddy next to ALIEN BUDDIES at the top of the game

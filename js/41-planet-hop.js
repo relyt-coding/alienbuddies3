@@ -937,7 +937,7 @@ function phGemVal(b){return b&&b.cleared?((b.dust||0)>=.999?1:.5):0;}
     if(R.idleS&&!R.won)eh+=R.idleS.h;
     const [ax,ay]=P(es,eh);
     if(!R.dead&&ea>0&&esc>0){R.trail.push([ax,ay]);if(R.trail.length>10)R.trail.shift();
-      R.trail.forEach((p,i)=>{g.fillStyle=`rgba(0,255,136,${i/R.trail.length*.25})`;g.beginPath();g.arc(p[0]-(R.trail.length-i)*BP*.035,p[1]-UP*.35,UP*.12*(i/R.trail.length),0,Math.PI*2);g.fill();});
+      R.trail.forEach((p,i)=>{g.fillStyle=`rgba(${typeof buddyInfo==='function'?buddyInfo().trail:'0,255,136'},${i/R.trail.length*.25})`;g.beginPath();g.arc(p[0]-(R.trail.length-i)*BP*.035,p[1]-UP*.35,UP*.12*(i/R.trail.length),0,Math.PI*2);g.fill();});
       const as=Math.max(26,UP*.85),col=(typeof getAlienColor==='function')?getAlienColor(0):'#00ff88';
       // shadow on the ground
       const [shx,shy]=P(S.s,phSupport(lv,S,S.s,S.h).top??-1);if(!R.won&&(!phInPit(lv,S.s)||S.h>-0.1)){g.fillStyle='rgba(0,0,0,.3)';g.beginPath();g.ellipse(shx,shy,as*.4*(1/(1+S.h*.4)),as*.1,0,0,Math.PI*2);g.fill();}
@@ -947,7 +947,8 @@ function phGemVal(b){return b&&b.cleared?((b.dust||0)>=.999?1:.5):0;}
         bb.addColorStop(0,'rgba(220,245,255,.28)');bb.addColorStop(.75,'rgba(140,210,255,.10)');bb.addColorStop(1,'rgba(170,230,255,.55)');g.fillStyle=bb;g.beginPath();g.arc(bx,by,br,0,Math.PI*2);g.fill();
         g.strokeStyle='rgba(200,240,255,.7)';g.lineWidth=1.5;g.beginPath();g.arc(bx,by,br,0,Math.PI*2);g.stroke();g.fillStyle='rgba(255,255,255,.8)';g.beginPath();g.ellipse(bx-br*.4,by-br*.45,br*.18,br*.09,-.6,0,Math.PI*2);g.fill();}
       g.save();g.globalAlpha=ea;g.translate(ax,ay-as*.48);g.rotate(-S.flip*Math.PI*2+(R.won&&lv.P.finish==='portal'?(1-esc)*6:0));g.scale((1+land*.18)*esc,(1-land*.18)*esc);
-      g.shadowColor=col;g.shadowBlur=14;g.font=`${Math.round(as)}px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif`;g.textAlign='center';g.textBaseline='middle';g.fillText('👽',0,0);g.shadowBlur=0;g.globalAlpha=1;g.restore();
+      if(typeof drawBuddy==='function')drawBuddy(g,0,0,as*1.15,{view:'side',face:1,run:S.s,air:!S.grounded,t,speed:R.state==='play'||R.won?1:0,pulse});
+      else{g.font=`${Math.round(as)}px sans-serif`;g.textAlign='center';g.textBaseline='middle';g.fillText('👽',0,0);}g.globalAlpha=1;g.restore();
     }
     // perfect rings, on-beat pulse at the alien's feet, floating timing words, the early/late meter
     const fp=Math.pow(1-((S.s%1)+1)%1,4);if(!R.dead&&S.grounded){const [fx,fy,ff]=P(S.s,0);g.save();g.translate(fx,fy);g.rotate(ff);g.strokeStyle=`rgba(255,255,255,${.12+.4*fp})`;g.lineWidth=2;g.beginPath();g.ellipse(0,0,BP*(.18+.12*fp),UP*.08,0,0,Math.PI*2);g.stroke();g.restore();}

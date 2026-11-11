@@ -501,8 +501,9 @@ function wwGemVal(b){return b&&(b.stars||0)>=1?(b.stars>=3?1:.5):0;}
     g2.fillStyle='#c9ced8';g2.strokeStyle='#4a505c';g2.lineWidth=2;g2.beginPath();g2.roundRect?g2.roundRect(-as*.32,-as*1.12,as*.64,as*.34,as*.08):g2.rect(-as*.32,-as*1.12,as*.64,as*.34);g2.fill();g2.stroke();
     g2.restore();
     g2.scale(squash,1/squash);
-    g2.shadowColor=col;g2.shadowBlur=12;g2.font=`${Math.round(as)}px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif`;g2.textAlign='center';g2.textBaseline='middle';
-    g2.fillText('👽',0,0);g2.shadowBlur=0;g2.restore();
+    const moving=Math.abs(al.tx-al.x)>as*.12;
+    if(typeof drawBuddy==='function')drawBuddy(g2,0,0,as*1.1,{view:moving?'side':'front',face:al.face,run:t*2.5,t,speed:1});
+    else{g2.font=`${Math.round(as)}px sans-serif`;g2.textAlign='center';g2.textBaseline='middle';g2.fillText('👽',0,0);}g2.restore();
     // particles
     G.fx=G.fx.filter(p=>(p.life-=dt*1.6)>0);
     G.fx.forEach(p=>{p.x+=p.vx*dt;p.y+=p.vy*dt;if(p.grav){p.vy+=900*dt;p.vx*=.98;}else{p.vx*=.92;p.vy*=.92;}g2.globalAlpha=Math.max(0,p.life);g2.fillStyle=p.col;g2.beginPath();g2.arc(p.x,p.y,p.s,0,Math.PI*2);g2.fill();});

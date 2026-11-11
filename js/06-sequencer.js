@@ -487,9 +487,10 @@ seqPlayPauseBtn&&seqPlayPauseBtn.addEventListener('click',()=>{if(seqPlaying)sto
 // BPM
 function updateBpmDisplay(){
   const d=document.getElementById('seqBpmDisplay');
-  if(d)d.textContent=seqBpm;
+  // while BPM is locked the number gets its unit, so players know what the 100 means
+  if(d)d.textContent=(typeof bpmLocked==='function'&&bpmLocked())?seqBpm+' BPM':seqBpm;
   const l=document.getElementById('seqAreaLabel');
-  if(l)l.textContent=`pattern · ${seqBpm} bpm`;
+  if(l)l.textContent='pattern';
 }
 function changeBpm(delta){
   if(typeof bpmLocked==='function'&&bpmLocked())return;

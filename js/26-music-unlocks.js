@@ -27,6 +27,7 @@ function applyMusicUnlocks(justBoughtId,quiet){
   const bpmOn=_sf('bpm');
   _muShow('seqBpmDown',bpmOn);_muShow('seqBpmUp',bpmOn);
   const bpmEl=document.getElementById('seqBpmDisplay');if(bpmEl){bpmEl.style.cursor=bpmOn?'pointer':'default';bpmEl.title=bpmOn?'Double-click to enter BPM':'BPM control unlocks in the store';}
+  if(typeof updateBpmDisplay==='function')updateBpmDisplay();
   if(!bpmOn&&typeof seqBpm!=='undefined'&&seqBpm!==100){seqBpm=100;if(typeof updateBpmDisplay==='function')updateBpmDisplay();if(seqPlaying){stopSeq();startSeq();}}
 
   // ── key: the KEY hub turns it on in C major; packs add more keys ──

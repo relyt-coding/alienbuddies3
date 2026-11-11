@@ -134,11 +134,25 @@
       ball(g,82,22,7,['#ffd0f0','#ff4fa8','#a01f6a']);ball(g,18,26,5,['#d9f6ff','#5ad1ff','#1f6fb0']);},
   };
   window.MATCH_ICONS=Object.keys(ICONS);
+  // a pose per buddy (the same on both cards of a pair, different from buddy to buddy)
+  const POSES=[
+    ()=>({view:'turn',angle:18}),
+    ()=>({view:'turn',angle:-35}),
+    ()=>({view:'turn',angle:60}),
+    ()=>({view:'side',face:1,run:.25,speed:1,k:.95}),
+    ()=>({view:'side',face:-1,run:.75,speed:1,k:.95}),
+    ()=>({view:'side',face:1,air:true,run:0,k:.95,dy:-.08}),
+    i=>({view:'float',m:tilt(i,.55,.9),k:.88,dy:-.06}),
+    i=>({view:'float',m:tilt(i,-.7,2.6),k:.88,dy:-.06}),
+  ];
+  function tilt(i,roll,yaw){if(typeof buddyTumble==='undefined')return null;const T=buddyTumble;return T.mul(T.axis([0,0,1],roll),T.axis([0,1,0],yaw+(i%5)*.3));}
+  function buddyPose(i){const o=POSES[(i*5+3)%POSES.length](i);if(o.view==='float'&&!o.m)return{view:'turn',angle:18};return o;}
   window.drawMatchFace=function(cv,pattern){
     const w=cv.clientWidth||cv.parentNode.clientWidth||60,h=cv.clientHeight||cv.parentNode.clientHeight||w,dpr=Math.min(2,window.devicePixelRatio||1);
     cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);const g=cv.getContext('2d');g.setTransform(dpr,0,0,dpr,0,0);g.clearRect(0,0,w,h);
-    const S=Math.min(w,h)*.86;
-    if(pattern.startsWith('b:')){if(typeof drawBuddy==='function')drawBuddy(g,w/2,h*.55,S*.82,{view:'turn',angle:18,idx:+pattern.slice(2),antenna:1,t:1,lite:S<70});return;}
+    const S=Math.min(w,h)*.86*.8;                  // pictures sit 20% smaller on the card
+    if(pattern.startsWith('b:')){if(typeof drawBuddy==='function'){const idx=+pattern.slice(2),o=buddyPose(idx),bs=S*.82*(o.k||1);
+      drawBuddy(g,w/2,h*.55+(o.dy||0)*bs,bs,Object.assign({idx,antenna:1,t:1,lite:false},o));}return;}
     const f=ICONS[pattern.slice(2)];if(!f)return;
     g.save();g.translate((w-S)/2,(h-S)/2);g.scale(S/100,S/100);f(g);g.restore();
   };

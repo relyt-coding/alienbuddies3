@@ -9,6 +9,7 @@
 //   CONGA LINE    a figure-8 conga line, hopping on the beat
 //   BOUNCE HOUSE  each instrument gets its own aliens, who jump when it plays
 //   GALAXY        a spinning spiral galaxy that breathes with the bar
+//   PLANET HOP    run along the top of the sequencer like in Planet Hop: a hop every beat, a double jump on beat 4
 // ══════════════════════════════════════════════
 const PARTY_STYLES=[
   {id:'glow',  icon:'✨',name:'GLOW'},
@@ -17,6 +18,7 @@ const PARTY_STYLES=[
   {id:'conga', icon:'🐍',name:'CONGA LINE'},
   {id:'bounce',icon:'🤸',name:'BOUNCE HOUSE'},
   {id:'galaxy',icon:'🌌',name:'GALAXY'},
+  {id:'hop',   icon:'🪐',name:'PLANET HOP'},
 ];
 let partyStyle='glow';
 try{const v=localStorage.getItem('ab2_party_style');if(PARTY_STYLES.some(s=>s.id===v))partyStyle=v;}catch(e){}
@@ -125,12 +127,13 @@ try{const v=localStorage.getItem('ab2_party_style');if(PARTY_STYLES.some(s=>s.id
   function clearFx(){eqBars.forEach(e=>e.remove());eqBars=[];}
   function enterStyle(){
     t0=performance.now();soundOrder.length=0;
-    bouncers.forEach(b=>{b._pp={};});
+    bouncers.forEach(b=>{b._pp={};if(typeof setBuddyHalo==='function')setBuddyHalo(b,partyGlowBase());});
     if(partyStyle!=='glow')analyserOn();
   }
   function leaveStyle(){
     // keep every alien exactly where it is, so normal bouncing (or the next style) carries on from there
-    bouncers.forEach(b=>{if(b._oy||b._ox){b.x+=b._ox||0;b.y+=b._oy||0;}b._ox=0;b._oy=0;b._pp={};b._scale=1;});
+    bouncers.forEach(b=>{if(b._oy||b._ox){b.x+=b._ox||0;b.y+=b._oy||0;}b._ox=0;b._oy=0;b._pp={};b._scale=1;if(typeof setBuddyHalo==='function')setBuddyHalo(b,0);});
+    if(typeof bouncerUnpose==='function')bouncerUnpose();   // running buddies go back to floating free
     clearFx();analyserOff();
   }
   window.partyStyleOn=function(){enterStyle();placeChip();};
@@ -195,6 +198,9 @@ try{const v=localStorage.getItem('ab2_party_style');if(PARTY_STYLES.some(s=>s.id
       bouncers.forEach((b,i)=>{
         const u=u0-i*gap;
         const hop=Math.abs(Math.sin(Math.PI*(beat-i*.25)));
+        // facing = the way this buddy is heading along the figure-8 (with a little hysteresis so nobody flickers)
+        const p=b._pp||(b._pp={}),dx=Math.cos(u);if(p.face==null)p.face=dx>=0?1:-1;if(dx>.12)p.face=1;else if(dx<-.12)p.face=-1;
+        if(typeof bouncerPose==='function')bouncerPose(b,Math.floor(((beat*2+i*.5)%1+1)%1*4),p.face<0);
         T.push({x:cx+ax*Math.sin(u)-sz/2,y:cy+ay*Math.sin(2*u)-sz/2,ox:0,oy:-16*hop*(.6+.6*energy),s:1});
       });
     }else if(st==='bounce'){
@@ -218,14 +224,35 @@ try{const v=localStorage.getItem('ab2_party_style');if(PARTY_STYLES.some(s=>s.id
         const r=R*Math.sqrt((i+.6)/N),a=i*2.39996+rot*(1.4-r/R*.8); // inner stars swirl faster
         T.push({x:cx+Math.cos(a)*r-sz/2,y:cy+Math.sin(a)*r*.8-sz/2,ox:0,oy:0,s:.85+.3*(1-r/R)+.15*hitEnv});
       });
+    }else if(st==='hop'){
+      // run left→right along the top of the sequencer (or the pads), wrapping around; hop every beat, double jump on beat 4
+      const ref=lm.seq||lm.pads;
+      const left=(ref?ref.left:B.x)+4,right=(ref?ref.right:B.x+B.w)-sz-4,span=Math.max(80,right-left);
+      let top=ref?ref.top:B.y+B.h-40;top=Math.max(B.y+sz+90,top);
+      const H=Math.max(28,Math.min(70,(top-B.y-sz)*.35));
+      const run=beat*30;                                   // px travelled per beat
+      bouncers.forEach((b,i)=>{
+        const p=b._pp||(b._pp={});
+        const bb=beat-i*.06,f=((bb%1)+1)%1,bar=Math.floor(bb)%4;
+        let y=0;
+        if(bar===3){                                       // beat 4: jump, then a second jump from the top of the first
+          if(f<.45)y=H*Math.sin(Math.PI*f/.9);
+          else{const s2=(f-.45)/.55;y=(1-s2)*H+4*1.25*H*s2*(1-s2);}
+        }else if(f<.62)y=H*Math.sin(Math.PI*f/.62);
+        const air=y>2;
+        if(typeof bouncerPose==='function')bouncerPose(b,air?4:Math.floor(((beat*2+i*.37)%1+1)%1*4),false);
+        const x=left+((run+i*span/Math.max(1,N))%span+span)%span;
+        if(p.lx!=null&&x<p.lx-span/2)p.wrap=true;p.lx=x;  // wrapped back to the left edge: jump there instead of sliding
+        T.push({x,y:top-sz,ox:0,oy:-y,s:1,snap:p.wrap});p.wrap=false;
+      });
     }else return false;
 
     // move: anchors glide (so switching styles is smooth), offsets apply instantly (so jumps stay snappy)
     const k=1-Math.exp(-dt/.12);
     bouncers.forEach((b,i)=>{
       const t=T[i];if(!t)return;
-      const tx=Math.min(maxX,Math.max(minX,t.x)),ty=Math.min(maxY,Math.max(minY,t.y));
-      b.x+=(tx-b.x)*k;b.y+=(ty-b.y)*k;
+      const tx=Math.min(maxX,Math.max(minX,t.x)),ty=Math.min(maxY+BOUNCER_NAME_PAD,Math.max(minY,t.y));
+      if(t.snap){b.x=tx;b.y=ty;}else{b.x+=(tx-b.x)*k;b.y+=(ty-b.y)*k;}
       b._ox=t.ox;b._oy=Math.max(B.y-b.y,t.oy);
       b._scale=t.s;
       const sy=t.sy?` scaleY(${t.sy.toFixed(3)})`:'';

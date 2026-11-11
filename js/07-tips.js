@@ -37,24 +37,32 @@ document.getElementById('tipReaderClose')&&document.getElementById('tipReaderClo
   document.getElementById('tipReader').style.display='none';
 });
 
+function tipHave(i){return tipsSet.includes(i);}
+// the cheapest tip you don't have yet (for the glow and the test bot)
+function nextTipIdx(){for(let i=0;i<MAX_TIPS;i++)if(!tipHave(i))return i;return -1;}
+function buyTip(i){
+  const cost=tipCost(i);
+  if(tipHave(i)||score<cost||i>=MAX_TIPS)return false;
+  score-=cost;tipsSet.push(i);tipsSet.sort((a,b)=>a-b);tipsOwned=tipsSet.length;tipsMult*=1.5;
+  return true;
+}
 function buildTipsList(){
   const list=document.getElementById('tipsList');
   if(!list)return;
   list.innerHTML='';
-  const show=Math.min(MAX_TIPS,Math.max(tipsOwned+2,3));
-  for(let i=0;i<Math.min(show,20);i++){
+  // tips can be bought in any order: show everything up to the furthest one you own or can afford, plus one more
+  let far=2;for(let i=0;i<MAX_TIPS;i++)if(tipHave(i)||score>=tipCost(i))far=Math.max(far,i+1);
+  const show=Math.min(MAX_TIPS,far+1);
+  for(let i=0;i<show;i++){
     const cost=tipCost(i);
-    const owned=i<tipsOwned;
-    const isNext=(i===tipsOwned); // tips must be bought in order (otherwise the counter and the ✓ marks get out of sync)
-    const canBuy=isNext&&score>=cost;
+    const owned=tipHave(i);
+    const canBuy=!owned&&score>=cost;
     const row=document.createElement('div');
     row.style.cssText='display:flex;align-items:center;justify-content:space-between;gap:.6rem;padding:.55rem .75rem;border-radius:10px;border:1px solid '+(owned?'#1a2a1a':canBuy?'#3a3a1a':'#1a1a1a')+';background:'+(owned?'#050f05':canBuy?'#0d0d04':'#060606')+';';
-    // Left: tip label button
     const label=document.createElement('button');
-    label.style.cssText=`font-family:'Bebas Neue',sans-serif;font-size:1.15rem;letter-spacing:.12em;padding:.35rem .85rem;border-radius:7px;border:1px solid ${owned?'#2a4a2a':canBuy?'#3a3a1a':'#1e1e1e'};background:${owned?'#0a1f0a':canBuy?'#1a1a04':'#111'};color:${owned?'#00cc66':canBuy?'#cccc44':'#444'};cursor:${owned?'pointer':'default'};touch-action:manipulation;white-space:nowrap;`;
+    label.style.cssText=`font-family:'Bebas Neue',sans-serif;font-size:1.15rem;letter-spacing:.12em;padding:.35rem .85rem;border-radius:7px;border:1px solid ${owned?'#2a4a2a':canBuy?'#3a3a1a':'#1e1e1e'};background:${owned?'#0a1f0a':canBuy?'#1a1a04':'#111'};color:${owned?'#00cc66':canBuy?'#cccc44':'#555'};cursor:${owned?'pointer':'default'};touch-action:manipulation;`;
     label.textContent=(owned?'✓ ':'')+'TIP '+(i+1);
     if(owned){row.style.cursor='pointer';row.addEventListener('click',()=>openTipReader(i));}
-    // Right: cost button or active badge
     const right=document.createElement('div');
     if(owned){
       const badge=document.createElement('div');
@@ -63,16 +71,14 @@ function buildTipsList(){
       right.appendChild(badge);
     } else {
       const btn=document.createElement('button');
-      btn.style.cssText=`font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:.1em;padding:.32rem .8rem;border-radius:6px;border:1px solid ${canBuy?'#aaaa33':'#2a2a1a'};background:${canBuy?'#1a1a04':'transparent'};color:${canBuy?'#cccc44':'#444'};cursor:${canBuy?'pointer':'default'};touch-action:manipulation;white-space:nowrap;`;
+      btn.style.cssText=`font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:.1em;padding:.32rem .8rem;border-radius:6px;border:1px solid ${canBuy?'#aaaa33':'#2a2a1a'};background:${canBuy?'#1a1a04':'transparent'};color:${canBuy?'#cccc44':'#444'};cursor:${canBuy?'pointer':'default'};touch-action:manipulation;`;
       btn.textContent=formatStore(cost)+' PTS';
       if(canBuy)btn.addEventListener('click',()=>{
-        if(score<cost)return;
-        if(tipsOwned>=MAX_TIPS)return;
-        score-=cost;tipsOwned++;tipsMult*=1.5;
+        if(!buyTip(i))return;
         showToast(`Tip purchased — your Tap Multiplier increased by ×1.5!`);
         playSfxTierUnlock(tipsOwned,0.4);
         buildTipsList();updateTipsLabel();renderUI();autoSave();
-        openTipReader(tipsOwned-1);
+        openTipReader(i);                       // opens the tip you bought; cheaper ones you skipped stay locked
       });
       right.appendChild(btn);
     }
@@ -84,7 +90,7 @@ function buildTipsList(){
 // TIPS button glows while the next tip is affordable and still unbought/unread
 function updateTipsGlow(){
   const b=document.getElementById('tipsBtn');if(!b)return;
-  const can=tipsOwned<MAX_TIPS&&score>=tipCost(tipsOwned);
+  let can=false;for(let i=0;i<MAX_TIPS;i++)if(!tipHave(i)&&score>=tipCost(i)){can=true;break;}
   b.classList.toggle('tips-glow',can);
 }
 function updateTipsLabel(){

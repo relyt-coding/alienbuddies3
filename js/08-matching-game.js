@@ -45,7 +45,7 @@ function updateMatchingBtn(){
   // (levels are shown from 1: the first board is 4 cards and free, then each level needs 4 more Alien Buddies)
   if(typeof mgBought!=='undefined'&&!mgBought.match&&!(typeof TEST_MODE!=='undefined'&&TEST_MODE)){
     btn.style.opacity='1';btn.style.borderColor='#1f6a3a';btn.style.color='#66cc88';btn.style.background='#03120a';btn.style.cursor='pointer';btn.style.boxShadow='none';btn.classList.remove('match-glow');
-    btn.innerHTML='🃏 MATCHING GAME <span class="mg-price">UNLOCK · 💎 '+(typeof MG_PRICE!=='undefined'?MG_PRICE.match:1)+'</span>';lck.textContent='';
+    btn.innerHTML='MATCHING GAME <span class="mg-price">UNLOCK · 💎 '+(typeof MG_PRICE!=='undefined'?MG_PRICE.match:1)+'</span>';lck.textContent='';
     btn.onclick=()=>mgBuy('match');return;
   }
   if(nextLvl>0&&totalAliens<needed){
@@ -57,7 +57,7 @@ function updateMatchingBtn(){
     btn.style.boxShadow='none';
     btn.classList.remove('match-glow');
     const left=needed-totalAliens;
-    btn.textContent='🃏 MATCHING GAME · '+left+' MORE ALIEN'+(left===1?'':'S')+' TO UNLOCK LVL '+(nextLvl+1);
+    btn.textContent='MATCHING GAME · '+left+' MORE ALIEN'+(left===1?'':'S')+' TO UNLOCK LVL '+(nextLvl+1);
     lck.textContent='UNLOCKS AT '+needed+' ALIEN BUDDIES';
     btn.onclick=null;
   } else {
@@ -69,10 +69,10 @@ function updateMatchingBtn(){
     btn.style.boxShadow='0 0 18px -4px rgba(0,255,136,.3)';
     btn.classList.toggle('match-glow',nextLvl<=25);
     if(nextLvl>25){
-      btn.textContent='🃏 MATCHING GAME · ALL COMPLETE 🏆';
+      btn.textContent='MATCHING GAME · ALL COMPLETE 🏆';
       lck.textContent='';
     } else {
-      btn.textContent='🃏 MATCHING GAME · LVL '+(nextLvl+1);
+      btn.textContent='MATCHING GAME · LVL '+(nextLvl+1);
       lck.textContent='';
     }
     btn.onclick=openMatchingGame;
@@ -87,7 +87,7 @@ function openMatchingGame(){
   if(nextLvl>0&&totalAliens<needed){showToast('Need '+needed+' aliens for level '+(nextLvl+1));return;}
   const modal=document.getElementById('matchingModal');
   modal.style.display='flex';
-  document.getElementById('matchTitle').textContent='🃏 MATCHING GAME';
+  document.getElementById('matchTitle').textContent='MATCHING GAME';
   document.getElementById('matchVictory').style.display='none';
   initMatchStars();
   matchIntroInfoStage=false;

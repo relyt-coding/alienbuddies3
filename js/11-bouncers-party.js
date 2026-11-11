@@ -115,7 +115,41 @@ function newTumble(){
   const a=[Math.random()-.5,Math.random()-.5,Math.random()-.5],l=Math.hypot(...a)||1,sp=(BUDDY_SPIN[0]+Math.random()*(BUDDY_SPIN[1]-BUDDY_SPIN[0]))*Math.PI/180;
   return{m:buddyTumble.random(),w:a.map(v=>v/l*sp)};
 }
-function refreshBouncerBuddy(idx){bouncers.forEach(b=>{if(b.idx===idx){const c=getAlienColor(idx);b._col=c;b.el._col=c;if(b._nameEl)b._nameEl.style.color=c;paintBouncerBuddy(b);}});}
+function refreshBouncerBuddy(idx){bouncers.forEach(b=>{if(b.idx===idx){const c=getAlienColor(idx);b._col=c;b.el._col=c;if(b._nameEl)b._nameEl.style.color=c;if(b._halo)b._halo.style.setProperty('--c',c);b._runFrames=null;b._poseKey=null;if(!b._pose)paintBouncerBuddy(b);}});}
+// ── party poses: upright running buddies (conga line, planet hop). Each buddy's run cycle is drawn once into a few
+//    small sprites, then the party just flips between them, so even lots of running buddies stay cheap.
+const RUN_FRAMES=4;
+let _runGenQ=[];
+function runFramesFor(b){
+  if(b._runFrames)return b._runFrames;
+  if(!_runGenQ.includes(b))_runGenQ.push(b);
+  return null;
+}
+function genRunFrames(max){
+  while(max-->0&&_runGenQ.length){
+    const b=_runGenQ.shift();if(!bouncers.includes(b)||b._runFrames)continue;
+    const fr=[];
+    for(let k=0;k<=RUN_FRAMES;k++){
+      const c=document.createElement('canvas');c.width=b._cv.width;c.height=b._cv.height;const g=c.getContext('2d');g.setTransform(BUDDY_DPR,0,0,BUDDY_DPR,0,0);
+      // feet on the bottom of the bouncer box (the canvas overhangs it by 13px all round)
+      drawBuddy(g,BUDDY_W/2,BUDDY_H-13-BUDDY_SIZE*.535,BUDDY_SIZE*1.02,k<RUN_FRAMES?{view:'side',face:1,run:k/RUN_FRAMES,speed:1,t:1,idx:b.idx,lite:true,antenna:1.15}:{view:'side',face:1,air:true,run:0,t:1,idx:b.idx,lite:true,antenna:1.15});
+      fr.push(c);
+    }
+    b._runFrames=fr;
+  }
+}
+// show frame k (RUN_FRAMES = in the air), mirrored when facing left
+window.bouncerPose=function(b,k,flip){
+  const fr=runFramesFor(b);if(!fr)return;
+  const key=k+(flip?'L':'R');if(b._poseKey===key)return;b._poseKey=key;b._pose=true;
+  const g=b._cv.getContext('2d');g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,b._cv.width,b._cv.height);
+  if(flip){g.translate(b._cv.width,0);g.scale(-1,1);}g.drawImage(fr[k],0,0);g.setTransform(1,0,0,1,0,0);
+};
+window.bouncerUnpose=function(){bouncers.forEach(b=>{if(b._pose){b._pose=false;b._poseKey=null;b._drawnM=null;}b._runFrames=null;});_runGenQ=[];};
+window.genBuddyRunFrames=genRunFrames;
+// glow party: light the halo behind a buddy (0..1)
+function setHalo(b,p){if(!b._halo)return;b._halo.style.opacity=(p*.95).toFixed(3);b._halo.style.transform=`translate(-50%,-50%) scale(${(.55+.75*p).toFixed(3)})`;}
+window.setBuddyHalo=setHalo;
 // Snap all bouncers back inside current bounds (call after layout changes)
 function clampBouncersToBounds(){
   const bounds=getBouncerBounds();
@@ -195,7 +229,8 @@ function spawnBouncer(animate=true,idx){
   const emojiSpan=document.createElement('canvas');emojiSpan.className='bouncer-emoji bouncer-buddy';
   emojiSpan.width=Math.round(BUDDY_W*BUDDY_DPR);emojiSpan.height=Math.round(BUDDY_H*BUDDY_DPR);emojiSpan.style.width=BUDDY_W+'px';emojiSpan.style.height=BUDDY_H+'px';
   const nameSpan=document.createElement('span');nameSpan.className='bouncer-name';nameSpan.textContent=data.name||'';nameSpan.style.color=col;nameSpan.style.display=data.name?'block':'none';
-  el.appendChild(emojiSpan);el.appendChild(nameSpan);
+  const halo=document.createElement('div');halo.className='bouncer-halo';halo.style.setProperty('--c',col);
+  el.appendChild(halo);el.appendChild(emojiSpan);el.appendChild(nameSpan);
   const filter=`drop-shadow(0 0 4px ${col}) drop-shadow(0 0 1px ${col})`;
   el.style.filter=filter;el._baseFilter=filter;el._col=col;el._nameEl=nameSpan;el._emojiEl=emojiSpan;
   if(!animate)el.style.opacity='.85';
@@ -204,7 +239,7 @@ function spawnBouncer(animate=true,idx){
   const x=bounds.x+Math.random()*Math.max(1,bounds.w-sz),y=bounds.y+Math.random()*Math.max(1,bounds.h-sz-BOUNCER_NAME_PAD);
   const spd=.9+Math.random()*1.3,ang=Math.random()*Math.PI*2;
   el.style.left='0';el.style.top='0';alienLayer.appendChild(el);
-  const nb={el,x,y,vx:Math.cos(ang)*spd,vy:Math.sin(ang)*spd,sz,idx,_nameEl:nameSpan,_col:col,_cv:emojiSpan,
+  const nb={el,x,y,vx:Math.cos(ang)*spd,vy:Math.sin(ang)*spd,sz,idx,_nameEl:nameSpan,_col:col,_cv:emojiSpan,_halo:halo,
     ...newTumble()};
   bouncers.push(nb);paintBouncerBuddy(nb); // _nameEl/_col live on the bouncer so renaming updates it instantly
 }
@@ -221,7 +256,7 @@ addEventListener('resize',()=>{_bbCache=null;});
   const bounds=cachedBouncerBounds(now||performance.now());
   const tnow=now||performance.now(),bdt=Math.min(.1,(tnow-(tickBouncers._t||tnow))/1000);tickBouncers._t=tnow;
   // party styles (js/36-party-modes.js) choreograph the aliens instead of free bouncing
-  if(partyMode&&typeof partyChoreo==='function'&&partyChoreo(now||performance.now(),bounds))return;
+  if(partyMode&&typeof partyChoreo==='function'&&partyChoreo(now||performance.now(),bounds)){genRunFrames(document.body.classList.contains('desktop-mode')?3:1);return;}
   const minX=bounds.x,minY=bounds.y,maxX=bounds.x+bounds.w,maxY=bounds.y+bounds.h;
   for(const b of bouncers){
     b.x+=b.vx;b.y+=b.vy;
@@ -253,11 +288,14 @@ function stopParty(){
   if(typeof partyStyleOff==='function')partyStyleOff(); // settle aliens where the dance left them
   partyMode=false;partyBtn.classList.remove('active');partyBtn.textContent='ALIEN PARTY';
   // Reset all bouncers to their base filter/transform
-  bouncers.forEach(b=>{b.el.style.filter=b._baseFilter;b._scale=1;b.el.style.transform=`translate(${b.x}px,${b.y}px) scale(1)`;if(b._partyTimeout){clearTimeout(b._partyTimeout);b._partyTimeout=null;}});
+  bouncers.forEach(b=>{setHalo(b,0);b.el.style.filter=b._baseFilter;b._scale=1;b.el.style.transform=`translate(${b.x}px,${b.y}px) scale(1)`;if(b._partyTimeout){clearTimeout(b._partyTimeout);b._partyTimeout=null;}});
   partyOverlay.classList.remove('active');partyOverlay.style.opacity='0';
 }
 function toggleParty(){if(partyMode)stopParty();else startParty();}
 
+// in the GLOW party every buddy keeps a soft coloured glow; beats light some of them up brightly
+function partyGlowBase(){return partyMode&&typeof partyStyle!=='undefined'&&partyStyle==='glow'?.38:0;}
+window.partyGlowBase=partyGlowBase;
 // Called every time any sound fires — pulses 2 random bouncers
 function partyPulseOnBeat(id,trackIdx,vel){
   if(!partyMode||bouncers.length===0)return;
@@ -276,8 +314,9 @@ function partyPulseOnBeat(id,trackIdx,vel){
       p=Math.max(0,Math.min(1,p));
       const gr=Math.round(4+28*p),sp=Math.round(1+8*p);
       b.el.style.filter=`drop-shadow(0 0 ${gr}px ${b.el._col}) drop-shadow(0 0 ${sp}px ${b.el._col})`;
+      setHalo(b,Math.max(partyGlowBase(),p));
       if(t<TOTAL){requestAnimationFrame(step);}
-      else{b.el.style.filter=b.el._baseFilter;b._partyAnim=false;}
+      else{b.el.style.filter=b.el._baseFilter;b._partyAnim=false;setHalo(b,partyGlowBase());}
     }
     requestAnimationFrame(step);
   });

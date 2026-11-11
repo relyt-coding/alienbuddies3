@@ -110,13 +110,13 @@ function shopOptions(){
   if(!shop.drumDotsUnlocked)add('ddU',DOT_UNLOCK_COST,unlockDrumDots);else if(shop.multLevel<DOT_MAX_LEVEL)add('dd',dotUpgradeCost(shop.multLevel+1),buyDrumMult);
   return L;
 }
-function buyTipDirect(){const c=tipCost(tipsOwned);if(score<c)return;score-=c;tipsOwned++;tipsMult*=1.5;try{updateTipsLabel();}catch(e){}}
+function buyTipDirect(){const i=nextTipIdx();if(i<0)return;buyTip(i);try{updateTipsLabel();}catch(e){}}
 // buys the cheapest affordable thing (shop + tips), repeatedly; returns how many things were bought
 function buyCheapestPoints(max){
   let n=0;
   for(let k=0;k<(max||40);k++){
     const L=opts.buyShop?shopOptions():[];
-    if(opts.buyTips&&tipsOwned<MAX_TIPS)L.push({name:'tip',cost:tipCost(tipsOwned),fn:buyTipDirect});
+    if(opts.buyTips&&nextTipIdx()>=0)L.push({name:'tip',cost:tipCost(nextTipIdx()),fn:buyTipDirect});
     if(!L.length)break;L.sort((a,b)=>a.cost-b.cost);
     if(L[0].cost>score)break;
     const before=score;try{L[0].fn();}catch(e){}

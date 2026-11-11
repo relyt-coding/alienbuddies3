@@ -13,6 +13,7 @@ const PARTY_LADDER=[
   {style:'eq',    cost:5e9,  main:'EQ BARS',          sub:'New party style: aliens line up as a live EQ meter for your music'},
   {style:'bounce',cost:5e10, main:'BOUNCE HOUSE',     sub:'New party style: each instrument gets its own aliens, who jump when it plays'},
   {style:'galaxy',cost:5e11, main:'GALAXY',           sub:'New party style: a spinning spiral galaxy that breathes with the bar'},
+  {style:'hop',   cost:5e12, main:'PLANET HOP',       sub:'New party style: your aliens run along the sequencer, hopping on every beat and double jumping on beat 4'},
 ];
 const PARTY_REVEAL_AT=5e6;
 const SEQ_FEATS=[

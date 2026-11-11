@@ -2034,3 +2034,34 @@ body.desktop-mode.cockpit-open #cockpitView{display:flex;}
 
 /* matching game: drawn card art (space & science pictures + alien buddies) */
 .match-face-art{width:90%;height:90%;display:block;pointer-events:none;}
+
+/* party glow: a coloured halo behind each buddy (a plain gradient, so it shows on every browser) */
+.bouncer-halo{position:absolute;left:50%;top:26px;width:120px;height:120px;border-radius:50%;pointer-events:none;z-index:-1;opacity:0;
+  transform:translate(-50%,-50%) scale(.55);background:radial-gradient(circle,var(--c) 0%,color-mix(in srgb,var(--c) 45%,transparent) 32%,transparent 68%);}
+@supports not (background:color-mix(in srgb,red 50%,transparent)){.bouncer-halo{background:radial-gradient(circle,var(--c) 0%,transparent 66%);}}
+
+/* ── SHOP LAYOUTS (Settings → SHOP LAYOUT) ── */
+#shopTabs{display:none;}
+/* B · GRID: two cards per row */
+body.shop-b .shop-shelf{display:grid;grid-template-columns:1fr 1fr;gap:.55rem;align-items:start;}
+body.shop-b .shop-shelf > .drum-upgrade-row,body.shop-b .shop-shelf > .tracks-row,body.shop-b .shop-shelf > div:not([class]){display:contents;}
+body.shop-b .shop-shelf .upgrade-card,body.shop-b .shop-shelf .drum-card,body.shop-b .shop-shelf .alien-store-card{width:auto !important;min-width:0;margin:0 !important;}
+body.shop-b .shop-shelf .alien-store-card{flex-direction:column;align-items:flex-start;gap:.3rem;}
+body.shop-b .shop-shelf .upgrade-buy-btn,body.shop-b .shop-shelf .drum-buy-btn{flex-wrap:wrap;gap:.35rem;}
+body.shop-b .shop-shelf .upgrade-price,body.shop-b .shop-shelf .drum-price{margin-left:auto;}
+body.shop-b .store-section-label{color:#6a6a8a;font-size:.85rem;}
+/* C · TABS: sticky tab bar, one section at a time */
+body.shop-c #shopTabs{display:flex;gap:.35rem;overflow-x:auto;position:sticky;top:0;z-index:5;padding:.5rem 0 .55rem;background:linear-gradient(#0d0d0d 80%,rgba(13,13,13,0));scrollbar-width:none;-webkit-overflow-scrolling:touch;}
+body.shop-c #shopTabs::-webkit-scrollbar{display:none;}
+body.shop-c #shopTabs button{flex:none;font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:.1em;padding:.45rem .8rem;border-radius:999px;border:1px solid #2a2a4a;background:#111122;color:#8a8ab8;cursor:pointer;white-space:nowrap;}
+body.shop-c #shopTabs button.on{border-color:#e8ff00;background:#22220a;color:#f4ff8a;box-shadow:0 0 10px rgba(232,255,0,.25);}
+body.shop-c .shop-sec{display:none;}
+body.shop-c .shop-sec.shop-tab-on{display:block;}
+body.shop-c .shop-sec .store-section-label{display:none;}
+/* D · SHELVES: each section is a row you swipe sideways */
+body.shop-d .shop-shelf{display:flex;gap:.6rem;overflow-x:auto;overflow-y:visible;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;padding:.2rem .1rem .7rem;scrollbar-width:thin;}
+body.shop-d .shop-shelf > .drum-upgrade-row,body.shop-d .shop-shelf > .tracks-row,body.shop-d .shop-shelf > div:not([class]){display:contents;}
+body.shop-d .shop-shelf .upgrade-card,body.shop-d .shop-shelf .drum-card,body.shop-d .shop-shelf .alien-store-card{flex:0 0 min(82%,340px) !important;width:min(82%,340px) !important;scroll-snap-align:start;margin:0 !important;}
+body.shop-d .store-section-label{color:#7a7aa8;font-size:.9rem;display:flex;align-items:center;gap:.35rem;}
+body.shop-d .store-section-label .bi{flex:none;}
+body.shop-d .store-section-label::after{content:'SWIPE ›';margin-left:auto;color:#44445a;font-size:.8rem;letter-spacing:.15em;}

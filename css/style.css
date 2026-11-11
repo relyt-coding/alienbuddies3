@@ -2062,3 +2062,33 @@ body.shop-b .store-section-label{color:#6a6a8a;font-size:.85rem;}
 @keyframes leadGlow{0%,100%{box-shadow:0 0 5px 0 rgba(0,255,136,.3);border-color:#1f8a5a;}50%{box-shadow:0 0 18px 4px rgba(0,255,136,.7);border-color:#00ff88;color:#b8ffdc;}}
 #openBunkerBtn.lead-glow,#matchingGameBtn.lead-glow{animation:leadGlow 1.4s ease-in-out infinite;}
 @media (prefers-reduced-motion:reduce){#openBunkerBtn.lead-glow,#matchingGameBtn.lead-glow{animation:none;box-shadow:0 0 14px 3px rgba(0,255,136,.6);border-color:#00ff88;}}
+
+/* ── egg hatch (loot-box reveal) ── */
+#eggReveal{position:fixed;top:0;right:0;bottom:0;left:0;z-index:400;display:none;flex-direction:column;align-items:center;justify-content:center;gap:.6rem;
+  background:radial-gradient(ellipse at 50% 55%,rgba(10,40,28,.97),rgba(2,6,6,.98) 70%);padding:env(safe-area-inset-top) 12px env(safe-area-inset-bottom);overflow:hidden;}
+#eggReveal.on{display:flex;}
+#eggReveal.special{background:radial-gradient(ellipse at 50% 55%,rgba(60,40,6,.97),rgba(8,4,0,.98) 70%);}
+#eggReveal canvas{touch-action:none;cursor:pointer;position:relative;z-index:2;}
+#eggReveal .er-top{text-align:center;position:relative;z-index:2;min-height:4.2rem;}
+#eggReveal .er-kicker{font-family:'Bebas Neue',sans-serif;font-size:1.15rem;letter-spacing:.25em;color:#7fd8b0;}
+#eggReveal.special .er-kicker{color:#ffd23f;text-shadow:0 0 12px rgba(255,210,63,.6);}
+#eggReveal .er-title{font-family:'Bebas Neue',sans-serif;font-size:2.4rem;letter-spacing:.08em;color:#e9fff4;line-height:1.05;text-shadow:0 0 18px rgba(0,255,136,.35);}
+#eggReveal .er-hint{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:.2em;color:#9fd9c4;opacity:0;transition:opacity .6s;position:relative;z-index:2;min-height:1.4rem;}
+#eggReveal .er-hint.on{opacity:.8;animation:erPulse 1.4s ease-in-out infinite;}
+@keyframes erPulse{50%{opacity:.35;}}
+#eggReveal .er-btns{display:flex;gap:.6rem;opacity:0;transform:translateY(10px);transition:opacity .4s,transform .4s;pointer-events:none;position:relative;z-index:2;}
+#eggReveal.show-btns .er-btns{opacity:1;transform:none;pointer-events:auto;}
+#eggReveal .er-btns button{font-family:'Bebas Neue',sans-serif;font-size:1.25rem;letter-spacing:.12em;min-height:48px;padding:0 1.4rem;border-radius:14px;border:1px solid #2a5a48;background:#0b231a;color:#cfeee2;cursor:pointer;}
+#eggReveal .er-btns .er-ok{background:linear-gradient(180deg,#19e48a,#0aa865);color:#06281a;border-color:#3dffa8;}
+#eggReveal.special .er-btns .er-ok{background:linear-gradient(180deg,#ffe36a,#e0a020);color:#3a2400;border-color:#fff1a0;}
+#eggReveal .er-rays{position:absolute;left:50%;top:52%;width:180vmax;height:180vmax;transform:translate(-50%,-50%) scale(.2);opacity:0;pointer-events:none;z-index:1;
+  background:repeating-conic-gradient(from 0deg,rgba(0,255,136,.26) 0deg 9deg,transparent 9deg 22deg);border-radius:50%;
+  -webkit-mask:radial-gradient(circle,#000 0%,transparent 55%);mask:radial-gradient(circle,#000 0%,transparent 55%);}
+#eggReveal.special .er-rays{background:repeating-conic-gradient(from 0deg,rgba(255,210,63,.34) 0deg 8deg,transparent 8deg 18deg);}
+#eggReveal.open-burst .er-rays{animation:erRays 1s cubic-bezier(.2,.8,.2,1) forwards,erSpin 14s linear infinite;}
+@keyframes erRays{to{opacity:1;transform:translate(-50%,-50%) scale(1);}}
+@keyframes erSpin{from{rotate:0deg;}to{rotate:360deg;}}
+/* the new buddy waits hidden on screen until it hatches, then pops in */
+.bouncer.hatching{visibility:hidden;}
+.bouncer.hatched .bouncer-buddy{animation:bPop .8s cubic-bezier(.34,1.56,.64,1);}
+@keyframes bPop{0%{transform:scale(0);}100%{transform:scale(1);}}

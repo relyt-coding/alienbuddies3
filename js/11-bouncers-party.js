@@ -105,7 +105,8 @@ function paintBouncerBuddy(b){
 function newTumble(){
   if(typeof buddyTumble==='undefined')return{};
   const a=[Math.random()-.5,Math.random()-.5,Math.random()-.5],l=Math.hypot(...a)||1,sp=(BUDDY_SPIN[0]+Math.random()*(BUDDY_SPIN[1]-BUDDY_SPIN[0]))*Math.PI/180;
-  return{m:buddyTumble.random(),w:a.map(v=>v/l*sp)};
+  const T=buddyTumble,m=T.mul(T.axis([0,0,1],(Math.random()-.5)*.5),T.mul(T.axis([1,0,0],(Math.random()-.5)*.35),T.axis([0,1,0],(Math.random()-.5)*.7)));
+  return{m,w:a.map(v=>v/l*sp)};
 }
 function refreshBouncerBuddy(idx){bouncers.forEach(b=>{if(b.idx===idx){const c=getAlienColor(idx);b._col=c;b.el._col=c;if(b._nameEl)b._nameEl.style.color=c;if(b._halo)b._halo.style.setProperty('--c',c);b._runFrames=null;b._poseKey=null;if(!b._pose)paintBouncerBuddy(b);}});}
 // ── party poses: upright running buddies (conga line, planet hop). Each buddy's run cycle is drawn once into a few
@@ -233,7 +234,8 @@ function spawnBouncer(animate=true,idx){
   el.style.left='0';el.style.top='0';alienLayer.appendChild(el);
   const nb={el,x,y,vx:Math.cos(ang)*spd,vy:Math.sin(ang)*spd,sz,idx,_nameEl:nameSpan,_col:col,_cv:emojiSpan,_halo:halo,
     ...newTumble()};
-  bouncers.push(nb);paintBouncerBuddy(nb);setHalo(nb,0); // _nameEl/_col live on the bouncer so renaming updates it instantly
+  bouncers.push(nb);paintBouncerBuddy(nb);setHalo(nb,0);
+  if(window._hatchingIdx===idx)el.classList.add('hatching'); // _nameEl/_col live on the bouncer so renaming updates it instantly
 }
 // bounds are measured only now and then (every frame forced a layout read)
 let _bbCache=null,_bbAt=0;

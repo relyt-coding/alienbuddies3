@@ -42,8 +42,8 @@
     const fur=[shade(L.body,.34*k+.02),shade(L.body,.12*k+.02),L.body,shade(L.body,-.17)],tc=h2r(L.tip);
     const B={fur,furLight:shade(L.body,.42*k+.04),furDark:shade(L.body,-.24),eye:tri(L.eye,.2,.2),mouth:tri(L.mouth,.2,.2),
       foot:tri(L.foot,.2,.2),stem:tri(L.stem,.18,.25),tip:tri(L.tip,.22,.18),glow:L.tip,trail:tc.join(','),
-      ant:L.ant||1.35,eyeSize:L.eyeSize||1,spec:L};
-    B.key=[L.body,L.eye,L.mouth,L.stem,L.tip,L.foot].join('');
+      ant:L.ant||1.35,eyeSize:L.eyeSize||1,spec:L,fx:L.fx||null};
+    B.key=[L.body,L.eye,L.mouth,L.stem,L.tip,L.foot,L.name||''].join('');
     // a bright, readable colour for names/borders: the body if it's lively, otherwise the glowing tips
     const[hh,ss,ll]=toHsl(L.body);B.accent=ss>.35&&ll>.25&&ll<.85?fromHsl(hh,Math.min(1,ss+.1),Math.max(.55,ll)):L.tip;
     return B;
@@ -63,9 +63,39 @@
   const lookCache={};
   function lookFor(spec){const k=JSON.stringify(spec);return lookCache[k]||(lookCache[k]=makeLook(spec));}
   window.BUDDY_PARTS=PARTS;
+  const SPECIALS=[
+    {name:'GOLDEN',   body:'#e0a020',eye:'#1b1b22',mouth:'#ff5fb8',stem:'#e8c25a',tip:'#ffffff',foot:'#f2f2f7',fx:{sheen:['#fff6b0','#ffd23f','#ffb02e'],spark:'#fff3a0',ring:'#ffd23f'}},
+    {name:'COSMIC',   body:'#283593',eye:'#f2f2f7',mouth:'#9b5cff',stem:'#a879ff',tip:'#3fe6ff',foot:'#2a2a33',fx:{sheen:['#7f8cff','#b06bff','#3fe6ff'],spark:'#c9f4ff',ring:'#b06bff'}},
+    {name:'AURORA',   body:'#26a69a',eye:'#ff5fb8',mouth:'#ffd23f',stem:'#f5f5fa',tip:'#9dff3f',foot:'#9b6bff',fx:{sheen:['#9dff3f','#3fe6ff','#ff4fa8'],spark:'#e6fff0',ring:'#3fffb0'}},
+    {name:'MAGMA',    body:'#e53935',eye:'#ffd23f',mouth:'#1b1b22',stem:'#2a2a33',tip:'#ff8a3d',foot:'#7a5230',fx:{sheen:['#ffe14d','#ff8a3d','#ff2b2b'],spark:'#ffd0a0',ring:'#ff8a3d'}},
+    {name:'FROST',    body:'#e8e4f0',eye:'#2f80ff',mouth:'#5ad1ff',stem:'#4fb3ff',tip:'#3fe6ff',foot:'#26c6da',fx:{sheen:['#ffffff','#bfeaff','#8ecbff'],spark:'#ffffff',ring:'#8ee6ff'}},
+    {name:'NEON',     body:'#2b2b36',eye:'#3ddc84',mouth:'#ff5fb8',stem:'#5fe07a',tip:'#ff4fa8',foot:'#ff7ac0',fx:{sheen:['#00ff88','#ff4fa8','#3fe6ff'],spark:'#b8ffdc',ring:'#00ff88'}},
+    {name:'RAINBOW',  body:'#ff5fa2',eye:'#2f80ff',mouth:'#ffd23f',stem:'#40e0d0',tip:'#9dff3f',foot:'#ffd23f',fx:{sheen:['#ff3b3b','#ffe14d','#3fe6ff','#b06bff'],spark:'#ffffff',ring:'#ffe14d'}},
+    {name:'SHADOW',   body:'#5d1049',eye:'#ff2b2b',mouth:'#9b5cff',stem:'#2a2a33',tip:'#b06bff',foot:'#1b1b22',fx:{sheen:['#b06bff','#5d1049','#ff2b2b'],spark:'#e2b8ff',ring:'#9b5cff'}},
+    {name:'PEARL',    body:'#f8bbd0',eye:'#c9a227',mouth:'#f2f2f7',stem:'#f5f5fa',tip:'#ffffff',foot:'#f2f2f7',fx:{sheen:['#ffffff','#ffd0ea','#bfeaff'],spark:'#ffffff',ring:'#ffffff'}},
+    {name:'SUPERNOVA',body:'#f57c00',eye:'#f2f2f7',mouth:'#2f80ff',stem:'#ffe14d',tip:'#ffffff',foot:'#2f80ff',fx:{sheen:['#ffffff','#ffe14d','#ff4fa8'],spark:'#fffbe0',ring:'#ffffff'}},
+  ];
+  const isSpecialSlot=i=>(i+1)%10===0;
+  // Each new buddy is picked at random from the designs you don't have yet (a different order every game);
+  // every 10th buddy is one of the 10 special designs. The pick is stored on the alien (alienData[i].base).
+  window.buddyIsSpecialSlot=isSpecialSlot;
+  window.buddyPickFor=function(i){
+    const ad=alienData;const used=new Set(),usedSp=new Set();
+    ad.forEach((a,k)=>{if(k!==i&&a&&a.base){if(a.base.sp!=null)usedSp.add(a.base.sp);else if(a.base.v!=null)used.add(a.base.v);}});
+    if(isSpecialSlot(i)){let left=[...Array(SPECIALS.length).keys()].filter(k=>!usedSp.has(k));if(!left.length)left=[...Array(SPECIALS.length).keys()];return{sp:left[Math.floor(Math.random()*left.length)]};}
+    let left=[...Array(VARIANTS.length).keys()].filter(k=>!used.has(k));if(!left.length)left=[...Array(VARIANTS.length).keys()];
+    return{v:left[Math.floor(Math.random()*left.length)]};
+  };
+  function baseSpec(i){
+    const a=typeof alienData!=='undefined'&&alienData[i];
+    if(a&&a.base){if(a.base.sp!=null){const S=SPECIALS[a.base.sp%SPECIALS.length];return Object.assign({},S);}return Object.assign({},VARIANTS[a.base.v%VARIANTS.length]);}
+    return Object.assign({},VARIANTS[((i%100)+100)%100]);   // aliens from before random order keep the look they had
+  }
+  window.buddySpecialInfo=function(i){const a=typeof alienData!=='undefined'&&alienData[i];return a&&a.base&&a.base.sp!=null?SPECIALS[a.base.sp%SPECIALS.length]:null;};
   window.buddyVariant=i=>Object.assign({},VARIANTS[((i%100)+100)%100]);
-  window.buddyLookSpec=function(i){const ad=typeof alienData!=='undefined'&&alienData[i];return Object.assign({},VARIANTS[((i%100)+100)%100],ad&&ad.look||{});};
-  window.buddyLook=function(i){const spec=buddyLookSpec(i);if(i%100===0&&!(typeof alienData!=='undefined'&&alienData[i]&&alienData[i].look))return BUDDIES.chloe;return lookFor(spec);};
+  window.buddyLookSpec=function(i){const ad=typeof alienData!=='undefined'&&alienData[i];return Object.assign(baseSpec(i),ad&&ad.look||{});};
+  window.buddyLook=function(i){const spec=buddyLookSpec(i),ad=typeof alienData!=='undefined'&&alienData[i];
+    const C=BUDDIES.chloe.spec;if(!(ad&&ad.look)&&!spec.fx&&['body','eye','mouth','stem','tip','foot'].every(k=>spec[k]===C[k]))return BUDDIES.chloe;return lookFor(spec);};
   window.makeBuddyLook=lookFor;
   const cache=new Map(),CACHE_MAX=140;
   function rnd(seed){let s=seed;return()=>{s=(s*9301+49297)%233280;return s/233280;};}
@@ -271,7 +301,9 @@
     const SQY=u*33,BR=Math.sin(t*Math.PI*2/2.2)*.022;g.translate(0,SQY);g.scale(1.04+BR,.95-BR*.9);g.translate(0,-SQY);
     before.sort((a,b)=>a.z-b.z).forEach(d=>d.f());
     strayHairs(g,B,R,CY,rot,true);
+    if(B.fx)specialFx(g,B,u,R,CY,t,'back',rot);
     const ball=furBall(B,Math.max(16,Math.round(u*50)));g.drawImage(ball,-u*50,-u*50+u*2,u*100,u*100);
+    if(B.fx)specialFx(g,B,u,R,CY,t,'sheen',rot);
     if(!LITE)furFibres(g,B,R,CY,rot);
     {g.save();g.beginPath();g.arc(0,CY,R*1.01,0,Math.PI*2);g.clip();
      const rim=g.createRadialGradient(-R*.25,CY-R*.3,R*.8,-R*.25,CY-R*.3,R*1.35);rim.addColorStop(0,'rgba(140,200,255,0)');rim.addColorStop(1,'rgba(150,200,255,.2)');g.fillStyle=rim;g.fillRect(-R*1.2,CY-R*1.2,R*2.4,R*2.4);
@@ -286,6 +318,7 @@
     feet(g,u,B,th,step,2);
     g.save();g.translate(0,CY);g.rotate(lean);g.translate(0,-CY);g.translate(0,SQY);g.scale(1.04,.95);g.translate(0,-SQY);
     after.sort((a,b)=>a.z-b.z).forEach(d=>d.f());
+    if(B.fx)specialFx(g,B,u,R,CY,t,'front',rot);
     g.restore();g.restore();
   }
 
@@ -328,10 +361,13 @@
         g.strokeStyle='rgba(255,255,255,.3)';g.lineWidth=Math.max(.6,u*.8);layer(face);g.stroke();});});
     before.sort((a,b)=>a.z-b.z).forEach(d=>d.f());
     strayHairs(g,B,R,CY,rot,true);
+    if(B.fx)specialFx(g,B,u,R,CY,o.t!=null?o.t:1,'back',rot);
     const ball=furBall(B,Math.max(16,Math.round(u*50)));g.drawImage(ball,-u*50,-u*50,u*100,u*100);
+    if(B.fx)specialFx(g,B,u,R,CY,o.t!=null?o.t:1,'sheen',rot);
     if(!LITE)furFibres(g,B,R,CY,rot);
     strayHairs(g,B,R,CY,rot,false);
     after.sort((a,b)=>a.z-b.z).forEach(d=>d.f());
+    if(B.fx)specialFx(g,B,u,R,CY,o.t!=null?o.t:1,'front',rot);
   }
   // orientation helpers for floating buddies: a random orientation, a slow random spin, and stepping it
   window.buddyTumble={
@@ -345,6 +381,32 @@
     // how far apart two orientations are, in degrees
     diff(A,B){let tr=0;for(let i=0;i<9;i++)tr+=A[i]*B[i];return Math.acos(Math.max(-1,Math.min(1,(tr-1)/2)))*180/Math.PI;}
   };
+
+  // ── special buddies: shimmering sheen on the fluff, a glowing ring orbiting the body, twinkling sparkles ──
+  //    (the ring is a real 3D circle around the pom, tilted, so it turns with the buddy)
+  function specialFx(g,B,u,R,CY,t,part,rot){
+    const F=B.fx;
+    if(part==='sheen'){
+      g.save();g.beginPath();g.arc(0,CY,R*.99,0,Math.PI*2);g.clip();
+      const a=t*.7,x0=Math.cos(a)*R,y0=Math.sin(a)*R,k=g.createLinearGradient(-x0,CY-y0,x0,CY+y0);
+      F.sheen.forEach((c,i)=>k.addColorStop(i/(F.sheen.length-1),c));
+      g.globalAlpha=.3;g.globalCompositeOperation='lighter';g.fillStyle=k;g.fillRect(-R,CY-R,R*2,R*2);
+      g.restore();return;}
+    // ring: points on a circle of radius 1.42R in the model, tilted 24°; back half before the pom, front half after
+    const N=48,P=[];
+    for(let i=0;i<=N;i++){const a=i/N*Math.PI*2+t*.25,x=Math.cos(a)*R*1.42,z=Math.sin(a)*R*1.42,y=Math.sin(a)*R*.38;const q=rot(x,y,z);P.push(q);}
+    g.save();g.lineCap='round';
+    for(let i=1;i<P.length;i++){const A=P[i-1],C=P[i],front=(A.z+C.z)>0;if(front!==(part==='front'))continue;
+      g.strokeStyle=F.ring;g.globalAlpha=.28;g.lineWidth=u*5;g.beginPath();g.moveTo(A.x,CY+A.y);g.lineTo(C.x,CY+C.y);g.stroke();
+      g.globalAlpha=.95;g.lineWidth=u*1.8;g.strokeStyle='#ffffff';g.beginPath();g.moveTo(A.x,CY+A.y);g.lineTo(C.x,CY+C.y);g.stroke();}
+    g.restore();
+    if(part!=='front')return;
+    // sparkles: little four-point stars twinkling around the buddy
+    g.save();g.fillStyle=F.spark;
+    for(let i=0;i<6;i++){const a=i*1.047+t*.35,d=R*(1.25+.18*Math.sin(i*2.3)),x=Math.cos(a)*d,y=CY+Math.sin(a)*d*.85-R*.1,tw=Math.max(0,Math.sin(t*3+i*1.7)),s=u*(2+3*tw);
+      if(tw<.05)continue;g.globalAlpha=.4+.6*tw;g.beginPath();g.moveTo(x,y-s*2);g.quadraticCurveTo(x,y,x+s*2,y);g.quadraticCurveTo(x,y,x,y+s*2);g.quadraticCurveTo(x,y,x-s*2,y);g.quadraticCurveTo(x,y,x,y-s*2);g.fill();}
+    g.restore();
+  }
   window.drawBuddy=function(g,x,y,size,o){
     o=o||{};const B=o.look||(o.idx!=null?buddyLook(o.idx):BUDDIES[o.id||current]||BUDDIES.chloe),u=size/100;
     const angle=o.view==='turn'?(o.angle||0)*Math.PI/180:o.view==='side'?((o.face||1)<0?-Math.PI/2:Math.PI/2):0;

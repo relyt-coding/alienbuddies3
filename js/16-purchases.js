@@ -131,7 +131,13 @@ function buySeqMultiClickNext(){
   showToast(`${up.effectMain} — each sequencer step now counts as ${lvl+2} clicks!`);renderUI();autoSave();
 }
 function buyAlien(){
-  updateBouncerToggleVisibility&&updateBouncerToggleVisibility();const cost=alienCost(totalAliens);if(score<cost)return;score-=cost;totalAliens++;bouncerOnNewAlien();updateMatchingBtn();viewingBunker=Math.max(0,Math.floor((totalAliens-1)/BUNKER_SIZE));playSfxAlienBuy();flashBuy(totalAliens%BUNKER_SIZE===0?'#00ff88':'#00cc66');renderUI();
+  updateBouncerToggleVisibility&&updateBouncerToggleVisibility();const cost=alienCost(totalAliens);if(score<cost)return;score-=cost;totalAliens++;
+  // pick this buddy's design at random from the ones you don't have yet (every 10th is a special)
+  const _ni=totalAliens-1;while(alienData.length<totalAliens)alienData.push({name:'',color:getAlienColor(alienData.length)});
+  if(typeof buddyPickFor==='function'&&!alienData[_ni].base){alienData[_ni].base=buddyPickFor(_ni);alienData[_ni].color=getAlienColor(_ni);}
+  const _hatch=typeof alienHatches==='function'&&alienHatches(_ni);if(_hatch)window._hatchingIdx=_ni;
+  bouncerOnNewAlien();window._hatchingIdx=null;
+  if(_hatch&&typeof openEggReveal==='function')setTimeout(()=>openEggReveal(_ni),120);updateMatchingBtn();viewingBunker=Math.max(0,Math.floor((totalAliens-1)/BUNKER_SIZE));playSfxAlienBuy();flashBuy(totalAliens%BUNKER_SIZE===0?'#00ff88':'#00cc66');renderUI();
   // Always update bunker sidebar on desktop
   if(document.body.classList.contains('desktop-mode'))renderBunkerView();
   autoSave();}

@@ -83,7 +83,7 @@
   }
   function randomize(){
     const P=BUDDY_PARTS,pk=a=>a[Math.floor(Math.random()*a.length)][0];
-    spec={body:pk(P.body),eye:pk(P.bead),mouth:pk(P.bead),stem:pk(P.stem),tip:pk(P.tip),foot:pk(P.foot),ant:spec.ant,eyeSize:spec.eyeSize};
+    spec={body:pk(P.body),eye:pk(P.bead),mouth:pk(P.bead),stem:pk(P.stem),tip:pk(P.tip),foot:pk(P.foot),ant:spec.ant,eyeSize:spec.eyeSize,fx:spec.fx,name:spec.name};
     if(spec.mouth===spec.eye)spec.mouth=pk(P.bead);
     save();render();
   }

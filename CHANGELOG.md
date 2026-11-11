@@ -2,6 +2,10 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.120 - 2026-11-11 15:40
+
+- Fix: drum pads no longer drop hits when you play with two fingers on iPhone. Pads now play from the finger touch itself (iOS was cancelling taps it thought might be a pinch), one hit per finger, and two-finger touches on the pads can't start a zoom
+
 ## v0.2.119 - 2026-11-11 14:32
 
 - Fix: aliens no longer go missing. Lag used to remove floating aliens and never bring them back; now they're never removed (they just hold still while the game is lagging)

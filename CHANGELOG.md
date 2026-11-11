@@ -2,6 +2,10 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.116 - 2026-11-11 08:05
+
+- File select and game header are clean again: no buddy above the title, no icon on saved slots (empty slots keep the moon), no buddy next to ALIEN BUDDIES at the top of the game
+
 ## v0.2.115 - 2026-11-11 01:35
 
 - Floating buddies are about 30% bigger and tumble freely in zero gravity: each drifts slowly around its own random axis (turning, tipping and rolling), with the light staying fixed

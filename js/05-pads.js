@@ -105,6 +105,7 @@ function rebuildPadGrid(){
     const idx=i;
     el.addEventListener('pointerdown',e=>{
       e.preventDefault();
+      if(e.pointerType==='touch'&&!padEditMode&&sndId){padTouchFire(idx,e);return;}   // one hit per finger (see below)
       if(padEditMode){
         // In edit mode: always open picker regardless of whether sound assigned
         openPadPicker(idx);
@@ -503,3 +504,25 @@ function firePad(idx,ev){
 // iOS: stop double-tap zoom, the text magnifier and selection from swallowing quick repeated taps on the pads
 // (pointerdown still fires first, so every tap is played)
 if(padGridEl)['touchstart','touchend','dblclick','selectstart'].forEach(n=>padGridEl.addEventListener(n,e=>{if(e.cancelable&&!padEditMode)e.preventDefault();},{passive:false}));
+// Every finger fires a touchstart, even when iOS thinks two fingers might be a pinch (that's when pointer events
+// get cancelled and taps were lost). So on touchscreens the pads play from touchstart, one hit per new finger.
+// A finger landing sends both a pointerdown and a touchstart (in either order, or only the touchstart when iOS
+// cancels the pointer for a possible pinch). Whichever arrives first plays the pad; the other one, a few ms later,
+// is the same finger and is skipped.
+const _padTouchAt=[];
+function padTouchFire(idx,e){
+  const now=performance.now();
+  if(now-(_padTouchAt[idx]||-1e9)<45)return;
+  _padTouchAt[idx]=now;firePad(idx,e);
+}
+if(padGridEl)padGridEl.addEventListener('touchstart',e=>{
+  if(padEditMode)return;
+  for(const tch of e.changedTouches){
+    const hit=document.elementFromPoint(tch.clientX,tch.clientY),el=hit&&hit.closest('.pad');
+    const idx=el?padEls.indexOf(el):-1;
+    if(idx<0||!padSounds[idx])continue;           // ghost pad / empty pad: their pointerdown handles them
+    padTouchFire(idx,e);
+  }
+},{passive:false});
+// iOS: never let a two-finger touch on the pads turn into a page zoom
+['gesturestart','gesturechange'].forEach(n=>document.addEventListener(n,e=>{if(e.target&&e.target.closest&&e.target.closest('#padGrid'))e.preventDefault();},{passive:false}));

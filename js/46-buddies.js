@@ -1,5 +1,6 @@
 // ── Alien buddy characters drawn in the minigame art style ──
 // Bright core → dark edge gradients with a white hotspot, ink-dark details, glowing accents, no emoji.
+// One 3D model for every view, so features line up at any angle.
 // drawBuddy(ctx, x, y, size, opts) draws the buddy centred at (x,y), about `size` px tall (same box as the old 👽 emoji).
 //   opts.view : 'front' | 'side'      opts.face : 1 (right) | -1 (left)  (side view)
 //   opts.run  : run phase in cycles (one cycle = two steps)               opts.air : true while jumping
@@ -40,37 +41,6 @@
     cache[key]=c;return c;
   }
   const grad=(g,x,y,r,col)=>{const k=g.createRadialGradient(x-r*.35,y-r*.4,r*.05,x,y,r);k.addColorStop(0,col[0]);k.addColorStop(.45,col[1]);k.addColorStop(1,col[2]);return k;};
-  // a bead seen from the front: a ring with the hole facing out
-  function beadFront(g,x,y,rx,ry,col,blink){
-    g.save();g.translate(x,y);g.scale(1,blink);
-    g.fillStyle=grad(g,0,0,Math.max(rx,ry),col);g.beginPath();g.ellipse(0,0,rx,ry,0,0,Math.PI*2);g.fill();
-    g.fillStyle='#fff';g.beginPath();g.ellipse(0,ry*.05,rx*.42,ry*.36,-.25,0,Math.PI*2);g.fill();
-    g.fillStyle='rgba(26,10,32,.35)';g.beginPath();g.ellipse(rx*.08,ry*.15,rx*.24,ry*.2,-.25,0,Math.PI*2);g.fill();
-    g.fillStyle='rgba(255,255,255,.85)';g.beginPath();g.arc(-rx*.5,-ry*.5,Math.max(1,rx*.14),0,Math.PI*2);g.fill();
-    g.restore();
-  }
-  // a glossy pony bead turned partly sideways: thick shiny ring, black hole, a sliver of the inner wall, iridescent sheen
-  function ponyBead(g,x,y,r,col,sx,blink,tilt){
-    g.save();g.translate(x,y);g.rotate(tilt||0);g.scale(sx,blink);
-    const hx=r*.16,hr=r*.4;                                          // the hole sits toward the side facing us
-    g.fillStyle='rgba(26,10,32,.35)';g.beginPath();g.arc(-r*.06,r*.08,r*1.04,0,Math.PI*2);g.fill();
-    const k=g.createRadialGradient(-r*.4,-r*.45,r*.05,0,0,r);k.addColorStop(0,col[0]);k.addColorStop(.5,col[1]);k.addColorStop(1,col[2]);
-    g.fillStyle=k;g.beginPath();g.arc(0,0,r,0,Math.PI*2);g.fill();
-    const ir=g.createLinearGradient(-r,-r,r,r);ir.addColorStop(0,'rgba(255,140,220,.22)');ir.addColorStop(.5,'rgba(255,255,255,0)');ir.addColorStop(1,'rgba(120,200,255,.2)');
-    g.fillStyle=ir;g.beginPath();g.arc(0,0,r,0,Math.PI*2);g.fill();
-    // hole: pitch black in the middle, the bead's inner wall catching a little light on the far side
-    g.save();g.beginPath();g.arc(hx,0,hr,0,Math.PI*2);g.clip();
-    g.fillStyle='#000';g.fillRect(hx-hr,-hr,hr*2,hr*2);
-    const w=g.createLinearGradient(hx-hr,0,hx+hr*.2,0);w.addColorStop(0,col[2]);w.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=w;g.beginPath();g.arc(hx-hr*.35,0,hr,0,Math.PI*2);g.fill();
-    g.restore();
-    g.strokeStyle='rgba(0,0,0,.45)';g.lineWidth=Math.max(.6,r*.06);g.beginPath();g.arc(hx,0,hr,0,Math.PI*2);g.stroke();
-    // shine: a bright curved streak top-left, a softer one bottom-right, a sparkle
-    g.lineCap='round';
-    g.strokeStyle='rgba(255,255,255,.9)';g.lineWidth=r*.16;g.beginPath();g.arc(0,0,r*.7,Math.PI*1.08,Math.PI*1.45);g.stroke();
-    g.strokeStyle='rgba(255,255,255,.35)';g.lineWidth=r*.12;g.beginPath();g.arc(0,0,r*.72,Math.PI*.1,Math.PI*.38);g.stroke();
-    g.fillStyle='#fff';g.beginPath();g.arc(-r*.22,-r*.78,Math.max(.6,r*.08),0,Math.PI*2);g.fill();
-    g.restore();
-  }
   // pipe cleaner: a fuzzy yellow wire (thick dark pass, light pass, little fluff dots)
   function stem(g,pts,u,B){
     g.lineCap='round';g.lineJoin='round';
@@ -103,82 +73,87 @@
     g.fillStyle=top;path(0);g.fill();
     g.strokeStyle='rgba(255,255,255,'+(o.dark?.12:.35)+')';g.lineWidth=Math.max(.6,u*.9);path(0);g.stroke();
   }
-  // both feet under the pom for a body turned to angle th (radians), drawn far one first
-  function feetAt(g,u,B,th,step){
+  // barrel pony bead glued to the pom: a short glossy cylinder whose hole runs along the surface normal n (3D, view space).
+  // p = screen point where the bead meets the fluff; it sticks out along n by `len`.
+  function barrelBead(g,p,n,r,len,hole,col){
+    const d=Math.hypot(n.x,n.y),ax=d>1e-4?n.x/d:0,ay=d>1e-4?n.y/d:0,mx=-ay,my=ax;   // screen axis + the end ellipse's long axis
+    const sq=Math.max(.06,Math.abs(n.z)),ang=Math.atan2(my,mx);
+    const c0={x:p.x,y:p.y},c1={x:p.x+n.x*len,y:p.y+n.y*len};                       // back and front end centres
+    // barrel wall: the two end ellipses joined, shaded across its width (light from the top-left)
+    const wall=g.createLinearGradient(c1.x+mx*r,c1.y+my*r,c1.x-mx*r,c1.y-my*r);
+    const lit=(mx*-1+my*-1)>0;wall.addColorStop(0,lit?col[0]:col[2]);wall.addColorStop(.5,col[1]);wall.addColorStop(1,lit?col[2]:col[0]);
+    g.fillStyle='rgba(26,10,32,.35)';g.beginPath();g.ellipse(c0.x+u0*.6,c0.y+u0,r*1.05,r*1.05*sq,ang,0,Math.PI*2);g.fill();
+    g.fillStyle=wall;g.beginPath();g.ellipse(c0.x,c0.y,r,r*sq,ang,0,Math.PI*2);g.fill();
+    g.beginPath();g.moveTo(c0.x+mx*r,c0.y+my*r);g.lineTo(c1.x+mx*r,c1.y+my*r);g.lineTo(c1.x-mx*r,c1.y-my*r);g.lineTo(c0.x-mx*r,c0.y-my*r);g.closePath();g.fill();
+    if(d>.15){g.strokeStyle='rgba(255,255,255,.55)';g.lineCap='round';g.lineWidth=r*.18;const o=lit?.55:-.55;   // shine running along the barrel
+      g.beginPath();g.moveTo(c0.x+mx*r*o+ax*r*.15,c0.y+my*r*o+ay*r*.15);g.lineTo(c1.x+mx*r*o-ax*r*.1,c1.y+my*r*o-ay*r*.1);g.stroke();}
+    if(n.z<-.02)return;                                                             // end face turned away
+    // front end: glossy ring, black hole with a sliver of inner wall, iridescent sheen, highlight + sparkle
+    g.save();g.translate(c1.x,c1.y);g.rotate(ang);g.scale(1,sq);
+    const k=g.createRadialGradient(-r*.35,-r*.4,r*.05,0,0,r);k.addColorStop(0,col[0]);k.addColorStop(.55,col[1]);k.addColorStop(1,col[2]);
+    g.fillStyle=k;g.beginPath();g.arc(0,0,r,0,Math.PI*2);g.fill();
+    const ir=g.createLinearGradient(-r,-r,r,r);ir.addColorStop(0,'rgba(255,140,220,.22)');ir.addColorStop(.5,'rgba(255,255,255,0)');ir.addColorStop(1,'rgba(120,200,255,.2)');g.fillStyle=ir;g.beginPath();g.arc(0,0,r,0,Math.PI*2);g.fill();
+    g.fillStyle='#000';g.beginPath();g.arc(0,0,hole,0,Math.PI*2);g.fill();
+    g.save();g.beginPath();g.arc(0,0,hole,0,Math.PI*2);g.clip();g.fillStyle=col[2];g.globalAlpha=.8*(1-sq);g.beginPath();g.arc(-hole*1.1,0,hole,0,Math.PI*2);g.fill();g.restore();
+    g.strokeStyle='rgba(255,255,255,.85)';g.lineWidth=r*.15;g.lineCap='round';g.beginPath();g.arc(0,0,(r+hole)/2,Math.PI*1.08,Math.PI*1.45);g.stroke();
+    g.strokeStyle='rgba(255,255,255,.3)';g.lineWidth=r*.1;g.beginPath();g.arc(0,0,(r+hole)/2,Math.PI*.1,Math.PI*.38);g.stroke();
+    g.restore();
+  }
+  let u0=1;
+  // feet are drawn twice: in full before the pom, then again clipped to just the parts physically in front of it.
+  // A point on a foot's top face at screen (px,py) has depth (py-baseY)/FK; it shows if that's nearer than the pom's surface there.
+  function frontClip(g,u,baseY){
+    const R=u*33,CY=u*2,N=24,BIG=u*400,f=[];
+    for(let i=0;i<=N;i++){const px=-R+2*R*i/N;let lo=CY-R,hi=CY+R;
+      for(let it=0;it<16;it++){const py=(lo+hi)/2,dy=py-CY,q=R*R-px*px-dy*dy,ok=q<=0||(py-baseY)/FK>Math.sqrt(q);if(ok)hi=py;else lo=py;}f.push([px,hi]);}
+    g.beginPath();g.moveTo(-BIG,-BIG);g.lineTo(-R,-BIG);f.forEach(([x,y])=>g.lineTo(x,y));g.lineTo(R,-BIG);g.lineTo(BIG,-BIG);g.lineTo(BIG,BIG);g.lineTo(-BIG,BIG);g.closePath();g.clip();
+  }
+  function feet(g,u,B,th,step,pass){
     const c=Math.cos(th),sn=Math.sin(th),L=[];
     [-1,1].forEach(sd=>{const mx=sd*u*13,mz=u*2,X=mx*c+mz*sn,Z=-mx*sn+mz*c,st=step?step(sd):{x:0,y:0,a:0};
-      L.push({z:Z,f:()=>duckFoot(g,X+st.x,u*35+Z*FK+st.y,th+sd*.14,u,B,{pitch:st.a,dark:Math.abs(sn)>.2&&Z<0})});});
+      L.push({z:Z,f:()=>{if(pass===2){g.save();frontClip(g,u,u*35+st.y);}
+        duckFoot(g,X+st.x,u*35+Z*FK+st.y,th+sd*.14,u,B,{pitch:st.a,dark:Math.abs(sn)>.2&&Z<0});
+        if(pass===2)g.restore();}});});
     L.sort((a,b)=>a.z-b.z).forEach(d=>d.f());
   }
-  function drawFront(g,B,u,o){
-    const t=o.t||0,sway=Math.sin(t*2.2)*u*2,pulse=o.pulse||0;
-    // antennae: up from the top of the pom, arcing outward, beads hanging at the ends
-    stem(g,[-u*8,-u*24, -u*10,-u*48, -u*30,-u*54, -u*34+sway,-u*36],u,B);
-    stem(g,[u*8,-u*24, u*10,-u*48, u*30,-u*54, u*34+sway,-u*36],u,B);
-    const ball=furBall(B,Math.max(16,Math.round(u*50)));g.drawImage(ball,-u*50,-u*50+u*2,u*100,u*100);
-    // the pom sits on two flat stick pieces; from the front you see their rounded ends peeking out under it
-    g.fillStyle='rgba(26,10,32,.35)';g.beginPath();g.ellipse(0,u*41,u*28,u*3.5,0,0,Math.PI*2);g.fill();
-    feetAt(g,u,B,0);
-    const blink=((t%3.7)<.12)?.15:1;
-    beadFront(g,-u*11,-u*2,u*8,u*7,B.eye,blink);beadFront(g,u*11,-u*2,u*8,u*7,B.eye,blink);
-    beadFront(g,0,u*14,u*7,u*5.2,B.mouth,1);
-    tip(g,-u*34+sway,-u*36,u,B,pulse);tip(g,u*34+sway,-u*36,u,B,pulse);
-  }
-  function drawSide(g,B,u,o){
-    const t=o.t||0,ph=(o.run||0)*Math.PI*2,air=!!o.air,sp=o.speed==null?1:o.speed,pulse=o.pulse||0;
-    const bob=air?0:-Math.abs(Math.sin(ph))*u*2*sp,lean=air?.05:.12*sp;
-    // feet: two flat stick pieces under the pom that shuffle along, two steps per cycle.
-    // The stepping one lifts a little with its front end tipped up; in the air they hang flat, tipped slightly down.
-    const step=p=>air?{x:0,y:u*2,a:.12}:{x:Math.sin(p)*u*6*sp,y:-Math.max(0,Math.cos(p))*u*5*sp,a:-Math.max(0,Math.cos(p))*.18*sp};
-    const fA=step(ph+Math.PI),fB=step(ph);
-    g.fillStyle='rgba(26,10,32,.3)';g.beginPath();g.ellipse(0,u*41.5-bob,u*26,u*3,0,0,Math.PI*2);g.fill();
-    g.save();g.translate(0,bob);
-    // far antenna, swept back a little more and drawn behind the body
-    const sw=u*(10+8*sp)+Math.sin(ph*2)*u*2*sp,fl=Math.sin(t*3)*u;
-    stem(g,[-u*6,-u*24, -u*4,-u*48, -u*22-sw*.6,-u*56, -u*30-sw,-u*40+fl],u,B);tip(g,-u*30-sw,-u*40+fl,u,B,pulse*.6);
-    g.save();g.rotate(lean);
-    const ball=furBall(B,Math.max(16,Math.round(u*50)));g.drawImage(ball,-u*50,-u*50+u*2,u*100,u*100);
-    g.restore();feetAt(g,u,B,Math.PI/2,sd=>sd<0?fB:fA);g.save();g.rotate(lean);   // near stick, in front of the pom's bottom
-    // near eye: a glossy pony bead turned toward us, hole facing out
-    const blink=((t%3.7)<.12)?.15:1;
-    ponyBead(g,u*17,-u*3,u*7.5,B.eye,.72,blink,0);
-    // a sliver of the far eye peeking past the front of the pom
-    g.fillStyle=B.eye[2];g.beginPath();g.ellipse(u*29,-u*3,u*1.6,u*5*blink,0,0,Math.PI*2);g.fill();
-    // mouth: a pony bead at the front of the face, turned sideways so its black hole faces forward
-    ponyBead(g,u*29,u*13,u*6.2,B.mouth,.55,1,-.1);
-    g.restore();
-    // near antenna: base on top, curving up and streaming back as she runs
-    stem(g,[u*2,-u*24, u*4,-u*50, -u*14-sw*.4,-u*58, -u*22-sw*.8,-u*42-fl],u,B);tip(g,-u*22-sw*.8,-u*42-fl,u,B,pulse);
-    g.restore();
-  }
-
-  // ── turnaround: any angle around her (0 = facing you, 90 = facing right, 180 = back). Features sit on the pom's
-  // surface in 3D and are projected, so 3/4 and back views line up with the front and side.
-  function drawTurn(g,B,u,o){
-    const th=(o.angle||0)*Math.PI/180,c=Math.cos(th),sn=Math.sin(th),t=o.t||0,pulse=o.pulse||0,R=u*31,CY=u*2;
+  // the whole buddy at body angle th (0 = facing you, +90deg = facing right). Running adds stepping feet,
+  // a forward lean and antennae streaming back; everything else is the same model as the turnaround.
+  function drawModel(g,B,u,o){
+    u0=u;const th=o.angle||0,c=Math.cos(th),sn=Math.sin(th),t=o.t||0,pulse=o.pulse||0,R=u*31,CY=u*2;
+    const run=o.run!=null&&o.speed!==0&&Math.abs(sn)>.5,air=!!o.air,sp=o.speed==null?1:o.speed,ph=(o.run||0)*Math.PI*2,dir=sn>=0?1:-1;
     const rot=(x,y,z)=>({x:x*c+z*sn,y,z:-x*sn+z*c});
-    const later=[],before=[];
-    // ground shadow
-    g.fillStyle='rgba(26,10,32,.33)';g.beginPath();g.ellipse(0,u*41,u*30,u*3.6,0,0,Math.PI*2);g.fill();
-    // antennae: pipe cleaners rising from the top, arcing out to the sides and leaning slightly back
-    [-1,1].forEach(sd=>{const P=[[8,-24,0],[10,-48,-6],[30,-54,-12],[34,-36,-16]].map(([x,y,z])=>rot(sd*x*u,y*u,z*u)),zz=P[3].z;
-      const f=()=>{stem(g,[P[0].x,P[0].y,P[1].x,P[1].y,P[2].x,P[2].y,P[3].x,P[3].y],u,B);tip(g,P[3].x,P[3].y,u,B,pulse);};
-      (zz>-u*4?later:before).push({z:zz,f});});
-    // bead eyes and mouth on the pom's surface
-    const bead=(lx,ly,r,col,sxr)=>{const lat=Math.asin(ly/R),lon=Math.asin(lx/(R*Math.cos(lat)));
-      const nx=Math.sin(lon)*Math.cos(lat),nz=Math.cos(lon)*Math.cos(lat),n=rot(nx,0,nz),out=R*.97+u*2.5,p=rot(nx*out,ly,nz*out);
-      if(n.z<-.12)return;const sx=Math.max(.38,n.z)*(n.x<0?-1:1)*(sxr||1),fade=Math.min(1,(n.z+.12)/.2);
-      later.push({z:p.z+R,f:()=>{g.save();g.globalAlpha=fade;ponyBead(g,p.x,CY+ly,r,col,sx,1,0);g.restore();}});};
-    bead(-u*11,-u*4,u*7.5,B.eye);bead(u*11,-u*4,u*7.5,B.eye);bead(0,u*12,u*6.2,B.mouth,.85);
+    const bob=run&&!air?-Math.abs(Math.sin(ph))*u*2*sp:0,lean=run?(air?.05:.12*sp)*dir:0;
+    // stepping: the moving foot slides forward, lifts and tips its rounded front up; in the air both hang tipped down
+    const step=run||air?(sd=>{const p=ph+(sd>0?Math.PI:0);if(air)return{x:0,y:u*2,a:.12*dir};
+      const lift=Math.max(0,Math.cos(p));return{x:Math.sin(p)*u*6*sp*dir,y:-lift*u*5*sp,a:-lift*.18*sp*dir};}):null;
+    const sweep=run?u*(12+8*sp)+Math.sin(ph*2)*u*2*sp:0,fl=Math.sin(t*3)*u*(run?1:.5);
+    g.save();g.translate(0,bob);
+    g.fillStyle='rgba(26,10,32,.33)';g.beginPath();g.ellipse(0,u*41-bob,u*30,u*3.6,0,0,Math.PI*2);g.fill();
+    const before=[],after=[];
+    // antennae: pipe cleaners from the top, arcing out and leaning back; when running they stream further back
+    [-1,1].forEach(sd=>{const P=[[8,-24,0,0],[10,-48,-6,.3],[30,-54,-12,.7],[34,-36,-16,1]].map(([x,y,z,w])=>rot(sd*x*u,y*u+(w===1?fl*sd:0),z*u-sweep*w));
+      P.forEach(q=>q.y+=q.z*FK);const f=()=>{stem(g,[P[0].x,P[0].y,P[1].x,P[1].y,P[2].x,P[2].y,P[3].x,P[3].y],u,B);tip(g,P[3].x,P[3].y,u,B,pulse);};
+      (P[3].z>-u*4?after:before).push({z:P[3].z,f});});
+    // barrel pony beads: eyes level and mirror-symmetric, mouth centred below; all stick out the same amount
+    const bead=(lx,ly,r,len,hole,col)=>{const lat=Math.asin(ly/R),lon=Math.asin(lx/(R*Math.cos(lat)));
+      const nx=Math.sin(lon)*Math.cos(lat),ny=Math.sin(lat),nz=Math.cos(lon)*Math.cos(lat),n=rot(nx,ny,nz),p=rot(nx*R*.93,ny*R*.93,nz*R*.93);
+      if(n.z<-.2)return;after.push({z:p.z+R,f:()=>barrelBead(g,{x:p.x,y:CY+p.y},n,r,len,hole,col)});};
+    bead(-u*11,-u*4,u*7,u*6,u*2.8,B.eye);bead(u*11,-u*4,u*7,u*6,u*2.8,B.eye);bead(0,u*12,u*5.6,u*5,u*2.2,B.mouth);
     before.sort((a,b)=>a.z-b.z).forEach(d=>d.f());
+    feet(g,u,B,th,step,1);
+    g.save();g.translate(0,CY);g.rotate(lean);g.translate(0,-CY);
     const ball=furBall(B,Math.max(16,Math.round(u*50)));g.drawImage(ball,-u*50,-u*50+u*2,u*100,u*100);
-    feetAt(g,u,B,th);
-    later.sort((a,b)=>a.z-b.z).forEach(d=>d.f());
+    g.restore();
+    feet(g,u,B,th,step,2);
+    g.save();g.translate(0,CY);g.rotate(lean);g.translate(0,-CY);
+    after.sort((a,b)=>a.z-b.z).forEach(d=>d.f());
+    g.restore();g.restore();
   }
   window.drawBuddy=function(g,x,y,size,o){
     o=o||{};const B=BUDDIES[o.id||current]||BUDDIES.chloe,u=size/100;
-    g.save();g.translate(x,y+u*5.5);   // sticks rest on the ground at the bottom of the box
-    if(o.view==='turn')drawTurn(g,B,u,o);else if(o.view==='side'){if((o.face||1)<0)g.scale(-1,1);drawSide(g,B,u,o);}else drawFront(g,B,u,o);
+    const angle=o.view==='turn'?(o.angle||0)*Math.PI/180:o.view==='side'?((o.face||1)<0?-Math.PI/2:Math.PI/2):0;
+    g.save();g.translate(x,y+u*5.5);   // feet rest on the ground at the bottom of the box
+    drawModel(g,B,u,Object.assign({},o,{angle}));
     g.restore();
   };
   window.buddyInfo=function(id){return BUDDIES[id||current]||BUDDIES.chloe;};

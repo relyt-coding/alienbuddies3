@@ -146,3 +146,13 @@ setInterval(()=>{
     showHintModal('🃏','Your aliens made an Alien Gem! Spend it in the Bunker to unlock the MATCHING GAME and earn Point Multipliers.');
   }
 },4000);
+
+// ── lead the way to the Matching Game: once you can afford it, the BUNKER button and the MATCHING GAME button glow
+//    (stops as soon as it's bought) ──
+setInterval(()=>{
+  if(typeof mgBought==='undefined'||typeof alienGems==='undefined')return;
+  const on=!mgBought.match&&alienGems>=MG_PRICE.match&&!(typeof TEST_MODE!=='undefined'&&TEST_MODE);
+  const bb=document.getElementById('openBunkerBtn'),mb=document.getElementById('matchingGameBtn');
+  if(bb)bb.classList.toggle('lead-glow',on);
+  if(mb)mb.classList.toggle('lead-glow',on);
+},500);

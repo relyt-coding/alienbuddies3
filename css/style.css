@@ -2057,3 +2057,8 @@ body.shop-b .store-section-label{color:#6a6a8a;font-size:.85rem;}
 .lock-cost{font-size:1rem !important;}
 #skillTreeUnlockCost{font-size:1.05rem !important;letter-spacing:.1em;color:#4a6aa0;}
 #skillTreeUnlockBtn.can-afford #skillTreeUnlockCost{color:#8fb0ff;}
+
+/* "go here next" glow: the BUNKER and MATCHING GAME buttons once your first gem can unlock the Matching Game */
+@keyframes leadGlow{0%,100%{box-shadow:0 0 5px 0 rgba(0,255,136,.3);border-color:#1f8a5a;}50%{box-shadow:0 0 18px 4px rgba(0,255,136,.7);border-color:#00ff88;color:#b8ffdc;}}
+#openBunkerBtn.lead-glow,#matchingGameBtn.lead-glow{animation:leadGlow 1.4s ease-in-out infinite;}
+@media (prefers-reduced-motion:reduce){#openBunkerBtn.lead-glow,#matchingGameBtn.lead-glow{animation:none;box-shadow:0 0 14px 3px rgba(0,255,136,.6);border-color:#00ff88;}}

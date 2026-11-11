@@ -2,6 +2,12 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.115 - 2026-11-11 01:35
+
+- Floating buddies are about 30% bigger and tumble freely in zero gravity: each drifts slowly around its own random axis (turning, tipping and rolling), with the light staying fixed
+- The tier-up chime only plays when you can see that tracker (no chime from the shop, bunker, cockpit or behind a popup)
+- No alien emoji anywhere: Chloe on the title screen (slowly turning), the header, shop, stats, settings and save slots; new app icons and link preview image; text labels use 🛸
+
 ## v0.2.114 - 2026-11-11 01:15
 
 - Alien buddies: the 👽 emoji is replaced by 3D craft buddies (pom-pom body, barrel pony-bead eyes and mouth, pipe-cleaner antennae with glowing tips, duck-shaped popsicle-stick feet). Buddy #1 is Chloe; all 100 buddies have their own colour combo

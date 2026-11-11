@@ -297,10 +297,10 @@ const SKILL_TREE_NODES = [
 
   // ── QUAD SUN 3 — Minigames (↙) ──
   {id:'sun_minigames', icon:'☀', name:'Quad Sun III', desc:'The third Quad Sun. Opens the Minigame Nexus path. Grants ×2 points.', cost:150, requires:['core'], x:-200, y:200, branch:'minigames', mult:2},
-  // (Planet Hop 1–5 and the Matching Game are bought in the bunker; this path opens everything after them)
-  {id:'ph_ice', icon:'❄️', name:'Ice Planet', desc:'Opens GLACIA in Planet Hop: levels 6–10 — bounce pads, falling icicles, ice scorpions and crystal bells you ring with BOUNCE.', cost:300, requires:['sun_minigames'], x:-340, y:300, branch:'minigames', mult:1.5},
-  {id:'mg_cockpit', icon:'🚀', name:'Minigame Cockpit', desc:'Builds the COCKPIT: a new page left of the bunker (swipe right from the bunker, or press GAMES) where all your minigames live.', cost:450, requires:['ph_ice'], x:-480, y:370, branch:'minigames', mult:1.5},
-  {id:'ww_moon', icon:'🪱', name:'Worm Whack', desc:'Unlocks WORM WHACK levels 1–5: whack space worms on a rocky moon to the beat. Every win boosts your Alien Gems.', cost:650, requires:['mg_cockpit'], x:-600, y:470, branch:'minigames', mult:1.5},
+  // (the Matching Game is bought in the bunker; this path opens the Cockpit with Planet Hop 1–5, then everything after it)
+  {id:'mg_cockpit', icon:'🚀', name:'Minigame Cockpit', desc:'Builds the COCKPIT: a new page left of the bunker (swipe right from the bunker, or press GAMES) where all your minigames live, and opens PLANET HOP: levels 1–5 on the moon Luna.', cost:300, requires:['sun_minigames'], x:-340, y:300, branch:'minigames', mult:1.5},
+  {id:'ph_ice', icon:'❄️', name:'Ice Planet', desc:'Opens GLACIA in Planet Hop: levels 6–10 — bounce pads, falling icicles, ice scorpions and crystal bells you ring with BOUNCE.', cost:450, requires:['mg_cockpit'], x:-480, y:370, branch:'minigames', mult:1.5},
+  {id:'ww_moon', icon:'🪱', name:'Worm Whack', desc:'Unlocks WORM WHACK levels 1–5: whack space worms on a rocky moon to the beat. Every win boosts your Alien Gems.', cost:650, requires:['ph_ice'], x:-600, y:470, branch:'minigames', mult:1.5},
   {id:'ph_magma', icon:'🌋', name:'Magmora', desc:'Opens MAGMORA in Planet Hop: levels 11–15, ending with the supernova comet.', cost:900, requires:['ww_moon'], x:-720, y:560, branch:'minigames', mult:1.5},
   {id:'beat_defense', icon:'🛸', name:'Beat Defense', desc:'Unlocks BEAT DEFENSE: guard your ship from lizards and scorpions with drum towers. Where you build a tower decides which beat it fires on — your defense is your beat.', cost:1300, requires:['ph_magma'], x:-860, y:650, branch:'minigames', mult:1.5},
   {id:'grand_tournament', icon:'🏆', name:'Grand Tournament', desc:'Coming soon — weekly challenge mode.', cost:5000, requires:['beat_defense'], x:-990, y:740, branch:'minigames', mult:1.5, placeholder:true},
@@ -1119,9 +1119,9 @@ function checkContextualHints(){
     showHintModal('💡',"Click on 'TIPS' in the Bunker to read helpful hints and earn Point Multipliers!");
     return;
   }
-  if(typeof mgBought!=='undefined'&&!mgBought.match&&mgBought.ph&&alienGems>=10&&!shownHints.matchingIntro&&matchLevelsCompleted<0){
+  if(typeof mgBought!=='undefined'&&!mgBought.match&&alienGems>=1&&!shownHints.matchingIntro&&matchLevelsCompleted<0){
     shownHints.matchingIntro=true;shownHints.matchingGame=true;autoSave();
-    showHintModal('🃏','Unlock the Matching Game in the Bunker for 10 Alien Gems to gain Point Multipliers!');
+    showHintModal('🃏','Unlock the Matching Game in the Bunker for 1 Alien Gem to gain Point Multipliers!');
     return;
   }
 }

@@ -45,7 +45,7 @@ function updateMatchingBtn(){
   // (levels are shown from 1: the first board is 4 cards and free, then each level needs 4 more Alien Buddies)
   if(typeof mgBought!=='undefined'&&!mgBought.match&&!(typeof TEST_MODE!=='undefined'&&TEST_MODE)){
     btn.style.opacity='1';btn.style.borderColor='#1f6a3a';btn.style.color='#66cc88';btn.style.background='#03120a';btn.style.cursor='pointer';btn.style.boxShadow='none';btn.classList.remove('match-glow');
-    btn.innerHTML='🃏 MATCHING GAME <span class="mg-price">UNLOCK · 💎 10</span>';lck.textContent='';
+    btn.innerHTML='🃏 MATCHING GAME <span class="mg-price">UNLOCK · 💎 '+(typeof MG_PRICE!=='undefined'?MG_PRICE.match:1)+'</span>';lck.textContent='';
     btn.onclick=()=>mgBuy('match');return;
   }
   if(nextLvl>0&&totalAliens<needed){

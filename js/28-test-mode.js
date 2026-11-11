@@ -153,12 +153,11 @@ function simStep(dt){
   if(!drumTrackerActive&&score>=25){score-=25;drumTrackerActive=true;}
   if(opts.buySkills)buyCheapestGems();
   if(opts.buyShop||opts.buyTips)buyCheapestPoints();
-  // minigames: buy Planet Hop (1 gem) and the Matching Game (10 gems) in the bunker as soon as possible, and assume a
+  // minigames: buy the Matching Game (1 gem) in the bunker as soon as possible (Planet Hop comes with the Cockpit), and assume a
   // minigame level gets cleared every `mgMins` minutes of play (Planet Hop first, then Worm Whack, then Beat Defense)
   if(typeof mgBought!=='undefined'){
-    if(!mgBought.ph&&alienGems>=1){alienGems-=1;mgBought.ph=true;logEvent('skill','🪐 Planet Hop (bunker)',1,'💎','mg_ph');run.lastBuyT=run.gameT;}
-    if(mgBought.ph&&!mgBought.match&&alienGems>=10){alienGems-=10;mgBought.match=true;logEvent('skill','🃏 Matching Game (bunker)',10,'💎','mg_match');run.lastBuyT=run.gameT;}
-    if(opts.mgAuto&&mgBought.ph){mgT=(mgT||0)+dt;
+    if(!mgBought.match&&alienGems>=1){alienGems-=1;mgBought.match=true;logEvent('skill','🃏 Matching Game (bunker)',1,'💎','mg_match');run.lastBuyT=run.gameT;}
+    if(opts.mgAuto&&mgPhOn()){mgT=(mgT||0)+dt;
       if(mgT>=opts.mgMins*60){mgT=0;const nextOf=(best,max,acc,ok)=>{for(let L=1;L<=max;L++){if(!ok(best[L])){return acc(L)?L:0;}}return 0;};
         let L=nextOf(phProgress.best,15,L=>mgPhAccess(L,true),b=>b&&b.cleared);
         if(L){phProgress.best[L]={cleared:true,pct:1,stars:2,dust:.9};logEvent('note','🪐 cleared Planet Hop '+L+' (sim)',null,'','mg_ph'+L);}

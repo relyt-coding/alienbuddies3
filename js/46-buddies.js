@@ -84,13 +84,21 @@
     g.fillStyle=grad(g,x,y,u*6,B.tip);g.beginPath();g.arc(x,y,u*6,0,Math.PI*2);g.fill();
     g.fillStyle='rgba(255,255,255,.8)';g.beginPath();g.arc(x-u*2,y-u*2.2,u*1.4,0,Math.PI*2);g.fill();
   }
-  // popsicle-stick foot: a rounded stick, pivoting at its top
-  function foot(g,x,y,ang,len,w,col,dark){
-    g.save();g.translate(x,y);g.rotate(ang);
-    const k=g.createLinearGradient(-w/2,0,w/2,0);k.addColorStop(0,dark?col[2]:col[0]);k.addColorStop(.5,dark?col[2]:col[1]);k.addColorStop(1,col[2]);
-    g.fillStyle=k;g.beginPath();if(g.roundRect)g.roundRect(-w/2,-w*.2,w,len,w/2);else g.rect(-w/2,-w*.2,w,len);g.fill();
-    g.fillStyle='rgba(255,255,255,.35)';g.fillRect(-w*.28,w*.2,w*.14,len*.6);
+  // popsicle-stick foot: a 1-inch piece of stick lying FLAT under the ball (the pom-pom sits on top of two of them).
+  // side view = a thin plank seen along its length (cut end at the back, rounded end at the front);
+  // front view = the stick's rounded end facing you.
+  function plank(g,x,y,len,th,col,tilt,dark){
+    g.save();g.translate(x,y);g.rotate(tilt||0);
+    const k=g.createLinearGradient(0,-th/2,0,th/2);k.addColorStop(0,dark?col[1]:col[0]);k.addColorStop(.45,dark?col[2]:col[1]);k.addColorStop(1,col[2]);
+    g.fillStyle=k;g.beginPath();
+    g.moveTo(-len/2,-th/2);g.lineTo(len/2-th*.6,-th/2);g.quadraticCurveTo(len/2,-th/2,len/2,0);g.quadraticCurveTo(len/2,th/2,len/2-th*.6,th/2);g.lineTo(-len/2,th/2);g.closePath();g.fill();
+    g.fillStyle='rgba(255,255,255,'+(dark?.15:.45)+')';g.fillRect(-len/2+th*.3,-th/2,len-th*1.2,Math.max(.6,th*.18));
     g.restore();
+  }
+  function stickEnd(g,x,y,w,th,col){
+    const k=g.createLinearGradient(0,y-th/2,0,y+th/2);k.addColorStop(0,col[0]);k.addColorStop(.5,col[1]);k.addColorStop(1,col[2]);
+    g.fillStyle=k;g.beginPath();if(g.roundRect)g.roundRect(x-w/2,y-th/2,w,th,th/2);else g.rect(x-w/2,y-th/2,w,th);g.fill();
+    g.fillStyle='rgba(255,255,255,.45)';g.fillRect(x-w*.35,y-th/2,w*.7,Math.max(.6,th*.2));
   }
   function drawFront(g,B,u,o){
     const t=o.t||0,sway=Math.sin(t*2.2)*u*2,pulse=o.pulse||0;
@@ -98,8 +106,9 @@
     stem(g,[-u*8,-u*24, -u*10,-u*48, -u*30,-u*54, -u*34+sway,-u*36],u,B);
     stem(g,[u*8,-u*24, u*10,-u*48, u*30,-u*54, u*34+sway,-u*36],u,B);
     const ball=furBall(B,Math.max(16,Math.round(u*50)));g.drawImage(ball,-u*50,-u*50+u*2,u*100,u*100);
-    // chunky stick feet poking out the bottom front, splayed like the drawing
-    foot(g,-u*15,u*27,.32,u*18,u*14,B.foot);foot(g,u*15,u*27,-.32,u*18,u*14,B.foot);
+    // the pom sits on two flat stick pieces; from the front you see their rounded ends peeking out under it
+    g.fillStyle='rgba(26,10,32,.35)';g.beginPath();g.ellipse(0,u*36,u*26,u*3.5,0,0,Math.PI*2);g.fill();
+    stickEnd(g,-u*13,u*34,u*14,u*7,B.foot);stickEnd(g,u*13,u*34,u*14,u*7,B.foot);
     const blink=((t%3.7)<.12)?.15:1;
     beadFront(g,-u*11,-u*2,u*8,u*7,B.eye,blink);beadFront(g,u*11,-u*2,u*8,u*7,B.eye,blink);
     beadFront(g,0,u*14,u*7,u*5.2,B.mouth,1);
@@ -107,17 +116,20 @@
   }
   function drawSide(g,B,u,o){
     const t=o.t||0,ph=(o.run||0)*Math.PI*2,air=!!o.air,sp=o.speed==null?1:o.speed,pulse=o.pulse||0;
-    const bob=air?0:-Math.abs(Math.sin(ph))*u*3,lean=air?.05:.12*sp;
-    // legs: a scissor stride, two steps per cycle; tucked forward in the air
-    const swing=air?0:Math.sin(ph)*.6*sp,tuck=air?-.7:0;
+    const bob=air?0:-Math.abs(Math.sin(ph))*u*2*sp,lean=air?.05:.12*sp;
+    // feet: two flat stick pieces under the pom that shuffle along, two steps per cycle.
+    // The stepping one lifts a little with its front end tipped up; in the air they hang flat, tipped slightly down.
+    const step=p=>air?{x:0,y:u*2,a:.12}:{x:Math.sin(p)*u*6*sp,y:-Math.max(0,Math.cos(p))*u*5*sp,a:-Math.max(0,Math.cos(p))*.18*sp};
+    const fA=step(ph+Math.PI),fB=step(ph);
+    g.fillStyle='rgba(26,10,32,.3)';g.beginPath();g.ellipse(0,u*38.5-bob,u*24,u*3,0,0,Math.PI*2);g.fill();
     g.save();g.translate(0,bob);
-    foot(g,-u*5,u*16,tuck+swing*-1,u*34,u*11,B.foot,true);                   // far leg (darker, behind)
+    plank(g,u*1+fA.x,u*33.5+fA.y,u*34,u*7,B.foot,fA.a,true);                 // far stick (darker, behind the pom)
     // far antenna, swept back a little more and drawn behind the body
     const sw=u*(10+8*sp)+Math.sin(ph*2)*u*2*sp,fl=Math.sin(t*3)*u;
     stem(g,[-u*6,-u*24, -u*4,-u*48, -u*22-sw*.6,-u*56, -u*30-sw,-u*40+fl],u,B);tip(g,-u*30-sw,-u*40+fl,u,B,pulse*.6);
-    foot(g,u*5,u*16,tuck+swing,u*34,u*11,B.foot,false);                     // near leg, also tucked under the pom
     g.save();g.rotate(lean);
     const ball=furBall(B,Math.max(16,Math.round(u*50)));g.drawImage(ball,-u*50,-u*50+u*2,u*100,u*100);
+    g.restore();plank(g,u*2+fB.x,u*35+fB.y,u*34,u*7,B.foot,fB.a,false);g.save();g.rotate(lean);   // near stick, in front of the pom's bottom
     // near eye: a glossy pony bead turned toward us, hole facing out
     const blink=((t%3.7)<.12)?.15:1;
     ponyBead(g,u*17,-u*3,u*7.5,B.eye,.72,blink,0);
@@ -132,7 +144,7 @@
   }
   window.drawBuddy=function(g,x,y,size,o){
     o=o||{};const B=BUDDIES[o.id||current]||BUDDIES.chloe,u=size/100;
-    g.save();g.translate(x,y);
+    g.save();g.translate(x,y+u*11);   // sticks rest on the ground at the bottom of the box
     if(o.view==='side'){if((o.face||1)<0)g.scale(-1,1);drawSide(g,B,u,o);}else drawFront(g,B,u,o);
     g.restore();
   };

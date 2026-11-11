@@ -49,6 +49,28 @@
     g.fillStyle='rgba(255,255,255,.85)';g.beginPath();g.arc(-rx*.5,-ry*.5,Math.max(1,rx*.14),0,Math.PI*2);g.fill();
     g.restore();
   }
+  // a glossy pony bead turned partly sideways: thick shiny ring, black hole, a sliver of the inner wall, iridescent sheen
+  function ponyBead(g,x,y,r,col,sx,blink,tilt){
+    g.save();g.translate(x,y);g.rotate(tilt||0);g.scale(sx,blink);
+    const hx=r*.16,hr=r*.4;                                          // the hole sits toward the side facing us
+    g.fillStyle='rgba(26,10,32,.35)';g.beginPath();g.arc(-r*.06,r*.08,r*1.04,0,Math.PI*2);g.fill();
+    const k=g.createRadialGradient(-r*.4,-r*.45,r*.05,0,0,r);k.addColorStop(0,col[0]);k.addColorStop(.5,col[1]);k.addColorStop(1,col[2]);
+    g.fillStyle=k;g.beginPath();g.arc(0,0,r,0,Math.PI*2);g.fill();
+    const ir=g.createLinearGradient(-r,-r,r,r);ir.addColorStop(0,'rgba(255,140,220,.22)');ir.addColorStop(.5,'rgba(255,255,255,0)');ir.addColorStop(1,'rgba(120,200,255,.2)');
+    g.fillStyle=ir;g.beginPath();g.arc(0,0,r,0,Math.PI*2);g.fill();
+    // hole: pitch black in the middle, the bead's inner wall catching a little light on the far side
+    g.save();g.beginPath();g.arc(hx,0,hr,0,Math.PI*2);g.clip();
+    g.fillStyle='#000';g.fillRect(hx-hr,-hr,hr*2,hr*2);
+    const w=g.createLinearGradient(hx-hr,0,hx+hr*.2,0);w.addColorStop(0,col[2]);w.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=w;g.beginPath();g.arc(hx-hr*.35,0,hr,0,Math.PI*2);g.fill();
+    g.restore();
+    g.strokeStyle='rgba(0,0,0,.45)';g.lineWidth=Math.max(.6,r*.06);g.beginPath();g.arc(hx,0,hr,0,Math.PI*2);g.stroke();
+    // shine: a bright curved streak top-left, a softer one bottom-right, a sparkle
+    g.lineCap='round';
+    g.strokeStyle='rgba(255,255,255,.9)';g.lineWidth=r*.16;g.beginPath();g.arc(0,0,r*.7,Math.PI*1.08,Math.PI*1.45);g.stroke();
+    g.strokeStyle='rgba(255,255,255,.35)';g.lineWidth=r*.12;g.beginPath();g.arc(0,0,r*.72,Math.PI*.1,Math.PI*.38);g.stroke();
+    g.fillStyle='#fff';g.beginPath();g.arc(-r*.22,-r*.78,Math.max(.6,r*.08),0,Math.PI*2);g.fill();
+    g.restore();
+  }
   // pipe cleaner: a fuzzy yellow wire (thick dark pass, light pass, little fluff dots)
   function stem(g,pts,u,B){
     g.lineCap='round';g.lineJoin='round';
@@ -96,22 +118,13 @@
     foot(g,u*5,u*16,tuck+swing,u*34,u*11,B.foot,false);                     // near leg, also tucked under the pom
     g.save();g.rotate(lean);
     const ball=furBall(B,Math.max(16,Math.round(u*50)));g.drawImage(ball,-u*50,-u*50+u*2,u*100,u*100);
-    // near eye: bead seen from three-quarters, hole still facing out
+    // near eye: a glossy pony bead turned toward us, hole facing out
     const blink=((t%3.7)<.12)?.15:1;
-    g.save();g.translate(u*17,-u*3);g.scale(1,blink);
-    g.fillStyle=grad(g,0,0,u*7,B.eye);g.beginPath();g.ellipse(0,0,u*5.2,u*7,0,0,Math.PI*2);g.fill();
-    g.fillStyle='#fff';g.beginPath();g.ellipse(u*1.4,0,u*2.2,u*3.6,-.15,0,Math.PI*2);g.fill();
-    g.fillStyle='rgba(26,10,32,.4)';g.beginPath();g.ellipse(u*2,u*.6,u*1.2,u*2,-.15,0,Math.PI*2);g.fill();
-    g.fillStyle='rgba(255,255,255,.85)';g.beginPath();g.arc(-u*1.8,-u*3.2,u*1.1,0,Math.PI*2);g.fill();
-    g.restore();
+    ponyBead(g,u*17,-u*3,u*7.5,B.eye,.72,blink,0);
     // a sliver of the far eye peeking past the front of the pom
     g.fillStyle=B.eye[2];g.beginPath();g.ellipse(u*29,-u*3,u*1.6,u*5*blink,0,0,Math.PI*2);g.fill();
-    // mouth bead poking out the front, opening facing forward
-    const mx=u*27,my=u*13;
-    g.fillStyle=grad(g,mx+u*3,my,u*6,B.mouth);g.beginPath();if(g.roundRect)g.roundRect(mx-u*2,my-u*4.6,u*8,u*9.2,u*2.5);else g.rect(mx-u*2,my-u*4.6,u*8,u*9.2);g.fill();
-    g.fillStyle=B.mouth[1];g.beginPath();g.ellipse(mx+u*6,my,u*2.6,u*4.6,0,0,Math.PI*2);g.fill();
-    g.fillStyle='#fff';g.beginPath();g.ellipse(mx+u*6.4,my,u*1.3,u*2.6,0,0,Math.PI*2);g.fill();
-    g.fillStyle='rgba(255,255,255,.7)';g.fillRect(mx,my-u*3.6,u*3,u*1.2);
+    // mouth: a pony bead at the front of the face, turned sideways so its black hole faces forward
+    ponyBead(g,u*29,u*13,u*6.2,B.mouth,.55,1,-.1);
     g.restore();
     // near antenna: base on top, curving up and streaming back as she runs
     stem(g,[u*2,-u*24, u*4,-u*50, -u*14-sw*.4,-u*58, -u*22-sw*.8,-u*42-fl],u,B);tip(g,-u*22-sw*.8,-u*42-fl,u,B,pulse);

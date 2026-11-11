@@ -50,6 +50,13 @@
     g.strokeStyle=B.stem[1];g.lineWidth=u*3.6;path();g.stroke();
     g.setLineDash([u*1.2,u*2.2]);g.strokeStyle=B.stem[0];g.lineWidth=u*2;path();g.stroke();g.setLineDash([]);
   }
+  function stemRun(g,pts,u,B,off){
+    g.lineCap='round';g.lineJoin='round';
+    const path=()=>{g.beginPath();pts.forEach((q,i)=>i?g.lineTo(q.x,q.y):g.moveTo(q.x,q.y));};
+    g.strokeStyle=B.stem[2];g.lineWidth=u*5.2;path();g.stroke();
+    g.strokeStyle=B.stem[1];g.lineWidth=u*3.6;path();g.stroke();
+    g.setLineDash([u*1.2,u*2.2]);g.lineDashOffset=-off;g.strokeStyle=B.stem[0];g.lineWidth=u*2;path();g.stroke();g.setLineDash([]);g.lineDashOffset=0;
+  }
   function tip(g,x,y,u,B,pulse){
     const hr=u*(13+pulse*5),h=g.createRadialGradient(x,y,u*2,x,y,hr);h.addColorStop(0,'rgba(255,170,90,.75)');h.addColorStop(1,'rgba(255,138,61,0)');g.fillStyle=h;g.beginPath();g.arc(x,y,hr,0,Math.PI*2);g.fill();
     g.fillStyle=grad(g,x,y,u*6,B.tip);g.beginPath();g.arc(x,y,u*6,0,Math.PI*2);g.fill();
@@ -132,19 +139,30 @@
     g.fillStyle='rgba(26,10,32,.33)';g.beginPath();g.ellipse(0,u*41-bob,u*30,u*3.6,0,0,Math.PI*2);g.fill();
     const before=[],after=[];
     // antennae: pipe cleaners from the top, arcing out and leaning back; when running they stream further back
-    const AL=o.antenna==null?1.35:o.antenna;
-    [-1,1].forEach(sd=>{const P=[[8,-24,0,0],[10,-48,-6,.3],[30,-54,-12,.7],[34,-36,-16,1]].map(([x,y,z,w])=>rot(sd*(8+(x-8)*AL)*u,(-24+(y+24)*AL)*u+(w===1?fl*sd:0),z*AL*u-sweep*w));
-      P.forEach(q=>q.y+=q.z*FK);const f=()=>{stem(g,[P[0].x,P[0].y,P[1].x,P[1].y,P[2].x,P[2].y,P[3].x,P[3].y],u,B);tip(g,P[3].x,P[3].y,u,B,pulse);};
-      (P[3].z>-u*4?after:before).push({z:P[3].z,f});});
+    const AL=o.antenna==null?1.35:o.antenna,RS=u*30;
+    // is a 3D point (screen x,y + depth z) in front of the pom? outside its outline, or nearer than its surface there
+    const inFront=q=>{const dx=q.x,dy=q.y-CY,h=RS*RS-dx*dx-dy*dy;return h<=0||q.z>Math.sqrt(h);};
+    [-1,1].forEach(sd=>{const P=[[8,-27,0,0],[10,-48,-6,.3],[30,-54,-12,.7],[34,-36,-16,1]].map(([x,y,z,w])=>rot(sd*(8+(x-8)*AL)*u,(-27+(y+27)*AL)*u+(w===1?fl*sd:0),z*AL*u-sweep*w));
+      P.forEach(q=>q.y+=q.z*FK);
+      const S=[],NS=22;let len=0;
+      for(let i=0;i<=NS;i++){const k=i/NS,m=1-k,b0=m*m*m,b1=3*m*m*k,b2=3*m*k*k,b3=k*k*k;
+        const q={x:b0*P[0].x+b1*P[1].x+b2*P[2].x+b3*P[3].x,y:b0*P[0].y+b1*P[1].y+b2*P[2].y+b3*P[3].y,z:b0*P[0].z+b1*P[1].z+b2*P[2].z+b3*P[3].z};
+        if(i)len+=Math.hypot(q.x-S[i-1].x,q.y-S[i-1].y);q.len=len;S.push(q);}
+      // each segment is in front or behind by its midpoint; consecutive segments on the same side become one stroke
+      let cur=null;
+      for(let i=1;i<S.length;i++){const A=S[i-1],C=S[i],f=inFront({x:(A.x+C.x)/2,y:(A.y+C.y)/2,z:(A.z+C.z)/2});
+        if(!cur||cur.f!==f){cur={f,pts:[A]};const run=cur;(f?after:before).push({z:A.z,f:()=>stemRun(g,run.pts,u,B,run.pts[0].len)});}
+        cur.pts.push(C);}
+      const T=S[S.length-1];(inFront(T)?after:before).push({z:T.z+1,f:()=>tip(g,T.x,T.y,u,B,pulse)});});
     // barrel pony beads: eyes level and mirror-symmetric, mouth centred below; all stick out the same amount
     const bead=(lx,ly,r,len,hole,col,blink)=>{const lat=Math.asin(ly/R),lon=Math.asin(lx/(R*Math.cos(lat)));
       const nx=Math.sin(lon)*Math.cos(lat),ny=Math.sin(lat),nz=Math.cos(lon)*Math.cos(lat),n=rot(nx,ny,nz),p=rot(nx*R*.93,ny*R*.93,nz*R*.93);
-      if(n.z<-.2)return;after.push({z:p.z+R,f:()=>{const by=CY+p.y;if(blink&&blink<1){g.save();g.translate(0,by);g.scale(1,blink);g.translate(0,-by);}barrelBead(g,{x:p.x,y:by},n,r,len,hole,col);if(blink&&blink<1)g.restore();}});};
+      if(n.z<-.75)return;(p.z>-u*2?after:before).push({z:p.z+R,f:()=>{const by=CY+p.y;if(blink&&blink<1){g.save();g.translate(0,by);g.scale(1,blink);g.translate(0,-by);}barrelBead(g,{x:p.x,y:by},n,r,len,hole,col);if(blink&&blink<1)g.restore();}});};
     const bk=(t+3)%15,blink=bk<.16?Math.max(.08,Math.abs(bk-.08)/.08):1;
     bead(-u*11,-u*4,u*7,u*6,u*2.8,B.eye,blink);bead(u*11,-u*4,u*7,u*6,u*2.8,B.eye,blink);bead(0,u*12,u*5.6,u*5,u*2.2,B.mouth);
-    before.sort((a,b)=>a.z-b.z).forEach(d=>d.f());
     feet(g,u,B,th,step,1);
     g.save();g.translate(0,CY);g.rotate(lean);g.translate(0,-CY);
+    before.sort((a,b)=>a.z-b.z).forEach(d=>d.f());
     const ball=furBall(B,Math.max(16,Math.round(u*50)));g.drawImage(ball,-u*50,-u*50+u*2,u*100,u*100);
     g.restore();
     feet(g,u,B,th,step,2);

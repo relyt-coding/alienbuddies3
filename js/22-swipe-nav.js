@@ -4,16 +4,17 @@
 //  Little dots at the bottom show where you are (only while swiping, not when the BUNKER / SHOP buttons are used).
 // ══════════════════════════════════════════════
 (function(){
-  var VIEW_IDS=['gameView','storeView','bunkerView','skillTreeModal','cockpitView'];
+  var VIEW_IDS=['gameView','storeView','bunkerView','skillTreeModal','cockpitView','bestBuddyView'];
   var busy=false,sx=0,sy=0,st=0,tracking=false;
   // page ids: 0 home, 1 shop, 2 bunker, 3 galaxies. Screen order left → right:
   // (4 = the minigame COCKPIT, left of the bunker, once it's unlocked in the skill tree)
-  function pageOrder(){var o=(typeof skillTreeUnlocked!=='undefined'&&skillTreeUnlocked)?[2,0,1,3]:[2,0,1];if(typeof mgCockpitOn==='function'&&mgCockpitOn())o.unshift(4);return o;}
+  function pageOrder(){var o=(typeof skillTreeUnlocked!=='undefined'&&skillTreeUnlocked)?[2,0,1,3]:[2,0,1];if(typeof bbOn==='function'&&bbOn())o.unshift(5);if(typeof mgCockpitOn==='function'&&mgCockpitOn())o.unshift(4);return o;}
   function pageCount(){return pageOrder().length;}
   function cur(){
     var b=document.body.classList,m=document.getElementById('skillTreeModal');
     if(m&&m.classList.contains('open'))return 3;
     if(b.contains('cockpit-open'))return 4;
+    if(b.contains('bestbuddy-open'))return 5;
     return b.contains('store-open')?1:b.contains('bunker-open')?2:0;
   }
   function blocked(t){
@@ -47,8 +48,8 @@
     fromEl.style.transform='translateX('+(dir*100)+'%)';
     toEl.style.transform='translateX(0)';
     // switch the real state (other code relies on these body classes)
-    closeStore();closeBunker();if(typeof closeCockpit==='function')closeCockpit();
-    if(target===1)openStore();else if(target===2)openBunker();else if(target===4&&typeof openCockpit==='function')openCockpit();
+    closeStore();closeBunker();if(typeof closeCockpit==='function')closeCockpit();if(typeof closeBestBuddy==='function'&&target!==5)closeBestBuddy();
+    if(target===1)openStore();else if(target===2)openBunker();else if(target===4&&typeof openCockpit==='function')openCockpit();else if(target===5&&typeof openBestBuddy==='function')openBestBuddy();
     setTimeout(function(){
       if(from===3&&typeof closeSkillTree==='function')closeSkillTree();
       // snap every page to its resting spot with NO animation (the page that just left would otherwise

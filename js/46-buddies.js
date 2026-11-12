@@ -171,7 +171,7 @@
   // th = which way the foot points (0 = toward you, 90deg = right); the camera looks down slightly (K) so the top shows.
   const FK=.18;
   function duckFoot(g,cx,cy,th,u,B,o){
-    o=o||{};const hw=u*5.5,fw=u*10.5,zh=-u*13,zf=u*13,zt=u*19.5,TH=u*4.2,c=Math.cos(th),sn=Math.sin(th),P=[];
+    o=o||{};const SH=o.shoe;if(SH&&SH.B)B=SH.B;const hw=u*5.5,fw=u*10.5,zh=-u*13,zf=u*13,zt=u*19.5,TH=u*4.2,c=Math.cos(th),sn=Math.sin(th),P=[];
     for(let i=0;i<=6;i++){const f=Math.PI+i/6*Math.PI;P.push([hw*Math.cos(f),zh+hw*Math.sin(f)*.8]);}        // round heel
     P.push([fw*.62,u*1]);
     for(let i=0;i<=10;i++){const f=i/10*Math.PI;P.push([fw*Math.cos(f),zf+(zt-zf)*Math.sin(f)]);}              // wide rounded front
@@ -192,7 +192,9 @@
     g.stroke();}
     // contact shadow: soft dark band where the pom presses down on the stick
     if(o.contact){const k=g.createRadialGradient(o.contact.x,o.contact.y,u*4,o.contact.x,o.contact.y,u*21);k.addColorStop(0,'rgba(26,10,32,.6)');k.addColorStop(.6,'rgba(26,10,32,.3)');k.addColorStop(1,'rgba(26,10,32,0)');g.fillStyle=k;g.fillRect(cx-u*40,cy-u*20,u*80,u*40);}
+    if(SH&&window.buddyAcc)buddyAcc.shoe(g,SH,'in',(x,z,h)=>{const q=proj(x,z);return[q[0],q[1]-(h||0)];},u,o.t||0,LITE,o.side||1);
     g.restore();
+    if(SH&&window.buddyAcc)buddyAcc.shoe(g,SH,'out',(x,z,h)=>{const q=proj(x,z);return[q[0],q[1]-(h||0)];},u,o.t||0,LITE,o.side||1,TH);
     // rounded top edge: a bright rim, plus a softer inner bevel
     g.strokeStyle='rgba(255,255,255,'+(o.dark?.12:.4)+')';g.lineWidth=Math.max(.6,u*.9);path(0);g.stroke();
     g.strokeStyle='rgba(255,255,255,'+(o.dark?.05:.15)+')';g.lineWidth=Math.max(.6,u*1.6);path(u*.9);g.stroke();
@@ -234,6 +236,36 @@
     g.strokeStyle='rgba(255,255,255,'+(mat==='glass'?.3:.18)+')';g.lineWidth=r*.1;g.beginPath();g.arc(0,0,(r+hole)/2,Math.PI*.1,Math.PI*.38);g.stroke();
     g.restore();
   }
+  // Eyes are plush-toy 'safety' eyes by default since v0.2.123 (players found the barrel-bead stare a bit creepy).
+  // Softer eye styles (the bead's dark hole + ring can read as a stare). 'safety' = plush-toy safety eye: a glossy dark
+  // dome inside a thin coloured rim. 'plush' = tall glossy oval, Kirby-style. 'button' = the bead with its hole plugged
+  // by a glossy pupil. Highlights stay put on screen (fixed light from the top-left) so the eyes always look wet and alive.
+  function domeEye(g,p,n,r,col,B,style,seed){
+    const d=Math.hypot(n.x,n.y),ax=d>1e-4?n.x/d:0,ay=d>1e-4?n.y/d:0,mx=-ay,my=ax,sq=Math.max(.06,Math.abs(n.z)),ang=Math.atan2(my,mx);
+    // glue seat in the fluff
+    g.save();g.translate(p.x,p.y);g.rotate(ang);g.scale(1,sq);const gs=g.createRadialGradient(0,0,r*.7,0,0,r*1.45);gs.addColorStop(0,'rgba(26,10,32,.55)');gs.addColorStop(1,'rgba(26,10,32,0)');
+    g.fillStyle=gs;g.beginPath();g.arc(0,0,r*1.45,0,Math.PI*2);g.fill();g.restore();
+    if(n.z<-.05)return;
+    const c={x:p.x+n.x*r*.45,y:p.y+n.y*r*.45},oval=style==='plush'?[.8,1.12]:[1,1];
+    g.save();g.translate(c.x,c.y);g.rotate(ang);g.scale(1,sq);g.rotate(-ang);g.scale(oval[0],oval[1]);
+    // side wall of the dome (gives it thickness when turned)
+    g.fillStyle='#07060c';g.beginPath();g.arc(-n.x*r*.25/oval[0],-n.y*r*.25/oval[1],r,0,Math.PI*2);g.fill();
+    if(style==='safety'){
+      const k=g.createRadialGradient(-r*.3,-r*.35,r*.1,0,0,r);k.addColorStop(0,col[0]);k.addColorStop(.6,col[1]);k.addColorStop(1,col[2]);g.fillStyle=k;g.beginPath();g.arc(0,0,r,0,Math.PI*2);g.fill();
+      const pk=g.createRadialGradient(-r*.25,-r*.3,0,0,0,r*.74);pk.addColorStop(0,'#3a3550');pk.addColorStop(.7,'#0a0912');pk.addColorStop(1,'#000');g.fillStyle=pk;g.beginPath();g.arc(0,r*.04,r*.74,0,Math.PI*2);g.fill();
+    }else if(style==='plush'){
+      const pk=g.createRadialGradient(-r*.25,-r*.35,0,0,0,r);pk.addColorStop(0,'#3d3852');pk.addColorStop(.75,'#0c0b14');pk.addColorStop(1,'#000');g.fillStyle=pk;g.beginPath();g.arc(0,0,r,0,Math.PI*2);g.fill();
+      g.save();g.beginPath();g.arc(0,0,r*.98,0,Math.PI*2);g.clip();const ir=g.createLinearGradient(0,r*.1,0,r);ir.addColorStop(0,'rgba(0,0,0,0)');ir.addColorStop(1,col[0]);g.globalAlpha=.85;g.fillStyle=ir;g.beginPath();g.ellipse(0,r*.75,r*.8,r*.5,0,0,Math.PI*2);g.fill();g.restore();
+    }else{ // button: bead face with the hole filled by a glossy dome
+      const k=g.createRadialGradient(-r*.35,-r*.4,r*.05,0,0,r);k.addColorStop(0,col[0]);k.addColorStop(.55,col[1]);k.addColorStop(1,col[2]);g.fillStyle=k;g.beginPath();g.arc(0,0,r,0,Math.PI*2);g.fill();
+      const pk=g.createRadialGradient(-r*.2,-r*.25,0,0,0,r*.55);pk.addColorStop(0,'#45405c');pk.addColorStop(1,'#050409');g.fillStyle=pk;g.beginPath();g.arc(0,0,r*.55,0,Math.PI*2);g.fill();
+    }
+    g.restore();
+    // fixed screen-space highlights: a big soft one top-left and a small sparkle bottom-right
+    const hs=r*Math.min(1,.45+sq*.6);
+    g.fillStyle='rgba(255,255,255,.95)';g.beginPath();g.ellipse(c.x-r*.3*oval[0],c.y-r*.36*oval[1],hs*.3,hs*.24,-.5,0,Math.PI*2);g.fill();
+    g.globalAlpha=.85;g.beginPath();g.arc(c.x+r*.3*oval[0],c.y+r*.3*oval[1],hs*.11,0,Math.PI*2);g.fill();g.globalAlpha=1;
+  }
   let u0=1,LITE=false;
   // feet are drawn twice: in full before the pom, then again clipped to just the parts physically in front of it.
   // A point on a foot's top face at screen (px,py) has depth (py-baseY)/FK; it shows if that's nearer than the pom's surface there.
@@ -243,11 +275,11 @@
       for(let it=0;it<16;it++){const py=(lo+hi)/2,dy=py-CY,q=R*R-px*px-dy*dy,ok=q<=0||(py-baseY)/FK>Math.sqrt(q);if(ok)hi=py;else lo=py;}f.push([px,hi]);}
     g.beginPath();g.moveTo(-BIG,-BIG);g.lineTo(-R,-BIG);f.forEach(([x,y])=>g.lineTo(x,y));g.lineTo(R,-BIG);g.lineTo(BIG,-BIG);g.lineTo(BIG,BIG);g.lineTo(-BIG,BIG);g.closePath();g.clip();
   }
-  function feet(g,u,B,th,step,pass){
+  function feet(g,u,B,th,step,pass,shoe,t){
     const c=Math.cos(th),sn=Math.sin(th),L=[];
     [-1,1].forEach(sd=>{const mx=sd*u*13,mz=u*2,X=mx*c+mz*sn,Z=-mx*sn+mz*c,st=step?step(sd):{x:0,y:0,a:0};
       L.push({z:Z,f:()=>{if(pass===2){g.save();frontClip(g,u,u*35+st.y);}
-        duckFoot(g,X+st.x,u*35+Z*FK+st.y,th+sd*.14,u,B,{pitch:st.a,dark:Math.abs(sn)>.2&&Z<0,contact:{x:0,y:u*33.5}});
+        duckFoot(g,X+st.x,u*35+Z*FK+st.y,th+sd*.14,u,B,{pitch:st.a,dark:Math.abs(sn)>.2&&Z<0,contact:{x:0,y:u*33.5},shoe,t,side:sd});
         if(pass===2)g.restore();}});});
     L.sort((a,b)=>a.z-b.z).forEach(d=>d.f());
   }
@@ -263,6 +295,7 @@
       const lift=Math.max(0,Math.cos(p));return{x:Math.sin(p)*u*6*sp*dir,y:-lift*u*5*sp,a:-lift*.18*sp*dir};}):null;
     const sweep=run?u*(12+8*sp)+Math.sin(ph*2)*u*2*sp:0,fl=(Math.sin(t*3)*.6+Math.sin(t*1.7+.8)*.9)*u*(run?1:1.3);
     g.save();g.translate(0,bob);
+    if(o.platform&&o.A&&window.buddyAcc)buddyAcc.platform(g,o.A,u,t,-bob,'back');
     g.fillStyle='rgba(26,10,32,.33)';g.beginPath();g.ellipse(0,u*41-bob,u*30,u*3.6,0,0,Math.PI*2);g.fill();
     const before=[],after=[],tips=[];
     // antennae: pipe cleaners from the top, arcing out and leaning back; when running they stream further back
@@ -294,8 +327,15 @@
       const nx=Math.sin(lon)*Math.cos(lat),ny=Math.sin(lat),nz=Math.cos(lon)*Math.cos(lat),n=rot(nx,ny,nz),p=rot(nx*R*.93,ny*R*.93,nz*R*.93);
       if(n.z<-.75)return;(p.z>-u*2?after:before).push({z:p.z+R,f:()=>{const by=CY+p.y;if(blink&&blink<1){g.save();g.translate(0,by);g.scale(1,blink);g.translate(0,-by);}barrelBead(g,{x:p.x,y:by},n,r,len,hole,col,B,mat,seed);if(blink&&blink<1)g.restore();}});};
     const bk=(t+3)%15,blink=bk<.16?Math.max(.08,Math.abs(bk-.08)/.08):1;
-    const E2=ES*1.12;bead(-u*11.96*(.85+ES*.15),-u*3.6,u*7*E2,u*6*E2,u*2.8*E2,B.eye,blink,'glass',3);bead(u*11.96*(.85+ES*.15),-u*3.6,u*7*E2,u*6*E2,u*2.8*E2,B.eye,blink,'glass',5);bead(0,u*13.1,u*6.72,u*6,u*2.64,B.mouth,1,'opaque',8);
-    feet(g,u,B,th,step,1);
+    const EST=o.eyeStyle||B.eyeStyle||window.BUDDY_EYE_STYLE||'safety';
+    const E2=ES*1.12;if(EST==='bead'){bead(-u*11.96*(.85+ES*.15),-u*3.6,u*7*E2,u*6*E2,u*2.8*E2,B.eye,blink,'glass',3);bead(u*11.96*(.85+ES*.15),-u*3.6,u*7*E2,u*6*E2,u*2.8*E2,B.eye,blink,'glass',5);}
+    else{const ex=u*13.2*(.85+ES*.15),ey=-u*1.2,er=u*(EST==='plush'?7.6:7.4)*ES;[-1,1].forEach(sd=>{const lx=sd*ex,lat=Math.asin(ey/R),lon=Math.asin(lx/(R*Math.cos(lat)));
+      const nx=Math.sin(lon)*Math.cos(lat),ny=Math.sin(lat),nz=Math.cos(lon)*Math.cos(lat),n=rot(nx,ny,nz),p=rot(nx*R*.95,ny*R*.95,nz*R*.95);if(n.z<-.75)return;
+      (p.z>-u*2?after:before).push({z:p.z+R,f:()=>{const by=CY+p.y;if(blink<1){g.save();g.translate(0,by);g.scale(1,blink);g.translate(0,-by);}domeEye(g,{x:p.x,y:by},n,er,B.eye,B,EST,sd);if(blink<1)g.restore();}});});}
+    bead(0,u*(EST==='bead'?13.1:14.2),u*6.72,u*6,u*2.64,B.mouth,1,'opaque',8);
+    if(o.A&&window.buddyAcc)buddyAcc.attach({g,u,R,CY,rot,B,t,lite:LITE,A:o.A,put:(z,f,fn)=>(f?after:before).push({z,f:fn}),eyeY:EST==='bead'?-u*3.6:-u*1.2,eyeX:EST==='bead'?u*11.96*(.85+ES*.15):u*13.2*(.85+ES*.15),eyeR:u*7*ES});
+    const ACC=o.A&&window.buddyAcc?o.A:null,SHOE=ACC?buddyAcc.shoeSpec(ACC,B):null;
+    feet(g,u,B,th,step,1,SHOE,t);
     g.save();g.translate(0,CY);g.rotate(lean);g.translate(0,-CY);
     // squish: the pom flattens a little where it rests on its feet (anchored at the contact point)
     const SQY=u*33,BR=Math.sin(t*Math.PI*2/2.2)*.022;g.translate(0,SQY);g.scale(1.04+BR,.95-BR*.9);g.translate(0,-SQY);
@@ -315,7 +355,7 @@
     const tgc=h2r(B.tip[1]).join(',');tips.forEach(T=>{if(T.z<-R*.5)return;const a=(.16+pulse*.1)*Math.min(1,(T.z+R*.5)/(R*.5)),k=g.createRadialGradient(T.x,T.y,u*4,T.x,T.y,u*34);k.addColorStop(0,'rgba('+tgc+','+a+')');k.addColorStop(1,'rgba('+tgc+',0)');g.fillStyle=k;g.fillRect(T.x-u*34,T.y-u*34,u*68,u*68);});
     g.restore();}
     g.restore();
-    feet(g,u,B,th,step,2);
+    feet(g,u,B,th,step,2,SHOE,t);
     g.save();g.translate(0,CY);g.rotate(lean);g.translate(0,-CY);g.translate(0,SQY);g.scale(1.04,.95);g.translate(0,-SQY);
     after.sort((a,b)=>a.z-b.z).forEach(d=>d.f());
     if(B.fx)specialFx(g,B,u,R,CY,t,'front',rot);
@@ -347,17 +387,26 @@
       const nx=Math.sin(lon)*Math.cos(lat),ny=Math.sin(lat),nz=Math.cos(lon)*Math.cos(lat),n=rot(nx,ny,nz),p=rot(nx*R*.93,ny*R*.93,nz*R*.93);
       if(n.z<-.75)return;put(p.z+R,p.z>-u*2,()=>barrelBead(g,{x:p.x,y:p.y},n,r,len,hole,col,B,mat,seed));};
     const ES=B.eyeSize||1;
-    const E2=ES*1.12;bead(-u*11.96*(.85+ES*.15),-u*3.6,u*7*E2,u*6*E2,u*2.8*E2,B.eye,'glass',3);bead(u*11.96*(.85+ES*.15),-u*3.6,u*7*E2,u*6*E2,u*2.8*E2,B.eye,'glass',5);bead(0,u*13.1,u*6.72,u*6,u*2.64,B.mouth,'opaque',8);
+    const EST=o.eyeStyle||B.eyeStyle||window.BUDDY_EYE_STYLE||'safety';
+    const E2=ES*1.12;if(EST==='bead'){bead(-u*11.96*(.85+ES*.15),-u*3.6,u*7*E2,u*6*E2,u*2.8*E2,B.eye,'glass',3);bead(u*11.96*(.85+ES*.15),-u*3.6,u*7*E2,u*6*E2,u*2.8*E2,B.eye,'glass',5);}
+    else{const ex=u*13.2*(.85+ES*.15),ey=-u*1.2,er=u*(EST==='plush'?7.6:7.4)*ES;[-1,1].forEach(sd=>{const yy=ey-2*u,lat=Math.asin(yy/R),lon=Math.asin(sd*ex/(R*Math.cos(lat)));
+      const nx=Math.sin(lon)*Math.cos(lat),ny=Math.sin(lat),nz=Math.cos(lon)*Math.cos(lat),n=rot(nx,ny,nz),p=rot(nx*R*.95,ny*R*.95,nz*R*.95);if(n.z<-.75)return;
+      put(p.z+R,p.z>-u*2,()=>domeEye(g,{x:p.x,y:p.y},n,er,B.eye,B,EST,sd));});}
+    bead(0,u*(EST==='bead'?13.1:14.2),u*6.72,u*6,u*2.64,B.mouth,'opaque',8);
+    const ACC=o.A&&window.buddyAcc?o.A:null,SHOE=ACC?buddyAcc.shoeSpec(ACC,B):null,BF=SHOE&&SHOE.B?SHOE.B:B;
+    if(ACC)buddyAcc.attach({g,u,R,CY,rot,B,t:o.t||0,lite:LITE,A:ACC,put,eyeY:(EST==='bead'?-u*3.6:-u*1.2)-2*u,eyeX:EST==='bead'?u*11.96*(.85+ES*.15):u*13.2*(.85+ES*.15),eyeR:u*7*ES,float:true});
     // feet: the two flat duck-shaped sticks, as real 3D slabs under the pom (whichever face points at you is drawn last)
     [-1,1].forEach(sd=>{const hw=u*5.5,fw=u*10.5,zh=-u*13,zf=u*13,zt=u*19.5,TH=u*4.2,cx=sd*u*13,cz=u*2,yTop=u*33,toe=sd*.14,ct=Math.cos(toe),st=Math.sin(toe),P=[];
       for(let i=0;i<=6;i++){const f=Math.PI+i/6*Math.PI;P.push([hw*Math.cos(f),zh+hw*Math.sin(f)*.8]);}P.push([fw*.62,u]);
       for(let i=0;i<=10;i++){const f=i/10*Math.PI;P.push([fw*Math.cos(f),zf+(zt-zf)*Math.sin(f)]);}P.push([-fw*.62,u]);
       const at=(x,z,y)=>rot(cx+x*ct+z*st,y,cz-x*st+z*ct),C=at(0,0,yTop+TH/2),up=rot(0,-1,0);
       put(C.z,C.z>-u*4,()=>{const layer=y=>{g.beginPath();P.forEach(([x,z],i)=>{const q=at(x,z,y);i?g.lineTo(q.x,q.y):g.moveTo(q.x,q.y);});g.closePath();};
-        const topFirst=up.z<0;g.fillStyle=B.foot[2];
+        const topFirst=up.z<0;g.fillStyle=BF.foot[2];
         for(let k=0;k<=6;k++){layer(topFirst?yTop+TH*k/6:yTop+TH*(1-k/6));g.fill();}
-        const face=topFirst?yTop+TH:yTop;layer(face);g.fillStyle=topFirst?B.foot[2]:B.foot[1];g.fill();
-        if(!topFirst){g.fillStyle=B.foot[0];g.globalAlpha=.55;layer(face);g.fill();g.globalAlpha=1;}
+        const face=topFirst?yTop+TH:yTop;layer(face);g.fillStyle=topFirst?BF.foot[2]:BF.foot[1];g.fill();
+        if(!topFirst){g.fillStyle=BF.foot[0];g.globalAlpha=.55;layer(face);g.fill();g.globalAlpha=1;
+          if(SHOE){const map=(x,z,h)=>{const q=at(x,z,yTop-(h||0));return[q.x,q.y];};g.save();layer(face);g.clip();buddyAcc.shoe(g,SHOE,'in',map,u,o.t||0,true,sd);g.restore();}}
+        if(SHOE)buddyAcc.shoe(g,SHOE,'out',(x,z,h)=>{const q=at(x,z,yTop-(h||0));return[q.x,q.y];},u,o.t||0,true,sd,TH);
         g.strokeStyle='rgba(255,255,255,.3)';g.lineWidth=Math.max(.6,u*.8);layer(face);g.stroke();});});
     before.sort((a,b)=>a.z-b.z).forEach(d=>d.f());
     strayHairs(g,B,R,CY,rot,true);
@@ -409,6 +458,7 @@
   }
   window.drawBuddy=function(g,x,y,size,o){
     o=o||{};const B=o.look||(o.idx!=null?buddyLook(o.idx):BUDDIES[o.id||current]||BUDDIES.chloe),u=size/100;
+    if(o.A===undefined){const ad=o.idx!=null&&typeof alienData!=='undefined'&&alienData[o.idx];o=Object.assign({},o,{A:ad&&ad.acc||null});}
     const angle=o.view==='turn'?(o.angle||0)*Math.PI/180:o.view==='side'?((o.face||1)<0?-Math.PI/2:Math.PI/2):0;
     if(o.view==='float'){g.save();g.translate(x,y);drawFloat(g,B,u,o);g.restore();return;}
     g.save();g.translate(x,y+u*5.5);   // feet rest on the ground at the bottom of the box

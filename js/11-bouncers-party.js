@@ -248,6 +248,8 @@ addEventListener('resize',()=>{_bbCache=null;});
   requestAnimationFrame(tickBouncers);
   if(document.hidden||!bouncers.length||!showBouncers)return;
   if(document.getElementById('buddyDesigner')&&document.getElementById('buddyDesigner').classList.contains('open')){tickBouncers._t=now;return;}
+  // the Best Buddy page covers the play area on phones: rest the floaters so the stage stays smooth
+  {const bc=document.body.classList;if(bc.contains('bestbuddy-open')&&!bc.contains('desktop-mode')){tickBouncers._t=now;return;}}
   const bounds=cachedBouncerBounds(now||performance.now());
   const tnow=now||performance.now(),bdt=Math.min(.1,(tnow-(tickBouncers._t||tnow))/1000);tickBouncers._t=tnow;
   const mv=bdt>0?Math.min(4,bdt*60):1;   // velocities are in px per 60fps-frame

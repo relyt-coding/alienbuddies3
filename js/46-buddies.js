@@ -75,16 +75,16 @@
     {name:'PEARL',    body:'#f8bbd0',eye:'#c9a227',mouth:'#f2f2f7',stem:'#f5f5fa',tip:'#ffffff',foot:'#f2f2f7',fx:{sheen:['#ffffff','#ffd0ea','#bfeaff'],spark:'#ffffff',ring:'#ffffff'}},
     {name:'SUPERNOVA',body:'#f57c00',eye:'#f2f2f7',mouth:'#2f80ff',stem:'#ffe14d',tip:'#ffffff',foot:'#2f80ff',fx:{sheen:['#ffffff','#ffe14d','#ff4fa8'],spark:'#fffbe0',ring:'#ffffff'}},
   ];
-  const isSpecialSlot=i=>(i+1)%10===0;
   // Each new buddy is picked at random from the designs you don't have yet (a different order every game);
-  // every 10th buddy is one of the 10 special designs. The pick is stored on the alien (alienData[i].base).
-  window.buddyIsSpecialSlot=isSpecialSlot;
+  // 10% of eggs hold one of the 10 special designs. The pick is stored on the alien (alienData[i].base).
+  // Special buddies are a 10% find on any egg (each of the 10 once); normal designs never repeat until all are used.
   window.buddyPickFor=function(i){
-    const ad=alienData;const used=new Set(),usedSp=new Set();
-    ad.forEach((a,k)=>{if(k!==i&&a&&a.base){if(a.base.sp!=null)usedSp.add(a.base.sp);else if(a.base.v!=null)used.add(a.base.v);}});
-    if(isSpecialSlot(i)){let left=[...Array(SPECIALS.length).keys()].filter(k=>!usedSp.has(k));if(!left.length)left=[...Array(SPECIALS.length).keys()];return{sp:left[Math.floor(Math.random()*left.length)]};}
-    let left=[...Array(VARIANTS.length).keys()].filter(k=>!used.has(k));if(!left.length)left=[...Array(VARIANTS.length).keys()];
-    return{v:left[Math.floor(Math.random()*left.length)]};
+    const used=new Set(),usedSp=new Set();
+    alienData.forEach((a,k)=>{if(k!==i&&a&&a.base){if(a.base.sp!=null)usedSp.add(a.base.sp);else if(a.base.v!=null)used.add(a.base.v);}});
+    const spLeft=[...Array(SPECIALS.length).keys()].filter(k=>!usedSp.has(k)),nLeft=[...Array(VARIANTS.length).keys()].filter(k=>!used.has(k));
+    const pick=a=>a[Math.floor(Math.random()*a.length)];
+    if(spLeft.length&&(Math.random()<.1||!nLeft.length))return{sp:pick(spLeft)};
+    return{v:pick(nLeft.length?nLeft:[...Array(VARIANTS.length).keys()])};
   };
   function baseSpec(i){
     const a=typeof alienData!=='undefined'&&alienData[i];

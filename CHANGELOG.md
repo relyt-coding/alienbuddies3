@@ -2,6 +2,13 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.121 - 2026-11-11 22:26
+
+- Egg hatching: your first alien buddy hatches from an egg with a loot-box reveal (tap 3 times to crack it, flash, rays, confetti, the buddy spins out to face you)
+- Every 10th buddy hatches from a golden special egg: 10 new special buddies (Golden, Cosmic, Aurora, Magma, Frost, Neon, Rainbow, Shadow, Pearl, Supernova) with a sheen, an orbiting ring and sparkles
+- Buddies unlock in a random order every game (no repeats); aliens you already own keep their looks
+- New floating buddies always start facing the camera
+
 ## v0.2.120 - 2026-11-11 15:40
 
 - Fix: drum pads no longer drop hits when you play with two fingers on iPhone. Pads now play from the finger touch itself (iOS was cancelling taps it thought might be a pinch), one hit per finger, and two-finger touches on the pads can't start a zoom

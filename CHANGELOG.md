@@ -2,6 +2,14 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.122 - 2026-11-12 01:20
+
+- Every alien buddy now hatches from an egg, so you meet each one and can name it (buy several quickly and they hatch one after another)
+- New egg art: decorated craft eggs painted in the colours of the buddy inside (polka dots, a zigzag band, speckles, shine and real cracks)
+- Special eggs are polished gold with a moving shimmer, raised stars and a rainbow band
+- Special buddies are now a 10% find on any egg instead of every 10th buddy (each of the 10 still appears once per game)
+- The egg draws faster on older phones
+
 ## v0.2.121 - 2026-11-11 22:26
 
 - Egg hatching: your first alien buddy hatches from an egg with a loot-box reveal (tap 3 times to crack it, flash, rays, confetti, the buddy spins out to face you)

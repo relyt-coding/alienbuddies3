@@ -92,7 +92,7 @@
       if(ST)DOTS.forEach(([x,y,r,q],i)=>{if(i%3)return;const hw=halfW(y),px=cx+x*w*hw*.88,py=cy+y*h,sq=Math.sqrt(Math.max(.15,1-x*x)),s=w*r*1.5;
         g.save();g.translate(px,py);g.scale(sq,1);g.fillStyle='rgba(150,80,0,.35)';star(1,1.2,s);g.fillStyle='rgba(255,250,210,.85)';star(0,0,s);g.restore();});
       if(ST)bandRainbow(cx,cy,w,h,t);
-      if(LV)SPECK.forEach(([x,y,q],i)=>{if(i%3)return;const tw=Math.max(0,Math.sin(t*4+q*20));if(tw<.4)return;const hw=halfW(y),px=cx+x*w*hw*.9,py=cy+y*h;g.fillStyle=`rgba(255,255,255,${tw})`;g.beginPath();g.arc(px,py,1.2+tw,0,TAU);g.fill();});
+      if(LV)SPECK.forEach(([x,y,q],i)=>{if(i%3)return;const tw=Math.max(0,Math.sin(t*4+q*20)),ta=tw*Math.max(0,Math.min(1,(tw-.25)/.3));if(ta<=0)return;const hw=halfW(y),px=cx+x*w*hw*.9,py=cy+y*h;g.fillStyle=`rgba(255,255,255,${ta})`;g.beginPath();g.arc(px,py,1.2+tw,0,TAU);g.fill();});
     }else if(ST){
       // polka dots in the buddy's colours (softened so dark eye colours don't read as bugs), wrapped round the curve
       scatterDots(pal.join('|')).forEach(d=>{const hw=halfW(d.y),px=cx+d.x*w*hw,py=cy+d.y*h,sq=Math.sqrt(Math.max(.15,1-d.x*d.x)),s=w*d.s;
@@ -133,6 +133,21 @@
       g.globalAlpha=GA*.7;g.fillStyle=hb;g.beginPath();g.moveTo(cx-w,cy+h*.12);g.quadraticCurveTo(cx,cy+h*.2,cx+w,cy+h*.12);g.lineTo(cx+w,cy+h*.27);g.quadraticCurveTo(cx,cy+h*.35,cx-w,cy+h*.27);g.closePath();g.fill();g.globalAlpha=GA;
       g.strokeStyle='rgba(255,255,255,.8)';g.lineWidth=1.5;g.stroke();}
   }
+  // where the hatching buddy is at o seconds after the egg opens (shared with the test harness via window.__hatchPose):
+  // it rises and grows while spinning two turns (ease-out), lands at 20°, then bobs gently; the bob eases in.
+  // The antennae stay at the landing angle the whole time, and the fur sprite is made once at the final size.
+  function hatchPose(o,W,H){
+    const baseY=H*.55,eh=W*.33,k=Math.min(1,o/1.1),e=1-Math.pow(1-k,3),ang=20+(1-e)*720,size=W*.5*(.35+.65*e);
+    const bk=Math.max(0,Math.min(1,(o-1.1)/.6)),bob=Math.sin(Math.max(0,o-1.1)*3)*bk*bk*(3-2*bk);
+    const ph=(o/.6)%1,pulse=ph<.1?(ph/.1)*(ph/.1)*(3-2*ph/.1):Math.pow(1-(ph-.1)/.9,3);   // beat: quick swell, slow fade
+    return{size,bob,by:baseY-eh*.12-e*eh*.06+bob*3,opts:{view:'turn',angle:ang,antAngle:20,t:o+1,noShadow:true,pulse,furPx:Math.ceil(W*.25*Math.min(2,window.devicePixelRatio||1)/12)*12}};
+  }
+  window.__hatchPose=hatchPose;
+  const sstep=(e0,e1,x)=>{const k=Math.max(0,Math.min(1,(x-e0)/(e1-e0)));return k*k*(3-2*k);};
+  function edgeFade(W,H){const m=Math.min(30,W*.09),mt=Math.min(56,H*.15);g.save();g.globalCompositeOperation='destination-out';
+    [[0,0,0,mt,0,0,W,mt],[0,H,0,H-m,0,H-m,W,m],[0,0,m,0,0,0,m,H],[W,0,W-m,0,W-m,0,m,H]].forEach(([x0,y0,x1,y1,rx,ry,rw,rh])=>{
+      const k=g.createLinearGradient(x0,y0,x1,y1);k.addColorStop(0,'rgba(0,0,0,1)');k.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=k;g.fillRect(rx,ry,rw,rh);});
+    g.restore();}
   function frame(now){
     raf=requestAnimationFrame(frame);if(!st)return;
     const t=(now-st.t0)/1000,W=S,H=S*1.12;
@@ -142,12 +157,13 @@
     const gl=g.createRadialGradient(cx,baseY,ew*.2,cx,baseY,W*.49);const gc=sp?'255,210,63':'0,255,136',ga=sp?.32:.16;gl.addColorStop(0,`rgba(${gc},${ga})`);gl.addColorStop(.45,`rgba(${gc},${ga*.45})`);gl.addColorStop(.75,`rgba(${gc},${ga*.12})`);gl.addColorStop(1,`rgba(${gc},0)`);g.fillStyle=gl;g.fillRect(0,0,W,H);
     if(st.phase!=='open'){
       // drop in with a bounce, then wobble; each tap gives a hard shake
-      const drop=Math.min(1,t/.55),y=baseY-(1-drop)*H*.8+(drop<1?0:0),bounce=t<.85&&t>.55?Math.sin((t-.55)/.3*Math.PI)*-14:0;
-      const wob=Math.sin(t*(sp?7:5))*.06*(t>.9?1:0)+st.shake*Math.sin(t*60)*.18;st.shake*=.9;
+      // falls in (speeding up like it's dropped), one damped bounce, then a gentle wobble that eases in
+      const drop=Math.min(1,t/.55),y=baseY-(1-drop*drop)*H*1.05,bs=(t-.55)/.3,bounce=bs>0&&bs<1?Math.sin(bs*Math.PI)*(1-bs)*-20:0;
+      const wob=Math.sin(t*(sp?7:5))*.06*sstep(.85,1.35,t)+st.shake*Math.sin(t*60)*.18;st.shake*=.9;
       g.fillStyle='rgba(0,0,0,.35)';g.beginPath();g.ellipse(cx,baseY+eh*1.02,ew*.9,ew*.18,0,0,TAU);g.fill();
       g.save();g.translate(cx,y+bounce+eh);g.rotate(wob);g.translate(-cx,-(y+bounce+eh));
       drawEgg(cx,y+bounce,ew,eh,t,sp,st.taps/3,null,st.pal);g.restore();
-      parts(t);
+      parts(t);edgeFade(W,H);
       if(t>1.4&&st.taps===0)document.getElementById('erHint').classList.add('on');
       return;
     }
@@ -155,16 +171,17 @@
     const o=(now-st.hatchT)/1000;
     const rays=document.querySelector('#eggReveal .er-rays');
     // bottom shell
-    const shA=Math.max(0,Math.min(1,(2.6-o)/.8)),bobS=Math.sin(Math.max(0,o-1.1)*3),shW=ew*(.62+.28*shA)*(1-bobS*.04);g.fillStyle=`rgba(0,0,0,${.3+.05*shA-bobS*.03})`;g.beginPath();g.ellipse(cx,baseY+eh*1.02,shW,shW*.2,0,0,TAU);g.fill();
+    const P=hatchPose(o,W,H),shA=Math.max(0,Math.min(1,(2.6-o)/.8)),bobS=P.bob,shW=ew*(.62+.28*shA)*(1-bobS*.04);g.fillStyle=`rgba(0,0,0,${.3+.05*shA-bobS*.03})`;g.beginPath();g.ellipse(cx,baseY+eh*1.02,shW,shW*.2,0,0,TAU);g.fill();
     g.save();g.globalAlpha=shA;drawEgg(cx,baseY,ew,eh,t,sp,1,'bottom',st.pal);g.restore();
     // the buddy rises out of the egg, spinning, and lands facing you
-    const k=Math.min(1,o/1.1),e=1-Math.pow(1-k,3),ang=20+(1-e)*720,size=W*.5*(.35+.65*e),by=baseY-eh*.12-e*eh*.06+Math.sin(Math.max(0,o-1.1)*3)*3;
-    if(typeof drawBuddy==='function')drawBuddy(g,cx,by,size,{view:'turn',angle:ang,antAngle:20,idx:st.idx,t:o+1,noShadow:true,pulse:Math.pow(1-((o/.6)%1),3)});
+    if(typeof drawBuddy==='function')drawBuddy(g,cx,P.by,P.size,Object.assign({idx:st.idx},P.opts));
     // top shell flies up and away
-    if(o<1.2){const ty=-o*o*H*.9,tx=o*W*.25,rot=o*4;g.save();g.translate(cx+tx,baseY+ty);g.rotate(rot);g.translate(-cx,-baseY);g.globalAlpha=Math.max(0,1-o/1.2);drawEgg(cx,baseY,ew,eh,t,sp,1,'top',st.pal);g.restore();}
+    if(o<.5){const q=Math.min(1,o/.5),eo=1-(1-q)*(1-q),pc=baseY-eh*.6,ty=-H*.12*eo,tx=W*.22*eo,rot=o*3.2,sc=1-.35*eo,al=1-sstep(.1,.45,o);
+      if(al>0){g.save();g.translate(cx+tx,pc+ty);g.rotate(rot);g.scale(sc,sc);g.translate(-cx,-pc);g.globalAlpha=al;drawEgg(cx,baseY,ew,eh,t,sp,1,'top',st.pal);g.restore();}}
     parts(t);
-    // flash
-    if(o<.35){g.fillStyle=`rgba(255,255,255,${(1-o/.35)*.9})`;g.fillRect(0,0,W,H);}
+    // flash: a burst of light from the egg that fades to nothing before the edges (no lit rectangle)
+    if(o<.35){const a=(1-o/.35)*.9,fl=g.createRadialGradient(cx,baseY-eh*.3,0,cx,baseY-eh*.3,W*.49);fl.addColorStop(0,`rgba(255,255,255,${a})`);fl.addColorStop(.5,`rgba(255,255,255,${a*.7})`);fl.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=fl;g.fillRect(0,0,W,H);}
+    edgeFade(W,H);
   }
   // shell chips and confetti
   function burst(n,cx,cy,cols,spd,life){const r=rnd(Math.floor(Math.random()*9999)+1);for(let i=0;i<n;i++){const a=r()*TAU,v=spd*(.4+r());st.fx.push({x:cx,y:cy,vx:Math.cos(a)*v,vy:Math.sin(a)*v-spd*.6,c:cols[i%cols.length],s:2+r()*4,r:r()*TAU,vr:(r()-.5)*12,t0:performance.now(),life:life*(.6+r()*.6),conf:life>1.2});}}
@@ -202,6 +219,9 @@
     dpr=Math.min(2,window.devicePixelRatio||1);S=Math.round(Math.min(340,window.innerWidth*.86,window.innerHeight*.5));
     cv.width=S*dpr;cv.height=Math.round(S*1.12)*dpr;cv.style.width=S+'px';cv.style.height=Math.round(S*1.12)+'px';
     root.className=special?'special':'';root.classList.add('on');
+    // make the buddy's fur sprite now, while the egg sits there, so the hatch frame has no extra work to do
+    setTimeout(()=>{try{if(st&&st.idx===idx&&typeof drawBuddy==='function'){const c=document.createElement('canvas');c.width=c.height=4;
+      drawBuddy(c.getContext('2d'),2,2,4,Object.assign({idx},hatchPose(2,S,S*1.12).opts));}}catch(e){}},120);
     document.getElementById('erKicker').textContent=special?'★ SPECIAL EGG ★':(idx===0?'SOMETHING IS MOVING…':'BUDDY #'+(idx+1));
     document.getElementById('erTitle').textContent=special?'SOMETHING RARE INSIDE':'IT’S ABOUT TO HATCH';
     document.getElementById('erTitle').style.color='';

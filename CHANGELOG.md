@@ -2,6 +2,11 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.125 - 2026-11-12 21:48
+
+- The ACTIVATE arrow now points at the button from the side, so nothing on the screen jumps when it appears
+- Title screen: the rename pencil sits closer to the ✕ (still with a safe gap)
+
 ## v0.2.124 - 2026-11-12 21:40
 
 - Matching cards got a glow-up: every science picture is now a glowing neon sign on a holo-foil trading card with a gold frame; buddy cards get the foil too, with a spotlight in the buddy's colour

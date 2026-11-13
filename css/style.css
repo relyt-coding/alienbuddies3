@@ -2243,3 +2243,10 @@ input[type=text],input[type=number],input[type=search],input:not([type]),textare
 @-webkit-keyframes mgSpin{to{-webkit-transform:rotate(360deg);}}
 @keyframes mgSpin{to{transform:rotate(360deg);}}
 @media (prefers-reduced-motion:reduce){.mg-gal i{-webkit-animation:none;animation:none;}}
+/* v0.2.129 shop buttons (phone): the same two-row layout for EVERY button. What you get sits on top (count badge +
+   name, full width so names never squeeze); the price sits on its own strip along the bottom, number and PTS on one
+   line. Nothing can overlap and every button in the grid lines up. */
+body:not(.desktop-mode) .upgrade-buy-btn,body:not(.desktop-mode) .drum-buy-btn{flex-wrap:wrap;align-items:center;padding-bottom:0;overflow:hidden;}
+body:not(.desktop-mode) .upgrade-buy-btn .upgrade-effect,body:not(.desktop-mode) .drum-buy-btn .upgrade-effect{flex:1 1 0;min-width:0;}
+body:not(.desktop-mode) .upgrade-price,body:not(.desktop-mode) .drum-price{flex:1 0 100%;display:flex;align-items:baseline;justify-content:flex-end;margin:.5rem -.7rem 0 -.7rem;padding:.32rem .75rem .38rem;border-top:1px solid rgba(255,255,255,.07);background:rgba(255,255,255,.035);text-align:right;line-height:1;}
+body:not(.desktop-mode) .upgrade-price small,body:not(.desktop-mode) .drum-price small{display:inline;margin-left:.3rem;}

@@ -112,16 +112,16 @@ function updateOnboardingArrows(){
   if(arrowAct){
     if(!drumTrackerActive&&score>=50&&activateBtn){
       // make room above the tracker so the arrow sits under the score instead of covering it
-      if(!document.body.classList.contains('arrow-act')){document.body.classList.add('arrow-act');requestAnimationFrame(updateOnboardingArrows);}
+      // v0.2.125: the arrow points at the button from the side, so nothing on the screen has to move to make room for it
       const rect=activateBtn.getBoundingClientRect();
+      if(!arrowAct._side){arrowAct._side=1;const svg=arrowAct.querySelector('svg'),w=document.createElement('span');w.style.cssText='display:block;transform:rotate(-90deg);margin:-6px 0;';
+        svg.parentNode.insertBefore(w,svg);w.appendChild(svg);}
       arrowAct.style.display='flex';
-      // Use the arrow element's own width to center it over the button
-      const arrowW=arrowAct.offsetWidth||36;
-      arrowAct.style.left=(rect.left+rect.width/2-arrowW/2)+'px';
-      arrowAct.style.top=(rect.top-62)+'px';
+      const aw=arrowAct.offsetWidth||48,ah=arrowAct.offsetHeight||60;
+      if(rect.left-aw-18>4){arrowAct.style.left=(rect.left-aw-18)+'px';arrowAct.style.top=(rect.top+rect.height/2-ah/2)+'px';}
+      else{arrowAct.style.left=Math.max(4,rect.left+rect.width/2-aw/2)+'px';arrowAct.style.top=(rect.top-ah-4)+'px';}
     } else {
       arrowAct.style.display='none';
-      if(document.body.classList.contains('arrow-act')){document.body.classList.remove('arrow-act');}
     }
   }
   // Arrow pointing at SHOP button — shows at 1500pts if shop never opened

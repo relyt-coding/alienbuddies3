@@ -1063,7 +1063,7 @@ body.desktop-mode .store-zoom-hint{display:none;}
 
 /* Early game: while the ACTIVATE arrow is showing, leave space under the score so the arrow never covers it */
 .score-section{transition:margin-bottom .25s ease;}
-body.arrow-act .score-section{margin-bottom:130px;}
+/* (v0.2.125) no extra room for the ACTIVATE arrow any more: it sits beside the button, so nothing jumps */
 
 /* The DRUMPAD label only appears once the SEQUENCER tracker exists beside it */
 body:not(.seq-on) #manualTiersCol .tiers-col-label{display:none !important;}
@@ -2219,7 +2219,7 @@ body.desktop-mode #alienNameModal{align-items:center;padding-top:0;}
 .upgrade-price,.drum-price{margin-left:auto;}
 /* title screen pencil: black & white; on saved files it sits left of the ✕ with a safe gap */
 .slot-edit-btn{font-family:system-ui,-apple-system,sans-serif;font-size:.8rem;padding:.12rem .32rem;border-radius:5px;border:1px solid #3a3a3a;background:transparent;color:#bbb;cursor:pointer;touch-action:manipulation;line-height:1;flex-shrink:0;-webkit-filter:grayscale(1);filter:grayscale(1);}
-.slot-edit-btn.big{font-size:.95rem;padding:.3rem .5rem;border-radius:6px;border-color:#555;color:#ddd;margin-right:1.3rem;}
+.slot-edit-btn.big{font-size:.95rem;padding:.3rem .5rem;border-radius:6px;border-color:#555;color:#ddd;margin-right:.7rem;}
 .slot-actions{display:flex;align-items:center;}
 #settingsViewChips{display:flex;flex-wrap:wrap;margin-top:.45rem;}
 .sv-chip{font-family:'Bebas Neue',sans-serif;font-size:.95rem;letter-spacing:.08em;padding:.4rem .7rem;margin:0 .35rem .35rem 0;border-radius:8px;border:1px solid #2a2a4a;background:#0d0d1c;color:#8a8ab0;cursor:pointer;touch-action:manipulation;}

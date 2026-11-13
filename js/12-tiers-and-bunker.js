@@ -299,7 +299,7 @@ function renderAlienProfile(){
   alienNamePreview.style.filter='none';
   if(!document.getElementById('alienProfileBuddy')){alienNamePreview.textContent='';const cv=document.createElement('canvas');cv.id='alienProfileBuddy';alienNamePreview.appendChild(cv);}
   profileBuddyLoop();
-  const db=document.getElementById('anmDesignBtn');if(db){const ok=typeof unlockedSkills!=='undefined'&&unlockedSkills.buddy_designer;db.textContent=ok?'🎨 DESIGN BUDDY':'🔒 BUDDY DESIGNER';db.classList.toggle('locked',!ok);}
+  const db=document.getElementById('anmDesignBtn');if(db){const ok=typeof unlockedSkills!=='undefined'&&unlockedSkills.buddy_designer;db.textContent='🎨 DESIGN BUDDY';db.classList.remove('locked');db.style.display=ok?'':'none';}   // hidden until Buddy Designer is unlocked
   const ad=alienData[alienProfileIdx]||{name:''};
   anmNameEl.textContent=ad.name||'NO NAME YET';
   anmNameEl.style.opacity=ad.name?'1':'0.3';

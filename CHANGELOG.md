@@ -2,6 +2,12 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.128 - 2026-11-13 07:47
+
+- Matching cards: calmer, dimmer galaxies on the face-down cards
+- Buddies on matching cards mostly face you now (straight on or a 3/4 turn, sometimes a head tilt); side-on poses are rare
+- Plain, symmetric pictures (UFO, planet, gem, flask and more) lean 8° for a bit of style
+
 ## v0.2.127 - 2026-11-13 07:25
 
 - Matching cards redesigned as ARCADE TILES: chunky pixel art on bold colour tiles with thick outlines; some buddy cards come out as rare HOLO or FOIL editions

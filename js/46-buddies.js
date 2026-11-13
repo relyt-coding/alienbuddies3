@@ -296,7 +296,7 @@
     const sweep=run?u*(12+8*sp)+Math.sin(ph*2)*u*2*sp:0,fl=run?(Math.sin(t*3)*.6+Math.sin(t*1.7+.8)*.9)*u:Math.sin(t*Math.PI*2/2.2-.35)*u*1.1;   // idle: on the breathing beat
     g.save();g.translate(0,bob);
     if(o.platform&&o.A&&window.buddyAcc)buddyAcc.platform(g,o.A,u,t,-bob,'back');
-    g.fillStyle='rgba(26,10,32,.33)';g.beginPath();g.ellipse(0,u*41-bob,u*30,u*3.6,0,0,Math.PI*2);g.fill();
+    if(!o.noShadow){g.fillStyle='rgba(26,10,32,.33)';g.beginPath();g.ellipse(0,u*41-bob,u*30,u*3.6,0,0,Math.PI*2);g.fill();}
     const before=[],after=[],tips=[];
     // antennae: pipe cleaners from the top, arcing out and leaning back; when running they stream further back
     const AL=o.antenna==null?(B.ant||1.35):o.antenna,RS=u*30,ES=B.eyeSize||1;

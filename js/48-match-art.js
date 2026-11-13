@@ -197,7 +197,11 @@
     const sz0=Math.min(w,h)*.86,NN=Math.max(48,Math.min(132,Math.round(sz0*dpr/2.4/4)*4));
     const sp=spriteFor(pattern,NN);if(sp){g.imageSmoothingEnabled=false;const sz=sz0;
       if(!sp._sh){const c=document.createElement('canvas');c.width=sp.width;c.height=sp.height;const x=c.getContext('2d');x.drawImage(sp,0,0);x.globalCompositeOperation='source-in';x.fillStyle='rgba(20,10,40,.4)';x.fillRect(0,0,c.width,c.height);sp._sh=c;}
-      const off=Math.max(2,sz*.035);g.drawImage(sp._sh,(w-sz)/2+off*.5,(h-sz)/2+h*.02+off,sz,sz);g.drawImage(sp,(w-sz)/2,(h-sz)/2+h*.02,sz,sz);}
+      // centre what's actually drawn (not the sprite's square), so every picture sits in the middle of its card
+      if(!sp._bb){let x0=sp.width,y0=sp.height,x1=-1,y1=-1;try{const d=sp.getContext('2d').getImageData(0,0,sp.width,sp.height).data;
+        for(let y=0;y<sp.height;y++)for(let x=0;x<sp.width;x++)if(d[(y*sp.width+x)*4+3]>40){if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y;}}catch(e){}
+        sp._bb=x1<0?{cx:.5,cy:.5}:{cx:(x0+x1+1)/2/sp.width,cy:(y0+y1+1)/2/sp.height};}
+      const ox=w/2-sp._bb.cx*sz,oy=h/2-sp._bb.cy*sz,off=Math.max(2,sz*.035);g.drawImage(sp._sh,ox+off*.5,oy+off,sz,sz);g.drawImage(sp,ox,oy,sz,sz);}
     g.restore();
     if(pattern.startsWith('b:')){const idx=+key,r=(idx*7+3)%9;if(r===0)edition(g,w,h,'holo');else if(r===4)edition(g,w,h,'foil');}
   };

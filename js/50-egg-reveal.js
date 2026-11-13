@@ -155,11 +155,11 @@
     const o=(now-st.hatchT)/1000;
     const rays=document.querySelector('#eggReveal .er-rays');
     // bottom shell
-    const shA=Math.max(0,Math.min(1,(2.6-o)/.8));g.fillStyle=`rgba(0,0,0,${.35*shA})`;g.beginPath();g.ellipse(cx,baseY+eh*1.02,ew*.9,ew*.18,0,0,TAU);g.fill();
+    const shA=Math.max(0,Math.min(1,(2.6-o)/.8)),bobS=Math.sin(Math.max(0,o-1.1)*3),shW=ew*(.62+.28*shA)*(1-bobS*.04);g.fillStyle=`rgba(0,0,0,${.3+.05*shA-bobS*.03})`;g.beginPath();g.ellipse(cx,baseY+eh*1.02,shW,shW*.2,0,0,TAU);g.fill();
     g.save();g.globalAlpha=shA;drawEgg(cx,baseY,ew,eh,t,sp,1,'bottom',st.pal);g.restore();
     // the buddy rises out of the egg, spinning, and lands facing you
     const k=Math.min(1,o/1.1),e=1-Math.pow(1-k,3),ang=20+(1-e)*720,size=W*.5*(.35+.65*e),by=baseY-eh*.12-e*eh*.06+Math.sin(Math.max(0,o-1.1)*3)*3;
-    if(typeof drawBuddy==='function')drawBuddy(g,cx,by,size,{view:'turn',angle:ang,idx:st.idx,t:o+1,pulse:Math.pow(1-((o/.6)%1),3)});
+    if(typeof drawBuddy==='function')drawBuddy(g,cx,by,size,{view:'turn',angle:ang,idx:st.idx,t:o+1,noShadow:true,pulse:Math.pow(1-((o/.6)%1),3)});
     // top shell flies up and away
     if(o<1.2){const ty=-o*o*H*.9,tx=o*W*.25,rot=o*4;g.save();g.translate(cx+tx,baseY+ty);g.rotate(rot);g.translate(-cx,-baseY);g.globalAlpha=Math.max(0,1-o/1.2);drawEgg(cx,baseY,ew,eh,t,sp,1,'top',st.pal);g.restore();}
     parts(t);

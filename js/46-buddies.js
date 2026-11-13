@@ -76,14 +76,14 @@
     {name:'SUPERNOVA',body:'#f57c00',eye:'#f2f2f7',mouth:'#2f80ff',stem:'#ffe14d',tip:'#ffffff',foot:'#2f80ff',fx:{sheen:['#ffffff','#ffe14d','#ff4fa8'],spark:'#fffbe0',ring:'#ffffff'}},
   ];
   // Each new buddy is picked at random from the designs you don't have yet (a different order every game);
-  // 10% of eggs hold one of the 10 special designs. The pick is stored on the alien (alienData[i].base).
-  // Special buddies are a 10% find on any egg (each of the 10 once); normal designs never repeat until all are used.
+  // 2.5% of eggs hold one of the 10 special designs. The pick is stored on the alien (alienData[i].base).
+  // Special buddies are a 2.5% find on any egg (each of the 10 once); normal designs never repeat until all are used.
   window.buddyPickFor=function(i){
     const used=new Set(),usedSp=new Set();
     alienData.forEach((a,k)=>{if(k!==i&&a&&a.base){if(a.base.sp!=null)usedSp.add(a.base.sp);else if(a.base.v!=null)used.add(a.base.v);}});
     const spLeft=[...Array(SPECIALS.length).keys()].filter(k=>!usedSp.has(k)),nLeft=[...Array(VARIANTS.length).keys()].filter(k=>!used.has(k));
     const pick=a=>a[Math.floor(Math.random()*a.length)];
-    if(spLeft.length&&(Math.random()<.1||!nLeft.length))return{sp:pick(spLeft)};
+    if(spLeft.length&&(Math.random()<.025||!nLeft.length))return{sp:pick(spLeft)};
     return{v:pick(nLeft.length?nLeft:[...Array(VARIANTS.length).keys()])};
   };
   function baseSpec(i){

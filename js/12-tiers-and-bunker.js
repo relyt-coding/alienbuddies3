@@ -271,6 +271,13 @@ const anmEditBtn=document.getElementById('anmEditBtn');
 // 🎲 NAME FOR ME: cycles through 100 alien names (skipping ones your buddies already have; no repeats until all are used)
 const ALIEN_NAMES=['Zorp','Blixa','Quibble','Nebbo','Glorp','Vexi','Plonk','Zuzu','Orbo','Kip-Kip','Fizzle','Bloop','Nova','Pixel','Quasar','Zib','Mimbo','Gloob','Tanzo','Yibbit','Snorkel','Wubzy','Kooza','Plinth','Zazzle','Bimble','Orbit','Flick','Grub','Squee','Tiko','Momo','Zing','Lumo','Blip','Gizmo','Quorx','Vroom','Nubbin','Zeppo','Fluxy','Comet','Doodle','Ziggy','Plorp','Wizzle','Jinx','Moxie','Spork','Noodle','Bixby','Glim','Rizzo','Twinkle','Zork','Pebble','Fuzzle','Kazoo','Yonder','Boop','Zylo','Squiggle','Nimbus','Gloop','Tinker','Wobble','Zap','Mork','Pip','Quix','Blorbo','Zinnia','Skoot','Huxley','Lumen','Frizz','Orbix','Zuzzle','Bebop','Kibble','Sprocket','Glimmer','Zeebo','Nibs','Woozy','Plip','Cosmo','Zarf','Tibbles','Floof','Grizzle','Mibbo','Starla','Vortex','Pudding','Zoink','Bubbles','Ziggo','Krill','Ollie'];
 let _nameDeck=[];
+// A button that works without taking focus from the name box: tapping it doesn't close the phone keyboard, so the
+// card stays exactly where it is (closing + reopening the keyboard is what made it slide up and down).
+function keepFocusTap(btn,fn){
+  btn.addEventListener('touchstart',e=>{e.preventDefault();fn();},{passive:false});   // no blur, no click afterwards
+  btn.addEventListener('mousedown',e=>e.preventDefault());                          // desktop: keep the caret in the box
+  btn.addEventListener('click',e=>{e.preventDefault();if(!e.sourceCapabilities||!e.sourceCapabilities.firesTouchEvents)fn();});
+}
 function nextAlienName(){
   const taken=new Set((alienData||[]).filter(Boolean).map(a=>(a.name||'').toLowerCase()));
   for(let tries=0;tries<2;tries++){
@@ -282,7 +289,8 @@ function nextAlienName(){
 (function(){
   const btns=document.getElementById('alienNameBtns');if(!btns||!alienNameInput)return;
   const b=document.createElement('button');b.id='alienNameRandom';b.textContent='🎲 NAME FOR ME';b.title='Tap again for another name';
-  b.addEventListener('click',e=>{e.preventDefault();alienNameInput.value=nextAlienName();alienNameInput.dispatchEvent(new Event('input',{bubbles:true}));});
+  const go=()=>{alienNameInput.value=nextAlienName();alienNameInput.dispatchEvent(new Event('input',{bubbles:true}));};
+  keepFocusTap(b,go);
   btns.insertBefore(b,btns.firstChild);
 })();
 
@@ -419,7 +427,7 @@ anmEditBtn&&anmEditBtn.addEventListener('click',openAnmEdit);
 anmNameEl&&anmNameEl.addEventListener('click',openAnmEdit); // tapping the name (or NO NAME YET) edits it too
 
 document.getElementById('alienNameSave')&&document.getElementById('alienNameSave').addEventListener('click',saveAlienName);
-document.getElementById('alienNameClear')&&document.getElementById('alienNameClear').addEventListener('click',()=>{alienNameInput.value='';});
+document.getElementById('alienNameClear')&&keepFocusTap(document.getElementById('alienNameClear'),()=>{alienNameInput.value='';});
 document.getElementById('alienNameClose')&&document.getElementById('alienNameClose').addEventListener('click',closeAlienNameModal);
 alienNameModal&&alienNameModal.addEventListener('pointerdown',e=>{if(e.target===alienNameModal)closeAlienNameModal();});
 alienNameInput&&alienNameInput.addEventListener('keydown',e=>{if(e.key==='Enter')saveAlienName();});

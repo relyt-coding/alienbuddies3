@@ -33,7 +33,7 @@ try{const v=localStorage.getItem('ab2_party_style');if(PARTY_STYLES.some(s=>s.id
   chip.type='button';chip.id='partyStyleBtn';
   document.body.appendChild(chip);
   function styleObj(){return PARTY_STYLES.find(s=>s.id===partyStyle)||PARTY_STYLES[0];}
-  function paintChip(){const s=styleObj();chip.textContent=s.icon+' '+s.name+' ▸';chip.title='Change how the aliens party';}
+  function paintChip(){const s=styleObj();chip.textContent=s.name+' ▸';chip.title='Change how the aliens party';}
   function owned(){return typeof partyOwnedStyles==='function'?partyOwnedStyles():PARTY_STYLES.map(s=>s.id);}
   function placeChip(){
     const pb=$('partyBtn');
@@ -59,7 +59,7 @@ try{const v=localStorage.getItem('ab2_party_style');if(PARTY_STYLES.some(s=>s.id
     const i=list.findIndex(s=>s.id===partyStyle);
     const nx=list[(i+1)%list.length];
     setStyle(nx.id);
-    if(typeof showToast==='function')showToast(nx.icon+' '+nx.name);
+    if(typeof showToast==='function')showToast('PARTY STYLE: '+nx.name);
   });
   paintChip();
   window.setPartyStyle=function(id){setStyle(id);placeChip();};

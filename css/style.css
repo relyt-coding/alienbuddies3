@@ -2209,3 +2209,19 @@ body.desktop-mode.bestbuddy-open #bestBuddyView{display:flex;z-index:900;}
 .pz-win-btns button{flex:1 1 0;margin:0 .25rem;min-height:3rem;font-family:'Bebas Neue',sans-serif;font-size:1.15rem;letter-spacing:.12em;border-radius:14px;border:1px solid #8a6a10;background:linear-gradient(180deg,#3a2c0a,#1e1606);color:#ffe28a;cursor:pointer;}
 .pz-win-btns button.ok{border-color:#3dffa8;background:linear-gradient(180deg,#19e48a,#0aa865);color:#06281a;}
 body.bestbuddy-open #settingsOpenBtn{display:none!important;}
+/* v0.2.124: the buddy card sits at a fixed spot near the top (it used to re-centre whenever the keyboard or the
+   name box opened, so it slid up and down while you were naming) */
+#alienNameModal{align-items:flex-start;padding-top:calc(env(safe-area-inset-top) + 7vh);overflow-y:auto;-webkit-overflow-scrolling:touch;}
+body.desktop-mode #alienNameModal{align-items:center;padding-top:0;}
+/* shop: a long word (SEQUENCER, DRUMPAD…) never runs under the price; the price drops to its own line instead */
+.upgrade-buy-btn,.drum-buy-btn{flex-wrap:wrap;}
+.upgrade-buy-btn .upgrade-effect,.drum-buy-btn .upgrade-effect{min-width:-webkit-min-content;min-width:min-content;}
+.upgrade-price,.drum-price{margin-left:auto;}
+/* title screen pencil: black & white; on saved files it sits left of the ✕ with a safe gap */
+.slot-edit-btn{font-family:system-ui,-apple-system,sans-serif;font-size:.8rem;padding:.12rem .32rem;border-radius:5px;border:1px solid #3a3a3a;background:transparent;color:#bbb;cursor:pointer;touch-action:manipulation;line-height:1;flex-shrink:0;-webkit-filter:grayscale(1);filter:grayscale(1);}
+.slot-edit-btn.big{font-size:.95rem;padding:.3rem .5rem;border-radius:6px;border-color:#555;color:#ddd;margin-right:1.3rem;}
+.slot-actions{display:flex;align-items:center;}
+#settingsViewChips{display:flex;flex-wrap:wrap;margin-top:.45rem;}
+.sv-chip{font-family:'Bebas Neue',sans-serif;font-size:.95rem;letter-spacing:.08em;padding:.4rem .7rem;margin:0 .35rem .35rem 0;border-radius:8px;border:1px solid #2a2a4a;background:#0d0d1c;color:#8a8ab0;cursor:pointer;touch-action:manipulation;}
+.sv-chip.on{border-color:#44eebb;color:#44eebb;background:#0a1a14;}
+#settingsViewRow > div{flex:1 1 auto;}

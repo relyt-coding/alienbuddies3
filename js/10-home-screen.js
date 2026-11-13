@@ -21,11 +21,10 @@ function buildHomeScreen(){
     const nameWrap=document.createElement('div');nameWrap.style.cssText='display:flex;align-items:center;gap:.4rem;';
     const name=document.createElement('div');name.className='slot-name'+(sum?'':' empty');name.textContent=slotLabel;
     const editBtn=document.createElement('button');
-    editBtn.textContent='✏';editBtn.title='Rename slot';
-    editBtn.style.cssText="font-size:.65rem;padding:.1rem .28rem;border-radius:4px;border:1px solid #2a2a2a;background:transparent;color:#444;cursor:pointer;touch-action:manipulation;line-height:1;flex-shrink:0;";
+    editBtn.textContent='\u270F\uFE0E';editBtn.title='Rename slot';editBtn.className='slot-edit-btn'+(sum?' big':'');   // black & white pencil (text style, not the yellow emoji)
     editBtn.addEventListener('click',e=>{e.stopPropagation();promptSlotRename(i,name);});
     editBtn.addEventListener('touchend',e=>{e.preventDefault();e.stopPropagation();promptSlotRename(i,name);});
-    nameWrap.appendChild(name);nameWrap.appendChild(editBtn);
+    nameWrap.appendChild(name);if(!sum)nameWrap.appendChild(editBtn);   // saved files: the pencil sits by the ✕ instead
     const detail=document.createElement('div');detail.style.cssText='display:flex;flex-direction:column;gap:.1rem;margin-top:.25rem;';
     if(sum){
       const aliensLine=document.createElement('div');aliensLine.className='slot-detail';
@@ -47,7 +46,7 @@ function buildHomeScreen(){
       const del=document.createElement('button');del.className='slot-del-btn';del.textContent='✕';
       del.addEventListener('click',e=>{e.stopPropagation();confirmDelete(i);});
       del.addEventListener('touchend',e=>{e.preventDefault();e.stopPropagation();confirmDelete(i);});
-      actions.appendChild(del);card.appendChild(actions);
+      actions.appendChild(editBtn);actions.appendChild(del);card.appendChild(actions);
     }
     slotsContainer.appendChild(card);
   }

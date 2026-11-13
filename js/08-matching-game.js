@@ -46,7 +46,7 @@ function updateMatchingBtn(){
   if(typeof mgBought!=='undefined'&&!mgBought.match&&!(typeof TEST_MODE!=='undefined'&&TEST_MODE)){
     btn.style.opacity='1';btn.style.borderColor='#1f6a3a';btn.style.color='#66cc88';btn.style.background='#03120a';btn.style.cursor='pointer';btn.style.boxShadow='none';btn.classList.remove('match-glow');
     btn.innerHTML='MATCHING GAME <span class="mg-price">UNLOCK · 💎 '+(typeof MG_PRICE!=='undefined'?MG_PRICE.match:1)+'</span>';lck.textContent='';
-    btn.onclick=()=>mgBuy('match');return;
+    btn.onclick=()=>openMatchingGame();return;   // one tap buys it AND starts level 1
   }
   if(nextLvl>0&&totalAliens<needed){
     btn.style.opacity='.5';
@@ -83,7 +83,7 @@ function openMatchingGame(){
   const nextLvl=matchLevelsCompleted+1;
   if(nextLvl>25){showToast('All 26 levels complete!');return;}
   const needed=aliensNeededForLevel(nextLvl);
-  if(typeof mgBought!=='undefined'&&!mgBought.match&&!(typeof TEST_MODE!=='undefined'&&TEST_MODE)){mgBuy('match');return;}
+  if(typeof mgBought!=='undefined'&&!mgBought.match&&!(typeof TEST_MODE!=='undefined'&&TEST_MODE)){mgBuy('match');if(!mgBought.match)return;}   // not enough gems → stop; bought → carry on into the game
   if(nextLvl>0&&totalAliens<needed){showToast('Need '+needed+' aliens for level '+(nextLvl+1));return;}
   const modal=document.getElementById('matchingModal');
   modal.style.display='flex';

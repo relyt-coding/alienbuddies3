@@ -388,9 +388,9 @@ body:not(.desktop-mode) .pad-key{display:none!important;}
 #alienNamePreview{font-size:3.8rem;filter:drop-shadow(0 0 14px var(--anc,#00ff88));line-height:1;margin:.2rem 0;}
 #anmName{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:.1em;color:var(--anc,#00ff88);min-height:1.4rem;text-align:center;}
 #anmEditSection{width:100%;display:flex;flex-direction:column;gap:.5rem;}
-#alienNameInput{font-family:'Bebas Neue',sans-serif;font-size:16px;background:#061208;border:1px solid #1a3a2a;border-radius:8px;padding:.5rem .7rem;color:#00ff88;outline:none;width:100%;text-align:center;letter-spacing:.05em;box-sizing:border-box;}
-#alienNameInput:focus{border-color:var(--anc,#00ff88);}
-#alienNameInput::placeholder{color:#1a4a2a;}
+#bdyTagField{font-family:'Bebas Neue',sans-serif;font-size:16px;background:#061208;border:1px solid #1a3a2a;border-radius:8px;padding:.5rem .7rem;color:#00ff88;outline:none;width:100%;text-align:center;letter-spacing:.05em;box-sizing:border-box;}
+#bdyTagField:focus{border-color:var(--anc,#00ff88);}
+#bdyTagField::placeholder{color:#1a4a2a;}
 #alienNameBtns{display:flex;gap:.5rem;}
 #alienNameSave{flex:1;font-family:'Bebas Neue',sans-serif;font-size:.85rem;letter-spacing:.1em;padding:.38rem;border-radius:8px;border:1px solid var(--anc,#00ff88);background:#0a2015;color:var(--anc,#00ff88);cursor:pointer;touch-action:manipulation;transition:all .15s;}
 #alienNameSave:hover{background:#0a3020;}

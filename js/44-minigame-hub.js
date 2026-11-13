@@ -109,7 +109,7 @@ function mgBuy(k){
   try{playSfxPurchase&&playSfxPurchase();}catch(e){}
   showToast(k==='ph'?'🪐 PLANET HOP unlocked! Levels 1–5 · each win boosts your Alien Gems':'MATCHING GAME unlocked! Each level gives a permanent point multiplier');
   if(typeof autoSave==='function')autoSave();if(typeof renderUI==='function')renderUI();
-  mgRefresh();return false;   // the first tap only buys it
+  mgRefresh();return false;   // (the matching game then opens straight away: see openMatchingGame)
 }
 
 // put every minigame button in the right place, with the right label

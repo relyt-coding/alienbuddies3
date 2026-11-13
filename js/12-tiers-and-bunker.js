@@ -259,7 +259,7 @@ function applyBouncerNameVisibility(){
 let alienProfileIdx=null; // currently viewed alien global index
 let anmEditOpen=false;
 const alienNameModal=document.getElementById('alienNameModal');
-const alienNameInput=document.getElementById('alienNameInput');
+const alienNameInput=document.getElementById('bdyTagField');
 const alienNamePreview=document.getElementById('alienNamePreview');
 let alienNameBox=document.getElementById('alienNameBox');
 const anmNameEl=document.getElementById('anmName');

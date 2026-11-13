@@ -2,6 +2,13 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.131 - 2026-11-13 09:15
+
+- Buddy breathing: eyes, front antennas and the fluff at the antenna roots now breathe with the head, so the antennas stay attached.
+- Egg reveal: the buddy floats above a single floor shadow where the egg sat; the shadow softly shrinks as it bobs. The spinning sunburst is replaced by a soft glow.
+- Matching cards: every picture is centred on what's actually drawn.
+- Naming card: the name field is a search field so iPhone stops offering AutoFill Contact.
+
 ## v0.2.130 - 2026-11-13 08:43
 
 - Matching cards: removed the dark outlines from the emoji and buddy art; a soft drop shadow keeps it readable.

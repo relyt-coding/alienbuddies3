@@ -2,6 +2,12 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.130 - 2026-11-13 08:43
+
+- Matching cards: removed the dark outlines from the emoji and buddy art; a soft drop shadow keeps it readable.
+- Egg reveal: eyes, beads and mouth slide behind the body while it spins instead of poking out past the fluff; fur no longer re-generates each frame as the buddy grows in (no more shimmer).
+- Antennas now bob on the same breathing beat as the head when idle, so they look connected.
+
 ## v0.2.129 - 2026-11-13 07:59
 
 - Matching cards: sharper, more detailed art (drawn at a resolution that fits the card size) and finer galaxy backs

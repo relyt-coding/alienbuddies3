@@ -141,6 +141,8 @@ setInterval(()=>{if(document.body.classList.contains('game-active'))mgRefresh();
 // a nudge toward the first purchase: once you can afford the Matching Game
 setInterval(()=>{
   if(!document.body.classList.contains('game-active')||typeof shownHints==='undefined'||_mgTest())return;
+  // wait until nothing else is up (shop, minigames, the egg hatch, the naming card…) so it never covers them
+  if(typeof overlayUp==='function'&&overlayUp())return;
   if(!mgBought.match&&!shownHints.matchingIntro&&(typeof alienGems!=='undefined'&&alienGems>=1)&&typeof showHintModal==='function'){
     shownHints.matchingIntro=true;shownHints.matchingGame=true;if(typeof autoSave==='function')autoSave();
     showHintModal('🃏','Your aliens made an Alien Gem! Spend it in the Bunker to unlock the MATCHING GAME and earn Point Multipliers.');

@@ -99,9 +99,19 @@ function updateTipsLabel(){
   if(el)el.textContent=tipsOwned+' TIP'+(tipsOwned!==1?'S':'')+' PURCHASED'+(tipsOwned>0?' · ×'+formatMult(tipsMult):'');
 }
 
+// true while any full screen sits over the pads (shop, bunker, best buddy, matching, galaxies, the hatch…)
+function overlayUp(){
+  const bc=document.body.classList;
+  if(['store-open','bunker-open','cockpit-open','bestbuddy-open','stats-open','ww-open','galaxy-intro'].some(k=>bc.contains(k)))return true;
+  const m=document.getElementById('matchingModal');if(m&&m.style.display==='flex')return true;
+  const st=document.getElementById('skillTreeModal');if(st&&st.classList.contains('open'))return true;
+  const er=document.getElementById('eggReveal');if(er&&er.classList.contains('on'))return true;
+  return false;
+}
 function updateOnboardingArrows(){
   // Arrows only belong to a running game — never on the home screen (they pointed at hidden buttons there)
-  if(!document.body.classList.contains('game-active')){
+  // …and never over another screen (shop, bunker, best buddy, minigames) — they used to peek through on top
+  if(!document.body.classList.contains('game-active')||overlayUp()){
     ['arrowActivate','arrowShop'].forEach(id=>{const a=document.getElementById(id);if(a)a.style.display='none';});
     document.body.classList.remove('arrow-act');
     return;

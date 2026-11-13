@@ -46,6 +46,15 @@ function progressDiscount(a){
   for(let i=1;i<T.length;i++)if(a<=T[i][0]){const[a0,l0]=T[i-1],[a1,l1]=T[i];L=l0+(l1-l0)*(a-a0)/(a1-a0);break;}
   return Math.pow(10,L);
 }
+// v0.2.136: aliens get their own discount curve (log10 per alien count, from ALIEN_L0), tuned so every alien from #47 on
+// is a 10–40 min wait for an active player instead of a 20-minute burst (#50–66) followed by multi-hour walls.
+// Upgrades keep the smooth PROGRESS_DISCOUNT above, so tuning one no longer knocks the other around.
+let ALIEN_L0=46,ALIEN_L=[6.92,7.22,6.86,8.16,9.02,9.06,8.38,6.72,7.7,8.89,7.65,8.63,8.69,9.9,8.97,9.51,10.69,11.92,10.56,11.54,12.73,12.95,12.51,13.56,13.68,14.71,14.11,14.34,15.57,16.69,13.71,13.1,13.97,15.15,13.67,14.85,15.9,16.42,15.54,16.72,16.74,17.9,17.3,17.35,18.7,19.71,18.18,19.22,20.6,20.45,19.99,20.31,21.05,22.23,22.83];
+function alienDiscount(n){
+  if(!ALIEN_L||n<ALIEN_L0)return progressDiscount(n);
+  const i=n-ALIEN_L0,k=ALIEN_L.length-1;
+  return Math.pow(10,i<=k?ALIEN_L[i]:ALIEN_L[k]+(ALIEN_L[k]-ALIEN_L[k-1])*(i-k));
+}
 const _disc=c=>{const d=progressDiscount();return d>1?Math.max(1,Math.round(c/d)):c;};
 const GAME_VERSION='0.2.135'; // bump on every delivered build (shown in Settings and on the home screen)
 const BASE_CPS=5;
@@ -85,16 +94,21 @@ function alienCost(n){
   }
   // v0.2.92 second-half balance: every alien after #20 costs an extra ×1.5 on top of the curve above
   // (simulated: early game unchanged; waits between matching levels after level 5 go from ~0 to ~5-50 min)
-  const d=progressDiscount(n);
+  const d=alienDiscount(n);
   return Math.max(1,Math.round(bump30(c)*(n>20?Math.pow(1.5,n-20):1)/d));
 }
 // Alien Power: each level makes EVERY alien worth more, so it snowballs with alien count. Levels after 4 cost ×1000 extra each.
 function alienBoostUpgradeCost(lvl){return Math.round(_alienBoostBase(lvl)*_p75(lvl));}
-function _alienBoostBase(lvl){if(lvl===0)return _disc(60000000);let c=60000000;for(let i=1;i<=lvl;i++){c=Math.round(c*(100+i*40));if(i>=2)c=Math.round(c*3);}return _disc(lvl>4?c*Math.pow(1000,lvl-4):c);}
+// v0.2.136: past level AP_SOFT each level only costs ×AP_LATE_R more (it was ~×1,000,000 a level, which made Alien Power
+// the cheapest thing in the shop yet hours away — a wall in front of every alien after #70)
+let AP_SOFT=16,AP_LATE_R=1e5;
+function _alienBoostBase(lvl){if(lvl===0)return _disc(60000000);const k=Math.min(lvl,AP_SOFT);let c=60000000;for(let i=1;i<=k;i++){c=Math.round(c*(100+i*40));if(i>=2)c=Math.round(c*3);}if(k>4)c*=Math.pow(1000,k-4);if(lvl>k)c*=Math.pow(AP_LATE_R,lvl-k);return _disc(c);}
 function alienBoostUpgradeAt(lvl){const cost=alienBoostUpgradeCost(lvl);const perAlien=(1.1+(lvl+1)*0.3).toFixed(1);const perAlienNext=(1.1+(lvl+2)*0.3).toFixed(1);return{effectMain:`ALIEN POWER ×${perAlienNext}/ALIEN`,effectSub:`Per-alien base: ×${perAlien} → ×${perAlienNext}`,cost};}
 // Multi-Click: levels after 5 cost ×100 extra each
 function multiClickUpgradeCost(lvl){return Math.round(_multiClickBase(lvl)*_p75(lvl));}
-function _multiClickBase(lvl){if(lvl===0)return _disc(15000000);let c=15000000;for(let i=1;i<=lvl;i++){c=Math.round(c*(100+i*40));if(i>=2)c=Math.round(c*3);}return _disc(lvl>5?c*Math.pow(100,lvl-5):c);}
+// v0.2.136: past level MC_SOFT each level is only ×MC_LATE_R more — a late level adds ~4% income, so a ×300,000 price made it a pure wall
+let MC_SOFT=20,MC_LATE_R=1000;
+function _multiClickBase(lvl){if(lvl===0)return _disc(15000000);const k=Math.min(lvl,MC_SOFT);let c=15000000;for(let i=1;i<=k;i++){c=Math.round(c*(100+i*40));if(i>=2)c=Math.round(c*3);}if(k>5)c*=Math.pow(100,k-5);if(lvl>k)c*=Math.pow(MC_LATE_R,lvl-k);return _disc(c);}
 function multiClickUpgradeAt(lvl){const clicks=lvl+2;return{effectMain:`${clicks}× CLICKS`,effectSub:`Each tap counts as ${clicks} clicks`,cost:multiClickUpgradeCost(lvl)};}
 
 // Pad button costs: 1 free, 2=5 (kick), 3=100 (snare), 4=3K, 5=2.5M ...

@@ -78,7 +78,7 @@ function diffLog(a,b){
   if(!a.tree&&b.tree)logEvent('skill','Explore the Galaxies',GEM_UNLOCK_COST,'gems','skill:tree');
   const had=new Set(a.skills);let mc=musicCount(a.skills);
   b.skills.filter(k=>!had.has(k)).forEach(k=>{const n=SKILL_MAP[k];if(!n)return;
-    let cost=n.cost;if(k.startsWith('mt_')){cost=Math.round(n.cost*Math.pow(typeof MUSIC_COST_GROWTH!=='undefined'?MUSIC_COST_GROWTH:1,mc));mc++;}
+    let cost=n.cost;if(k.startsWith('mt_')){cost=Math.round(n.cost*(typeof musicCostScale==='function'?musicCostScale(mc):1));mc++;}
     logEvent('skill',(n.hub?'★ ':'')+n.name,cost,'gems','skill:'+k);});
   for(let r=a.seqRows;r<b.seqRows;r++)logEvent('row','Sequencer row '+(r+1)+' active',null,'','seqrow:'+(r+1));
   for(let r=a.drumRows;r<b.drumRows;r++)logEvent('row','Drumpad row '+(r+1)+' active',null,'','drumrow:'+(r+1));

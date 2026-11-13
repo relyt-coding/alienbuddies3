@@ -372,13 +372,17 @@ const BRANCH_COLORS = {
 // That matches the ×1.2 gem bonus each branch node gives, so later unlocks keep taking real time instead of
 // snowballing (simulated with 10 aliens: Effects ~30 min, Key ~6 h, Piano Roll ~17 h, whole branch ~3 days).
 const MUSIC_COST_GROWTH=1.2;
+// v0.2.136: past the first MUSIC_SOFT_N music nodes each one only adds ×MUSIC_LATE_GROWTH, so the last vocal nodes
+// (Vocal Stack → Choir → Vocoder) stop turning into multi-hour gem waits
+let MUSIC_SOFT_N=28,MUSIC_LATE_GROWTH=1.04;
+function musicCostScale(n){return Math.pow(MUSIC_COST_GROWTH,Math.min(n,MUSIC_SOFT_N))*Math.pow(MUSIC_LATE_GROWTH,Math.max(0,n-MUSIC_SOFT_N));}
 function musicOwnedCount(){let n=0;for(const k in unlockedSkills)if(unlockedSkills[k]&&k.startsWith('mt_'))n++;return n;}
 function _round2(v){if(v<100)return Math.round(v);const p=Math.pow(10,Math.floor(Math.log10(v))-1);return Math.round(v/p)*p;}
 function skillCost(node){
   if(typeof node==='string')node=SKILL_MAP[node];
   if(!node)return Infinity;
   if(!node.id.startsWith('mt_'))return node.cost;
-  return _round2(node.cost*Math.pow(MUSIC_COST_GROWTH,musicOwnedCount()));
+  return _round2(node.cost*musicCostScale(musicOwnedCount()));
 }
 function fmtGems(v){return v<100000?Math.round(v).toLocaleString():formatStore(v);}
 

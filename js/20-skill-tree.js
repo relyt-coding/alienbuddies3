@@ -487,8 +487,8 @@ function updateSkillTreeBtn(){
   if(!btn) return;
   if(skillTreeUnlocked){
     btn.className = 'unlocked';
-    btn.querySelector('span').textContent = '🌌 EXPLORE THE GALAXIES';
-    if(costEl) costEl.textContent = 'OPEN →';
+    const nm=btn.querySelector('.st-name');if(nm)nm.textContent = 'EXPLORE THE GALAXIES';
+    if(costEl) costEl.textContent = 'OPEN';
   } else {
     const canAfford = Math.floor(alienGems) >= GEM_UNLOCK_COST;
     btn.className = canAfford ? 'can-afford' : '';

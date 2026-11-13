@@ -2272,3 +2272,32 @@ body.galaxy-intro .bouncer{visibility:hidden;}
 @keyframes stLaunch{0%{box-shadow:0 0 40px rgba(200,240,255,.9);}100%{box-shadow:0 0 0 rgba(200,240,255,0);}}
 #skillTreeUnlockBtn.nudge{animation:stNudge .35s ease-in-out;}
 @keyframes stNudge{0%,100%{transform:none;}25%{transform:translateX(-4px);}75%{transform:translateX(4px);}}
+
+/* ── Explore the Galaxies button: a little window into space ── */
+#skillTreeUnlockBtn{justify-content:flex-start;gap:.85rem;padding:.75rem 1rem;min-height:74px;border-radius:16px;border:2px solid #22305a;color:#6f84b8;text-align:left;
+  background:radial-gradient(1px 1px at 18% 30%,rgba(255,255,255,.7),transparent 60%),radial-gradient(1px 1px at 62% 72%,rgba(255,255,255,.55),transparent 60%),
+    radial-gradient(1.5px 1.5px at 84% 22%,rgba(200,230,255,.8),transparent 60%),radial-gradient(1px 1px at 40% 85%,rgba(255,255,255,.4),transparent 60%),
+    radial-gradient(1px 1px at 92% 64%,rgba(255,255,255,.5),transparent 60%),radial-gradient(1px 1px at 30% 12%,rgba(255,255,255,.45),transparent 60%),
+    radial-gradient(ellipse at 15% 50%,rgba(120,70,200,.35),transparent 55%),radial-gradient(ellipse at 85% 40%,rgba(30,120,170,.3),transparent 60%),#070b1c;}
+#skillTreeUnlockBtn .st-lbl{display:flex;flex-direction:column;gap:.15rem;flex:1;min-width:0;}
+#skillTreeUnlockBtn .st-name{font-size:1.35rem;letter-spacing:.12em;line-height:1;color:inherit;}
+#skillTreeUnlockBtn #skillTreeUnlockCost{font-size:1rem !important;letter-spacing:.12em;line-height:1;}
+/* orbit icon: a little sun with two moons on dashed orbits (colours slowly cycle) */
+#skillTreeUnlockBtn .st-orbit{position:relative;width:44px;height:44px;flex:none;}
+#skillTreeUnlockBtn .st-orbit i{position:absolute;left:50%;top:50%;width:14px;height:14px;margin:-7px 0 0 -7px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#fffbe8,#ffd25a 50%,#ff9a2e);box-shadow:0 0 10px rgba(255,190,80,.7);}
+#skillTreeUnlockBtn .st-orbit b{position:absolute;left:3px;top:13px;width:36px;height:16px;border:1px dashed rgba(160,190,255,.45);border-radius:50%;animation:stOrb 6s linear infinite;}
+#skillTreeUnlockBtn .st-orbit b::after{content:'';position:absolute;left:-3px;top:4px;width:6px;height:6px;border-radius:50%;background:#3fe6ff;box-shadow:0 0 6px #3fe6ff;}
+#skillTreeUnlockBtn .st-orbit b+b{transform:rotate(60deg);animation-duration:9s;animation-direction:reverse;}
+#skillTreeUnlockBtn .st-orbit b+b::after{background:#ff4fa8;box-shadow:0 0 6px #ff4fa8;left:auto;right:-3px;}
+@keyframes stOrb{from{filter:hue-rotate(0deg);}to{filter:hue-rotate(360deg);}}
+#skillTreeUnlockBtn .st-go{flex:none;width:12px;height:12px;border-top:3px solid currentColor;border-right:3px solid currentColor;transform:rotate(45deg);margin-right:.3rem;opacity:.8;}
+/* locked and can't afford yet: dim and quiet */
+#skillTreeUnlockBtn:not(.can-afford):not(.unlocked){filter:saturate(.45) brightness(.8);}
+#skillTreeUnlockBtn:not(.can-afford):not(.unlocked) .st-go{display:none;}
+/* ready to launch: bright, with a slow breathing glow */
+#skillTreeUnlockBtn.can-afford{border-color:#7fb0ff;color:#dbe8ff;animation:stReady 2.4s ease-in-out infinite;}
+#skillTreeUnlockBtn.can-afford #skillTreeUnlockCost{color:#ffd25a;}
+@keyframes stReady{0%,100%{box-shadow:0 0 10px -2px rgba(120,170,255,.35);}50%{box-shadow:0 0 22px 0 rgba(120,200,255,.6);}}
+#skillTreeUnlockBtn.unlocked{border-color:#44aaff;color:#cfe6ff;}
+#skillTreeUnlockBtn.unlocked #skillTreeUnlockCost{color:#5fc4ff;}
+#skillTreeUnlockBtn.charging{animation:none;}

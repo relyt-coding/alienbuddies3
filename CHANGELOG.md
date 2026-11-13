@@ -2,6 +2,15 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.127 - 2026-11-13 07:25
+
+- Matching cards redesigned as ARCADE TILES: chunky pixel art on bold colour tiles with thick outlines; some buddy cards come out as rare HOLO or FOIL editions
+- Face-down matching cards are now slowly swirling pixel galaxies
+- If the page ever gets zoomed in, it zooms back out by itself (and text boxes no longer make iPhones zoom in when you tap them)
+- The dot tracker panels stay scrolled to the bottom (whole last row in view); they only move when you scroll them yourself, and snap back when you return to the drum pads
+- Shop: no emojis anymore except the gem
+- Title screen: the rename pencil sits right next to the ✕
+
 ## v0.2.126 - 2026-11-12 22:19
 
 - Egg polka dots are scattered at random now (different on every egg, in the colours of the buddy inside) instead of sitting in rows

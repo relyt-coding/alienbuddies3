@@ -147,72 +147,58 @@
   ];
   function tilt(i,roll,yaw){if(typeof buddyTumble==='undefined')return null;const T=buddyTumble;return T.mul(T.axis([0,0,1],roll),T.axis([0,1,0],yaw+(i%5)*.3));}
   function buddyPose(i){const o=POSES[(i*5+3)%POSES.length](i);if(o.view==='float'&&!o.m)return{view:'turn',angle:18};return o;}
-  // ── v0.2.124 look: every science picture as a glowing NEON sign on a HOLO-FOIL trading card ──
-  // The pictures above are drawn through a "neon pen": a stand-in canvas that turns each filled shape into a faint
-  // tint plus a glowing tube along its edge, ink outlines into tubes in the shape's colour, and soft glows into light.
-  const parse=c=>{if(typeof c!=='string')return[255,255,255,1];c=c.trim();
-    if(c[0]==='#'){let h=c.slice(1);if(h.length===3)h=h.split('').map(x=>x+x).join('');const n=parseInt(h.slice(0,6),16);return[n>>16&255,n>>8&255,n&255,1];}
-    const m=c.match(/[\d.]+/g)||[255,255,255];return[+m[0],+m[1],+m[2],m[3]!=null?+m[3]:1];};
-  const css=(r,g2,b,a)=>'rgba('+Math.round(r)+','+Math.round(g2)+','+Math.round(b)+','+(a==null?1:a)+')';
-  const brighten=([r,g2,b])=>{const mx=Math.max(r,g2,b,1),k=Math.min(2.2,235/mx);return[Math.min(255,r*k+20),Math.min(255,g2*k+20),Math.min(255,b*k+20)];};
-  const isInk=c=>typeof c==='string'&&/^#1a0a20$/i.test(c.trim());
-  function neonPen(t,k){
-    let fs='#fff',ss='#000',lw=1,last=[120,230,255];
-    const fake=(type,args)=>({_fake:1,type,args,stops:[],addColorStop(o,c){this.stops.push([o,c]);}});
-    const pick=v=>{if(v&&v._fake){const st=v.stops.map(x=>parse(x[1]));if(!st.length)return[255,255,255,1];
-        const fade=st[st.length-1][3]<.05;if(fade)return[...st[0].slice(0,3),0];   // a soft glow (ends transparent)
-        let best=st[0],bs=-1;st.forEach(c=>{const mx=Math.max(c[0],c[1],c[2]),mn=Math.min(c[0],c[1],c[2]),sat=mx-mn+mx*.15;if(sat>bs){bs=sat;best=c;}});return best;}
-      return parse(v);};
-    const real=v=>{if(!v||!v._fake)return v;const q=v.type==='L'?t.createLinearGradient(...v.args):t.createRadialGradient(...v.args);v.stops.forEach(([o,c])=>q.addColorStop(o,c));return q;};
-    function tube(rgb,w){const c=brighten(rgb);t.save();t.lineJoin='round';t.lineCap='round';
-      t.shadowColor=css(...c,1);t.shadowBlur=9*k;t.strokeStyle=css(...c,.55);t.lineWidth=w*2;t.stroke();
-      t.shadowBlur=3.5*k;t.strokeStyle=css(...c,1);t.lineWidth=w;t.stroke();
-      t.shadowBlur=0;t.strokeStyle=css(Math.min(255,c[0]+90),Math.min(255,c[1]+90),Math.min(255,c[2]+90),.95);t.lineWidth=w*.38;t.stroke();t.restore();}
-    function nfill(args){const c=pick(fs);
-      if(c[3]===0){t.save();t.globalAlpha*=.55;t.fillStyle=real(fs);t.fill(...args);t.restore();return;}   // glow → light
-      const lum=(c[0]*.3+c[1]*.59+c[2]*.11)/255;
-      if(c[3]<.55){t.save();t.fillStyle=css(...brighten(c),c[3]*.55);t.fill(...args);t.restore();return;}      // beams, haze
-      if(lum>.92&&c[3]<.95){t.save();t.fillStyle='rgba(255,255,255,.9)';t.shadowColor='#fff';t.shadowBlur=4*k;t.fill(...args);t.restore();return;}  // sparkle
-      last=c;t.save();t.fillStyle=css(...brighten(c),.13);t.fill(...args);t.restore();tube(c,2.1);}
-    function nstroke(){const c=isInk(ss)?last:pick(ss);if(c[3]===0)return;tube(c,isInk(ss)?Math.min(2.4,lw*.7):Math.max(1.8,Math.min(4.5,lw*.7)));}
-    return new Proxy(t,{
-      get(o,p){if(p==='createLinearGradient')return(...a)=>fake('L',a);if(p==='createRadialGradient')return(...a)=>fake('R',a);
-        if(p==='fill')return(...a)=>nfill(a);if(p==='stroke')return()=>nstroke();
-        if(p==='fillRect')return(x,y,w,h)=>{o.beginPath();o.rect(x,y,w,h);nfill([]);};
-        if(p==='strokeRect')return(x,y,w,h)=>{o.beginPath();o.rect(x,y,w,h);nstroke();};
-        if(p==='fillStyle')return fs;if(p==='strokeStyle')return ss;if(p==='lineWidth')return lw;
-        const v=o[p];return typeof v==='function'?v.bind(o):v;},
-      set(o,p,v){if(p==='fillStyle'){fs=v;return true;}if(p==='strokeStyle'){ss=v;return true;}if(p==='lineWidth')lw=v;o[p]=v;return true;}});
-  }
-  // the holo-foil card: deep purple base, rainbow foil, diagonal light bands, sparkles and a gold frame
+  // ── v0.2.127 look: "ARCADE TILE" cards ── chunky pixel art on a bold colour tile (thick dark outline, dithered
+  // shading, top bevel). Every picture is drawn small, posterised and outlined so it reads as crisp pixel art.
+  // Some buddy cards come out as rare HOLO or FOIL editions. The card backs are slowly swirling pixel galaxies (CSS).
+  const OUT='#1d1530',TINT=['#ff6b6b','#ffb347','#4fd1c5','#9b5cff','#ff5fb8','#3fa9ff','#7ad84a','#e8b830'];
+  const hash=k=>{let s=7;for(let i=0;i<k.length;i++)s=(s*31+k.charCodeAt(i))%9973;return s;};
+  function pixelate(drawFn,N){
+    const c=document.createElement('canvas');c.width=c.height=N;const x=c.getContext('2d');drawFn(x,N);
+    const d=x.getImageData(0,0,N,N),a=d.data,op=new Uint8Array(N*N);
+    for(let i=0;i<N*N;i++){const k=i*4;if(a[k+3]>100){a[k+3]=255;op[i]=1;for(let j=0;j<3;j++)a[k+j]=Math.min(255,Math.round(a[k+j]/40)*40+8);}else a[k+3]=0;}
+    const o=new Uint8ClampedArray(a);   // 1-pixel dark outline round the sprite
+    for(let y=0;y<N;y++)for(let X=0;X<N;X++){const i=y*N+X;if(op[i])continue;
+      if((X>0&&op[i-1])||(X<N-1&&op[i+1])||(y>0&&op[i-N])||(y<N-1&&op[i+N])){const k=i*4;o[k]=29;o[k+1]=21;o[k+2]=48;o[k+3]=255;}}
+    x.putImageData(new ImageData(o,N,N),0,0);return c;}
+  const sprCache={};
+  function spriteFor(pattern){
+    if(sprCache[pattern])return sprCache[pattern];const N=40;let c;
+    if(pattern.startsWith('b:')){const idx=+pattern.slice(2),o=buddyPose(idx);
+      c=pixelate((x,N)=>{x.translate(N*.06,N*.08);x.scale(.88,.88);drawBuddy(x,N/2,N*.56,N*.86*(o.k||1),Object.assign({idx,antenna:1,t:1,lite:true},o));},N);}
+    else{const f=ICONS[pattern.slice(2)];if(!f)return null;c=pixelate((x,N)=>{x.scale(N/100,N/100);x.translate(9,9);x.scale(.82,.82);f(x);},N);}
+    return sprCache[pattern]=c;}
   function rrect(g,x,y,w,h,r){g.beginPath();g.moveTo(x+r,y);g.arcTo(x+w,y,x+w,y+h,r);g.arcTo(x+w,y+h,x,y+h,r);g.arcTo(x,y+h,x,y,r);g.arcTo(x,y,x+w,y,r);g.closePath();}
-  function holo(g,w,h,seed){
-    const R=Math.max(6,w*.09);g.save();rrect(g,0,0,w,h,R);g.fillStyle='#160c34';g.fill();g.clip();
-    let q=g.createLinearGradient(0,0,w,h);['#ff7ac0','#ffe14d','#5ce8ff','#b06bff','#9dff3f','#ff7ac0'].forEach((c,k,a)=>q.addColorStop(k/(a.length-1),c));
-    g.globalAlpha=.3;g.fillStyle=q;g.fillRect(0,0,w,h);
-    g.globalAlpha=.14;g.fillStyle='#fff';for(let k=-2;k<6;k++){const x=k*w*.38+(seed%3)*w*.06;g.beginPath();g.moveTo(x,0);g.lineTo(x+w*.13,0);g.lineTo(x-w*.42,h);g.lineTo(x-w*.55,h);g.fill();}
-    g.globalAlpha=1;q=g.createRadialGradient(w/2,h*.48,2,w/2,h*.48,w*.65);q.addColorStop(0,'rgba(10,4,30,.55)');q.addColorStop(1,'rgba(10,4,30,0)');g.fillStyle=q;g.fillRect(0,0,w,h);
-    let s=seed*97+13;const rn=()=>(s=(s*16807)%2147483647)/2147483647;
-    for(let k=0;k<12;k++){const x=rn()*w,y=rn()*h,z=.6+rn()*Math.max(1.2,w*.025);g.fillStyle='rgba(255,255,255,'+(.35+rn()*.6)+')';g.beginPath();for(let j=0;j<8;j++){const a=j*Math.PI/4,d=j%2?z*.3:z*1.7;g.lineTo(x+Math.cos(a)*d,y+Math.sin(a)*d);}g.fill();}
-    g.restore();
-    const fw=Math.max(2.5,w*.045);g.lineWidth=fw;q=g.createLinearGradient(0,0,w,h);q.addColorStop(0,'#fff3a0');q.addColorStop(.5,'#c9a227');q.addColorStop(1,'#fff3a0');g.strokeStyle=q;rrect(g,fw/2,fw/2,w-fw,h-fw,R-fw/2);g.stroke();
-    g.lineWidth=1;g.strokeStyle='rgba(255,255,255,.6)';rrect(g,fw+2,fw+2,w-2*fw-4,h-2*fw-4,Math.max(3,R-fw));g.stroke();
-  }
+  function edition(g,w,h,ed){g.save();rrect(g,0,0,w,h,w*.12);g.clip();g.globalCompositeOperation='overlay';
+    if(ed==='foil'){const q=g.createLinearGradient(0,0,w,h);q.addColorStop(0,'rgba(80,160,255,0)');q.addColorStop(.42,'rgba(120,200,255,.9)');q.addColorStop(.52,'rgba(255,255,255,.95)');q.addColorStop(.62,'rgba(80,160,255,0)');g.fillStyle=q;g.fillRect(0,0,w,h);}
+    else{for(let k=-6;k<10;k++){g.fillStyle='hsla('+((k*45)%360)+',100%,60%,.55)';g.beginPath();g.moveTo(k*w*.2,0);g.lineTo(k*w*.2+w*.11,0);g.lineTo(k*w*.2+w*.11-w*.8,h);g.lineTo(k*w*.2-w*.8,h);g.fill();}}
+    g.restore();const p=Math.max(2,Math.round(w*.03));g.fillStyle='#fff';[[.78,.18],[.22,.7]].forEach(([x,y])=>{g.fillRect(x*w-p/2,y*h-p*1.5,p,p*3);g.fillRect(x*w-p*1.5,y*h-p/2,p*3,p);});
+    g.font='bold '+Math.round(h*.085)+'px "Bebas Neue"';g.textAlign='center';g.textBaseline='middle';const lab=ed==='foil'?'FOIL':'HOLO',tw=g.measureText(lab).width+w*.12;
+    rrect(g,(w-tw)/2,h*.055,tw,h*.1,h*.04);g.fillStyle=ed==='foil'?'#4aa8ff':'#ff5fb8';g.fill();g.fillStyle=OUT;g.fillText(lab,w/2,h*.108);}
   window.drawMatchFace=function(cv,pattern){
     const w=cv.clientWidth||cv.parentNode.clientWidth||60,h=cv.clientHeight||cv.parentNode.clientHeight||w,dpr=Math.min(2,window.devicePixelRatio||1);
     cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);const g=cv.getContext('2d');g.setTransform(dpr,0,0,dpr,0,0);g.clearRect(0,0,w,h);
-    const key=pattern.slice(2);let seed=0;for(let i=0;i<key.length;i++)seed=(seed*31+key.charCodeAt(i))%9973;
-    holo(g,w,h,seed+1);
-    const S=Math.min(w,h)*.86*.8;                  // pictures sit 20% smaller on the card
-    if(pattern.startsWith('b:')){if(typeof drawBuddy==='function'){const idx=+pattern.slice(2),o=buddyPose(idx),bs=S*.95*(o.k||1);
-      // a soft spotlight in the buddy's colour so it pops off the foil like a rare card
-      const col=typeof getAlienColor==='function'?getAlienColor(idx):'#9fffd8',L=g.createRadialGradient(w/2,h*.5,2,w/2,h*.5,w*.48);
-      L.addColorStop(0,'rgba(255,255,255,.55)');L.addColorStop(.45,/^#[0-9a-f]{6}$/i.test(col)?col+'66':'rgba(160,255,220,.4)');L.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=L;g.beginPath();g.arc(w/2,h*.5,w*.48,0,Math.PI*2);g.fill();
-      drawBuddy(g,w/2,h*.55+(o.dy||0)*bs,bs,Object.assign({idx,antenna:1,t:1,lite:false},o));}return;}
-    const f=ICONS[key];if(!f)return;
-    g.save();g.translate((w-S)/2,(h-S)/2);g.scale(S/100,S/100);
-    let pen=g;try{pen=neonPen(g,dpr*S/100*.55);}catch(e){}
-    try{f(pen);}catch(e){g.restore();g.save();g.translate((w-S)/2,(h-S)/2);g.scale(S/100,S/100);f(g);}
+    const key=pattern.slice(2),hv=hash(pattern),tint=TINT[hv%TINT.length],R=w*.14,m=Math.max(2.5,w*.055);
+    rrect(g,0,0,w,h,R);g.fillStyle=OUT;g.fill();                                   // thick dark outline
+    g.save();rrect(g,m,m,w-2*m,h-2*m,R*.8);g.clip();
+    let q=g.createLinearGradient(0,m,0,h-m);q.addColorStop(0,tint);q.addColorStop(1,OUT);g.fillStyle=q;g.fillRect(0,0,w,h);
+    const st=Math.max(3,Math.round(w*.05));g.fillStyle='rgba(255,255,255,.12)';for(let y=0;y<h;y+=st)for(let x=((y/st)%2)*st;x<w;x+=st*2)g.fillRect(x,y,st*.5,st*.5);   // dither
+    g.fillStyle='rgba(255,255,255,.2)';g.fillRect(0,m,w,h*.07);                       // top bevel
+    const sp=spriteFor(pattern);if(sp){g.imageSmoothingEnabled=false;const sz=Math.min(w,h)*.86;g.drawImage(sp,(w-sz)/2,(h-sz)/2+h*.02,sz,sz);}
     g.restore();
+    if(pattern.startsWith('b:')){const idx=+key,r=(idx*7+3)%9;if(r===0)edition(g,w,h,'holo');else if(r===4)edition(g,w,h,'foil');}
   };
+
+  // ── the card back: a pixel spiral galaxy (made once), slowly turning behind every face-down card ──
+  (function(){
+    const N=72,c=document.createElement('canvas');c.width=c.height=N;const x=c.getContext('2d'),d=x.createImageData(N,N);
+    const PAL=[[14,8,34],[40,16,80],[90,30,130],[170,50,160],[240,110,170],[255,190,150],[255,246,216],[110,220,230]];
+    const hs=(i,j)=>{const s=Math.sin(i*127.1+j*311.7)*43758.5453;return s-Math.floor(s);};
+    for(let j=0;j<N;j++)for(let i=0;i<N;i++){const X=(i-N/2+.5)/(N/2),Y=(j-N/2+.5)/(N/2),r=Math.hypot(X,Y),th=Math.atan2(Y,X);
+      const a=th+3.1*Math.log(r+.05),arm=Math.pow(Math.max(0,Math.cos(2*a)),2.2)*Math.exp(-r*1.6),core=Math.exp(-r*r*18),dust=hs(i,j)*.25;
+      let v=arm*1.25+core*1.4+dust*arm;let k=Math.max(0,Math.min(6.99,v*6.5));if(arm>.22&&hs(i+7,j+3)>.8&&r>.3)k=7;
+      const P=PAL[Math.floor(k)],q=(j*N+i)*4;d.data[q]=P[0];d.data[q+1]=P[1];d.data[q+2]=P[2];d.data[q+3]=255;
+      if(hs(i*3,j*5)>.985){d.data[q]=d.data[q+1]=d.data[q+2]=255;}}
+    x.putImageData(d,0,0);
+    try{document.documentElement.style.setProperty('--mg-galaxy','url('+c.toDataURL()+')');}catch(e){}
+  })();
 })();

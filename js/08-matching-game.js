@@ -125,7 +125,7 @@ function buildLevel0Grid(){
   const msg='Visit the bunker every time you buy 4 Alien Buddies to play the matching game. Finding all matches wins you Multipliers!';
   const card=document.createElement('div');
   card.className='match-card';
-  const back=document.createElement('div');back.className='match-card-face match-card-back';
+  const back=document.createElement('div');back.className='match-card-face match-card-back';back.innerHTML='<div class="mg-gal"><i></i></div>';
   const front=document.createElement('div');front.className='match-card-face match-card-front';
   front.style.cssText='background:linear-gradient(135deg,#041a0d,#0a2a18);border-color:#00ff88;font-size:'+(document.body.classList.contains('desktop-mode')?'1.9rem':'1.4rem')+';font-family:Bebas Neue,sans-serif;letter-spacing:.06em;color:#00ff88;line-height:1.3;padding:3rem 1rem 1.2rem;display:flex;align-items:center;justify-content:center;text-align:center;';
   front.textContent=msg;
@@ -218,7 +218,7 @@ function resumeMatchGrid(saved){
     card.className='match-card';
     card.dataset.pattern=cardData.pattern;
     card.dataset.idx=idx;
-    const back=document.createElement('div');back.className='match-card-face match-card-back';
+    const back=document.createElement('div');back.className='match-card-face match-card-back';back.innerHTML='<div class="mg-gal"><i></i></div>';
     const front=document.createElement('div');front.className='match-card-face match-card-front';
     const hue=Math.floor(Math.random()*60)+180;
     front.style.background=`linear-gradient(135deg,hsl(${hue},60%,8%),hsl(${hue+40},70%,12%))`;
@@ -277,7 +277,7 @@ function buildMatchGrid(){
     card.dataset.idx=idx;
 
     const back=document.createElement('div');
-    back.className='match-card-face match-card-back';
+    back.className='match-card-face match-card-back';back.innerHTML='<div class="mg-gal"><i></i></div>';
 
     const front=document.createElement('div');
     front.className='match-card-face match-card-front';

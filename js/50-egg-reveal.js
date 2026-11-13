@@ -36,7 +36,19 @@
   // iridescent sheen sliding across, embossed stars and a rainbow band.
   const DOTS=(()=>{const r=rnd(11),L=[];for(let i=0;i<22;i++)L.push([r()*2-1,r()*1.8-.9,.05+r()*.06,r()]);return L;})();
   // neat rows of polka dots (above and below the band), staggered like a hand-painted egg
-  const PDOTS=[[-.62,[-.45,0,.45]],[-.28,[-.75,-.25,.25,.75]],[.6,[-.55,0,.55]],[.84,[-.25,.25]]];
+  // Polka dots scattered at random (but never touching each other or the zigzag band), different on every egg:
+  // the layout comes from the buddy's colours, so a buddy's egg always looks the same if you see it again.
+  const dotCache={};
+  function scatterDots(key){
+    if(dotCache[key])return dotCache[key];let sd=7;for(let i=0;i<key.length;i++)sd=(sd*31+key.charCodeAt(i))%2147483647;
+    const r=rnd(sd||1),L=[];
+    for(let tries=0;tries<600&&L.length<11;tries++){
+      const y=-.86+r()*1.8;if(y>-.04&&y<.45)continue;                 // keep clear of the band
+      const hw=halfW(y),x=(r()*2-1)*.86;if(Math.abs(x)>.9)continue;
+      const sz=.085+r()*.085,s=sz*Math.min(1,hw*1.3);if(s<.04)continue;
+      const px=x*hw,ok=L.every(d=>{const dx=(d.px-px)*1.0,dy=(d.y-y)*1.3;return Math.hypot(dx,dy)>(d.s+s)*1.35+.05;});
+      if(ok)L.push({x,y,px,s,c:Math.floor(r()*4)});}
+    return dotCache[key]=L;}
   const tint=(c,k)=>{const m=/^#?([0-9a-f]{6})$/i.exec(c||'');if(!m)return c;const n=parseInt(m[1],16);let R=n>>16,G=n>>8&255,B=n&255;
     const lum=(R*.3+G*.59+B*.11)/255;if(lum<.35)k=Math.max(k,.55);R=Math.round(R+(255-R)*k);G=Math.round(G+(255-G)*k);B=Math.round(B+(255-B)*k);return`rgb(${R},${G},${B})`;};
   const SPECK=(()=>{const r=rnd(29),L=[];for(let i=0;i<90;i++)L.push([r()*2-1,r()*2-1,r()]);return L;})();
@@ -83,10 +95,10 @@
       if(LV)SPECK.forEach(([x,y,q],i)=>{if(i%3)return;const tw=Math.max(0,Math.sin(t*4+q*20));if(tw<.4)return;const hw=halfW(y),px=cx+x*w*hw*.9,py=cy+y*h;g.fillStyle=`rgba(255,255,255,${tw})`;g.beginPath();g.arc(px,py,1.2+tw,0,TAU);g.fill();});
     }else if(ST){
       // polka dots in the buddy's colours (softened so dark eye colours don't read as bugs), wrapped round the curve
-      let ci=0;PDOTS.forEach(([y,xs])=>{const hw=halfW(y);xs.forEach(x=>{const px=cx+x*w*hw,py=cy+y*h,sq=Math.sqrt(Math.max(.15,1-x*x)),s=w*.13*Math.min(1,hw*1.25);
-        g.fillStyle=tint(pal[(ci++)%pal.length],.18);g.beginPath();g.ellipse(px,py,s*sq,s,0,0,TAU);g.fill();
+      scatterDots(pal.join('|')).forEach(d=>{const hw=halfW(d.y),px=cx+d.x*w*hw,py=cy+d.y*h,sq=Math.sqrt(Math.max(.15,1-d.x*d.x)),s=w*d.s;
+        g.fillStyle=tint(pal[d.c%pal.length],.18);g.beginPath();g.ellipse(px,py,s*sq,s,0,0,TAU);g.fill();
         g.fillStyle='rgba(0,0,0,.08)';g.beginPath();g.ellipse(px+s*sq*.15,py+s*.2,s*sq*.9,s*.75,0,0,TAU);g.fill();
-        g.fillStyle='rgba(255,255,255,.5)';g.beginPath();g.ellipse(px-s*sq*.3,py-s*.35,s*sq*.35,s*.22,-.4,0,TAU);g.fill();});});
+        g.fillStyle='rgba(255,255,255,.5)';g.beginPath();g.ellipse(px-s*sq*.3,py-s*.35,s*sq*.35,s*.22,-.4,0,TAU);g.fill();});
       // painted zigzag band in the buddy's main colour, with a white piped edge
       const by=cy+h*.13,bh=h*.17,N=12;g.beginPath();
       for(let k=0;k<=N;k++){const x=-1+2*k/N,px=cx+x*w*1.02,py=by+(k%2?-bh:bh)*.55;k?g.lineTo(px,py):g.moveTo(px,py);}

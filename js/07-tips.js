@@ -118,7 +118,10 @@ function updateOnboardingArrows(){
         svg.parentNode.insertBefore(w,svg);w.appendChild(svg);}
       arrowAct.style.display='flex';
       const aw=arrowAct.offsetWidth||48,ah=arrowAct.offsetHeight||60;
-      if(rect.left-aw-18>4){arrowAct.style.left=(rect.left-aw-18)+'px';arrowAct.style.top=(rect.top+rect.height/2-ah/2)+'px';}
+      if(rect.left-aw-18>4){arrowAct.style.left=(rect.left-aw-18)+'px';
+        // line the arrow itself (not arrow + label) up with the middle of the button
+        const sp=arrowAct.querySelector('span'),cy=rect.top+rect.height/2;let top=cy-ah/2;arrowAct.style.top=top+'px';
+        if(sp){const r=sp.getBoundingClientRect();top+=cy-(r.top+r.height/2);arrowAct.style.top=top+'px';}}
       else{arrowAct.style.left=Math.max(4,rect.left+rect.width/2-aw/2)+'px';arrowAct.style.top=(rect.top-ah-4)+'px';}
     } else {
       arrowAct.style.display='none';

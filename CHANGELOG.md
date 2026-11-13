@@ -2,6 +2,14 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.129 - 2026-11-13 07:59
+
+- Matching cards: sharper, more detailed art (drawn at a resolution that fits the card size) and finer galaxy backs
+- One tap on UNLOCK · 💎 1 now buys the matching game and starts level 1
+- Naming a buddy: the text box no longer looks like a contact-name field, so iPhones shouldn't offer AutoFill Contact
+- Naming a buddy: the card stays whole and steady above the keyboard (it shrinks to fit instead of getting cut off)
+- Shop buttons on phones: a tidy two-row layout with the price on its own strip, so text never overlaps
+
 ## v0.2.128 - 2026-11-13 07:47
 
 - Matching cards: calmer, dimmer galaxies on the face-down cards

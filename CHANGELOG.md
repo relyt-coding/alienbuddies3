@@ -2,6 +2,19 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.124 - 2026-11-12 21:40
+
+- Matching cards got a glow-up: every science picture is now a glowing neon sign on a holo-foil trading card with a gold frame; buddy cards get the foil too, with a spotlight in the buddy's colour
+- Drum pads catch light taps better: a tap in the gap between pads (or just past the edge) plays the nearest pad, and two fingers on one pad both count
+- Sound comes back by itself after switching apps (no more refreshing): the game wakes the audio when you return and on your first tap, and rebuilds the sound engine if the phone froze it
+- Special eggs are now a 5% find (rarer than before)
+- Settings has a VIEW section (trackers, sequencer, drum pads, step counts), the same switches as the VIEW button
+- Naming a buddy: NAME FOR ME and CLEAR keep the keyboard up, and the card stays put instead of sliding around
+- Buddy Designer button stays hidden until you unlock Buddy Designer
+- Title screen: the rename pencil is black & white, and on saved files it sits next to the ✕ with a safe gap
+- Party style chip and toasts no longer use emojis
+- Shop: long upgrade names never run under the price anymore
+
 ## v0.2.123 - 2026-11-12 20:25
 
 - New BEST BUDDY page (Alien Evolution path, right after Buddy Designer): your favourite buddy hangs out on a platform doing random idle animations: looking around, hopping, spinning, wiggling, napping. Tap them for hearts

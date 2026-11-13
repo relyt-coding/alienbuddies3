@@ -146,11 +146,19 @@
     i=>({view:'float',m:tilt(i,-.7,2.6),k:.88,dy:-.06}),
   ];
   function tilt(i,roll,yaw){if(typeof buddyTumble==='undefined')return null;const T=buddyTumble;return T.mul(T.axis([0,0,1],roll),T.axis([0,1,0],yaw+(i%5)*.3));}
-  function buddyPose(i){const o=POSES[(i*5+3)%POSES.length](i);if(o.view==='float'&&!o.m)return{view:'turn',angle:18};return o;}
+  // v0.2.128: most buddy cards face you (straight on or a 3/4 turn, sometimes a playful tilt); side-on is rare (~1 in 10)
+  const FRONT=[0,18,-22,30,-34,10,-14,38,-40,24];
+  function buddyPose(i){
+    const r=(i*7+3)%20;
+    if(r===0)return POSES[3](i);if(r===10)return POSES[5](i);                     // the rare side-on runner / jumper
+    if(r%6===1&&typeof buddyTumble!=='undefined'){const T=buddyTumble,sg=i%2?1:-1;   // a friendly head tilt, still facing you
+      return{view:'float',m:T.mul(T.axis([0,0,1],sg*.32),T.axis([0,1,0],-sg*.35)),k:.9,dy:-.04};}
+    return{view:'turn',angle:FRONT[(i*3)%FRONT.length]};}
   // ── v0.2.127 look: "ARCADE TILE" cards ── chunky pixel art on a bold colour tile (thick dark outline, dithered
   // shading, top bevel). Every picture is drawn small, posterised and outlined so it reads as crisp pixel art.
   // Some buddy cards come out as rare HOLO or FOIL editions. The card backs are slowly swirling pixel galaxies (CSS).
   const OUT='#1d1530',TINT=['#ff6b6b','#ffb347','#4fd1c5','#9b5cff','#ff5fb8','#3fa9ff','#7ad84a','#e8b830'];
+  const TILTED={ufo:1,planet:1,moon:1,star:1,sun:1,atom:1,tube:1,flask:1,bulb:1,battery:1,gem:1,earth:1,helmet:1,robot:1,compass:1,thermometer:1,blackhole:1,alienplanet:1,magnet:1,galaxy:1,asteroid:1};
   const hash=k=>{let s=7;for(let i=0;i<k.length;i++)s=(s*31+k.charCodeAt(i))%9973;return s;};
   function pixelate(drawFn,N){
     const c=document.createElement('canvas');c.width=c.height=N;const x=c.getContext('2d');drawFn(x,N);
@@ -165,7 +173,9 @@
     if(sprCache[pattern])return sprCache[pattern];const N=40;let c;
     if(pattern.startsWith('b:')){const idx=+pattern.slice(2),o=buddyPose(idx);
       c=pixelate((x,N)=>{x.translate(N*.06,N*.08);x.scale(.88,.88);drawBuddy(x,N/2,N*.56,N*.86*(o.k||1),Object.assign({idx,antenna:1,t:1,lite:true},o));},N);}
-    else{const f=ICONS[pattern.slice(2)];if(!f)return null;c=pixelate((x,N)=>{x.scale(N/100,N/100);x.translate(9,9);x.scale(.82,.82);f(x);},N);}
+    else{const k=pattern.slice(2),f=ICONS[k];if(!f)return null;
+      const tl=TILTED[k]?(hash(k)%2?1:-1)*8*Math.PI/180:0;   // plain, symmetric pictures lean 8° for a bit of attitude
+      c=pixelate((x,N)=>{x.scale(N/100,N/100);x.translate(50,50);x.rotate(tl);x.translate(-50,-50);x.translate(9,9);x.scale(.82,.82);f(x);},N);}
     return sprCache[pattern]=c;}
   function rrect(g,x,y,w,h,r){g.beginPath();g.moveTo(x+r,y);g.arcTo(x+w,y,x+w,y+h,r);g.arcTo(x+w,y+h,x,y+h,r);g.arcTo(x,y+h,x,y,r);g.arcTo(x,y,x+w,y,r);g.closePath();}
   function edition(g,w,h,ed){g.save();rrect(g,0,0,w,h,w*.12);g.clip();g.globalCompositeOperation='overlay';
@@ -191,13 +201,13 @@
   // ── the card back: a pixel spiral galaxy (made once), slowly turning behind every face-down card ──
   (function(){
     const N=72,c=document.createElement('canvas');c.width=c.height=N;const x=c.getContext('2d'),d=x.createImageData(N,N);
-    const PAL=[[14,8,34],[40,16,80],[90,30,130],[170,50,160],[240,110,170],[255,190,150],[255,246,216],[110,220,230]];
+    const PAL=[[14,8,34],[28,12,58],[52,20,88],[88,32,112],[124,56,128],[150,96,126],[172,150,150],[70,130,150]];   // dimmed: less glare on face-down cards
     const hs=(i,j)=>{const s=Math.sin(i*127.1+j*311.7)*43758.5453;return s-Math.floor(s);};
     for(let j=0;j<N;j++)for(let i=0;i<N;i++){const X=(i-N/2+.5)/(N/2),Y=(j-N/2+.5)/(N/2),r=Math.hypot(X,Y),th=Math.atan2(Y,X);
       const a=th+3.1*Math.log(r+.05),arm=Math.pow(Math.max(0,Math.cos(2*a)),2.2)*Math.exp(-r*1.6),core=Math.exp(-r*r*18),dust=hs(i,j)*.25;
-      let v=arm*1.25+core*1.4+dust*arm;let k=Math.max(0,Math.min(6.99,v*6.5));if(arm>.22&&hs(i+7,j+3)>.8&&r>.3)k=7;
+      let v=arm*1.15+core*1.05+dust*arm;let k=Math.max(0,Math.min(6.99,v*6.5));if(arm>.22&&hs(i+7,j+3)>.8&&r>.3)k=7;
       const P=PAL[Math.floor(k)],q=(j*N+i)*4;d.data[q]=P[0];d.data[q+1]=P[1];d.data[q+2]=P[2];d.data[q+3]=255;
-      if(hs(i*3,j*5)>.985){d.data[q]=d.data[q+1]=d.data[q+2]=255;}}
+      if(hs(i*3,j*5)>.985){d.data[q]=d.data[q+1]=d.data[q+2]=190;}}
     x.putImageData(d,0,0);
     try{document.documentElement.style.setProperty('--mg-galaxy','url('+c.toDataURL()+')');}catch(e){}
   })();

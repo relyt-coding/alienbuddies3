@@ -2,6 +2,15 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.134 - 2026-11-13 11:22
+
+- Hatch: the light on the mouth slides round smoothly as the buddy turns instead of flipping sides at the end of the spin.
+- Stray hairs and fur strands fade in and out at the edge of the buddy and blend between shades, so none pop on or off.
+- Smaller fixes so nothing jumps between frames: antenna wire stripes turn smoothly, the antenna-tip glow swells in on each beat, feet and cheek blush shade gradually, and special-buddy sparkles fade in.
+- Sharper fur on the hatched buddy, prepared before the egg opens.
+- Softer flash (no lit rectangle); the shell top tumbles off and fades; nothing gets cut off at the edges of the hatch area.
+- The egg drops in with gravity, bounces once and eases into its wobble.
+
 ## v0.2.133 - 2026-11-13 10:28
 
 - Egg hatch spin: the antennas hold still while the body turns under them, so the tips no longer sweep across the face.

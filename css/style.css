@@ -2301,3 +2301,34 @@ body.galaxy-intro .bouncer{visibility:hidden;}
 #skillTreeUnlockBtn.unlocked{border-color:#44aaff;color:#cfe6ff;}
 #skillTreeUnlockBtn.unlocked #skillTreeUnlockCost{color:#5fc4ff;}
 #skillTreeUnlockBtn.charging{animation:none;}
+
+/* ── BUDDY KEYS (v0.2.136) ── */
+.pad-area{position:relative;}
+#buddyKeys{position:absolute;z-index:6;display:none;flex-direction:column;gap:6px;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:none;}
+body.keys-on #buddyKeys{display:flex;}
+body.keys-on #padGrid{visibility:hidden;}
+body.keys-on #padEditToggleBtn,body.keys-on #padCountSelector{display:none!important;}
+#bkCanvas{display:block;touch-action:none;-webkit-tap-highlight-color:transparent;}
+.bk-bar{display:flex;align-items:center;gap:6px;height:40px;padding:0 2px;font-family:'Bebas Neue',sans-serif;}
+.bk-voice{min-width:5.6em;text-align:center;font-size:1.3rem;letter-spacing:.1em;text-shadow:0 0 12px currentColor;}
+.bk-arrow{width:36px;height:36px;border-radius:50%;border:1px solid #3a3360;background:#15122a;position:relative;cursor:pointer;touch-action:manipulation;flex:none;}
+.bk-arrow::after{content:'';position:absolute;left:50%;top:50%;width:9px;height:9px;border-left:3px solid #c9bfff;border-bottom:3px solid #c9bfff;transform:translate(-30%,-50%) rotate(45deg);}
+.bk-arrow.r::after{transform:translate(-70%,-50%) rotate(-135deg);}
+.bk-arrow:active{background:#241d48;}
+.bk-oct{margin-left:auto;display:flex;align-items:center;gap:6px;color:#b7aee0;font-size:1rem;letter-spacing:.12em;}
+.bk-oct span{min-width:2.6em;text-align:center;}
+.bk-oct button{width:36px;height:36px;border-radius:50%;border:1px solid #3a3360;background:#15122a;color:#e6e0ff;font-family:'Bebas Neue',sans-serif;font-size:1.3rem;line-height:1;cursor:pointer;touch-action:manipulation;padding:0;}
+.bk-oct button:disabled{opacity:.3;}
+#keysSwitch{position:absolute;z-index:7;display:none;border:1px solid #4a3d99;border-radius:50px;background:#110d24;padding:2px;box-shadow:0 0 12px -5px #8f73ff;}
+#keysSwitch button{font-family:'Bebas Neue',sans-serif;font-size:.88rem;letter-spacing:.1em;padding:.28rem .75rem;border:0;border-radius:50px;background:transparent;color:#7d72b0;cursor:pointer;touch-action:manipulation;}
+#keysSwitch button.on{background:#6b55d9;color:#fff;}
+.bk-voice{flex:1 1 auto;min-width:0;white-space:nowrap;overflow:hidden;}
+.bk-oct{flex:none;}
+@media (max-width:350px){
+  .bk-bar{gap:4px;}
+  .bk-voice{font-size:1.15rem;letter-spacing:.05em;}
+  .bk-arrow,.bk-oct button{width:32px;height:32px;}
+  .bk-oct{gap:3px;font-size:.92rem;}
+  .bk-oct span{min-width:2.1em;}
+}
+body.phone-land #keysSwitch button{font-size:.7rem;padding:.2rem .55rem;}

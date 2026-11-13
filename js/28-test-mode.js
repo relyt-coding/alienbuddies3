@@ -107,6 +107,7 @@ function shopOptions(){
     if(!shop.seqMultiClickUnlocked)add('smcU',SEQ_MC_UNLOCK_COST,unlockSeqMultiClick);else if(shop.seqMultiClickLevel<SEQ_MC_MAX_LEVEL)add('smc',seqMultiClickCost(shop.seqMultiClickLevel+1),buySeqMultiClickNext);
     if(!shop.seqDotsUnlocked)add('sdU',DOT_UNLOCK_COST,unlockSeqDots);else if(shop.seqMultLevel<DOT_MAX_LEVEL)add('sd',dotUpgradeCost(shop.seqMultLevel+1),buySeqMult);
   }
+  if(typeof keysLadderCost==='function'&&(shop.keysLevel||0)<KEYS_VOICES.length)add('keys',keysLadderCost(shop.keysLevel||0),()=>{const c=keysLadderCost(shop.keysLevel||0);if(score<c)return;score-=c;shop.keysLevel=(shop.keysLevel||0)+1;});
   if(!shop.drumDotsUnlocked)add('ddU',DOT_UNLOCK_COST,unlockDrumDots);else if(shop.multLevel<DOT_MAX_LEVEL)add('dd',dotUpgradeCost(shop.multLevel+1),buyDrumMult);
   return L;
 }

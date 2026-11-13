@@ -133,6 +133,7 @@ function renderUI(newlyLit){
 
 function renderStore(){
   if(typeof renderStoreUnlocks==='function')renderStoreUnlocks();
+  if(typeof renderKeysCard==='function')renderKeysCard();
   // ── DRUM: PAD BUTTONS ──
   const totalPads=drum.pads;const nextPadIdx=totalPads; // 0-based, so next pad is index = totalPads
   const maxPads=8;const atMax=totalPads>=maxPads;

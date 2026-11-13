@@ -486,6 +486,7 @@ function padTapTime(ev){
 }
 function firePad(idx,ev){
   const sndId=padSounds[idx];if(!sndId)return;
+  if(document.body.classList.contains('keys-on'))return;   // Buddy Keys are showing instead of the pads
   getCtx();playSound(sndId,undefined,padTapTime(ev));
   window._lastPadHit=performance.now();   // floating buddies hold still while you drum
   if(typeof addSeqEnergy==='function')addSeqEnergy(SEQ_ENERGY_PER_TAP); // every pad hit recharges the sequencer energy meter

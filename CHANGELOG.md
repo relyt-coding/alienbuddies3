@@ -2,6 +2,16 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.136 - 2026-11-13 15:36
+
+- NEW: Buddy Keys (shop, under Drum Pad). Swap your drum pads for an 8-key keyboard with your own buddies sitting on the keys; tap a key and its buddy hops and sings the note. Switch between DRUM PADS and BUDDY KEYS in the VIEW menu (or Settings → View).
+- 10 voices to unlock: Ooh, Aah, Bell, Marimba, Whistle, Chiptune, Robot, Kazoo, Bass and Choir. Each one adds ×1.2 to taps.
+- The keys follow your song's key (C major if none), with a LOW / MID / HIGH octave switch. Key taps earn the same as pad taps; multi-touch, sliding across keys and A S D F G H J K on a computer all work.
+- Late-game balance: aliens #47–100 now come every 10–40 minutes instead of a quick burst followed by hours-long walls.
+- Alien Power and Multi-Click no longer get stuck at a price that takes hours to reach in the late game.
+- The last vocal skills in the Galaxies (Vocal Stack through Vocoder) cost far fewer gems.
+- Fixes: the "Alien Gem" hint and the onboarding arrows no longer pop up on top of the shop, bunker, Best Buddy or minigames.
+
 ## v0.2.135 - 2026-11-13 12:02
 
 - Explore the Galaxies: hold the button to launch it. A glowing bar charges up with a rumble and a rising engine note; let go early and it powers back down, and a quick tap just nudges the button.

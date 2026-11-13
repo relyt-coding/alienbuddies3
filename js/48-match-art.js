@@ -160,23 +160,24 @@
   const OUT='#1d1530',TINT=['#ff6b6b','#ffb347','#4fd1c5','#9b5cff','#ff5fb8','#3fa9ff','#7ad84a','#e8b830'];
   const TILTED={ufo:1,planet:1,moon:1,star:1,sun:1,atom:1,tube:1,flask:1,bulb:1,battery:1,gem:1,earth:1,helmet:1,robot:1,compass:1,thermometer:1,blackhole:1,alienplanet:1,magnet:1,galaxy:1,asteroid:1};
   const hash=k=>{let s=7;for(let i=0;i<k.length;i++)s=(s*31+k.charCodeAt(i))%9973;return s;};
-  function pixelate(drawFn,N){
+  function pixelate(drawFn,N,thick){
     const c=document.createElement('canvas');c.width=c.height=N;const x=c.getContext('2d');drawFn(x,N);
     const d=x.getImageData(0,0,N,N),a=d.data,op=new Uint8Array(N*N);
-    for(let i=0;i<N*N;i++){const k=i*4;if(a[k+3]>100){a[k+3]=255;op[i]=1;for(let j=0;j<3;j++)a[k+j]=Math.min(255,Math.round(a[k+j]/40)*40+8);}else a[k+3]=0;}
-    const o=new Uint8ClampedArray(a);   // 1-pixel dark outline round the sprite
-    for(let y=0;y<N;y++)for(let X=0;X<N;X++){const i=y*N+X;if(op[i])continue;
-      if((X>0&&op[i-1])||(X<N-1&&op[i+1])||(y>0&&op[i-N])||(y<N-1&&op[i+N])){const k=i*4;o[k]=29;o[k+1]=21;o[k+2]=48;o[k+3]=255;}}
+    for(let i=0;i<N*N;i++){const k=i*4;if(a[k+3]>100){a[k+3]=255;op[i]=1;for(let j=0;j<3;j++)a[k+j]=Math.min(255,Math.round(a[k+j]/22)*22+6);}else a[k+3]=0;}
+    const o=new Uint8ClampedArray(a);   // dark outline round the sprite (2 px thick on the high-res sprites)
+    let m=op;for(let pass=0;pass<(thick?2:1);pass++){const nm=m.slice();
+      for(let y=0;y<N;y++)for(let X=0;X<N;X++){const i=y*N+X;if(m[i])continue;
+        if((X>0&&m[i-1])||(X<N-1&&m[i+1])||(y>0&&m[i-N])||(y<N-1&&m[i+N])){const k=i*4;o[k]=29;o[k+1]=21;o[k+2]=48;o[k+3]=255;nm[i]=1;}}m=nm;}
     x.putImageData(new ImageData(o,N,N),0,0);return c;}
   const sprCache={};
-  function spriteFor(pattern){
-    if(sprCache[pattern])return sprCache[pattern];const N=40;let c;
+  function spriteFor(pattern,N){
+    N=N||40;const ck=pattern+'@'+N;if(sprCache[ck])return sprCache[ck];const th=N>=72;let c;
     if(pattern.startsWith('b:')){const idx=+pattern.slice(2),o=buddyPose(idx);
-      c=pixelate((x,N)=>{x.translate(N*.06,N*.08);x.scale(.88,.88);drawBuddy(x,N/2,N*.56,N*.86*(o.k||1),Object.assign({idx,antenna:1,t:1,lite:true},o));},N);}
+      c=pixelate((x,N)=>{x.translate(N*.06,N*.08);x.scale(.88,.88);drawBuddy(x,N/2,N*.56,N*.86*(o.k||1),Object.assign({idx,antenna:1,t:1,lite:N<72},o));},N,th);}
     else{const k=pattern.slice(2),f=ICONS[k];if(!f)return null;
       const tl=TILTED[k]?(hash(k)%2?1:-1)*8*Math.PI/180:0;   // plain, symmetric pictures lean 8° for a bit of attitude
-      c=pixelate((x,N)=>{x.scale(N/100,N/100);x.translate(50,50);x.rotate(tl);x.translate(-50,-50);x.translate(9,9);x.scale(.82,.82);f(x);},N);}
-    return sprCache[pattern]=c;}
+      c=pixelate((x,N)=>{x.scale(N/100,N/100);x.translate(50,50);x.rotate(tl);x.translate(-50,-50);x.translate(9,9);x.scale(.82,.82);f(x);},N,th);}
+    return sprCache[ck]=c;}
   function rrect(g,x,y,w,h,r){g.beginPath();g.moveTo(x+r,y);g.arcTo(x+w,y,x+w,y+h,r);g.arcTo(x+w,y+h,x,y+h,r);g.arcTo(x,y+h,x,y,r);g.arcTo(x,y,x+w,y,r);g.closePath();}
   function edition(g,w,h,ed){g.save();rrect(g,0,0,w,h,w*.12);g.clip();g.globalCompositeOperation='overlay';
     if(ed==='foil'){const q=g.createLinearGradient(0,0,w,h);q.addColorStop(0,'rgba(80,160,255,0)');q.addColorStop(.42,'rgba(120,200,255,.9)');q.addColorStop(.52,'rgba(255,255,255,.95)');q.addColorStop(.62,'rgba(80,160,255,0)');g.fillStyle=q;g.fillRect(0,0,w,h);}
@@ -191,23 +192,24 @@
     rrect(g,0,0,w,h,R);g.fillStyle=OUT;g.fill();                                   // thick dark outline
     g.save();rrect(g,m,m,w-2*m,h-2*m,R*.8);g.clip();
     let q=g.createLinearGradient(0,m,0,h-m);q.addColorStop(0,tint);q.addColorStop(1,OUT);g.fillStyle=q;g.fillRect(0,0,w,h);
-    const st=Math.max(3,Math.round(w*.05));g.fillStyle='rgba(255,255,255,.12)';for(let y=0;y<h;y+=st)for(let x=((y/st)%2)*st;x<w;x+=st*2)g.fillRect(x,y,st*.5,st*.5);   // dither
+    const st=Math.max(3,Math.min(7,Math.round(w*.05)));g.fillStyle='rgba(255,255,255,.12)';for(let y=0;y<h;y+=st)for(let x=((y/st)%2)*st;x<w;x+=st*2)g.fillRect(x,y,st*.5,st*.5);   // dither
     g.fillStyle='rgba(255,255,255,.2)';g.fillRect(0,m,w,h*.07);                       // top bevel
-    const sp=spriteFor(pattern);if(sp){g.imageSmoothingEnabled=false;const sz=Math.min(w,h)*.86;g.drawImage(sp,(w-sz)/2,(h-sz)/2+h*.02,sz,sz);}
+    const sz0=Math.min(w,h)*.86,NN=Math.max(48,Math.min(132,Math.round(sz0*dpr/2.4/4)*4));
+    const sp=spriteFor(pattern,NN);if(sp){g.imageSmoothingEnabled=false;const sz=sz0;g.drawImage(sp,(w-sz)/2,(h-sz)/2+h*.02,sz,sz);}
     g.restore();
     if(pattern.startsWith('b:')){const idx=+key,r=(idx*7+3)%9;if(r===0)edition(g,w,h,'holo');else if(r===4)edition(g,w,h,'foil');}
   };
 
   // ── the card back: a pixel spiral galaxy (made once), slowly turning behind every face-down card ──
   (function(){
-    const N=72,c=document.createElement('canvas');c.width=c.height=N;const x=c.getContext('2d'),d=x.createImageData(N,N);
+    const N=144,c=document.createElement('canvas');c.width=c.height=N;const x=c.getContext('2d'),d=x.createImageData(N,N);
     const PAL=[[14,8,34],[28,12,58],[52,20,88],[88,32,112],[124,56,128],[150,96,126],[172,150,150],[70,130,150]];   // dimmed: less glare on face-down cards
     const hs=(i,j)=>{const s=Math.sin(i*127.1+j*311.7)*43758.5453;return s-Math.floor(s);};
     for(let j=0;j<N;j++)for(let i=0;i<N;i++){const X=(i-N/2+.5)/(N/2),Y=(j-N/2+.5)/(N/2),r=Math.hypot(X,Y),th=Math.atan2(Y,X);
       const a=th+3.1*Math.log(r+.05),arm=Math.pow(Math.max(0,Math.cos(2*a)),2.2)*Math.exp(-r*1.6),core=Math.exp(-r*r*18),dust=hs(i,j)*.25;
       let v=arm*1.15+core*1.05+dust*arm;let k=Math.max(0,Math.min(6.99,v*6.5));if(arm>.22&&hs(i+7,j+3)>.8&&r>.3)k=7;
       const P=PAL[Math.floor(k)],q=(j*N+i)*4;d.data[q]=P[0];d.data[q+1]=P[1];d.data[q+2]=P[2];d.data[q+3]=255;
-      if(hs(i*3,j*5)>.985){d.data[q]=d.data[q+1]=d.data[q+2]=190;}}
+      if(hs(i*3,j*5)>.992){d.data[q]=d.data[q+1]=d.data[q+2]=190;}}
     x.putImageData(d,0,0);
     try{document.documentElement.style.setProperty('--mg-galaxy','url('+c.toDataURL()+')');}catch(e){}
   })();

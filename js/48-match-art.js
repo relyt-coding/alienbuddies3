@@ -165,7 +165,7 @@
     const d=x.getImageData(0,0,N,N),a=d.data,op=new Uint8Array(N*N);
     for(let i=0;i<N*N;i++){const k=i*4;if(a[k+3]>100){a[k+3]=255;op[i]=1;for(let j=0;j<3;j++)a[k+j]=Math.min(255,Math.round(a[k+j]/22)*22+6);}else a[k+3]=0;}
     const o=new Uint8ClampedArray(a);   // dark outline round the sprite (2 px thick on the high-res sprites)
-    let m=op;for(let pass=0;pass<(thick?2:1);pass++){const nm=m.slice();
+    let m=op;for(let pass=0;pass<0;pass++){const nm=m.slice();
       for(let y=0;y<N;y++)for(let X=0;X<N;X++){const i=y*N+X;if(m[i])continue;
         if((X>0&&m[i-1])||(X<N-1&&m[i+1])||(y>0&&m[i-N])||(y<N-1&&m[i+N])){const k=i*4;o[k]=29;o[k+1]=21;o[k+2]=48;o[k+3]=255;nm[i]=1;}}m=nm;}
     x.putImageData(new ImageData(o,N,N),0,0);return c;}
@@ -195,7 +195,9 @@
     const st=Math.max(3,Math.min(7,Math.round(w*.05)));g.fillStyle='rgba(255,255,255,.12)';for(let y=0;y<h;y+=st)for(let x=((y/st)%2)*st;x<w;x+=st*2)g.fillRect(x,y,st*.5,st*.5);   // dither
     g.fillStyle='rgba(255,255,255,.2)';g.fillRect(0,m,w,h*.07);                       // top bevel
     const sz0=Math.min(w,h)*.86,NN=Math.max(48,Math.min(132,Math.round(sz0*dpr/2.4/4)*4));
-    const sp=spriteFor(pattern,NN);if(sp){g.imageSmoothingEnabled=false;const sz=sz0;g.drawImage(sp,(w-sz)/2,(h-sz)/2+h*.02,sz,sz);}
+    const sp=spriteFor(pattern,NN);if(sp){g.imageSmoothingEnabled=false;const sz=sz0;
+      if(!sp._sh){const c=document.createElement('canvas');c.width=sp.width;c.height=sp.height;const x=c.getContext('2d');x.drawImage(sp,0,0);x.globalCompositeOperation='source-in';x.fillStyle='rgba(20,10,40,.4)';x.fillRect(0,0,c.width,c.height);sp._sh=c;}
+      const off=Math.max(2,sz*.035);g.drawImage(sp._sh,(w-sz)/2+off*.5,(h-sz)/2+h*.02+off,sz,sz);g.drawImage(sp,(w-sz)/2,(h-sz)/2+h*.02,sz,sz);}
     g.restore();
     if(pattern.startsWith('b:')){const idx=+key,r=(idx*7+3)%9;if(r===0)edition(g,w,h,'holo');else if(r===4)edition(g,w,h,'foil');}
   };

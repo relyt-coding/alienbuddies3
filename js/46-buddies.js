@@ -293,7 +293,7 @@
     // stepping: the moving foot slides forward, lifts and tips its rounded front up; in the air both hang tipped down
     const step=run||air?(sd=>{const p=ph+(sd>0?Math.PI:0);if(air)return{x:0,y:u*2,a:.12*dir};
       const lift=Math.max(0,Math.cos(p));return{x:Math.sin(p)*u*6*sp*dir,y:-lift*u*5*sp,a:-lift*.18*sp*dir};}):null;
-    const sweep=run?u*(12+8*sp)+Math.sin(ph*2)*u*2*sp:0,fl=(Math.sin(t*3)*.6+Math.sin(t*1.7+.8)*.9)*u*(run?1:1.3);
+    const sweep=run?u*(12+8*sp)+Math.sin(ph*2)*u*2*sp:0,fl=run?(Math.sin(t*3)*.6+Math.sin(t*1.7+.8)*.9)*u:Math.sin(t*Math.PI*2/2.2-.35)*u*2.2;   // idle: on the breathing beat
     g.save();g.translate(0,bob);
     if(o.platform&&o.A&&window.buddyAcc)buddyAcc.platform(g,o.A,u,t,-bob,'back');
     g.fillStyle='rgba(26,10,32,.33)';g.beginPath();g.ellipse(0,u*41-bob,u*30,u*3.6,0,0,Math.PI*2);g.fill();
@@ -302,7 +302,7 @@
     const AL=o.antenna==null?(B.ant||1.35):o.antenna,RS=u*30,ES=B.eyeSize||1;
     // is a 3D point (screen x,y + depth z) in front of the pom? outside its outline, or nearer than its surface there
     const inFront=q=>{const dx=q.x,dy=q.y-CY,h=RS*RS-dx*dx-dy*dy;return h<=0||q.z>Math.sqrt(h);};
-    [-1,1].forEach(sd=>{const P=[[8,-27,0,0],[10,-48,-6,.3],[30,-54,-12,.7],[34,-36,-16,1]].map(([x,y,z,w])=>rot(sd*(8+(x-8)*AL)*u,(-27+(y+27)*AL)*u+(w===1?fl*sd:0),z*AL*u-sweep*w));
+    [-1,1].forEach(sd=>{const P=[[8,-27,0,0],[10,-48,-6,.3],[30,-54,-12,.7],[34,-36,-16,1]].map(([x,y,z,w])=>rot(sd*(8+(x-8)*AL)*u,(-27+(y+27)*AL)*u+(w===1?(run?fl*sd:fl):w*fl*.35),z*AL*u-sweep*w));
       P.forEach(q=>q.y+=q.z*FK);
       const S=[],NS=22;let len=0;
       for(let i=0;i<=NS;i++){const k=i/NS,m=1-k,b0=m*m*m,b1=3*m*m*k,b2=3*m*k*k,b3=k*k*k;
@@ -325,13 +325,13 @@
     // barrel pony beads: eyes level and mirror-symmetric, mouth centred below; all stick out the same amount
     const bead=(lx,ly,r,len,hole,col,blink,mat,seed)=>{const lat=Math.asin(ly/R),lon=Math.asin(lx/(R*Math.cos(lat)));
       const nx=Math.sin(lon)*Math.cos(lat),ny=Math.sin(lat),nz=Math.cos(lon)*Math.cos(lat),n=rot(nx,ny,nz),p=rot(nx*R*.93,ny*R*.93,nz*R*.93);
-      if(n.z<-.75)return;(p.z>-u*2?after:before).push({z:p.z+R,f:()=>{const by=CY+p.y;if(blink&&blink<1){g.save();g.translate(0,by);g.scale(1,blink);g.translate(0,-by);}barrelBead(g,{x:p.x,y:by},n,r,len,hole,col,B,mat,seed);if(blink&&blink<1)g.restore();}});};
+      if(n.z<-.75)return;(p.z>-u*2?after:before).push({z:p.z+R,f:()=>{const by=CY+p.y,cl=n.z<.4;if(cl){g.save();g.beginPath();g.arc(0,CY,R*1.03,0,Math.PI*2);g.clip();}if(blink&&blink<1){g.save();g.translate(0,by);g.scale(1,blink);g.translate(0,-by);}barrelBead(g,{x:p.x,y:by},n,r,len,hole,col,B,mat,seed);if(blink&&blink<1)g.restore();if(cl)g.restore();}});};
     const bk=(t+3)%15,blink=bk<.16?Math.max(.08,Math.abs(bk-.08)/.08):1;
     const EST=o.eyeStyle||B.eyeStyle||window.BUDDY_EYE_STYLE||'safety';
     const E2=ES*1.12;if(EST==='bead'){bead(-u*11.96*(.85+ES*.15),-u*3.6,u*7*E2,u*6*E2,u*2.8*E2,B.eye,blink,'glass',3);bead(u*11.96*(.85+ES*.15),-u*3.6,u*7*E2,u*6*E2,u*2.8*E2,B.eye,blink,'glass',5);}
     else{const ex=u*13.2*(.85+ES*.15),ey=-u*1.2,er=u*(EST==='plush'?7.6:7.4)*ES;[-1,1].forEach(sd=>{const lx=sd*ex,lat=Math.asin(ey/R),lon=Math.asin(lx/(R*Math.cos(lat)));
       const nx=Math.sin(lon)*Math.cos(lat),ny=Math.sin(lat),nz=Math.cos(lon)*Math.cos(lat),n=rot(nx,ny,nz),p=rot(nx*R*.95,ny*R*.95,nz*R*.95);if(n.z<-.75)return;
-      (p.z>-u*2?after:before).push({z:p.z+R,f:()=>{const by=CY+p.y;if(blink<1){g.save();g.translate(0,by);g.scale(1,blink);g.translate(0,-by);}domeEye(g,{x:p.x,y:by},n,er,B.eye,B,EST,sd);if(blink<1)g.restore();}});});}
+      (p.z>-u*2?after:before).push({z:p.z+R,f:()=>{const by=CY+p.y,cl=n.z<.4;if(cl){g.save();g.beginPath();g.arc(0,CY,R*1.03,0,Math.PI*2);g.clip();}if(blink<1){g.save();g.translate(0,by);g.scale(1,blink);g.translate(0,-by);}domeEye(g,{x:p.x,y:by},n,er,B.eye,B,EST,sd);if(blink<1)g.restore();if(cl)g.restore();}});});}
     bead(0,u*(EST==='bead'?13.1:14.2),u*6.72,u*6,u*2.64,B.mouth,1,'opaque',8);
     if(o.A&&window.buddyAcc)buddyAcc.attach({g,u,R,CY,rot,B,t,lite:LITE,A:o.A,put:(z,f,fn)=>(f?after:before).push({z,f:fn}),eyeY:EST==='bead'?-u*3.6:-u*1.2,eyeX:EST==='bead'?u*11.96*(.85+ES*.15):u*13.2*(.85+ES*.15),eyeR:u*7*ES});
     const ACC=o.A&&window.buddyAcc?o.A:null,SHOE=ACC?buddyAcc.shoeSpec(ACC,B):null;
@@ -342,7 +342,7 @@
     before.sort((a,b)=>a.z-b.z).forEach(d=>d.f());
     strayHairs(g,B,R,CY,rot,true);
     if(B.fx)specialFx(g,B,u,R,CY,t,'back',rot);
-    const ball=furBall(B,Math.max(16,Math.round(u*50)));g.drawImage(ball,-u*50,-u*50+u*2,u*100,u*100);
+    const ball=furBall(B,Math.max(16,Math.ceil(u*50/12)*12));g.drawImage(ball,-u*50,-u*50+u*2,u*100,u*100);
     if(B.fx)specialFx(g,B,u,R,CY,t,'sheen',rot);
     if(!LITE)furFibres(g,B,R,CY,rot);
     {g.save();g.beginPath();g.arc(0,CY,R*1.01,0,Math.PI*2);g.clip();
@@ -411,7 +411,7 @@
     before.sort((a,b)=>a.z-b.z).forEach(d=>d.f());
     strayHairs(g,B,R,CY,rot,true);
     if(B.fx)specialFx(g,B,u,R,CY,o.t!=null?o.t:1,'back',rot);
-    const ball=furBall(B,Math.max(16,Math.round(u*50)));g.drawImage(ball,-u*50,-u*50,u*100,u*100);
+    const ball=furBall(B,Math.max(16,Math.ceil(u*50/12)*12));g.drawImage(ball,-u*50,-u*50,u*100,u*100);
     if(B.fx)specialFx(g,B,u,R,CY,o.t!=null?o.t:1,'sheen',rot);
     if(!LITE)furFibres(g,B,R,CY,rot);
     strayHairs(g,B,R,CY,rot,false);

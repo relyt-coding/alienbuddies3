@@ -492,7 +492,7 @@ function updateSkillTreeBtn(){
   } else {
     const canAfford = Math.floor(alienGems) >= GEM_UNLOCK_COST;
     btn.className = canAfford ? 'can-afford' : '';
-    if(costEl) costEl.textContent = `UNLOCK — ${SKILL_TREE_COST_STR}`;
+    if(costEl) costEl.textContent = canAfford ? `HOLD TO LAUNCH — ${SKILL_TREE_COST_STR}` : `UNLOCK — ${SKILL_TREE_COST_STR}`;
   }  if(typeof window.refreshPageDots==='function') window.refreshPageDots();
 }
 
@@ -881,8 +881,15 @@ function initSkillTreePan(){
 
 // ── Wire buttons ──
 document.getElementById('skillTreeUnlockBtn')&&document.getElementById('skillTreeUnlockBtn').addEventListener('click',()=>{
+  if(document.body.classList.contains('galaxy-intro')) return;   // the release that finished a hold-to-launch
   if(skillTreeUnlocked){ openSkillTree(); return; }
   if(Math.floor(alienGems) < GEM_UNLOCK_COST){ showToast('Need 25 💎 Alien Gems to Explore the Galaxies!'); return; }
+  // affordable: the unlock happens by holding the button (js/59-galaxy-intro.js); a quick tap just nudges it
+  if(typeof window.stHoldNudge==='function'){ window.stHoldNudge(); return; }
+  window.doSkillTreeUnlock();
+});
+window.doSkillTreeUnlock=function(){
+  if(skillTreeUnlocked||Math.floor(alienGems) < GEM_UNLOCK_COST) return;
   alienGems -= GEM_UNLOCK_COST;
   updateGemDisplays();
   skillTreeUnlocked = true;
@@ -892,7 +899,7 @@ document.getElementById('skillTreeUnlockBtn')&&document.getElementById('skillTre
   // a short hyperspace intro, then the tree opens underneath it as it fades
   if(typeof playGalaxyIntro==='function')playGalaxyIntro(()=>openSkillTree(),()=>showToast('🌌 Explore the Galaxies unlocked! Find it at the top of the Shop.'));
   else{showToast('🌌 Explore the Galaxies unlocked! Find it at the top of the Shop.');openSkillTree();}
-});
+};
 document.getElementById('skillTreeCloseBtn')&&document.getElementById('skillTreeCloseBtn').addEventListener('click', closeSkillTree);
 document.getElementById('stDetailBuyBtn')&&document.getElementById('stDetailBuyBtn').addEventListener('click',()=>{ if(_stDetailNode) buySkill(_stDetailNode); closeStDetail(); });
 const _stDetailClose = document.getElementById('stDetailClose');

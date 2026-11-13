@@ -87,6 +87,33 @@
     root.classList.remove('on','gi-show');root.style.opacity='';document.body.classList.remove('galaxy-intro');
     r.onDone&&r.onDone();
   }
+  // ── hold to launch: while the unlock is affordable, holding the button charges it up (fill, rumble, rising
+  // engine note); let go early and it powers back down; reach the top and the intro launches ──
+  const HOLD=1.2;let hold=null;
+  function holdHum(){try{if(typeof getCtx!=='function')return null;const c=getCtx();if(!c||!masterGainNode)return null;const t=c.currentTime;
+    const o=c.createOscillator(),o2=c.createOscillator(),lp=c.createBiquadFilter(),gn=c.createGain();o.type='sawtooth';o2.type='sawtooth';o2.detune.value=9;
+    o.frequency.setValueAtTime(48,t);o.frequency.exponentialRampToValueAtTime(110,t+HOLD);o2.frequency.setValueAtTime(48,t);o2.frequency.exponentialRampToValueAtTime(110,t+HOLD);
+    lp.type='lowpass';lp.frequency.setValueAtTime(140,t);lp.frequency.exponentialRampToValueAtTime(1400,t+HOLD);gn.gain.setValueAtTime(0,t);gn.gain.linearRampToValueAtTime(.08,t+.25);
+    o.connect(lp);o2.connect(lp);lp.connect(gn);gn.connect(masterGainNode);o.start(t);o2.start(t);
+    return{stop(fast){const n=c.currentTime;gn.gain.cancelScheduledValues(n);gn.gain.setValueAtTime(gn.gain.value,n);gn.gain.linearRampToValueAtTime(0,n+(fast?.05:.25));o.stop(n+.3);o2.stop(n+.3);}};}catch(e){return null;}}
+  function armed(){return typeof skillTreeUnlocked!=='undefined'&&!skillTreeUnlocked&&typeof alienGems!=='undefined'&&Math.floor(alienGems)>=GEM_UNLOCK_COST;}
+  function setP(btn,p){btn.style.setProperty('--hp',p.toFixed(3));btn.classList.toggle('charging',p>0);
+    const sh=p>.15?(p*p*2.2):0;btn.style.transform=sh?`translate(${(Math.random()-.5)*sh}px,${(Math.random()-.5)*sh}px)`:'';}
+  function holdTick(now){if(!hold)return;const p=Math.min(1,(now-hold.t0)/1000/HOLD);setP(hold.btn,p);
+    if(p>=1){const b=hold.btn,h=hold.hum;hold=null;h&&h.stop(true);setP(b,0);b.classList.add('launched');setTimeout(()=>b.classList.remove('launched'),600);
+      if(navigator.vibrate)try{navigator.vibrate(30);}catch(e){}window.doSkillTreeUnlock&&window.doSkillTreeUnlock();return;}
+    hold.raf=requestAnimationFrame(holdTick);}
+  function holdStart(e){const btn=e.currentTarget;if(!armed()||hold)return;if(e.cancelable)e.preventDefault();
+    hold={btn,t0:performance.now(),hum:holdHum()};hold.raf=requestAnimationFrame(holdTick);}
+  function holdEnd(){if(!hold)return;const h=hold;hold=null;cancelAnimationFrame(h.raf);h.hum&&h.hum.stop();
+    // power back down smoothly
+    const b=h.btn,p0=parseFloat(b.style.getPropertyValue('--hp'))||0,t0=performance.now();
+    (function down(now){const p=Math.max(0,p0-(now-t0)/1000/.3*p0);setP(b,p);if(p>0)requestAnimationFrame(down);})(t0);}
+  window.stHoldNudge=function(){const b=document.getElementById('skillTreeUnlockBtn');if(!b||hold)return;b.classList.remove('nudge');void b.offsetWidth;b.classList.add('nudge');};
+  function wire(){const b=document.getElementById('skillTreeUnlockBtn');if(!b)return;
+    b.addEventListener('pointerdown',holdStart);['pointerup','pointercancel','pointerleave'].forEach(ev=>b.addEventListener(ev,holdEnd));
+    b.addEventListener('contextmenu',e=>{if(armed())e.preventDefault();});}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',wire);else wire();
   // onOpen fires just before the intro fades, so the skill tree is already there underneath
   window.playGalaxyIntro=function(onOpen,onDone){
     if(!root)build();if(run)finish();

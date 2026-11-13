@@ -222,7 +222,7 @@
       g.beginPath();g.moveTo(c0.x+mx*r*o+ax*r*.15,c0.y+my*r*o+ay*r*.15);g.lineTo(c1.x+mx*r*o-ax*r*.1,c1.y+my*r*o-ay*r*.1);g.stroke();}
     if(n.z<-.02)return;                                                             // end face turned away
     // front end: glossy ring, black hole with a sliver of inner wall, iridescent sheen, highlight + sparkle
-    g.save();g.translate(c1.x,c1.y);g.rotate(ang);g.scale(1,sq);
+    g.save();g.translate(c1.x,c1.y);g.rotate(ang);g.scale(1,sq);g.rotate(-ang);
     const k=g.createRadialGradient(-r*.35,-r*.4,r*.05,0,0,r);k.addColorStop(0,col[0]);k.addColorStop(.55,col[1]);k.addColorStop(1,col[2]);
     g.fillStyle=k;g.beginPath();g.arc(0,0,r,0,Math.PI*2);g.fill();
     const ir=g.createLinearGradient(-r,-r,r,r);ir.addColorStop(0,'rgba(255,140,220,.22)');ir.addColorStop(.5,'rgba(255,255,255,0)');ir.addColorStop(1,'rgba(120,200,255,.2)');g.fillStyle=ir;g.beginPath();g.arc(0,0,r,0,Math.PI*2);g.fill();
@@ -230,7 +230,7 @@
       const tl=g.createRadialGradient(r*.42,r*.45,0,r*.42,r*.45,r*.75);tl.addColorStop(0,'rgba(255,190,170,.75)');tl.addColorStop(1,'rgba(255,120,120,0)');g.fillStyle=tl;g.beginPath();g.arc(0,0,r,0,Math.PI*2);g.fill();
       const dp=g.createRadialGradient(0,0,hole,0,0,r*.8);dp.addColorStop(0,'rgba(90,0,10,.55)');dp.addColorStop(1,'rgba(90,0,10,0)');g.fillStyle=dp;g.beginPath();g.arc(0,0,r,0,Math.PI*2);g.fill();}
     g.fillStyle='#000';g.beginPath();g.arc(0,0,hole,0,Math.PI*2);g.fill();
-    g.save();g.beginPath();g.arc(0,0,hole,0,Math.PI*2);g.clip();g.fillStyle=col[2];g.globalAlpha=.8*(1-sq);g.beginPath();g.arc(-hole*1.1,0,hole,0,Math.PI*2);g.fill();g.restore();
+    g.save();g.beginPath();g.arc(0,0,hole,0,Math.PI*2);g.clip();g.fillStyle=col[2];g.globalAlpha=.8*(1-sq);g.beginPath();g.arc(-hole*1.1*mx,-hole*1.1*my,hole,0,Math.PI*2);g.fill();g.restore();
     g.strokeStyle='rgba(255,255,255,'+(mat==='glass'?.9:.55)+')';g.lineWidth=r*(mat==='glass'?.15:.2);g.lineCap='round';g.beginPath();g.arc(0,0,(r+hole)/2,Math.PI*1.08,Math.PI*1.45);g.stroke();
     if(mat==='glass'){g.fillStyle='#fff';g.beginPath();g.arc(-r*.2,-r*.72,Math.max(.6,r*.08),0,Math.PI*2);g.fill();g.globalAlpha=.85;g.beginPath();g.arc(r*.42,r*.38,Math.max(.5,r*.11),0,Math.PI*2);g.fill();g.globalAlpha=1;}
     g.strokeStyle='rgba(255,255,255,'+(mat==='glass'?.3:.18)+')';g.lineWidth=r*.1;g.beginPath();g.arc(0,0,(r+hole)/2,Math.PI*.1,Math.PI*.38);g.stroke();

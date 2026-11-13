@@ -105,7 +105,7 @@ function rebuildPadGrid(){
     const idx=i;
     el.addEventListener('pointerdown',e=>{
       e.preventDefault();
-      if(e.pointerType==='touch'&&!padEditMode&&sndId){padTouchFire(idx,e);return;}   // one hit per finger (see below)
+      if(e.pointerType==='touch'&&!padEditMode&&sndId){padTouchFire(idx,e,'ptr');return;}   // one hit per finger (see below)
       if(padEditMode){
         // In edit mode: always open picker regardless of whether sound assigned
         openPadPicker(idx);
@@ -509,20 +509,40 @@ if(padGridEl)['touchstart','touchend','dblclick','selectstart'].forEach(n=>padGr
 // A finger landing sends both a pointerdown and a touchstart (in either order, or only the touchstart when iOS
 // cancels the pointer for a possible pinch). Whichever arrives first plays the pad; the other one, a few ms later,
 // is the same finger and is skipped.
-const _padTouchAt=[];
-function padTouchFire(idx,e){
-  const now=performance.now();
-  if(now-(_padTouchAt[idx]||-1e9)<45)return;
-  _padTouchAt[idx]=now;firePad(idx,e);
+// Pairing: a finger's touchstart and pointerdown arrive within a few ms of each other, so a pointerdown is skipped
+// only when a touchstart just played that pad (and the other way round). Two different fingers / two quick taps on
+// the same pad both play: touchstart never blocks another touchstart.
+// Light touches: a tap that lands in the gap between pads (or just off the edge of the grid) plays the nearest pad.
+const _padPend={touch:[],ptr:[]};   // per pad: times of hits from one source still waiting for their twin
+function padTouchFire(idx,e,src){
+  src=src||(e&&e.type==='touchstart'?'touch':'ptr');const other=src==='touch'?'ptr':'touch',now=performance.now();
+  const q=(_padPend[other][idx]||[]).filter(t=>now-t<80);
+  if(q.length){q.shift();_padPend[other][idx]=q;return;}        // this is the twin of a hit that already played
+  _padPend[other][idx]=q;const mine=(_padPend[src][idx]||[]).filter(t=>now-t<80);mine.push(now);_padPend[src][idx]=mine;
+  firePad(idx,e);
 }
-if(padGridEl)padGridEl.addEventListener('touchstart',e=>{
-  if(padEditMode)return;
-  for(const tch of e.changedTouches){
-    const hit=document.elementFromPoint(tch.clientX,tch.clientY),el=hit&&hit.closest('.pad');
-    const idx=el?padEls.indexOf(el):-1;
-    if(idx<0||!padSounds[idx])continue;           // ghost pad / empty pad: their pointerdown handles them
-    padTouchFire(idx,e);
-  }
-},{passive:false});
+const PAD_REACH=26;   // px: how far outside a pad a touch still counts for it
+function padAt(x,y,target){
+  let el=target&&target.closest?target.closest('.pad'):null;
+  if(!el){const hit=document.elementFromPoint(x,y);el=hit&&hit.closest?hit.closest('.pad'):null;}
+  if(el)return padEls.indexOf(el);
+  let best=-1,bd=PAD_REACH;
+  padEls.forEach((p,i)=>{if(!padSounds[i])return;const r=p.getBoundingClientRect(),dx=Math.max(r.left-x,0,x-r.right),dy=Math.max(r.top-y,0,y-r.bottom),d=Math.hypot(dx,dy);if(d<bd){bd=d;best=i;}});
+  return best;
+}
+function padTouches(e){
+  if(padEditMode||document.body.classList.contains('pad-edit'))return;
+  for(const tch of e.changedTouches){const idx=padAt(tch.clientX,tch.clientY,tch.target);if(idx<0||!padSounds[idx])continue;padTouchFire(idx,e,'touch');}
+}
+if(padGridEl)padGridEl.addEventListener('touchstart',padTouches,{passive:false});
+// just outside the grid: only on the bare game screen (never steals taps from buttons, menus or other pages)
+document.addEventListener('touchstart',e=>{
+  if(!padGridEl||padGridEl.contains(e.target))return;const t=e.target;
+  if(t.closest&&t.closest('button,a,input,select,textarea,[role=button],.modal,[id$="Modal"],.view:not(#gameView),.bouncer,#seqPanel,.seq-panel'))return;
+  const b=document.body.classList;if(b.contains('store-open')||b.contains('bunker-open')||b.contains('cockpit-open')||b.contains('bestbuddy-open'))return;
+  const r=padGridEl.getBoundingClientRect();
+  for(const tch of e.changedTouches){if(tch.clientX<r.left-PAD_REACH||tch.clientX>r.right+PAD_REACH||tch.clientY<r.top-PAD_REACH||tch.clientY>r.bottom+PAD_REACH)continue;
+    const idx=padAt(tch.clientX,tch.clientY,null);if(idx>=0&&padSounds[idx])padTouchFire(idx,e,'touch');}
+},{passive:true});
 // iOS: never let a two-finger touch on the pads turn into a page zoom
 ['gesturestart','gesturechange'].forEach(n=>document.addEventListener(n,e=>{if(e.target&&e.target.closest&&e.target.closest('#padGrid'))e.preventDefault();},{passive:false}));

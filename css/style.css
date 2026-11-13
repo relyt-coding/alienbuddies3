@@ -2033,7 +2033,7 @@ body.desktop-mode.cockpit-open #cockpitView{display:flex;}
 #buddyDesigner .bd-actions .bd-done{background:linear-gradient(180deg,#19e48a,#0aa865);color:#06281a;border-color:#3dffa8;}
 
 /* matching game: drawn card art (space & science pictures + alien buddies) */
-.match-face-art{width:90%;height:90%;display:block;pointer-events:none;}
+.match-face-art{width:100%;height:100%;display:block;pointer-events:none;}
 
 /* party glow: a coloured halo behind each buddy (a plain gradient, so it shows on every browser) */
 .bouncer-halo{position:absolute;left:50%;top:26px;width:120px;height:120px;border-radius:50%;pointer-events:none;z-index:-1;opacity:0;

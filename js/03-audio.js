@@ -26,7 +26,8 @@ function getCtx(){
     audioCtx=new(window.AudioContext||window.webkitAudioContext)();
     _initAudioGraph(audioCtx,masterVol);
   }
-  if(!_exporting&&audioCtx.state==='suspended')audioCtx.resume();
+  // iOS reports 'interrupted' (not 'suspended') after you switch apps or take a call, so wake it from either
+  if(!_exporting&&(audioCtx.state==='suspended'||audioCtx.state==='interrupted')){try{const p=audioCtx.resume();if(p&&p.catch)p.catch(()=>{});}catch(e){}}
   return audioCtx;
 }
 const Tnow=()=>getCtx().currentTime;

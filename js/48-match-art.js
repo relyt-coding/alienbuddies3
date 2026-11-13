@@ -147,13 +147,72 @@
   ];
   function tilt(i,roll,yaw){if(typeof buddyTumble==='undefined')return null;const T=buddyTumble;return T.mul(T.axis([0,0,1],roll),T.axis([0,1,0],yaw+(i%5)*.3));}
   function buddyPose(i){const o=POSES[(i*5+3)%POSES.length](i);if(o.view==='float'&&!o.m)return{view:'turn',angle:18};return o;}
+  // ── v0.2.124 look: every science picture as a glowing NEON sign on a HOLO-FOIL trading card ──
+  // The pictures above are drawn through a "neon pen": a stand-in canvas that turns each filled shape into a faint
+  // tint plus a glowing tube along its edge, ink outlines into tubes in the shape's colour, and soft glows into light.
+  const parse=c=>{if(typeof c!=='string')return[255,255,255,1];c=c.trim();
+    if(c[0]==='#'){let h=c.slice(1);if(h.length===3)h=h.split('').map(x=>x+x).join('');const n=parseInt(h.slice(0,6),16);return[n>>16&255,n>>8&255,n&255,1];}
+    const m=c.match(/[\d.]+/g)||[255,255,255];return[+m[0],+m[1],+m[2],m[3]!=null?+m[3]:1];};
+  const css=(r,g2,b,a)=>'rgba('+Math.round(r)+','+Math.round(g2)+','+Math.round(b)+','+(a==null?1:a)+')';
+  const brighten=([r,g2,b])=>{const mx=Math.max(r,g2,b,1),k=Math.min(2.2,235/mx);return[Math.min(255,r*k+20),Math.min(255,g2*k+20),Math.min(255,b*k+20)];};
+  const isInk=c=>typeof c==='string'&&/^#1a0a20$/i.test(c.trim());
+  function neonPen(t,k){
+    let fs='#fff',ss='#000',lw=1,last=[120,230,255];
+    const fake=(type,args)=>({_fake:1,type,args,stops:[],addColorStop(o,c){this.stops.push([o,c]);}});
+    const pick=v=>{if(v&&v._fake){const st=v.stops.map(x=>parse(x[1]));if(!st.length)return[255,255,255,1];
+        const fade=st[st.length-1][3]<.05;if(fade)return[...st[0].slice(0,3),0];   // a soft glow (ends transparent)
+        let best=st[0],bs=-1;st.forEach(c=>{const mx=Math.max(c[0],c[1],c[2]),mn=Math.min(c[0],c[1],c[2]),sat=mx-mn+mx*.15;if(sat>bs){bs=sat;best=c;}});return best;}
+      return parse(v);};
+    const real=v=>{if(!v||!v._fake)return v;const q=v.type==='L'?t.createLinearGradient(...v.args):t.createRadialGradient(...v.args);v.stops.forEach(([o,c])=>q.addColorStop(o,c));return q;};
+    function tube(rgb,w){const c=brighten(rgb);t.save();t.lineJoin='round';t.lineCap='round';
+      t.shadowColor=css(...c,1);t.shadowBlur=9*k;t.strokeStyle=css(...c,.55);t.lineWidth=w*2;t.stroke();
+      t.shadowBlur=3.5*k;t.strokeStyle=css(...c,1);t.lineWidth=w;t.stroke();
+      t.shadowBlur=0;t.strokeStyle=css(Math.min(255,c[0]+90),Math.min(255,c[1]+90),Math.min(255,c[2]+90),.95);t.lineWidth=w*.38;t.stroke();t.restore();}
+    function nfill(args){const c=pick(fs);
+      if(c[3]===0){t.save();t.globalAlpha*=.55;t.fillStyle=real(fs);t.fill(...args);t.restore();return;}   // glow → light
+      const lum=(c[0]*.3+c[1]*.59+c[2]*.11)/255;
+      if(c[3]<.55){t.save();t.fillStyle=css(...brighten(c),c[3]*.55);t.fill(...args);t.restore();return;}      // beams, haze
+      if(lum>.92&&c[3]<.95){t.save();t.fillStyle='rgba(255,255,255,.9)';t.shadowColor='#fff';t.shadowBlur=4*k;t.fill(...args);t.restore();return;}  // sparkle
+      last=c;t.save();t.fillStyle=css(...brighten(c),.13);t.fill(...args);t.restore();tube(c,2.1);}
+    function nstroke(){const c=isInk(ss)?last:pick(ss);if(c[3]===0)return;tube(c,isInk(ss)?Math.min(2.4,lw*.7):Math.max(1.8,Math.min(4.5,lw*.7)));}
+    return new Proxy(t,{
+      get(o,p){if(p==='createLinearGradient')return(...a)=>fake('L',a);if(p==='createRadialGradient')return(...a)=>fake('R',a);
+        if(p==='fill')return(...a)=>nfill(a);if(p==='stroke')return()=>nstroke();
+        if(p==='fillRect')return(x,y,w,h)=>{o.beginPath();o.rect(x,y,w,h);nfill([]);};
+        if(p==='strokeRect')return(x,y,w,h)=>{o.beginPath();o.rect(x,y,w,h);nstroke();};
+        if(p==='fillStyle')return fs;if(p==='strokeStyle')return ss;if(p==='lineWidth')return lw;
+        const v=o[p];return typeof v==='function'?v.bind(o):v;},
+      set(o,p,v){if(p==='fillStyle'){fs=v;return true;}if(p==='strokeStyle'){ss=v;return true;}if(p==='lineWidth')lw=v;o[p]=v;return true;}});
+  }
+  // the holo-foil card: deep purple base, rainbow foil, diagonal light bands, sparkles and a gold frame
+  function rrect(g,x,y,w,h,r){g.beginPath();g.moveTo(x+r,y);g.arcTo(x+w,y,x+w,y+h,r);g.arcTo(x+w,y+h,x,y+h,r);g.arcTo(x,y+h,x,y,r);g.arcTo(x,y,x+w,y,r);g.closePath();}
+  function holo(g,w,h,seed){
+    const R=Math.max(6,w*.09);g.save();rrect(g,0,0,w,h,R);g.fillStyle='#160c34';g.fill();g.clip();
+    let q=g.createLinearGradient(0,0,w,h);['#ff7ac0','#ffe14d','#5ce8ff','#b06bff','#9dff3f','#ff7ac0'].forEach((c,k,a)=>q.addColorStop(k/(a.length-1),c));
+    g.globalAlpha=.3;g.fillStyle=q;g.fillRect(0,0,w,h);
+    g.globalAlpha=.14;g.fillStyle='#fff';for(let k=-2;k<6;k++){const x=k*w*.38+(seed%3)*w*.06;g.beginPath();g.moveTo(x,0);g.lineTo(x+w*.13,0);g.lineTo(x-w*.42,h);g.lineTo(x-w*.55,h);g.fill();}
+    g.globalAlpha=1;q=g.createRadialGradient(w/2,h*.48,2,w/2,h*.48,w*.65);q.addColorStop(0,'rgba(10,4,30,.55)');q.addColorStop(1,'rgba(10,4,30,0)');g.fillStyle=q;g.fillRect(0,0,w,h);
+    let s=seed*97+13;const rn=()=>(s=(s*16807)%2147483647)/2147483647;
+    for(let k=0;k<12;k++){const x=rn()*w,y=rn()*h,z=.6+rn()*Math.max(1.2,w*.025);g.fillStyle='rgba(255,255,255,'+(.35+rn()*.6)+')';g.beginPath();for(let j=0;j<8;j++){const a=j*Math.PI/4,d=j%2?z*.3:z*1.7;g.lineTo(x+Math.cos(a)*d,y+Math.sin(a)*d);}g.fill();}
+    g.restore();
+    const fw=Math.max(2.5,w*.045);g.lineWidth=fw;q=g.createLinearGradient(0,0,w,h);q.addColorStop(0,'#fff3a0');q.addColorStop(.5,'#c9a227');q.addColorStop(1,'#fff3a0');g.strokeStyle=q;rrect(g,fw/2,fw/2,w-fw,h-fw,R-fw/2);g.stroke();
+    g.lineWidth=1;g.strokeStyle='rgba(255,255,255,.6)';rrect(g,fw+2,fw+2,w-2*fw-4,h-2*fw-4,Math.max(3,R-fw));g.stroke();
+  }
   window.drawMatchFace=function(cv,pattern){
     const w=cv.clientWidth||cv.parentNode.clientWidth||60,h=cv.clientHeight||cv.parentNode.clientHeight||w,dpr=Math.min(2,window.devicePixelRatio||1);
     cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);const g=cv.getContext('2d');g.setTransform(dpr,0,0,dpr,0,0);g.clearRect(0,0,w,h);
+    const key=pattern.slice(2);let seed=0;for(let i=0;i<key.length;i++)seed=(seed*31+key.charCodeAt(i))%9973;
+    holo(g,w,h,seed+1);
     const S=Math.min(w,h)*.86*.8;                  // pictures sit 20% smaller on the card
-    if(pattern.startsWith('b:')){if(typeof drawBuddy==='function'){const idx=+pattern.slice(2),o=buddyPose(idx),bs=S*.82*(o.k||1);
+    if(pattern.startsWith('b:')){if(typeof drawBuddy==='function'){const idx=+pattern.slice(2),o=buddyPose(idx),bs=S*.95*(o.k||1);
+      // a soft spotlight in the buddy's colour so it pops off the foil like a rare card
+      const col=typeof getAlienColor==='function'?getAlienColor(idx):'#9fffd8',L=g.createRadialGradient(w/2,h*.5,2,w/2,h*.5,w*.48);
+      L.addColorStop(0,'rgba(255,255,255,.55)');L.addColorStop(.45,/^#[0-9a-f]{6}$/i.test(col)?col+'66':'rgba(160,255,220,.4)');L.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=L;g.beginPath();g.arc(w/2,h*.5,w*.48,0,Math.PI*2);g.fill();
       drawBuddy(g,w/2,h*.55+(o.dy||0)*bs,bs,Object.assign({idx,antenna:1,t:1,lite:false},o));}return;}
-    const f=ICONS[pattern.slice(2)];if(!f)return;
-    g.save();g.translate((w-S)/2,(h-S)/2);g.scale(S/100,S/100);f(g);g.restore();
+    const f=ICONS[key];if(!f)return;
+    g.save();g.translate((w-S)/2,(h-S)/2);g.scale(S/100,S/100);
+    let pen=g;try{pen=neonPen(g,dpr*S/100*.55);}catch(e){}
+    try{f(pen);}catch(e){g.restore();g.save();g.translate((w-S)/2,(h-S)/2);g.scale(S/100,S/100);f(g);}
+    g.restore();
   };
 })();

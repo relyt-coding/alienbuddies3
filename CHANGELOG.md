@@ -2,6 +2,12 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.135 - 2026-11-13 12:02
+
+- Explore the Galaxies: hold the button to launch it. A glowing bar charges up with a rumble and a rising engine note; let go early and it powers back down, and a quick tap just nudges the button.
+- New unlock animation: a hyperspace jump, a burst of light, the core sun igniting with the four Quad Suns swinging into orbit, the title, then a fly-in to the skill tree (tap to skip).
+- Restyled shop button: a little starry window into space with an orbit icon, dim until you can afford it, then a slow ready glow.
+
 ## v0.2.134 - 2026-11-13 11:22
 
 - Hatch: the light on the mouth slides round smoothly as the buddy turns instead of flipping sides at the end of the spin.

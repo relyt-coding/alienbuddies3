@@ -108,7 +108,7 @@ function keysVoiceOwned(i){return i<(shop.keysLevel||0);}
     const nx=nextStep();if(!nx||score<nx.cost)return;
     score-=nx.cost;const lv=shop.keysLevel||0;shop.keysLevel=lv+1;
     if(typeof playSfxPurchase==='function')playSfxPurchase();if(typeof flashBuy==='function')flashBuy(KEYS_VOICES[lv].color);
-    if(lv===0){showToast('BUDDY KEYS unlocked! Tap KEYS above your pads to play.');}
+    if(lv===0){showToast(viewMenuReady()?'BUDDY KEYS unlocked! Switch to them in the VIEW menu.':'BUDDY KEYS unlocked! Tap KEYS above your pads to play.');}
     else{shop.keysVoice=lv;showToast(KEYS_VOICES[lv].name+' voice unlocked! Your buddies sing in it now.');}
     refreshUI();if(typeof renderUI==='function')renderUI();else renderCard();
     if(typeof autoSave==='function')autoSave();
@@ -149,18 +149,43 @@ function keysVoiceOwned(i){return i<(shop.keysLevel||0);}
     const own=keysOwned(),on=isOn();
     document.body.classList.toggle('keys-owned',own);document.body.classList.toggle('keys-on',on);
     sw.querySelectorAll('button').forEach(b=>b.classList.toggle('on',(b.dataset.m==='keys')===on));root.setAttribute('aria-hidden',on?'false':'true');
-    paintBar();placeSwitch();if(on)start();else stop();
+    paintBar();placeSwitch();paintViewRows();if(on)start();else stop();
   }
   window.refreshBuddyKeys=refreshUI;
 
   function placeSwitch(){
     if(!keysOwned()||!area||!grid){sw.style.display='none';return;}
     const b=document.body.classList;
-    if(!b.contains('game-active')||b.contains('daw-wide')||b.contains('pad-edit')){sw.style.display='none';return;}
+    if(!b.contains('game-active')||b.contains('daw-wide')||b.contains('pad-edit')||viewMenuReady()){sw.style.display='none';return;}
     sw.style.display='flex';
     const ar=area.getBoundingClientRect(),gr=grid.getBoundingClientRect();
     sw.style.top=Math.round(gr.top-ar.top-(sw.offsetHeight||30)-6)+'px';sw.style.left=Math.round(gr.right-ar.left-(sw.offsetWidth||110))+'px';
   }
+
+  // ── VIEW menu: with Buddy Keys owned, the DRUM PADS row becomes PADS / KEYS (show / hide) and gets two choices
+  //    under it, the same way STEP COUNTS has its options ──
+  function viewMenuReady(){return typeof drum!=='undefined'&&drum.seqTracks>0&&!!document.getElementById('vtbViewBtn');}
+  const vm=$('viewMenu'),padsRow=vm&&vm.querySelector('[data-vm="pads"]');
+  const pkRows=[];
+  if(padsRow){
+    [['pads','DRUM PADS'],['keys','BUDDY KEYS']].reverse().forEach(([k,label])=>{
+      const r=document.createElement('button');r.type='button';r.className='vm-row vm-sub';r.setAttribute('data-pk',k);
+      r.innerHTML='<span class="vm-check"></span>'+label;padsRow.after(r);pkRows.push(r);
+      r.addEventListener('click',()=>{
+        if(typeof padsHidden!=='undefined'&&padsHidden){padsHidden=false;try{_saveViewPrefs();applySeqView();}catch(e){}}
+        setOn(k==='keys');paintViewRows();
+        if(typeof openViewMenu==='function'&&vm.style.display==='flex')openViewMenu();
+      });
+    });
+  }
+  function paintViewRows(){
+    if(!padsRow)return;const own=keysOwned(),shown=!(typeof padsHidden!=='undefined'&&padsHidden);
+    padsRow.lastChild.textContent=own?'PADS / KEYS':'DRUM PADS';
+    pkRows.forEach(r=>{const k=r.getAttribute('data-pk'),on=(k==='keys')===isOn();
+      r.style.display=own?'':'none';r.classList.toggle('on',on);r.classList.toggle('dim',!shown);r.firstChild.textContent=on?'●':'';});
+  }
+  if(typeof refreshViewMenu==='function'){const _rvm=refreshViewMenu;refreshViewMenu=function(){_rvm.apply(this,arguments);try{paintViewRows();}catch(e){}};}
+  window.paintKeysViewRows=paintViewRows;
 
   // keyboard box: from the top of the pad grid down to just above the bottom row of pills
   let W=0,H=0,dpr=1,keyTop=0,keyW=0,sprites=null,spriteKey='';

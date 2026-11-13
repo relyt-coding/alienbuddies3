@@ -6,12 +6,16 @@
 (function(){
   const row=document.getElementById('settingsViewRow'),box=document.getElementById('settingsViewChips'),menu=document.getElementById('viewMenu');
   if(!row||!box||!menu)return;
-  const CH=[['vm','tiers','TRACKERS'],['vm','seq','SEQUENCER'],['vm','pads','DRUM PADS'],['sc','toggle','STEP COUNTS']];
+  const CH=[['vm','tiers','TRACKERS'],['vm','seq','SEQUENCER'],['vm','pads','DRUM PADS'],['pk','keys','BUDDY KEYS'],['sc','toggle','STEP COUNTS']];
   function paint(){
     const on=typeof drum!=='undefined'&&drum.seqTracks>0;row.style.display=on?'':'none';if(!on)return;
     if(typeof refreshViewMenu==='function')refreshViewMenu();
     box.innerHTML='';
-    CH.forEach(([kind,key,label])=>{const src=menu.querySelector('[data-'+kind+'="'+key+'"]');if(!src)return;
+    CH.forEach(([kind,key,label])=>{let src=menu.querySelector('[data-'+kind+'="'+key+'"]');if(!src)return;
+      // BUDDY KEYS chip (only once owned): on = playing the keys; tapping it again goes back to the pads
+      if(kind==='pk'){if(src.style.display==='none')return;if(src.classList.contains('on')){const back=menu.querySelector('[data-pk="pads"]');const b=document.createElement('button');b.type='button';b.className='sv-chip on';b.textContent='✓ '+label;
+        b.addEventListener('click',e=>{e.stopPropagation();back.click();paint();});box.appendChild(b);return;}}
+      if(kind==='vm'&&key==='pads'&&typeof keysOwned==='function'&&keysOwned())label='PADS / KEYS';
       const b=document.createElement('button');b.type='button';b.className='sv-chip'+(src.classList.contains('on')?' on':'');b.textContent=(src.classList.contains('on')?'✓ ':'')+label;
       b.addEventListener('click',e=>{e.stopPropagation();src.click();paint();});box.appendChild(b);});
   }

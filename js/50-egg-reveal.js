@@ -139,7 +139,7 @@
     g.setTransform(dpr,0,0,dpr,0,0);g.clearRect(0,0,W,H);
     const cx=W/2,baseY=H*.55,ew=W*.26,eh=W*.33,sp=st.special;
     // glow under the egg
-    const gl=g.createRadialGradient(cx,baseY,ew*.2,cx,baseY,W*.55);gl.addColorStop(0,sp?'rgba(255,210,63,.45)':'rgba(0,255,136,.25)');gl.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=gl;g.fillRect(0,0,W,H);
+    const gl=g.createRadialGradient(cx,baseY,ew*.2,cx,baseY,W*.49);const gc=sp?'255,210,63':'0,255,136',ga=sp?.45:.25;gl.addColorStop(0,`rgba(${gc},${ga})`);gl.addColorStop(.45,`rgba(${gc},${ga*.45})`);gl.addColorStop(.75,`rgba(${gc},${ga*.12})`);gl.addColorStop(1,`rgba(${gc},0)`);g.fillStyle=gl;g.fillRect(0,0,W,H);
     if(st.phase!=='open'){
       // drop in with a bounce, then wobble; each tap gives a hard shake
       const drop=Math.min(1,t/.55),y=baseY-(1-drop)*H*.8+(drop<1?0:0),bounce=t<.85&&t>.55?Math.sin((t-.55)/.3*Math.PI)*-14:0;

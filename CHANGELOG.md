@@ -2,6 +2,11 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.133 - 2026-11-13 10:28
+
+- Egg hatch spin: the antennas hold still while the body turns under them, so the tips no longer sweep across the face.
+- Eyes and mouth fade out softly as they turn toward the edge of the body instead of being cut off mid-spin.
+
 ## v0.2.132 - 2026-11-13 10:18
 
 - Home screen: the rename pencil sits right next to the X.

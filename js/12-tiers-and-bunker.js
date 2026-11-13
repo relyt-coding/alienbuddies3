@@ -432,24 +432,38 @@ document.getElementById('alienNameClose')&&document.getElementById('alienNameClo
 alienNameModal&&alienNameModal.addEventListener('pointerdown',e=>{if(e.target===alienNameModal)closeAlienNameModal();});
 alienNameInput&&alienNameInput.addEventListener('keydown',e=>{if(e.key==='Enter')saveAlienName();});
 
-// ── Trackers show only the newest 4 rows; scroll up (no scrollbar) to see the first colours ──
+// ── Trackers show the newest 4 rows, scrolled to the BOTTOM (the whole last row in view). Only scrolling up with
+//    your own finger / mouse wheel moves it; it snaps back to the bottom when you come back to the drum pads. ──
+window._tierManual={};
+function tierPin(c,force){if(!c)return;if(force)window._tierManual[c.id]=false;if(!window._tierManual[c.id])c.scrollTop=c.scrollHeight;}
 (function(){
   const VISIBLE_ROWS=4;
   ['tiersContainer','autoTiersContainer'].forEach(id=>{
     const c=document.getElementById(id);if(!c)return;
-    let stick=true;
-    c.addEventListener('scroll',()=>{stick=c.scrollTop+c.clientHeight>=c.scrollHeight-6;},{passive:true});
+    let userDrag=false;
+    const mark=()=>{userDrag=true;};
+    c.addEventListener('touchstart',mark,{passive:true});c.addEventListener('wheel',mark,{passive:true});c.addEventListener('mousedown',mark);
+    // a scroll only counts as "manual" while a finger / wheel is driving it
+    c.addEventListener('scroll',()=>{if(!userDrag)return;window._tierManual[id]=c.scrollTop+c.clientHeight<c.scrollHeight-6;},{passive:true});
+    c.addEventListener('touchend',()=>{setTimeout(()=>{userDrag=false;},600);},{passive:true});c.addEventListener('mouseup',()=>{userDrag=false;});
     function fit(){
       const rows=c.querySelectorAll('.tier-row');
-      if(rows.length<=VISIBLE_ROWS){c.style.maxHeight='';return;}
-      const h=rows[rows.length-1].offsetHeight;
-      if(!h)return; // hidden right now
-      const gap=parseFloat(getComputedStyle(c).rowGap)||5;
-      c.style.maxHeight=(VISIBLE_ROWS*h+(VISIBLE_ROWS-1)*gap+2)+'px';
-      if(stick)c.scrollTop=c.scrollHeight;
+      if(rows.length<=VISIBLE_ROWS){c.style.maxHeight='';tierPin(c);return;}
+      const last=rows[rows.length-1],first=rows[rows.length-VISIBLE_ROWS];
+      if(!last.offsetHeight)return; // hidden right now
+      // exact height from the top of the 4th-newest row to the bottom of the newest one (+ room for the dot glow)
+      const pad=parseFloat(getComputedStyle(c).paddingTop)||0,hh=last.offsetTop+last.offsetHeight-first.offsetTop+pad+6;
+      c.style.maxHeight=Math.ceil(hh)+'px';
+      tierPin(c);
     }
-    new MutationObserver(fit).observe(c,{childList:true});
+    new MutationObserver(()=>requestAnimationFrame(fit)).observe(c,{childList:true});
     addEventListener('resize',fit);
     setInterval(()=>{if(!document.hidden)fit();},1500); // cheap catch-all (row heights change with layout)
   });
+  // back on the drum pad page (from the shop, bunker, any other page or another app) → bottom again
+  const onGame=()=>{const b=document.body.classList;return !['store-open','bunker-open','cockpit-open','bestbuddy-open','skilltree-open','match-open'].some(k=>b.contains(k))&&!document.querySelector('#skillTreeModal.open');};
+  let was=true;
+  const back=()=>{const now=onGame();if(now&&!was)['tiersContainer','autoTiersContainer'].forEach(id=>{const c=document.getElementById(id);tierPin(c,true);requestAnimationFrame(()=>tierPin(c));});was=now;};
+  new MutationObserver(back).observe(document.body,{attributes:true,attributeFilter:['class']});
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden){was=false;back();}});
 })();

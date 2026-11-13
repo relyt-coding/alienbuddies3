@@ -56,7 +56,7 @@ function promptSlotRename(slotIdx, nameEl){
   const input=document.createElement('input');
   input.type='text';input.maxLength=20;input.value=current;
   input.autocomplete='off';input.spellcheck=false;
-  input.style.cssText="font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:.1em;background:#0a1a0f;border:1px solid #00ff88;border-radius:6px;color:#00ff88;padding:.2rem .5rem;width:100%;outline:none;box-sizing:border-box;";
+  input.style.cssText="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:.1em;background:#0a1a0f;border:1px solid #00ff88;border-radius:6px;color:#00ff88;padding:.2rem .5rem;width:100%;outline:none;box-sizing:border-box;";
   const orig=nameEl.textContent;
   nameEl.textContent='';
   nameEl.appendChild(input);

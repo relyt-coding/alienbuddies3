@@ -18,7 +18,7 @@ function pinTierScroll(){
   [document.getElementById('tiersContainer'),document.getElementById('autoTiersContainer')].forEach(c=>{
     if(!c)return;
     const n=c.children.length;
-    if(c._rc!==n){c._rc=n;c.scrollTop=c.scrollHeight;}
+    if(c._rc!==n){c._rc=n;if(typeof tierPin==='function')tierPin(c);else c.scrollTop=c.scrollHeight;}
     c.classList.toggle('scrolls',c.scrollHeight>c.clientHeight+3);
   });
 }

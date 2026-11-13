@@ -2227,3 +2227,5 @@ body.desktop-mode #alienNameModal{align-items:center;padding-top:0;}
 #settingsViewRow > div{flex:1 1 auto;}
 /* shop: no emoji-style icons (the little buddy icons stood in for the old alien emoji); only the 💎 stays */
 #storeView .bi,#storeView .buddy-icon{display:none!important;}
+/* iPhones zoom the whole page in when you tap a text box with text smaller than 16px; never let that happen */
+input[type=text],input[type=number],input[type=search],input:not([type]),textarea,select{font-size:16px!important;}

@@ -114,7 +114,22 @@
       b.style.display='block';
       b.style.transform='translate('+(vv.offsetLeft+vv.width/2)+'px,'+(vv.offsetTop+10)+'px) scale('+(1/vv.scale)+') translateX(-50%)';
     }
-    vv.addEventListener('resize',place);vv.addEventListener('scroll',place);place();
+    // v0.2.127: if the page ever ends up zoomed in (outside the big sequencer), zoom back out by itself once your
+    // fingers are off the screen and nobody is typing, no button press needed
+    var autoT=null;
+    function autoReset(){
+      clearTimeout(autoT);
+      if(vv.scale<=1.03||document.querySelector('#seqFullModal.open'))return;
+      autoT=setTimeout(function(){
+        var ae=document.activeElement,typing=ae&&(ae.tagName==='INPUT'||ae.tagName==='TEXTAREA')&&ae.type!=='range'&&ae.type!=='checkbox';
+        if(vv.scale>1.03&&!document.querySelector('#seqFullModal.open')&&!typing&&touchesDown===0)resetPageZoom();
+        else if(vv.scale>1.03)autoReset();
+      },700);
+    }
+    vv.addEventListener('resize',function(){place();autoReset();});vv.addEventListener('scroll',place);place();
+    document.addEventListener('focusout',function(){setTimeout(autoReset,350);},true);
+    document.addEventListener('visibilitychange',function(){if(!document.hidden)autoReset();});
+    window.addEventListener('pageshow',autoReset);autoReset();
   })();
   // the BACK buttons also wait until you have zoomed out
   document.addEventListener('click',function(e){

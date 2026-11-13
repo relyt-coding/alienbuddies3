@@ -2,6 +2,11 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.126 - 2026-11-12 22:19
+
+- Egg polka dots are scattered at random now (different on every egg, in the colours of the buddy inside) instead of sitting in rows
+- The ACTIVATE arrow lines up exactly with the middle of the button
+
 ## v0.2.125 - 2026-11-12 21:48
 
 - The ACTIVATE arrow now points at the button from the side, so nothing on the screen jumps when it appears

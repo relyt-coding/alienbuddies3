@@ -2,6 +2,12 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.132 - 2026-11-13 10:18
+
+- Home screen: the rename pencil sits right next to the X.
+- Egg reveal: the glow behind the buddy fades out softly (no hard edges at the sides) and is dimmer.
+- Buddy mouth: its shine stays lit from the top-left instead of sliding around as the hatch spin settles.
+
 ## v0.2.131 - 2026-11-13 09:15
 
 - Buddy breathing: eyes, front antennas and the fluff at the antenna roots now breathe with the head, so the antennas stay attached.

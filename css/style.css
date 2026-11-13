@@ -2251,3 +2251,14 @@ body:not(.desktop-mode) .upgrade-buy-btn,body:not(.desktop-mode) .drum-buy-btn{f
 body:not(.desktop-mode) .upgrade-buy-btn .upgrade-effect,body:not(.desktop-mode) .drum-buy-btn .upgrade-effect{flex:1 1 0;min-width:0;}
 body:not(.desktop-mode) .upgrade-price,body:not(.desktop-mode) .drum-price{flex:1 0 100%;display:flex;align-items:baseline;justify-content:flex-end;margin:.5rem -.7rem 0 -.7rem;padding:.32rem .75rem .38rem;border-top:1px solid rgba(255,255,255,.07);background:rgba(255,255,255,.035);text-align:right;line-height:1;}
 body:not(.desktop-mode) .upgrade-price small,body:not(.desktop-mode) .drum-price small{display:inline;margin-left:.3rem;}
+
+/* ── Explore the Galaxies intro (js/59-galaxy-intro.js) ── */
+#galaxyIntro{position:fixed;top:0;right:0;bottom:0;left:0;z-index:900;display:none;background:#02030a;touch-action:none;}
+#galaxyIntro.on{display:block;}
+#galaxyIntro canvas{position:absolute;top:0;left:0;}
+#galaxyIntro .gi-text{position:absolute;left:0;right:0;top:66%;text-align:center;opacity:0;transform:scale(.86);transition:opacity .45s,transform 1.2s cubic-bezier(.2,.8,.2,1);pointer-events:none;}
+#galaxyIntro.gi-show .gi-text{opacity:1;transform:none;}
+#galaxyIntro .gi-kicker{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:.35em;color:#ffd25a;text-shadow:0 0 12px rgba(255,190,80,.6);}
+#galaxyIntro .gi-title{font-family:'Bebas Neue',sans-serif;font-size:2.7rem;letter-spacing:.1em;color:#f2fbff;line-height:1.05;text-shadow:0 0 22px rgba(120,220,255,.7);padding:0 1rem;}
+#galaxyIntro .gi-skip{position:absolute;bottom:calc(1.4rem + env(safe-area-inset-bottom,0px));left:0;right:0;text-align:center;font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:.25em;color:rgba(200,230,255,.35);}
+body.galaxy-intro .bouncer{visibility:hidden;}

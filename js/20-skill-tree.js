@@ -889,8 +889,9 @@ document.getElementById('skillTreeUnlockBtn')&&document.getElementById('skillTre
   renderUI();
   autoSave();
   updateSkillTreeBtn();
-  showToast('🌌 Explore the Galaxies unlocked! Find it at the top of the Shop.');
-  openSkillTree();
+  // a short hyperspace intro, then the tree opens underneath it as it fades
+  if(typeof playGalaxyIntro==='function')playGalaxyIntro(()=>openSkillTree(),()=>showToast('🌌 Explore the Galaxies unlocked! Find it at the top of the Shop.'));
+  else{showToast('🌌 Explore the Galaxies unlocked! Find it at the top of the Shop.');openSkillTree();}
 });
 document.getElementById('skillTreeCloseBtn')&&document.getElementById('skillTreeCloseBtn').addEventListener('click', closeSkillTree);
 document.getElementById('stDetailBuyBtn')&&document.getElementById('stDetailBuyBtn').addEventListener('click',()=>{ if(_stDetailNode) buySkill(_stDetailNode); closeStDetail(); });

@@ -2082,10 +2082,9 @@ body.shop-b .store-section-label{color:#6a6a8a;font-size:.85rem;}
 #eggReveal .er-btns .er-ok{background:linear-gradient(180deg,#19e48a,#0aa865);color:#06281a;border-color:#3dffa8;}
 #eggReveal.special .er-btns .er-ok{background:linear-gradient(180deg,#ffe36a,#e0a020);color:#3a2400;border-color:#fff1a0;}
 #eggReveal .er-rays{position:absolute;left:50%;top:52%;width:180vmax;height:180vmax;transform:translate(-50%,-50%) scale(.2);opacity:0;pointer-events:none;z-index:1;
-  background:repeating-conic-gradient(from 0deg,rgba(0,255,136,.26) 0deg 9deg,transparent 9deg 22deg);border-radius:50%;
-  -webkit-mask:radial-gradient(circle,#000 0%,transparent 55%);mask:radial-gradient(circle,#000 0%,transparent 55%);}
-#eggReveal.special .er-rays{background:repeating-conic-gradient(from 0deg,rgba(255,210,63,.34) 0deg 8deg,transparent 8deg 18deg);}
-#eggReveal.open-burst .er-rays{animation:erRays 1s cubic-bezier(.2,.8,.2,1) forwards,erSpin 14s linear infinite;}
+  background:radial-gradient(circle,rgba(0,255,136,.22) 0%,rgba(0,255,136,.08) 18%,transparent 34%);border-radius:50%;}
+#eggReveal.special .er-rays{background:radial-gradient(circle,rgba(255,210,63,.3) 0%,rgba(255,210,63,.1) 18%,transparent 34%);}
+#eggReveal.open-burst .er-rays{animation:erRays 1s cubic-bezier(.2,.8,.2,1) forwards;}
 @keyframes erRays{to{opacity:1;transform:translate(-50%,-50%) scale(1);}}
 @keyframes erSpin{from{rotate:0deg;}to{rotate:360deg;}}
 /* the new buddy waits hidden on screen until it hatches, then pops in */

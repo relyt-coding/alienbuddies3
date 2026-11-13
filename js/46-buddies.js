@@ -293,7 +293,7 @@
     // stepping: the moving foot slides forward, lifts and tips its rounded front up; in the air both hang tipped down
     const step=run||air?(sd=>{const p=ph+(sd>0?Math.PI:0);if(air)return{x:0,y:u*2,a:.12*dir};
       const lift=Math.max(0,Math.cos(p));return{x:Math.sin(p)*u*6*sp*dir,y:-lift*u*5*sp,a:-lift*.18*sp*dir};}):null;
-    const sweep=run?u*(12+8*sp)+Math.sin(ph*2)*u*2*sp:0,fl=run?(Math.sin(t*3)*.6+Math.sin(t*1.7+.8)*.9)*u:Math.sin(t*Math.PI*2/2.2-.35)*u*2.2;   // idle: on the breathing beat
+    const sweep=run?u*(12+8*sp)+Math.sin(ph*2)*u*2*sp:0,fl=run?(Math.sin(t*3)*.6+Math.sin(t*1.7+.8)*.9)*u:Math.sin(t*Math.PI*2/2.2-.35)*u*1.1;   // idle: on the breathing beat
     g.save();g.translate(0,bob);
     if(o.platform&&o.A&&window.buddyAcc)buddyAcc.platform(g,o.A,u,t,-bob,'back');
     g.fillStyle='rgba(26,10,32,.33)';g.beginPath();g.ellipse(0,u*41-bob,u*30,u*3.6,0,0,Math.PI*2);g.fill();
@@ -356,7 +356,7 @@
     g.restore();}
     g.restore();
     feet(g,u,B,th,step,2,SHOE,t);
-    g.save();g.translate(0,CY);g.rotate(lean);g.translate(0,-CY);g.translate(0,SQY);g.scale(1.04,.95);g.translate(0,-SQY);
+    g.save();g.translate(0,CY);g.rotate(lean);g.translate(0,-CY);g.translate(0,SQY);g.scale(1.04+BR,.95-BR*.9);g.translate(0,-SQY);
     after.sort((a,b)=>a.z-b.z).forEach(d=>d.f());
     if(B.fx)specialFx(g,B,u,R,CY,t,'front',rot);
     g.restore();g.restore();

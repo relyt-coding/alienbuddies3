@@ -2,6 +2,16 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.123 - 2026-11-12 20:25
+
+- New BEST BUDDY page (Alien Evolution path, right after Buddy Designer): your favourite buddy hangs out on a platform doing random idle animations: looking around, hopping, spinning, wiggling, napping. Tap them for hearts
+- Best Buddy sits left of the bunker; the Cockpit is now left of that. ◀ ▶ arrows and SWITCH BUDDY pick who's out
+- ACCESSORIZE: 100 accessories in 4 categories (25 head, 25 eyes, 25 shoes, 25 stands). Hats, eyewear and shoes show on floating buddies and in the bunker too
+- 25 puzzles along the Alien Evolution path unlock the accessories: Slide Puzzle, Light Up, Drum Echo, Twist Tiles, Bead Sort, Buddy Maze, Odd One Out and Beat Match, getting harder as you go. Pay once, play until solved
+- Theme songs: open a buddy in the bunker and tap MAKE A SONG FOR THIS BUDDY for a clean sequencer slate. Your own pattern comes back untouched, and the song plays (with dancing) on the Best Buddy page
+- Friendlier eyes: buddies now have glossy plush-toy safety eyes instead of barrel beads
+- The Best Buddy page goes easy on older phones (lighter drawing, floating buddies rest while it's open)
+
 ## v0.2.122 - 2026-11-12 01:20
 
 - Every alien buddy now hatches from an egg, so you meet each one and can name it (buy several quickly and they hatch one after another)

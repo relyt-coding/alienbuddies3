@@ -159,7 +159,7 @@
     g.save();g.globalAlpha=shA;drawEgg(cx,baseY,ew,eh,t,sp,1,'bottom',st.pal);g.restore();
     // the buddy rises out of the egg, spinning, and lands facing you
     const k=Math.min(1,o/1.1),e=1-Math.pow(1-k,3),ang=20+(1-e)*720,size=W*.5*(.35+.65*e),by=baseY-eh*.12-e*eh*.06+Math.sin(Math.max(0,o-1.1)*3)*3;
-    if(typeof drawBuddy==='function')drawBuddy(g,cx,by,size,{view:'turn',angle:ang,idx:st.idx,t:o+1,noShadow:true,pulse:Math.pow(1-((o/.6)%1),3)});
+    if(typeof drawBuddy==='function')drawBuddy(g,cx,by,size,{view:'turn',angle:ang,antAngle:20,idx:st.idx,t:o+1,noShadow:true,pulse:Math.pow(1-((o/.6)%1),3)});
     // top shell flies up and away
     if(o<1.2){const ty=-o*o*H*.9,tx=o*W*.25,rot=o*4;g.save();g.translate(cx+tx,baseY+ty);g.rotate(rot);g.translate(-cx,-baseY);g.globalAlpha=Math.max(0,1-o/1.2);drawEgg(cx,baseY,ew,eh,t,sp,1,'top',st.pal);g.restore();}
     parts(t);

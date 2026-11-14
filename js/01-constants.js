@@ -56,7 +56,7 @@ function alienDiscount(n){
   return Math.pow(10,i<=k?ALIEN_L[i]:ALIEN_L[k]+(ALIEN_L[k]-ALIEN_L[k-1])*(i-k));
 }
 const _disc=c=>{const d=progressDiscount();return d>1?Math.max(1,Math.round(c/d)):c;};
-const GAME_VERSION='0.2.136'; // bump on every delivered build (shown in Settings and on the home screen)
+const GAME_VERSION='0.2.137'; // bump on every delivered build (shown in Settings and on the home screen)
 const BASE_CPS=5;
 const UNLOCK_COST=bump30(60000000);
 const ALIEN_POWER_UNLOCK_COST=bump30(600000000);

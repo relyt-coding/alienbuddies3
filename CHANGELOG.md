@@ -2,6 +2,14 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.137 - 2026-11-13 18:43
+
+- Naming a buddy no longer makes the card jump. On phones the card stays perfectly still while the keyboard opens and closes, and grows or shrinks smoothly from its bottom edge when you start or finish editing.
+- Every other text box (renaming a save, naming patterns and arrangements, BPM, sound search and volumes, the start step, the alien limit, chop and vocal names) also stays put when the keyboard comes up. Boxes low in a list glide up with the list instead of the whole screen lurching.
+- On phones, the Save Pattern and Save Arrangement panels now drop down from the top, so the keyboard never covers them, and the sound picker keeps one height while you search.
+- Explore the Galaxies: once unlocked, a tap opens it, and holding the button replays the launch animation.
+- Shop: the DISMISS button is now a small ✕ in the corner of maxed cards (it turns into a + to bring a card back).
+
 ## v0.2.136 - 2026-11-13 15:36
 
 - NEW: Buddy Keys (shop, under Drum Pad). Swap your drum pads for an 8-key keyboard with your own buddies sitting on the keys; tap a key and its buddy hops and sings the note. Switch between DRUM PADS and BUDDY KEYS in the VIEW menu (or Settings → View).

@@ -904,6 +904,7 @@ function voxSlider(label,min,max,val,fmt,fn){
 }
 function voxOpenLaneMenu(li){
   const L=voxLayer(li),M=voxModal('voxLaneModal');voxHead(M,voxLayerName(li),VOX_LANE_COLORS[li]);
+  M.m.classList.add('kbs-top');   // it has a text box: on phones it sits near the top so the keyboard never covers it
   const nm=document.createElement('input');nm.type='text';nm.maxLength=16;nm.value=L.name||'';nm.placeholder='VOX '+(li+1);nm.className='vox-name-in';
   nm.addEventListener('input',()=>{L.name=nm.value.trim();voxRender();autoSave();});
   M.box.appendChild(_vx('div','more-sub','Name'));M.box.appendChild(nm);

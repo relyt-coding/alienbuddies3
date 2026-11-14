@@ -2354,3 +2354,38 @@ body:not(.desktop-mode) #alienNameModal.fit-tiny{padding-top:calc(env(safe-area-
 #alienNameModal.fit-tiny #alienNameBox{padding-top:.9rem;padding-bottom:.9rem;gap:.5rem;}
 #alienNameModal.fit-tiny #alienProfileBuddy{width:92px!important;height:92px!important;}
 #alienNameModal.fit-tiny #alienNamePreview{margin:0;}
+
+/* ── v0.2.137 KEYBOARD STEADY (js/61-keyboard-steady.js): touch screens type into an invisible box at the top of
+   the screen so Safari never scrolls; the box you tapped shows a focus ring + a drawn caret ── */
+.kbs-catcher{position:fixed;top:4px;left:50%;width:1px;height:1px;min-width:0;margin:0;padding:0;border:0;border-radius:0;opacity:0;
+  font-size:16px;color:transparent;background:transparent;caret-color:transparent;pointer-events:none;z-index:1;-webkit-user-select:text;user-select:text;-webkit-appearance:none;appearance:none;}
+#kbsCaret{display:none;position:fixed;left:0;top:0;width:2px;height:16px;border-radius:1px;pointer-events:none;z-index:2147483000;}
+#kbsCaret.kbs-blink{animation:btBlink 1.06s steps(1,end) .5s infinite;}
+input.kbs-on{box-shadow:0 0 0 1.5px currentColor!important;}
+input.kbs-all{background-image:linear-gradient(rgba(110,160,255,.3),rgba(110,160,255,.3))!important;}
+@media (hover:none) and (pointer:coarse){
+  .pa-search{font-size:16px;}
+  #seqBpmDisplay input{font-size:16px!important;width:54px!important;}
+}
+/* v0.2.137: the shop's DISMISS button is now a small ✕ in the card's corner (a + when it brings a card back).
+   The circle you see is 24px; the button itself is 34px, so it's easy to hit. */
+.shop-dismiss-btn{right:.2rem;top:.2rem;width:34px;height:34px;padding:0;border:0;border-radius:50%;color:#7c7c9c;font-size:0;letter-spacing:0;line-height:0;
+  background:radial-gradient(circle,#0c0c16 0,#0c0c16 11px,#30304a 11.5px,#30304a 12.5px,rgba(48,48,74,0) 13px);-webkit-tap-highlight-color:transparent;transition:transform .2s,color .15s;}
+.shop-dismiss-btn::before,.shop-dismiss-btn::after{content:'';position:absolute;left:50%;top:50%;width:11px;height:1.6px;border-radius:1px;background:currentColor;}
+.shop-dismiss-btn::before{transform:translate(-50%,-50%) rotate(45deg);}
+.shop-dismiss-btn::after{transform:translate(-50%,-50%) rotate(-45deg);}
+.shop-dismiss-btn.restore{transform:rotate(45deg);color:#a6abff;}
+.shop-dismiss-btn:active{color:#e2e4ff;background:radial-gradient(circle,#1c1c2e 0,#1c1c2e 11px,#4a4a7a 11.5px,#4a4a7a 12.5px,rgba(74,74,122,0) 13px);}
+.drum-card-header.has-x,.upgrade-card-header.has-x{padding-right:30px;}
+/* v0.2.137: on phones, pop-ups that have a text box sit near the TOP, so their box is already clear of the keyboard
+   and nothing has to move when it comes up. (The save sheets drop down from the top instead of rising from below.) */
+@keyframes kbsDrop{from{transform:translateY(-100%)}to{transform:translateY(0)}}
+@media (hover:none) and (pointer:coarse){
+  #savePatModal,#saveArrModal{align-items:flex-start!important;}
+  #savePatModal>div,#saveArrModal>div{border-radius:0 0 20px 20px!important;padding:calc(env(safe-area-inset-top) + 1.1rem) 1.4rem 1.3rem!important;animation:kbsDrop .22s cubic-bezier(.34,1.1,.64,1)!important;}
+  #patStartModal,.more-modal.kbs-top{align-items:flex-start!important;padding-top:calc(env(safe-area-inset-top) + 18px)!important;}
+}
+.kbs-spacer{flex:none;pointer-events:none;}
+/* v0.2.137 (phones): the sound picker keeps one height, so it doesn't grow and shrink (moving the search box) as
+   you type a search, and short result lists sit up high where the keyboard can't cover them */
+@media (hover:none) and (pointer:coarse){#padAssignInner{height:84vh;max-height:84vh;}#padAssignList{flex:1 1 auto;min-height:0;}}

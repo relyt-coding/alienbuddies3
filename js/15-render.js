@@ -300,7 +300,9 @@ function updateShopDismiss(){
       });
       hdr.appendChild(btn);
     }
-    if(btn){btn.style.display=maxed?'':'none';btn.textContent=isDis?'RESTORE':'DISMISS';}
+    // v0.2.137: a small ✕ in the corner (drawn, not text); on a tucked-away card it turns into a + to bring it back
+    if(btn){btn.style.display=maxed?'':'none';btn.textContent='';btn.classList.toggle('restore',isDis);btn.setAttribute('aria-label',isDis?'Restore':'Dismiss');btn.title=isDis?'Bring back':'Tuck away';}
+    const hdr2=card.querySelector('.drum-card-header,.upgrade-card-header');if(hdr2)hdr2.classList.toggle('has-x',maxed);
     card.classList.toggle('shop-dismissed',isDis&&!shopShowDismissed);
     card.classList.toggle('shop-dismissed-shown',isDis&&shopShowDismissed);
   });

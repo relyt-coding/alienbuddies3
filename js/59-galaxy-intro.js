@@ -97,22 +97,40 @@
     o.connect(lp);o2.connect(lp);lp.connect(gn);gn.connect(masterGainNode);o.start(t);o2.start(t);
     return{stop(fast){const n=c.currentTime;gn.gain.cancelScheduledValues(n);gn.gain.setValueAtTime(gn.gain.value,n);gn.gain.linearRampToValueAtTime(0,n+(fast?.05:.25));o.stop(n+.3);o2.stop(n+.3);}};}catch(e){return null;}}
   function armed(){return typeof skillTreeUnlocked!=='undefined'&&!skillTreeUnlocked&&typeof alienGems!=='undefined'&&Math.floor(alienGems)>=GEM_UNLOCK_COST;}
+  // v0.2.137: once the galaxies are unlocked a tap just opens them, and holding the button replays the launch.
+  // The charge-up waits a moment before it shows, so an ordinary tap never flashes it.
+  function holdMode(){if(armed())return 'unlock';if(typeof skillTreeUnlocked!=='undefined'&&skillTreeUnlocked)return 'replay';return null;}
+  const REPLAY_WAIT=.22;
   function setP(btn,p){btn.style.setProperty('--hp',p.toFixed(3));btn.classList.toggle('charging',p>0);
     const sh=p>.15?(p*p*2.2):0;btn.style.transform=sh?`translate(${(Math.random()-.5)*sh}px,${(Math.random()-.5)*sh}px)`:'';}
-  function holdTick(now){if(!hold)return;const p=Math.min(1,(now-hold.t0)/1000/HOLD);setP(hold.btn,p);
-    if(p>=1){const b=hold.btn,h=hold.hum;hold=null;h&&h.stop(true);setP(b,0);b.classList.add('launched');setTimeout(()=>b.classList.remove('launched'),600);
-      if(navigator.vibrate)try{navigator.vibrate(30);}catch(e){}window.doSkillTreeUnlock&&window.doSkillTreeUnlock();return;}
+  function holdTick(now){if(!hold)return;const p=Math.max(0,Math.min(1,(now-hold.t0)/1000/HOLD));
+    if(p>0&&!hold.hum&&!hold.humTried){hold.humTried=true;hold.hum=holdHum();}
+    setP(hold.btn,p);hold.p=p;
+    if(p>=1){const b=hold.btn,h=hold.hum,mode=hold.mode;hold=null;h&&h.stop(true);setP(b,0);b.classList.add('launched');setTimeout(()=>b.classList.remove('launched'),600);
+      if(navigator.vibrate)try{navigator.vibrate(30);}catch(e){}
+      if(mode==='replay')replay();else window.doSkillTreeUnlock&&window.doSkillTreeUnlock();
+      return;}
     hold.raf=requestAnimationFrame(holdTick);}
-  function holdStart(e){const btn=e.currentTarget;if(!armed()||hold)return;if(e.cancelable)e.preventDefault();
-    hold={btn,t0:performance.now(),hum:holdHum()};hold.raf=requestAnimationFrame(holdTick);}
+  function replay(){
+    if(document.body.classList.contains('galaxy-intro'))return;
+    if(typeof playGalaxyIntro==='function')playGalaxyIntro(()=>{if(typeof openSkillTree==='function')openSkillTree();},null);
+    else if(typeof openSkillTree==='function')openSkillTree();
+  }
+  window.replayGalaxyIntro=replay;
+  function holdStart(e){const btn=e.currentTarget,mode=holdMode();if(!mode||hold)return;if(e.cancelable)e.preventDefault();
+    btn._skipOpen=false;
+    hold={btn,mode,p:0,t0:performance.now()+(mode==='replay'?REPLAY_WAIT*1000:0),hum:mode==='unlock'?holdHum():null,humTried:mode==='unlock'};hold.raf=requestAnimationFrame(holdTick);}
   function holdEnd(){if(!hold)return;const h=hold;hold=null;cancelAnimationFrame(h.raf);h.hum&&h.hum.stop();
+    // let go part-way through a replay charge: that was a hold, not a tap, so don't open the tree as well
+    if(h.mode==='replay'&&h.p>.12)h.btn._skipOpen=true;
     // power back down smoothly
     const b=h.btn,p0=parseFloat(b.style.getPropertyValue('--hp'))||0,t0=performance.now();
     (function down(now){const p=Math.max(0,p0-(now-t0)/1000/.3*p0);setP(b,p);if(p>0)requestAnimationFrame(down);})(t0);}
   window.stHoldNudge=function(){const b=document.getElementById('skillTreeUnlockBtn');if(!b||hold)return;b.classList.remove('nudge');void b.offsetWidth;b.classList.add('nudge');};
   function wire(){const b=document.getElementById('skillTreeUnlockBtn');if(!b)return;
     b.addEventListener('pointerdown',holdStart);['pointerup','pointercancel','pointerleave'].forEach(ev=>b.addEventListener(ev,holdEnd));
-    b.addEventListener('contextmenu',e=>{if(armed())e.preventDefault();});}
+    b.addEventListener('contextmenu',e=>{if(holdMode())e.preventDefault();});
+    b.addEventListener('click',e=>{if(b._skipOpen){b._skipOpen=false;e.stopImmediatePropagation();e.preventDefault();}},true);}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',wire);else wire();
   // onOpen fires just before the intro fades, so the skill tree is already there underneath
   window.playGalaxyIntro=function(onOpen,onDone){

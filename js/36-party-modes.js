@@ -138,7 +138,7 @@ try{const v=localStorage.getItem('ab2_party_style');if(PARTY_STYLES.some(s=>s.id
   }
 
   // ── styles: each returns per-alien targets {x,y,ox,oy,s} (x,y follow smoothly; ox/oy are instant offsets) ──
-  let eqBars=[],t0=0,lastT=0;
+  let eqBars=[],t0=0,lastT=0,idleAmt=0;
   function clearFx(){eqBars.forEach(e=>e.remove());eqBars=[];}
   function enterStyle(){
     t0=performance.now();soundOrder.length=0;
@@ -160,6 +160,27 @@ try{const v=localStorage.getItem('ab2_party_style');if(PARTY_STYLES.some(s=>s.id
     return{cx:x0>x1?B.x+B.w/2:Math.min(x1,Math.max(x0,cx)),cy:y0>y1?B.y+B.h/2:Math.min(y1,Math.max(y0,cy))};
   }
   function bpm(){return(typeof seqBpm==='number'&&seqBpm>0)?seqBpm:100;}
+  // v0.2.138: the beat the moves land on. While the sequencer plays it comes from the sequencer itself (which step is
+  // sounding right now), so hops land on the real beat; otherwise a steady clock at the song's BPM. Switching between
+  // the two eases over a moment instead of snapping.
+  let syncOff=0,lastSrc=null;
+  function seqBeatNow(){
+    const m=window._seqMark;if(!m||typeof seqPlaying==='undefined'||!seqPlaying||typeof audioCtx==='undefined'||!audioCtx)return null;
+    const sd=60/bpm()/4,frac=Math.max(-1.5,Math.min(1.5,(audioCtx.currentTime-m.at)/sd));
+    return((m.st%16)+frac)/4;                      // beats into the bar (0..4), steps are 16ths
+  }
+  let clockB=0;
+  function musicBeat(now,dt){
+    clockB+=dt*bpm()/60;                            // steady beat clock (a tempo change bends it, never jumps it)
+    const sb=seqBeatNow();
+    if(sb!=null){
+      let want=sb-clockB;want-=4*Math.round((want-syncOff)/4);   // same spot in the bar, nearest way round
+      const d=want-syncOff;
+      syncOff+=Math.abs(d)<.02?d:d*Math.min(1,dt*(lastSrc==='seq'?20:6));   // just started: glide onto the beat
+      lastSrc='seq';
+    }else lastSrc='clock';
+    return clockB+syncOff;
+  }
 
   window.partyChoreo=function(now,B){
     if(partyStyle==='glow'||!bouncers.length)return false;
@@ -167,7 +188,7 @@ try{const v=localStorage.getItem('ab2_party_style');if(PARTY_STYLES.some(s=>s.id
     readAudio();
     const lm=landmarks(now);
     const N=bouncers.length,sz=bouncers[0].sz||41;
-    const beat=(now/1000)*bpm()/60;                 // beats since page start
+    const beat=musicBeat(now,dt);                   // beats (bar-aligned to the sequencer while it plays)
     const hitEnv=Math.exp(-(now-lastHit)/170);       // 1 right after a hit, fading
     const minX=B.x+4,maxX=B.x+B.w-sz-4,minY=B.y+4,maxY=B.y+B.h-sz-BOUNCER_NAME_PAD;
     const T=[];
@@ -221,13 +242,16 @@ try{const v=localStorage.getItem('ab2_party_style');if(PARTY_STYLES.some(s=>s.id
     }else if(st==='bounce'){
       let floor=B.y+B.h-sz-BOUNCER_NAME_PAD-12;
       if(lm.pads&&lm.pads.top-B.y>200)floor=lm.pads.top-sz-6;
+      // nothing playing for a moment: a small hop on every beat, rippling along the line (fades out when music starts)
+      const quiet=now-lastHit>1600;idleAmt+=((quiet?1:0)-idleAmt)*Math.min(1,dt*(quiet?2:8));
       bouncers.forEach((b,i)=>{
         const p=b._pp||(b._pp={});
         p.vy=(p.vy||0)-2600*dt;p.jy=(p.jy||0)+p.vy*dt;
         if(p.jy<=0){p.jy=0;if(p.vy<-160){p.vy=-p.vy*.28;p.squash=1;}else p.vy=0;}
         p.squash=(p.squash||0)*Math.exp(-dt*12);
-        const xn=N>1?i/(N-1):.5;
-        T.push({x:B.x+20+xn*(B.w-40-sz),y:floor,ox:0,oy:-p.jy,s:1+.18*Math.min(1,p.jy/120),sy:1-.22*p.squash});
+        const ph=(((beat-i*.09)%1)+1)%1,idle=idleAmt*16*Math.max(0,Math.sin(Math.PI*Math.min(1,ph/.55)));
+        const xn=N>1?i/(N-1):.5,lift=p.jy+idle;
+        T.push({x:B.x+20+xn*(B.w-40-sz),y:floor,ox:0,oy:-lift,s:1+.18*Math.min(1,p.jy/120),sy:1-.22*p.squash});
       });
     }else if(st==='galaxy'){
       let cx=B.x+B.w/2,cy=B.y+B.h*.45;
@@ -245,7 +269,7 @@ try{const v=localStorage.getItem('ab2_party_style');if(PARTY_STYLES.some(s=>s.id
       const left=(ref?ref.left:B.x)+4,right=(ref?ref.right:B.x+B.w)-sz-4,span=Math.max(80,right-left);
       let top=ref?ref.top:B.y+B.h-40;top=Math.max(B.y+sz+90,top);
       const H=Math.max(28,Math.min(70,(top-B.y-sz)*.35));
-      const run=beat*30;                                   // px travelled per beat
+      const run=clockB*30;                                 // 30 px per beat on the steady clock (never jumps back)
       bouncers.forEach((b,i)=>{
         const p=b._pp||(b._pp={});
         const bb=beat-i*.06,f=((bb%1)+1)%1,bar=Math.floor(bb)%4;

@@ -229,6 +229,7 @@ function keysVoiceOwned(i){return i<(shop.keysLevel||0);}
     hop[i]=performance.now()/1000;notes.push({i,t0:hop[i],col:v.color,dx:(Math.random()-.5)*.6});if(notes.length>24)notes.shift();
     window._lastPadHit=performance.now();
     if(typeof addSeqEnergy==='function')addSeqEnergy(SEQ_ENERGY_PER_TAP);
+    if(typeof partyPulseOnBeat==='function')partyPulseOnBeat('bk'+i,undefined,1);   // party: each key is its own instrument
     const r=cv.getBoundingClientRect();doTap({x:r.left+(i+.5)*keyW,y:r.top+keyTop,hex:v.color});
     kick();
   }

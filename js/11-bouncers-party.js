@@ -137,7 +137,7 @@ window.bouncerPose=function(b,k,flip){
   const g=b._cv.getContext('2d');g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,b._cv.width,b._cv.height);
   if(flip){g.translate(b._cv.width,0);g.scale(-1,1);}g.drawImage(fr[k],0,0);g.setTransform(1,0,0,1,0,0);
 };
-window.bouncerUnpose=function(){bouncers.forEach(b=>{if(b._pose){b._pose=false;b._poseKey=null;b._drawnM=null;}b._runFrames=null;b._runPart=null;});_runGenQ=[];};
+window.bouncerUnpose=function(){bouncers.forEach(b=>{if(b._pose){b._pose=false;b._poseKey=null;b._drawnM=null;b._needFloat=true;}b._runFrames=null;b._runPart=null;});_runGenQ=[];};
 window.genBuddyRunFrames=genRunFrames;
 // glow party: light the halo behind a buddy (0..1). At rest every buddy keeps a faint glow in its colour.
 const HALO_REST=.16;
@@ -254,7 +254,12 @@ addEventListener('resize',()=>{_bbCache=null;});
   const tnow=now||performance.now(),bdt=Math.min(.1,(tnow-(tickBouncers._t||tnow))/1000);tickBouncers._t=tnow;
   const mv=bdt>0?Math.min(4,bdt*60):1;   // velocities are in px per 60fps-frame
   // party styles (js/36-party-modes.js) choreograph the aliens instead of free bouncing
-  if(partyMode&&typeof partyChoreo==='function'&&partyChoreo(now||performance.now(),bounds)){genRunFrames(document.body.classList.contains('desktop-mode')?6:(bdt>.028?1:2));return;}
+  if(partyMode&&typeof partyChoreo==='function'&&partyChoreo(now||performance.now(),bounds)){
+    const bud=document.body.classList.contains('desktop-mode')?6:(bdt>.028?1:2);genRunFrames(bud);
+    // v0.2.138: buddies coming out of a running pose (planet hop / conga → another style) get their normal look back
+    // a couple per frame — they used to stay frozen mid-stride for the rest of the party
+    let k=bud;for(const b of bouncers){if(k<=0)break;if(b._needFloat&&!b._pose){b._needFloat=false;paintBouncerBuddy(b);k--;}}
+    return;}
   const minX=bounds.x,minY=bounds.y,maxX=bounds.x+bounds.w,maxY=bounds.y+bounds.h;
   for(const b of bouncers){
     b.x+=b.vx*mv;b.y+=b.vy*mv;   // time-based: same speed whatever the frame rate

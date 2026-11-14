@@ -145,6 +145,7 @@ function playRollNote(id,midi,at,durSec,vel,layer){
   if(!SOUND_MAP[id]||!PITCHED_SOUNDS[id])return;
   const c=getCtx(),now=c.currentTime;at=Math.max(at||now,now);
   const cents=(midi-rollBaseMidi(id))*100;
+  if(typeof partyPulseOnBeat==='function'&&!(typeof _exporting!=='undefined'&&_exporting)){const d=(at-now)*1000;const go=()=>partyPulseOnBeat(id,layer,vel);if(d>8)setTimeout(go,d);else go();}   // party sees roll notes too
   const gv=getSoundGainVal(id)*(vel==null?1:vel);
   // each roll layer has its own effects channel (6 + layer), just like a sequencer track
   const lay=(layer==null)?(typeof rollView==='number'?rollView:-1):layer;

@@ -751,6 +751,7 @@ function startSeq(){
 function seqRunStep(quiet,delayMs,audioAt){
   delayMs=delayMs||0;
   const _at=(audioAt!==undefined)?audioAt:Tnow()+delayMs/1000; // audio-clock time this step should sound
+  window._seqMark={st:seqStep,at:_at};   // party styles read this to hop on the real beat (js/36)
   const later=fn=>{if(delayMs>6)setTimeout(fn,delayMs);else fn();};
   // while vocals are recording the sequencer is in "studio time": it doesn't score (and doesn't use energy)
   if(!(typeof voxIsRecording==='function'&&voxIsRecording()))scoreSeqStep(quiet);

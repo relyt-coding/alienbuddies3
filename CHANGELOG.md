@@ -2,6 +2,15 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.139 - 2026-11-14 12:48
+
+- NEW: unlock cutscenes in Explore the Galaxies, about 4 seconds each (tap to skip):
+  - Tucana Core: specks of matter spiral in to a quickening heartbeat, the core ignites, and the four Quad Sun spots light up around it.
+  - Quad Suns: a comet races out of the core round the orbit, the sun ignites, and the camera swoops in. Planet Atlas gets little worlds swinging into orbit, Musical Toolkit a drum groove with EQ rays, Minigame Nexus an 8-bit countdown and pixel fireworks, and Alien Evolution a DNA helix and bouncing buddies.
+  - Planets: a warp jump drops out of hyperspace in front of the new world, and its continents light up one by one, each playing the planet's own instruments.
+- When a cutscene ends, the map glides over to the new skill and makes it glow.
+- Tap an unlocked core, sun or planet and press WATCH AGAIN to replay its cutscene.
+
 ## v0.2.138 - 2026-11-14 07:55
 
 - Explore the Galaxies has a whole new map. Trails curve and sway instead of running in straight lines and grids, the lines between skills are smooth curves, and nothing overlaps (labels included). It's designed to read well in both the 3D and FLAT views.

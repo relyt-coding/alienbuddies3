@@ -70,11 +70,11 @@
     </div>
     <div class="settings-row" id="settingsIntroRow">
       <div><div class="settings-label">🎬 INTRO</div></div>
-      <button id="settingsIntroBtn" type="button" style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:.1em;background:#0d0d1c;border:1px solid #2a2a4a;border-radius:6px;color:#a0a8ff;padding:.3rem .7rem;cursor:pointer;">▶ REPLAY</button>
+      <button id="settingsIntroBtn" type="button" class="settings-mini-btn">▶ REPLAY</button>
     </div>
     <div class="settings-row" id="settingsViewRow" style="display:none;">
-      <div><div class="settings-label">👁 VIEW</div><div style="font-size:.6rem;color:#667;letter-spacing:.06em;margin-top:2px;">What shows on the game screen (same as the VIEW button)</div>
-        <div id="settingsViewChips"></div></div>
+      <div><div class="settings-label">👁 VIEW</div><div id="settingsViewSummary"></div></div>
+      <button id="settingsViewBtn" type="button" class="settings-mini-btn">OPEN ▸</button>
     </div>
     <div class="settings-row">
       <div><div class="settings-label">🏷 VERSION</div></div>
@@ -103,6 +103,13 @@
     <button class="settings-close-btn" id="settingsDonateBtn" style="background:#0a0a1a;border-color:#6699ff;color:#6699ff;" onclick="window.open('https://streamlabs.com/attackingtucans/tip','_blank')">💙 SUPPORT THE DEVELOPER</button>
     <button class="settings-close-btn" id="settingsSaveExitBtn" style="background:#0a1a0f;border-color:#00ff88;color:#00ff88;">💾 SAVE AND EXIT</button>
     <button class="settings-close-btn" id="settingsCloseBtn">DONE</button>
+  </div>
+  <!-- Settings ▸ VIEW: its own panel (the same switches as the VIEW button by the sequencer) -->
+  <div id="settingsViewSheet">
+    <div class="settings-title">👁 VIEW</div>
+    <div class="svs-sub">What shows on the game screen. Same as the VIEW button by the sequencer.</div>
+    <div id="settingsViewList"></div>
+    <button class="settings-close-btn" id="settingsViewBack" type="button">◀ BACK</button>
   </div>
 </div>
 

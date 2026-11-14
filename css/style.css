@@ -2222,10 +2222,29 @@ body.desktop-mode #alienNameModal{align-items:center;padding-top:0;}
 .slot-edit-btn{font-family:system-ui,-apple-system,sans-serif;font-size:.8rem;padding:.12rem .32rem;border-radius:5px;border:1px solid #3a3a3a;background:transparent;color:#bbb;cursor:pointer;touch-action:manipulation;line-height:1;flex-shrink:0;-webkit-filter:grayscale(1);filter:grayscale(1);}
 .slot-edit-btn.big{font-size:.95rem;padding:.3rem .5rem;border-radius:6px;border-color:#555;color:#ddd;margin-right:.2rem;}
 .slot-actions{display:flex;align-items:center;gap:0;}
-#settingsViewChips{display:flex;flex-wrap:wrap;margin-top:.45rem;}
-.sv-chip{font-family:'Bebas Neue',sans-serif;font-size:.95rem;letter-spacing:.08em;padding:.4rem .7rem;margin:0 .35rem .35rem 0;border-radius:8px;border:1px solid #2a2a4a;background:#0d0d1c;color:#8a8ab0;cursor:pointer;touch-action:manipulation;}
-.sv-chip.on{border-color:#44eebb;color:#44eebb;background:#0a1a14;}
-#settingsViewRow > div{flex:1 1 auto;}
+/* small action buttons on the right of a settings row (INTRO ▶ REPLAY, VIEW OPEN ▸) */
+.settings-mini-btn{flex-shrink:0;font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:.1em;background:#0d0d1c;border:1px solid #2a2a4a;border-radius:6px;color:#a0a8ff;padding:.35rem .75rem;cursor:pointer;touch-action:manipulation;}
+.settings-mini-btn:active{border-color:#a0a8ff;background:#16163a;}
+#settingsViewRow > div{flex:1 1 auto;min-width:0;}
+#settingsViewSummary{font-family:'Bebas Neue',sans-serif;font-size:.85rem;letter-spacing:.08em;color:#44eebb;margin-top:3px;}
+/* Settings ▸ VIEW panel: takes the settings box's place until BACK */
+#settingsViewSheet{display:none;background:#111;border:1px solid #2a2a2a;border-radius:20px;padding:1.4rem 1.5rem 1.6rem;width:100%;max-width:340px;flex-direction:column;gap:.7rem;max-height:94vh;max-height:94dvh;overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y;scrollbar-width:none;animation:settingsIn .18s cubic-bezier(.34,1.1,.64,1);}
+#settingsViewSheet::-webkit-scrollbar{display:none;}
+#settingsPanel.view-open #settingsBox{display:none;}
+#settingsPanel.view-open #settingsViewSheet{display:flex;}
+.svs-sub{font-family:'Bebas Neue',sans-serif;font-size:.95rem;letter-spacing:.06em;color:#778;text-align:center;line-height:1.25;}
+#settingsViewList{display:flex;flex-direction:column;gap:.4rem;}
+.svs-row{display:flex;align-items:center;gap:.75rem;width:100%;font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:.1em;padding:.65rem .8rem;border-radius:10px;border:1px solid #22224a;background:#0d0d1c;color:#778;cursor:pointer;text-align:left;touch-action:manipulation;}
+.svs-row.on{color:#e4e6ff;border-color:#44eebb;background:#0a1a14;}
+.svs-row:active{background:#1a1a3a;}
+.svs-row.sub{width:auto;margin-left:1.6rem;font-size:1.05rem;padding:.5rem .75rem;}
+.svs-row.sub.on{border-color:#2f8f74;background:#0b1512;}
+.svs-row.dim{opacity:.5;}
+.svs-check{flex-shrink:0;width:1.35rem;height:1.35rem;display:inline-flex;align-items:center;justify-content:center;border:1.5px solid #3a3a6a;border-radius:5px;color:#00ff88;font-size:1rem;line-height:1;}
+.svs-row.on .svs-check{border-color:#44eebb;}
+.svs-row.sub .svs-check{border-radius:50%;width:1.15rem;height:1.15rem;font-size:.8rem;}
+.svs-sep{height:1px;background:#22224a;margin:.25rem .3rem;}
+@media (max-height:700px){.svs-row{padding:.5rem .7rem;font-size:1.1rem;}.svs-row.sub{padding:.4rem .7rem;}#settingsViewList{gap:.3rem;}}
 /* shop: no emoji-style icons (the little buddy icons stood in for the old alien emoji); only the 💎 stays */
 #storeView .bi,#storeView .buddy-icon{display:none!important;}
 /* iPhones zoom the whole page in when you tap a text box with text smaller than 16px; never let that happen */

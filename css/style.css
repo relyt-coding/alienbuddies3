@@ -2332,3 +2332,25 @@ body.keys-on #padEditToggleBtn,body.keys-on #padCountSelector{display:none!impor
   .bk-oct span{min-width:2.1em;}
 }
 body.phone-land #keysSwitch button{font-size:.7rem;padding:.2rem .55rem;}
+
+/* ── v0.2.137 BUDDY NAME CARD: stays still while you type (see js/58-name-card-keyboard.js) ──
+   Touch screens: the real text field is invisible and parked at the top of the card (so iPhone Safari never
+   scrolls the page for it); #bdyTagShow is the name box you see, drawn in the usual spot. */
+#bdyTagShow{display:none;}
+body.bt-proxy #bdyTagShow{display:block;box-sizing:border-box;min-height:37px;padding:.5rem .7rem;border:1px solid #1a3a2a;border-radius:8px;background:#061208;
+  font-family:'Bebas Neue',sans-serif;font-size:16px;line-height:19px;letter-spacing:.05em;color:var(--anc,#00ff88);text-align:center;white-space:pre;overflow:hidden;
+  cursor:text;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
+body.bt-proxy #bdyTagShow.focus{border-color:var(--anc,#00ff88);}
+body.bt-proxy #bdyTagShow .bt-ph{color:#1a4a2a;}
+body.bt-proxy #bdyTagShow .bt-sel{background:rgba(110,160,255,.38);border-radius:2px;}
+.bt-caret{display:inline-block;width:2px;height:17px;margin:0 1px;vertical-align:-3px;background:var(--anc,#00ff88);border-radius:1px;animation:btBlink 1.06s steps(1,end) .5s infinite;}
+@keyframes btBlink{0%{opacity:0}50%{opacity:1}}
+body.bt-proxy #bdyTagField{position:absolute;top:6px;left:50%;width:1px;height:1px;min-width:0;margin:0;padding:0;border:0;border-radius:0;opacity:0;
+  font-size:16px;color:transparent;background:transparent;caret-color:transparent;pointer-events:none;-webkit-user-select:text;user-select:text;}
+/* short screens: the card sits a little higher (and on the smallest, the buddy is smaller) so the name box and its
+   buttons stay above the keyboard. Picked once when the card opens, so nothing shifts while the keyboard comes and goes. */
+body:not(.desktop-mode) #alienNameModal.fit-short{padding-top:calc(env(safe-area-inset-top) + 14px);}
+body:not(.desktop-mode) #alienNameModal.fit-tiny{padding-top:calc(env(safe-area-inset-top) + 6px);}
+#alienNameModal.fit-tiny #alienNameBox{padding-top:.9rem;padding-bottom:.9rem;gap:.5rem;}
+#alienNameModal.fit-tiny #alienProfileBuddy{width:92px!important;height:92px!important;}
+#alienNameModal.fit-tiny #alienNamePreview{margin:0;}

@@ -407,7 +407,7 @@ function saveAlienName(){
   }
 
   autoSave();
-  renderAlienProfile();
+  if(typeof anmSmooth==='function')anmSmooth(renderAlienProfile);else renderAlienProfile();
 }
 
 // Nav arrows
@@ -418,16 +418,16 @@ anmNextBtn&&anmNextBtn.addEventListener('click',()=>{if(alienProfileIdx<totalAli
 function openAnmEdit(){
   if(anmEditOpen&&anmEditSection.style.display==='flex')return;
   anmEditOpen=true;
-  anmEditSection.style.display='flex';
-  anmEditBtn.style.display='none';
-  alienNameInput.value=(alienData[alienProfileIdx]||{name:''}).name||'';
-  try{alienNameInput.focus();alienNameInput.select();}catch(e){}
+  const show=()=>{anmEditSection.style.display='flex';anmEditBtn.style.display='none';alienNameInput.value=(alienData[alienProfileIdx]||{name:''}).name||'';};
+  if(typeof anmSmooth==='function')anmSmooth(show);else show();   // the card grows from its bottom edge; its top never moves
+  // focus without letting the browser scroll (js/58: on phones the real text box sits at the top of the card)
+  if(typeof bdyFocus==='function')bdyFocus(true);else{try{alienNameInput.focus();alienNameInput.select();}catch(e){}}
 }
 anmEditBtn&&anmEditBtn.addEventListener('click',openAnmEdit);
 anmNameEl&&anmNameEl.addEventListener('click',openAnmEdit); // tapping the name (or NO NAME YET) edits it too
 
 document.getElementById('alienNameSave')&&document.getElementById('alienNameSave').addEventListener('click',saveAlienName);
-document.getElementById('alienNameClear')&&keepFocusTap(document.getElementById('alienNameClear'),()=>{alienNameInput.value='';});
+document.getElementById('alienNameClear')&&keepFocusTap(document.getElementById('alienNameClear'),()=>{alienNameInput.value='';alienNameInput.dispatchEvent(new Event('input',{bubbles:true}));});
 document.getElementById('alienNameClose')&&document.getElementById('alienNameClose').addEventListener('click',closeAlienNameModal);
 alienNameModal&&alienNameModal.addEventListener('pointerdown',e=>{if(e.target===alienNameModal)closeAlienNameModal();});
 alienNameInput&&alienNameInput.addEventListener('keydown',e=>{if(e.key==='Enter')saveAlienName();});

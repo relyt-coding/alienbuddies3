@@ -173,7 +173,7 @@ function simStep(dt){
   run.gameT+=dt;
 }
 // side effects that would slow fast-forward to a crawl (sounds, flashes, toasts, saving, re-rendering)
-const QUIET=['showToast','flashBuy','playSfxPurchase','playSfxTierUnlock','playSfxAlienBuy','renderUI','autoSave','requestRender','startSeq','updateGemDisplays','renderSkillTree','updateSkillTreeBtn','updateMatchingBtn','showHintModal','checkContextualHints'];
+const QUIET=['playSeqUnlockFx','playPartyUnlockFx','showToast','flashBuy','playSfxPurchase','playSfxTierUnlock','playSfxAlienBuy','renderUI','autoSave','requestRender','startSeq','updateGemDisplays','renderSkillTree','updateSkillTreeBtn','updateMatchingBtn','showHintModal','checkContextualHints'];
 function quietly(fn){
   const saved={};QUIET.forEach(k=>{if(typeof window[k]==='function'){saved[k]=window[k];window[k]=function(){};}});
   try{fn();}finally{Object.keys(saved).forEach(k=>window[k]=saved[k]);}

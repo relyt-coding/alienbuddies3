@@ -465,7 +465,7 @@
   function sceneFor(id){if(FIXED[id])return FIXED[id];const n=typeof SKILL_MAP!=='undefined'&&SKILL_MAP[id];if(n&&n.placeholder)return null;
     if(n&&/^planet_/.test(id))return planetScene(id);for(const m of MAKERS){const S=m(id,n);if(S)return S;}return null;}
   // the drawing / sound kit, for the scenes in other files (they draw with st.g)
-  window.US_KIT={TAU,cl,ss,lerp,eOut,eBack,rnd,rgba,tone,noise,inst,riser,boom,cents,glow,ring,flash,disc,space,warp,sun,ball,buddy,sph,patch,line3,globe,THEMES,
+  window.US_KIT={TAU,cl,ss,lerp,eOut,eBack,rnd,rgba,mixer,tone,noise,inst,riser,boom,cents,glow,ring,flash,disc,space,warp,sun,ball,buddy,sph,patch,line3,globe,THEMES,
     planetTheme:id=>THEMES[String(id).replace(/^planet_/,'')]||genericTheme(typeof SKILL_MAP!=='undefined'&&SKILL_MAP[id])};
   window.hasUnlockCutscene=id=>!!sceneFor(id);
 

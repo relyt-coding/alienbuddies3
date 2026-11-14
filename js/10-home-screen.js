@@ -134,10 +134,14 @@ function startGame(slotIndex){
   updateSoundboardUnlocked();
   updateBouncerToggleVisibility();
   // Show new game hint
+  // (a brand new file opens with the intro: the three pages come together, then the hi-hat hint)
+  let introOn=false;
   if(isNewFile){
     const isMobile=!document.body.classList.contains('desktop-mode');
     const verb=isMobile?'Press':'Click';
-    setTimeout(()=>showToast(verb+' the Hi-Hat button to gain points!'),800);
+    const hint=()=>showToast(verb+' the Hi-Hat button to gain points!');
+    if(typeof playNewFileIntro==='function'&&!window.__noIntro&&!document.body.classList.contains('mobile-view-mode'))introOn=()=>{if(!playNewFileIntro({tuck:true,onDone:()=>setTimeout(hint,250)}))setTimeout(hint,500);};
+    else setTimeout(hint,800);
   }
   // start sequencer if tracks exist
   if(drum.seqTracks>0&&!seqPlaying)startSeq();
@@ -151,6 +155,7 @@ function startGame(slotIndex){
     // Delay bunker render slightly to ensure buildBunkerGrid() DOM is ready
     setTimeout(()=>{renderBunkerView();repositionCollapseButtons();},60);
   }
+  if(introOn)introOn();
 }
 
 function goToHomeScreen(){

@@ -71,7 +71,8 @@ function partyOwnedStyles(){return PARTY_LADDER.slice(0,Math.max(0,shop.partyLev
     const pl=shop.partyLevel||0,next=PARTY_LADDER[pl];if(!next||score<next.cost)return;
     score-=next.cost;shop.partyLevel=pl+1;
     if(typeof playSfxPurchase==='function')playSfxPurchase();if(typeof flashBuy==='function')flashBuy('#ff00cc');
-    if(pl===0)showToast('ALIEN PARTY unlocked! Tap the button to get your aliens dancing.');
+    if(pl===0){const toast=showToast,msg=()=>toast('ALIEN PARTY unlocked! Tap the button to get your aliens dancing.');
+      if(typeof playPartyUnlockFx==='function'){const fx=playPartyUnlockFx;setTimeout(()=>fx(msg),60);}else msg();}
     else{showToast(next.main+' unlocked! Tap the style chip during a party to switch.');if(typeof setPartyStyle==='function'&&partyMode)setPartyStyle(next.style);}
     if(typeof refreshPartyAccess==='function')refreshPartyAccess();
     if(typeof renderUI==='function')renderUI();else renderStoreUnlocks();

@@ -2,6 +2,17 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.140 - 2026-11-14 15:25
+
+- NEW: a brand new save file opens with an intro, about 8 seconds (tap or press any key to skip). The real Bunker, Drum Pads and Shop pages fly in from space and line up side by side. The camera visits each page as its parts pop into place, then the pages slide together and it zooms into the drum pads, where the hi-hat pulses to show you where to start. Works on phones and computers. Watch it again from Settings > INTRO > REPLAY.
+- NEW: buying your first sequencer track boots it up on screen. The frame lights up, a scan sweeps across as the steps pop in, then the sequencer starts playing. (If you buy it in the shop, the screen slides over to the pads so you can watch.)
+- NEW: buying ALIEN PARTY drops a disco ball over the screen. Coloured beams and light spots sweep around while your buddies dance to a short groove, then the ball lifts away and the ALIEN PARTY button drops in.
+- NEW: more unlock cutscenes in Explore the Galaxies (tap to skip, WATCH AGAIN to replay):
+  - Musical Toolkit hubs (Effects, Keys, Piano, Groove, Master, Arrangement, Vocals, Chops): each one bursts open with its own sound and a medallion.
+  - Continents: a quick fly-in that plays one of the continent's sounds.
+  - Minigame worlds (Cockpit, Ice, Worms, Magma, Beat, Wyrm, Grand Tournament): each gets its own little world and theme.
+  - Best Buddy: your buddy appears with question-mark bubbles for the accessories still to win.
+
 ## v0.2.139 - 2026-11-14 12:48
 
 - NEW: unlock cutscenes in Explore the Galaxies, about 4 seconds each (tap to skip):

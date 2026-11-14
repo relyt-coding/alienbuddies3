@@ -68,16 +68,30 @@ try{const v=localStorage.getItem('ab2_party_style');if(PARTY_STYLES.some(s=>s.id
   addEventListener('resize',placeChip);
 
   // ── audio analyser on the master output (only connected while a party style needs it) ──
-  let an=null,freq=null,wave=null,anOn=false;
+  // v0.2.138: it listens to the MUSIC only — the mix right after the safety limiter, before the background ambience
+  // (a constant 36 Hz drone + a soft 184–246 Hz pad) and the menu blips join it. It used to listen to the very end of
+  // the chain, so the ambience held the lowest EQ bars up all the time. (Also before the volume knob, so the bars
+  // dance the same at any volume.)
+  let an=null,freq=null,wave=null,anOn=false,anSrc=[];
+  function musicTaps(c){
+    const t=[];
+    if(typeof _lim!=='undefined'&&_lim&&_lim.c===c&&_lim.out)t.push(_lim.out);
+    else if(typeof drumMasterReal!=='undefined'&&drumMasterReal)t.push(drumMasterReal);
+    if(typeof partyMusicGain!=='undefined'&&partyMusicGain&&partyMusicGain.context===c)t.push(partyMusicGain);
+    return t;
+  }
   function analyserOn(){
     if(anOn)return;
     try{
-      const c=getCtx();if(!c||!masterGainNode)return;
-      if(!an){an=c.createAnalyser();an.fftSize=512;an.smoothingTimeConstant=.6;freq=new Uint8Array(an.frequencyBinCount);wave=new Uint8Array(an.fftSize);}
-      masterGainNode.connect(an);anOn=true;
+      const c=getCtx();if(!c)return;
+      if(!an||an.context!==c){an=c.createAnalyser();an.fftSize=512;an.smoothingTimeConstant=.5;an.minDecibels=-90;an.maxDecibels=-12;freq=new Uint8Array(an.frequencyBinCount);wave=new Uint8Array(an.fftSize);}
+      anSrc=musicTaps(c);if(!anSrc.length)return;
+      anSrc.forEach(n=>n.connect(an));anOn=true;
     }catch(e){}
   }
-  function analyserOff(){if(anOn){try{masterGainNode.disconnect(an);}catch(e){}anOn=false;}}
+  function analyserOff(){if(anOn){anSrc.forEach(n=>{try{n.disconnect(an);}catch(e){}});anSrc=[];anOn=false;}}
+  // the music chain can be rebuilt (Mastering turned on/off, audio waking up): follow it
+  setInterval(()=>{if(!anOn)return;try{const c=getCtx();const t=musicTaps(c);if(an.context!==c||t.length!==anSrc.length||t.some((n,i)=>n!==anSrc[i])){analyserOff();analyserOn();}}catch(e){}},1000);
   let energy=0;
   function readAudio(){
     if(!anOn)return;
@@ -94,7 +108,8 @@ try{const v=localStorage.getItem('ab2_party_style');if(PARTY_STYLES.some(s=>s.id
     const a=Math.floor(lo*Math.pow(hi/lo,k/n)),b=Math.max(a+1,Math.floor(lo*Math.pow(hi/lo,(k+1)/n)));
     let m=0;for(let i=a;i<b;i++)if(freq[i]>m)m=freq[i];
     const tilt=1+.9*k/Math.max(1,n-1); // highs are quieter — lift them so every bar dances
-    return Math.max(0,Math.min(1,((m/255)-.28)/.62*tilt));
+    // wider range (-90…-12 dB) so loud music doesn't pin the bars at the top: they pump with each hit
+    return Math.max(0,Math.min(1,((m/255)-.3)/.6*tilt));
   }
 
   // ── hits from the sound engine ──
@@ -171,7 +186,7 @@ try{const v=localStorage.getItem('ab2_party_style');if(PARTY_STYLES.some(s=>s.id
       bouncers.forEach((b,i)=>{
         const p=b._pp||(b._pp={});
         const lv=band(i,N);
-        p.lift=Math.max(lv,(p.lift||0)-dt*1.5);       // peak-hold fall like a real meter
+        p.lift=Math.max(lv,(p.lift||0)-dt*2.4);       // peak-hold fall like a real meter
         const cx=left+(i+.5)*w;
         const lift=p.lift*maxLift;
         T.push({x:cx-sz/2,y:base-sz,ox:0,oy:-lift-3*Math.sin(now/420+i*.7)*(p.lift<.05?1:0),s:1+p.lift*.25});

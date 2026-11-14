@@ -2389,3 +2389,19 @@ input.kbs-all{background-image:linear-gradient(rgba(110,160,255,.3),rgba(110,160
 /* v0.2.137 (phones): the sound picker keeps one height, so it doesn't grow and shrink (moving the search box) as
    you type a search, and short result lists sit up high where the keyboard can't cover them */
 @media (hover:none) and (pointer:coarse){#padAssignInner{height:84vh;max-height:84vh;}#padAssignList{flex:1 1 auto;min-height:0;}}
+
+/* v0.2.138 organic skill tree: curved links, nebula glow, planet orbit rings (js/62-tree-layout.js) */
+.st-links{position:absolute;overflow:visible;pointer-events:none;}
+.st-link{fill:none;stroke-linecap:round;stroke-width:2.5;}
+.st-link.ghost{stroke:#0f1328;stroke-width:2;}
+.st-link.dim{stroke:#1e2648;stroke-width:2.2;}
+.st-link.lit{stroke-opacity:.45;stroke-width:3;}
+.st-link.next{stroke-opacity:.9;stroke-width:3;stroke-dasharray:1 9;animation:stFlow 1.4s linear infinite;}
+@keyframes stFlow{to{stroke-dashoffset:-20;}}
+body:not(.desktop-mode) .st-link.next{animation:none;}
+@media (prefers-reduced-motion:reduce){.st-link.next{animation:none;}}
+#skillTreeModal.st-3d .st-link{stroke-width:3.5;}
+#skillTreeModal.st-3d .st-link.ghost{stroke-width:2.5;}
+.st-nebula{position:absolute;border-radius:50%;pointer-events:none;}
+.st-halo{position:absolute;border-radius:50%;border:2px dashed;pointer-events:none;opacity:.45;}
+.st-halo.on{opacity:.85;}

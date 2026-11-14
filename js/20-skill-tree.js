@@ -177,8 +177,106 @@ const MUSIC_TREE_NODES=(function(){
   return N;
 })();
 
+// ── Planets Timbra (wood) and Alloy (steel): planet → 5 continents → a trail of 5 sounds each (sounds: js/03b-planet-sounds-timbra-alloy.js).
+// The x/y here are only a simple fallback: js/62-tree-layout.js grows every planet system into its final shape.
+const PLANET_TREE_2=(function(){
+  const N=[],D=Math.PI/180;
+  function planet(p){
+    N.push({id:p.id,icon:p.icon,name:p.name,desc:p.desc,cost:p.cost,requires:[p.req],x:p.x,y:p.y,branch:'planets',mult:1.5});
+    p.conts.forEach((c,i)=>{
+      const a=(p.head+(i-(p.conts.length-1)/2)*36)*D,cx=Math.round(p.x+Math.cos(a)*240),cy=Math.round(p.y+Math.sin(a)*240);
+      N.push({id:'cont_'+c.key,icon:c.icon,name:'Continent: '+c.name,desc:c.desc,fact:c.fact,cost:p.contCost,requires:[p.id],x:cx,y:cy,branch:'planets',mult:1.5,sounds:c.snd.map(s=>s[0])});
+      let prev='cont_'+c.key;
+      c.snd.forEach(([sid,name,desc],j)=>{
+        N.push({id:'snd_'+sid,icon:c.icon,name,desc,cost:p.sndCost,requires:[prev],x:Math.round(cx+Math.cos(a)*100*(j+1)),y:Math.round(cy+Math.sin(a)*100*(j+1)),branch:'planets',mult:1.5,soundUnlock:sid});
+        prev='snd_'+sid;
+      });
+    });
+  }
+  planet({id:'planet_timbra',icon:'🌳',name:'Planet Timbra',req:'planet_hyphae',x:-1500,y:-500,head:-150,cost:800,contCost:400,sndCost:110,
+    desc:'A forest world where every tree is an instrument. Unlocks 5 continents of wooden sound.',
+    conts:[
+      {key:'rosewood',icon:'🌹',name:'Rosewood',desc:'Marimbas and xylophones carved from hard rosewood. 5 sounds.',
+       fact:'Concert marimba bars are usually rosewood. The tube hanging under each bar is cut to that bar\'s note, so the sound rings longer and louder.',
+       snd:[['rw_marimba','Warm Marimba','A deep, mellow marimba note from a soft yarn mallet.'],
+            ['rw_xylo','Xylophone','A bright, dry xylophone note. Its name is Greek for "wood sound".'],
+            ['rw_balafon','Balafon','A West African marimba: gourds under the bars add a buzzy rattle to every note.'],
+            ['rw_bass','Bass Marimba','A big low marimba bar with a long, round ring.'],
+            ['rw_roll','Marimba Roll','Two mallets trading fast hits on one bar, the way marimba players hold a long note.']]},
+      {key:'bamboo',icon:'🎋',name:'Bamboo',desc:'Hollow bamboo you tap, shake, stamp and tip over. 5 sounds.',
+       fact:'An angklung group from Indonesia gives each player just one or two notes. Shaking them at the right moments, the group plays whole songs together, like a hand-bell choir.',
+       snd:[['bm_tick','Bamboo Tick','A dry, hollow tick on a bamboo tube.'],
+            ['bm_angklung','Angklung','A shaken frame of bamboo tubes tuned in octaves.'],
+            ['bm_stamp','Stamp Tube','A bamboo tube stamped on the ground: a round, hollow "pung".'],
+            ['bm_chimes','Bamboo Chimes','Hollow bamboo chimes clacking together in the breeze.'],
+            ['bm_rain','Rain Stick','Pebbles trickling down through a rain stick.']]},
+      {key:'oak',icon:'🌰',name:'Oak',desc:'Big wooden drums: slit drums, cajón and temple blocks. 5 sounds.',
+       fact:'The cajón comes from Peru, where it began as a simple wooden box to sit on and slap. Hit the middle for a deep bass, the top edge for a sharp snap.',
+       snd:[['ok_slit','Slit Drum','A hollow log with a slit cut in the top; each side of the slit plays its own note.'],
+            ['ok_cajonbass','Cajón Bass','A slap in the middle of the cajón: a deep, boomy bass.'],
+            ['ok_cajonslap','Cajón Slap','A slap on the cajón\'s top edge, where wires inside add a snare-like snap.'],
+            ['ok_temple','Temple Block','A round, carved temple block: a bright, hollow knock.'],
+            ['ok_thump','Oak Thump','A heavy wooden kick, like stomping on a big oak stage.']]},
+      {key:'ebony',icon:'🥢',name:'Ebony',desc:'Little hardwood hand percussion: clicks, clacks and scrapes. 5 sounds.',
+       fact:'Claves play the clave rhythm, a pattern of five hits that holds Cuban son and salsa together.',
+       snd:[['eb_claves','Claves','Two hardwood sticks clicked together.'],
+            ['eb_castanets','Castanets','Two wooden shells clacked together in the palm: a quick triple clack.'],
+            ['eb_guiro','Güiro','A ridged gourd scraped with a stick: zzzip!'],
+            ['eb_slap','Slapstick','Two wooden boards slapped shut, like a whip crack.'],
+            ['eb_tok','Wood Tok','A tiny, high woodblock tok.']]},
+      {key:'cedar',icon:'🌲',name:'Cedar',desc:'Wooden flutes, pipes and long drones. 5 sounds.',
+       fact:'Many Native American flutes are carved from cedar. They have two chambers: a block on top steers your breath out of the first one and across a sharp edge into the second.',
+       snd:[['cd_flute','Cedar Flute','A soft, breathy cedar flute with a gentle vibrato.'],
+            ['cd_panpipe','Pan Pipe','A puff of air across the top of a pipe.'],
+            ['cd_didge','Didgeridoo','A long wooden drone from northern Australia, shaped by the player\'s mouth into a "wow".'],
+            ['cd_owl','Owl Hoot','A wooden owl whistle: hoo, hoooo.'],
+            ['cd_creak','Wood Creak','An old wooden door creaking open.']]},
+    ]});
+  planet({id:'planet_alloy',icon:'⚙',name:'Planet Alloy',req:'planet_timbra',x:-1500,y:-1500,head:-90,cost:1200,contCost:550,sndCost:150,
+    desc:'A shining steel world of pans, bells and forges. Unlocks 5 continents of metal sound.',
+    conts:[
+      {key:'chrome',icon:'🛢',name:'Chrome',desc:'The steel band: five steel pans, from highest to lowest. 5 sounds.',
+       fact:'The steel pan was invented in Trinidad and Tobago in the 1930s and 40s, hammered out of old oil drums. Every bump on its surface is tuned to its own note.',
+       snd:[['cr_tenor','Tenor Pan','The highest steel pan, the one that plays the melody.'],
+            ['cr_double','Double Second','A pair of pans played together, for harmonies.'],
+            ['cr_guitar','Guitar Pan','Guitar pans strum the chords in a steel band.'],
+            ['cr_cello','Cello Pan','Deep, warm middle notes.'],
+            ['cr_bass','Bass Pan','A whole oil drum for a handful of notes: the low end of the steel band.']]},
+      {key:'cobalt',icon:'🔔',name:'Cobalt',desc:'Bells and chimes that ring for ages. 5 sounds.',
+       fact:'Orchestras use tubular bells whenever a piece needs church bells: real church bells are far too heavy to bring on stage.',
+       snd:[['cb_tubular','Tubular Bell','A long metal tube struck near the top: a church-bell ring.'],
+            ['cb_glock','Glockenspiel','Little steel bars and hard mallets: sparkly and bright.'],
+            ['cb_musicbox','Music Box','A metal comb plucked by tiny pins on a turning drum.'],
+            ['cb_triangle','Triangle','A steel triangle: a long, silvery ring.'],
+            ['cb_windchime','Wind Chimes','Metal wind chimes catching a breeze.']]},
+      {key:'titan',icon:'🔨',name:'Titan',desc:'The forge: anvils, barrels, pipes, steam and springs. 5 sounds.',
+       fact:'Verdi\'s opera Il Trovatore (1853) has a famous Anvil Chorus: a camp of singers keeps time by hammering on anvils.',
+       snd:[['ti_anvil','Anvil','A blacksmith\'s hammer on an anvil: KLANG!'],
+            ['ti_barrel','Oil Barrel','A boom on the side of an old oil barrel.'],
+            ['ti_pipe','Pipe Clang','A long metal pipe struck with a mallet.'],
+            ['ti_steam','Steam Snare','A snare drum that lets off a puff of steam.'],
+            ['ti_spring','Spring Boing','A big metal spring: boi-oi-oing!']]},
+      {key:'nickel',icon:'🥄',name:'Nickel',desc:'Small metal percussion: a thumb piano, bells, spoons and jingles. 5 sounds.',
+       fact:'The kalimba is a modern cousin of the mbira, a thumb piano from Zimbabwe that has been played for many centuries.',
+       snd:[['ni_kalimba','Kalimba','A thumb piano: steel tines plucked on a wooden box.'],
+            ['ni_agogo','Agogo Bell','A bright metal bell from samba bands.'],
+            ['ni_spoons','Spoons','Two spoons clacked back to back, a folk-music classic.'],
+            ['ni_tamb','Tambourine','A shake and a hit: little metal jingles in a wooden ring.'],
+            ['ni_ride','Ride Ping','The ping of a ride cymbal, ringing out under the beat.']]},
+      {key:'bronze',icon:'🥉',name:'Bronze',desc:'The gamelan: shimmering metal bars and great gongs. 5 sounds.',
+       fact:'In Balinese gamelan, the instruments come in pairs tuned slightly apart. Played together they make a fast shimmer called ombak, which means "wave".',
+       snd:[['bz_gangsa','Gangsa','A Balinese metallophone with a shimmering twin.'],
+            ['bz_bonang','Bonang','A row of small bronze kettle gongs, played with padded sticks.'],
+            ['bz_saron','Saron','Thick bronze bars hit with a mallet: the gamelan\'s main melody.'],
+            ['bz_kempul','Kempul','A hanging gong that marks the phrases of the music.'],
+            ['bz_gong','Big Gong','The gong ageng: the biggest gong in the gamelan, struck at the end of each long cycle.']]},
+    ]});
+  return N;
+})();
+
 // ── Skill Tree Data ──
-// Layout: center at (0,0), branches go diagonally
+// Layout: center at (0,0), branches go diagonally. These x / y are the "intent" layout: js/62-tree-layout.js grows the
+// organic map from them (curving trails, planet systems, no overlaps) the first time the tree is drawn.
 // Each node: {id, icon, name, desc, cost, requires, x, y, branch, placeholder}
 const SKILL_TREE_NODES = [
   // ── CENTER ──
@@ -283,10 +381,10 @@ const SKILL_TREE_NODES = [
   {id:'snd_be_crackle', icon:'✨', name:'Crackle', desc:'A snappy crackle with energy. ×1.5 points.', cost:80, requires:['snd_be_woodsnap'], x:-1145, y:-680, branch:'planets', mult:1.5, soundUnlock:'be_crackle'},
   {id:'snd_be_accent', icon:'✨', name:'Accent', desc:'A punchy accent note from Bella peaks. ×1.5 points.', cost:80, requires:['snd_be_brightpop'], x:-1335, y:-680, branch:'planets', mult:1.5, soundUnlock:'be_accent'},
 
-  // Planet 3 — placeholder (branches from Hyphae, far left)
-  {id:'planet_3', icon:'🌑', name:'???', desc:'An unknown world detected at the edge of the Tucana system. Coming in a future update.', cost:1000, requires:['planet_hyphae'], x:-1530, y:-330, branch:'planets', mult:1.5, placeholder:true},
-  // Planet 4 — placeholder (branches from Mantra)
-  {id:'planet_4', icon:'🌑', name:'???', desc:'An unknown world detected at the edge of the Tucana system. Coming in a future update.', cost:1000, requires:['planet_mantra'], x:-260, y:-1480, branch:'planets', mult:1.5, placeholder:true},
+  // Planets Timbra (wood) and Alloy (steel)
+  ...PLANET_TREE_2,
+  // the next world — placeholder at the end of the planet road
+  {id:'planet_next', icon:'🌑', name:'???', desc:'An unknown world detected at the edge of the Tucana system. Coming in a future update.', cost:1600, requires:['planet_alloy'], x:-900, y:-2100, branch:'planets', mult:1.5, placeholder:true},
 
   // ── QUAD SUN 2 — Musical Toolkit (↗) ──
   {id:'sun_points', icon:'☀', name:'Quad Sun II', desc:'The second Quad Sun. Opens the Musical Toolkit path: tools and features to make your music better. Grants ×2 points.', cost:150, requires:['core'], x:200, y:-200, branch:'points', mult:2},
@@ -562,11 +660,52 @@ function drawLine(inner, x1, y1, x2, y2, active){
   inner.appendChild(line);
 }
 
+// ── Curved links (one SVG layer). Each link is coloured by how far you've got:
+//    lit = you own the node · next = you can buy it now (a dotted line flowing towards it) · dim = the ??? one step further · ghost = still hidden
+function drawLinks(inner, stateOf){
+  const NS='http://www.w3.org/2000/svg';
+  let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;
+  SKILL_TREE_NODES.forEach(n=>{x0=Math.min(x0,n.x);y0=Math.min(y0,n.y);x1=Math.max(x1,n.x);y1=Math.max(y1,n.y);});
+  x0-=300;y0-=300;x1+=300;y1+=300;
+  const svg=document.createElementNS(NS,'svg');
+  svg.setAttribute('class','st-links');svg.setAttribute('viewBox',`${x0} ${y0} ${x1-x0} ${y1-y0}`);
+  svg.style.cssText=`left:${x0}px;top:${y0}px;width:${x1-x0}px;height:${y1-y0}px;`;
+  const groups={ghost:[],dim:[],lit:[],next:[]};
+  SKILL_TREE_NODES.forEach(node=>node.requires.forEach(reqId=>{
+    if(!SKILL_MAP[reqId]) return;
+    if(reqId==='core' && /^sun_/.test(node.id)) return; // the orbit ring replaces core → sun spokes
+    const st=stateOf(node.id);
+    groups[st==='unlocked'?'lit':st==='available'?'next':st==='silhouette'?'dim':'ghost'].push([reqId,node]);
+  }));
+  ['ghost','dim','lit','next'].forEach(kind=>groups[kind].forEach(([reqId,node])=>{
+    const path=document.createElementNS(NS,'path');
+    path.setAttribute('d',stLinkPath(reqId,node.id));path.setAttribute('class','st-link '+kind);
+    if(kind==='lit'||kind==='next') path.style.stroke=BRANCH_COLORS[node.branch]||'#44eebb';
+    svg.appendChild(path);
+  }));
+  inner.appendChild(svg);
+}
+
 // ── Render the tree ──
 function renderSkillTree(){
   const inner = document.getElementById('skillTreeInner');
   if(!inner) return;
   inner.innerHTML = '';
+  if(typeof stLayoutEnsure==='function') stLayoutEnsure(); // js/62-tree-layout.js grows the organic map (once)
+
+  // Visibility state for each node: unlocked → available → silhouette (1 step past available) → hidden
+  const availableIds = new Set(
+    SKILL_TREE_NODES.filter(n => !unlockedSkills[n.id] && skillAvailable(n.id)).map(n=>n.id)
+  );
+  const silhouetteIds = new Set(
+    SKILL_TREE_NODES.filter(n =>
+      !unlockedSkills[n.id] && !availableIds.has(n.id) && n.id!=='core' &&
+      n.requires.some(r => availableIds.has(r) || unlockedSkills[r])
+    ).map(n=>n.id)
+  );
+  const stateOf = id => unlockedSkills[id] ? 'unlocked' : availableIds.has(id) ? 'available' : silhouetteIds.has(id) ? 'silhouette' : 'hidden';
+  // soft nebula glow around the explored parts of the galaxy, and orbit rings round the planets (behind everything)
+  if(typeof stDrawDecor==='function') stDrawDecor(inner, stateOf);
 
   // Draw branch labels
   const branchLabels = [
@@ -586,8 +725,9 @@ function renderSkillTree(){
   // The four Quad Suns orbit the core on a ring (js/35-solar-tree.js); the paths stay put and start from the ring
   if(typeof stDrawOrbit==='function') stDrawOrbit(inner);
 
-  // Draw connector lines first (behind nodes)
-  SKILL_TREE_NODES.forEach(node=>{
+  // Draw connector lines first (behind nodes): smooth curves when the organic layout is loaded, straight lines otherwise
+  if(typeof stLinkPath==='function') drawLinks(inner, stateOf);
+  else SKILL_TREE_NODES.forEach(node=>{
     node.requires.forEach(reqId=>{
       const req = SKILL_MAP[reqId];
       if(!req) return;
@@ -597,18 +737,6 @@ function renderSkillTree(){
       drawLine(inner, req.x, req.y, node.x, node.y, active);
     });
   });
-
-  // Determine visibility state for each node
-  // unlocked → available → silhouette (1 step past available) → hidden
-  const availableIds = new Set(
-    SKILL_TREE_NODES.filter(n => !unlockedSkills[n.id] && skillAvailable(n.id)).map(n=>n.id)
-  );
-  const silhouetteIds = new Set(
-    SKILL_TREE_NODES.filter(n =>
-      !unlockedSkills[n.id] && !availableIds.has(n.id) && n.id!=='core' &&
-      n.requires.some(r => availableIds.has(r) || unlockedSkills[r])
-    ).map(n=>n.id)
-  );
 
   // Draw nodes
   SKILL_TREE_NODES.forEach(node=>{

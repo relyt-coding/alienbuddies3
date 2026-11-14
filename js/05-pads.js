@@ -160,8 +160,9 @@ const padAssignClose=document.getElementById('padAssignClose');
 // Row 1: SOURCE  (ALL · SPACESHIP (the shop sounds; key 'tucana') · each planet you have unlocked sounds on)
 // Row 2: depends on row 1 — a planet shows its CONTINENTS, TUCANA shows sound TYPES (drums, synth…)
 // The list below is grouped under headers, and a search box narrows it further.
-const PA_PLANET_NAMES={mantra:'MANTRA',hyphae:'HYPHAE'};
-const PA_CONT_NAMES={om:'OM',sohum:'SO HUM',manas:'MANAS',floww:'FLOWW',enoki:'ENOKI',morel:'MOREL',porcini:'PORCINI',oyster:'OYSTER',reishi:'REISHI',bella:'BELLA'};
+const PA_PLANET_NAMES={mantra:'MANTRA',hyphae:'HYPHAE',timbra:'TIMBRA',alloy:'ALLOY'};
+const PA_CONT_NAMES={om:'OM',sohum:'SO HUM',manas:'MANAS',floww:'FLOWW',enoki:'ENOKI',morel:'MOREL',porcini:'PORCINI',oyster:'OYSTER',reishi:'REISHI',bella:'BELLA',
+  rosewood:'ROSEWOOD',bamboo:'BAMBOO',oak:'OAK',ebony:'EBONY',cedar:'CEDAR',chrome:'CHROME',cobalt:'COBALT',titan:'TITAN',nickel:'NICKEL',bronze:'BRONZE'};
 function paPlanetName(p){return PA_PLANET_NAMES[p]||String(p).toUpperCase();}
 function paContName(c){return PA_CONT_NAMES[c]||String(c).toUpperCase();}
 let paSub='';      // continent (for a planet) or sound type tag (for tucana); '' = all of the source

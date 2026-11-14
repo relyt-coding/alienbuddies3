@@ -2,6 +2,18 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.138 - 2026-11-14 07:55
+
+- Explore the Galaxies has a whole new map. Trails curve and sway instead of running in straight lines and grids, the lines between skills are smooth curves, and nothing overlaps (labels included). It's designed to read well in both the 3D and FLAT views.
+- Each planet is now its own little spiral galaxy: its continents circle it like moons, with their sounds curling outward as arms.
+- The map shows your progress: paths you own glow in their branch colour, a dotted line leads to anything you can buy next, and the parts of the galaxy you've explored light up with a soft glow.
+- The 25 accessory puzzles now coil inward like a snail shell, with the last one at the centre.
+- NEW: Planet Timbra, the wood planet (after Hyphae). 5 continents and 25 sounds: Rosewood (marimbas, xylophone, balafon), Bamboo (angklung, stamp tube, rain stick), Oak (slit drum, cajón, temple block), Ebony (claves, castanets, güiro) and Cedar (cedar flute, pan pipe, didgeridoo).
+- NEW: Planet Alloy, the steel planet (after Timbra). 5 continents and 25 sounds: Chrome (five steel pans, tenor to bass), Cobalt (tubular bell, glockenspiel, music box), Titan (anvil, oil barrel, spring boing), Nickel (kalimba, agogo, tambourine) and Bronze (gamelan and a big gong).
+- 22 of the new sounds can be played in the piano roll, and all the tuned ones follow your song's KEY. Every new continent has a "Did you know?" fact about its instruments.
+- Holding Explore the Galaxies after it's unlocked now replays exactly the same launch as the first time.
+- Alien Party fixes: the low EQ bars no longer stay stuck up, Planet Hop and Bounce House land on the beat, buddies no longer freeze mid-stride after you switch styles, and Bounce House now reacts to Buddy Keys and piano-roll notes.
+
 ## v0.2.137 - 2026-11-13 18:43
 
 - Naming a buddy no longer makes the card jump. On phones the card stays perfectly still while the keyboard opens and closes, and grows or shrinks smoothly from its bottom edge when you start or finish editing.

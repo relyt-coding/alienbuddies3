@@ -2261,7 +2261,7 @@ body:not(.desktop-mode) .upgrade-price small,body:not(.desktop-mode) .drum-price
 #galaxyIntro .gi-kicker{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:.35em;color:#ffd25a;text-shadow:0 0 12px rgba(255,190,80,.6);}
 #galaxyIntro .gi-title{font-family:'Bebas Neue',sans-serif;font-size:2.7rem;letter-spacing:.1em;color:#f2fbff;line-height:1.05;text-shadow:0 0 22px rgba(120,220,255,.7);padding:0 1rem;}
 #galaxyIntro .gi-skip{position:absolute;bottom:calc(1.4rem + env(safe-area-inset-bottom,0px));left:0;right:0;text-align:center;font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:.25em;color:rgba(200,230,255,.35);}
-body.galaxy-intro .bouncer{visibility:hidden;}
+body.galaxy-intro .bouncer,body.unlock-scene .bouncer{visibility:hidden;}
 
 /* hold-to-launch charge on the Explore the Galaxies button */
 #skillTreeUnlockBtn{position:relative;overflow:hidden;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;}
@@ -2405,3 +2405,20 @@ body:not(.desktop-mode) .st-link.next{animation:none;}
 .st-nebula{position:absolute;border-radius:50%;pointer-events:none;}
 .st-halo{position:absolute;border-radius:50%;border:2px dashed;pointer-events:none;opacity:.45;}
 .st-halo.on{opacity:.85;}
+
+/* v0.2.139 unlock cutscenes (js/63-unlock-cutscenes.js): same look as the galaxy launch, tinted per scene (--usc) */
+#unlockScene{position:fixed;top:0;right:0;bottom:0;left:0;z-index:900;display:none;background:#02030a;touch-action:none;--usc:#ffd25a;}
+#unlockScene.on{display:block;}
+#unlockScene canvas{position:absolute;top:0;left:0;}
+#unlockScene .us-text{position:absolute;left:0;right:0;top:66%;text-align:center;pointer-events:none;}
+#unlockScene .us-kicker,#unlockScene .us-title,#unlockScene .us-sub{opacity:0;transform:translateY(14px);transition:opacity .4s,transform .9s cubic-bezier(.2,.8,.2,1),letter-spacing 1.4s cubic-bezier(.2,.8,.2,1);}
+#unlockScene .us-kicker{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:.35em;color:var(--usc);text-shadow:0 0 12px var(--usc);}
+#unlockScene .us-title{font-family:'Bebas Neue',sans-serif;font-size:2.7rem;letter-spacing:.32em;color:#f2fbff;line-height:1.05;text-shadow:0 0 22px var(--usc);padding:0 1rem;transform:scale(.9);transition-delay:.08s;}
+#unlockScene .us-sub{font-family:'Bebas Neue',sans-serif;font-size:1.15rem;letter-spacing:.14em;color:rgba(230,240,255,.8);margin-top:.35rem;padding:0 1rem;transition-delay:.25s;}
+#unlockScene.us-show .us-kicker,#unlockScene.us-show .us-sub{opacity:1;transform:none;}
+#unlockScene.us-show .us-title{opacity:1;transform:none;letter-spacing:.1em;}
+#unlockScene .us-skip{position:absolute;bottom:calc(1.4rem + env(safe-area-inset-bottom,0px));left:0;right:0;text-align:center;font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:.25em;color:rgba(200,230,255,.35);}
+#stDetailBuyBtn.replay{border-color:#2a3f6a;background:#060b18;color:#8fc4ff;}
+/* the node you just unlocked gets two bright rings when the map lands on it */
+.st-node.st-fresh .st-node-circle{animation:stFresh 1.1s ease-out 2;}
+@keyframes stFresh{0%{box-shadow:0 0 0 0 rgba(255,255,255,.9),0 0 18px 4px rgba(255,255,255,.5);}100%{box-shadow:0 0 0 26px rgba(255,255,255,0),0 0 18px 4px rgba(255,255,255,0);}}

@@ -578,6 +578,12 @@ function buySkill(id){
   updateSkillTreeBtn();
   renderUI();
   autoSave();
+  // the Tucana Core, the Quad Suns and the planets get a cutscene (js/63-unlock-cutscenes.js); afterwards the map
+  // glides over to the new node. (Test-mode autoplay buys quietly.)
+  if(!window.__stQuietBuy && typeof hasUnlockCutscene==='function' && hasUnlockCutscene(id)){
+    playUnlockCutscene(id, ()=>{ showToast(`✨ ${node.name} unlocked!`); if(id!=='core' && typeof stFocusNode==='function') stFocusNode(id); });
+    return;
+  }
   showToast(`✨ ${node.name} unlocked!`);
 }
 
@@ -828,7 +834,11 @@ function openStDetail(id, fromEl){
   document.getElementById('stDetailCost').textContent = isUnlocked ? '✓ UNLOCKED' : `💎 ${fmtGems(price)} GEMS`;
 
   const buyBtn = document.getElementById('stDetailBuyBtn');
-  if(isUnlocked){
+  if(isUnlocked && typeof hasUnlockCutscene==='function' && hasUnlockCutscene(id)){
+    buyBtn.textContent = '▶ WATCH AGAIN';   // replay its unlock cutscene
+    buyBtn.className = 'replay';
+    buyBtn.disabled = false;
+  } else if(isUnlocked){
     buyBtn.textContent = '✓ UNLOCKED';
     buyBtn.className = 'owned';
     buyBtn.disabled = true;
@@ -1033,7 +1043,10 @@ window.doSkillTreeUnlock=function(){
   else{showToast('🌌 Explore the Galaxies unlocked! Find it at the top of the Shop.');openSkillTree();}
 };
 document.getElementById('skillTreeCloseBtn')&&document.getElementById('skillTreeCloseBtn').addEventListener('click', closeSkillTree);
-document.getElementById('stDetailBuyBtn')&&document.getElementById('stDetailBuyBtn').addEventListener('click',()=>{ if(_stDetailNode) buySkill(_stDetailNode); closeStDetail(); });
+document.getElementById('stDetailBuyBtn')&&document.getElementById('stDetailBuyBtn').addEventListener('click',()=>{
+  const id=_stDetailNode;
+  if(id && unlockedSkills[id] && typeof hasUnlockCutscene==='function' && hasUnlockCutscene(id)){ closeStDetail(); playUnlockCutscene(id); return; } // WATCH AGAIN
+  if(id) buySkill(id); closeStDetail(); });
 const _stDetailClose = document.getElementById('stDetailClose');
 if(_stDetailClose){
   _stDetailClose.onclick = closeStDetail;

@@ -133,7 +133,7 @@ function buyCheapestGems(){
     const av=SKILL_TREE_NODES.filter(x=>!unlockedSkills[x.id]&&skillAvailable(x.id)&&(!x.placeholder||x.id==='memory_boost')&&!x.puzzle);
     if(!av.length)break;av.sort((a,b)=>skillCost(a)-skillCost(b));
     if(skillCost(av[0])>Math.floor(alienGems))break;
-    buySkill(av[0].id);n++;
+    window.__stQuietBuy=true;try{buySkill(av[0].id);}finally{window.__stQuietBuy=false;}n++;   // no cutscenes while fast-forwarding
   }
   return n;
 }

@@ -59,12 +59,12 @@
     const s=c.createBufferSource(),f=c.createBiquadFilter(),v=c.createGain();s.buffer=b;f.type=o.type||'bandpass';f.Q.value=o.q||1;f.frequency.setValueAtTime(o.f0||1000,t);if(o.f1)f.frequency.exponentialRampToValueAtTime(o.f1,t+len-.05);
     const a=o.a||.1,k=o.k||.005,h=o.hold||0;v.gain.setValueAtTime(0,t);v.gain.linearRampToValueAtTime(a,t+k);if(h)v.gain.setValueAtTime(a,t+k+h);v.gain.exponentialRampToValueAtTime(.0005,t+len-.05);
     s.connect(f);f.connect(v);v.connect(S.out);if(o.rv){const r=c.createGain();r.gain.value=o.rv;v.connect(r);r.connect(S.send);}s.start(t);s.stop(t+len);}
-  // one of the game's own instruments (a drum, a planet sound…), retuned by `cents`, played into the cutscene mix
-  function inst(S,id,t,cents,gv){
+  // one of the game's own instruments (a drum, a planet sound…), retuned by `cents`, played into the cutscene mix (or into `dest`)
+  function inst(S,id,t,cents,gv,dest){
     const def=(typeof SOUND_MAP!=='undefined'&&SOUND_MAP[id])||(typeof PLANET_SOUND_DEFS!=='undefined'&&PLANET_SOUND_DEFS.find(d=>d.id===id));
     if(!def||typeof def.fn!=='function')return;
     const c=S.c,orig=c.createOscillator,dm=drumMasterGain,rn=rvbNode;
-    try{if(cents)c.createOscillator=function(){const o=orig.call(this);o.detune.value=cents;return o;};drumMasterGain=S.out;rvbNode=S.send;def.fn(t,gv==null?1:gv);}
+    try{if(cents)c.createOscillator=function(){const o=orig.call(this);o.detune.value=cents;return o;};drumMasterGain=dest||S.out;rvbNode=S.send;def.fn(t,gv==null?1:gv);}
     catch(e){}finally{if(cents)delete c.createOscillator;drumMasterGain=dm;rvbNode=rn;}
   }
   // a swelling engine + rising whoosh, for the jumps (len: seconds to the arrival)
@@ -406,6 +406,18 @@
         boom(S,t+1.4,.6);inst(S,'bz_gong',t+1.42,0,.85);inst(S,'ti_anvil',t+1.44,0,.6);
         const sc=[0,400,700,1100,1200,1400];for(let i=0;i<K;i++){inst(S,'cr_tenor',t+1.95+i*.2,sc[i%sc.length],.75);if(i===0)inst(S,'ti_anvil',t+1.95,0,.35);}}},
   };
+  // a whole planet: atmosphere, lit globe with the theme's surface, anything drawn on the surface (inner), night side, rim
+  function globe(st,T,x,y,r,rot,t,inner){
+    g.save();
+    const at=g.createRadialGradient(x,y,r*.92,x,y,r*1.3);at.addColorStop(0,rgba(T.atm,.5));at.addColorStop(1,rgba(T.atm,0));g.fillStyle=at;disc(x,y,r*1.3);
+    g.beginPath();g.arc(x,y,r,0,TAU);g.clip();
+    const b=g.createRadialGradient(x-r*.35,y-r*.4,r*.1,x,y,r*1.05);b.addColorStop(0,T.lite);b.addColorStop(.6,T.base);b.addColorStop(1,T.dark);g.fillStyle=b;g.fillRect(x-r,y-r,r*2,r*2);
+    T.surface(st,x,y,r,rot,st.tilt,t);
+    inner&&inner();
+    const nt=g.createRadialGradient(x-r*.5,y-r*.55,r*.35,x-r*.2,y-r*.25,r*1.6);nt.addColorStop(0,'rgba(0,0,0,0)');nt.addColorStop(.55,'rgba(0,0,12,.15)');nt.addColorStop(1,'rgba(0,0,14,.78)');g.fillStyle=nt;g.fillRect(x-r,y-r,r*2,r*2);
+    g.restore();
+    g.strokeStyle=rgba(T.atm,.55);g.lineWidth=Math.max(1.5,r*.02);g.beginPath();g.arc(x,y,r,0,TAU);g.stroke();
+  }
   function planetScene(id){
     const node=typeof SKILL_MAP!=='undefined'&&SKILL_MAP[id],key=id.replace(/^planet_/,''),T=THEMES[key]||genericTheme(node);
     const conts=typeof SKILL_TREE_NODES!=='undefined'?SKILL_TREE_NODES.filter(n=>n.requires&&n.requires[0]===id&&/^cont_/.test(n.id)):[];
@@ -423,18 +435,12 @@
         const rot=st.rot0+t*.28;
         T.back&&T.back(st,x,y,r,t);
         if(arr<.3){g.globalCompositeOperation='lighter';glow(x,y,far*6,T.col,.9);g.globalCompositeOperation='source-over';}
-        g.save();
-        const at=g.createRadialGradient(x,y,r*.92,x,y,r*1.3);at.addColorStop(0,rgba(T.atm,.5));at.addColorStop(1,rgba(T.atm,0));g.fillStyle=at;disc(x,y,r*1.3);
-        g.beginPath();g.arc(x,y,r,0,TAU);g.clip();
-        const b=g.createRadialGradient(x-r*.35,y-r*.4,r*.1,x,y,r*1.05);b.addColorStop(0,T.lite);b.addColorStop(.6,T.base);b.addColorStop(1,T.dark);g.fillStyle=b;g.fillRect(x-r,y-r,r*2,r*2);
-        T.surface(st,x,y,r,rot,st.tilt,t);
-        // continents light up one by one
-        st.pins.forEach((p,i)=>{const t0=1.95+i*.2;if(t<t0)return;const s=sph(rot+p.lo-(t-2.4)*.28,p.la,rot,st.tilt);if(s.z<.05)return;const px=x+s.x*r,py=y+s.y*r,q=t-t0;
-          const vz=Math.min(1,s.z*2);g.globalCompositeOperation='lighter';glow(px,py,r*.3,T.atm,.45*vz);glow(px,py,r*.1*(1+.2*Math.sin(t*5+i)),'#ffffff',.6*vz);g.globalCompositeOperation='source-over';g.fillStyle=rgba('#ffffff',.9*vz);disc(px,py,Math.max(1.5,r*.025));
-          if(q<.8)ring(px,py,r*(.05+.5*eOut(q/.8)),2,'#ffffff',.9*(1-q/.8));});
-        const nt=g.createRadialGradient(x-r*.5,y-r*.55,r*.35,x-r*.2,y-r*.25,r*1.6);nt.addColorStop(0,'rgba(0,0,0,0)');nt.addColorStop(.55,'rgba(0,0,12,.15)');nt.addColorStop(1,'rgba(0,0,14,.78)');g.fillStyle=nt;g.fillRect(x-r,y-r,r*2,r*2);
-        g.restore();
-        g.strokeStyle=rgba(T.atm,.55);g.lineWidth=Math.max(1.5,r*.02);g.beginPath();g.arc(x,y,r,0,TAU);g.stroke();
+        globe(st,T,x,y,r,rot,t,()=>{
+          // continents light up one by one
+          st.pins.forEach((p,i)=>{const t0=1.95+i*.2;if(t<t0)return;const s=sph(rot+p.lo-(t-2.4)*.28,p.la,rot,st.tilt);if(s.z<.05)return;const px=x+s.x*r,py=y+s.y*r,q=t-t0;
+            const vz=Math.min(1,s.z*2);g.globalCompositeOperation='lighter';glow(px,py,r*.3,T.atm,.45*vz);glow(px,py,r*.1*(1+.2*Math.sin(t*5+i)),'#ffffff',.6*vz);g.globalCompositeOperation='source-over';g.fillStyle=rgba('#ffffff',.9*vz);disc(px,py,Math.max(1.5,r*.025));
+            if(q<.8)ring(px,py,r*(.05+.5*eOut(q/.8)),2,'#ffffff',.9*(1-q/.8));});
+        });
         // the sound of each continent lighting up, and anything the theme throws off (sparks…)
         while(st.pinged<K&&t>=1.95+st.pinged*.2){const p=st.pins[st.pinged],s=sph(rot+p.lo-(t-2.4)*.28,p.la,rot,st.tilt);T.onPing&&T.onPing(st,x+s.x*r,y+s.y*r);st.pinged++;}
         T.outer&&T.outer(st,x,y,r,t);
@@ -454,7 +460,13 @@
 
   // ══ which nodes have a cutscene ══
   const FIXED={core:CORE,sun_planets:SUN_I,sun_points:SUN_II,sun_minigames:SUN_III,sun_aliens:SUN_IV};
-  function sceneFor(id){if(FIXED[id])return FIXED[id];const n=typeof SKILL_MAP!=='undefined'&&SKILL_MAP[id];if(n&&/^planet_/.test(id)&&!n.placeholder)return planetScene(id);return null;}
+  // more scenes plug in from other files (js/64-unlock-cutscenes-2.js): makers(id) → scene or null
+  const MAKERS=[];window.addUnlockCutscenes=fn=>MAKERS.push(fn);
+  function sceneFor(id){if(FIXED[id])return FIXED[id];const n=typeof SKILL_MAP!=='undefined'&&SKILL_MAP[id];if(n&&n.placeholder)return null;
+    if(n&&/^planet_/.test(id))return planetScene(id);for(const m of MAKERS){const S=m(id,n);if(S)return S;}return null;}
+  // the drawing / sound kit, for the scenes in other files (they draw with st.g)
+  window.US_KIT={TAU,cl,ss,lerp,eOut,eBack,rnd,rgba,tone,noise,inst,riser,boom,cents,glow,ring,flash,disc,space,warp,sun,ball,buddy,sph,patch,line3,globe,THEMES,
+    planetTheme:id=>THEMES[String(id).replace(/^planet_/,'')]||genericTheme(typeof SKILL_MAP!=='undefined'&&SKILL_MAP[id])};
   window.hasUnlockCutscene=id=>!!sceneFor(id);
 
   // ══ the player ══
@@ -465,9 +477,10 @@
     g.setTransform(run.dpr,0,0,run.dpr,0,0);
     const sh=!REDUCED&&S.shake?S.shake(t):0;if(sh>0)g.translate((Math.random()-.5)*sh,(Math.random()-.5)*sh);
     try{S.draw(st,t);}catch(e){console.warn('cutscene',e);finish();return;}
-    root.classList.toggle('us-show',t>2.05&&t<3.6);
-    root.style.opacity=t>3.85?String(Math.max(0,1-(t-3.85)/.4)):'';
-    if(t>DUR)finish();
+    const D=S.dur||DUR,fo=D-.45;   // short scenes set their own length and title timing
+    root.classList.toggle('us-show',t>(S.tIn||2.05)&&t<(S.tOut||3.6));
+    root.style.opacity=t>fo?String(Math.max(0,1-(t-fo)/.4)):'';
+    if(t>D)finish();
   }
   function finish(){
     if(!run)return;const r=run;run=null;cancelAnimationFrame(raf);
@@ -481,7 +494,7 @@
     opts=opts||{};
     const dpr=Math.min(2,window.devicePixelRatio||1),W=window.innerWidth,H=window.innerHeight,U=Math.min(W,H);
     cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);cv.style.width=W+'px';cv.style.height=H+'px';
-    const st={W,H,U,cx:W/2,cy:H*.44,R:Math.hypot(W,H)*.6,dt:0,t:0,bg:[],ws:[]};
+    const st={W,H,U,cx:W/2,cy:H*.44,R:Math.hypot(W,H)*.6,dt:0,t:0,bg:[],ws:[],g,id};
     for(let i=0;i<(W*H>400000?170:120);i++)st.bg.push({x:Math.random(),y:Math.random(),r:Math.random()<.15?2:1,a:rnd(.25,.85),tw:rnd(1,4),ph:rnd(0,TAU),d:rnd(.2,1)});
     for(let i=0;i<(W*H>400000?240:170);i++)st.ws.push({a:Math.random()*TAU,r:.05+Math.random()*.95,z:Math.random(),i});
     S.init&&S.init(st);

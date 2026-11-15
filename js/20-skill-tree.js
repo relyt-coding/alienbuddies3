@@ -1270,7 +1270,7 @@ function checkContextualHints(){
   // Only show one at a time; check in priority order
   if(score>=750000&&!shownHints.tips){
     shownHints.tips=true;autoSave();
-    showHintModal('💡',"Click on 'TIPS' in the Bunker to read helpful hints and earn Point Multipliers!");
+    showHintModal('💡',"Open the VAULT in the Bunker: tips that earn Point Multipliers, plus music lessons and words that grow as you play!");
     return;
   }
   if(typeof mgBought!=='undefined'&&!mgBought.match&&alienGems>=1&&!shownHints.matchingIntro&&matchLevelsCompleted<0){
@@ -1284,6 +1284,7 @@ let _hintCanDismiss=false;
 let _hintDismissTimer=null;
 
 function showHintModal(emoji,text){
+  if(typeof HINT_POPUPS_ON!=='undefined'&&!HINT_POPUPS_ON)return;   // pop-ups off for now (js/17)
   const el=document.getElementById('hintModal');
   const em=document.getElementById('hintModalIcon');
   const tx=document.getElementById('hintModalText');

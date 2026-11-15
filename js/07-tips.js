@@ -12,7 +12,9 @@ const TIPS_DATA = [
   {cost:1250000000,   text:"You can give your alien buddies a name by clicking on their square in the bunker!"},
   {cost:12500000000,  text:"Double click on the BPM number on the sequencer to manually enter any value between 50 and 250!"},
   {cost:125000000000, text:"Tap VELOCITY on the sequencer, then tap any lit step to change that note's volume!"},
-];
+  {cost:1250000000000, text:"Every note in the Piano Roll follows the song's KEY, so the notes you place always fit together. Change the key and the whole song moves with it!"},
+  {cost:12500000000000,text:"Use the planet filter in the sound picker to see every sound from one planet. Mixing sounds from different planets is a great way to find your own style!"},
+];   // each tip's tab in the Knowledge Vault: VAULT_TIP_TAB (js/68)
 
 function tipCost(idx){
   let base;
@@ -105,6 +107,7 @@ function overlayUp(){
   if(['store-open','bunker-open','cockpit-open','bestbuddy-open','stats-open','ww-open','galaxy-intro','unlock-scene','intro-run'].some(k=>bc.contains(k)))return true;
   if(typeof newFileIntroRunning==='function'&&newFileIntroRunning())return true;
   const m=document.getElementById('matchingModal');if(m&&m.style.display==='flex')return true;
+  const vm=document.getElementById('vaultModal');if(vm&&vm.classList.contains('open'))return true;
   const st=document.getElementById('skillTreeModal');if(st&&st.classList.contains('open'))return true;
   const er=document.getElementById('eggReveal');if(er&&er.classList.contains('on'))return true;
   return false;
@@ -204,6 +207,7 @@ document.getElementById('drumTrackerActivateBtn')&&document.getElementById('drum
 });
 
 document.getElementById('tipsBtn')&&document.getElementById('tipsBtn').addEventListener('click',()=>{
+  if(typeof openVault==='function'){openVault();return;}   // v0.2.147: TIPS became the KNOWLEDGE VAULT (js/68)
   buildTipsList();
   document.getElementById('tipsModal').style.display='flex';
   const tipsScoreEl=document.getElementById('tipsModalScore');

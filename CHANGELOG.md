@@ -2,6 +2,16 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.147 - 2026-11-15 09:45
+
+- NEW: the KNOWLEDGE VAULT. The bunker's TIPS button is now VAULT, opening a page with tabs: Game Basics, Alien Buddies, Drum Pads, Sequencer, Piano Roll, Sounds & Instruments, Effects & Mixing, Vocals and Music Words.
+- Tips are sorted into those tabs (same prices, same ×1.5 tap boost, any order), and tips 9 and 10 finally have real text (Piano Roll keys, the planet sound filter).
+- LEARN cards: short music lessons that unlock as you play (the drum kit, the backbeat, 16 steps = 1 bar, BPM, the 12 notes, octaves, timbre…). Every skill-tree fun fact you unlock is filed in its tab too.
+- MUSIC WORDS: a glossary that grows as you unlock pads, the sequencer and skill-tree nodes (34 words to start).
+- New things are tagged NEW, and the VAULT button gets a dot until you've read them. Locked entries aren't named, just counted.
+- Level 1 is the egg: before your first buddy, the sequencer's spot is empty and the egg rolls into the middle of it (bigger). The sequencer teaser now fades in when BUNKER and SHOP appear, so unlocking it feels like level 2.
+- Hint pop-ups are switched off for now so they never interrupt the music (the energy meter already says TAP A PAD TO RECHARGE on its own).
+
 ## v0.2.146 - 2026-11-15 09:20
 
 - The MATCHING GAME is free: level 1 is waiting in the bunker as soon as it opens after your first buddy hatches, and its button glows until you've played it. (No more 1 Alien Gem unlock; later levels still unlock by hatching buddies.)

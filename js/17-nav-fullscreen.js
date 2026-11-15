@@ -2,7 +2,11 @@
 // ══════════════════════════════════════════════
 //  NAV
 // ══════════════════════════════════════════════
+// v0.2.147: hint pop-ups are switched off for now: they stop the music flow. What they taught moves to quieter, on-screen
+// cues (and the Knowledge Vault). Flip this back to true to bring them all back.
+const HINT_POPUPS_ON=false;
 function showHint(icon, text, onClose){
+  if(!HINT_POPUPS_ON){if(typeof onClose==='function')onClose();return;}
   document.getElementById('hintModalIcon').textContent=icon;
   document.getElementById('hintModalText').innerHTML=text;
   document.getElementById('hintModal').style.display='flex';

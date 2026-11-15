@@ -39,7 +39,7 @@ function autoSave(){
     totalAliens,alienData,
     drum:{pads:drum.pads,extraSounds:drum.extraSounds,seqTracks:drum.seqTracks},
     matchLevelsCompleted,matchingMultiplier,matchSavedState,wormMultiplier,wormProgress,phMultiplier,phProgress,
-    mgBought:(typeof mgBought!=='undefined')?mgBought:undefined,bdProgress:(typeof bdProgress!=='undefined')?bdProgress:undefined,tipsOwned,tipsSet,tipsMult,drumTrackerActive,shopOpenCount,hasSeenSeqHint,
+    mgBought:(typeof mgBought!=='undefined')?mgBought:undefined,bdProgress:(typeof bdProgress!=='undefined')?bdProgress:undefined,tipsOwned,tipsSet,tipsMult,vaultSeen,drumTrackerActive,shopOpenCount,hasSeenSeqHint,
     savedPatterns,savedArrangements,songSlots,
     padSounds:[...padSounds],
     soundVols:{...soundVols},
@@ -80,6 +80,7 @@ let matchLevelsCompleted=-1; // -1 = level 0 not yet seen
 let tipsOwned=0; // number of tips purchased
 let tipsSet=[];  // which tips (0-based) are bought: they can be bought in any order
 let tipsMult=1; // permanent ×1.5 per tip
+let vaultSeen=[]; // Knowledge Vault entries already read (js/68)
 let drumTrackerActive=false; // paid 25pts to activate drum dot tracker
 let shopOpenCount=0;
 let hasSeenSeqHint=false;
@@ -212,6 +213,7 @@ function loadFromSave(data){
   // older saves bought tips in order: tips 1..N
   tipsSet=Array.isArray(data.tipsSet)?data.tipsSet.filter(Number.isInteger):[...Array(tipsOwned).keys()];tipsOwned=tipsSet.length;
   tipsMult=data.tipsMult||1;
+  vaultSeen=Array.isArray(data.vaultSeen)?data.vaultSeen.filter(x=>typeof x==='string'):[];
   drumTrackerActive=data.drumTrackerActive||false;
   shopOpenCount=data.shopOpenCount||0;
   hasSeenSeqHint=data.hasSeenSeqHint||false;

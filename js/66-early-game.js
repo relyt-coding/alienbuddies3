@@ -93,7 +93,9 @@
     $('gameView').appendChild(egg);
     egg.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();tapEgg();});
   }
-  function eggSize(){return B.contains('phone-land')?{w:30,h:38}:isDesk()?{w:58,h:72}:{w:52,h:64};}
+  // v0.2.147: until the first buddy hatches, the sequencer's spot is an empty stage and the egg sits in the middle of it
+  function eggStage(){const t=$('seqTeaser');return !B.contains('phone-land')&&B.contains('nav-locked')&&t&&t.style.display!=='none'&&t.offsetWidth>0?t:null;}
+  function eggSize(){if(eggStage())return isDesk()?{w:84,h:104}:{w:76,h:94};return B.contains('phone-land')?{w:30,h:38}:isDesk()?{w:58,h:72}:{w:52,h:64};}
   function paintEggCanvas(crack){
     const cv=egg.querySelector('canvas'),S=eggSize(),k=Math.min(2,window.devicePixelRatio||1),W=S.w+12,H=S.h+12;
     cv.width=Math.round(W*k);cv.height=Math.round(H*k);cv.style.width=W+'px';cv.style.height=H+'px';
@@ -108,6 +110,9 @@
     const op=egg.offsetParent||gv,o=op.getBoundingClientRect(),ew=egg.offsetWidth||64,ch=(egg.querySelector('canvas').offsetHeight)||76;
     // just right of the score, centred on it (never off the edge)
     const gr=gv.getBoundingClientRect();
+    const stg=eggStage();
+    if(stg){const sr=stg.getBoundingClientRect(),eh=egg.offsetHeight||ch+24;
+      egg.style.left=(sr.left+sr.width/2-ew/2-o.left).toFixed(1)+'px';egg.style.top=(sr.top+sr.height/2-eh/2-o.top).toFixed(1)+'px';return;}
     const land=B.contains('phone-land');
     let x=r.right+Math.max(16,Math.min(36,r.height*.45)),maxX=Math.min(window.innerWidth,gr.right)-ew-10;
     // sideways phone: the score row is short and busy on the right, so it waits on the left of the score
@@ -208,12 +213,19 @@
   function chase(now){chaseRaf=requestAnimationFrame(chase);if(demo)return;const i=Math.floor((now-chaseT)/150)%16;tzSteps.forEach((s,k)=>s.classList.toggle('lit',k===i));}
   function startChase(){if(chaseRaf)return;chaseT=performance.now();chaseRaf=requestAnimationFrame(chase);}
   function stopChase(){cancelAnimationFrame(chaseRaf);chaseRaf=0;tzSteps.forEach(s=>s.classList.remove('lit'));}
-  let tzShown=null,tzPrice='';
+  let tzShown=null,tzPrice='',tzHoldSeen=false;
   function updateTeaser(){
     if(!tz)return;
     const show=active()&&typeof drum!=='undefined'&&drum.seqTracks===0;
     if(show!==tzShown){tzShown=show;tz.style.display=show?'':'none';if(typeof fitPadAreaSoon==='function')fitPadAreaSoon();if(!show){stopChase();tzReady=false;tz.classList.remove('ready');}}
     if(!show)return;
+    // v0.2.147: the teaser keeps its space but stays empty (the egg's stage) until BUNKER and SHOP arrive with the
+    // first buddy, then fades in with them: hatching is level 1, the sequencer is level 2
+    const hold=B.contains('nav-locked');
+    if(hold!==tz.classList.contains('tz-hold')){tz.classList.toggle('tz-hold',hold);
+      if(!hold&&tzHoldSeen){tz.classList.remove('tz-in');void tz.offsetWidth;tz.classList.add('tz-in');setTimeout(()=>tz.classList.remove('tz-in'),1600);}
+      if(eggOn)setTimeout(()=>{paintEggCanvas(eggCrack<0?0:eggCrack);placeEgg();},0);}
+    if(hold){tzHoldSeen=true;return;}
     const c=tzCost(),ready=score>=c;
     const pt=c.toLocaleString('en-US');if(pt!==tzPrice){tzPrice=pt;$('seqTeaserPrice').innerHTML=pt+'<small>PTS</small>';}
     $('seqTeaserFill').style.width=(Math.min(1,score/c)*100).toFixed(2)+'%';
@@ -224,6 +236,6 @@
   function tick(){try{applyNavLock();updateEgg();updateTeaser();paintGlows();}catch(e){console.warn('early game',e);}}
   setInterval(tick,200);
   // right as a file opens, so the buttons never flash in for a moment
-  if(typeof startGame==='function'){const sg=startGame;window.startGame=function(){const r=sg.apply(this,arguments);eggPick=null;dealSeen=new Set();bunkerNew=false;tick();return r;};}
+  if(typeof startGame==='function'){const sg=startGame;window.startGame=function(){const r=sg.apply(this,arguments);eggPick=null;dealSeen=new Set();bunkerNew=false;tzHoldSeen=false;tick();return r;};}
   window.addEventListener('resize',()=>{if(eggOn)placeEgg();});
 })();

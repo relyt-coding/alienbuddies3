@@ -1,6 +1,7 @@
 // ══════════════════════════════════════════════
 //  MINIGAME HUB — how the minigames unlock, what they pay, and the COCKPIT page
-//  · In the bunker from the start: the MATCHING GAME for 1 Alien Gem (so you need an alien first).
+//  · In the bunker from the start: the MATCHING GAME, free (v0.2.146). The bunker itself only opens once your first
+//    buddy hatches, and the matching game's button glows until you've played level 1.
 //  · The skill tree's minigame path: Cockpit (a page left of the bunker that holds every minigame, and opens
 //    PLANET HOP levels 1–5) → Ice Planet (Planet Hop 6–10) → Worm Whack (levels 1–5) → Magmora (Planet Hop 11–15)
 //    → Beat Defense, and a later planet,
@@ -8,9 +9,9 @@
 //  · Rewards: the Matching Game gives point multipliers. Planet Hop, Worm Whack and Beat Defense boost ALIEN GEMS:
 //    +0.5× for every level cleared, +1× for a perfect clear (all stardust / 3 stars / no damage). Added, not multiplied.
 // ══════════════════════════════════════════════
-let mgBought={ph:false,match:false,wwAll:false};   // bunker purchases (+ wwAll: saves from before v0.2.111 keep every Worm Whack level)
+let mgBought={ph:false,match:true,wwAll:false};   // bunker purchases (+ wwAll: saves from before v0.2.111 keep every Worm Whack level)
 let bdProgress={best:{}};                            // Beat Defense: best[L] = {cleared, flawless}
-const MG_PRICE={match:1};
+const MG_PRICE={match:0};   // the matching game is free now (it used to cost 1 Alien Gem)
 const MG_WW_NODES=[[5,'ww_moon'],[10,'ww_deep'],[15,'ww_t1'],[20,'ww_t2'],[25,'ww_t3'],[30,'ww_t4']];
 const _mgTest=()=>typeof TEST_MODE!=='undefined'&&TEST_MODE;
 const _mgHas=id=>typeof unlockedSkills!=='undefined'&&!!unlockedSkills[id];
@@ -41,6 +42,7 @@ function mgLevelGemText(perfectWord){return '+0.5× Alien Gems for the clear · 
 // ── saves ──
 function mgLoad(data){
   mgBought=Object.assign({ph:false,match:false,wwAll:false},data.mgBought||{});
+  mgBought.match=true;   // free since v0.2.146 (saves that never paid the gem get it too)
   bdProgress=(data.bdProgress&&data.bdProgress.best)?data.bdProgress:{best:{}};
   if(!data.mgBought&&typeof unlockedSkills!=='undefined'){
     // first load on v0.2.111+: keep everything the player already had
@@ -149,12 +151,12 @@ setInterval(()=>{
   }
 },4000);
 
-// ── lead the way to the Matching Game: once you can afford it, the BUNKER button and the MATCHING GAME button glow
-//    (stops as soon as it's bought) ──
+// ── lead the way to the Matching Game ──
 setInterval(()=>{
   if(typeof mgBought==='undefined'||typeof alienGems==='undefined')return;
-  const on=!mgBought.match&&alienGems>=MG_PRICE.match&&!(typeof TEST_MODE!=='undefined'&&TEST_MODE);
+  // v0.2.146: the MATCHING GAME button glows from the moment the bunker opens until level 1 has been played
+  const on=typeof matchLevelsCompleted!=='undefined'&&matchLevelsCompleted<0&&typeof totalAliens!=='undefined'&&totalAliens>=1&&!(typeof TEST_MODE!=='undefined'&&TEST_MODE);
   const bb=document.getElementById('openBunkerBtn'),mb=document.getElementById('matchingGameBtn');
-  if(bb)bb.classList.toggle('lead-glow',on);
+  if(bb)bb.classList.remove('lead-glow');   // (the bunker button has its own "come visit" glow: js/66)
   if(mb)mb.classList.toggle('lead-glow',on);
 },500);

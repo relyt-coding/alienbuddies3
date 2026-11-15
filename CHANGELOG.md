@@ -2,6 +2,11 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.146 - 2026-11-15 09:20
+
+- The MATCHING GAME is free: level 1 is waiting in the bunker as soon as it opens after your first buddy hatches, and its button glows until you've played it. (No more 1 Alien Gem unlock; later levels still unlock by hatching buddies.)
+- EDIT PADS is back from the very start (key bindings and per-pad volume right away).
+
 ## v0.2.145 - 2026-11-15 09:30
 
 - EDIT PADS stays hidden until you unlock the 4th pad (the first one without a sound), then pops in.

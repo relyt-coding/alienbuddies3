@@ -2,6 +2,12 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.152 - 2026-11-15 12:00
+
+- Level 4: the GEM RING. 30 seconds after you unlock the Alien Party, a ring with the Gem Buddy in it appears (top-right on phones held upright, next to SHOP on sideways phones, beside the score on a computer). It fills up toward your next gem goal: first 25 gems for the galaxies. When it's full it glows. Tap it to unlock Explore the Galaxies right there. After that it counts toward the next skill-tree node you can buy, and tapping it opens the galaxy map. (The card in the shop still works too.)
+- Gems come off your buddies: when your aliens make gems, little gems pop off the floating buddies and fly into the ring, with a soft chime as each one lands.
+- NEW: MY ACCOUNT button (top-left on phones held upright). For now it shows that you're playing offline on this device. Signing in and playing online with friends are coming.
+
 ## v0.2.151 - 2026-11-15 11:40
 
 - The Gem Buddy's eyes moved up into the top of the crystal, so it looks friendlier and less goofy.

@@ -29,7 +29,7 @@
   const shown=e=>e&&getComputedStyle(e).display!=='none'&&e.getBoundingClientRect().width>0;
   let placed=false;
   function placeHeaderButtons(){
-    const left=['settingsOpenBtn','padEditToggleBtn'].map($),right=[$('partyBtn')];
+    const left=['accountBtn','settingsOpenBtn','padEditToggleBtn'].map($),right=[$('partyBtn')];
     if(!B.classList.contains('phone-land')){
       if(placed){placed=false;[...left,...right].forEach(e=>{if(e){e.style.left='';e.style.right='';}});if(typeof updatePartyBtnPosition==='function')updatePartyBtnPosition();}
       return;

@@ -28,7 +28,7 @@ README.md covers the file layout, test mode and vocals in depth; this file is th
   page 6 (`#vaultView`, body class `vault-open`); on desktop it's the `#vaultModal` window.
 - Upright phones get body class `thumb-nav` (js/69): BUNKER / SETTINGS / EDIT PADS / SHOP in one bottom row. The PARTY button (`.pb-small`) is
   placed next to ♪ by `placeViewButtons` (06-sequencer); tapping opens `openPartyMenu`. Level 1 egg / level 2 sequencer teaser live in
-  66-early-game; the level 3 disco ball (`#partyTeaser`) in 69; the level 4 gem ring (`#gemRing`, 30 s after the party; HOLD unlocks the
+  66-early-game (the bunker/shop unlock plays js/65's 'nav' cutscene; a new file plays the short 'pads' intro; `IMODES` in js/65); the level 3 disco ball (`#partyTeaser`) in 69; the level 4 gem ring (`#gemRing`, 30 s after the party; HOLD unlocks the
   galaxies via `wireGalaxyHold` from js/59, then tap opens the map / hold replays the launch) in 71. Gems make no sounds. `#accountBtn` / `openAccountSheet()` (71) is the placeholder for sign-in and online play.
 - Planets: nodes via `planet({...})` in 20-skill-tree (PLANET_TREE_2), sounds as `PLANET_SOUND_DEFS` entries (03b / 03c; pitched ones in
   `PITCHED_SOUNDS`), map spot in 62-tree-layout `PLANETS`, picker names in 05-pads `PA_PLANET_NAMES` / `PA_CONT_NAMES`, cutscene look in 63 `THEMES`

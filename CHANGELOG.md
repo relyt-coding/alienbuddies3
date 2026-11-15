@@ -2,6 +2,13 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.156 - 2026-11-15 14:30
+
+- The opening is shorter (about 3.5 seconds): on a new file only the DRUM PADS fly in and build themselves, then the camera zooms in.
+- The BUNKER and SHOP now get their own cutscene when they unlock, right after you hatch (and name) your first buddy: the camera pulls back from
+  the drum pads, the bunker flies in from the left and the shop from the right, each builds itself, and the camera zooms back in.
+- REPLAY in Settings still plays the whole three-page intro once the bunker and shop are open.
+
 ## v0.2.155 - 2026-11-15 13:35
 
 - NEW: PLANET 808, after Alloy in the Planet Atlas. A dark neon world of speaker cones, with 5 continents of drum machine sound (25 sounds):

@@ -1,7 +1,12 @@
 // ══════════════════════════════════════════════
 //  NEW-FILE INTRO + SEQUENCER / ALIEN PARTY UNLOCK FX
 //
-//  New file (about 8 s, tap to skip, REPLAY in settings): the real pages come together.
+//  v0.2.156: the intro comes in two parts.
+//   • New file ('pads', ~3.5 s): only the DRUM PADS fly up and build themselves, then the camera zooms in.
+//   • When BUNKER and SHOP unlock (after the first buddy hatches and is named; js/66) ('nav', ~6 s): the camera pulls
+//     back from the pads, the BUNKER flies in from the left and the SHOP from the right, each builds, and we zoom back.
+//   • REPLAY in settings plays the whole thing ('all', ~8 s) once the bunker and shop are open.
+//  The full version, as before: the real pages come together.
 //   The camera starts zoomed out in space. The BUNKER flies in from the left, the SHOP from the right and the
 //   DRUM PADS up from below, and they line up side by side (on desktop: the three columns, bunker | pads | shop).
 //   Then each page builds itself in turn (its parts pop, drop and slide in), the gaps close, and the camera zooms
@@ -24,9 +29,19 @@
   function snd(fn,vol){if(!K||!K.mixer)return;const S=K.mixer(vol||.8);if(S)try{fn(S,S.t);}catch(e){console.warn('intro sound',e);}}
 
   // ══════════════════════ NEW-FILE INTRO ══════════════════════
-  const DUR=8,IDS={b:'bunkerView',h:'gameView',s:'storeView'},OFF={b:-1,h:0,s:1},NAMES={b:'BUNKER',h:'DRUM PADS',s:'SHOP'};
-  const FLY={b:[.25,1.25],s:[.45,1.45],h:[.65,1.65]},BUILD={b:1.7,s:3.0,h:4.3},ZOOM=[5.6,6.8];
-  let I=null;
+  const IDS={b:'bunkerView',h:'gameView',s:'storeView'},OFF={b:-1,h:0,s:1},NAMES={b:'BUNKER',h:'DRUM PADS',s:'SHOP'};
+  // each intro: which pages take part, when they fly in (FLY) and build (BUILD), the camera path, the final zoom in,
+  // when the page names show, and its length. `zout` = it starts zoomed in on the pads and pulls back first.
+  const IMODES={
+    all:{pages:['b','h','s'],FLY:{b:[.25,1.25],s:[.45,1.45],h:[.65,1.65]},BUILD:{b:1.7,s:3.0,h:4.3},ZOOM:[5.6,6.8],DUR:8,LBL:[1.45,1.9,5.3,5.6],
+      CAM:[[0,'c',0],[1.55,'c',0],[2.05,'b',1],[2.85,'b',1],[3.45,'s',1],[4.15,'s',1],[4.6,'h',1],[5.6,'h',1],[6.8,'c',2]]},
+    pads:{pages:['h'],FLY:{h:[.15,.95]},BUILD:{h:1.0},ZOOM:[2.15,3.0],DUR:3.6,LBL:[.7,1.0,1.95,2.2],
+      CAM:[[0,'c',0],[2.15,'c',0],[3.0,'c',2]]},
+    nav:{pages:['b','h','s'],FLY:{b:[.45,1.35],s:[.65,1.55]},BUILD:{b:1.65,s:2.85},ZOOM:[4.55,5.4],DUR:6,LBL:[1.3,1.6,4.25,4.55],zout:[0,1.05],
+      CAM:[[0,'c',2],[1.05,'c',0],[1.45,'c',0],[1.85,'b',1],[2.65,'b',1],[3.2,'s',1],[3.9,'s',1],[4.3,'h',1],[4.55,'h',1],[5.4,'c',2]]},
+  };
+  let I=null,M=IMODES.all,FLY=M.FLY,BUILD=M.BUILD,ZOOM=M.ZOOM,DUR=M.DUR,CAM=M.CAM;
+  function useMode(k){M=IMODES[k]||IMODES.all;FLY=M.FLY;BUILD=M.BUILD;ZOOM=M.ZOOM;DUR=M.DUR;CAM=M.CAM;}
 
   function stage(){
     let st=document.getElementById('introStage');if(st)return st;
@@ -45,21 +60,28 @@
   function assignParts(){
     const list=[];const add=(el,type,d)=>{if(el&&vis(el)){el.classList.add('ib','ib-'+type);el.style.setProperty('--ibd',d.toFixed(3)+'s');list.push(el);}};
     const B=document.getElementById(IDS.b),S=document.getElementById(IDS.s),H=document.getElementById(IDS.h);
+    let t0;
+    if(BUILD.b!=null){
     // bunker: header, stats, then the alien grid ripples in from the top-left corner
-    let t0=BUILD.b;add(B.querySelector('.page-header'),'drop',t0);
+    t0=BUILD.b;add(B.querySelector('.page-header'),'drop',t0);
     B.querySelectorAll('.bunker-stat').forEach((e,i)=>add(e,'pop',t0+.12+i*.09));add(B.querySelector('.bunker-number-label'),'pop',t0+.3);
     B.querySelectorAll('.bunker-grid').forEach((grid,gi)=>{const cells=[...grid.children].filter(vis).slice(0,140);if(!cells.length)return;
       const w=cells[0].offsetWidth||1,h=cells[0].offsetHeight||1,x0=cells[0].offsetLeft,y0=cells[0].offsetTop;
       cells.forEach(e=>{const c=Math.round((e.offsetLeft-x0)/w),r=Math.round((e.offsetTop-y0)/h);add(e,'pop',t0+.35+gi*.2+(r+c)*.034);});});
     add(B.querySelector('#mgList'),'rise',t0+.95);add(B.querySelector('.bunker-progress-wrap'),'rise',t0+1.05);add(B.querySelector('.bunker-full-banner'),'pop',t0+.5);
+    }
+    if(BUILD.s!=null){
     // shop: header, then its shelves slide in one after another and their cards pop
     t0=BUILD.s;add(S.querySelector('.page-header'),'drop',t0);
     const shelves=[...S.querySelectorAll('.store-scroll > *')].filter(vis).slice(0,8);shelves.forEach((e,i)=>add(e,'slide',t0+.15+i*.13));
     [...S.querySelectorAll('.drum-card,.upgrade-card')].filter(vis).slice(0,16).forEach((e,i)=>add(e,'pop',t0+.3+i*.07));
+    }
+    if(BUILD.h!=null){
     // drum pads: header drops, the score pops, then the pads pop in one by one, and anything else rises
     t0=BUILD.h;add(H.querySelector('.header'),'drop',t0);add(H.querySelector('#scoreRow'),'pop',t0+.2);
     [...H.querySelectorAll('.pad-grid > .pad')].filter(vis).slice(0,16).forEach((e,i)=>add(e,'pop',t0+.45+i*.09));
     const app=H.querySelector('.app');if(app)[...app.children].filter(e=>vis(e)&&!e.classList.contains('ib')&&!e.querySelector('.ib')).slice(0,6).forEach((e,i)=>add(e,'rise',t0+.6+i*.1));
+    }
     return list;
   }
   // world: the three pages in a row (phone: each a whole screen wide, as swiping lays them out; desktop: the
@@ -73,10 +95,10 @@
       ['b','h','s'].forEach(k=>{G.v[k]={bx:W/2,by:H/2,X:W/2+OFF[k]*W,h:H,w:W};});
       G.gw=W*.2;G.z0=(W*.9)/(3*W+2*G.gw);G.zf=Math.min(.52,G.z0*2.1);G.pan=1;G.cy0=H*.455;G.rad=48;
     }
+    if(M.pages.length===1){G.z0=desk?.62:.6;G.cy0=H*.47;}
     return G;
   }
-  // camera path: overview → over to the bunker as it builds → across to the shop → back to the pads → zoom in
-  const CAM=[[0,'c',0],[1.55,'c',0],[2.05,'b',1],[2.85,'b',1],[3.45,'s',1],[4.15,'s',1],[4.6,'h',1],[5.6,'h',1],[6.8,'c',2]];
+  // camera path (per mode, see IMODES): overview → over to the bunker as it builds → across to the shop → back to the pads → zoom in
   function camAt(G,t){
     const X=n=>n==='c'?G.xc:lerp(G.xc,G.v[n].X+OFF[n]*G.gw,G.pan),Z=n=>n===0?G.z0:n===1?G.zf:1;
     let i=0;while(i<CAM.length-2&&t>=CAM[i+1][0])i++;
@@ -91,6 +113,9 @@
     opts=opts||{};
     if(!BC.contains('game-active')||BC.contains('mobile-view-mode')||!document.getElementById('gameScreen')){opts.onDone&&opts.onDone();return false;}
     if(I)finishIntro(false);
+    // before the first buddy (a new file) only the drum pads exist yet
+    const noBuddy=BC.contains('nav-locked')||(typeof totalAliens!=='undefined'&&totalAliens<1);
+    useMode(opts.mode||(noBuddy?'pads':'all'));
     // start from the pads page with nothing open
     try{if(typeof closeSettings==='function')closeSettings();}catch(e){}
     try{if(typeof closeSkillTree==='function'&&document.querySelector('#skillTreeModal.open'))closeSkillTree();}catch(e){}
@@ -99,18 +124,20 @@
     const desk=isDesk(),st=stage(),cv=st.querySelector('canvas'),g=cv.getContext('2d');
     const prev={bc:null,sc:null};
     if(desk){const bv=document.getElementById('bunkerView'),sv=document.getElementById('storeView');prev.bc=bv.classList.contains('sidebar-collapsed');prev.sc=sv.classList.contains('sidebar-collapsed');
-      [bv,sv].forEach(v=>{v.style.transition='none';v.classList.remove('sidebar-collapsed');});void bv.offsetWidth;}
+      if(M.pages.length>1){[bv,sv].forEach(v=>{v.style.transition='none';v.classList.remove('sidebar-collapsed');});void bv.offsetWidth;}}
     BC.add('intro-run');
     const G=geometry();
     const dpr=Math.min(2,window.devicePixelRatio||1);cv.width=Math.round(G.W*dpr);cv.height=Math.round(G.H*dpr);cv.style.width=G.W+'px';cv.style.height=G.H+'px';
     const stars=[];for(let i=0;i<130;i++)stars.push({x:Math.random(),y:Math.random(),z:Math.random(),r:Math.random()<.15?2:1,ph:Math.random()*6});
     const parts=assignParts();
     st.classList.add('on');st.style.opacity='';
-    st.querySelectorAll('.in-lbl').forEach(l=>{l.textContent=NAMES[l.dataset.k];l.style.opacity='0';});
+    st.querySelectorAll('.in-lbl').forEach(l=>{l.textContent=NAMES[l.dataset.k];l.style.opacity='0';l.style.display=M.pages.includes(l.dataset.k)?'':'none';});
     const lbl={};st.querySelectorAll('.in-lbl').forEach(l=>lbl[l.dataset.k]=l);
-    I={lbl,t0:performance.now(),sp:opts.speed||1,G,g,cv,dpr,stars,parts,prev,desk,opts,woke:false,assembled:false,el(){return(performance.now()-this.t0)/1000*this.sp;}};
+    I={lbl,t0:performance.now(),sp:opts.speed||1,G,g,cv,dpr,stars,parts,prev,desk,opts,M,woke:false,assembled:false,el(){return(performance.now()-this.t0)/1000*this.sp;}};
+    // pages that sit this one out are parked out of sight (the intro styles would otherwise drop them on top)
+    ['b','h','s'].forEach(k=>{if(!M.pages.includes(k))setView(k,'translate(-400vw,0)',0,0,0);});
     document.getElementById('introCatch').classList.add('on');
-    if(!opts.silent)introSound();
+    if(!opts.silent)introSound(opts.mode||(M===IMODES.pads?'pads':M===IMODES.nav?'nav':'all'));
     I.raf=requestAnimationFrame(introFrame);
     return true;
   };
@@ -118,21 +145,21 @@
     if(!I)return;I.raf=requestAnimationFrame(introFrame);
     const t=I.el(),G=I.G,g=I.g,W=G.W,H=G.H;
     // the starfield drifts gently towards us, faster as we zoom in
-    const zp=eIO(ss(ZOOM[0],ZOOM[1],t));
+    const zp=Math.max(eIO(ss(ZOOM[0],ZOOM[1],t)),M.zout?1-eIO(ss(M.zout[0],M.zout[1],t)):0);
     g.setTransform(I.dpr,0,0,I.dpr,0,0);g.clearRect(0,0,W,H);
     I.stars.forEach(s=>{s.z-=.0016*(1+zp*14);if(s.z<=.05){s.z=1;s.x=Math.random();s.y=Math.random();}const k=.35/s.z,x=W/2+(s.x-.5)*W*k,y=H/2+(s.y-.5)*H*k;if(x<0||x>W||y<0||y>H)return;
       g.fillStyle=`rgba(210,235,255,${Math.min(1,(1-s.z)*1.3)*(.6+.4*Math.sin(t*2+s.ph))})`;g.fillRect(x,y,s.r,s.r);});
     // the camera: zoomed out on the row of pages, visiting each as it builds, then into the drum pads
     if(!I.assembled){
       const cam=camAt(G,t),z=cam.z,gw=G.gw*(1-zp),cy=lerp(G.cy0,H/2,zp),rad=G.rad*(1-zp);
-      ['b','h','s'].forEach(k=>{const v=G.v[k],[f0,f1]=FLY[k],fp=eOut(ss(f0,f1,t));
+      M.pages.forEach(k=>{const v=G.v[k],[f0,f1]=FLY[k]||[-2,-1],fp=eOut(ss(f0,f1,t));
         // fly-in: bunker from the left, shop from the right, pads up from below, each settling from a little tilt
         const fx=k==='b'?-W*.9:k==='s'?W*.9:0,fy=k==='h'?H*.75:0,tilt=(k==='b'?-6:k==='s'?6:0)*(1-fp),fs=k==='h'?lerp(.7,1,fp):1;
         // focus: the page being built glows and stands forward, the others dim back a little
-        const b0=BUILD[k],foc=t<ZOOM[0]?ss(b0-.3,b0,t)*(1-ss(b0+1.3,b0+1.55,t)):0,dim=(1-foc)*.4*ss(BUILD.b-.3,BUILD.b,t)*(1-ss(ZOOM[0]-.3,ZOOM[0]+.1,t));
+        const b0=BUILD[k],bf=Math.min(...Object.values(BUILD)),foc=(t<ZOOM[0]&&b0!=null)?ss(b0-.3,b0,t)*(1-ss(b0+1.3,b0+1.55,t)):0,dim=M.pages.length>1?(1-foc)*.4*ss(bf-.3,bf,t)*(1-ss(ZOOM[0]-.3,ZOOM[0]+.1,t)):0;
         const wx=v.X+OFF[k]*gw,sx=W/2+(wx-cam.x)*z+fx*(1-fp),sy=cy+(v.by-H/2)*z+fy*(1-fp),sc=z*fs*(1+.04*foc);
         setView(k,`translate(${(sx-v.bx).toFixed(1)}px,${(sy-v.by).toFixed(1)}px) scale(${sc.toFixed(4)}) rotate(${tilt.toFixed(2)}deg)`,(Math.min(fp*1.4,1)*(1-dim)).toFixed(3),rad,((.2+.6*foc)*(1-zp)).toFixed(3));
-        const lb=I.lbl[k];if(lb){lb.style.left=sx.toFixed(1)+'px';lb.style.top=(sy+v.h*sc/2+14).toFixed(1)+'px';lb.style.opacity=(ss(1.45,1.9,t)*(1-ss(5.3,5.6,t))*(.5+.5*foc)*Math.min(fp*1.4,1)).toFixed(3);lb.classList.toggle('foc',foc>.5);}});
+        const lb=I.lbl[k];if(lb){lb.style.left=sx.toFixed(1)+'px';lb.style.top=(sy+v.h*sc/2+14).toFixed(1)+'px';lb.style.opacity=(ss(M.LBL[0],M.LBL[1],t)*(1-ss(M.LBL[2],M.LBL[3],t))*(M.pages.length>1?.5+.5*foc:1)*Math.min(fp*1.4,1)).toFixed(3);lb.classList.toggle('foc',foc>.5);}});
     }
     if(t>=ZOOM[1]&&!I.assembled){I.assembled=true;assemble();}
     if(t>=ZOOM[1]+.05&&!I.woke){I.woke=true;wake();}
@@ -184,8 +211,23 @@
   if(rb)rb.addEventListener('click',()=>{try{if(typeof closeSettings==='function')closeSettings();}catch(e){}
     setTimeout(()=>{if(!window.playNewFileIntro({})&&typeof showToast==='function')showToast('The intro plays with a game open.');},200);});
 
-  function introSound(){
+  function introSound(mode){
     if(!K)return;
+    if(mode==='pads'){snd((S,t)=>{const{tone,noise,inst}=K;
+      tone(S,t,110,{a:.03,k:.8,hold:1.6,d:1.2,rv:.6});tone(S,t,164.8,{a:.02,k:1,hold:1.4,d:1.2,rv:.6});
+      noise(S,t+FLY.h[0],{f0:500,f1:2600,q:1.4,a:.05,k:.7,d:.2});tone(S,t+FLY.h[1],210,{f1:140,gl:.05,a:.12,d:.12});
+      tone(S,t+BUILD.h+.2,880,{a:.04,d:.4,rv:.5});['kick','hihat','snare','hihat'].forEach((id,i)=>inst(S,id,t+BUILD.h+.45+i*.18,0,.45));
+      noise(S,t+ZOOM[0],{f0:400,f1:5000,q:1,a:.07,k:.8,d:.12});tone(S,t+ZOOM[0],160,{f1:640,gl:.85,a:.035,k:.8,d:.1});
+      inst(S,'kick',t+ZOOM[1],0,.6);[130.81,261.63,329.63,392,493.88,587.33].forEach((f,i)=>tone(S,t+ZOOM[1]+i*.025,f,{type:i<2?'triangle':'sine',a:i?.045:.06,k:.06,d:2.4,rv:.6}));
+      inst(S,'hihat',t+ZOOM[1]+.35,0,.7);},1.35);return;}
+    if(mode==='nav'){snd((S,t)=>{const{tone,noise}=K;
+      noise(S,t,{f0:3000,f1:500,q:1,a:.05,k:.6,d:.25});tone(S,t,520,{f1:260,gl:.9,a:.025,k:.3,d:.4,rv:.5});   // pulling back
+      [['b',FLY.b[1]],['s',FLY.s[1]]].forEach(([k,land],i)=>{noise(S,t+FLY[k][0],{f0:500,f1:2600,q:1.4,a:.05,k:.6,d:.2});tone(S,t+land,240-i*30,{f1:150,gl:.05,a:.12,d:.12});noise(S,t+land,{type:'highpass',f0:3500,a:.05,d:.03});});
+      [0,2,4,7,9,12,14,16,19,21,24].forEach((s2,i)=>tone(S,t+BUILD.b+.35+i*.07,523.25*Math.pow(2,s2/12),{a:.022,d:.35,rv:.5}));
+      for(let i=0;i<6;i++)noise(S,t+BUILD.s+.15+i*.13,{f0:1800,f1:900,q:2,a:.035,d:.1});
+      tone(S,t+BUILD.s+1.0,1318.5,{a:.04,d:.5,rv:.5});tone(S,t+BUILD.s+1.08,1975.5,{a:.03,d:.6,rv:.5});
+      noise(S,t+ZOOM[0],{f0:400,f1:4000,q:1,a:.06,k:.8,d:.12});
+      [[0,659.25],[.4,987.77]].forEach(([d,f])=>{tone(S,t+ZOOM[1]+d,f,{type:'triangle',a:.05,d:.5,rv:.5});tone(S,t+ZOOM[1]+d+.06,f*1.5,{a:.025,d:.5,rv:.5});});},1.35);return;}
     snd((S,t)=>{const{tone,noise,inst}=K;
       // space: a soft swell
       tone(S,t,110,{a:.035,k:1.2,hold:4.5,d:1.8,rv:.6});tone(S,t,164.8,{a:.022,k:1.6,hold:4,d:1.8,rv:.6});tone(S,t+2.5,220,{a:.015,k:1.5,hold:2,d:1.5,rv:.6});

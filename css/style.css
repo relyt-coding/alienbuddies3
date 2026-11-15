@@ -2662,3 +2662,8 @@ body.desktop-mode.bunker-open #partyBtn.pb-split{display:inline-flex !important;
 .keys-switch-seq button{font-family:'Bebas Neue',sans-serif;font-size:.9rem;letter-spacing:.1em;line-height:1;padding:.3rem .55rem;border:0;border-radius:6px;background:transparent;color:#7d72b0;cursor:pointer;touch-action:manipulation;}
 .keys-switch-seq button.on{background:#6b55d9;color:#fff;}
 body.phone-land .keys-switch-seq button{font-size:.72rem;padding:.2rem .42rem;}
+
+/* v0.2.145: EDIT PADS stays hidden until the 4th pad is unlocked, then pops in */
+body.edit-pads-locked #padEditToggleBtn,body.edit-pads-locked #padEditBtn{display:none!important;}
+body.edit-pads-reveal #padEditToggleBtn{animation:editPadsPopIn .65s cubic-bezier(.3,1.6,.5,1) both;}
+@keyframes editPadsPopIn{0%{opacity:0;transform:scale(.2);}60%{opacity:1;}100%{opacity:1;transform:none;}}

@@ -220,10 +220,24 @@
     if(ready!==tzReady){tzReady=ready;tz.classList.toggle('ready',ready);if(ready)startChase();else stopChase();}
   }
 
+  // ══════════ EDIT PADS: hidden until the 4th pad is unlocked (v0.2.145) ══════════
+  // Pads 1–3 come with their sounds already set, so there's nothing to edit until the 4th (blank) pad arrives.
+  // When it does, EDIT PADS pops in with the same bounce as BUNKER / SHOP.
+  let editWasLocked=null;
+  function applyEditLock(){
+    const lock=typeof drum!=='undefined'&&drum.pads<4;
+    if(lock===editWasLocked)return;
+    if(lock){B.add('edit-pads-locked');if(typeof padEditMode!=='undefined'&&padEditMode&&typeof exitPadEditMode==='function')exitPadEditMode();}
+    else{B.remove('edit-pads-locked');
+      if(editWasLocked&&active()){B.remove('edit-pads-reveal');void document.body.offsetWidth;B.add('edit-pads-reveal');setTimeout(()=>B.remove('edit-pads-reveal'),1400);}}
+    editWasLocked=lock;
+    if(typeof fitPadAreaSoon==='function')fitPadAreaSoon();
+  }
+
   // ══════════ keep it all up to date ══════════
-  function tick(){try{applyNavLock();updateEgg();updateTeaser();paintGlows();}catch(e){console.warn('early game',e);}}
+  function tick(){try{applyNavLock();applyEditLock();updateEgg();updateTeaser();paintGlows();}catch(e){console.warn('early game',e);}}
   setInterval(tick,200);
   // right as a file opens, so the buttons never flash in for a moment
-  if(typeof startGame==='function'){const sg=startGame;window.startGame=function(){const r=sg.apply(this,arguments);eggPick=null;dealSeen=new Set();bunkerNew=false;tick();return r;};}
+  if(typeof startGame==='function'){const sg=startGame;window.startGame=function(){const r=sg.apply(this,arguments);eggPick=null;dealSeen=new Set();bunkerNew=false;editWasLocked=null;tick();return r;};}
   window.addEventListener('resize',()=>{if(eggOn)placeEgg();});
 })();

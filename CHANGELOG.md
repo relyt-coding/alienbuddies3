@@ -2,6 +2,12 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.145 - 2026-11-15 09:30
+
+- EDIT PADS stays hidden until you unlock the 4th pad (the first one without a sound), then pops in.
+- Redrawn matching cards: the shooting star (a chunky rainbow swoosh with sparkles), the space helmet (dark star-reflecting visor, ear pieces, neck ring, so it no longer looks like an egg), the comet (icy head with a wide fanned tail instead of a lollipop) and the flask (solid glass, the neck no longer vanishes).
+- Naming a new buddy is quicker: NAME IT on a hatch goes straight to the name box with the keyboard up, and SAVE closes the card. (Opening a buddy from the bunker works as before.)
+
 ## v0.2.144 - 2026-11-15 08:32
 
 - NEW: the groove. The background hum now plays on the title screen too (from your first tap there). Once the kick pad is yours, it grows into a groove of soft keys and bass (no drums, those are yours) to jam along with on the drum pads. It plays at 100 BPM; once the sequencer is unlocked it follows its BPM and, while it plays, lands right on its steps. It changes key with you when you pick one in KEY.

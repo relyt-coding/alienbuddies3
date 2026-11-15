@@ -15,7 +15,8 @@
     cv=root.querySelector('#erCanvas');g=cv.getContext('2d');
     cv.addEventListener('pointerdown',e=>{e.preventDefault();tap();});
     root.querySelector('#erOk').onclick=close;
-    root.querySelector('#erName').onclick=()=>{const i=st&&st.idx;queue.length=0;close();if(i!=null&&typeof openAlienNameModal==='function')setTimeout(()=>openAlienNameModal(i),250);};
+    // opened inside the tap (no delay) so iPhone lets the name box bring the keyboard straight up
+    root.querySelector('#erName').onclick=()=>{const i=st&&st.idx;queue.length=0;close();if(i!=null&&typeof openAlienNameModal==='function')openAlienNameModal(i,{quick:true});};
   }
   // ── sounds (tiny synth, through the game's master volume) ──
   function sfx(kind){

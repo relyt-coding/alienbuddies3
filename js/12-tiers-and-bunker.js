@@ -346,14 +346,19 @@ function profileBuddyLoop(){
   (function f(now){if(alienProfileIdx===null)return;const t=(now-t0)/1000;g.setTransform(dpr,0,0,dpr,0,0);g.clearRect(0,0,S,S);
     drawBuddy(g,S/2,S*.53,S*.62,{view:'turn',angle:20+Math.sin(t*.35)*40,idx:alienProfileIdx,t,pulse:Math.pow(1-((t/.6)%1),3)});_profRaf=requestAnimationFrame(f);})(t0);
 }
-function openAlienNameModal(globalIdx){
-  alienProfileIdx=globalIdx;
+// opts.quick (straight from a hatch): skip the EDIT NAME step (the name box opens with the keyboard up) and SAVE
+// closes the card, so naming a new buddy is NAME IT → type → SAVE
+let anmQuick=false;
+function openAlienNameModal(globalIdx,opts){
+  alienProfileIdx=globalIdx;anmQuick=!!(opts&&opts.quick);
   alienNameModal.classList.add('open');
   document.body.classList.add('stats-open'); // hides the floating aliens so they never cover this window
   renderAlienProfile();
+  if(anmQuick)openAnmEdit();
 }
 
 function closeAlienNameModal(){
+  anmQuick=false;
   cancelAnimationFrame(_profRaf);
   alienNameModal.classList.remove('open');
   document.body.classList.remove('stats-open');
@@ -407,12 +412,13 @@ function saveAlienName(){
   }
 
   autoSave();
+  if(anmQuick){closeAlienNameModal();return;}
   if(typeof anmSmooth==='function')anmSmooth(renderAlienProfile);else renderAlienProfile();
 }
 
 // Nav arrows
-anmPrevBtn&&anmPrevBtn.addEventListener('click',()=>{if(alienProfileIdx>0){alienProfileIdx--;renderAlienProfile();}});
-anmNextBtn&&anmNextBtn.addEventListener('click',()=>{if(alienProfileIdx<totalAliens-1){alienProfileIdx++;renderAlienProfile();}});
+anmPrevBtn&&anmPrevBtn.addEventListener('click',()=>{anmQuick=false;if(alienProfileIdx>0){alienProfileIdx--;renderAlienProfile();}});
+anmNextBtn&&anmNextBtn.addEventListener('click',()=>{anmQuick=false;if(alienProfileIdx<totalAliens-1){alienProfileIdx++;renderAlienProfile();}});
 
 // Edit toggle
 function openAnmEdit(){

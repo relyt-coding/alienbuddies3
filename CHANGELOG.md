@@ -2,6 +2,10 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.151 - 2026-11-15 11:40
+
+- The Gem Buddy's eyes moved up into the top of the crystal, so it looks friendlier and less goofy.
+
 ## v0.2.150 - 2026-11-15 11:35
 
 - Alien Gems have their own look: the Gem Buddy, a green crystal with a little face and antennae with glowing pink bead tips (like Chloe's). It replaces the diamond everywhere: the shop, the bunker, the galaxy map, prices, rewards and messages.

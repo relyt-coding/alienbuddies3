@@ -32,10 +32,11 @@
     g.fillStyle='rgba(0,60,50,.3)';poly(g,[[50,92],[58,56],[86,56]]);g.fill();
     g.strokeStyle='rgba(20,60,50,.55)';g.lineWidth=2;g.beginPath();g.moveTo(14,56);g.lineTo(86,56);g.moveTo(42,56);g.lineTo(50,92);g.lineTo(58,56);g.moveTo(42,56);g.lineTo(50,38);g.lineTo(58,56);g.stroke();
     poly(g,P);ink(g,4);
-    // face
-    if(bl>.5){g.strokeStyle=INK;g.lineWidth=2.6;g.lineCap='round';[40,60].forEach(x=>{g.beginPath();g.moveTo(x-3.6,66);g.quadraticCurveTo(x,68.5,x+3.6,66);g.stroke();});}
-    else{g.fillStyle=INK;[40,60].forEach(x=>{g.beginPath();g.ellipse(x,66,3.6,3.6*(1-bl*1.6),0,0,TAU);g.fill();});
-      if(bl<.2){g.fillStyle='#fff';[41,61].forEach(x=>{g.beginPath();g.arc(x,65,1.2,0,TAU);g.fill();});}}
+    // face (v0.2.151: eyes sit up in the crown, above the girdle line)
+    const EY=o.eyeY||51;
+    if(bl>.5){g.strokeStyle=INK;g.lineWidth=2.6;g.lineCap='round';[40,60].forEach(x=>{g.beginPath();g.moveTo(x-3.6,EY);g.quadraticCurveTo(x,EY+2.5,x+3.6,EY);g.stroke();});}
+    else{g.fillStyle=INK;[40,60].forEach(x=>{g.beginPath();g.ellipse(x,EY,3.6,3.6*(1-bl*1.6),0,0,TAU);g.fill();});
+      if(bl<.2){g.fillStyle='#fff';[41,61].forEach(x=>{g.beginPath();g.arc(x,EY-1,1.2,0,TAU);g.fill();});}}
     g.restore();
   }
   window.drawAlienGem=drawGem;

@@ -118,19 +118,14 @@ function startGame(slotIndex){
   startGemInterval();
   if(!ambStarted)startAmbience();
   applyAmbienceLock();
-  // Restore BG music preference
-  if(data.musicOn===false){
-    musicOn=false;
-    const bgToggle=document.getElementById('bgMusicToggle');
-    const sbToggle=document.getElementById('settingsBgMusic');
-    if(bgToggle)bgToggle.checked=false;
-    if(sbToggle)sbToggle.checked=false;
-    if(ambGain){
-      const now=audioCtx.currentTime;
-      ambGain.gain.cancelScheduledValues(now);
-      ambGain.gain.setValueAtTime(0,now);
-    }
-  }
+  // Restore the groove (BG music) setting. Saves from before the groove had the hum switched off automatically when
+  // the sequencer unlocked (not by choice), so those get it back once.
+  {let on=data.musicOn!==false;
+    if(!on&&data.seqHasAutoMutedAmbience&&!data.grooveV)on=true;
+    musicOn=on;
+    ['bgMusicToggle','settingsBgMusic'].forEach(id=>{const t=document.getElementById(id);if(t)t.checked=on;});
+    if(ambGain&&audioCtx){const now=audioCtx.currentTime;ambGain.gain.cancelScheduledValues(now);ambGain.gain.setValueAtTime(on?AMB_LEVEL:0,now);}
+    if(typeof grooveRefresh==='function')grooveRefresh();}
   updateSoundboardUnlocked();
   updateBouncerToggleVisibility();
   // Show new game hint

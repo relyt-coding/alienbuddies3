@@ -63,21 +63,7 @@ function buySeqTrack(){
       const start=()=>{if(go)return;go=true;if(!seqPlaying&&drum.seqTracks>0)st();toast('🎛 Sequencer unlocked — every step now earns points! Click steps to set beats.');};
       playSeqUnlockFx(start);setTimeout(start,3500);}
     else startSeq();
-    // Auto-mute background ambience when sequencer first unlocks
-    if(!seqHasAutoMutedAmbience){
-      seqHasAutoMutedAmbience=true;
-      musicOn=false;
-      const bgToggle=document.getElementById('bgMusicToggle');
-      const sbToggle=document.getElementById('settingsBgMusic');
-      if(bgToggle)bgToggle.checked=false;
-      if(sbToggle)sbToggle.checked=false;
-      if(ambGain){
-        const now=audioCtx.currentTime;
-        ambGain.gain.cancelScheduledValues(now);
-        ambGain.gain.setValueAtTime(ambGain.gain.value,now);
-        ambGain.gain.linearRampToValueAtTime(0,now+2);
-      }
-    }
+    // (the background groove keeps playing: it now follows the sequencer's BPM and steps; ♪ GROOVE next to VIEW turns it off)
     applyAmbienceLock();
     if(typeof playSeqUnlockFx!=='function')showToast('🎛 Sequencer unlocked — every step now earns points! Click steps to set beats.');
   }else{

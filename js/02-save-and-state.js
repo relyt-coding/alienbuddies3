@@ -57,6 +57,7 @@ function autoSave(){
     automation:(typeof automationSave==='function')?automationSave():undefined,
     seqHasAutoMutedAmbience,
     musicOn,
+    grooveV:1,
     shownHints,
     hasReceivedEgg,
     alienGems,

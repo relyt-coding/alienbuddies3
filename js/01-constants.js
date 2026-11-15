@@ -125,6 +125,7 @@ function soundLibCost(idx){
   // idx 0 = 5,000, idx 1 = 50,000, idx 2 = 500,000, each ×10 after
   let c=5000;
   for(let i=0;i<idx;i++) c*=10;
+  if(idx<20)c/=2;   // the first 20 instruments are half price: lots of new sounds to play with early on
   return _disc(bump30(c));
 }
 

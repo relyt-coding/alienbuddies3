@@ -73,14 +73,10 @@ document.getElementById('saveQuitBtn')&&document.getElementById('saveQuitBtn').a
   else location.reload();
 });
 
-// Once the sequencer is unlocked the background ambience is switched off for good and its setting disappears
+// (the background hum / groove used to be switched off for good once the sequencer unlocked; now it follows the
+//  sequencer, and its setting stays: GROOVE in Settings and the soundboard, plus ♪ GROOVE next to VIEW)
 function applyAmbienceLock(){
-  const locked=typeof drum!=='undefined'&&drum.seqTracks>=1;
-  ['settingsBgMusicRow','bgMusicToggleRow'].forEach(id=>{const r=document.getElementById(id);if(r)r.style.display=locked?'none':'';});
-  if(!locked)return;
-  musicOn=false;
-  ['bgMusicToggle','settingsBgMusic'].forEach(id=>{const t=document.getElementById(id);if(t)t.checked=false;});
-  if(ambGain&&audioCtx){const now=audioCtx.currentTime;ambGain.gain.cancelScheduledValues(now);ambGain.gain.setValueAtTime(ambGain.gain.value,now);ambGain.gain.linearRampToValueAtTime(0,now+(ambGain.gain.value>0.001?2:0.01));}
+  ['settingsBgMusicRow','bgMusicToggleRow'].forEach(id=>{const r=document.getElementById(id);if(r)r.style.display='';});
 }
 const bgMusicToggleEl=document.getElementById('bgMusicToggle');
 bgMusicToggleEl&&bgMusicToggleEl.addEventListener('change',()=>{

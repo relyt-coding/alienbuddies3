@@ -625,14 +625,15 @@ function startAmbience(){
   if(ambStarted)return;ambStarted=true;
   const ctx=getCtx();
   const droneG=ctx.createGain();droneG.gain.value=.08;droneG.connect(ambGain);
-  const drone=ctx.createOscillator();drone.type='sine';drone.frequency.value=36;
+  const drone=ctx.createOscillator();drone.type='sine';drone.frequency.value=41.2;   // E1 (the hum sits in A, like the groove)
   const wob=ctx.createOscillator();wob.frequency.value=.07;const wobG=ctx.createGain();wobG.gain.value=.8;
   wob.connect(wobG);wobG.connect(drone.frequency);wob.start();drone.start();drone.connect(droneG);
   const padG=ctx.createGain();padG.gain.value=0;padG.connect(ambGain);
   const padFilt=ctx.createBiquadFilter();padFilt.type='bandpass';padFilt.frequency.value=800;padFilt.Q.value=.7;padFilt.connect(padG);
   const lfoF=ctx.createOscillator();lfoF.frequency.value=.13;const lfoFG=ctx.createGain();lfoFG.gain.value=300;
   lfoF.connect(lfoFG);lfoFG.connect(padFilt.frequency);lfoF.start();
-  [183.8,184.6,245.5,246.2].forEach(f=>{const o=ctx.createOscillator();o.type='sine';o.frequency.value=f;const g=ctx.createGain();g.gain.value=.18;o.connect(g);g.connect(padFilt);o.start();});
+  const _pads=[];[164.8,165.6,220,220.8].forEach(f=>{const o=ctx.createOscillator();o.type='sine';o.frequency.value=f;const g=ctx.createGain();g.gain.value=.18;o.connect(g);g.connect(padFilt);o.start();_pads.push([o,f]);});
+  window._humOsc={drone:[drone,41.2],pads:_pads,ctx};   // the groove retunes these when the song key changes (js/67-groove.js)
   padG.gain.setValueAtTime(0,ctx.currentTime);padG.gain.linearRampToValueAtTime(.22,ctx.currentTime+6);
   const noiseG=ctx.createGain();noiseG.gain.value=0;noiseG.connect(ambGain);
   const nbuf=ctx.createBuffer(1,ctx.sampleRate*3,ctx.sampleRate);const nd=nbuf.getChannelData(0);for(let i=0;i<nd.length;i++)nd[i]=Math.random()*2-1;

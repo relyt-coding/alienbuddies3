@@ -60,10 +60,12 @@ function placeViewButtons(){
     vtbViewBtn.className='seq-save-pat-btn';
     if(vtbKeyBtn){targetRow.insertBefore(vtbKeyBtn,vtbViewBtn.nextSibling);vtbKeyBtn.className='seq-save-pat-btn';}
     if(vtbFxBtn&&vtbKeyBtn){targetRow.insertBefore(vtbFxBtn,vtbKeyBtn.nextSibling);vtbFxBtn.className='seq-save-pat-btn';}
+    {const gb=document.getElementById('vtbGrooveBtn');if(gb){targetRow.insertBefore(gb,vtbViewBtn.nextSibling);gb.className='seq-save-pat-btn';}}   // ♪ GROOVE right next to VIEW
     viewToggleBar.style.display='none';
   }else{
     viewToggleBar.appendChild(vtbViewBtn);
     vtbViewBtn.className='vtb-btn';
+    {const gb=document.getElementById('vtbGrooveBtn');if(gb){viewToggleBar.appendChild(gb);gb.className='vtb-btn';}}
     if(vtbKeyBtn){viewToggleBar.appendChild(vtbKeyBtn);vtbKeyBtn.className='vtb-btn';}
     if(vtbFxBtn){viewToggleBar.appendChild(vtbFxBtn);vtbFxBtn.className='vtb-btn';}
     viewToggleBar.style.display=drum.seqTracks?'':'none';
@@ -753,6 +755,7 @@ function seqRunStep(quiet,delayMs,audioAt){
   delayMs=delayMs||0;
   const _at=(audioAt!==undefined)?audioAt:Tnow()+delayMs/1000; // audio-clock time this step should sound
   window._seqMark={st:seqStep,at:_at};   // party styles read this to hop on the real beat (js/36)
+  if(!quiet&&typeof grooveSeqStep==='function')grooveSeqStep(seqMode==='pattern'?seqStep:seqMode==='arrange'?arrBarStep:songArrBarStep,_at);
   const later=fn=>{if(delayMs>6)setTimeout(fn,delayMs);else fn();};
   // while vocals are recording the sequencer is in "studio time": it doesn't score (and doesn't use energy)
   if(!(typeof voxIsRecording==='function'&&voxIsRecording()))scoreSeqStep(quiet);

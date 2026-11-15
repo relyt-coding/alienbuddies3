@@ -2596,3 +2596,7 @@ body.phone-land #padEgg .pe-tag{font-size:12px;padding:2px 6px 1px;}
 body.phone-land #padEgg .pe-glow{width:60px;height:60px;margin:-30px 0 0 -30px;}
 body.phone-land #padEgg{flex-direction:row-reverse;align-items:center;gap:3px;}
 body.phone-land #padEgg .pe-tag{margin-top:0;}
+
+/* ♪ GROOVE (next to VIEW): lit while the background groove is on */
+#vtbGrooveBtn[data-on="1"]{color:#7dffc4 !important;border-color:rgba(68,238,187,.65) !important;box-shadow:0 0 10px -3px rgba(68,238,187,.6);}
+#vtbGrooveBtn[data-on="0"]{opacity:.6;}

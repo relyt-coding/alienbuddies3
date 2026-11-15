@@ -138,13 +138,13 @@ function updateOnboardingArrows(){
       arrowAct.style.display='none';
     }
   }
-  // Arrow pointing at SHOP button — shows at 1500pts if shop never opened
+  // Arrow pointing at SHOP button — shows at 50,000 pts if the shop still hasn't been opened
   const arrowShop=document.getElementById('arrowShop');
   // On desktop, point at the collapse/sidebar button instead
   const isDesktop=document.body.classList.contains('desktop-mode');
   const shopBtn=isDesktop?document.getElementById('collapseShopBtn'):document.getElementById('openStoreBtn');
   if(arrowShop){
-    if(shopOpenCount===0&&score>=1500&&shopBtn&&!document.body.classList.contains('nav-locked')){
+    if(shopOpenCount===0&&score>=50000&&shopBtn&&!document.body.classList.contains('nav-locked')){
       const rect=shopBtn.getBoundingClientRect();
       arrowShop.style.display='flex';
       if(isDesktop){

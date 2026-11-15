@@ -2,6 +2,13 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.142 - 2026-11-14 21:27
+
+- NEW: FILL boxes in the sequencer's sound picker (tap a track's name) to quick-start a beat with that track's sound. 1 fills steps 1, 5, 9, 13, 2 fills 2, 6, 10, 14, 3 and 4 the same way, and ALL fills every step. Works with 32 and 64 step loops too. A box lights up when its steps are all on; press it again to take them back out. The picker stays open so you can stack them (1 + 3 for a kick on the 1s and 3s).
+- Unlocking 32 or 64 STEPS no longer changes your loop length, so the beat you have stays as it is. Switch whenever you like with the STEPS button.
+- The title screen now checks for a newer version (after Save and Exit, when you come back to the tab, or when the page loads) and reloads into it, so a tab left open for days doesn't miss new features like the new-file intro. It never reloads during play.
+- The sound picker opens above the track's name if there isn't room below, and picking a sound after changing the filter in the full-screen sequencer works again.
+
 ## v0.2.141 - 2026-11-14 18:53
 
 - Settings: VIEW is now a single OPEN button, with a line under it saying what's on screen right now (for example TRACKERS · SEQUENCER · DRUM PADS). It opens a VIEW panel with big, easy-to-tap rows for everything the VIEW button by the sequencer has: trackers, sequencer, pads / keys (drum pads or buddy keys) and step counts with their options. BACK returns to Settings. Both always match.

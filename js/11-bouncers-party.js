@@ -287,12 +287,12 @@ addEventListener('resize',()=>{_bbCache=null;});
 let partyBeat=0;
 const partyOverlay=document.getElementById('partyOverlay');
 const partyBtn=document.getElementById('partyBtn');
-function startParty(){partyMode=true;partyBtn.classList.add('active');partyBtn.textContent='STOP PARTY';
+function startParty(){partyMode=true;partyBtn.classList.add('active');if(typeof paintPartyBtn==='function')paintPartyBtn();else partyBtn.textContent='STOP PARTY';
   if(typeof partyStyleOn==='function')partyStyleOn();
   if(typeof bouncerMode!=='undefined'&&bouncerMode!=='all'){setBouncerMode('all');showToast('🛸 Aliens are back for the party!');}} // hidden buddies come back out for a party
 function stopParty(){
   if(typeof partyStyleOff==='function')partyStyleOff(); // settle aliens where the dance left them
-  partyMode=false;partyBtn.classList.remove('active');partyBtn.textContent='ALIEN PARTY';
+  partyMode=false;partyBtn.classList.remove('active');if(typeof paintPartyBtn==='function')paintPartyBtn();else partyBtn.textContent='ALIEN PARTY';
   // Reset all bouncers to their base filter/transform
   bouncers.forEach(b=>{setHalo(b,0);b.el.style.filter=b._baseFilter;b._scale=1;b.el.style.transform=`translate(${b.x}px,${b.y}px) scale(1)`;if(b._partyTimeout){clearTimeout(b._partyTimeout);b._partyTimeout=null;}});
   partyOverlay.classList.remove('active');partyOverlay.style.opacity='0';
@@ -326,8 +326,9 @@ function partyPulseOnBeat(id,trackIdx,vel){
     requestAnimationFrame(step);
   });
 }
-partyBtn.addEventListener('click',toggleParty);
-partyBtn.addEventListener('touchend',e=>{e.preventDefault();toggleParty();});
+// (js/36: start with the disco ball, tap the style to switch it, STOP to end)
+partyBtn.addEventListener('click',e=>{if(typeof partyBtnPress==='function')partyBtnPress(e);else toggleParty();});
+partyBtn.addEventListener('touchend',e=>{e.preventDefault();if(typeof partyBtnPress==='function')partyBtnPress(e);else toggleParty();});
 
 // ── watchdog: every 5 seconds, put back any alien that should be on screen but isn't ──
 setInterval(()=>{

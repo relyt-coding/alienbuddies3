@@ -242,10 +242,10 @@
       let fx=document.getElementById('partyFx');
       if(!fx){fx=document.createElement('div');fx.id='partyFx';fx.innerHTML='<canvas></canvas>';document.body.appendChild(fx);
         const skip=e=>{if(e&&e.cancelable)e.preventDefault();if(P&&(performance.now()-P.t0)*P.sp>500)endParty();};fx.addEventListener('pointerdown',skip);fx.addEventListener('touchstart',skip,{passive:false});}
+      if(P)endParty();
       const cv=fx.querySelector('canvas'),g=cv.getContext('2d'),W=window.innerWidth,H=window.innerHeight,U=Math.min(W,H),dpr=Math.min(2,window.devicePixelRatio||1);
       cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);cv.style.width=W+'px';cv.style.height=H+'px';
-      const spots=[];for(let i=0;i<34;i++)spots.push({a:Math.random()*6.3,r:Math.random(),v:.4+Math.random()*.8,h:Math.floor(Math.random()*360),s:.6+Math.random()*.8});
-      P={t0:performance.now(),sp,g,W,H,U,dpr,spots,onDone,partyOn:false,landed:false};
+      P=Object.assign({t0:performance.now(),sp,g,W,H,U,dpr,spots:mkSpots(),onDone,partyOn:false,landed:false,fx},MODES.unlock);
       fx.classList.add('on');
       snd((S,t)=>{const{tone,noise,inst}=K;
         noise(S,t,{f0:3000,f1:300,q:2,a:.08,d:.3});tone(S,t,900,{f1:180,gl:.3,a:.05,d:.2});   // a record scratch into the drop
@@ -259,16 +259,39 @@
     },sp);
   };
   let P=null;
-  const PDUR=4.0,LAND=3.4,BALL_C=['#ff5fb8','#3fe6ff','#ffd23f','#5fe07a','#b38cff','#ff8a3d'];
+  const BALL_C=['#ff5fb8','#3fe6ff','#ffd23f','#5fe07a','#b38cff','#ff8a3d'];
+  // unlock: the full show (dims the screen, runs a short party with its own groove, the button lands at the end)
+  // start: every time you press ALIEN PARTY — the ball drops and lights up the room while your party gets going
+  //        (lighter, shorter, never in the way of your taps, and it lifts away by itself)
+  const MODES={
+    unlock:{mode:'unlock',ballY:.17,dimMax:.5,drop0:.05,drop1:.55,up0:2.85,up1:3.35,on0:.45,on1:.65,off0:2.8,off1:3.3,dim0:2.9,dim1:3.4,dur:4.0,land:3.4},
+    start: {mode:'start', ballY:.095,dimMax:.2,drop0:0,  drop1:.5, up0:2.45,up1:2.95,on0:.35,on1:.55,off0:2.35,off1:2.85,dim0:2.35,dim1:2.85,dur:3.0,land:1e9},
+  };
+  function mkSpots(){const a=[];for(let i=0;i<34;i++)a.push({a:Math.random()*6.3,r:Math.random(),v:.4+Math.random()*.8,h:Math.floor(Math.random()*360),s:.6+Math.random()*.8});return a;}
+  window.playPartyStartFx=function(o){
+    const sp=(o&&o.speed)||1;
+    let fx=document.getElementById('partyFxStart');
+    if(!fx){fx=document.createElement('div');fx.id='partyFxStart';fx.innerHTML='<canvas></canvas>';(document.getElementById('gameScreen')||document.body).appendChild(fx);}
+    if(P)endParty();
+    const cv=fx.querySelector('canvas'),g=cv.getContext('2d'),W=window.innerWidth,H=window.innerHeight,U=Math.min(W,H),dpr=Math.min(2,window.devicePixelRatio||1);
+    cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);cv.style.width=W+'px';cv.style.height=H+'px';
+    P=Object.assign({t0:performance.now(),sp,g,W,H,U,dpr,spots:mkSpots(),onDone:null,partyOn:true,partyOff:true,landed:true,fx},MODES.start);
+    fx.classList.add('on');
+    // a sparkly swoop as the ball drops in
+    snd((S,t)=>{const{tone,noise}=K;noise(S,t,{f0:5000,f1:1200,q:1.5,a:.03,k:.6,d:.25});tone(S,t,1400,{f1:700,gl:.45,a:.025,d:.1});
+      [1318.5,1568,2093,2637].forEach((f,i)=>tone(S,t+.5+i*.06,f,{a:.022,d:.5,rv:.6}));},.8);
+    P.raf=requestAnimationFrame(partyFrame);
+  };
   function partyFrame(now){
     if(!P)return;P.raf=requestAnimationFrame(partyFrame);
-    const t=(performance.now()-P.t0)/1000*P.sp,{g,W,H,U}=P,dim=ss(0,.4,t)*(1-ss(2.9,3.4,t)),drop=eBack(ss(.05,.55,t))*(1-eOut(ss(2.85,3.35,t))),bx=W/2,by=lerp(-U*.2,H*.17,drop),br=U*.085;
+    const t=(performance.now()-P.t0)/1000*P.sp,{g,W,H,U}=P,dim=ss(0,.4,t)*(1-ss(P.dim0,P.dim1,t)),drop=eBack(ss(P.drop0,P.drop1,t))*(1-eOut(ss(P.up0,P.up1,t))),bx=W/2,by=lerp(-U*.2,H*P.ballY,drop),br=U*.085;
+    if(P.mode==='start'&&typeof partyMode!=='undefined'&&!partyMode&&t>.1){endParty();return;}   // stopped the party: lights off
     g.setTransform(P.dpr,0,0,P.dpr,0,0);g.clearRect(0,0,W,H);
-    g.fillStyle=`rgba(4,2,12,${.5*dim})`;g.fillRect(0,0,W,H);
+    g.fillStyle=`rgba(4,2,12,${P.dimMax*dim})`;g.fillRect(0,0,W,H);
     if(t>.45&&!P.partyOn){P.partyOn=true;P.wasParty=typeof partyMode!=='undefined'&&partyMode;if(!P.wasParty&&typeof startParty==='function')try{startParty();}catch(e){}}
     if(t>3.25&&!P.partyOff){P.partyOff=true;if(!P.wasParty&&typeof stopParty==='function')try{stopParty();}catch(e){}}
     // beams and light spots from the ball
-    const on=ss(.45,.65,t)*(1-ss(2.8,3.3,t));
+    const on=ss(P.on0,P.on1,t)*(1-ss(P.off0,P.off1,t));
     if(on>0){g.globalCompositeOperation='lighter';
       for(let i=0;i<6;i++){const a=i/6*Math.PI*2+t*.9,L=Math.hypot(W,H),c=BALL_C[i],ex=bx+Math.cos(a)*L,ey=by+Math.sin(a)*L;const gr=g.createLinearGradient(bx,by,ex,ey);gr.addColorStop(0,c+'55');gr.addColorStop(1,c+'00');g.fillStyle=gr;g.globalAlpha=on;
         const w=.07;g.beginPath();g.moveTo(bx,by);g.lineTo(bx+Math.cos(a-w)*L,by+Math.sin(a-w)*L);g.lineTo(bx+Math.cos(a+w)*L,by+Math.sin(a+w)*L);g.fill();}
@@ -283,12 +306,12 @@
       const hl=g.createRadialGradient(bx-br*.35,by-br*.4,0,bx-br*.35,by-br*.4,br*.8);hl.addColorStop(0,'rgba(255,255,255,.55)');hl.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=hl;g.fillRect(bx-br,by-br,br*2,br*2);g.restore();
       for(let i=0;i<5;i++){const a=t*2+i*1.3,s=(Math.sin(t*6+i*2)+1)/2;if(s<.6)continue;const x=bx+Math.cos(a)*br*1.05,y=by+Math.sin(a)*br*1.05;g.fillStyle=`rgba(255,255,255,${s})`;g.beginPath();g.moveTo(x,y-6*s);g.lineTo(x+1.5,y);g.lineTo(x,y+6*s);g.lineTo(x-1.5,y);g.fill();g.beginPath();g.moveTo(x-6*s,y);g.lineTo(x,y+1.5);g.lineTo(x+6*s,y);g.lineTo(x,y-1.5);g.fill();}}
     // the ALIEN PARTY button lands
-    if(t>LAND&&!P.landed){P.landed=true;const b=document.getElementById('partyBtn');if(b){b.classList.remove('pb-land');void b.offsetWidth;b.classList.add('pb-land');setTimeout(()=>b.classList.remove('pb-land'),3200);}}
-    if(t>PDUR)endParty();
+    if(t>P.land&&!P.landed){P.landed=true;const b=document.getElementById('partyBtn');if(b){b.classList.remove('pb-land');void b.offsetWidth;b.classList.add('pb-land');setTimeout(()=>b.classList.remove('pb-land'),3200);}}
+    if(t>P.dur)endParty();
   }
   function endParty(){
     if(!P)return;const p=P;P=null;cancelAnimationFrame(p.raf);
-    const fx=document.getElementById('partyFx');if(fx)fx.classList.remove('on');
+    if(p.fx)p.fx.classList.remove('on');
     if(p.partyOn&&!p.partyOff&&!p.wasParty&&typeof stopParty==='function')try{stopParty();}catch(e){}
     if(!p.landed){const b=document.getElementById('partyBtn');if(b){b.classList.add('pb-land');setTimeout(()=>b.classList.remove('pb-land'),3200);}}
     p.onDone&&p.onDone();

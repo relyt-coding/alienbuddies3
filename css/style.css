@@ -2601,3 +2601,51 @@ body.phone-land #padEgg .pe-tag{margin-top:0;}
 #vtbGrooveBtn[data-on="1"]{color:#7dffc4 !important;border-color:rgba(68,238,187,.65) !important;box-shadow:0 0 10px -3px rgba(68,238,187,.6);}
 #vtbGrooveBtn[data-on="0"]{opacity:.6;}
 #vtbGrooveBtn{flex:0 0 auto;min-width:2.4em;font-size:1.05rem;line-height:1;padding-left:.55rem;padding-right:.55rem;font-family:system-ui,-apple-system,'Segoe UI',sans-serif;}
+
+/* ═══════ ALIEN PARTY card: same build as PET ALIEN BUDDY beside it, so they line up (same height, prices on one line) ═══════ */
+body.shop-b .shop-shelf #alienBuyBtn,body.shop-b .shop-shelf #partyStoreCard{align-self:stretch;}
+body.shop-b .shop-shelf #alienBuyBtn .alien-card-price,body.shop-b .shop-shelf #partyStoreCard .alien-card-price{margin-top:auto;}
+.party-store-card{position:relative;overflow:hidden;background:linear-gradient(155deg,#2b0a2c 0%,#170619 55%,#0e0412 100%);border-color:#4a1a4a;}
+.party-store-card::before{content:'';position:absolute;top:-30%;right:-20%;width:90%;height:120%;pointer-events:none;opacity:.55;
+  background:conic-gradient(from 200deg at 78% 18%,rgba(255,95,184,0) 0deg,rgba(255,95,184,.22) 12deg,rgba(255,95,184,0) 24deg,rgba(63,230,255,.18) 40deg,rgba(63,230,255,0) 52deg,rgba(255,210,63,.16) 68deg,rgba(255,210,63,0) 80deg);}
+.party-store-card .alien-card-info{position:relative;z-index:1;padding-right:34px;}
+.party-store-card .alien-card-name{color:#ff6ee6;text-shadow:0 0 10px rgba(255,80,220,.45);}
+.party-store-card .alien-card-stats{color:#9a5a96;}
+.party-store-card .alien-card-stats span{color:#ffa6f2;}
+.party-store-card .psc-next{font-family:'Bebas Neue',sans-serif;font-size:.95rem;letter-spacing:.08em;line-height:1.1;color:#e9d2ff;margin-top:.15rem;}
+.party-store-card .alien-card-price{position:relative;z-index:1;color:#ff6ee6;}
+.party-store-card .alien-card-price small{color:#8a4a86;}
+.party-store-card .alien-card-price.cant-afford{color:#ff4444;}
+.party-store-card .alien-card-price.cant-afford small{color:#663333;}
+.party-store-card.buyable{border-color:#ff44dd;box-shadow:0 0 16px -5px rgba(255,68,221,.75),inset 0 1px 0 rgba(255,255,255,.08);}
+.party-store-card.buyable:active{background:linear-gradient(155deg,#3a0e3c 0%,#200822 55%,#140618 100%);}
+.party-store-card.locked{opacity:.72;}
+.party-store-card.maxed{cursor:default;border-color:#6a2a66;}
+/* a little disco ball hanging in the corner */
+.psc-ball{position:absolute;top:16px;right:12px;width:26px;height:26px;border-radius:50%;z-index:1;
+  background:radial-gradient(circle at 34% 30%,rgba(255,255,255,.95) 0 9%,rgba(255,255,255,0) 32%),
+    repeating-linear-gradient(0deg,rgba(20,10,40,.35) 0 1px,transparent 1px 4.4px),
+    repeating-linear-gradient(90deg,rgba(20,10,40,.35) 0 1px,transparent 1px 4.4px),
+    radial-gradient(circle at 45% 40%,#f2f0ff 0%,#b9b6dc 45%,#5a5682 100%);
+  box-shadow:0 0 10px rgba(255,140,240,.55);animation:pscSpin 3s linear infinite;}
+.psc-ball::before{content:'';position:absolute;left:50%;bottom:100%;width:1px;height:16px;margin-left:-.5px;background:rgba(220,210,255,.55);}
+.psc-ball::after{content:'';position:absolute;top:3px;left:15px;width:4px;height:4px;border-radius:50%;background:#fff;box-shadow:0 0 6px 2px #fff;animation:pscTwinkle 1.6s ease-in-out infinite;}
+@keyframes pscSpin{to{background-position:0 0,4.4px 0,0 4.4px,0 0;filter:hue-rotate(0deg);}}
+@keyframes pscTwinkle{0%,100%{opacity:0;transform:scale(.4);}50%{opacity:1;transform:scale(1);}}
+
+/* ═══════ the party button during a party: [ STYLE ▸ | STOP ] in one bubble ═══════ */
+#partyBtn.pb-split{display:none;align-items:center;white-space:nowrap;}
+#partyBtn.pb-split.visible{display:inline-flex;}
+#partyBtn .pb-style{padding-right:.6rem;margin-right:.6rem;border-right:1.5px solid rgba(255,102,255,.45);}
+#partyBtn.pb-multi .pb-style{color:#ffd2ff;}
+#partyBtn .pb-stop{color:#ff9cf0;}
+body.desktop-mode.bunker-open #partyBtn.pb-split{display:inline-flex !important;}
+#partyStyleBtn{display:none !important;}
+
+/* the disco ball that drops in when you start a party (under the party button, never in the way of taps) */
+#partyFxStart{position:fixed;top:0;right:0;bottom:0;left:0;z-index:49;display:none;pointer-events:none;}
+#partyFxStart.on{display:block;}
+#partyFxStart canvas{display:block;}
+#partyBtn.pb-split{padding-left:.8rem;padding-right:.8rem;}
+#partyBtn.pb-tight{font-size:.82rem;padding:.48rem .6rem;}
+#partyBtn.pb-tight .pb-style{padding-right:.42rem;margin-right:.42rem;}

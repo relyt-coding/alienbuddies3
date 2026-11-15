@@ -37,8 +37,14 @@ function partyOwnedStyles(){return PARTY_LADDER.slice(0,Math.max(0,shop.partyLev
       <div class="drum-price" id="${id}Price"></div></div>`;
     return d;
   }
-  // party card goes right under PET ALIEN BUDDY; sequencer upgrades right under the Sequencer card
-  const partyCard=card('partyStoreCard','ALIEN PARTY','Party modes for your aliens');
+  // party card sits right beside PET ALIEN BUDDY, built the same way so the two line up (with a little disco ball);
+  // sequencer upgrades right under the Sequencer card
+  const partyCard=document.createElement('div');partyCard.className='alien-store-card party-store-card';partyCard.id='partyStoreCard';
+  partyCard.innerHTML=`<span class="psc-ball" aria-hidden="true"></span>
+    <div class="alien-card-info"><div class="alien-card-name">ALIEN PARTY</div>
+      <div class="alien-card-stats">STYLES: <span id="partyStoreCardNum">0</span>/${PARTY_LADDER.length}</div>
+      <div class="psc-next" id="partyStoreCardMain"></div></div>
+    <div class="alien-card-price" id="partyStoreCardPrice"></div>`;
   const ab=$('alienBuyBtn');if(ab)ab.after(partyCard);
   const seqUpCard=card('seqUpCard','🎚 SEQUENCER UPGRADES','New controls for your sequencer');
   const sc=$('seqCard');if(sc)sc.after(seqUpCard);
@@ -60,7 +66,13 @@ function partyOwnedStyles(){return PARTY_LADDER.slice(0,Math.max(0,shop.partyLev
     if(!shop.partySeen&&score>=PARTY_REVEAL_AT)shop.partySeen=true;
     const pl=shop.partyLevel||0;
     partyCard.style.display=(shop.partySeen||pl>0)?'':'none';
-    paint('partyStoreCard',pl,PARTY_LADDER.length,'STYLES',PARTY_LADDER[pl],'EVERY PARTY STYLE','All '+PARTY_LADDER.length+' styles unlocked · switch with the chip next to ALIEN PARTY');
+    {const next=PARTY_LADDER[pl],can=!!next&&score>=next.cost;
+      $('partyStoreCardNum').textContent=pl;
+      $('partyStoreCardMain').textContent=!next?'EVERY STYLE':pl===0?'UNLOCK THE PARTY':'NEXT: '+next.main;
+      partyCard.title=next?next.sub:'All '+PARTY_LADDER.length+' styles unlocked · tap the style on the party button to switch';
+      partyCard.className='alien-store-card party-store-card '+(!next?'maxed':can?'buyable':'locked');
+      const pr=$('partyStoreCardPrice');pr.className='alien-card-price'+(!next||can?'':' cant-afford');
+      pr.innerHTML=next?`${formatStore(next.cost)}<small>pts</small>`:'MAX';}
     // ── sequencer ──
     const sf=shop.seqFeat||0;
     seqUpCard.style.display=(typeof drum!=='undefined'&&drum.seqTracks>0)?'':'none';
@@ -73,7 +85,7 @@ function partyOwnedStyles(){return PARTY_LADDER.slice(0,Math.max(0,shop.partyLev
     if(typeof playSfxPurchase==='function')playSfxPurchase();if(typeof flashBuy==='function')flashBuy('#ff00cc');
     if(pl===0){const toast=showToast,msg=()=>toast('ALIEN PARTY unlocked! Tap the button to get your aliens dancing.');
       if(typeof playPartyUnlockFx==='function'){const fx=playPartyUnlockFx;setTimeout(()=>fx(msg),60);}else msg();}
-    else{showToast(next.main+' unlocked! Tap the style chip during a party to switch.');if(typeof setPartyStyle==='function'&&partyMode)setPartyStyle(next.style);}
+    else{showToast(next.main+' unlocked! During a party, tap the style name on the party button to switch.');if(typeof setPartyStyle==='function'&&partyMode)setPartyStyle(next.style);}
     if(typeof refreshPartyAccess==='function')refreshPartyAccess();
     if(typeof renderUI==='function')renderUI();else renderStoreUnlocks();
     if(typeof autoSave==='function')autoSave();
@@ -88,7 +100,7 @@ function partyOwnedStyles(){return PARTY_LADDER.slice(0,Math.max(0,shop.partyLev
     if(typeof renderUI==='function')renderUI();else renderStoreUnlocks();
     if(typeof autoSave==='function')autoSave();
   }
-  addEP('partyStoreCardBtn',buyParty);
+  addEP('partyStoreCard',buyParty);
   addEP('seqUpCardBtn',buySeqFeat);
   renderStoreUnlocks();
 })();

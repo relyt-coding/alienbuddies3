@@ -1,7 +1,8 @@
 
 // ══════════════════════════════════════════════
 //  ALIEN PARTY STYLES
-//  The party button starts a party in the last style; the chip next to it cycles styles.
+//  The party button starts a party in the last style (with a disco ball dropping in). During a party the button
+//  shows the style on its left (tap it to cycle styles) and STOP on its right: one bubble, no extra chip.
 //  GLOW is the original (aliens light up to the beat while bouncing around). Every other style
 //  takes over the aliens' positions and choreographs them to the music:
 //   EQ BARS       line up on the sequencer and rise and fall with the real audio spectrum
@@ -12,13 +13,13 @@
 //   PLANET HOP    run along the top of the sequencer like in Planet Hop: a hop every beat, a double jump on beat 4
 // ══════════════════════════════════════════════
 const PARTY_STYLES=[
-  {id:'glow',  icon:'✨',name:'GLOW'},
-  {id:'eq',    icon:'📊',name:'EQ BARS'},
-  {id:'orbit', icon:'🪩',name:'DISCO ORBIT'},
-  {id:'conga', icon:'🐍',name:'CONGA LINE'},
-  {id:'bounce',icon:'🤸',name:'BOUNCE HOUSE'},
-  {id:'galaxy',icon:'🌌',name:'GALAXY'},
-  {id:'hop',   icon:'🪐',name:'PLANET HOP'},
+  {id:'glow',  icon:'✨',name:'GLOW',        short:'GLOW'},
+  {id:'eq',    icon:'📊',name:'EQ BARS',     short:'EQ BARS'},
+  {id:'orbit', icon:'🪩',name:'DISCO ORBIT', short:'ORBIT'},
+  {id:'conga', icon:'🐍',name:'CONGA LINE',  short:'CONGA'},
+  {id:'bounce',icon:'🤸',name:'BOUNCE HOUSE',short:'BOUNCE'},
+  {id:'galaxy',icon:'🌌',name:'GALAXY',      short:'GALAXY'},
+  {id:'hop',   icon:'🪐',name:'PLANET HOP',  short:'HOP'},
 ];
 let partyStyle='glow';
 try{const v=localStorage.getItem('ab2_party_style');if(PARTY_STYLES.some(s=>s.id===v))partyStyle=v;}catch(e){}
@@ -28,44 +29,49 @@ try{const v=localStorage.getItem('ab2_party_style');if(PARTY_STYLES.some(s=>s.id
   const TAU=Math.PI*2;
   const layer=$('alienLayer');
 
-  // ── style chip next to the party button ──
-  const chip=document.createElement('button');
-  chip.type='button';chip.id='partyStyleBtn';
-  document.body.appendChild(chip);
+  // ── the party button: ALIEN PARTY, or during a party [ STYLE ▸ | STOP ] in the same bubble ──
   function styleObj(){return PARTY_STYLES.find(s=>s.id===partyStyle)||PARTY_STYLES[0];}
-  function paintChip(){const s=styleObj();chip.textContent=s.name+' ▸';chip.title='Change how the aliens party';}
   function owned(){return typeof partyOwnedStyles==='function'?partyOwnedStyles():PARTY_STYLES.map(s=>s.id);}
-  function placeChip(){
-    const pb=$('partyBtn');
-    if(!owned().includes(partyStyle)){partyStyle='glow';paintChip();}
-    const show=partyMode&&pb&&getComputedStyle(pb).display!=='none'&&owned().length>1;
-    chip.classList.toggle('show',!!show);
-    if(!show)return;
-    const r=pb.getBoundingClientRect();
-    chip.style.right=Math.max(4,innerWidth-r.right)+'px';chip.style.left='auto';
-    if(r.top>70){chip.style.top='auto';chip.style.bottom=(innerHeight-r.top+8)+'px';}
-    else{chip.style.bottom='auto';chip.style.top=(r.bottom+6)+'px';}
+  function paintBtn(){
+    const pb=$('partyBtn');if(!pb)return;
+    if(!owned().includes(partyStyle))partyStyle='glow';
+    if(!partyMode){if(pb.dataset.mode!=='idle'){pb.dataset.mode='idle';pb.textContent='ALIEN PARTY';pb.classList.remove('pb-split','pb-multi');}return;}
+    const s=styleObj(),multi=owned().length>1,key=s.id+(multi?'+':'');
+    if(pb.dataset.mode!==key){pb.dataset.mode=key;
+      pb.innerHTML='<span class="pb-style" data-act="style"></span><span class="pb-stop" data-act="stop">STOP</span>';
+      pb.querySelector('.pb-style').textContent=(s.short||s.name)+(multi?' ▸':'');
+      pb.classList.add('pb-split');pb.classList.toggle('pb-multi',multi);pb.classList.remove('pb-tight');
+      pb.title=s.name+(multi?' · tap the style to change it':'');}
+    // small phones: if it would run into EDIT PADS / SETTINGS on the same row, tighten it up
+    const r=pb.getBoundingClientRect();if(!r.width)return;
+    const hit=['padEditToggleBtn','settingsOpenBtn','socialsBtn'].some(id=>{const e=$(id);if(!e)return false;const q=e.getBoundingClientRect();return q.width&&q.bottom>r.top&&q.top<r.bottom&&q.right+6>r.left&&q.left<r.right;});
+    if(hit&&!pb.classList.contains('pb-tight'))pb.classList.add('pb-tight');
   }
   function setStyle(id){
     leaveStyle();
     partyStyle=id;try{localStorage.setItem('ab2_party_style',id);}catch(e){}
-    paintChip();
+    paintBtn();
     if(partyMode)enterStyle();
   }
-  chip.addEventListener('click',e=>{
-    e.stopPropagation();
+  function cycleStyle(){
     const list=PARTY_STYLES.filter(s=>owned().includes(s.id));
-    if(list.length<2)return;
-    const i=list.findIndex(s=>s.id===partyStyle);
-    const nx=list[(i+1)%list.length];
+    if(list.length<2)return false;
+    const i=list.findIndex(s=>s.id===partyStyle),nx=list[(i+1)%list.length];
     setStyle(nx.id);
     if(typeof showToast==='function')showToast('PARTY STYLE: '+nx.name);
-  });
-  paintChip();
-  window.setPartyStyle=function(id){setStyle(id);placeChip();};
-  window.refreshPartyAccess=function(){placeChip();};
-  setInterval(()=>{placeChip();},300);
-  addEventListener('resize',placeChip);
+    return true;
+  }
+  // a press: start the party (the disco ball drops in), switch style, or stop
+  window.partyBtnPress=function(e){
+    if(!partyMode){if(typeof startParty==='function')startParty();if(typeof playPartyStartFx==='function')try{playPartyStartFx();}catch(err){}return;}
+    const t=e&&e.target&&e.target.closest?e.target.closest('[data-act]'):null;
+    if(t&&t.dataset.act==='style'&&cycleStyle())return;
+    if(typeof stopParty==='function')stopParty();
+  };
+  window.paintPartyBtn=paintBtn;
+  window.setPartyStyle=function(id){setStyle(id);};
+  window.refreshPartyAccess=function(){paintBtn();};
+  setInterval(paintBtn,400);
 
   // ── audio analyser on the master output (only connected while a party style needs it) ──
   // v0.2.138: it listens to the MUSIC only — the mix right after the safety limiter, before the background ambience
@@ -151,8 +157,8 @@ try{const v=localStorage.getItem('ab2_party_style');if(PARTY_STYLES.some(s=>s.id
     if(typeof bouncerUnpose==='function')bouncerUnpose();   // running buddies go back to floating free
     clearFx();analyserOff();
   }
-  window.partyStyleOn=function(){enterStyle();placeChip();};
-  window.partyStyleOff=function(){leaveStyle();placeChip();};
+  window.partyStyleOn=function(){enterStyle();paintBtn();};
+  window.partyStyleOff=function(){leaveStyle();paintBtn();};
 
   // keep a ring/spiral of radius rx×ry fully on screen (its centre slides away from the edges as needed)
   function fitCenter(cx,cy,rx,ry,B,sz){

@@ -63,7 +63,7 @@ function buySeqTrack(){
       const start=()=>{if(go)return;go=true;if(!seqPlaying&&drum.seqTracks>0)st();toast('🎛 Sequencer unlocked — every step now earns points! Click steps to set beats.');};
       playSeqUnlockFx(start);setTimeout(start,3500);}
     else startSeq();
-    // (the background groove keeps playing: it now follows the sequencer's BPM and steps; ♪ GROOVE next to VIEW turns it off)
+    // (the background hum keeps playing; the old ♪ groove was removed in v0.2.157)
     applyAmbienceLock();
     if(typeof playSeqUnlockFx!=='function')showToast('🎛 Sequencer unlocked — every step now earns points! Click steps to set beats.');
   }else{

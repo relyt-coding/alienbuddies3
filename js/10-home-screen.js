@@ -129,14 +129,14 @@ function startGame(slotIndex){
   updateSoundboardUnlocked();
   updateBouncerToggleVisibility();
   // Show new game hint
-  // (a brand new file opens with the intro: the three pages come together, then the hi-hat hint)
+  // v0.2.157: EVERY time a file opens, the pages form (js/65 picks: just the drum pads before the first buddy, else
+  // bunker + drum pads + shop). A brand new file then gets the hi-hat hint.
   let introOn=false;
-  if(isNewFile){
-    const isMobile=!document.body.classList.contains('desktop-mode');
+  {const isMobile=!document.body.classList.contains('desktop-mode');
     const verb=isMobile?'Press':'Click';
-    const hint=()=>showToast(verb+' the Hi-Hat button to gain points!');
+    const hint=isNewFile?()=>showToast(verb+' the Hi-Hat button to gain points!'):()=>{};
     if(typeof playNewFileIntro==='function'&&!window.__noIntro&&!document.body.classList.contains('mobile-view-mode'))introOn=()=>{if(!playNewFileIntro({tuck:true,onDone:()=>setTimeout(hint,250)}))setTimeout(hint,500);};
-    else setTimeout(hint,800);
+    else if(isNewFile)setTimeout(hint,800);
   }
   // start sequencer if tracks exist
   if(drum.seqTracks>0&&!seqPlaying)startSeq();

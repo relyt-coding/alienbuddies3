@@ -168,6 +168,7 @@
   // the pages are in place: hand the real layout back (desktop: the sidebars tuck away, as on every new file)
   function assemble(){
     BC.remove('intro-run');
+    if(typeof floatBuddiesIn==='function')try{floatBuddiesIn();}catch(e){}   // buddies drift in from off screen
     ['b','h','s'].forEach(k=>{const e=document.getElementById(IDS[k]);if(!e)return;e.style.removeProperty('--itf');e.style.removeProperty('--itr');e.style.removeProperty('--ita');e.style.opacity='';e.style.transition='none';});
     void document.body.offsetWidth;['b','h','s'].forEach(k=>{const e=document.getElementById(IDS[k]);if(e)e.style.transition='';});
     cleanParts();

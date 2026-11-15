@@ -2,6 +2,11 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.157 - 2026-11-15 14:40
+- Every time you open a file, the pages come together again: the bunker, drum pads and shop once you've hatched a buddy, or just the drum pads before that.
+- Your buddies float in from off screen as the pages land, instead of already being there.
+- The background groove and its ♪ button are gone. The quiet background hum stays, with its switch in Settings (now called BACKGROUND HUM).
+
 ## v0.2.156 - 2026-11-15 14:30
 
 - The opening is shorter (about 3.5 seconds): on a new file only the DRUM PADS fly in and build themselves, then the camera zooms in.

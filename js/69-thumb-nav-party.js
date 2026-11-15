@@ -80,7 +80,7 @@ body.phone-land #partyTeaser .pt-tag{font-size:12px;padding:2px 6px 1px;}
   }
 
   // ══════════ the PARTY button + menu ══════════
-  const pb=$('partyBtn'),grooveBtn=$('vtbGrooveBtn');
+  const pb=$('partyBtn'),grooveBtn=$('vtbGrooveBtn')||$('vtbViewBtn');   // (♪ GROOVE was removed in v0.2.157: PARTY follows VIEW)
   if(pb&&grooveBtn&&grooveBtn.parentNode){pb.classList.add('pb-small');pb.style.cssText='';grooveBtn.parentNode.insertBefore(pb,grooveBtn.nextSibling);
     try{if(typeof paintPartyBtn==='function')paintPartyBtn();if(typeof placeViewButtons==='function')placeViewButtons();}catch(e){}}
   const menu=document.createElement('div');menu.id='partyMenu';document.body.appendChild(menu);

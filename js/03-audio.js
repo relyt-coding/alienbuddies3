@@ -633,7 +633,7 @@ function startAmbience(){
   const lfoF=ctx.createOscillator();lfoF.frequency.value=.13;const lfoFG=ctx.createGain();lfoFG.gain.value=300;
   lfoF.connect(lfoFG);lfoFG.connect(padFilt.frequency);lfoF.start();
   const _pads=[];[164.8,165.6,220,220.8].forEach(f=>{const o=ctx.createOscillator();o.type='sine';o.frequency.value=f;const g=ctx.createGain();g.gain.value=.18;o.connect(g);g.connect(padFilt);o.start();_pads.push([o,f]);});
-  window._humOsc={drone:[drone,41.2],pads:_pads,ctx};   // the groove retunes these when the song key changes (js/67-groove.js)
+  window._humOsc={drone:[drone,41.2],pads:_pads,ctx};   // (the groove that retuned these was removed in v0.2.157)
   padG.gain.setValueAtTime(0,ctx.currentTime);padG.gain.linearRampToValueAtTime(.22,ctx.currentTime+6);
   const noiseG=ctx.createGain();noiseG.gain.value=0;noiseG.connect(ambGain);
   const nbuf=ctx.createBuffer(1,ctx.sampleRate*3,ctx.sampleRate);const nd=nbuf.getChannelData(0);for(let i=0;i<nd.length;i++)nd[i]=Math.random()*2-1;

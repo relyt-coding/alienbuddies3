@@ -262,6 +262,14 @@ addEventListener('resize',()=>{_bbCache=null;});
     return;}
   const minX=bounds.x,minY=bounds.y,maxX=bounds.x+bounds.w,maxY=bounds.y+bounds.h;
   for(const b of bouncers){
+    if(b._enter){   // v0.2.157: floating in from off screen after the opening (see floatBuddiesIn below)
+      const E=b._enter,p=Math.max(0,Math.min(1,(tnow-E.t0)/E.dur)),e=1-Math.pow(1-p,3);
+      b.x=E.sx+(E.tx-E.sx)*e;b.y=E.sy+(E.ty-E.sy)*e;
+      if(p>=1){b._enter=null;const a=Math.atan2(E.ty-E.sy,E.tx-E.sx),sp=.9+Math.random()*1.3;b.vx=Math.cos(a)*sp;b.vy=Math.sin(a)*sp;}
+      b.el.style.transform=`translate3d(${b.x.toFixed(1)}px,${b.y.toFixed(1)}px,0) scale(${b._scale||1})`;
+      if(b.m&&b.w)b.m=buddyTumble.step(b.m,b.w,bdt);
+      continue;
+    }
     b.x+=b.vx*mv;b.y+=b.vy*mv;   // time-based: same speed whatever the frame rate
     if(b.x<=minX){b.x=minX;b.vx=Math.abs(b.vx);}
     if(b.y<=minY){b.y=minY;b.vy=Math.abs(b.vy);}
@@ -330,6 +338,21 @@ function partyPulseOnBeat(id,trackIdx,vel){
 partyBtn.addEventListener('click',e=>{if(typeof partyBtnPress==='function')partyBtnPress(e);else toggleParty();});
 partyBtn.addEventListener('touchend',e=>{e.preventDefault();if(typeof partyBtnPress==='function')partyBtnPress(e);else toggleParty();});
 
+// v0.2.157: every buddy drifts in from just past a random screen edge to a spot inside, a little staggered
+//   (js/65 calls this the moment the opening's pages land)
+function floatBuddiesIn(){
+  if(!bouncers.length||partyMode)return;
+  const B=getBouncerBounds(),now=performance.now(),W=innerWidth,H=innerHeight;
+  bouncers.forEach((b,i)=>{
+    const tx=B.x+Math.random()*Math.max(1,B.w-b.sz),ty=B.y+Math.random()*Math.max(1,B.h-b.sz-BOUNCER_NAME_PAD);
+    const side=Math.floor(Math.random()*4),r=Math.random();
+    const sx=side===0?-b.sz-40:side===1?W+40:r*W, sy=side===2?-b.sz-60:side===3?H+40:r*H;
+    b.x=sx;b.y=sy;b.el.style.transform=`translate3d(${sx.toFixed(1)}px,${sy.toFixed(1)}px,0) scale(${b._scale||1})`;
+    b._enter={sx,sy,tx,ty,t0:now+Math.min(i,12)*140,dur:1700+Math.random()*700};
+  });
+}
+window.floatBuddiesIn=floatBuddiesIn;
+
 // ── watchdog: every 5 seconds, put back any alien that should be on screen but isn't ──
 setInterval(()=>{
   try{
@@ -338,6 +361,7 @@ setInterval(()=>{
     syncBouncers();                                         // missing ones respawn, extra ones go
     const B=getBouncerBounds();
     bouncers.forEach(b=>{
+      if(b._enter)return;   // still floating in from off screen
       if(!b.el.isConnected)alienLayer.appendChild(b.el);
       if(b.el.style.display==='none')b.el.style.display='';
       if(b.el.style.opacity==='0')b.el.style.opacity='';

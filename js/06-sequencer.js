@@ -61,7 +61,7 @@ function placeViewButtons(){
     if(vtbKeyBtn){targetRow.insertBefore(vtbKeyBtn,vtbViewBtn.nextSibling);vtbKeyBtn.className='seq-save-pat-btn';}
     if(vtbFxBtn&&vtbKeyBtn){targetRow.insertBefore(vtbFxBtn,vtbKeyBtn.nextSibling);vtbFxBtn.className='seq-save-pat-btn';}
     {const gb=document.getElementById('vtbGrooveBtn');if(gb){targetRow.insertBefore(gb,vtbViewBtn.nextSibling);gb.className='seq-save-pat-btn';}}   // ♪ GROOVE right next to VIEW
-    {const gb=document.getElementById('vtbGrooveBtn'),pb=document.getElementById('partyBtn');if(gb&&pb&&pb.classList.contains('pb-small'))targetRow.insertBefore(pb,gb.nextSibling);}   // v0.2.149: PARTY right after ♪
+    {const ks=document.getElementById('keysSwitchSeq'),an=document.getElementById('vtbGrooveBtn')||(ks&&ks.parentNode===targetRow?ks:vtbViewBtn),pb=document.getElementById('partyBtn');if(pb&&pb.classList.contains('pb-small'))targetRow.insertBefore(pb,an.nextSibling);}   // v0.2.149: PARTY right after ♪
     {const ks=document.getElementById('keysSwitchSeq');if(ks)targetRow.insertBefore(ks,vtbViewBtn.nextSibling);}   // DRUMS | KEYS between VIEW and ♪
     viewToggleBar.style.display='none';
   }else{

@@ -2,6 +2,11 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.161 - 2026-11-15 15:16
+- Your first buddy no longer flashes on screen before the bunker and shop cutscene. It stays hidden until the cutscene is over, then pops in.
+- Knowledge Vault: tap a tip, lesson or word you own to fold it down to its title; tap again to open it.
+- The Vault no longer shows its explanation pop-up when you open it. The ? button has it.
+
 ## v0.2.160 - 2026-11-15 15:10
 - Bigger drum pads early on: once you have 2 or 3 pads, the next ones show as outlines (snare 100 pts, 4th pad 5,000 pts), so the pads sit in a roomy 2×2 grid instead of three small ones in a row. Three in a row only shows if you pick 3 in EDIT PADS.
 - The 4th pad now costs 5,000 points.

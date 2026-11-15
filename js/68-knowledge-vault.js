@@ -146,6 +146,10 @@ function vaultTabHasNew(tab){return vaultTabOpen(tab)&&vaultEntries(tab).some(va
 function vaultTabCanBuy(tab){if(!vaultTabOpen(tab))return false;const far=vaultTipFar();return vaultTipsIn(tab).some(i=>i<far&&!tipHave(i)&&score>=tipCost(i))||(score>=vaultEntryCost()&&vaultEntries(tab).some(e=>e.on()&&!vaultHasEntry(e)));}
 // v0.2.149: lessons, facts and words cost points too. They show up (title only) once their feature is unlocked; buying one
 // reveals it and adds a permanent ×1.05. The price climbs with every one you own (×1.35 each), so order doesn't matter.
+// v0.2.161: tap a tip / lesson / word you own to fold it down to its title; tap again to open it (remembered in the save)
+function vaultFolded(k){return vaultSeen.includes('c:'+k);}
+function vaultFold(k){const i=vaultSeen.indexOf('c:'+k);if(i>=0)vaultSeen.splice(i,1);else vaultSeen.push('c:'+k);renderVault();if(typeof autoSave==='function')try{autoSave();}catch(e){}}
+function vaultFoldable(node,k){node.classList.add('vb-fold');if(vaultFolded(k))node.classList.add('folded');node.addEventListener('click',()=>vaultFold(k));}
 function vaultHasEntry(e){return vaultOwned.includes(e.id);}
 function vaultNice(n){if(n<100)return Math.round(n);const p=Math.pow(10,Math.floor(Math.log10(n))-1);return Math.round(n/p)*p;}
 function vaultEntryCost(){return vaultNice(250*Math.pow(1.35,vaultOwned.length));}
@@ -191,6 +195,10 @@ body.desktop-mode #vaultBox{border-radius:20px;height:86vh;}
 .vt-tab.buy .vt-dot{background:#e8ff00;box-shadow:0 0 6px #e8ff00;}
 #vaultBody{flex:1;overflow-y:auto;padding:.9rem 1.1rem 2.5rem;display:flex;flex-direction:column;gap:.7rem;touch-action:pan-y;-webkit-overflow-scrolling:touch;}
 .vb-sec{font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:.16em;color:#666;margin:.3rem 0 -.2rem;}
+.vb-fold{cursor:pointer;-webkit-tap-highlight-color:transparent;}
+.vb-fold.folded p,.vb-fold.folded > span{display:none;}
+.vb-fold h4::after,.vb-fold > b::after{content:'▾';font-size:.8em;opacity:.55;margin-left:.1rem;transition:transform .2s;}
+.vb-fold.folded h4::after,.vb-fold.folded > b::after{display:inline-block;transform:rotate(-90deg);}
 .vb-card{border:1px solid #1e1e26;background:#0e0e14;border-radius:12px;padding:.8rem .95rem;display:flex;flex-direction:column;gap:.35rem;}
 .vb-card h4{margin:0;font-family:'Bebas Neue',sans-serif;font-weight:400;font-size:1.25rem;letter-spacing:.08em;color:var(--c);display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;}
 .vb-card p{margin:0;font-family:system-ui,-apple-system,'Segoe UI',sans-serif;font-size:1rem;line-height:1.5;color:#c9c9d4;}
@@ -270,9 +278,9 @@ function openVault(){
     swipeNavGo(6,1);return;}            // slides in from the left, like swiping right
   vaultPrep();
   document.getElementById('vaultModal').classList.add('open');
-  renderVault(true);setTimeout(()=>vaultHelp(false),350);
+  renderVault(true);
 }
-function openVaultPage(){vaultPrep();document.body.classList.add('vault-open');renderVault(true);setTimeout(()=>vaultHelp(false),450);}
+function openVaultPage(){vaultPrep();document.body.classList.add('vault-open');renderVault(true);}
 function closeVaultPage(){
   if(!document.body.classList.contains('vault-open'))return;
   document.body.classList.remove('vault-open');vaultMarkSeen(vaultTab);updateVaultBtn();
@@ -334,7 +342,7 @@ function renderVault(scrollTab){
     shownTips.forEach(i=>{
       const card=el('div','vb-card vb-tip');card.style.setProperty('--c','#e0e055');
       const row=el('div','vb-row');row.appendChild(el('h4','',(tipHave(i)?'✓ ':'')+'TIP '+(i+1)));
-      if(tipHave(i)){row.appendChild(el('div','vb-act','×1.5 ACTIVE'));card.appendChild(row);card.appendChild(el('p','',esc(tipText(i))));}
+      if(tipHave(i)){row.appendChild(el('div','vb-act','×1.5 ACTIVE'));card.appendChild(row);card.appendChild(el('p','',esc(tipText(i))));vaultFoldable(card,'tip'+i);}
       else{
         const cost=tipCost(i),can=score>=cost,bt=el('button','vb-buy'+(can?' can':''),formatStore(cost)+' PTS');bt.type='button';
         if(can)bt.addEventListener('click',()=>{
@@ -357,14 +365,14 @@ function renderVault(scrollTab){
   if(tab.id==='words'){
     open.slice().sort((a,b)=>a.title.localeCompare(b.title)).forEach(e=>{
       const w=el('div','vb-word'+(vaultHasEntry(e)?'':' vb-closed'));
-      if(vaultHasEntry(e)){w.appendChild(el('b','',esc(e.title)+tag(e)));w.appendChild(el('span','',esc(e.text)));}
+      if(vaultHasEntry(e)){w.appendChild(el('b','',esc(e.title)+tag(e)));w.appendChild(el('span','',esc(e.text)));vaultFoldable(w,e.id);}
       else{const r=el('div','vb-row');r.appendChild(el('b','',esc(e.title)+tag(e)));r.appendChild(buyBtn(e));w.appendChild(r);}
       body.appendChild(w);});
   }else{
     open.forEach(e=>{
       const own=vaultHasEntry(e),card=el('div','vb-card'+(own?'':' vb-closed'));card.style.setProperty('--c',col);
       const h=el('h4','',esc(e.title)+tag(e)+(e.src?' <span class="vb-src">· FROM THE '+e.src+'</span>':''));
-      if(own){card.appendChild(h);card.appendChild(el('p','',esc(e.text)));}
+      if(own){card.appendChild(h);card.appendChild(el('p','',esc(e.text)));vaultFoldable(card,e.id);}
       else{const r=el('div','vb-row');r.appendChild(h);r.appendChild(buyBtn(e));card.appendChild(r);}
       body.appendChild(card);});
   }

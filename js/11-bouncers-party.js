@@ -341,7 +341,7 @@ partyBtn.addEventListener('touchend',e=>{e.preventDefault();if(typeof partyBtnPr
 // v0.2.157: every buddy drifts in from just past a random screen edge to a spot inside, a little staggered
 //   (js/65 calls this the moment the opening's pages land)
 function floatBuddiesIn(){
-  if(!bouncers.length||partyMode)return;
+  if(!bouncers.length||partyMode||document.body.classList.contains('buddy-hold'))return;   // (the first buddy pops in after its cutscene instead: js/66)
   const B=getBouncerBounds(),now=performance.now(),W=innerWidth,H=innerHeight;
   bouncers.forEach((b,i)=>{
     const tx=B.x+Math.random()*Math.max(1,B.w-b.sz),ty=B.y+Math.random()*Math.max(1,B.h-b.sz-BOUNCER_NAME_PAD);

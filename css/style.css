@@ -369,6 +369,10 @@ body:not(.desktop-mode) .pad-key{display:none!important;}
 .pad.ghost-pad.affordable .ghost-cost{color:var(--pc);}
 .pad.ghost-pad:active{transform:scale(.95);}
 .pad.ghost-pad.ghost-later{opacity:.28;}
+/* v0.2.161: no buddy on screen until the bunker/shop cutscene is done; then it pops in */
+body.nav-locked #alienLayer,body.buddy-hold #alienLayer{visibility:hidden!important;}
+#alienLayer .bouncer.pop-in{animation:buddyPopIn .65s cubic-bezier(.3,1.6,.5,1) both;}
+@keyframes buddyPopIn{0%{opacity:0;scale:.1;}60%{opacity:1;}100%{opacity:1;scale:1;}}
 .pad.ghost-pad.nope{animation:ghostNope .4s ease-in-out;}
 @keyframes ghostNope{0%,100%{transform:translateX(0);}25%{transform:translateX(-6px);}60%{transform:translateX(5px);}}
 @keyframes ghostPulse{0%,100%{transform:scale(1);}50%{transform:scale(1.03);}}

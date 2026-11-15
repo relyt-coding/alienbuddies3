@@ -45,15 +45,26 @@
     if(!active()){B.remove('nav-locked');wasLocked=false;return;}
     // the first buddy is here: wait for its hatch window (and naming) to close, then bring the buttons in
     if(blockedByOverlay()){revealPending=true;return;}
+    if(wasLocked)B.add('buddy-hold');   // v0.2.161: the new buddy stays hidden until the bunker/shop cutscene is over
     B.remove('nav-locked');revealPending=false;
     if(wasLocked)revealNav();
     wasLocked=false;
   }
+  // v0.2.161: after the nav cutscene the first buddy pops in (it was flashing on screen for a moment before it)
+  let holdT=0;
+  function releaseBuddies(){
+    clearTimeout(holdT);if(!B.contains('buddy-hold'))return;
+    B.remove('buddy-hold');
+    document.querySelectorAll('#alienLayer .bouncer').forEach((el,i)=>{el.style.animationDelay=(i*.08)+'s';el.classList.remove('pop-in');void el.offsetWidth;el.classList.add('pop-in');
+      setTimeout(()=>{el.classList.remove('pop-in');el.style.animationDelay='';},900+i*80);});
+  }
+  window.releaseBuddies=releaseBuddies;
   function revealNav(){
-    bunkerNew=true;
+    bunkerNew=true;holdT=setTimeout(releaseBuddies,15000);   // (never stuck hidden)
     // v0.2.156: the BUNKER and SHOP get their own cutscene: the camera pulls back from the pads and the two pages fly
     // in and build themselves on either side (js/65, 'nav' mode). The buttons are simply there when it hands back.
-    if(typeof playNewFileIntro==='function'&&!(typeof unlockCutsceneRunning==='function'&&unlockCutsceneRunning())&&playNewFileIntro({mode:'nav',onDone:()=>{if(isDesk()&&typeof repositionCollapseButtons==='function')repositionCollapseButtons();}}))return;
+    if(typeof playNewFileIntro==='function'&&!(typeof unlockCutsceneRunning==='function'&&unlockCutsceneRunning())&&playNewFileIntro({mode:'nav',onDone:()=>{setTimeout(releaseBuddies,150);if(isDesk()&&typeof repositionCollapseButtons==='function')repositionCollapseButtons();}}))return;
+    setTimeout(releaseBuddies,400);
     B.remove('nav-reveal');void document.body.offsetWidth;B.add('nav-reveal');
     setTimeout(()=>B.remove('nav-reveal'),1600);
     if(isDesk()&&typeof repositionCollapseButtons==='function')repositionCollapseButtons();

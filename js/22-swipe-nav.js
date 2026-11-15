@@ -4,17 +4,19 @@
 //  Little dots at the bottom show where you are (only while swiping, not when the BUNKER / SHOP buttons are used).
 // ══════════════════════════════════════════════
 (function(){
-  var VIEW_IDS=['gameView','storeView','bunkerView','skillTreeModal','cockpitView','bestBuddyView'];
+  var VIEW_IDS=['gameView','storeView','bunkerView','skillTreeModal','cockpitView','bestBuddyView','vaultView'];
   var busy=false,sx=0,sy=0,st=0,tracking=false;
-  // page ids: 0 home, 1 shop, 2 bunker, 3 galaxies. Screen order left → right:
+  // page ids: 0 home, 1 shop, 2 bunker, 3 galaxies, 6 KNOWLEDGE VAULT. Screen order left → right:
+  // Cockpit · Vault · Best Buddy · Bunker · Home · Shop · Galaxies (v0.2.149)
   // (4 = the minigame COCKPIT, left of the bunker, once it's unlocked in the skill tree)
-  function pageOrder(){var o=(typeof skillTreeUnlocked!=='undefined'&&skillTreeUnlocked)?[2,0,1,3]:[2,0,1];if(typeof bbOn==='function'&&bbOn())o.unshift(5);if(typeof mgCockpitOn==='function'&&mgCockpitOn())o.unshift(4);return o;}
+  function pageOrder(){var o=(typeof skillTreeUnlocked!=='undefined'&&skillTreeUnlocked)?[2,0,1,3]:[2,0,1];if(typeof bbOn==='function'&&bbOn())o.unshift(5);if(document.getElementById('vaultView'))o.unshift(6);if(typeof mgCockpitOn==='function'&&mgCockpitOn())o.unshift(4);return o;}
   function pageCount(){return pageOrder().length;}
   function cur(){
     var b=document.body.classList,m=document.getElementById('skillTreeModal');
     if(m&&m.classList.contains('open'))return 3;
     if(b.contains('cockpit-open'))return 4;
     if(b.contains('bestbuddy-open'))return 5;
+    if(b.contains('vault-open'))return 6;
     return b.contains('store-open')?1:b.contains('bunker-open')?2:0;
   }
   function blocked(t){
@@ -29,7 +31,7 @@
       if(t.closest('#stDetailPop'))return true;
       return !t.closest('#skillTreeHeader');
     }
-    if(t.closest('input,select,textarea,.pad-area,.seq-area,#seqFullModal,#autoTiersCol,#padCountSelector,[id$="Modal"],.modal,.modal-overlay,#settingsBox'))return true;
+    if(t.closest('#vaultTabs,input,select,textarea,.pad-area,.seq-area,#seqFullModal,#autoTiersCol,#padCountSelector,[id$="Modal"],.modal,.modal-overlay,#settingsBox'))return true;
     var pops=document.querySelectorAll('[id$="Modal"]');
     for(var i=0;i<pops.length;i++){var s=pops[i];if(s.id==='skillTreeModal')continue;if(s.classList.contains('open')||(s.style.display&&s.style.display!=='none'&&s.style.display!==''))return true;}
     return false;
@@ -49,8 +51,8 @@
     fromEl.style.transform='translateX('+(dir*100)+'%)';
     toEl.style.transform='translateX(0)';
     // switch the real state (other code relies on these body classes)
-    closeStore();closeBunker();if(typeof closeCockpit==='function')closeCockpit();if(typeof closeBestBuddy==='function'&&target!==5)closeBestBuddy();
-    if(target===1)openStore();else if(target===2)openBunker();else if(target===4&&typeof openCockpit==='function')openCockpit();else if(target===5&&typeof openBestBuddy==='function')openBestBuddy();
+    closeStore();closeBunker();if(typeof closeCockpit==='function')closeCockpit();if(typeof closeBestBuddy==='function'&&target!==5)closeBestBuddy();if(typeof closeVaultPage==='function'&&target!==6)closeVaultPage();
+    if(target===1)openStore();else if(target===2)openBunker();else if(target===4&&typeof openCockpit==='function')openCockpit();else if(target===5&&typeof openBestBuddy==='function')openBestBuddy();else if(target===6&&typeof openVaultPage==='function')openVaultPage();
     setTimeout(function(){
       if(from===3&&typeof closeSkillTree==='function')closeSkillTree();
       // snap every page to its resting spot with NO animation (the page that just left would otherwise

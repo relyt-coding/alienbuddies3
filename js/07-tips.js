@@ -108,6 +108,7 @@ function overlayUp(){
   if(typeof newFileIntroRunning==='function'&&newFileIntroRunning())return true;
   const m=document.getElementById('matchingModal');if(m&&m.style.display==='flex')return true;
   const vm=document.getElementById('vaultModal');if(vm&&vm.classList.contains('open'))return true;
+  if(bc.contains('vault-open'))return true;
   const st=document.getElementById('skillTreeModal');if(st&&st.classList.contains('open'))return true;
   const er=document.getElementById('eggReveal');if(er&&er.classList.contains('on'))return true;
   return false;
@@ -170,10 +171,19 @@ function updateOnboardingArrows(){
         arrowShop.style.alignItems='center';
         const svg=arrowShop.querySelector('svg');
         if(svg)svg.style.transform='';
+        if(arrowShop._down&&!document.body.classList.contains('thumb-nav')){const w=arrowShop.querySelector('.arrow-flip');if(w&&svg){w.parentNode.insertBefore(svg,w);w.remove();}arrowShop._down=0;}
         const lbl=arrowShop.querySelector('div');
         if(lbl){lbl.style.marginTop='4px';lbl.style.marginRight='';lbl.style.order='';}
         arrowShop.style.left=(rect.left+rect.width/2-18)+'px';
         arrowShop.style.top=(rect.bottom+6)+'px';
+        // v0.2.149: SHOP sits on the bottom row of upright phones, so the arrow points down at it from above
+        if(document.body.classList.contains('thumb-nav')){
+          arrowShop.style.flexDirection='column-reverse';
+          if(svg&&!arrowShop._down){arrowShop._down=1;const w=document.createElement('span');w.className='arrow-flip';w.style.cssText='display:block;transform:rotate(180deg);';svg.parentNode.insertBefore(w,svg);w.appendChild(svg);}
+          if(lbl){lbl.style.marginTop='';lbl.style.marginBottom='4px';}
+          arrowShop.style.left=(rect.left+rect.width/2-(arrowShop.offsetWidth||36)/2)+'px';
+          arrowShop.style.top=(rect.top-(arrowShop.offsetHeight||64)-8)+'px';
+        }
       }
     } else {
       arrowShop.style.display='none';

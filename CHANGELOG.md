@@ -2,6 +2,15 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.149 - 2026-11-15 10:40
+
+- The Knowledge Vault is now its own page: from the bunker, swipe right (or tap VAULT). Page order: Cockpit · Vault · Best Buddy · Bunker · Home · Shop · Galaxies. On a computer it still opens as a window.
+- Every lesson, fun fact and music word in the Vault now costs points to unlock, like tips. They only appear once you've unlocked the feature they're about. Each one you unlock is a permanent ×1.05 tap boost, and the price goes up a little with every one you own. Tips still give ×1.5. Score breakdown shows your Vault boost.
+- Phones held upright: BUNKER, SETTINGS, EDIT PADS and SHOP now sit in one row along the bottom where your thumbs are. The top of the screen is just the title.
+- ALIEN PARTY is now a small PARTY button next to the ♪. Tap it for a menu of your party styles: pick one to start or switch, or END PARTY (holding the button still ends it too).
+- Level 3: 30 seconds after you unlock the sequencer, a disco ball lowers in next to your score with the party's price. It fills up as you earn and sparkles when you can afford it. Tap it to unlock the party. The first party now costs 1,000,000 points (was 5,000,000).
+- The SHOP arrow now points down at the SHOP button on the bottom row.
+
 ## v0.2.148 - 2026-11-15 10:00
 
 - Five Knowledge Vault tabs now open with the heart of the skill tree: the Tucana Core opens MUSIC WORDS, Quad Sun I (Planet Atlas) opens SOUNDS & INSTRUMENTS, Quad Sun II (Musical Toolkit) opens EFFECTS & MIXING, Quad Sun III (Minigame Nexus) opens PIANO ROLL and Quad Sun IV (Alien Evolution) opens VOCALS. Locked tabs show a 🔒 and say which node opens them.

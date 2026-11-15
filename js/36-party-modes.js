@@ -36,6 +36,10 @@ try{const v=localStorage.getItem('ab2_party_style');if(PARTY_STYLES.some(s=>s.id
   function paintBtn(){
     const pb=$('partyBtn');if(!pb)return;
     if(!owned().includes(partyStyle))partyStyle='glow';
+    // v0.2.149: the small PARTY button by the ♪ (js/69) just shows PARTY, or the style while one is going
+    if(pb.classList.contains('pb-small')){const k=partyMode?'on:'+partyStyle:'idle';
+      if(pb.dataset.mode!==k){pb.dataset.mode=k;pb.textContent=partyMode?(styleObj().short||styleObj().name):'PARTY';pb.classList.remove('pb-split','pb-multi','pb-tight');pb.title=partyMode?'Party styles · hold to end the party':'Alien Party';}
+      return;}
     if(!partyMode){if(pb.dataset.mode!=='idle'){pb.dataset.mode='idle';pb.textContent='ALIEN PARTY';pb.classList.remove('pb-split','pb-multi');}return;}
     const s=styleObj(),list=ownedList(),multi=list.length>1,idx=list.findIndex(x=>x.id===s.id),key=s.id+':'+list.length;
     if(pb.dataset.mode!==key){pb.dataset.mode=key;
@@ -70,6 +74,7 @@ try{const v=localStorage.getItem('ab2_party_style');if(PARTY_STYLES.some(s=>s.id
   let holdFired=false,holdT=null;
   window.partyBtnPress=function(e){
     if(holdFired){holdFired=false;return;}   // that was the end of a press-and-hold
+    if(typeof openPartyMenu==='function'){openPartyMenu();return;}   // v0.2.149: a menu of your styles (js/69)
     if(!partyMode){if(typeof startParty==='function')startParty();if(typeof playPartyStartFx==='function')try{playPartyStartFx();}catch(err){}return;}
     cycleStyle();
   };
@@ -91,6 +96,8 @@ try{const v=localStorage.getItem('ab2_party_style');if(PARTY_STYLES.some(s=>s.id
     }}
   window.paintPartyBtn=paintBtn;
   window.setPartyStyle=function(id){setStyle(id);};
+  window.partyStylesOwned=function(){return ownedList();};
+  window.partyStyleNow=function(){return partyStyle;};
   window.refreshPartyAccess=function(){paintBtn();};
   setInterval(paintBtn,400);
 

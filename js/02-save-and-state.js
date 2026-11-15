@@ -39,7 +39,7 @@ function autoSave(){
     totalAliens,alienData,
     drum:{pads:drum.pads,extraSounds:drum.extraSounds,seqTracks:drum.seqTracks},
     matchLevelsCompleted,matchingMultiplier,matchSavedState,wormMultiplier,wormProgress,phMultiplier,phProgress,
-    mgBought:(typeof mgBought!=='undefined')?mgBought:undefined,bdProgress:(typeof bdProgress!=='undefined')?bdProgress:undefined,tipsOwned,tipsSet,tipsMult,vaultSeen,drumTrackerActive,shopOpenCount,hasSeenSeqHint,
+    mgBought:(typeof mgBought!=='undefined')?mgBought:undefined,bdProgress:(typeof bdProgress!=='undefined')?bdProgress:undefined,tipsOwned,tipsSet,tipsMult,vaultSeen,vaultOwned,drumTrackerActive,shopOpenCount,hasSeenSeqHint,
     savedPatterns,savedArrangements,songSlots,
     padSounds:[...padSounds],
     soundVols:{...soundVols},
@@ -80,7 +80,9 @@ let matchLevelsCompleted=-1; // -1 = level 0 not yet seen
 let tipsOwned=0; // number of tips purchased
 let tipsSet=[];  // which tips (0-based) are bought: they can be bought in any order
 let tipsMult=1; // permanent ×1.5 per tip
-let vaultSeen=[]; // Knowledge Vault entries already read (js/68)
+let vaultSeen=[]; // Knowledge Vault entries already seen (js/68)
+let vaultOwned=[]; // Knowledge Vault lessons / words bought with points (×1.05 each, js/68)
+let vaultMult=1;
 let drumTrackerActive=false; // paid 25pts to activate drum dot tracker
 let shopOpenCount=0;
 let hasSeenSeqHint=false;
@@ -125,7 +127,7 @@ function drumMultiplier(){
 // (The skill tree only boosts Alien Gems, not points.)
 function sharedMultiplier(){
   // (Planet Hop / Worm Whack / Beat Defense boost Alien Gems instead; only the Matching Game gives point multipliers)
-  return alienMultiplier()*drumMultiplier()*matchingMultiplier*tipsMult;
+  return alienMultiplier()*drumMultiplier()*matchingMultiplier*tipsMult*vaultMult;
 }
 // Each tracker keeps its own tier multipliers: DRUMPAD (left) for pad taps, SEQUENCER (right) for sequencer steps.
 function drumTierProduct(){return tiers.reduce((m,t,i)=>t.multiplierActive?m*tierMultValueFor('drum',i):m,1);}
@@ -214,6 +216,7 @@ function loadFromSave(data){
   tipsSet=Array.isArray(data.tipsSet)?data.tipsSet.filter(Number.isInteger):[...Array(tipsOwned).keys()];tipsOwned=tipsSet.length;
   tipsMult=data.tipsMult||1;
   vaultSeen=Array.isArray(data.vaultSeen)?data.vaultSeen.filter(x=>typeof x==='string'):[];
+  vaultOwned=Array.isArray(data.vaultOwned)?data.vaultOwned.filter(x=>typeof x==='string'):[];vaultMult=Math.pow(1.05,vaultOwned.length);
   drumTrackerActive=data.drumTrackerActive||false;
   shopOpenCount=data.shopOpenCount||0;
   hasSeenSeqHint=data.hasSeenSeqHint||false;

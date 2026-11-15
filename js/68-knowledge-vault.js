@@ -136,7 +136,20 @@ function vaultTipsIn(tab){const r=[];for(let i=0;i<MAX_TIPS;i++)if(VAULT_TIP_TAB
 function vaultTipFar(){let far=2;for(let i=0;i<MAX_TIPS;i++)if(tipHave(i)||score>=tipCost(i))far=Math.max(far,i+1);return Math.min(MAX_TIPS,far+1);}
 function vaultIsNew(e){return e.on()&&!vaultSeen.includes(e.id);}
 function vaultTabHasNew(tab){return vaultTabOpen(tab)&&vaultEntries(tab).some(vaultIsNew);}
-function vaultTabCanBuy(tab){if(!vaultTabOpen(tab))return false;const far=vaultTipFar();return vaultTipsIn(tab).some(i=>i<far&&!tipHave(i)&&score>=tipCost(i));}
+function vaultTabCanBuy(tab){if(!vaultTabOpen(tab))return false;const far=vaultTipFar();return vaultTipsIn(tab).some(i=>i<far&&!tipHave(i)&&score>=tipCost(i))||(score>=vaultEntryCost()&&vaultEntries(tab).some(e=>e.on()&&!vaultHasEntry(e)));}
+// v0.2.149: lessons, facts and words cost points too. They show up (title only) once their feature is unlocked; buying one
+// reveals it and adds a permanent ×1.05. The price climbs with every one you own (×1.35 each), so order doesn't matter.
+function vaultHasEntry(e){return vaultOwned.includes(e.id);}
+function vaultNice(n){if(n<100)return Math.round(n);const p=Math.pow(10,Math.floor(Math.log10(n))-1);return Math.round(n/p)*p;}
+function vaultEntryCost(){return vaultNice(250*Math.pow(1.35,vaultOwned.length));}
+function vaultBuyEntry(e){
+  const c=vaultEntryCost();if(vaultHasEntry(e)||score<c||!e.on())return false;
+  score-=c;vaultOwned.push(e.id);vaultMult=Math.pow(1.05,vaultOwned.length);if(!vaultSeen.includes(e.id))vaultSeen.push(e.id);
+  try{playSfxTierUnlock(Math.min(12,vaultOwned.length%12+1),0.3);}catch(err){}
+  showToast((e.kind==='word'?'New word: ':'Unlocked: ')+e.title+' · ×1.05 tap boost');
+  if(typeof renderUI==='function')renderUI();if(typeof autoSave==='function')autoSave();
+  return true;
+}
 function vaultAnyNew(){return VAULT_TABS.some(t=>vaultTabHasNew(t.id));}
 
 // ── the page ──
@@ -181,8 +194,18 @@ body.desktop-mode #vaultBox{border-radius:20px;height:86vh;}
 .vb-lockbox{margin-top:1.2rem;border:1px dashed var(--c);border-radius:14px;padding:1.6rem 1.2rem;display:flex;flex-direction:column;gap:.6rem;align-items:center;text-align:center;}
 .vb-lockbox b{font-family:'Bebas Neue',sans-serif;font-weight:400;font-size:1.5rem;letter-spacing:.12em;color:var(--c);}
 .vb-lockbox span{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;font-size:1rem;line-height:1.5;color:#a9a9b8;}
+.vb-row{display:flex;align-items:center;justify-content:space-between;gap:.6rem;}
+.vb-closed h4,.vb-closed b{opacity:.85;}
+.vb-closed .vb-buy{flex-shrink:0;}
 .vb-locked{font-family:'Bebas Neue',sans-serif;font-size:1.05rem;letter-spacing:.1em;color:#55556a;text-align:center;padding:.9rem;border:1px dashed #26262e;border-radius:12px;}
 .vb-intro{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;font-size:.95rem;line-height:1.45;color:#8a8a9a;}
+#vaultView{transform:translateX(-100%);background:#08080c;z-index:11;overflow:hidden;}
+body.vault-open #vaultView{transform:translateX(0);}
+body.vault-open #alienLayer{visibility:hidden;}   /* nothing floats over the reading */
+body.desktop-mode #vaultView{display:none;}
+#vaultView #vaultBox{border:none;border-radius:0;max-width:none;height:100%;animation:none;padding-top:env(safe-area-inset-top,0px);}
+#vaultView #vaultBox>*{width:100%;max-width:640px;margin-left:auto;margin-right:auto;box-sizing:border-box;}
+body.vault-open #soundboardBtn,body.vault-open #padEditToggleBtn,body.vault-open #partyBtn,body.vault-open #socialsBtn,body.vault-open #settingsOpenBtn{display:none!important;}
 #tipsBtn{position:relative;}
 #tipsBtn .vault-dot{position:absolute;top:-3px;right:-3px;width:9px;height:9px;border-radius:50%;background:#ff4d6a;box-shadow:0 0 6px #ff4d6a;display:none;}
 #tipsBtn.vault-new .vault-dot{display:block;}
@@ -192,22 +215,44 @@ body.desktop-mode #vaultBox{border-radius:20px;height:86vh;}
     <div id="vaultHead"><button id="vaultClose">← BACK</button><div class="vh-mid"><div id="vaultTitle">KNOWLEDGE VAULT</div><div id="vaultSub"></div></div></div>
     <div id="vaultTabs"></div><div id="vaultBody"></div></div>`;
   document.body.appendChild(m);
+  const pg=document.createElement('div');pg.className='view';pg.id='vaultView';
+  (document.getElementById('gameScreen')||document.body).appendChild(pg);
   m.addEventListener('click',e=>{if(e.target===m)closeVault();});
   document.getElementById('vaultClose').addEventListener('click',closeVault);
-  addEventListener('keydown',e=>{if(e.code==='Escape'&&m.classList.contains('open'))closeVault();});
+  addEventListener('keydown',e=>{if(e.code==='Escape'&&(m.classList.contains('open')||document.body.classList.contains('vault-open')))closeVault();});
   // the bunker button: TIPS → VAULT (with a dot while something new is waiting)
   const b=document.getElementById('tipsBtn');if(b){b.textContent='VAULT';const d=document.createElement('i');d.className='vault-dot';b.appendChild(d);}
 })();
 
-function openVault(){
-  vaultSig='';
+// Phone: the Vault is a swipe page (left of Best Buddy / the bunker). Computer: a window over the game.
+function vaultIsPage(){return !document.body.classList.contains('desktop-mode');}
+function vaultPlace(){
+  const box=document.getElementById('vaultBox'),pg=document.getElementById('vaultView'),m=document.getElementById('vaultModal');if(!box)return;
+  const want=vaultIsPage()?pg:m;if(want&&box.parentElement!==want)want.appendChild(box);
+}
+function vaultPrep(){
+  vaultSig='';vaultPlace();
   if(vaultTab&&!vaultTabOpen(vaultTab))vaultTab=null;
   if(!vaultTab){   // open on a tab with something to buy, else something new, else the basics
     const t=VAULT_TABS.find(t=>vaultTabCanBuy(t.id))||VAULT_TABS.find(t=>vaultTabHasNew(t.id));vaultTab=t?t.id:'basics';}
+}
+function openVault(){
+  if(vaultIsPage()&&typeof swipeNavGo==='function'){
+    if(document.body.classList.contains('vault-open'))return;
+    swipeNavGo(6,1);return;}            // slides in from the left, like swiping right
+  vaultPrep();
   document.getElementById('vaultModal').classList.add('open');
   renderVault(true);
 }
+function openVaultPage(){vaultPrep();document.body.classList.add('vault-open');renderVault(true);}
+function closeVaultPage(){
+  if(!document.body.classList.contains('vault-open'))return;
+  document.body.classList.remove('vault-open');vaultMarkSeen(vaultTab);updateVaultBtn();
+  if(typeof autoSave==='function')autoSave();
+}
 function closeVault(){
+  if(document.body.classList.contains('vault-open')){
+    if(typeof swipeNavGo==='function')swipeNavGo(2,-1);else closeVaultPage();return;}   // BACK: slide over to the bunker
   document.getElementById('vaultModal').classList.remove('open');
   vaultMarkSeen(vaultTab);updateVaultBtn();
   if(typeof autoSave==='function')autoSave();
@@ -220,10 +265,10 @@ function vaultMarkSeen(tab){
 function vaultCounts(){
   let have=0,all=0;
   VAULT_TABS.forEach(t=>vaultEntries(t.id).forEach(e=>{all++;if(e.on())have++;}));
-  return{have:have+tipsOwned,all:all+MAX_TIPS};
+  return{have:vaultOwned.length+tipsOwned,all:all+MAX_TIPS};
 }
 let vaultSig='';
-function vaultSigNow(){const far=vaultTipFar();let k=tipsOwned+':'+far+':';for(let i=0;i<far;i++)k+=(score>=tipCost(i)?1:0);return k;}
+function vaultSigNow(){const far=vaultTipFar();let k=tipsOwned+':'+far+':'+vaultOwned.length+':'+(score>=vaultEntryCost()?1:0)+':';for(let i=0;i<far;i++)k+=(score>=tipCost(i)?1:0);return k;}
 function renderVault(scrollTab){
   vaultSig=vaultSigNow();
   const tabsEl=document.getElementById('vaultTabs'),body=document.getElementById('vaultBody');if(!tabsEl||!body)return;
@@ -275,18 +320,26 @@ function renderVault(scrollTab){
       body.appendChild(card);
     });
   }
-  // LEARN cards / WORDS
+  // LEARN cards / WORDS (each one costs points once its feature is unlocked)
   const entries=vaultEntries(tab.id),open=entries.filter(e=>e.on());locked+=entries.length-open.length;
+  const ec=vaultEntryCost(),canE=score>=ec;
+  const buyBtn=e=>{const bt=el('button','vb-buy'+(canE?' can':''),formatStore(ec)+' PTS');bt.type='button';
+    if(canE)bt.addEventListener('click',ev=>{ev.stopPropagation();if(vaultBuyEntry(e))renderVault();});return bt;};
+  const tag=e=>vaultIsNew(e)?' <span class="vb-tag">NEW</span>':'';
+  if(open.length)body.appendChild(el('div','vb-sec',(tab.id==='words'?'WORDS':'LEARN')+' · EACH ONE IS A PERMANENT ×1.05 TAP BOOST'));
   if(tab.id==='words'){
-    if(open.length)body.appendChild(el('div','vb-intro','Music words you\'ve discovered so far. More appear as you unlock new pads, the sequencer and skill-tree nodes.'));
     open.slice().sort((a,b)=>a.title.localeCompare(b.title)).forEach(e=>{
-      const w=el('div','vb-word');w.appendChild(el('b','',esc(e.title)+(vaultIsNew(e)?' <span class="vb-tag">NEW</span>':'')));w.appendChild(el('span','',esc(e.text)));body.appendChild(w);});
-  }else if(open.length){
-    body.appendChild(el('div','vb-sec','LEARN'));
+      const w=el('div','vb-word'+(vaultHasEntry(e)?'':' vb-closed'));
+      if(vaultHasEntry(e)){w.appendChild(el('b','',esc(e.title)+tag(e)));w.appendChild(el('span','',esc(e.text)));}
+      else{const r=el('div','vb-row');r.appendChild(el('b','',esc(e.title)+tag(e)));r.appendChild(buyBtn(e));w.appendChild(r);}
+      body.appendChild(w);});
+  }else{
     open.forEach(e=>{
-      const card=el('div','vb-card');card.style.setProperty('--c',col);
-      card.appendChild(el('h4','',esc(e.title)+(vaultIsNew(e)?' <span class="vb-tag">NEW</span>':'')+(e.src?' <span class="vb-src">· FROM THE '+e.src+'</span>':'')));
-      card.appendChild(el('p','',esc(e.text)));body.appendChild(card);});
+      const own=vaultHasEntry(e),card=el('div','vb-card'+(own?'':' vb-closed'));card.style.setProperty('--c',col);
+      const h=el('h4','',esc(e.title)+tag(e)+(e.src?' <span class="vb-src">· FROM THE '+e.src+'</span>':''));
+      if(own){card.appendChild(h);card.appendChild(el('p','',esc(e.text)));}
+      else{const r=el('div','vb-row');r.appendChild(h);r.appendChild(buyBtn(e));card.appendChild(r);}
+      body.appendChild(card);});
   }
   if(locked)body.appendChild(el('div','vb-locked','🔒 '+locked+' MORE TO DISCOVER IN THIS TAB · KEEP PLAYING'));
   if(!open.length&&!shownTips.length&&!locked)body.appendChild(el('div','vb-locked','NOTHING HERE YET'));
@@ -298,4 +351,4 @@ function updateVaultBtn(){
 }
 setInterval(()=>{if(document.body.classList.contains('game-active'))updateVaultBtn();},2000);
 // keep the open page's prices / buy buttons current
-setInterval(()=>{const m=document.getElementById('vaultModal');if(m&&m.classList.contains('open')&&vaultSigNow()!==vaultSig)renderVault();},700);
+setInterval(()=>{const m=document.getElementById('vaultModal');if(((m&&m.classList.contains('open'))||document.body.classList.contains('vault-open'))&&vaultSigNow()!==vaultSig)renderVault();},700);

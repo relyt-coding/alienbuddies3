@@ -95,9 +95,10 @@ function buildScoreStats(){
   }
 
   // ── TIPS ──
-  if(tipsOwned>0){
-    scoreStatsList.appendChild(ssLabel('TIPS'));
-    scoreStatsList.appendChild(ssRow('💡',`TIPS (${tipsOwned})`,`${tipsOwned} tip${tipsOwned!==1?'s':''} purchased · ×1.5 each`,`×${formatMult(tipsMult)}`,true,'green'));
+  if(tipsOwned>0||(typeof vaultOwned!=='undefined'&&vaultOwned.length)){
+    scoreStatsList.appendChild(ssLabel('KNOWLEDGE VAULT'));
+    if(tipsOwned>0)scoreStatsList.appendChild(ssRow('💡',`TIPS (${tipsOwned})`,`${tipsOwned} tip${tipsOwned!==1?'s':''} purchased · ×1.5 each`,`×${formatMult(tipsMult)}`,true,'green'));
+    if(typeof vaultOwned!=='undefined'&&vaultOwned.length)scoreStatsList.appendChild(ssRow('📚',`VAULT (${vaultOwned.length})`,`${vaultOwned.length} lesson${vaultOwned.length!==1?'s':''} & words unlocked · ×1.05 each`,`×${formatMult(vaultMult)}`,true,'green'));
   }
 
   // ── MATCHING GAME ──

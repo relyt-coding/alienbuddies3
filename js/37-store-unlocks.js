@@ -7,7 +7,7 @@
 //                    → Arrangement tab → Song tab. (These used to be skill-tree nodes.)
 // ══════════════════════════════════════════════
 const PARTY_LADDER=[
-  {style:'glow',  cost:5e6,  main:'ALIEN PARTY',        sub:'Adds the ALIEN PARTY button: your aliens glow and bounce to the beat'},
+  {style:'glow',  cost:1e6,  main:'ALIEN PARTY',        sub:'Adds the ALIEN PARTY button: your aliens glow and bounce to the beat'},
   {style:'orbit', cost:5e7,  main:'DISCO ORBIT',      sub:'New party style: aliens spin in a ring around your score'},
   {style:'conga', cost:5e8,  main:'CONGA LINE',       sub:'New party style: a figure-8 conga line, hopping on the beat'},
   {style:'eq',    cost:5e9,  main:'EQ BARS',          sub:'New party style: aliens line up as a live EQ meter for your music'},
@@ -15,7 +15,7 @@ const PARTY_LADDER=[
   {style:'galaxy',cost:5e11, main:'GALAXY',           sub:'New party style: a spinning spiral galaxy that breathes with the bar'},
   {style:'hop',   cost:5e12, main:'PLANET HOP',       sub:'New party style: your aliens run along the sequencer, hopping on every beat and double jumping on beat 4'},
 ];
-const PARTY_REVEAL_AT=5e6;
+const PARTY_REVEAL_AT=1e6;   // (v0.2.149: the party is "level 3" at 1M, teased on screen by js/69)
 const SEQ_FEATS=[
   {id:'bpm',    cost:1e7,   main:'BPM CONTROL',      sub:'Speed the sequencer up or slow it down (− / + next to play)'},
   {id:'steps32',cost:3.2e7, main:'32 STEPS',         sub:'Double the loop to 2 bars · switch with the STEPS button'},
@@ -69,7 +69,7 @@ function partyOwnedStyles(){return PARTY_LADDER.slice(0,Math.max(0,shop.partyLev
     {const next=PARTY_LADDER[pl],can=!!next&&score>=next.cost;
       $('partyStoreCardNum').textContent=pl;
       $('partyStoreCardMain').textContent=!next?'EVERY STYLE':pl===0?'UNLOCK THE PARTY':'NEXT: '+next.main;
-      partyCard.title=next?next.sub:'All '+PARTY_LADDER.length+' styles unlocked · tap the style on the party button to switch';
+      partyCard.title=next?next.sub:'All '+PARTY_LADDER.length+' styles unlocked · pick one from the PARTY menu';
       partyCard.className='alien-store-card party-store-card '+(!next?'maxed':can?'buyable':'locked');
       const pr=$('partyStoreCardPrice');pr.className='alien-card-price'+(!next||can?'':' cant-afford');
       pr.innerHTML=next?`${formatStore(next.cost)}<small>pts</small>`:'MAX';}
@@ -85,11 +85,12 @@ function partyOwnedStyles(){return PARTY_LADDER.slice(0,Math.max(0,shop.partyLev
     if(typeof playSfxPurchase==='function')playSfxPurchase();if(typeof flashBuy==='function')flashBuy('#ff00cc');
     if(pl===0){const toast=showToast,msg=()=>toast('ALIEN PARTY unlocked! Tap the button to get your aliens dancing.');
       if(typeof playPartyUnlockFx==='function'){const fx=playPartyUnlockFx;setTimeout(()=>fx(msg),60);}else msg();}
-    else{showToast(next.main+' unlocked! During a party, tap the style name on the party button to switch.');if(typeof setPartyStyle==='function'&&partyMode)setPartyStyle(next.style);}
+    else{showToast(next.main+' unlocked! Pick it from the PARTY menu.');if(typeof setPartyStyle==='function'&&partyMode)setPartyStyle(next.style);}
     if(typeof refreshPartyAccess==='function')refreshPartyAccess();
     if(typeof renderUI==='function')renderUI();else renderStoreUnlocks();
     if(typeof autoSave==='function')autoSave();
   }
+  window.buyPartyNext=buyParty;   // (the level 3 teaser on the drum pads screen buys through this too)
   function buySeqFeat(){
     const sf=shop.seqFeat||0,next=SEQ_FEATS[sf];if(!next||score<next.cost)return;
     score-=next.cost;shop.seqFeat=sf+1;

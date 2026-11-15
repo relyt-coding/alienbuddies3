@@ -2,6 +2,11 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.150 - 2026-11-15 11:35
+
+- Alien Gems have their own look: the Gem Buddy, a green crystal with a little face and antennae with glowing pink bead tips (like Chloe's). It replaces the diamond everywhere: the shop, the bunker, the galaxy map, prices, rewards and messages.
+- Where there's room (the gem counters in the shop, the bunker and the galaxy map) the gem bobs slowly, its antennae sway behind the motion, and every so often it blinks.
+
 ## v0.2.149 - 2026-11-15 10:40
 
 - The Knowledge Vault is now its own page: from the bunker, swipe right (or tap VAULT). Page order: Cockpit · Vault · Best Buddy · Bunker · Home · Shop · Galaxies. On a computer it still opens as a window.

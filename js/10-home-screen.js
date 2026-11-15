@@ -175,5 +175,29 @@ function goToHomeScreen(){
   updateFullscreenBtnVisibility();
   buildHomeScreen();
   autoSave();
+  checkForUpdate();
 }
 buildHomeScreen();
+
+// ── Newer version? A phone can keep a tab open for days, still running the version it first loaded (that's how a
+//    new file can miss a brand-new feature). Whenever the title screen is up (nothing to lose there: the game is
+//    saved), check for a newer deploy and quietly reload into it. ──
+let _verCheckAt=0;
+function _verNewer(a,b){const A=a.split('.').map(Number),B=b.split('.').map(Number);for(let i=0;i<Math.max(A.length,B.length);i++){const x=A[i]||0,y=B[i]||0;if(x!==y)return x>y;}return false;}
+function checkForUpdate(){
+  try{
+    if(document.body.classList.contains('game-active')||location.protocol==='file:'||typeof fetch!=='function')return;
+    const now=Date.now();if(now-_verCheckAt<15000)return;_verCheckAt=now;
+    fetch('js/01-constants.js?v='+now,{cache:'no-store'}).then(r=>r.ok?r.text():'').then(t=>{
+      const m=/GAME_VERSION\s*=\s*'([\d.]+)'/.exec(t||'');if(!m||!_verNewer(m[1],GAME_VERSION))return;
+      // still on the title screen, not typing a file name, and not already reloaded for this version
+      const ae=document.activeElement;
+      if(document.body.classList.contains('game-active')||(ae&&/INPUT|TEXTAREA/.test(ae.tagName)))return;
+      try{if(sessionStorage.getItem('ab2_reloadedFor')===m[1])return;sessionStorage.setItem('ab2_reloadedFor',m[1]);}catch(e){}
+      location.reload();
+    }).catch(()=>{});
+  }catch(e){}
+}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')checkForUpdate();});
+window.addEventListener('pageshow',e=>{if(e.persisted)checkForUpdate();});
+setTimeout(checkForUpdate,1500);

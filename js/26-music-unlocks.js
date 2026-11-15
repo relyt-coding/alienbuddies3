@@ -16,9 +16,8 @@ function applyMusicUnlocks(justBoughtId,quiet){
   const _sf=id=>typeof seqFeatHas==='function'&&seqFeatHas(id);
   const lvl=_sf('steps64')?2:(_sf('steps32')?1:0);
   shop.seqStepsLevel=lvl;
-  if(justBoughtId==='mt_steps32'||justBoughtId==='mt_steps64'){
-    STEPS=justBoughtId==='mt_steps64'?64:32;applyStepCount(); // switch to the new length straight away
-  }else if((STEPS===32&&lvl<1)||(STEPS===64&&lvl<2)){
+  // (unlocking 32 / 64 steps doesn't change the loop: your beat stays as it is until you pick a length with STEPS)
+  if((STEPS===32&&lvl<1)||(STEPS===64&&lvl<2)){
     STEPS=16;applyStepCount();
   }
   if(typeof updateStepsBtn==='function')updateStepsBtn();
@@ -63,8 +62,8 @@ function applyMusicUnlocks(justBoughtId,quiet){
 
   // a short pointer to where the new feature lives
   const where={
-    mt_steps32:'🔢 32 steps! Switch loop length with the STEPS button.',
-    mt_steps64:'🔢 64 steps! Switch loop length with the STEPS button.',
+    mt_steps32:'🔢 32 steps unlocked! Your beat stays as it is. Use the STEPS button to switch.',
+    mt_steps64:'🔢 64 steps unlocked! Your beat stays as it is. Use the STEPS button to switch.',
     mt_reverb:'🏛 Reverb unlocked: open EFFECTS under the sequencer.',
     mt_echo:'📣 Echo unlocked: open EFFECTS under the sequencer.',
     mt_key:'🎼 The KEY button is here. Your song is now in C major.',

@@ -82,7 +82,7 @@ function partyOwnedStyles(){return PARTY_LADDER.slice(0,Math.max(0,shop.partyLev
     const sf=shop.seqFeat||0,next=SEQ_FEATS[sf];if(!next||score<next.cost)return;
     score-=next.cost;shop.seqFeat=sf+1;
     if(typeof playSfxPurchase==='function')playSfxPurchase();if(typeof flashBuy==='function')flashBuy('#a0a8ff');
-    const toasts={bpm:'⏱ BPM control unlocked: use − / + next to play (double-tap the number to type one).',steps32:'🔢 32 steps! Switch loop length with the STEPS button.',steps64:'🔢 64 steps! Switch loop length with the STEPS button.',arrange:'🧩 Arrangement tab unlocked: PAT / ARR switch at the top of the sequencer.',song:'💿 SONG tab unlocked next to PAT / ARR.'};
+    const toasts={bpm:'⏱ BPM control unlocked: use − / + next to play (double-tap the number to type one).',steps32:'🔢 32 steps unlocked! Your beat stays as it is. Use the STEPS button to switch.',steps64:'🔢 64 steps unlocked! Your beat stays as it is. Use the STEPS button to switch.',arrange:'🧩 Arrangement tab unlocked: PAT / ARR switch at the top of the sequencer.',song:'💿 SONG tab unlocked next to PAT / ARR.'};
     showToast(toasts[next.id]);
     if(typeof applyMusicUnlocks==='function')applyMusicUnlocks(next.id==='steps32'?'mt_steps32':next.id==='steps64'?'mt_steps64':null,true);
     if(typeof renderUI==='function')renderUI();else renderStoreUnlocks();

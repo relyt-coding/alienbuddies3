@@ -23,6 +23,22 @@ const ALIEN_TINTS=['hue-rotate(0deg)','hue-rotate(40deg)','hue-rotate(80deg)','h
 const PARTY_COLORS=['#ff0044','#ff8800','#ffee00','#00ff88','#00ccff','#aa44ff','#ff00cc','#ffffff'];
 
 function formatNum(n){n=Math.floor(n);const T=1e12;function sci(x){const e=Math.floor(Math.log10(x));return (x/Math.pow(10,e)).toFixed(3).replace(/\.?0+$/,'')+'e'+e;}return n<T?n.toLocaleString():sci(n);}
+// ── v0.2.162: the score is ENERGY, shown in watts with real units (W, kW, MW, GW …), like a power meter ──
+//   fmtW(n)      → "2.5 MW"   (prices, messages; 4 significant digits)
+//   fmtW(n,6)    → "520.526 kW" (the big score: more digits so each tap visibly moves it)
+//   wHtml(n)     → "2.5<small>MW</small>" (shop price tags: big number, small unit)
+const W_UNITS=['W','kW','MW','GW','TW','PW','EW','ZW','YW','RW','QW'];
+function wParts(n,sig){n=Math.max(0,Math.floor(n||0));sig=sig||4;
+  if(n<1000)return[n.toLocaleString(),'W'];
+  const k=Math.floor(Math.log10(n)/3);
+  if(k>=W_UNITS.length){const e=Math.floor(Math.log10(n));return[(n/Math.pow(10,e)).toFixed(2).replace(/\.?0+$/,'')+'e'+e,'W'];}
+  let v=n/Math.pow(1000,k),t=v.toPrecision(sig);
+  if(parseFloat(t)>=1000&&k+1<W_UNITS.length)return wParts(Math.pow(1000,k+1),sig);   // 999,999 W → "1 MW", not "1000 kW"
+  if(t.indexOf('e')>=0)t=String(Math.round(v));
+  if(t.indexOf('.')>=0)t=t.replace(/0+$/,'').replace(/\.$/,'');
+  return[t,W_UNITS[k]];}
+function fmtW(n,sig){const p=wParts(n,sig);return p[0]+' '+p[1];}
+function wHtml(n,sig){const p=wParts(n,sig);return p[0]+'<small>'+p[1]+'</small>';}
 function formatSci(n){n=Math.floor(n);if(n===0)return '0';const e=Math.floor(Math.log10(Math.max(1,n)));return (n/Math.pow(10,e)).toFixed(3).replace(/\.?0+$/,'')+'e'+e;}
 function formatFull(n){n=Math.floor(n);return n.toLocaleString();}
 function formatStore(n){n=Math.floor(n);const T=1e12;function sci(x){const e=Math.floor(Math.log10(x));return (x/Math.pow(10,e)).toFixed(2).replace(/\.?0+$/,'')+'E'+e;}if(n<T){if(n>=1e9)return(n/1e9).toFixed(2).replace(/\.?0+$/,'')+'B';if(n>=1e6)return(n/1e6).toFixed(2).replace(/\.?0+$/,'')+'M';if(n>=1e3)return(n/1e3).toFixed(0)+'K';return n.toLocaleString();}return sci(n);}
@@ -56,7 +72,7 @@ function alienDiscount(n){
   return Math.pow(10,i<=k?ALIEN_L[i]:ALIEN_L[k]+(ALIEN_L[k]-ALIEN_L[k-1])*(i-k));
 }
 const _disc=c=>{const d=progressDiscount();return d>1?Math.max(1,Math.round(c/d)):c;};
-const GAME_VERSION='0.2.161'; // bump on every delivered build (shown in Settings and on the home screen)
+const GAME_VERSION='0.2.162'; // bump on every delivered build (shown in Settings and on the home screen)
 const BASE_CPS=5;
 const UNLOCK_COST=bump30(60000000);
 const ALIEN_POWER_UNLOCK_COST=bump30(600000000);
@@ -112,6 +128,7 @@ function _multiClickBase(lvl){if(lvl===0)return _disc(15000000);const k=Math.min
 function multiClickUpgradeAt(lvl){const clicks=lvl+2;return{effectMain:`${clicks}× CLICKS`,effectSub:`Each tap counts as ${clicks} clicks`,cost:multiClickUpgradeCost(lvl)};}
 
 // Pad button costs: 1 free, 2=5 (kick), 3=100 (snare), 4=3K, 5=2.5M ...
+const SEQ_TRACKER_COST=1e6;   // v0.2.162: ACTIVATE for the sequencer's dot tracker (1 MW)
 const PAD_COSTS=[0,10,100,5000,2500000,9000000000,60000000000,450000000000].map(bump30); // pad 2 (kick) is just 10 pts so players find the drum pad fast
 const PAD_DEFAULT_SOUNDS=['hihat','kick','snare',null,null,null,null,null]; // null = no sound, must buy from library
 

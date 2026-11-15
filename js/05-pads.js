@@ -104,7 +104,7 @@ function rebuildPadGrid(){
       `<div class="pad-edit-hint">✏</div>`+
       `<div class="pad-name">${snd?snd.name:'NO SOUND'}</div><div class="pad-key" data-pad="${i}">${keyHintFor(i)}</div>`+
       `<div class="pad-sub${snd?'':' empty'}">${snd?snd.tag:'tap to assign'}</div>`+
-      (i===0?'<div class="pad-click-hint" id="padClickHint" style="display:none;">CLICK FOR POINTS</div>':'');
+      (i===0?'<div class="pad-click-hint" id="padClickHint" style="display:none;">CLICK FOR WATTS</div>':'');
     const idx=i;
     el.addEventListener('pointerdown',e=>{
       e.preventDefault();
@@ -126,7 +126,7 @@ function rebuildPadGrid(){
     const _gi=drum.pads+k,_gs=SOUND_MAP[PAD_DEFAULT_SOUNDS[_gi]];
     g.className='pad ghost-pad'+(k?' ghost-later':'');g.id=k?'ghostPad'+(k+1):'ghostPad';
     g.style.setProperty('--pc',_gi===1?'#ff7a50':((_gs&&_gs.color)||'#ffcc44'));
-    g.innerHTML=`<div class="pad-name">${(_gs&&_gs.name)||'NEW PAD'}</div><div class="ghost-cost"${k?'':' id="ghostPadSub"'}>${(typeof formatStore==='function'?formatStore(PAD_COSTS[_gi]):PAD_COSTS[_gi])} PTS</div>`;
+    g.innerHTML=`<div class="pad-name">${(_gs&&_gs.name)||'NEW PAD'}</div><div class="ghost-cost"${k?'':' id="ghostPadSub"'}>${fmtW(PAD_COSTS[_gi])}</div>`;
     // the next one buys; a later one just shakes (pads unlock in order)
     g.addEventListener('pointerdown',e=>{e.preventDefault();if(!k){unlockGhostPad();return;}g.classList.remove('nope');void g.offsetWidth;g.classList.add('nope');});
     padGridEl.appendChild(g); // not added to padEls, so pad indexes stay correct
@@ -143,7 +143,7 @@ function updatePadClickHint(){
 function unlockGhostPad(){
   if(drum.pads<1||drum.pads>3)return;
   const cost=PAD_COSTS[drum.pads];
-  if(score<cost){showToast(`Need ${typeof formatStore==='function'?formatStore(cost):cost} points — keep tapping!`);return;}
+  if(score<cost){showToast(`Need ${fmtW(cost)} — keep tapping!`);return;}
   buyNextPad();
 }
 function updateGhostPad(){

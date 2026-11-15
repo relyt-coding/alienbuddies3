@@ -19,8 +19,8 @@ const KEYS_VOICES=[
   {id:'bass',    name:'BASS',     color:'#ff5577'},
   {id:'choir',   name:'CHOIR',    color:'#e6d4ff'},
 ];
-const KEYS_REVEAL_AT=2e6;
-function keysLadderCost(lvl){return _disc(bump30(2e7*Math.pow(20,lvl)));}   // unlock 26M, then ×20 per voice
+const KEYS_REVEAL_AT=2e7;
+function keysLadderCost(lvl){return _disc(bump30(2e8*Math.pow(20,lvl)));}   // v0.2.162: ×10 dearer: unlock 260 MW, then ×20 per voice
 function keysOwned(){return (shop.keysLevel||0)>0;}
 function keysVoiceOwned(i){return i<(shop.keysLevel||0);}
 
@@ -102,17 +102,76 @@ function keysVoiceOwned(i){return i<(shop.keysLevel||0);}
     $('keysCardNum').textContent=lv;const nx=nextStep(),btn=$('keysCardBtn'),pr=$('keysCardPrice');
     if(!nx){btn.className='drum-buy-btn maxed';$('keysCardMain').textContent='EVERY VOICE';$('keysCardSub2').textContent='All '+KEYS_VOICES.length+' voices · change voice with the arrows above the keys';pr.className='drum-price';pr.textContent='MAX';return;}
     const can=score>=nx.cost;btn.className='drum-buy-btn '+(can?'buyable':'locked');
-    $('keysCardMain').textContent=nx.main;$('keysCardSub2').textContent=nx.sub;pr.className='drum-price'+(can?'':' cant-afford');pr.innerHTML=`${formatStore(nx.cost)}<small>pts</small>`;
+    $('keysCardMain').textContent=nx.main;$('keysCardSub2').textContent=nx.sub;pr.className='drum-price'+(can?'':' cant-afford');pr.innerHTML=`${wHtml(nx.cost)}`;
   }
   function buy(){
     const nx=nextStep();if(!nx||score<nx.cost)return;
     score-=nx.cost;const lv=shop.keysLevel||0;shop.keysLevel=lv+1;
     if(typeof playSfxPurchase==='function')playSfxPurchase();if(typeof flashBuy==='function')flashBuy(KEYS_VOICES[lv].color);
-    if(lv===0){showToast(viewMenuReady()?'BUDDY KEYS unlocked! Switch to them in the VIEW menu.':'BUDDY KEYS unlocked! Tap KEYS above your pads to play.');}
+    if(lv===0){if(!playKeysUnlockFx())showToast(viewMenuReady()?'BUDDY KEYS unlocked! Switch to them in the VIEW menu.':'BUDDY KEYS unlocked! Tap KEYS above your pads to play.');}
     else{shop.keysVoice=lv;showToast(KEYS_VOICES[lv].name+' voice unlocked! Your buddies sing in it now.');}
     refreshUI();if(typeof renderUI==='function')renderUI();else renderCard();
     if(typeof autoSave==='function')autoSave();
   }
+  // ── v0.2.162: the unlock gets its own little show ──
+  // The screen dims, eight glowing keys rise one by one with a buddy popping onto each, and every key sings the next
+  // note of the scale (OOH voice) up to a final chord. Then the shop closes and the keyboard is waiting. Tap to skip.
+  function playKeysUnlockFx(){
+    if(document.getElementById('bkUnlockFx'))return true;
+    const wrap=document.createElement('div');wrap.id='bkUnlockFx';
+    wrap.innerHTML='<canvas></canvas><div class="bku-t"><b>BUDDY KEYS</b><span>Your buddies sing every note you play</span></div><div class="bku-skip">TAP TO SKIP</div>';
+    document.body.appendChild(wrap);
+    const cvs=wrap.querySelector('canvas'),g=cvs.getContext('2d'),DPR=Math.min(2,window.devicePixelRatio||1);
+    let W=0,H=0;function size(){W=innerWidth;H=innerHeight;cvs.width=W*DPR;cvs.height=H*DPR;cvs.style.width=W+'px';cvs.style.height=H+'px';}size();
+    // buddy sprites, drawn once
+    const nB=Math.max(1,typeof totalAliens!=='undefined'?totalAliens:1),spr=[];
+    for(let i=0;i<N;i++){const c=document.createElement('canvas'),S=96;c.width=c.height=S;const gg=c.getContext('2d');
+      try{drawBuddy(gg,S/2,S*.62,S*.62,Object.assign({view:'turn',angle:(i%2?-1:1)*18,lite:true,antenna:1,t:1,noShadow:true},nB>=1&&typeof alienData!=='undefined'&&alienData.length?{idx:i%nB}:{id:'chloe'}));}catch(e){}
+      spr.push(c);}
+    const STEP=.17,T0=.35,ENDK=T0+N*STEP,DUR=ENDK+1.9,col=KEYS_VOICES[0].color;
+    let t0=performance.now(),done=false,raf=0;const played=new Array(N).fill(false);let chord=false;
+    const c=getCtx(),sc=scale(),f=k=>440*Math.pow(2,(sc[k]-69)/12);
+    function sing(k,len,vel){try{const s=SYN.ooh(c.currentTime,f(k),vel||1,drumMasterGain);s.stop(c.currentTime+len);}catch(e){}}
+    const ease=x=>1-Math.pow(1-Math.max(0,Math.min(1,x)),3),pop=x=>{x=Math.max(0,Math.min(1,x));return x<.6?x/.6*1.15:1.15-.15*(x-.6)/.4;};
+    function frame(now){
+      if(done)return;const t=(now-t0)/1000;
+      g.setTransform(DPR,0,0,DPR,0,0);g.clearRect(0,0,W,H);
+      const fadeIn=Math.min(1,t/.3),fadeOut=t>DUR-.45?Math.max(0,(DUR-t)/.45):1;
+      g.fillStyle='rgba(6,4,18,'+(.9*fadeIn*fadeOut)+')';g.fillRect(0,0,W,H);
+      const kw=Math.min(W*.86,560)/N,kh=Math.min(H*.3,kw*3.4),x0=(W-kw*N)/2,y0=H*.55-kh/2;
+      for(let i=0;i<N;i++){
+        const ti=T0+i*STEP,p=ease((t-ti)/.35);
+        if(t>=ti&&!played[i]){played[i]=true;sing(i,.32,.9);}
+        if(p<=0)continue;
+        const x=x0+i*kw,lit=Math.max(0,1-(t-ti)/.6),glow=chord?Math.max(0,1-(t-ENDK)/1.2):0,y=y0+(1-p)*kh*.6;
+        g.globalAlpha=p*fadeOut;
+        g.fillStyle='rgba(157,123,255,'+(.18+.55*Math.max(lit,glow))+')';g.beginPath();g.roundRect?g.roundRect(x+3-6,y-6,kw-6+12,kh+12,14):g.rect(x+3-6,y-6,kw-6+12,kh+12);g.fill();
+        const gr=g.createLinearGradient(0,y,0,y+kh);gr.addColorStop(0,'#ffffff');gr.addColorStop(1,lit>0||glow>0?'#e6dcff':'#cfc8e8');
+        g.fillStyle=gr;g.beginPath();g.roundRect?g.roundRect(x+3,y,kw-6,kh,10):g.rect(x+3,y,kw-6,kh);g.fill();
+        // its buddy pops on and hops on its note
+        const bp=pop((t-ti-.08)/.3),hopY=Math.sin(Math.min(1,Math.max(0,(t-ti)/.35))*Math.PI)*kw*.35+(chord?Math.abs(Math.sin((t-ENDK)*9))*kw*.12*glow:0);
+        if(bp>0){const s=kw*1.15*bp;g.drawImage(spr[i],x+kw/2-s/2,y-s*.82-hopY,s,s);}
+      }
+      g.globalAlpha=1;
+      if(t>=ENDK&&!chord){chord=true;[0,2,4,7].forEach((k,j)=>setTimeout(()=>sing(k,1.1,.75),j*25));
+        wrap.classList.add('title');}
+      if(t>=DUR){finish();return;}
+      raf=requestAnimationFrame(frame);
+    }
+    function finish(){
+      if(done)return;done=true;cancelAnimationFrame(raf);wrap.classList.add('out');setTimeout(()=>wrap.remove(),300);
+      removeEventListener('resize',size);
+      // straight to the keyboard
+      const desk=document.body.classList.contains('desktop-mode');
+      if(!desk&&document.body.classList.contains('store-open')&&typeof closeStore==='function')closeStore();
+      setOn(true);
+    }
+    addEventListener('resize',size);
+    wrap.addEventListener('pointerdown',e=>{e.preventDefault();if((performance.now()-t0)>400)finish();});
+    raf=requestAnimationFrame(frame);
+    return true;
+  }
+  window.playKeysUnlockFx=playKeysUnlockFx;
   addEP('keysCardBtn',buy);
   window.renderKeysCard=renderCard;window.__keysSyn=SYN;
 

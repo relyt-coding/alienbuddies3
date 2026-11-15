@@ -239,7 +239,7 @@
 
   // ── Quad Sun I · Planet Atlas: four little worlds swing into orbit ──
   const WORLDS=[['#4fd1c5','#b8fff6','#14535a'],['#d65db1','#ffc6ec','#4a1543'],['#6fbf4a','#d2ffb0','#20451a'],['#b8c4d4','#ffffff','#3c4452']];
-  const SUN_I=quadSun({id:'sun_planets',vol:1.1,col:'#aa66ff',mid:'#efd9ff',kicker:'QUAD SUN I IGNITED',title:'PLANET ATLAS',sub:'Worlds full of new sounds · ×2 points',dir:1,
+  const SUN_I=quadSun({id:'sun_planets',vol:1.1,col:'#aa66ff',mid:'#efd9ff',kicker:'QUAD SUN I IGNITED',title:'PLANET ATLAS',sub:'Worlds full of new sounds · ×2 watts',dir:1,
     trail(st,t){g.globalCompositeOperation='lighter';st.trail.forEach((p,i)=>{const a=i/st.trail.length;g.fillStyle=rgba(i%3?'#c79bff':'#ffffff',a*.8);disc(p.x+Math.sin(i*1.7)*3,p.y+Math.cos(i*2.3)*3,1+a*st.U*.008);});g.globalCompositeOperation='source-over';},
     worlds(st,t,front){const{rs}=st;WORLDS.forEach((w,i)=>{const p=ss(1.95+i*.17,2.3+i*.17,t);if(p<=0)return;const R=st.rs*(2.0+i*.8),sp=[1.5,1.05,.78,.6][i],a=t*sp+i*1.9,z=Math.sin(a);
       if(front!==(z>=0))return;const x=st.sx+Math.cos(a)*R,y=st.sy+z*R*.42,r=st.U*(.03+.005*i)*eBack(p)*(.85+.2*z);
@@ -256,7 +256,7 @@
   // ── Quad Sun II · Musical Toolkit: it pulses to a drum groove; EQ bars blaze round it ──
   const BEAT=60/126,KICKS=[1.5,1.5+BEAT,1.5+2*BEAT,1.5+3*BEAT,1.5+4*BEAT,1.5+5*BEAT];
   const kickEnv=t=>{let e=0;KICKS.forEach(k=>{if(t>=k)e=Math.max(e,Math.exp(-(t-k)*8));});return e;};
-  const SUN_II=quadSun({id:'sun_points',vol:.4,col:'#ffcc00',mid:'#fff3b8',kicker:'QUAD SUN II IGNITED',title:'MUSICAL TOOLKIT',sub:'Tools for your music · ×2 points',dir:-1,rays:16,
+  const SUN_II=quadSun({id:'sun_points',vol:.4,col:'#ffcc00',mid:'#fff3b8',kicker:'QUAD SUN II IGNITED',title:'MUSICAL TOOLKIT',sub:'Tools for your music · ×2 watts',dir:-1,rays:16,
     pulse(st,t){return kickEnv(t);},
     trail(st,t){g.lineCap='round';for(let i=1;i<st.trail.length;i++){const a=i/st.trail.length,p=st.trail[i],q=st.trail[i-1];g.strokeStyle=rgba('#ffd84a',a*.9);g.lineWidth=1+a*st.U*.012;g.beginPath();g.moveTo(q.x,q.y);g.lineTo(p.x,p.y);g.stroke();}},
     back(st,t){if(t<1.5)return;const e=kickEnv(t),n=40;g.globalCompositeOperation='lighter';
@@ -284,7 +284,7 @@
   // ── Quad Sun III · Minigame Nexus: 8-bit — a countdown, a pixel comet, a sun that rezzes in, game icons and coins ──
   const ICONS=['🪐','🪱','🥁','🏆'];
   function pixCanvas(st){if(!st.pc){st.pc=document.createElement('canvas');st.pq=st.pc.getContext('2d');}return st.pq;}
-  const SUN_III=quadSun({id:'sun_minigames',vol:2.2,col:'#ff6644',mid:'#ffd8a0',kicker:'QUAD SUN III IGNITED',title:'MINIGAME NEXUS',sub:'New games to play · ×2 points',dir:1,flash:'#fff0c0',
+  const SUN_III=quadSun({id:'sun_minigames',vol:2.2,col:'#ff6644',mid:'#ffd8a0',kicker:'QUAD SUN III IGNITED',title:'MINIGAME NEXUS',sub:'New games to play · ×2 watts',dir:1,flash:'#fff0c0',
     trail(st,t){const px=Math.max(4,Math.round(st.U/64));st.trail.forEach((p,i)=>{const a=i/st.trail.length;g.fillStyle=['#ff3b3b','#ff8a2a','#ffd23f','#ffffff'][Math.min(3,Math.floor(a*4))];g.globalAlpha=.25+a*.75;
       const s=px*(1+Math.floor(a*2));g.fillRect(Math.round(p.x/px)*px-s/2,Math.round(p.y/px)*px-s/2,s,s);});g.globalAlpha=1;
       // 3 · 2 · 1
@@ -314,7 +314,7 @@
 
   // ── Quad Sun IV · Alien Evolution: it spins in on a DNA helix, then buddies pop up round it ──
   const BUD_COLS=['#42a5f5','#ff5fb8','#5fe07a','#ffd23f','#b38cff','#ff8a3d'];
-  const SUN_IV=quadSun({id:'sun_aliens',vol:1.2,col:'#44eebb',mid:'#d8fff0',kicker:'QUAD SUN IV IGNITED',title:'ALIEN EVOLUTION',sub:'Evolve your buddies · ×2 points',dir:-1,
+  const SUN_IV=quadSun({id:'sun_aliens',vol:1.2,col:'#44eebb',mid:'#d8fff0',kicker:'QUAD SUN IV IGNITED',title:'ALIEN EVOLUTION',sub:'Evolve your buddies · ×2 watts',dir:-1,
     trail(st,t){const T=st.trail;if(T.length<3)return;
       for(let i=1;i<T.length;i++){const p=T[i],q=T[i-1],dx=p.x-q.x,dy=p.y-q.y,l=Math.hypot(dx,dy)||1,nx=-dy/l,ny=dx/l,a=i/T.length,w=st.U*.018*a,ph=i*.55-t*9;
         const A={x:p.x+nx*Math.sin(ph)*w,y:p.y+ny*Math.sin(ph)*w},B={x:p.x-nx*Math.sin(ph)*w,y:p.y-ny*Math.sin(ph)*w};

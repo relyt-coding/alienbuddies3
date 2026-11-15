@@ -50,13 +50,13 @@ function buildScoreStats(){
   scoreStatsList.appendChild(totalRow);
 
   // ── SCORE ──
-  scoreStatsList.appendChild(ssLabel('CURRENT SCORE'));
-  scoreStatsList.appendChild(ssRow('🏆','SCORE','Your total accumulated points',formatNum(score),true,'gold'));
+  scoreStatsList.appendChild(ssLabel('ENERGY'));
+  scoreStatsList.appendChild(ssRow('⚡','WATTS','All the energy your music has made · '+formatFull(score)+' W',fmtW(score),true,'gold'));
 
   // ── PER TAP ──
   scoreStatsList.appendChild(ssLabel('PER TAP'));
-  const ptVal=formatNum(Math.floor(mult*cpt));
-  scoreStatsList.appendChild(ssRow('👆','POINTS PER TAP',`×${formatMult(mult)} × ${cpt} click${cpt>1?'s':''}`,ptVal,true,'green'));
+  const ptVal=fmtW(Math.floor(mult*cpt));
+  scoreStatsList.appendChild(ssRow('👆','WATTS PER TAP',`×${formatMult(mult)} × ${cpt} click${cpt>1?'s':''}`,ptVal,true,'green'));
   if(cpt>1){
     scoreStatsList.appendChild(ssRow('🖱','MULTI-CLICK',`Tap counts as ${cpt} clicks`,`×${cpt}`,true));
   }
@@ -125,7 +125,7 @@ function buildScoreStats(){
   scoreStatsList.appendChild(ssLabel('SEQUENCER'));
   if(drum.seqTracks>=1){
     scoreStatsList.appendChild(ssRow('🎛','SEQUENCER',seqPlaying?`Playing · ${seqBpm} BPM`:'Paused · press play to earn',`${formatRate(seqPlaying?seqStepsPerSec():0)} steps/sec`,seqPlaying));
-    scoreStatsList.appendChild(ssRow('💰','SEQUENCER EARNINGS','Every step scores · BPM never changes points per second',formatRate(seqPlaying?seqEarningsPerSec():0)+'/s',seqPlaying,'gold'));
+    scoreStatsList.appendChild(ssRow('💰','SEQUENCER EARNINGS','Every step makes watts · BPM never changes the watts per second',formatRate(seqPlaying?seqEarningsPerSec():0)+'/s',seqPlaying,'gold'));
     scoreStatsList.appendChild(ssRow('🔋','ENERGY',`Pad hits recharge it · drains 1 section per ${SEQ_ENERGY_SEC_PER_SECTION}s while the sequencer plays`,`${Math.ceil(seqEnergy-1e-9)}/${SEQ_ENERGY_MAX}`,seqEnergy>0));
     scoreStatsList.appendChild(ssRow('✖️','SEQUENCER STEP VALUE','Sequencer tiers × shared boosts',`×${formatMult(seqStepMultiplier())}`,true));
     autoTiers.forEach((t,i)=>{if(t.multiplierActive)scoreStatsList.appendChild(ssRow('⚡',`SEQUENCER TIER ${i+1}`,'Dot streak reward · stacks',`×${tierMultValueFor('seq',i).toLocaleString()}`,true));});

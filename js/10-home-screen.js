@@ -28,7 +28,7 @@ function buildHomeScreen(){
     const detail=document.createElement('div');detail.style.cssText='display:flex;flex-direction:column;gap:.1rem;margin-top:.25rem;';
     if(sum){
       const aliensLine=document.createElement('div');aliensLine.className='slot-detail';
-      aliensLine.textContent=`${formatNum(sum.score)} pts  ·  ${sum.aliens} alien${sum.aliens!==1?'s':''}`;
+      aliensLine.textContent=`${fmtW(sum.score)}  ·  ${sum.aliens} alien${sum.aliens!==1?'s':''}`;
       const dateLine=document.createElement('div');dateLine.className='slot-detail';
       dateLine.style.color='#446655';dateLine.textContent=`Last played: ${sum.date}`;
       detail.appendChild(aliensLine);detail.appendChild(dateLine);
@@ -134,7 +134,7 @@ function startGame(slotIndex){
   let introOn=false;
   {const isMobile=!document.body.classList.contains('desktop-mode');
     const verb=isMobile?'Press':'Click';
-    const hint=isNewFile?()=>showToast(verb+' the Hi-Hat button to gain points!'):()=>{};
+    const hint=isNewFile?()=>showToast(verb+' the Hi-Hat button to make watts!'):()=>{};
     if(typeof playNewFileIntro==='function'&&!window.__noIntro&&!document.body.classList.contains('mobile-view-mode'))introOn=()=>{if(!playNewFileIntro({tuck:true,onDone:()=>setTimeout(hint,250)}))setTimeout(hint,500);};
     else if(isNewFile)setTimeout(hint,800);
   }

@@ -55,6 +55,7 @@ function addDotToTier(i,anims){
   if(tier.litDots>=DOTS){tier.litDots=0;if(!tier.multiplierActive){tier.multiplierActive=true;flashBuy(color(i).hex);ensureTiers(i+2);if(trackerOnScreen('manualTiersCol'))playSfxTierUnlock(i,0.4);}addDotToTier(i+1,anims);}
 }
 function addDotToAutoTier(i,anims){
+  if(typeof seqTrackerActive!=='undefined'&&!seqTrackerActive)return;   // v0.2.162: needs its own ACTIVATE first
   ensureAutoTiers(i+1);const tier=autoTiers[i];tier.litDots++;
   anims.push({src:'auto',tier:i,dot:tier.litDots-1});
   if(tier.litDots>=DOTS){tier.litDots=0;if(!tier.multiplierActive){tier.multiplierActive=true;if(trackerOnScreen('autoTiersCol'))playSfxTierUnlock(i,0.4);ensureAutoTiers(i+2);}addDotToAutoTier(i+1,anims);}

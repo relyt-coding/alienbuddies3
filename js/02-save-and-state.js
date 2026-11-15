@@ -39,7 +39,7 @@ function autoSave(){
     totalAliens,alienData,
     drum:{pads:drum.pads,extraSounds:drum.extraSounds,seqTracks:drum.seqTracks},
     matchLevelsCompleted,matchingMultiplier,matchSavedState,wormMultiplier,wormProgress,phMultiplier,phProgress,
-    mgBought:(typeof mgBought!=='undefined')?mgBought:undefined,bdProgress:(typeof bdProgress!=='undefined')?bdProgress:undefined,tipsOwned,tipsSet,tipsMult,vaultSeen,vaultOwned,drumTrackerActive,shopOpenCount,hasSeenSeqHint,
+    mgBought:(typeof mgBought!=='undefined')?mgBought:undefined,bdProgress:(typeof bdProgress!=='undefined')?bdProgress:undefined,tipsOwned,tipsSet,tipsMult,vaultSeen,vaultOwned,drumTrackerActive,seqTrackerActive,shopOpenCount,hasSeenSeqHint,
     savedPatterns,savedArrangements,songSlots,
     padSounds:[...padSounds],
     soundVols:{...soundVols},
@@ -84,6 +84,7 @@ let vaultSeen=[]; // Knowledge Vault entries already seen (js/68)
 let vaultOwned=[]; // Knowledge Vault lessons / words bought with points (×1.05 each, js/68)
 let vaultMult=1;
 let drumTrackerActive=false; // paid 25pts to activate drum dot tracker
+let seqTrackerActive=false; // v0.2.162: the sequencer's dot tracker is its own 1 MW ACTIVATE (js/72)
 let shopOpenCount=0;
 let hasSeenSeqHint=false;
 let shownHints={tips:false,matchingIntro:false,matchingGame:false};
@@ -218,6 +219,7 @@ function loadFromSave(data){
   vaultSeen=Array.isArray(data.vaultSeen)?data.vaultSeen.filter(x=>typeof x==='string'):[];
   vaultOwned=Array.isArray(data.vaultOwned)?data.vaultOwned.filter(x=>typeof x==='string'):[];vaultMult=Math.pow(1.05,vaultOwned.length);
   drumTrackerActive=data.drumTrackerActive||false;
+  seqTrackerActive=data.seqTrackerActive!==undefined?!!data.seqTrackerActive:((data.drum&&data.drum.seqTracks)||0)>=1;   // old saves that had it keep it
   shopOpenCount=data.shopOpenCount||0;
   hasSeenSeqHint=data.hasSeenSeqHint||false;
   setTimeout(()=>{updateTipsLabel();updateDrumTrackerOverlay();},0);

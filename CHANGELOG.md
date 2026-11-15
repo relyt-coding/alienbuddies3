@@ -2,6 +2,14 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.162 - 2026-11-15 16:00
+- Your music now makes energy: the score is shown in watts with real units (W, kW, MW, GW and up), and shop prices and messages use watts too. Tap the score for the Watts Breakdown.
+- Alien Gem Math: tap the gem counter in the Bunker or the Shop to see where your gems come from (also at the bottom of the Watts Breakdown).
+- The PARTY button moved to the top-left corner with a little disco ball. MY ACCOUNT is now in Settings.
+- The DRUMS | KEYS switch is the same size as the buttons next to it.
+- Buddy Keys cost 10× more, and unlocking them plays a little show: your buddies pop onto glowing keys and sing a scale.
+- The sequencer's dot tracker now has its own 1 MW ACTIVATE button after you buy the sequencer (if you already had it, you keep it).
+
 ## v0.2.161 - 2026-11-15 15:16
 - Your first buddy no longer flashes on screen before the bunker and shop cutscene. It stays hidden until the cutscene is over, then pops in.
 - Knowledge Vault: tap a tip, lesson or word you own to fold it down to its title; tap again to open it.

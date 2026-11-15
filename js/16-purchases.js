@@ -60,12 +60,12 @@ function buySeqTrack(){
     // the sequencer boots up on screen first, then starts playing
     // (the functions are picked up now, so a quiet test-mode buy stays quiet)
     if(typeof playSeqUnlockFx==='function'){const st=startSeq,toast=showToast;let go=false;
-      const start=()=>{if(go)return;go=true;if(!seqPlaying&&drum.seqTracks>0)st();toast('🎛 Sequencer unlocked — every step now earns points! Click steps to set beats.');};
+      const start=()=>{if(go)return;go=true;if(!seqPlaying&&drum.seqTracks>0)st();toast('🎛 Sequencer unlocked — every step now makes watts! Click steps to set beats.');};
       playSeqUnlockFx(start);setTimeout(start,3500);}
     else startSeq();
     // (the background hum keeps playing; the old ♪ groove was removed in v0.2.157)
     applyAmbienceLock();
-    if(typeof playSeqUnlockFx!=='function')showToast('🎛 Sequencer unlocked — every step now earns points! Click steps to set beats.');
+    if(typeof playSeqUnlockFx!=='function')showToast('🎛 Sequencer unlocked — every step now makes watts! Click steps to set beats.');
   }else{
     // Add another track — auto-add it immediately, no button press needed
     const defaults=['hihat','snare','kick','clap','sub','chord'];

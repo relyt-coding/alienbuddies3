@@ -42,10 +42,10 @@ const _vPiano=()=>_vHas('mt_piano')||_vKeys();
 // ── LEARN cards: [id, tab, title, text, unlocked?] ──
 const VAULT_LEARN=[
   // GAME BASICS
-  ['l_points','basics','Points & Multipliers','Every hit of a drum pad earns points. Multipliers stack by multiplying: a ×2 and a ×3 together make ×6, which is why small boosts add up fast.',()=>true],
+  ['l_points','basics','Watts & Multipliers','Every hit of a drum pad makes energy, counted in watts (W). 1,000 W is a kilowatt (kW), 1,000 kW is a megawatt (MW), then gigawatts (GW) and up. Multipliers stack by multiplying: a ×2 and a ×3 together make ×6, which is why small boosts add up fast.',()=>true],
   ['l_gems','basics','Alien Gems','Each alien buddy makes 1 Alien Gem every minute, even while you\'re busy doing something else. Gems are spent in the skill tree.',()=>_vBuddies(1)],
   ['l_tree','basics','The Skill Tree','The skill tree is a map of galaxies. Every node you unlock opens a new sound, feature or minigame, and many of them teach you a new music fact. You\'ll find those facts again here in the Vault.',()=>_vTree()],
-  ['l_match','basics','Minigames','The Matching Game gives you permanent point multipliers. The minigames in the Cockpit (Planet Hop, Worm Whack and more) boost your Alien Gems instead.',()=>_vBuddies(1)],
+  ['l_match','basics','Minigames','The Matching Game gives you permanent watt multipliers. The minigames in the Cockpit (Planet Hop, Worm Whack and more) boost your Alien Gems instead.',()=>_vBuddies(1)],
   // ALIEN BUDDIES
   ['l_hatch','buddies','Hatching','Every alien buddy hatches from an egg, and no two games hatch them in the same order. Every 10th buddy comes from a special egg.',()=>_vBuddies(1)],
   ['l_bunker','buddies','The Bunker','The bunker is your buddies\' home: 100 buddies fit in each bunker. Tap any buddy to see it up close and give it a name.',()=>_vBuddies(1)],
@@ -344,7 +344,7 @@ function renderVault(scrollTab){
       const row=el('div','vb-row');row.appendChild(el('h4','',(tipHave(i)?'✓ ':'')+'TIP '+(i+1)));
       if(tipHave(i)){row.appendChild(el('div','vb-act','×1.5 ACTIVE'));card.appendChild(row);card.appendChild(el('p','',esc(tipText(i))));vaultFoldable(card,'tip'+i);}
       else{
-        const cost=tipCost(i),can=score>=cost,bt=el('button','vb-buy'+(can?' can':''),formatStore(cost)+' PTS');bt.type='button';
+        const cost=tipCost(i),can=score>=cost,bt=el('button','vb-buy'+(can?' can':''),fmtW(cost));bt.type='button';
         if(can)bt.addEventListener('click',()=>{
           if(!buyTip(i))return;
           showToast('Tip unlocked: your Tap Multiplier increased by ×1.5!');
@@ -359,7 +359,7 @@ function renderVault(scrollTab){
   // LEARN cards / WORDS (each one costs points once its feature is unlocked)
   const entries=vaultEntries(tab.id),open=entries.filter(e=>e.on());locked+=entries.length-open.length;
   const ec=vaultEntryCost(),canE=score>=ec;
-  const buyBtn=e=>{const bt=el('button','vb-buy'+(canE?' can':''),formatStore(ec)+' PTS');bt.type='button';
+  const buyBtn=e=>{const bt=el('button','vb-buy'+(canE?' can':''),fmtW(ec));bt.type='button';
     if(canE)bt.addEventListener('click',ev=>{ev.stopPropagation();if(vaultBuyEntry(e))renderVault();});return bt;};
   const tag=e=>vaultIsNew(e)?' <span class="vb-tag">NEW</span>':'';
   if(tab.id==='words'){

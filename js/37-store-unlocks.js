@@ -59,7 +59,7 @@ function partyOwnedStyles(){return PARTY_LADDER.slice(0,Math.max(0,shop.partyLev
     btn.className='drum-buy-btn '+(can?'buyable':'locked');
     $(pre+'Main').textContent=next.main;$(pre+'Sub2').textContent=next.sub;
     pr.className='drum-price'+(can?'':' cant-afford');
-    pr.innerHTML=`${formatStore(next.cost)}<small>pts</small>`;
+    pr.innerHTML=`${wHtml(next.cost)}`;
   }
   window.renderStoreUnlocks=function(){
     // ── party ──
@@ -72,7 +72,7 @@ function partyOwnedStyles(){return PARTY_LADDER.slice(0,Math.max(0,shop.partyLev
       partyCard.title=next?next.sub:'All '+PARTY_LADDER.length+' styles unlocked · pick one from the PARTY menu';
       partyCard.className='alien-store-card party-store-card '+(!next?'maxed':can?'buyable':'locked');
       const pr=$('partyStoreCardPrice');pr.className='alien-card-price'+(!next||can?'':' cant-afford');
-      pr.innerHTML=next?`${formatStore(next.cost)}<small>pts</small>`:'MAX';}
+      pr.innerHTML=next?`${wHtml(next.cost)}`:'MAX';}
     // ── sequencer ──
     const sf=shop.seqFeat||0;
     seqUpCard.style.display=(typeof drum!=='undefined'&&drum.seqTracks>0)?'':'none';

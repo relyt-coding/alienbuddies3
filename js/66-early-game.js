@@ -243,7 +243,7 @@
       if(eggOn)setTimeout(()=>{paintEggCanvas(eggCrack<0?0:eggCrack);placeEgg();},0);}
     if(hold){tzHoldSeen=true;return;}
     const c=tzCost(),ready=score>=c;
-    const pt=c.toLocaleString('en-US');if(pt!==tzPrice){tzPrice=pt;$('seqTeaserPrice').innerHTML=pt+'<small>PTS</small>';}
+    const pt=wHtml(c);if(pt!==tzPrice){tzPrice=pt;$('seqTeaserPrice').innerHTML=pt;}
     $('seqTeaserFill').style.width=(Math.min(1,score/c)*100).toFixed(2)+'%';
     if(ready!==tzReady){tzReady=ready;tz.classList.toggle('ready',ready);if(ready)startChase();else stopChase();}
   }

@@ -113,6 +113,7 @@ body.desktop-mode #socialsBtn:active{background:#1a1a1a;border-color:#6699ff;col
 
 /* Score */
 .score-section{text-align:center;z-index:3;}
+.score .w-unit{font-size:.42em;margin-left:.14em;letter-spacing:.04em;opacity:.8;}
 .score{font-family:'Bebas Neue',sans-serif;font-size:clamp(2.6rem,12vw,5.5rem);line-height:1;letter-spacing:-.02em;}
 .score-sub{font-family:'Bebas Neue',sans-serif;font-size:clamp(.52rem,1.8vw,.75rem);color:#3a6a4a;letter-spacing:.04em;line-height:1.3;margin-top:.15rem;min-height:.9rem;transition:opacity .3s;word-break:break-all;white-space:normal;overflow-wrap:break-word;padding:0 .5rem;}
 .score.flash{text-shadow:0 0 40px rgba(255,255,255,.9);}

@@ -2633,12 +2633,18 @@ body.shop-b .shop-shelf #alienBuyBtn .alien-card-price,body.shop-b .shop-shelf #
 @keyframes pscSpin{to{background-position:0 0,4.4px 0,0 4.4px,0 0;filter:hue-rotate(0deg);}}
 @keyframes pscTwinkle{0%,100%{opacity:0;transform:scale(.4);}50%{opacity:1;transform:scale(1);}}
 
-/* ═══════ the party button during a party: [ STYLE ▸ | STOP ] in one bubble ═══════ */
-#partyBtn.pb-split{display:none;align-items:center;white-space:nowrap;}
+/* ═══════ the party button during a party: the style's name, a dot per style (tap = next style, past the last one
+   = party over), and press-and-hold fills it up to end the party ═══════ */
+#partyBtn{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;}
+#partyBtn.pb-split{display:none;align-items:center;white-space:nowrap;position:fixed;overflow:hidden;}
 #partyBtn.pb-split.visible{display:inline-flex;}
-#partyBtn .pb-style{padding-right:.6rem;margin-right:.6rem;border-right:1.5px solid rgba(255,102,255,.45);}
 #partyBtn.pb-multi .pb-style{color:#ffd2ff;}
-#partyBtn .pb-stop{color:#ff9cf0;}
+#partyBtn .pb-pips{display:inline-flex;gap:4px;margin-left:.55rem;align-items:center;}
+#partyBtn .pb-pips i{display:block;width:6px;height:6px;border-radius:50%;background:rgba(255,140,240,.3);}
+#partyBtn .pb-pips i.on{background:#ffd2ff;box-shadow:0 0 6px #ff8cf0;}
+#partyBtn.pb-split::before{content:'';position:absolute;top:0;bottom:0;left:0;width:0;background:rgba(255,80,220,.35);pointer-events:none;}
+#partyBtn.pb-holding::before{animation:pbHold .55s linear forwards;}
+@keyframes pbHold{to{width:100%;}}
 body.desktop-mode.bunker-open #partyBtn.pb-split{display:inline-flex !important;}
 #partyStyleBtn{display:none !important;}
 
@@ -2648,4 +2654,11 @@ body.desktop-mode.bunker-open #partyBtn.pb-split{display:inline-flex !important;
 #partyFxStart canvas{display:block;}
 #partyBtn.pb-split{padding-left:.8rem;padding-right:.8rem;}
 #partyBtn.pb-tight{font-size:.82rem;padding:.48rem .6rem;}
-#partyBtn.pb-tight .pb-style{padding-right:.42rem;margin-right:.42rem;}
+#partyBtn.pb-tight .pb-pips{margin-left:.4rem;gap:3px;}
+#partyBtn .pb-style,#partyBtn .pb-pips{position:relative;}
+
+/* DRUMS | KEYS in the sequencer's button row (between VIEW and ♪) */
+.keys-switch-seq{display:inline-flex;flex:0 0 auto;align-items:stretch;border:1px solid #4a3d99;border-radius:8px;background:#110d24;padding:2px;gap:2px;box-shadow:0 0 10px -5px #8f73ff;}
+.keys-switch-seq button{font-family:'Bebas Neue',sans-serif;font-size:.9rem;letter-spacing:.1em;line-height:1;padding:.3rem .55rem;border:0;border-radius:6px;background:transparent;color:#7d72b0;cursor:pointer;touch-action:manipulation;}
+.keys-switch-seq button.on{background:#6b55d9;color:#fff;}
+body.phone-land .keys-switch-seq button{font-size:.72rem;padding:.2rem .42rem;}

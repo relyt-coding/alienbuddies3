@@ -124,8 +124,12 @@ function keysVoiceOwned(i){return i<(shop.keysLevel||0);}
     <div class="bk-oct"><button id="bkOctDn" aria-label="octave down">−</button><span id="bkOct">MID</span><button id="bkOctUp" aria-label="octave up">+</button></div></div><canvas id="bkCanvas"></canvas>`;
   if(area){area.appendChild(root);}
   // PADS | KEYS toggle: sits just above the top-right corner of the pads (or the keyboard), in both modes
-  const sw=document.createElement('div');sw.id='keysSwitch';sw.innerHTML='<button type="button" data-m="pads">PADS</button><button type="button" data-m="keys">KEYS</button>';
+  const sw=document.createElement('div');sw.id='keysSwitch';sw.innerHTML='<button type="button" data-m="pads">DRUMS</button><button type="button" data-m="keys">KEYS</button>';
   if(area)area.appendChild(sw);
+  // once the sequencer's in: the same DRUMS | KEYS switch sits in its button row, between VIEW and ♪ (js/06 places it)
+  const sw2=document.createElement('div');sw2.id='keysSwitchSeq';sw2.className='keys-switch-seq';sw2.setAttribute('role','group');sw2.setAttribute('aria-label','Drums or keys');
+  sw2.innerHTML='<button type="button" data-m="pads">DRUMS</button><button type="button" data-m="keys">KEYS</button>';
+  const vb=$('vtbViewBtn');if(vb&&vb.parentNode)vb.parentNode.insertBefore(sw2,vb.nextSibling);
   const cv=root.querySelector('canvas'),bar=root.querySelector('.bk-bar');
 
   function isOn(){return keysOwned()&&!!shop.keysOn;}
@@ -135,6 +139,10 @@ function keysVoiceOwned(i){return i<(shop.keysLevel||0);}
     if(typeof autoSave==='function')autoSave();
   }
   sw.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>setOn(b.dataset.m==='keys')));
+  sw2.querySelectorAll('button').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();
+    // (if the pads were hidden in VIEW, switching shows them again)
+    if(typeof padsHidden!=='undefined'&&padsHidden){padsHidden=false;try{_saveViewPrefs();applySeqView();}catch(err){}}
+    setOn(b.dataset.m==='keys');}));
   function cycleVoice(d){const n=Math.max(1,shop.keysLevel||1);shop.keysVoice=(((shop.keysVoice||0)+d)%n+n)%n;paintBar();preview();if(typeof autoSave==='function')autoSave();}
   $('bkPrev').addEventListener('click',()=>cycleVoice(-1));$('bkNext').addEventListener('click',()=>cycleVoice(1));
   function setOct(d){shop.keysOct=Math.max(-1,Math.min(1,(shop.keysOct||0)+d));paintBar();sprites=null;if(typeof autoSave==='function')autoSave();}
@@ -149,11 +157,13 @@ function keysVoiceOwned(i){return i<(shop.keysLevel||0);}
     const own=keysOwned(),on=isOn();
     document.body.classList.toggle('keys-owned',own);document.body.classList.toggle('keys-on',on);
     sw.querySelectorAll('button').forEach(b=>b.classList.toggle('on',(b.dataset.m==='keys')===on));root.setAttribute('aria-hidden',on?'false':'true');
+    sw2.querySelectorAll('button').forEach(b=>b.classList.toggle('on',(b.dataset.m==='keys')===on));sw2.style.display=own&&viewMenuReady()?'':'none';
     paintBar();placeSwitch();paintViewRows();if(on)start();else stop();
   }
   window.refreshBuddyKeys=refreshUI;
 
   function placeSwitch(){
+    {const show=keysOwned()&&viewMenuReady()?'':'none';if(sw2.style.display!==show)sw2.style.display=show;}
     if(!keysOwned()||!area||!grid){sw.style.display='none';return;}
     const b=document.body.classList;
     if(!b.contains('game-active')||b.contains('daw-wide')||b.contains('pad-edit')||viewMenuReady()){sw.style.display='none';return;}

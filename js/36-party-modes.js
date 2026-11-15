@@ -1,8 +1,9 @@
 
 // ══════════════════════════════════════════════
 //  ALIEN PARTY STYLES
-//  The party button starts a party in the last style (with a disco ball dropping in). During a party the button
-//  shows the style on its left (tap it to cycle styles) and STOP on its right: one bubble, no extra chip.
+//  The party button starts a party in the last style (with a disco ball dropping in). During a party it shows the
+//  style's name with a little dot per style you own: each tap moves to the next style, and a tap on the last one ends
+//  the party (the next party starts again from the first). Press and hold to end the party straight away.
 //  GLOW is the original (aliens light up to the beat while bouncing around). Every other style
 //  takes over the aliens' positions and choreographs them to the music:
 //   EQ BARS       line up on the sequencer and rise and fall with the real audio spectrum
@@ -36,12 +37,12 @@ try{const v=localStorage.getItem('ab2_party_style');if(PARTY_STYLES.some(s=>s.id
     const pb=$('partyBtn');if(!pb)return;
     if(!owned().includes(partyStyle))partyStyle='glow';
     if(!partyMode){if(pb.dataset.mode!=='idle'){pb.dataset.mode='idle';pb.textContent='ALIEN PARTY';pb.classList.remove('pb-split','pb-multi');}return;}
-    const s=styleObj(),multi=owned().length>1,key=s.id+(multi?'+':'');
+    const s=styleObj(),list=ownedList(),multi=list.length>1,idx=list.findIndex(x=>x.id===s.id),key=s.id+':'+list.length;
     if(pb.dataset.mode!==key){pb.dataset.mode=key;
-      pb.innerHTML='<span class="pb-style" data-act="style"></span><span class="pb-stop" data-act="stop">STOP</span>';
-      pb.querySelector('.pb-style').textContent=(s.short||s.name)+(multi?' ▸':'');
+      pb.innerHTML='<span class="pb-style"></span>'+(multi?'<span class="pb-pips">'+list.map((x,i)=>'<i'+(i===idx?' class="on"':'')+'></i>').join('')+'</span>':'');
+      pb.querySelector('.pb-style').textContent=s.short||s.name;
       pb.classList.add('pb-split');pb.classList.toggle('pb-multi',multi);pb.classList.remove('pb-tight');
-      pb.title=s.name+(multi?' · tap the style to change it':'');}
+      pb.title=s.name+' · tap for the next style'+(multi?'':' (or to end the party)')+' · hold to end the party';}
     // small phones: if it would run into EDIT PADS / SETTINGS on the same row, tighten it up
     const r=pb.getBoundingClientRect();if(!r.width)return;
     const hit=['padEditToggleBtn','settingsOpenBtn','socialsBtn'].some(id=>{const e=$(id);if(!e)return false;const q=e.getBoundingClientRect();return q.width&&q.bottom>r.top&&q.top<r.bottom&&q.right+6>r.left&&q.left<r.right;});
@@ -53,21 +54,41 @@ try{const v=localStorage.getItem('ab2_party_style');if(PARTY_STYLES.some(s=>s.id
     paintBtn();
     if(partyMode)enterStyle();
   }
+  function ownedList(){return PARTY_STYLES.filter(s=>owned().includes(s.id));}
+  // next style; past the last one the party ends (and the next one starts from the first style again)
   function cycleStyle(){
-    const list=PARTY_STYLES.filter(s=>owned().includes(s.id));
-    if(list.length<2)return false;
-    const i=list.findIndex(s=>s.id===partyStyle),nx=list[(i+1)%list.length];
-    setStyle(nx.id);
+    const list=ownedList(),i=list.findIndex(s=>s.id===partyStyle);
+    if(i<0||i>=list.length-1){
+      if(typeof stopParty==='function')stopParty();
+      if(list.length)setStyle(list[0].id);
+      return;
+    }
+    const nx=list[i+1];setStyle(nx.id);
     if(typeof showToast==='function')showToast('PARTY STYLE: '+nx.name);
-    return true;
   }
-  // a press: start the party (the disco ball drops in), switch style, or stop
+  // a tap: start the party (the disco ball drops in) or move to the next style
+  let holdFired=false,holdT=null;
   window.partyBtnPress=function(e){
+    if(holdFired){holdFired=false;return;}   // that was the end of a press-and-hold
     if(!partyMode){if(typeof startParty==='function')startParty();if(typeof playPartyStartFx==='function')try{playPartyStartFx();}catch(err){}return;}
-    const t=e&&e.target&&e.target.closest?e.target.closest('[data-act]'):null;
-    if(t&&t.dataset.act==='style'&&cycleStyle())return;
-    if(typeof stopParty==='function')stopParty();
+    cycleStyle();
   };
+  // press and hold during a party: it ends right away (the button fills up as you hold)
+  {const pb=$('partyBtn');
+    const cancel=()=>{clearTimeout(holdT);holdT=null;if(pb)pb.classList.remove('pb-holding');};
+    if(pb){
+      pb.addEventListener('pointerdown',()=>{
+        cancel();holdFired=false;if(!partyMode)return;
+        pb.classList.add('pb-holding');
+        holdT=setTimeout(()=>{holdT=null;pb.classList.remove('pb-holding');if(!partyMode)return;holdFired=true;
+          if(typeof stopParty==='function')stopParty();
+          if(navigator.vibrate)try{navigator.vibrate(20);}catch(e){}},550);
+      });
+      ['pointerup','pointercancel','pointerleave'].forEach(ev=>pb.addEventListener(ev,cancel));
+      // (if the button changed size under your finger, the click may never come: don't let it eat your next tap)
+      document.addEventListener('pointerup',()=>{if(holdFired)setTimeout(()=>{holdFired=false;},250);},true);
+      pb.addEventListener('contextmenu',e=>e.preventDefault());
+    }}
   window.paintPartyBtn=paintBtn;
   window.setPartyStyle=function(id){setStyle(id);};
   window.refreshPartyAccess=function(){paintBtn();};

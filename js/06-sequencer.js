@@ -61,10 +61,12 @@ function placeViewButtons(){
     if(vtbKeyBtn){targetRow.insertBefore(vtbKeyBtn,vtbViewBtn.nextSibling);vtbKeyBtn.className='seq-save-pat-btn';}
     if(vtbFxBtn&&vtbKeyBtn){targetRow.insertBefore(vtbFxBtn,vtbKeyBtn.nextSibling);vtbFxBtn.className='seq-save-pat-btn';}
     {const gb=document.getElementById('vtbGrooveBtn');if(gb){targetRow.insertBefore(gb,vtbViewBtn.nextSibling);gb.className='seq-save-pat-btn';}}   // ♪ GROOVE right next to VIEW
+    {const ks=document.getElementById('keysSwitchSeq');if(ks)targetRow.insertBefore(ks,vtbViewBtn.nextSibling);}   // DRUMS | KEYS between VIEW and ♪
     viewToggleBar.style.display='none';
   }else{
     viewToggleBar.appendChild(vtbViewBtn);
     vtbViewBtn.className='vtb-btn';
+    {const ks=document.getElementById('keysSwitchSeq');if(ks)viewToggleBar.appendChild(ks);}
     {const gb=document.getElementById('vtbGrooveBtn');if(gb){viewToggleBar.appendChild(gb);gb.className='vtb-btn';}}
     if(vtbKeyBtn){viewToggleBar.appendChild(vtbKeyBtn);vtbKeyBtn.className='vtb-btn';}
     if(vtbFxBtn){viewToggleBar.appendChild(vtbFxBtn);vtbFxBtn.className='vtb-btn';}

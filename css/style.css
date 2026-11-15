@@ -2493,3 +2493,15 @@ body.mobile-view-mode #settingsIntroRow{display:none;}
 body.desktop-mode #partyFx{z-index:170;}
 #partyBtn.pb-land{animation:pbLand .7s cubic-bezier(.3,1.6,.5,1) both,partyBtnPulse 1s ease-in-out .7s 3 !important;}
 @keyframes pbLand{0%{transform:translateY(-60px) scale(.4);opacity:0;}60%{opacity:1;}100%{transform:none;opacity:1;}}
+
+/* sequencer sound picker: FILL 1 2 3 4 ALL (quick-start a beat with the track's sound) */
+.mini-picker{max-height:300px;max-height:min(300px,72vh);}
+.mp-fill{margin:0 0 .45rem;padding:0 0 .5rem;border-bottom:1px solid #1d1d36;}
+.mp-fill-hd{font-family:'Bebas Neue',sans-serif;font-size:.85rem;letter-spacing:.1em;color:#8a8ab0;margin:0 0 .3rem .1rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.mp-fill-row{display:flex;gap:4px;}
+.mp-fill-btn{flex:1 1 0;min-width:0;height:32px;padding:0;font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:.04em;line-height:1;border-radius:6px;border:1px solid #2a2a4a;background:#111124;color:#9a9ac0;cursor:pointer;touch-action:manipulation;-webkit-user-select:none;user-select:none;transition:background .1s,color .1s,border-color .1s;}
+.mp-fill-btn.all{flex:1.5 1 0;}
+.mp-fill-btn:active{transform:scale(.94);}
+.mp-fill-btn.on{background:var(--lc);border-color:var(--lc);color:#0a0a14;box-shadow:0 0 8px -2px var(--lc);}
+.seq-step.mp-filled{animation:mpFilled .4s cubic-bezier(.3,1.6,.6,1);}
+@keyframes mpFilled{0%{transform:scale(.45);}}

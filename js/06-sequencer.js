@@ -296,10 +296,11 @@ seqFullAddBtn&&seqFullAddBtn.addEventListener('click',()=>{
 let mpFullLayer=null,mpFullDot=null,mpFullName=null;
 function openMiniPickerInFull(layer,dot,name){
   mpFullLayer=layer;mpFullDot=dot;mpFullName=name;mpTarget=null;
-  const rect=dot.getBoundingClientRect();
-  miniPicker.style.top=(rect.bottom+6)+'px';
-  miniPicker.style.left=Math.min(rect.left,window.innerWidth-210)+'px';
-  buildMpListFull();miniPicker.classList.add('open');
+  if(typeof buildMpFill==='function')buildMpFill();
+  buildMpListFull();
+  if(typeof placeMiniPicker==='function')placeMiniPicker(dot.getBoundingClientRect());
+  else{const rect=dot.getBoundingClientRect();miniPicker.style.top=(rect.bottom+6)+'px';miniPicker.style.left=Math.min(rect.left,window.innerWidth-210)+'px';}
+  miniPicker.classList.add('open');
 }
 function buildMpListFull(){
   mpListEl.innerHTML='';

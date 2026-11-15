@@ -2,6 +2,12 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.153 - 2026-11-15 12:15
+
+- The gem ring launches the galaxies the same way the shop card does: hold it down. It charges up for a moment (a bright sweep round the ring, a rumble and a rising hum), then the hyperspace intro plays. A quick tap just gives it a little bounce.
+- Once the galaxies are open, tap the ring to open the map, or hold it to watch the launch again.
+- Gems landing in the ring are silent now (no more chime).
+
 ## v0.2.152 - 2026-11-15 12:00
 
 - Level 4: the GEM RING. 30 seconds after you unlock the Alien Party, a ring with the Gem Buddy in it appears (top-right on phones held upright, next to SHOP on sideways phones, beside the score on a computer). It fills up toward your next gem goal: first 25 gems for the galaxies. When it's full it glows. Tap it to unlock Explore the Galaxies right there. After that it counts toward the next skill-tree node you can buy, and tapping it opens the galaxy map. (The card in the shop still works too.)

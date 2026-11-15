@@ -9,7 +9,7 @@
 //    has the party or the galaxies). Upright phones: top-right corner. Sideways phones: next to SHOP. Computer:
 //    beside the score. The skill-tree card in the shop still works too.
 //  • Gems come off your buddies: when your aliens make gems, little gems pop off floating buddies and fly into the
-//    ring; the count goes up as each one lands, with a soft chime. (Up to 6 per 5-second gem tick; on the drum pads
+//    ring; the count goes up as each one lands (silently: no gem sounds). (Up to 6 per 5-second gem tick; on the drum pads
 //    screen only, and only while the ring is showing.)
 //  • MY ACCOUNT (top-left on upright phones, by SETTINGS elsewhere): for now it says you're playing offline on this
 //    device; signing in and playing with friends online are coming.
@@ -19,7 +19,7 @@
   const css=document.createElement('style');css.textContent=`
 #gemRing{position:fixed;z-index:48;display:none;align-items:center;font-family:'Bebas Neue',sans-serif;color:#5dffc0;letter-spacing:.08em;line-height:1;
   cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;}
-#gemRing.on{display:flex;animation:grIn .9s cubic-bezier(.3,1.5,.5,1) both;}
+#gemRing.on{display:flex;animation:grIn .9s cubic-bezier(.3,1.5,.5,1) backwards;}
 #gemRing.gr-v{flex-direction:column;gap:3px;}
 #gemRing.gr-h{flex-direction:row;gap:7px;}
 #gemRing .gr-ring{position:relative;width:var(--gr,58px);height:var(--gr,58px);border-radius:50%;flex-shrink:0;
@@ -37,6 +37,14 @@ body.desktop-mode #gemRing.gr-h .gr-n{font-size:1.3rem;}body.desktop-mode #gemRi
 #gemRing.bump .gr-ring{animation:grBump .32s cubic-bezier(.3,1.8,.5,1);}
 #gemRing.ready.bump .gr-ring{animation:grBump .32s cubic-bezier(.3,1.8,.5,1),grGlow 1.3s ease-in-out infinite;}
 #gemRing.nope{animation:grNope .4s ease-in-out!important;}
+#gemRing.nudge .gr-ring{animation:grBump .35s cubic-bezier(.3,1.8,.5,1),grGlow 1.3s ease-in-out infinite;}
+/* holding: a bright charge sweeps round the outside of the ring and the glow swells */
+#gemRing .gr-ring::after{content:'';position:absolute;inset:-5px;border-radius:50%;pointer-events:none;opacity:0;
+  background:conic-gradient(#e6fff6 calc(var(--hp,0)*360deg),transparent 0);
+  -webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 4px),#000 calc(100% - 3.5px));mask:radial-gradient(farthest-side,transparent calc(100% - 4px),#000 calc(100% - 3.5px));}
+#gemRing.charging .gr-ring::after{opacity:1;}
+#gemRing.charging .gr-ring{box-shadow:0 0 calc(10px + var(--hp,0)*34px) rgba(150,255,220,.85);transform:scale(calc(1 + var(--hp,0)*.1));animation:none;}
+#gemRing.launched .gr-ring{animation:grBump .5s ease-out;}
 @keyframes grIn{0%{opacity:0;transform:scale(.3) rotate(-30deg);}60%{opacity:1;}100%{opacity:1;transform:none;}}
 @keyframes grGlow{0%,100%{box-shadow:0 0 10px -2px rgba(80,255,190,.7);}50%{box-shadow:0 0 26px 4px rgba(80,255,190,.9);}}
 @keyframes grBump{0%{transform:scale(1);}40%{transform:scale(1.14);}100%{transform:scale(1);}}
@@ -124,11 +132,14 @@ body.desktop-mode #accountBox{border-radius:20px;}
     if(on){shownCount=null;paint();layout();setTimeout(layout,50);
       try{const k=window.US_KIT;if(k&&k.mixer&&!(typeof sfxOn!=='undefined'&&!sfxOn)){const S=k.mixer(.45);if(S)[0,.1,.2].forEach((d,i)=>k.tone(S,S.t+.15+d,[1318.5,1661.2,1975.5][i],{type:'triangle',a:.035,d:.4,rv:.6}));}}catch(e){}}
   }
+  // v0.2.153: like the shop card, the galaxies launch by HOLDING the ring (it charges up for 1.2 s: fill, rumble, hum).
+  // Afterwards a tap opens the map, and holding it replays the launch. (The hold itself lives in js/59.)
+  if(typeof wireGalaxyHold==='function')wireGalaxyHold(ring);
   ring.addEventListener('click',e=>{e.stopPropagation();
+    if(B.contains('galaxy-intro'))return;            // the release that finished a hold-to-launch
     if(typeof skillTreeUnlocked!=='undefined'&&skillTreeUnlocked){if(typeof openSkillTree==='function')openSkillTree();return;}
-    const c=goal().cost;
-    if(Math.floor(alienGems)>=c&&typeof doSkillTreeUnlock==='function'){doSkillTreeUnlock();return;}
-    ring.classList.remove('nope');void ring.offsetWidth;ring.classList.add('nope');setTimeout(()=>ring.classList.remove('nope'),450);
+    const c=goal().cost,cls=Math.floor(alienGems)>=c?'nudge':'nope';   // affordable: a quick tap says "hold me"
+    ring.classList.remove('nope','nudge');void ring.offsetWidth;ring.classList.add(cls);setTimeout(()=>ring.classList.remove(cls),450);
   });
 
   // ══════════ gems come off your buddies ══════════
@@ -138,10 +149,6 @@ body.desktop-mode #accountBox{border-radius:20px;}
     const out=[];bouncers.forEach(b=>{const el=b&&b.el;if(!el||el.style.display==='none')return;const r=el.getBoundingClientRect();
       if(r.width&&r.bottom>0&&r.top<innerHeight&&r.right>0&&r.left<innerWidth)out.push({x:r.left+r.width/2,y:r.top+r.height*.45});});
     return out;
-  }
-  function chime(){
-    try{const k=window.US_KIT;if(!k||!k.mixer||(typeof sfxOn!=='undefined'&&!sfxOn))return;const S=k.mixer(.28);if(!S)return;
-      const notes=[1567.98,1760,1975.53,2349.32,2637.02];k.tone(S,S.t,notes[Math.floor(Math.random()*notes.length)],{type:'sine',a:.03,d:.25,rv:.5});}catch(e){}
   }
   function fly(from){
     const el=document.createElement('div');el.className='gem-fly';const ic=document.createElement('span');ic.className='agem';el.appendChild(ic);
@@ -156,7 +163,7 @@ body.desktop-mode #accountBox{border-radius:20px;}
       el.style.transform='translate('+x.toFixed(1)+'px,'+y.toFixed(1)+'px) scale('+s.toFixed(2)+')';
       if(k<1&&shown){requestAnimationFrame(step);return;}
       el.remove();inFlight=Math.max(0,inFlight-1);
-      shownCount=(shownCount||0)+1;paint();chime();
+      shownCount=(shownCount||0)+1;paint();
       ring.classList.remove('bump');void ring.offsetWidth;ring.classList.add('bump');setTimeout(()=>ring.classList.remove('bump'),340);
     })(t0);
   }

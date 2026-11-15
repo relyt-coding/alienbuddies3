@@ -126,10 +126,14 @@
     const b=h.btn,p0=parseFloat(b.style.getPropertyValue('--hp'))||0,t0=performance.now();
     (function down(now){const p=Math.max(0,p0-(now-t0)/1000/.3*p0);setP(b,p);if(p>0)requestAnimationFrame(down);})(t0);}
   window.stHoldNudge=function(){const b=document.getElementById('skillTreeUnlockBtn');if(!b||hold)return;b.classList.remove('nudge');void b.offsetWidth;b.classList.add('nudge');};
-  function wire(){const b=document.getElementById('skillTreeUnlockBtn');if(!b)return;
+  // v0.2.153: any button can be a launch button (the shop card, and the gem ring on the drum pads screen: js/71)
+  function wireHold(b){if(!b||b._holdWired)return;b._holdWired=true;
     b.addEventListener('pointerdown',holdStart);['pointerup','pointercancel','pointerleave'].forEach(ev=>b.addEventListener(ev,holdEnd));
     b.addEventListener('contextmenu',e=>{if(holdMode())e.preventDefault();});
     b.addEventListener('click',e=>{if(b._skipOpen){b._skipOpen=false;e.stopImmediatePropagation();e.preventDefault();}},true);}
+  window.wireGalaxyHold=wireHold;
+  window.galaxyHoldBusy=()=>!!hold;
+  function wire(){wireHold(document.getElementById('skillTreeUnlockBtn'));}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',wire);else wire();
   // onOpen fires just before the intro fades, so the skill tree is already there underneath
   window.playGalaxyIntro=function(onOpen,onDone){

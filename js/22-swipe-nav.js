@@ -20,6 +20,7 @@
   function blocked(t){
     if(document.body.classList.contains('desktop-mode'))return true;
     if(!document.body.classList.contains('game-active'))return true;
+    if(document.body.classList.contains('nav-locked'))return true;   // no bunker or shop until the first buddy
     if(!t||!t.closest)return false;
     // don't steal swipes from controls that use their own horizontal drags, or from pop-ups
     var treeOpen=!!document.querySelector('#skillTreeModal.open');

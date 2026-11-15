@@ -162,7 +162,7 @@
       const wob=Math.sin(t*(sp?7:5))*.06*sstep(.85,1.35,t)+st.shake*Math.sin(t*60)*.18;st.shake*=.9;
       g.fillStyle='rgba(0,0,0,.35)';g.beginPath();g.ellipse(cx,baseY+eh*1.02,ew*.9,ew*.18,0,0,TAU);g.fill();
       g.save();g.translate(cx,y+bounce+eh);g.rotate(wob);g.translate(-cx,-(y+bounce+eh));
-      drawEgg(cx,y+bounce,ew,eh,t,sp,st.taps/3,null,st.pal);g.restore();
+      if(!(st.hideUntil&&now<st.hideUntil))drawEgg(cx,y+bounce,ew,eh,t,sp,st.taps/3,null,st.pal);g.restore();
       parts(t);edgeFade(W,H);
       if(t>1.4&&st.taps===0)document.getElementById('erHint').classList.add('on');
       return;
@@ -213,9 +213,12 @@
   function reveal(idx){if(typeof bouncers==='undefined')return;bouncers.forEach(b=>{if(b.idx===idx&&b.el.classList.contains('hatching')){b.el.classList.remove('hatching');b.el.classList.add('hatched');setTimeout(()=>b.el.classList.remove('hatched'),900);}});}
   function open(idx){
     if(!root)build();
+    // (the first egg flies in from the drum pads screen: it opens already landed, and the canvas egg stays hidden
+    //  until the flying one arrives)
+    const oo=window.__eggOpenOpts||{};window.__eggOpenOpts=null;
     const info0=typeof buddySpecialInfo==='function'?buddySpecialInfo(idx):null,special=!!info0;
     const L=typeof buddyLookSpec==='function'?buddyLookSpec(idx):{body:'#7fe3c0',tip:'#ff9ccf',eye:'#9fc5ff'};
-    st={idx,special,info:info0,pal:[L.body,L.tip,L.eye,L.foot||L.body],phase:'egg',t0:performance.now(),taps:0,shake:0,fx:[]};
+    st={idx,special,info:info0,pal:[L.body,L.tip,L.eye,L.foot||L.body],phase:'egg',t0:performance.now()-(oo.landed?1000:0),taps:0,shake:0,fx:[],hideUntil:oo.hideMs?performance.now()+oo.hideMs:0};
     dpr=Math.min(2,window.devicePixelRatio||1);S=Math.round(Math.min(340,window.innerWidth*.86,window.innerHeight*.5));
     cv.width=S*dpr;cv.height=Math.round(S*1.12)*dpr;cv.style.width=S+'px';cv.style.height=Math.round(S*1.12)+'px';
     root.className=special?'special':'';root.classList.add('on');
@@ -229,11 +232,18 @@
     cancelAnimationFrame(raf);raf=requestAnimationFrame(frame);
   }
   function close(){
-    if(!root)return;if(st)reveal(st.idx);st=null;cancelAnimationFrame(raf);root.className='';
+    if(!root)return;const was=st&&st.idx;if(st)reveal(st.idx);st=null;cancelAnimationFrame(raf);root.className='';
+    try{document.dispatchEvent(new CustomEvent('egg-reveal-closed',{detail:{idx:was}}));}catch(e){}
     if(typeof autoSave==='function')autoSave();
     if(queue.length)setTimeout(()=>{const n=queue.shift();if(n!=null)open(n);},250);
   }
   const queue=[];
+  // paint an egg onto any canvas (the first egg waiting on the drum pads screen): pal = the buddy's colours
+  window.paintBuddyEgg=function(ctx,cx,cy,w,h,t,special,crack,pal,k){
+    const g0=g,d0=dpr;g=ctx;dpr=k||1;try{drawEgg(cx,cy,w,h,t,special,crack,null,pal);}finally{g=g0;dpr=d0;}
+  };
+  // where the canvas egg sits on screen once the reveal is open (for the flying egg to land on)
+  window.eggRevealTarget=function(){if(!cv||!root||!root.classList.contains('on'))return null;const r=cv.getBoundingClientRect(),W=r.width,H=r.height;return{x:r.left+W/2,y:r.top+H*.55,w:W*.26,h:W*.33};};
   window.openEggReveal=function(idx){if(st||(root&&root.classList.contains('on'))){if(!queue.includes(idx))queue.push(idx);return;}open(idx);};
   // which new aliens hatch from an egg: the very first, and every 10th (the specials)
   window.alienHatches=()=>true;   // every buddy hatches from an egg

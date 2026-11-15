@@ -1266,6 +1266,7 @@ eggModal&&eggModal.addEventListener('click',e=>{if(e.target===eggModal){/* don't
 // ── Contextual Hints ──
 function checkContextualHints(){
   if(activeSlot<0)return;
+  if(document.body.classList.contains('nav-locked'))return;   // no bunker yet (it opens with the first buddy)
   // Only show one at a time; check in priority order
   if(score>=750000&&!shownHints.tips){
     shownHints.tips=true;autoSave();

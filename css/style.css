@@ -2505,3 +2505,94 @@ body.desktop-mode #partyFx{z-index:170;}
 .mp-fill-btn.on{background:var(--lc);border-color:var(--lc);color:#0a0a14;box-shadow:0 0 8px -2px var(--lc);}
 .seq-step.mp-filled{animation:mpFilled .4s cubic-bezier(.3,1.6,.6,1);}
 @keyframes mpFilled{0%{transform:scale(.45);}}
+
+/* ═══════ BUNKER / SHOP buttons: chunkier, glowing, with little drawn icons ═══════ */
+#openBunkerBtn,#openStoreBtn{display:inline-flex;align-items:center;gap:.34rem;font-size:.98rem;letter-spacing:.11em;line-height:1;padding:.42rem .72rem .42rem .52rem;border-radius:13px;border:1.5px solid;overflow:hidden;
+  transition:filter .15s,box-shadow .2s,border-color .2s;-webkit-tap-highlight-color:transparent;}
+#openBunkerBtn{color:#5dffb0;border-color:rgba(0,255,136,.55);background:linear-gradient(180deg,#123b2a 0%,#0a1d13 55%,#07130d 100%);
+  box-shadow:0 0 14px -5px rgba(0,255,136,.8),inset 0 1px 0 rgba(255,255,255,.16),inset 0 -2px 0 rgba(0,0,0,.4);}
+#openStoreBtn{color:#ffe14d;border-color:rgba(255,210,63,.62);background:linear-gradient(180deg,#3d3008 0%,#1d1704 55%,#131003 100%);
+  box-shadow:0 0 14px -5px rgba(255,210,63,.8),inset 0 1px 0 rgba(255,255,255,.18),inset 0 -2px 0 rgba(0,0,0,.4);}
+#openBunkerBtn:active,#openStoreBtn:active{filter:brightness(1.35);}
+#openBunkerBtn:active{background:linear-gradient(180deg,#123b2a 0%,#0a1d13 55%,#07130d 100%);border-color:#00ff88;}
+#openStoreBtn:active{background:linear-gradient(180deg,#3d3008 0%,#1d1704 55%,#131003 100%);border-color:#ffe14d;}
+.nb-ico{width:19px;height:19px;flex-shrink:0;display:block;filter:drop-shadow(0 0 3px currentColor);}
+.nb-lbl{display:block;padding-top:1px;}
+/* a soft shine sweeps across now and then */
+#openBunkerBtn::after,#openStoreBtn::after{content:'';position:absolute;top:0;bottom:0;left:-60%;width:45%;pointer-events:none;
+  background:linear-gradient(100deg,rgba(255,255,255,0),rgba(255,255,255,.2),rgba(255,255,255,0));animation:nbShine 6s ease-in-out infinite;}
+#openStoreBtn::after{animation-delay:3s;}
+@keyframes nbShine{0%,80%{left:-60%;}100%{left:130%;}}
+body.phone-land #openBunkerBtn,body.phone-land #openStoreBtn{font-size:.8rem;padding:.26rem .55rem .26rem .42rem;border-radius:10px;}
+body.phone-land .nb-ico{width:15px;height:15px;}
+/* SHOP: something new you can afford (until you look) */
+#openStoreBtn.nb-deal{animation:nbDeal 1.5s ease-in-out infinite;}
+@keyframes nbDeal{0%,100%{box-shadow:0 0 10px -4px rgba(255,210,63,.7),inset 0 1px 0 rgba(255,255,255,.18);}50%{box-shadow:0 0 22px 1px rgba(255,210,63,.8),inset 0 1px 0 rgba(255,255,255,.18);border-color:#ffe14d;}}
+#openStoreBtn.nb-deal::before,#collapseShopBtn.nb-deal::before{content:'';position:absolute;top:3px;right:3px;width:8px;height:8px;border-radius:50%;background:#ff4f7a;box-shadow:0 0 6px #ff4f7a;animation:nbDot 1.5s ease-in-out infinite;}
+@keyframes nbDot{50%{transform:scale(1.3);}}
+/* BUNKER: your buddy's home is new (until you visit) */
+#openBunkerBtn.nb-new,#collapseBunkerBtn.nb-new{animation:leadGlow 1.4s ease-in-out infinite;}
+/* desktop side tabs, same colours */
+#collapseBunkerBtn{color:#5dffb0;border-color:rgba(0,255,136,.6);background:linear-gradient(90deg,#07130d,#123b2a);box-shadow:0 0 14px -4px rgba(0,255,136,.7),inset 0 1px 0 rgba(255,255,255,.14);border-radius:0 11px 11px 0;border-left:none;padding:.7rem .4rem;}
+#collapseShopBtn{color:#ffe14d;border-color:rgba(255,210,63,.65);background:linear-gradient(270deg,#131003,#3d3008);box-shadow:0 0 14px -4px rgba(255,210,63,.7),inset 0 1px 0 rgba(255,255,255,.16);border-radius:11px 0 0 11px;border-right:none;padding:.7rem .4rem;}
+#collapseBunkerBtn:hover{color:#c8ffe4;border-color:#00ff88;background:linear-gradient(90deg,#0a1d13,#1a4d37);box-shadow:0 0 20px -3px rgba(0,255,136,.8);}
+#collapseShopBtn:hover{color:#fff4b0;border-color:#ffe14d;background:linear-gradient(270deg,#1d1704,#4d3d0a);box-shadow:0 0 20px -3px rgba(255,210,63,.8);}
+#collapseShopBtn.nb-deal{animation:nbDealTab 1.5s ease-in-out infinite;}
+@keyframes nbDealTab{50%{box-shadow:0 0 24px 0 rgba(255,210,63,.85);border-color:#ffe14d;}}
+#collapseBunkerBtn,#collapseShopBtn{position:fixed;overflow:visible;}
+
+/* ═══════ locked until the first buddy ═══════ */
+body.nav-locked #openBunkerBtn,body.nav-locked #openStoreBtn{visibility:hidden;pointer-events:none;}
+body.nav-locked #collapseBunkerBtn,body.nav-locked #collapseShopBtn,body.nav-locked #pageDots{display:none !important;}
+body.nav-locked.desktop-mode:not(.intro-run) #bunkerView,body.nav-locked.desktop-mode:not(.intro-run) #storeView{width:0 !important;overflow:hidden;border:none;}
+/* …and they pop in when the first buddy has hatched */
+body.nav-reveal #openBunkerBtn,body.nav-reveal #openStoreBtn,body.nav-reveal #collapseBunkerBtn,body.nav-reveal #collapseShopBtn{animation:navPopIn .65s cubic-bezier(.3,1.6,.5,1) both;}
+body.nav-reveal #openStoreBtn,body.nav-reveal #collapseShopBtn{animation-delay:.45s;}
+@keyframes navPopIn{0%{opacity:0;transform:translateY(-50%) scale(.2);}60%{opacity:1;}}
+
+/* ═══════ the first egg, waiting next to the score ═══════ */
+#padEgg{position:absolute;z-index:6;display:flex;flex-direction:column;align-items:center;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;}
+#padEgg .pe-body{transform-origin:50% 88%;will-change:transform;}
+#padEgg canvas{display:block;}
+#padEgg .pe-glow{position:absolute;left:50%;top:44%;width:96px;height:96px;margin:-48px 0 0 -48px;border-radius:50%;pointer-events:none;opacity:0;transition:opacity .4s;
+  background:radial-gradient(circle,rgba(0,255,136,.42) 0%,rgba(0,255,136,.14) 45%,rgba(0,255,136,0) 70%);}
+#padEgg.ready .pe-glow{opacity:1;animation:peGlow 1.5s ease-in-out infinite;}
+@keyframes peGlow{50%{transform:scale(1.18);}}
+#padEgg .pe-tag{margin-top:-2px;font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:.08em;line-height:1;padding:3px 8px 2px;border-radius:999px;color:#c9c2a8;background:rgba(20,18,12,.85);border:1px solid rgba(255,240,200,.25);white-space:nowrap;}
+#padEgg.ready .pe-tag{color:#00ff88;border-color:rgba(0,255,136,.7);box-shadow:0 0 10px -2px rgba(0,255,136,.7);}
+#padEgg .pe-tag.bump{animation:peBump .4s cubic-bezier(.3,1.6,.5,1);}
+@keyframes peBump{40%{transform:scale(1.25);color:#fff;}}
+#padEgg.rolling{animation:peRoll 1.2s cubic-bezier(.25,.7,.35,1) both;}
+#padEgg.rolling .pe-tag{animation:peTagIn .35s .95s both;}
+@keyframes peRoll{0%{transform:translateX(75vw) rotate(720deg);opacity:0;}8%{opacity:1;}72%{transform:translateX(-10px) rotate(-14deg);}86%{transform:translateX(4px) rotate(6deg);}100%{transform:none;}}
+@keyframes peTagIn{from{opacity:0;transform:translateY(-6px) scale(.6);}}
+#padEggFly{position:fixed;z-index:401;pointer-events:none;transform-origin:50% 50%;}
+body.intro-run #padEgg,body.store-open:not(.desktop-mode) #padEgg,body.bunker-open:not(.desktop-mode) #padEgg{visibility:hidden;}
+
+/* ═══════ SEQUENCER TEASER: a dashed outline with its price, from the very start ═══════ */
+.seq-teaser{display:flex;flex-direction:column;gap:.45rem;width:100%;box-sizing:border-box;margin:.35rem 0 .25rem;padding:.6rem .75rem .55rem;border:2px dashed rgba(68,238,187,.36);border-radius:14px;
+  background:rgba(68,238,187,.025);cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;font-family:'Bebas Neue',sans-serif;color:#5f8f80;position:relative;text-align:left;transition:border-color .3s,background .3s;}
+.seq-teaser .sqt-head{display:flex;justify-content:space-between;align-items:baseline;gap:.5rem;}
+.seq-teaser .sqt-name{font-size:1.05rem;letter-spacing:.32em;color:#6fd8b6;opacity:.7;}
+.seq-teaser .sqt-price{font-size:1.15rem;letter-spacing:.06em;color:#9ab8ae;}
+.seq-teaser .sqt-price small{font-size:.72em;margin-left:.2em;letter-spacing:.1em;opacity:.8;}
+.seq-teaser .sqt-steps{display:flex;gap:4px;}
+.seq-teaser .sqt-step{flex:1 1 0;min-width:0;height:22px;border-radius:5px;border:1.5px dashed rgba(68,238,187,.22);box-sizing:border-box;transition:background .25s,border-color .25s,box-shadow .25s;}
+.seq-teaser .sqt-step.beat{border-color:rgba(68,238,187,.42);}
+.seq-teaser .sqt-step.on{background:rgba(68,238,187,.45);border-style:solid;border-color:rgba(68,238,187,.8);}
+.seq-teaser .sqt-step.lit{background:rgba(160,255,225,.85);border-style:solid;border-color:#b8ffe8;box-shadow:0 0 10px rgba(68,238,187,.8);transition:none;}
+.seq-teaser.fade .sqt-step.on{background:transparent;border-style:dashed;border-color:rgba(68,238,187,.22);transition:all .6s;}
+.seq-teaser .sqt-bar{display:block;height:3px;border-radius:2px;background:rgba(68,238,187,.1);overflow:hidden;}
+#seqTeaserFill{display:block;height:100%;width:0;background:linear-gradient(90deg,#1f7a5f,#44eebb);transition:width .4s;}
+.seq-teaser:active{background:rgba(68,238,187,.07);}
+.seq-teaser.ready{border-color:#44eebb;animation:sqtReady 1.4s ease-in-out infinite;}
+.seq-teaser.ready .sqt-name{opacity:1;color:#b8ffe8;}
+.seq-teaser.ready .sqt-price{color:#44eebb;}
+@keyframes sqtReady{50%{box-shadow:0 0 22px -2px rgba(68,238,187,.55);background:rgba(68,238,187,.08);}}
+body.phone-land .seq-teaser{margin:.2rem 0;padding:.4rem .6rem;gap:.3rem;}
+body.phone-land .seq-teaser .sqt-step{height:16px;}
+@media (max-height:700px){.seq-teaser{padding:.45rem .65rem .4rem;gap:.35rem;}.seq-teaser .sqt-step{height:18px;}}
+body.phone-land #padEgg .pe-tag{font-size:12px;padding:2px 6px 1px;}
+body.phone-land #padEgg .pe-glow{width:60px;height:60px;margin:-30px 0 0 -30px;}
+body.phone-land #padEgg{flex-direction:row-reverse;align-items:center;gap:3px;}
+body.phone-land #padEgg .pe-tag{margin-top:0;}

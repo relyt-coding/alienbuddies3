@@ -144,7 +144,7 @@ function updateOnboardingArrows(){
   const isDesktop=document.body.classList.contains('desktop-mode');
   const shopBtn=isDesktop?document.getElementById('collapseShopBtn'):document.getElementById('openStoreBtn');
   if(arrowShop){
-    if(shopOpenCount===0&&score>=1500&&shopBtn){
+    if(shopOpenCount===0&&score>=1500&&shopBtn&&!document.body.classList.contains('nav-locked')){
       const rect=shopBtn.getBoundingClientRect();
       arrowShop.style.display='flex';
       if(isDesktop){

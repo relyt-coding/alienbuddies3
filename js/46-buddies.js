@@ -93,6 +93,8 @@
     if(a&&a.base){if(a.base.sp!=null){const S=SPECIALS[a.base.sp%SPECIALS.length];return Object.assign({},S);}return Object.assign({},VARIANTS[a.base.v%VARIANTS.length]);}
     return Object.assign({},VARIANTS[((i%100)+100)%100]);   // aliens from before random order keep the look they had
   }
+  // the look a picked design will have (used for the first egg, which shows its buddy's colours before it's bought)
+  window.buddyBaseSpec=function(b){if(!b)return Object.assign({},VARIANTS[0]);return b.sp!=null?Object.assign({},SPECIALS[b.sp%SPECIALS.length]):Object.assign({},VARIANTS[b.v%VARIANTS.length]);};
   window.buddySpecialInfo=function(i){const a=typeof alienData!=='undefined'&&alienData[i];return a&&a.base&&a.base.sp!=null?SPECIALS[a.base.sp%SPECIALS.length]:null;};
   window.buddyVariant=i=>Object.assign({},VARIANTS[((i%100)+100)%100]);
   window.buddyLookSpec=function(i){const ad=typeof alienData!=='undefined'&&alienData[i];return Object.assign(baseSpec(i),ad&&ad.look||{});};

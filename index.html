@@ -159,12 +159,12 @@
   <div class="view" id="gameView">
     <div class="app">
       <div class="header">
-        <button class="nav-btn alien-btn btn-left" id="openBunkerBtn">BUNKER</button>
+        <button class="nav-btn alien-btn btn-left" id="openBunkerBtn"><svg class="nb-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.6 8.2C7.6 5.6 6.2 4.2 4.6 3.3M15.4 8.2c1-2.6 2.4-4 4-4.9" stroke="currentColor" stroke-width="1.7" fill="none" stroke-linecap="round"/><circle cx="4.3" cy="3.1" r="1.9" fill="#ff9ccf"/><circle cx="19.7" cy="3.1" r="1.9" fill="#ff9ccf"/><circle cx="12" cy="14.6" r="8" fill="currentColor"/><circle cx="9.2" cy="13.6" r="1.55" fill="#062012"/><circle cx="14.8" cy="13.6" r="1.55" fill="#062012"/><path d="M10 17.2q2 1.5 4 0" stroke="#062012" stroke-width="1.4" fill="none" stroke-linecap="round"/></svg><span class="nb-lbl">BUNKER</span></button>
         <div>
           <div class="game-title" id="titleEl">ALIEN BUDDIES</div>
           <div class="subtitle" id="slotSubtitle">SLOT 1</div>
         </div>
-        <button class="nav-btn btn-right" id="openStoreBtn">SHOP</button>
+        <button class="nav-btn btn-right" id="openStoreBtn"><svg class="nb-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.4 7.6h14.1l-1.9 6.9a1.7 1.7 0 0 1-1.64 1.25H9.7a1.7 1.7 0 0 1-1.66-1.33z" fill="currentColor" opacity=".35"/><path d="M2.4 3.8h2.7l2.6 10.6a1.7 1.7 0 0 0 1.66 1.3h7.5a1.7 1.7 0 0 0 1.64-1.25l1.95-6.85H6.3" stroke="currentColor" stroke-width="1.9" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9.8" cy="19.7" r="1.8" fill="currentColor"/><circle cx="16.6" cy="19.7" r="1.8" fill="currentColor"/></svg><span class="nb-lbl">SHOP</span></button>
       </div>
 
       <!-- SCORE + TRACKERS (side by side on desktop once the sequencer is unlocked) -->
@@ -228,6 +228,13 @@
         <button type="button" class="vm-row vm-sub" data-sc="ends"><span class="vm-check"></span>4, 8, 12, 16…</button>
         <button type="button" class="vm-row vm-sub" data-sc="all"><span class="vm-check"></span>EVERY STEP</button>
       </div>
+
+      <!-- SEQUENCER TEASER: its outline and price from the very start (js/66-early-game.js) -->
+      <button type="button" class="seq-teaser" id="seqTeaser" style="display:none;" aria-label="Sequencer">
+        <span class="sqt-head"><span class="sqt-name">SEQUENCER</span><span class="sqt-price" id="seqTeaserPrice"></span></span>
+        <span class="sqt-steps" id="seqTeaserSteps"></span>
+        <span class="sqt-bar"><span id="seqTeaserFill"></span></span>
+      </button>
 
       <!-- SEQUENCER (replaces tiers when visible) -->
       <div class="seq-area" id="seqArea">
@@ -1014,5 +1021,6 @@
 <script src="js/63-unlock-cutscenes.js"></script>
 <script src="js/64-unlock-cutscenes-2.js"></script>
 <script src="js/65-intro-and-unlock-fx.js"></script>
+<script src="js/66-early-game.js"></script>
 </body>
 </html>

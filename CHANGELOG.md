@@ -2,6 +2,10 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.141 - 2026-11-14 18:53
+
+- Settings: VIEW is now a single OPEN button, with a line under it saying what's on screen right now (for example TRACKERS · SEQUENCER · DRUM PADS). It opens a VIEW panel with big, easy-to-tap rows for everything the VIEW button by the sequencer has: trackers, sequencer, pads / keys (drum pads or buddy keys) and step counts with their options. BACK returns to Settings. Both always match.
+
 ## v0.2.140 - 2026-11-14 15:25
 
 - NEW: a brand new save file opens with an intro, about 8 seconds (tap or press any key to skip). The real Bunker, Drum Pads and Shop pages fly in from space and line up side by side. The camera visits each page as its parts pop into place, then the pages slide together and it zooms into the drum pads, where the hi-hat pulses to show you where to start. Works on phones and computers. Watch it again from Settings > INTRO > REPLAY.

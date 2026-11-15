@@ -2,6 +2,10 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.160 - 2026-11-15 15:10
+- Bigger drum pads early on: once you have 2 or 3 pads, the next ones show as outlines (snare 100 pts, 4th pad 5,000 pts), so the pads sit in a roomy 2×2 grid instead of three small ones in a row. Three in a row only shows if you pick 3 in EDIT PADS.
+- The 4th pad now costs 5,000 points.
+
 ## v0.2.159 - 2026-11-15 15:05
 - Knowledge Vault: pages you haven't unlocked yet don't appear at all. They show up once there's something in them.
 - The "permanent tap boost" line is gone from every page. It's now a pop-up the first time you open the Vault, and the new ? button brings it back.

@@ -368,6 +368,9 @@ body:not(.desktop-mode) .pad-key{display:none!important;}
 .pad.ghost-pad.affordable{opacity:.95;filter:none;border:1px dashed var(--pc);box-shadow:0 0 22px -5px var(--pc);animation:ghostPulse 1.5s ease-in-out infinite;}
 .pad.ghost-pad.affordable .ghost-cost{color:var(--pc);}
 .pad.ghost-pad:active{transform:scale(.95);}
+.pad.ghost-pad.ghost-later{opacity:.28;}
+.pad.ghost-pad.nope{animation:ghostNope .4s ease-in-out;}
+@keyframes ghostNope{0%,100%{transform:translateX(0);}25%{transform:translateX(-6px);}60%{transform:translateX(5px);}}
 @keyframes ghostPulse{0%,100%{transform:scale(1);}50%{transform:scale(1.03);}}
 .pad.no-sound .pad-name{color:#553333;}
 /* pad that's unlocked but has no sound assigned */

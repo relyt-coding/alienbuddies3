@@ -88,8 +88,11 @@ function rebuildPadGrid(){
   const _showPads=Math.min(visiblePads,drum.pads);
   // Pad 2 (the kick) shows up as a dim "ghost" pad next to pad 1 until it's bought for 10 pts
   // Pad 3 (the snare) does the same once pad 2 is owned, so the way forward is always visible
-  const _ghost=((drum.pads===1||drum.pads===2)&&visiblePads>=drum.pads);
-  padGridEl.setAttribute('data-pads',_showPads+(_ghost?1:0));
+  // v0.2.160: with 2 or 3 pads owned, BOTH the snare (3rd) and the 4th pad show as outlines, so the grid is a roomy 2×2
+  //   instead of three small pads in a row (three in a row now only happens if you pick 3 in EDIT PADS)
+  const _ghost=((drum.pads>=1&&drum.pads<=3)&&visiblePads>=drum.pads);
+  const _ghostN=!_ghost?0:drum.pads===1?1:4-drum.pads;
+  padGridEl.setAttribute('data-pads',_showPads+_ghostN);
   for(let i=0;i<_showPads;i++){
     const sndId=padSounds[i];
     const snd=sndId?SOUND_MAP[sndId]:null;
@@ -118,16 +121,17 @@ function rebuildPadGrid(){
     padEls.push(el);
     padGridEl.appendChild(el);
   }
-  if(_ghost){
+  for(let k=0;k<_ghostN;k++){
     const g=document.createElement('div');
-    g.className='pad ghost-pad';g.id='ghostPad';
-    const _gi=drum.pads,_gs=SOUND_MAP[PAD_DEFAULT_SOUNDS[_gi]];
+    const _gi=drum.pads+k,_gs=SOUND_MAP[PAD_DEFAULT_SOUNDS[_gi]];
+    g.className='pad ghost-pad'+(k?' ghost-later':'');g.id=k?'ghostPad'+(k+1):'ghostPad';
     g.style.setProperty('--pc',_gi===1?'#ff7a50':((_gs&&_gs.color)||'#ffcc44'));
-    g.innerHTML=`<div class="pad-name">${(_gs&&_gs.name)||'NEW PAD'}</div><div class="ghost-cost" id="ghostPadSub">${(typeof formatStore==='function'?formatStore(PAD_COSTS[_gi]):PAD_COSTS[_gi])} PTS</div>`;
-    g.addEventListener('pointerdown',e=>{e.preventDefault();unlockGhostPad();});
+    g.innerHTML=`<div class="pad-name">${(_gs&&_gs.name)||'NEW PAD'}</div><div class="ghost-cost"${k?'':' id="ghostPadSub"'}>${(typeof formatStore==='function'?formatStore(PAD_COSTS[_gi]):PAD_COSTS[_gi])} PTS</div>`;
+    // the next one buys; a later one just shakes (pads unlock in order)
+    g.addEventListener('pointerdown',e=>{e.preventDefault();if(!k){unlockGhostPad();return;}g.classList.remove('nope');void g.offsetWidth;g.classList.add('nope');});
     padGridEl.appendChild(g); // not added to padEls, so pad indexes stay correct
-    updateGhostPad();
   }
+  if(_ghostN)updateGhostPad();
   if(typeof fitPadAreaSoon==='function')fitPadAreaSoon(); // keep the grid inside the free vertical space
   updatePadClickHint();
 }
@@ -137,7 +141,7 @@ function updatePadClickHint(){
   if(hint)hint.style.display=(score===0&&drum.pads<=1&&!(typeof seqPlaying!=='undefined'&&seqPlaying))?'flex':'none';
 }
 function unlockGhostPad(){
-  if(drum.pads!==1&&drum.pads!==2)return;
+  if(drum.pads<1||drum.pads>3)return;
   const cost=PAD_COSTS[drum.pads];
   if(score<cost){showToast(`Need ${typeof formatStore==='function'?formatStore(cost):cost} points — keep tapping!`);return;}
   buyNextPad();

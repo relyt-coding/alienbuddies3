@@ -2,6 +2,10 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.158 - 2026-11-15 14:55
+- Fixed: the BUNKER button on phones didn't respond to taps (the drum pads' empty space was catching them).
+- Messages no longer cover the drum tracker: once it's on, they show just under its dots. Turning it on no longer shows a message, since the dots lighting up say it.
+
 ## v0.2.157 - 2026-11-15 14:40
 - Every time you open a file, the pages come together again: the bunker, drum pads and shop once you've hatched a buddy, or just the drum pads before that.
 - Your buddies float in from off screen as the pages land, instead of already being there.

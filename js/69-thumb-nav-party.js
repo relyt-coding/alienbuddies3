@@ -20,6 +20,9 @@ body.thumb-nav #openBunkerBtn,body.thumb-nav #openStoreBtn,body.thumb-nav #setti
 body.thumb-nav #openBunkerBtn,body.thumb-nav #openStoreBtn{transform:none!important;}
 body.thumb-nav #openBunkerBtn{left:var(--tn-x0)!important;}
 body.thumb-nav #soundboardBtn{display:none!important;}
+/* v0.2.158: BUNKER / SHOP live in the header, which sat under the pad area (same z-index, earlier in the page), so the
+   pads' empty bottom padding swallowed taps on BUNKER. Lift the header above it. */
+body.thumb-nav #gameView .app > .header{z-index:5;}
 body.thumb-nav #settingsOpenBtn{left:var(--tn-x1)!important;}
 body.thumb-nav #padEditToggleBtn{left:var(--tn-x2)!important;}
 body.thumb-nav #openStoreBtn{left:var(--tn-x3)!important;}

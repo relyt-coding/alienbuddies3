@@ -212,7 +212,6 @@ document.getElementById('drumTrackerActivateBtn')&&document.getElementById('drum
   drumTrackerActive=true;
   playSfxTierUnlock(0);
   updateDrumTrackerOverlay();
-  showToast('Drum tracker activated!');
   renderUI();autoSave();
 });
 

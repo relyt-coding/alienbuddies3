@@ -9,7 +9,10 @@ function showToast(msg){
   // sit just under the score numbers (covering the energy meter, which matters less)
   try{const em=document.getElementById('energyMeter'),sc=document.getElementById('scoreSectionBtn');
     let r=em&&em.offsetParent!==null?em.getBoundingClientRect():null;
-    const top=r&&r.height>0?r.top:(sc?sc.getBoundingClientRect().bottom:0);
+    // v0.2.158: once the drum tracker is on, its dots matter: the message goes just under them instead of over them
+    const tw=typeof drumTrackerActive!=='undefined'&&drumTrackerActive&&document.getElementById('tiersWrap');
+    const tr=tw&&tw.offsetParent!==null?tw.getBoundingClientRect():null;
+    const top=tr&&tr.height>0?tr.bottom+6:r&&r.height>0?r.top:(sc?sc.getBoundingClientRect().bottom:0);
     if(top>0)el.style.top=(top+4)+'px';}catch(e){}
   el.classList.add('show');
   if(toastTimer)clearTimeout(toastTimer);

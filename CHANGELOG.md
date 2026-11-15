@@ -2,6 +2,11 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.159 - 2026-11-15 15:05
+- Knowledge Vault: pages you haven't unlocked yet don't appear at all. They show up once there's something in them.
+- The "permanent tap boost" line is gone from every page. It's now a pop-up the first time you open the Vault, and the new ? button brings it back.
+- Messages no longer cover the 25 PTS ACTIVATE button: they show just under it.
+
 ## v0.2.158 - 2026-11-15 14:55
 - Fixed: the BUNKER button on phones didn't respond to taps (the drum pads' empty space was catching them).
 - Messages no longer cover the drum tracker: once it's on, they show just under its dots. Turning it on no longer shows a message, since the dots lighting up say it.

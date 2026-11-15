@@ -24,7 +24,7 @@ README.md covers the file layout, test mode and vocals in depth; this file is th
 - The Knowledge Vault (`68-knowledge-vault.js`) reads tips from `TIPS_DATA` (07-tips; tab per tip in `VAULT_TIP_TAB`), its own LEARN cards and
   MUSIC WORDS lists, and every skill-tree node's `fact` (`SKILL_TREE_NODES`, tab picked by `vaultTabForNode`). Add a `fact` to a node and it
   shows up in the Vault automatically. Five tabs need a skill node first (`req` in `VAULT_TABS`: Core → Music Words, Quad Suns →
-  Sounds / Effects / Piano Roll / Vocals); tips in a locked tab can't be bought yet (`vaultTipLocked`). Lessons / facts / words cost points
+  Sounds / Effects / Piano Roll / Vocals); tips in a locked tab can't be bought yet (`vaultTipLocked`). Since v0.2.159 tabs only appear when unlocked AND non-empty (`vaultTabShown`), nothing hints at locked content, and the boost explanation is the `vaultHelp()` pop-up (first open, then the ? button; seen flag = '__help' in `vaultSeen`). Lessons / facts / words cost points
   (`vaultEntryCost`, ×1.35 per one owned) and give ×1.05 each (`vaultOwned`, `vaultMult` in `sharedMultiplier`). On phones the Vault is swipe
   page 6 (`#vaultView`, body class `vault-open`); on desktop it's the `#vaultModal` window.
 - Upright phones get body class `thumb-nav` (js/69): BUNKER / SETTINGS / EDIT PADS / SHOP in one bottom row. The PARTY button (`.pb-small`) is

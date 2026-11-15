@@ -23,6 +23,8 @@ const VAULT_TABS=[
 ];
 // v0.2.148: five tabs open with the skill tree's centre: the Tucana Core and each Quad Sun opens one
 const VAULT_REQ_NAME={core:'the Tucana Core',sun_planets:'Quad Sun I (Planet Atlas)',sun_points:'Quad Sun II (Musical Toolkit)',sun_minigames:'Quad Sun III (Minigame Nexus)',sun_aliens:'Quad Sun IV (Alien Evolution)'};
+// v0.2.159: a tab only exists once it's unlocked AND has something in it (no locked tabs, no "more to discover")
+function vaultTabShown(id){return vaultTabOpen(id)&&(vaultEntries(id).some(e=>e.on())||vaultTipsIn(id).some(i=>i<vaultTipFar()));}
 function vaultTabOpen(id){const t=VAULT_TABS.find(t=>t.id===id);return !!t&&(!t.req||(typeof unlockedSkills!=='undefined'&&!!unlockedSkills[t.req])||false);}
 function vaultTipLocked(i){return !vaultTabOpen(VAULT_TIP_TAB[i]);}
 // which tab each buyable tip lives in (index = tip number − 1)
@@ -169,6 +171,15 @@ body.desktop-mode #vaultBox{border-radius:20px;height:86vh;}
 #vaultHead{position:relative;display:flex;align-items:center;justify-content:center;padding:1rem 1.1rem .6rem;flex-shrink:0;min-height:3.4rem;}
 #vaultHead .vh-mid{display:flex;flex-direction:column;align-items:center;gap:.15rem;text-align:center;padding:0 5.4rem;}
 #vaultTitle{font-family:'Bebas Neue',sans-serif;font-size:clamp(1.15rem,5.2vw,1.6rem);letter-spacing:.12em;color:#ffd23f;line-height:1;white-space:nowrap;}
+#vaultHelpBtn{flex-shrink:0;width:2.1rem;height:2.1rem;border-radius:50%;border:1px solid #4a4a2a;background:#14140a;color:#d8d860;font-family:'Bebas Neue',sans-serif;font-size:1.25rem;line-height:1;padding:0;cursor:pointer;position:absolute;right:1.1rem;top:50%;transform:translateY(-40%);}
+#vaultHelp{position:fixed;inset:0;z-index:100000;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.55);padding:1.2rem;}
+#vaultHelp.on{display:flex;}
+#vaultHelp .vhp{max-width:330px;background:#101016;border:1px solid #e0e055;border-radius:16px;padding:1.1rem 1.2rem;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,.6);animation:vhpIn .3s cubic-bezier(.3,1.4,.5,1);}
+#vaultHelp b{display:block;font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:.1em;color:#ffd23f;margin-bottom:.4rem;}
+#vaultHelp p{color:#c8c8d4;font-size:.95rem;line-height:1.45;margin:.3rem 0;}
+#vaultHelp em{font-style:normal;color:#e0e055;font-weight:700;}
+#vaultHelp button{margin-top:.7rem;font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:.12em;background:#e0e055;color:#111;border:0;border-radius:10px;padding:.45rem 1.6rem;cursor:pointer;}
+@keyframes vhpIn{from{opacity:0;transform:scale(.85);}to{opacity:1;transform:none;}}
 #vaultSub{font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:.1em;color:#8a8a6a;white-space:nowrap;}
 #vaultClose{position:absolute;left:1.1rem;top:50%;transform:translateY(-35%);white-space:nowrap;font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:.1em;padding:.4rem .9rem;border-radius:8px;border:1px solid #3a3a1a;background:#0d0d02;color:#aaaa33;cursor:pointer;touch-action:manipulation;}
 #vaultTabs{display:flex;gap:.45rem;overflow-x:auto;padding:.3rem 1.1rem .7rem;flex-shrink:0;scrollbar-width:none;-webkit-overflow-scrolling:touch;border-bottom:1px solid #1a1a12;touch-action:pan-x;}
@@ -217,7 +228,7 @@ body.vault-open #soundboardBtn,body.vault-open #padEditToggleBtn,body.vault-open
 `;document.head.appendChild(css);
   const m=document.createElement('div');m.id='vaultModal';
   m.innerHTML=`<div id="vaultBox">
-    <div id="vaultHead"><button id="vaultClose">← BACK</button><div class="vh-mid"><div id="vaultTitle">KNOWLEDGE VAULT</div><div id="vaultSub"></div></div></div>
+    <div id="vaultHead"><button id="vaultClose">← BACK</button><div class="vh-mid"><div id="vaultTitle">KNOWLEDGE VAULT</div><div id="vaultSub"></div></div><button id="vaultHelpBtn" type="button" aria-label="How the Vault works">?</button></div>
     <div id="vaultTabs"></div><div id="vaultBody"></div></div>`;
   document.body.appendChild(m);
   const pg=document.createElement('div');pg.className='view';pg.id='vaultView';
@@ -237,19 +248,31 @@ function vaultPlace(){
 }
 function vaultPrep(){
   vaultSig='';vaultPlace();
-  if(vaultTab&&!vaultTabOpen(vaultTab))vaultTab=null;
+  if(vaultTab&&!vaultTabShown(vaultTab))vaultTab=null;
   if(!vaultTab){   // open on a tab with something to buy, else something new, else the basics
-    const t=VAULT_TABS.find(t=>vaultTabCanBuy(t.id))||VAULT_TABS.find(t=>vaultTabHasNew(t.id));vaultTab=t?t.id:'basics';}
+    const t=VAULT_TABS.find(t=>vaultTabShown(t.id)&&vaultTabCanBuy(t.id))||VAULT_TABS.find(t=>vaultTabShown(t.id)&&vaultTabHasNew(t.id))||VAULT_TABS.find(t=>vaultTabShown(t.id));vaultTab=t?t.id:'basics';}
 }
+// v0.2.159: how boosts work is a pop-up (the first time the Vault opens, then behind the ? button), not a line on every tab
+function vaultHelp(force){
+  if(!force&&vaultSeen.includes('__help'))return;
+  if(!vaultSeen.includes('__help'))vaultSeen.push('__help');
+  let h=document.getElementById('vaultHelp');
+  if(!h){h=document.createElement('div');h.id='vaultHelp';
+    h.innerHTML='<div class="vhp"><b>KNOWLEDGE VAULT</b><p>Every lesson, fact or music word you buy here is a permanent <em>×1.05</em> tap boost. Tips are bigger: <em>×1.5</em> each.</p><p>New pages show up as you unlock more of the game.</p><button type="button">GOT IT</button></div>';
+    h.addEventListener('click',e=>{if(e.target===h||e.target.tagName==='BUTTON')h.classList.remove('on');});
+    document.body.appendChild(h);}
+  h.classList.add('on');if(typeof autoSave==='function')try{autoSave();}catch(e){}
+}
+document.addEventListener('click',e=>{if(e.target&&e.target.id==='vaultHelpBtn'){e.stopPropagation();vaultHelp(true);}});
 function openVault(){
   if(vaultIsPage()&&typeof swipeNavGo==='function'){
     if(document.body.classList.contains('vault-open'))return;
     swipeNavGo(6,1);return;}            // slides in from the left, like swiping right
   vaultPrep();
   document.getElementById('vaultModal').classList.add('open');
-  renderVault(true);
+  renderVault(true);setTimeout(()=>vaultHelp(false),350);
 }
-function openVaultPage(){vaultPrep();document.body.classList.add('vault-open');renderVault(true);}
+function openVaultPage(){vaultPrep();document.body.classList.add('vault-open');renderVault(true);setTimeout(()=>vaultHelp(false),450);}
 function closeVaultPage(){
   if(!document.body.classList.contains('vault-open'))return;
   document.body.classList.remove('vault-open');vaultMarkSeen(vaultTab);updateVaultBtn();
@@ -269,8 +292,9 @@ function vaultMarkSeen(tab){
 }
 function vaultCounts(){
   let have=0,all=0;
-  VAULT_TABS.forEach(t=>vaultEntries(t.id).forEach(e=>{all++;if(e.on())have++;}));
-  return{have:vaultOwned.length+tipsOwned,all:all+MAX_TIPS};
+  // (only what's already discovered counts: nothing hints at what's still locked)
+  const far=vaultTipFar();VAULT_TABS.forEach(t=>{if(!vaultTabOpen(t.id))return;vaultEntries(t.id).forEach(e=>{if(e.on())all++;});all+=vaultTipsIn(t.id).filter(i=>i<far).length;});
+  return{have:vaultOwned.length+tipsOwned,all:Math.max(all,vaultOwned.length+tipsOwned)};
 }
 let vaultSig='';
 function vaultSigNow(){const far=vaultTipFar();let k=tipsOwned+':'+far+':'+vaultOwned.length+':'+(score>=vaultEntryCost()?1:0)+':';for(let i=0;i<far;i++)k+=(score>=tipCost(i)?1:0);return k;}
@@ -283,9 +307,9 @@ function renderVault(scrollTab){
   // tabs
   tabsEl.innerHTML='';
   VAULT_TABS.forEach(t=>{
+    if(!vaultTabShown(t.id))return;
     const b=document.createElement('button');b.type='button';b.className='vt-tab'+(t.id===vaultTab?' on':'');b.style.setProperty('--c',t.col);b.textContent=t.name;
     const any=vaultEntries(t.id).some(e=>e.on())||vaultTipsIn(t.id).some(i=>i<far);if(!any)b.classList.add('empty');
-    if(!vaultTabOpen(t.id)){b.classList.add('locked');b.textContent='🔒 '+t.name;}
     const buy=vaultTabCanBuy(t.id),nw=t.id!==vaultTab&&vaultTabHasNew(t.id);
     if(buy||nw){const d=document.createElement('i');d.className='vt-dot';b.appendChild(d);if(buy)b.classList.add('buy');}
     b.addEventListener('click',()=>{if(vaultTab===t.id)return;vaultMarkSeen(vaultTab);vaultTab=t.id;renderVault(true);body.scrollTop=0;});
@@ -307,7 +331,6 @@ function renderVault(scrollTab){
   const tips=vaultTipsIn(tab.id);
   const shownTips=tips.filter(i=>i<far);locked+=tips.length-shownTips.length;
   if(shownTips.length){
-    body.appendChild(el('div','vb-sec','TIPS · EACH ONE IS A PERMANENT ×1.5 TAP BOOST'));
     shownTips.forEach(i=>{
       const card=el('div','vb-card vb-tip');card.style.setProperty('--c','#e0e055');
       const row=el('div','vb-row');row.appendChild(el('h4','',(tipHave(i)?'✓ ':'')+'TIP '+(i+1)));
@@ -331,7 +354,6 @@ function renderVault(scrollTab){
   const buyBtn=e=>{const bt=el('button','vb-buy'+(canE?' can':''),formatStore(ec)+' PTS');bt.type='button';
     if(canE)bt.addEventListener('click',ev=>{ev.stopPropagation();if(vaultBuyEntry(e))renderVault();});return bt;};
   const tag=e=>vaultIsNew(e)?' <span class="vb-tag">NEW</span>':'';
-  if(open.length)body.appendChild(el('div','vb-sec',(tab.id==='words'?'WORDS':'LEARN')+' · EACH ONE IS A PERMANENT ×1.05 TAP BOOST'));
   if(tab.id==='words'){
     open.slice().sort((a,b)=>a.title.localeCompare(b.title)).forEach(e=>{
       const w=el('div','vb-word'+(vaultHasEntry(e)?'':' vb-closed'));
@@ -346,8 +368,7 @@ function renderVault(scrollTab){
       else{const r=el('div','vb-row');r.appendChild(h);r.appendChild(buyBtn(e));card.appendChild(r);}
       body.appendChild(card);});
   }
-  if(locked)body.appendChild(el('div','vb-locked','🔒 '+locked+' MORE TO DISCOVER IN THIS TAB · KEEP PLAYING'));
-  if(!open.length&&!shownTips.length&&!locked)body.appendChild(el('div','vb-locked','NOTHING HERE YET'));
+  if(!open.length&&!shownTips.length)body.appendChild(el('div','vb-locked','NOTHING HERE YET'));
   if(!scrollTab)body.scrollTop=keepY;
 }
 function updateVaultBtn(){

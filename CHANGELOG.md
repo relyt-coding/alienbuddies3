@@ -2,6 +2,13 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.154 - 2026-11-15 12:55
+
+- Better planet cutscenes. Every planet is now lit by a distant star you can see in the sky: a bright day side, a clear line into night, and a glowing rim of atmosphere. Each one has a little moon swinging round it. Mantra got coastlines, drifting clouds, an ocean glint and golden lights on its night side. Hyphae got bigger, layered mushroom caps. Timbra got thicker forests, its tree rings now show, and fireflies come out at night. Alloy got brushed-metal belts and its ring now casts a shadow (no more blown-out white). The continent pings are smaller and brighter.
+- Luna and the Wyrm Moon have giant ringed planets hanging in their skies, shaded craters and a glowing horizon. Magmora has mountain ranges catching the lava light, a shaded volcano with a glowing crater and brighter lava rivers.
+- Old iPhones (iOS 15, like the iPhone 7): Planet Hop's buttons, the sequencer's sound labels, Beat Defense towers and the playing song slot were missing their tinted colours there. They have proper colours now.
+- On narrow phones (iPhone 7 / SE size) MY ACCOUNT shrinks to just its icon when it would bump into the title or score. On sideways phones it moves into Settings (there's now a MY ACCOUNT row at the top of Settings on every device).
+
 ## v0.2.153 - 2026-11-15 12:15
 
 - The gem ring launches the galaxies the same way the shop card does: hold it down. It charges up for a moment (a bright sweep round the ring, a rumble and a rising hum), then the hyperspace intro plays. A quick tap just gives it a little bounce.

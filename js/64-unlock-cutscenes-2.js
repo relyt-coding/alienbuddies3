@@ -258,7 +258,23 @@
     g.fillStyle='#f2f4fa';g.beginPath();g.ellipse(0,0,s*.22,s*.55,0,0,TAU);g.fill();
     g.fillStyle='#ff4a4a';g.beginPath();g.ellipse(0,-s*.3,s*.18,s*.27,0,Math.PI,TAU);g.fill();
     g.fillStyle='#3fa9ff';disc(0,-s*.04,s*.1);g.strokeStyle='#c9d2e6';g.lineWidth=s*.03;g.beginPath();g.arc(0,-s*.04,s*.1,0,TAU);g.stroke();g.restore();}
-  function crater(g,x,y,r,a){g.fillStyle=`rgba(60,60,80,${a})`;g.beginPath();g.ellipse(x,y,r,r*.55,0,0,TAU);g.fill();g.strokeStyle=`rgba(255,255,255,${a*.4})`;g.lineWidth=1.5;g.beginPath();g.ellipse(x,y+r*.08,r,r*.55,0,Math.PI*.1,Math.PI*.9);g.stroke();}
+  // v0.2.154: craters are shaded bowls (shadow inside on the lit side, a bright rim on the far side)
+  function crater(g,x,y,r,a){
+    g.fillStyle=`rgba(40,40,62,${a})`;g.beginPath();g.ellipse(x,y,r,r*.55,0,0,TAU);g.fill();
+    const k=g.createLinearGradient(x-r,y-r*.5,x+r,y+r*.5);k.addColorStop(0,`rgba(10,10,24,${a*.9})`);k.addColorStop(.6,`rgba(10,10,24,0)`);g.fillStyle=k;g.beginPath();g.ellipse(x,y,r*.92,r*.5,0,0,TAU);g.fill();
+    g.strokeStyle=`rgba(255,255,255,${a*.55})`;g.lineWidth=Math.max(1.2,r*.08);g.beginPath();g.ellipse(x,y,r,r*.55,0,-Math.PI*.15,Math.PI*.75);g.stroke();
+    g.strokeStyle=`rgba(0,0,0,${a*.35})`;g.lineWidth=Math.max(1,r*.06);g.beginPath();g.ellipse(x,y,r,r*.55,0,Math.PI*.85,Math.PI*1.7);g.stroke();}
+  // a giant ringed planet hanging in the sky (depth for the moon / world scenes)
+  function skyGiant(g,x,y,r,body,dark,ringCol,a){if(r<2||a<=0)return;g.save();g.globalAlpha=a;
+    const half=front=>{g.save();g.translate(x,y);g.rotate(-.3);g.strokeStyle=ringCol;g.lineWidth=r*.12;g.beginPath();g.ellipse(0,0,r*1.9,r*.42,0,front?0:Math.PI,front?Math.PI:TAU);g.stroke();
+      g.strokeStyle='rgba(0,0,0,.25)';g.lineWidth=r*.025;g.beginPath();g.ellipse(0,0,r*1.78,r*.39,0,front?0:Math.PI,front?Math.PI:TAU);g.stroke();g.restore();};
+    half(false);
+    const k=g.createRadialGradient(x-r*.45,y-r*.45,r*.1,x,y,r);k.addColorStop(0,'#ffffff');k.addColorStop(.25,body);k.addColorStop(1,dark);g.fillStyle=k;disc(x,y,r);
+    g.save();g.beginPath();g.arc(x,y,r,0,TAU);g.clip();g.globalAlpha=a*.35;[-.45,-.1,.3,.6].forEach((dy,i)=>{g.fillStyle=i%2?dark:'#ffffff';g.fillRect(x-r,y+dy*r,r*2,r*(i%2?.16:.08));});g.restore();
+    g.globalAlpha=a;half(true);g.restore();}
+  // the glowing edge of a world's horizon (atmosphere seen edge-on)
+  function horizonGlow(g,cx,cy,R,col,a){g.save();g.globalCompositeOperation='lighter';g.strokeStyle=rgba(col,.55*a);g.lineWidth=6;g.beginPath();g.arc(cx,cy,R+2,Math.PI*1.05,Math.PI*1.95);g.stroke();
+    g.strokeStyle=rgba(col,.2*a);g.lineWidth=22;g.beginPath();g.arc(cx,cy,R+10,Math.PI*1.05,Math.PI*1.95);g.stroke();g.restore();}
 
   // ── Minigame Cockpit: lift-off, a quick flight, and a soft landing on the moon Luna ──
   const MG_COCKPIT=world({vol:1.75,kicker:'MINIGAMES',title:'MINIGAME COCKPIT',sub:'Planet Hop opens on Luna · levels 1–5',
@@ -266,9 +282,11 @@
     bg(st,t,g){const sp=t<.8?0:t<1.6?ss(.8,1.2,t):1-ss(1.6,2.1,t);g.fillStyle='#04050d';g.fillRect(-50,-50,st.W+100,st.H+100);
       g.strokeStyle='rgba(220,235,255,.7)';g.lineCap='round';st.fs.forEach(s=>{s.y+=st.dt*sp*2.2*s.l;if(s.y>1)s.y-=1;const L=2+sp*st.H*.06*s.l;g.lineWidth=s.l*1.6;g.beginPath();g.moveTo(s.x*st.W,s.y*st.H);g.lineTo(s.x*st.W,s.y*st.H-L);g.stroke();});},
     draw(st,t,g,S){const{W,H,U}=st,moonR=Math.max(W,H)*.75,ms=eOut(ss(1.35,2.0,t)),moonY=lerp(H*1.9,H*.56+moonR,ms);
-      // Luna rising into view
-      if(ms>0){const k=g.createRadialGradient(W*.4,moonY-moonR*.9,moonR*.1,W/2,moonY,moonR);k.addColorStop(0,'#e4e6f0');k.addColorStop(.7,'#9a9db0');k.addColorStop(1,'#5a5d70');g.fillStyle=k;disc(W/2,moonY,moonR);
-        [[-.3,-.93,.06],[.12,-.97,.04],[.36,-.9,.07],[-.08,-.86,.05],[.22,-.82,.035]].forEach(([dx,dy,r])=>crater(g,W/2+dx*moonR,moonY+dy*moonR,r*moonR,.5));}
+      // a big blue ringed world fills the sky as we arrive (depth), then Luna rises into view
+      if(ms>0)skyGiant(g,W*.78,lerp(H*.75,H*.2,ms),U*.2,'#5ab0ff','#122a5a','rgba(190,220,255,.65)',ms);
+      if(ms>0){const k=g.createRadialGradient(W*.4,moonY-moonR*.9,moonR*.1,W/2,moonY,moonR);k.addColorStop(0,'#eceef6');k.addColorStop(.5,'#a8abbd');k.addColorStop(.8,'#6a6d82');k.addColorStop(1,'#3a3d52');g.fillStyle=k;disc(W/2,moonY,moonR);
+        [[-.3,-.93,.06],[.12,-.97,.04],[.36,-.9,.07],[-.08,-.86,.05],[.22,-.82,.035],[-.45,-.84,.05],[.5,-.8,.045],[-.18,-.97,.025],[.02,-.92,.022],[.3,-.96,.02]].forEach(([dx,dy,r])=>crater(g,W/2+dx*moonR,moonY+dy*moonR,r*moonR,.55));
+        horizonGlow(g,W/2,moonY,moonR,'#bcd4ff',ms);}
       const ground=moonY-moonR;
       // the rocket: rumble, lift-off, fly, then come down on the moon
       let ry,fl,a=0;if(t<.8){ry=H*.62+Math.sin(t*60)*1.5;fl=t>.3?.3:0;}else if(t<1.45){const q=ss(.8,1.45,t);ry=lerp(H*.62,H*.3,q*q);fl=1;}else{const q=eOut(ss(1.45,2.1,t));ry=lerp(H*.3,ground-U*.1,q);fl=t<2.1?.45:0;}
@@ -356,14 +374,21 @@
     draw(st,t,g,S){const{W,U}=st,gy=S.y+S.SH*.4,vx=S.cx,top=S.y-S.SH*.12,erupt=ss(1.45,1.6,t);
       // lava glow behind the cone, then the cone
       g.globalCompositeOperation='lighter';glow(vx,top,U*(.18+.5*erupt),'#ff7a1f',.4+.5*erupt);g.globalCompositeOperation='source-over';
-      g.fillStyle='#2b1410';g.beginPath();g.moveTo(vx-S.SW*.5,gy);g.lineTo(vx-U*.08,top);g.lineTo(vx+U*.08,top);g.lineTo(vx+S.SW*.5,gy);g.fill();
-      g.strokeStyle=`rgba(255,${120+80*erupt},40,${.5+.4*erupt})`;g.lineWidth=3;[[-.03,.4],[.04,.55],[-.01,.7]].forEach(([dx,f])=>{g.beginPath();g.moveTo(vx+dx*S.SW,top);g.quadraticCurveTo(vx+dx*S.SW*3,lerp(top,gy,f*.5),vx+dx*S.SW*6,lerp(top,gy,f));g.stroke();});
+      // far ranges first (v0.2.154), their ridges catching the lava light
+      [[.55,'#1e0a0c',.9,7],[.75,'#2a0f0c',.55,5]].forEach(([hh,col,amp,n],li)=>{const yb=gy-S.SH*.05*(1-li);g.fillStyle=col;g.beginPath();g.moveTo(-20,gy);
+        for(let i=0;i<=n*2;i++){const px=-20+(W+40)*i/(n*2),py=yb-(i%2?S.SH*hh*(.55+.45*Math.abs(Math.sin(i*1.7+li))):S.SH*hh*.2)*amp;g.lineTo(px,py);}g.lineTo(W+20,gy);g.fill();
+        g.strokeStyle=`rgba(255,110,40,${.25+.25*erupt})`;g.lineWidth=1.5;g.stroke();});
+      // the cone: a lit face and a shadow face, with a glowing crater lip
+      g.fillStyle='#3a1a12';g.beginPath();g.moveTo(vx-S.SW*.5,gy);g.lineTo(vx-U*.08,top);g.lineTo(vx+U*.01,top);g.lineTo(vx+S.SW*.08,gy);g.fill();
+      g.fillStyle='#1f0c0a';g.beginPath();g.moveTo(vx+S.SW*.08,gy);g.lineTo(vx+U*.01,top);g.lineTo(vx+U*.08,top);g.lineTo(vx+S.SW*.5,gy);g.fill();
+      g.globalCompositeOperation='lighter';g.fillStyle=`rgba(255,140,40,${.55+.4*erupt})`;g.beginPath();g.ellipse(vx,top,U*.08,U*.018,0,0,TAU);g.fill();g.globalCompositeOperation='source-over';
+      g.globalCompositeOperation='lighter';[[Math.max(9,U*.024),`rgba(255,90,30,${.18+.2*erupt})`],[Math.max(3,U*.008),`rgba(255,${120+80*erupt},40,${.5+.4*erupt})`]].forEach(([lw,col])=>{g.strokeStyle=col;g.lineWidth=lw;[[-.03,.4],[.04,.55],[-.01,.7]].forEach(([dx,f])=>{g.beginPath();g.moveTo(vx+dx*S.SW,top);g.quadraticCurveTo(vx+dx*S.SW*3,lerp(top,gy,f*.5),vx+dx*S.SW*6,lerp(top,gy,f));g.stroke();});});g.globalCompositeOperation='source-over';
       // a lava lake in front, bubbling
       const k=g.createLinearGradient(0,gy,0,st.H);k.addColorStop(0,'#ffb030');k.addColorStop(.1,'#ff5a1f');k.addColorStop(.38,'#5a1206');k.addColorStop(1,'#220603');g.fillStyle=k;g.fillRect(-10,gy,W+20,st.H);
       if(Math.random()<st.dt*14)st.bub.push({x:rnd(0,W),b:t,s:rnd(.6,1.3)});st.bub.forEach(p=>{const q=(t-p.b)/.5;if(q>1)return;ring(p.x,gy+U*.03,U*.02*p.s*q,2,'#ffe080',1-q,.5);});
       // smoke before, lava bombs after
       if(t<1.45&&Math.random()<st.dt*20)st.smoke.push({x:vx+rnd(-1,1)*U*.03,y:top,b:t,v:rnd(.6,1)});
-      st.smoke.forEach(p=>{const q=(t-p.b)/1.4;if(q>1)return;g.fillStyle=`rgba(90,70,70,${.45*(1-q)})`;disc(p.x+Math.sin(q*4)*U*.02,p.y-q*S.SH*.6*p.v,U*.03*(1+q*2));});
+      st.smoke.forEach(p=>{const q=(t-p.b)/1.4;if(q>1)return;const px=p.x+Math.sin(q*4)*U*.02,py=p.y-q*S.SH*.6*p.v,pr=U*.03*(1+q*2);g.fillStyle=`rgba(90,70,70,${.45*(1-q)})`;disc(px,py,pr);g.fillStyle=`rgba(255,120,50,${.18*(1-q)})`;disc(px,py+pr*.35,pr*.6);});
       if(t>1.45&&st.blobs.length<90&&t<2.6)for(let i=0;i<3;i++){const a=-Math.PI/2+rnd(-.6,.6),v=U*rnd(.9,1.7);st.blobs.push({x:vx,y:top,vx:Math.cos(a)*v,vy:Math.sin(a)*v,b:t,s:rnd(.5,1.2)});}
       st.blobs.forEach(p=>{p.vy+=U*1.6*st.dt;p.x+=p.vx*st.dt;p.y+=p.vy*st.dt;if(p.y>gy)return;const q=Math.min(1,(t-p.b)/1.2);g.fillStyle=`hsl(${40-30*q},100%,${70-25*q}%)`;disc(p.x,p.y,U*.014*p.s);});
       // the supernova comet
@@ -408,9 +433,11 @@
     init(st){st.rock=[];st.rk=0;},
     draw(st,t,g,S){const{W,H,U}=st,mR=Math.max(W,H)*.7,mY=H*.62+mR*.82,surf=mY-mR;
       // the moon
-      const k=g.createRadialGradient(W*.35,mY-mR*.95,mR*.1,W/2,mY,mR);k.addColorStop(0,'#d8ccff');k.addColorStop(.6,'#6a58a8');k.addColorStop(1,'#241a48');g.fillStyle=k;disc(W/2,mY,mR);
+      skyGiant(g,W*.2,H*.16,U*.16,'#ff8ad8','#4a1050','rgba(255,200,240,.55)',ss(.2,1,t));
+      const k=g.createRadialGradient(W*.35,mY-mR*.95,mR*.1,W/2,mY,mR);k.addColorStop(0,'#e4daff');k.addColorStop(.45,'#7a68b8');k.addColorStop(.8,'#3a2a70');k.addColorStop(1,'#1a1238');g.fillStyle=k;disc(W/2,mY,mR);
+      horizonGlow(g,W/2,mY,mR,'#c4a8ff',1);
       g.globalCompositeOperation='lighter';glow(W/2,surf,mR*.6,'#9d7bff',.25);g.globalCompositeOperation='source-over';
-      [[-.25,.03],[.1,.06],[.3,.025],[-.05,.04]].forEach(([dx,r])=>crater(g,W/2+dx*W,surf+U*.06+Math.abs(dx)*U*.12,r*W,.4));
+      [[-.25,.03],[.1,.06],[.3,.025],[-.05,.04],[-.4,.035],[.42,.03],[.2,.018],[-.14,.016]].forEach(([dx,r])=>crater(g,W/2+dx*W,surf+U*.06+Math.abs(dx)*U*.12,r*W,.5));
       // the wyrm: a chain of segments following an arc out of the ground and back in
       const q=ss(1.4,3.1,t),ax=W*.16,bx=W*.84,peak=S.y-S.SH*.85,n=16,path=u=>({x:lerp(ax,bx,u),y:surf-Math.sin(u*Math.PI)*(surf-peak)});
       if(q>0)for(let i=n-1;i>=0;i--){const u=q*1.3-i*.035;if(u<0||u>1)continue;const p=path(u),s=U*(.1-i*.0042),hue=270-i*6;

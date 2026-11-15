@@ -47,6 +47,10 @@ Serve the folder (`python3 -m http.server`) and drive it with Playwright + `/usr
 `unlockedSkills.x=true`) and screenshot. The first tap on a new file plays an intro (tap a few times to skip).
 
 ## Things that bite
+- Old Safari (iOS 15 / iPhone 7) has no CSS `color-mix()`: give every color-mix declaration a fallback (see the `@supports not` block at the end
+  of css/style.css). Avoid canvas `shadowBlur` in per-frame cutscene drawing (it halved Magmora's frame rate); use a wide faint stroke instead.
+- Device smoke test: `/home/claude/preview/smoke.py`-style Playwright run over iPhone 7 (375×667, sideways 667×375), iPhone 14, iPad both ways,
+  1280×720 and 1920×1080, checking page errors and overlapping buttons. Old-Safari syntax/API scan: parse js/ with acorn at ES2021.
 - Must run on old iPhones (a playtester uses an iPhone 7): `21-legacy-safari.js` has fallbacks; keep effects cheap.
 - iPhone only shows the keyboard if `focus()` happens inside the tap itself, so open text boxes synchronously (no setTimeout).
 - No 👽 emoji anywhere: buddies are drawn (46-buddies). The shop has no emoji except 💎, and js/70 draws every 💎 on screen as the

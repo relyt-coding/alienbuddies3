@@ -60,8 +60,11 @@ body.store-open #gemRing,body.bunker-open #gemRing,body.cockpit-open #gemRing,bo
 #accountBtn .ab-av{width:1.45rem;height:1.45rem;border-radius:50%;background:#16203e;border:1px solid #3a4a80;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 #accountBtn .ab-av svg{width:70%;height:70%;}
 #accountBtn:active{background:#131a33;border-color:#5a6ab0;}
+#accountBtn.ab-mini{font-size:0;gap:0;padding:.3rem;}
+#settingsAccountRow .as-open-btn{font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:.1em;padding:.35rem .9rem;border-radius:8px;border:1px solid #2a3350;background:#0b0f1e;color:#8ea2e8;cursor:pointer;}
+#accountBtn.ab-mini .ab-av{width:1.75rem;height:1.75rem;}
 body.store-open #accountBtn,body.bunker-open #accountBtn,body.cockpit-open #accountBtn,body.bestbuddy-open #accountBtn,body.vault-open #accountBtn,body.intro-run #accountBtn,body.roll-full #accountBtn,body.vox-full #accountBtn,body.nav-locked #accountBtn{display:none!important;}
-body.phone-land #accountBtn{font-size:.62rem;padding:.2rem .5rem .2rem .25rem;top:calc(4px + env(safe-area-inset-top,0px))!important;bottom:auto!important;}
+body.phone-land #accountBtn{display:none!important;}
 body.phone-land #accountBtn .ab-av{width:1.05rem;height:1.05rem;}
 #accountSheet{position:fixed;inset:0;z-index:480;background:rgba(0,0,0,.82);display:none;align-items:flex-end;justify-content:center;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);}
 #accountSheet.open{display:flex;}
@@ -196,13 +199,24 @@ body.desktop-mode #accountBox{border-radius:20px;}
   sh.querySelector('.as-x').addEventListener('click',closeAccount);
   addEventListener('keydown',e=>{if(e.code==='Escape'&&sh.classList.contains('open'))closeAccount();});
   window.openAccountSheet=openAccount;
+  (function(){const box=$('settingsBox'),title=box&&box.querySelector('.settings-title');if(!title)return;
+    const row=document.createElement('div');row.className='settings-row';row.id='settingsAccountRow';
+    row.innerHTML='<div><div class="settings-label">MY ACCOUNT</div></div><button type="button" class="as-open-btn">OPEN</button>';
+    title.after(row);row.querySelector('button').addEventListener('click',e=>{e.stopPropagation();if(typeof closeSettings==='function')closeSettings();openAccount();});})();
   function placeAccount(){
     const on=B.contains('game-active');ab.classList.toggle('on',on);if(!on)return;
-    if(B.contains('phone-land'))return;                            // js/34 lines it up in the header row
+    if(B.contains('phone-land')){ab.classList.add('ab-mini');ab.classList.remove('on');return;}   // sideways: the header row is full; MY ACCOUNT is in Settings
     if(B.contains('desktop-mode')){   // computer: in the bottom row, after EDIT PADS (the top-left holds the drum tracker)
       const ep=$('padEditToggleBtn'),r=ep&&ep.getBoundingClientRect();
       ab.style.top='auto';ab.style.bottom='1.4rem';ab.style.left=(r&&r.width?r.right+10:340)+'px';return;}
     ab.style.bottom='auto';ab.style.left='10px';ab.style.top='calc(env(safe-area-inset-top,0px) + 10px)';
+    // narrow phones (iPhone 7 / SE): if the label would run into the title, show just the avatar
+    // (the score climbs into the top row once the sequencer is in, so check it too)
+    const txt=id=>{const e=$(id);if(!e)return null;try{const rg=document.createRange();rg.selectNodeContents(e);const r=rg.getBoundingClientRect();return r.width?r:null;}catch(x){return null;}};
+    if(B.contains('desktop-mode')){ab.classList.remove('ab-mini');return;}
+    ab.classList.remove('ab-mini');const r=ab.getBoundingClientRect();
+    const hit=q=>q&&r.right>q.left-10&&r.bottom>q.top-4&&r.top<q.bottom+4;
+    ab.classList.toggle('ab-mini',hit(txt('titleEl'))||hit(txt('scoreEl')));
   }
 
   // ══════════ keep it all up to date ══════════

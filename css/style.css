@@ -2669,3 +2669,16 @@ body.phone-land .keys-switch-seq button{font-size:.72rem;padding:.2rem .42rem;}
 #seqTeaser.tz-hold>*{visibility:hidden;}
 #seqTeaser.tz-in{animation:tzIn 1.1s .5s cubic-bezier(.3,1.4,.5,1) both;}
 @keyframes tzIn{0%{opacity:0;transform:scale(.92);}100%{opacity:1;transform:none;}}
+
+/* v0.2.154: fallbacks for browsers without color-mix() (Safari 15 and older — an iPhone 7 tops out at iOS 15).
+   Without these the tinted backgrounds and borders below were dropped there. */
+@supports not (background:color-mix(in srgb,red 50%,transparent)){
+  .seq-song-slot.playing{background:rgba(160,168,255,.1);}
+  .seq-snd-pill{background:#11141a !important;border:1px solid var(--lc) !important;box-shadow:0 0 8px -3px var(--lc);}
+  .ph-pads .ph-pad{background:radial-gradient(120% 140% at 0% 100%,rgba(255,255,255,.07),transparent 70%),linear-gradient(180deg,#141428,#0a0a16);
+    box-shadow:inset 0 0 calc(18px + var(--cue,0)*26px) -8px var(--c),0 0 calc(8px + var(--cue,0)*22px) -6px var(--c),inset 0 -3px 0 var(--c);border-color:var(--c);}
+  .ph-pad .ph-ico{background:#0d0d1a;}
+  .ph-pad .ph-snd{border:1px solid rgba(255,255,255,.4);}
+  .ph-pad .ph-keys{color:#fff;}
+  .bd-tw{background:#0f0f1a;}
+}

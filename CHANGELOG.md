@@ -2,6 +2,14 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.143 - 2026-11-14 22:22
+
+- NEW "level 1": your first buddy comes to you. At 500 points an egg rolls onto the drum pads screen next to the score, with a 1,000 price tag. It wobbles more the closer you get, and at 1,000 it glows and bounces. Tap it and it flies up to hatch.
+- BUNKER and SHOP stay hidden until your first buddy hatches (buttons, page swipes and the computer's side tabs), then pop in. BUNKER glows until you visit your buddy's new home.
+- New look for the BUNKER and SHOP buttons: little drawn icons (a buddy and a shopping cart), a glossy glow and a soft shine. SHOP glows with a red dot when something new in it is affordable, until you look.
+- The sequencer is teased from the start: a dashed outline with its 100,000 price and a progress line. Tap it to hear a bar of the beat you'll get. When you can afford it, it glows and a light runs along its steps; tap to unlock (the shop card still works too).
+- The sequencer now starts with a hi-hat beat (every other step plus the last two), so it plays itself straight away.
+
 ## v0.2.142 - 2026-11-14 21:27
 
 - NEW: FILL boxes in the sequencer's sound picker (tap a track's name) to quick-start a beat with that track's sound. 1 fills steps 1, 5, 9, 13, 2 fills 2, 6, 10, 14, 3 and 4 the same way, and ALL fills every step. Works with 32 and 64 step loops too. A box lights up when its steps are all on; press it again to take them back out. The picker stays open so you can stack them (1 + 3 for a kick on the 1s and 3s).

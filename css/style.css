@@ -2600,3 +2600,4 @@ body.phone-land #padEgg .pe-tag{margin-top:0;}
 /* ♪ GROOVE (next to VIEW): lit while the background groove is on */
 #vtbGrooveBtn[data-on="1"]{color:#7dffc4 !important;border-color:rgba(68,238,187,.65) !important;box-shadow:0 0 10px -3px rgba(68,238,187,.6);}
 #vtbGrooveBtn[data-on="0"]{opacity:.6;}
+#vtbGrooveBtn{flex:0 0 auto;min-width:2.4em;font-size:1.05rem;line-height:1;padding-left:.55rem;padding-right:.55rem;font-family:system-ui,-apple-system,'Segoe UI',sans-serif;}

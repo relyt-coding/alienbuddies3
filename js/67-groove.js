@@ -6,7 +6,7 @@
 //  • 100 BPM to start; once the sequencer is unlocked it follows the sequencer's BPM, and while the sequencer plays
 //    every groove note lands on the sequencer's own steps (bar 1 of the groove = step 1 of your beat).
 //  • It follows the song key once you pick one (KEY), so melodic sounds fit with it.
-//  • On / off: ♪ GROOVE next to VIEW (once the sequencer's unlocked), or 🎵 GROOVE in Settings and the soundboard.
+//  • On / off: the ♪ button next to VIEW (once the sequencer's unlocked), or 🎵 GROOVE in Settings and the soundboard.
 // ══════════════════════════════════════════════
 (function(){
   const B=document.body.classList;

@@ -104,6 +104,11 @@ const VAULT_WORDS=[
   ['Delay (Echo)','Copies of a sound repeated a little later, often in time with the beat.',()=>_vHas('mt_echo')],
   ['Mixing','Balancing the volume, tone and position of every track so they sound good together.',()=>_vHas('mt_mastering')],
   ['Arrangement','Deciding which parts play when: intro, verse, chorus, bridge, outro.',()=>_vHas('mt_arrangement')],
+  ['808','The booming bass and drums of the Roland TR-808 drum machine (1980). Today "808" usually means a long, low bass note in hip-hop and trap.',()=>_vHas('planet_808')],
+  ['Drum Machine','An electronic instrument that plays drum patterns you program step by step, like the sequencer in this game.',()=>_vHas('planet_808')],
+  ['Woodwind','An instrument you blow into, where the sound starts at a reed or a sharp edge: flutes, clarinets, oboes, bassoons and saxophones.',()=>_vHas('planet_zephyr')],
+  ['Reed','A thin strip of cane that vibrates when you blow past it. Clarinets and saxophones use one reed; oboes and bassoons use two.',()=>_vHas('planet_zephyr')],
+  ['Vibrato','A gentle, regular wobble in pitch that makes a held note sound alive. Singers and wind players add it as the note goes on.',()=>_vHas('planet_zephyr')],
   ['DAW','Digital Audio Workstation: software for recording, building and mixing music. This game is slowly turning into one!',()=>_vSeq()],
 ];
 

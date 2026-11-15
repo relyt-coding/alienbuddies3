@@ -177,7 +177,7 @@ const MUSIC_TREE_NODES=(function(){
   return N;
 })();
 
-// ── Planets Timbra (wood) and Alloy (steel): planet → 5 continents → a trail of 5 sounds each (sounds: js/03b-planet-sounds-timbra-alloy.js).
+// ── Planets Timbra (wood), Alloy (steel), 808 and Zephyr (woodwinds): planet → 5 continents → a trail of 5 sounds each (sounds: js/03b, js/03c).
 // The x/y here are only a simple fallback: js/62-tree-layout.js grows every planet system into its final shape.
 const PLANET_TREE_2=(function(){
   const N=[],D=Math.PI/180;
@@ -270,6 +270,85 @@ const PLANET_TREE_2=(function(){
             ['bz_saron','Saron','Thick bronze bars hit with a mallet: the gamelan\'s main melody.'],
             ['bz_kempul','Kempul','A hanging gong that marks the phrases of the music.'],
             ['bz_gong','Big Gong','The gong ageng: the biggest gong in the gamelan, struck at the end of each long cycle.']]},
+    ]});
+  // v0.2.155: Planet 808 (drum machine) and Planet Zephyr (woodwinds) · sounds: js/03c-planet-sounds-808-zephyr.js
+  planet({id:'planet_808',icon:'🔊',name:'Planet 808',req:'planet_alloy',x:-200,y:-2800,head:-60,cost:1600,contCost:700,sndCost:190,
+    desc:'A booming electronic world made of the most famous drum machine sounds. Unlocks 5 continents of 808 sound.',
+    conts:[
+      {key:'subquake',icon:'💥',name:'Subquake',desc:'808 kicks and long, booming 808 bass. 5 sounds.',
+       fact:'The Roland TR-808 drum machine came out in 1980 and sold poorly at first, because its drums didn\'t sound like real ones. Its long, booming bass drum later became the foundation of hip-hop and trap.',
+       snd:[['eo_kick','Boom Kick','The classic 808 kick: a sine wave that starts high and drops fast into a low boom.'],
+            ['eo_sub','Long 808','A long 808 bass note that rings out. Producers tune it to play basslines.'],
+            ['eo_glide','808 Glide','An 808 that slides down into its note, a sound all over trap music.'],
+            ['eo_dist','Distorted 808','An 808 pushed so hard it growls. Distortion adds higher tones, so you hear it even on tiny speakers.'],
+            ['eo_punch','Punch Kick','A short, tight kick that hits hard and gets out of the way.']]},
+      {key:'claptrap',icon:'👏',name:'Claptrap',desc:'Snares, claps, rimshots and snaps. 5 sounds.',
+       fact:'The 808\'s handclap isn\'t a recording. It\'s a burst of filtered noise fired a few times in a row, so it sounds like several people clapping a split second apart.',
+       snd:[['eo_snare','808 Snare','Two tones plus a hiss of noise: the 808\'s bright, snappy snare.'],
+            ['eo_clap','808 Clap','Three quick slaps of noise and a short tail.'],
+            ['eo_rim','Rimshot','A stick hitting the rim of the drum: a sharp knock.'],
+            ['eo_snap','Finger Snap','A crisp finger snap, the backbeat of a lot of chill songs.'],
+            ['eo_bigclap','Stadium Clap','A huge clap that rings out like a whole crowd.']]},
+      {key:'hatstack',icon:'🎩',name:'Hatstack',desc:'Hi-hats and cymbals: closed, open, rolls and crashes. 5 sounds.',
+       fact:'Trap producers program hi-hat rolls: fast runs of 16th, 32nd and even 64th notes between the main hits. The 808\'s hats are made from six square waves at clashing pitches, which gives them that metallic sizzle.',
+       snd:[['eo_chh','Closed Hat','A short, tight tick: the hi-hat closed shut.'],
+            ['eo_ohh','Open Hat','The hi-hat left open, so it sizzles.'],
+            ['eo_roll','Hat Roll','A fast roll of hats that gets louder: the trap hat roll.'],
+            ['eo_pedal','Pedal Hat','The soft "chick" of a hi-hat closed with the foot pedal.'],
+            ['eo_cymbal','808 Cymbal','A long, shimmering cymbal wash.']]},
+      {key:'tomtom',icon:'🥁',name:'Tomtom',desc:'808 toms and congas, from low to high. 5 sounds.',
+       fact:'Right after a drum is hit, its pitch drops a little: the hit stretches the skin tighter for a moment. The 808 copies this with a quick downward pitch sweep on its toms, congas and kick.',
+       snd:[['eo_tomlo','Low Tom','A deep, round tom that drops into its note.'],
+            ['eo_tommid','Mid Tom','The middle tom, for fills that roll across the kit.'],
+            ['eo_tomhi','High Tom','A high, bright tom.'],
+            ['eo_congahi','High Conga','A short, bouncy electronic conga.'],
+            ['eo_congalo','Low Conga','A lower conga to answer the high one.']]},
+      {key:'cowbella',icon:'🐄',name:'Cowbella',desc:'Cowbell, claves, maracas and electronic blips. 5 sounds.',
+       fact:'The 808 cowbell is just two square waves, about 540 and 800 Hz, played together through a filter. Their clashing pitches give it its famous clanky sound.',
+       snd:[['eo_cowbell','808 Cowbell','Two clashing tones: the most famous cowbell in music.'],
+            ['eo_clave','808 Clave','A tiny, high "tock" from a single sine wave.'],
+            ['eo_maracas','Maracas','A quick shake of bright noise.'],
+            ['eo_zap','Laser Zap','A pitch that dives from high to low: pew!'],
+            ['eo_blip','Blip','A short electronic beep you can play melodies with.']]},
+    ]});
+  planet({id:'planet_zephyr',icon:'🌬',name:'Planet Zephyr',req:'planet_808',x:-1300,y:-3300,head:-120,cost:2000,contCost:850,sndCost:230,
+    desc:'A windy world where the breeze sings through reeds and pipes. Unlocks 5 continents of woodwind sound.',
+    conts:[
+      {key:'fluterra',icon:'🍃',name:'Fluterra',desc:'Flutes: concert flute, piccolo, alto flute, recorder and tin whistle. 5 sounds.',
+       fact:'A flute has no reed. You blow across a hole, and the air splits on its sharp edge, just like blowing over the top of a bottle.',
+       snd:[['zp_flute','Concert Flute','The silver flute of the orchestra: clear and breathy.'],
+            ['zp_piccolo','Piccolo','A half-size flute that plays an octave higher: the highest voice in the orchestra.'],
+            ['zp_altoflute','Alto Flute','A bigger flute with a soft, dark, breathy voice.'],
+            ['zp_recorder','Recorder','The flute many people learn first at school: you blow into it instead of across it.'],
+            ['zp_whistle','Tin Whistle','A small Irish whistle, with a quick flick of a grace note before the main note.']]},
+      {key:'clarion',icon:'🎵',name:'Clarion',desc:'Clarinets, from the big bass clarinet to the little one. 5 sounds.',
+       fact:'A clarinet has one reed, and its tube is closed at the reed end, so it plays mostly odd harmonics. That gives it its hollow, woody sound.',
+       snd:[['zp_clarinet','Clarinet','A smooth, woody single-reed voice.'],
+            ['zp_bassclar','Bass Clarinet','A big clarinet with a deep, velvety low end.'],
+            ['zp_chalumeau','Low Clarinet','The clarinet\'s dark lowest register, called the chalumeau.'],
+            ['zp_ebclar','Little Clarinet','A small, high clarinet with a bright, piercing tone.'],
+            ['zp_trill','Clarinet Trill','Two notes swapped back and forth very fast: a trill.']]},
+      {key:'reedwood',icon:'🌿',name:'Reedwood',desc:'Double reeds: oboe, English horn, bassoon, contrabassoon and duduk. 5 sounds.',
+       fact:'Before a concert the whole orchestra tunes to an A played by the oboe, because its clear, steady sound carries over everyone else.',
+       snd:[['zp_oboe','Oboe','Two reeds buzzing together: a bright, singing, slightly nasal voice.'],
+            ['zp_cor','English Horn','A bigger, lower oboe with a warm, sad voice. It\'s neither English nor a horn.'],
+            ['zp_bassoon','Bassoon','The low double reed of the orchestra, often the funny voice in cartoons.'],
+            ['zp_contra','Contrabassoon','The lowest woodwind of all: its tube is over 5 metres long, folded up.'],
+            ['zp_duduk','Duduk','An apricot-wood double reed from Armenia with a soft, mournful voice.']]},
+      {key:'saxony',icon:'🎷',name:'Saxony',desc:'Saxophones: soprano, alto, tenor, baritone and a growl. 5 sounds.',
+       fact:'The saxophone is made of brass but counts as a woodwind, because it makes its sound with a reed. Adolphe Sax invented it in the 1840s.',
+       snd:[['zp_sopsax','Soprano Sax','The small, straight saxophone with a bright, singing tone.'],
+            ['zp_altosax','Alto Sax','The most common saxophone: smooth with a little edge.'],
+            ['zp_tenorsax','Tenor Sax','The big, warm voice of jazz and rock solos.'],
+            ['zp_barisax','Baritone Sax','A huge saxophone with a deep, honking bottom end.'],
+            ['zp_growl','Sax Growl','A note with a hum sung into the horn at the same time, for a raspy growl.']]},
+      {key:'windlands',icon:'🗺',name:'Windlands',desc:'Winds from around the world: shakuhachi, ocarina, bansuri, bagpipes and hulusi. 5 sounds.',
+       fact:'Vessel flutes like the ocarina are some of the oldest instruments people make: clay whistles like them have been found from thousands of years ago.',
+       snd:[['zp_shaku','Shakuhachi','A Japanese bamboo flute: lots of breath, and notes that bend up into place.'],
+            ['zp_ocarina','Ocarina','A round clay flute with a pure, hollow tone.'],
+            ['zp_bansuri','Bansuri','A bamboo flute from India, with a grace note sliding into the main note.'],
+            ['zp_bagpipe','Bagpipes','A melody pipe over steady drones, all fed from one bag of air.'],
+            ['zp_hulusi','Hulusi','A gourd flute from southwest China with a soft, reedy hum.']]},
     ]});
   return N;
 })();
@@ -384,7 +463,7 @@ const SKILL_TREE_NODES = [
   // Planets Timbra (wood) and Alloy (steel)
   ...PLANET_TREE_2,
   // the next world — placeholder at the end of the planet road
-  {id:'planet_next', icon:'🌑', name:'???', desc:'An unknown world detected at the edge of the Tucana system. Coming in a future update.', cost:1600, requires:['planet_alloy'], x:-900, y:-2100, branch:'planets', mult:1.5, placeholder:true},
+  {id:'planet_next', icon:'🌑', name:'???', desc:'An unknown world detected at the edge of the Tucana system. Coming in a future update.', cost:2400, requires:['planet_zephyr'], x:-1900, y:-2800, branch:'planets', mult:1.5, placeholder:true},
 
   // ── QUAD SUN 2 — Musical Toolkit (↗) ──
   {id:'sun_points', icon:'☀', name:'Quad Sun II', desc:'The second Quad Sun. Opens the Musical Toolkit path: tools and features to make your music better. Grants ×2 points.', cost:150, requires:['core'], x:200, y:-200, branch:'points', mult:2},

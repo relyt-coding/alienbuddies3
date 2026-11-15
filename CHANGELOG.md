@@ -2,6 +2,19 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.155 - 2026-11-15 13:35
+
+- NEW: PLANET 808, after Alloy in the Planet Atlas. A dark neon world of speaker cones, with 5 continents of drum machine sound (25 sounds):
+  SUBQUAKE (808 kicks and long 808 bass, glide, distorted), CLAPTRAP (snare, clap, rimshot, finger snap, stadium clap), HATSTACK (closed, open,
+  pedal hats, hat roll, cymbal), TOMTOM (three toms, two congas) and COWBELLA (cowbell, clave, maracas, laser zap, blip).
+- NEW: PLANET ZEPHYR, after 808. A windy sky world with 5 continents of woodwinds (25 sounds): FLUTERRA (concert flute, piccolo, alto flute,
+  recorder, tin whistle), CLARION (clarinet, bass clarinet, low clarinet, little clarinet, trill), REEDWOOD (oboe, English horn, bassoon,
+  contrabassoon, duduk), SAXONY (soprano, alto, tenor, baritone sax, sax growl) and WINDLANDS (shakuhachi, ocarina, bansuri, bagpipes, hulusi).
+- Melodic sounds on both planets follow the song's key, and most can be played in the piano roll and on Buddy Keys.
+- Both planets have their own arrival cutscenes (808 pumps to a beat with sub-bass shockwaves; Zephyr is wrapped in racing wind), and every continent
+  teaches a fact for the Knowledge Vault. New Music Words: 808, Drum Machine, Woodwind, Reed and Vibrato.
+- The mystery world (???) moved out past Zephyr.
+
 ## v0.2.154 - 2026-11-15 12:55
 
 - Better planet cutscenes. Every planet is now lit by a distant star you can see in the sky: a bright day side, a clear line into night, and a glowing rim of atmosphere. Each one has a little moon swinging round it. Mantra got coastlines, drifting clouds, an ocean glint and golden lights on its night side. Hyphae got bigger, layered mushroom caps. Timbra got thicker forests, its tree rings now show, and fireflies come out at night. Alloy got brushed-metal belts and its ring now casts a shadow (no more blown-out white). The continent pings are smaller and brighter.

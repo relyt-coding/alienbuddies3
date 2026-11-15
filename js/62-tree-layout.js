@@ -36,7 +36,9 @@
     planet_hyphae:{x:-1020,y:-430,fan:[-220,-30],rc:230,step:100,swirl:-1,pitch:40},
     planet_timbra:{x:-1880,y:-1180,fan:[-280,-100],rc:235,step:106,swirl:1,pitch:32},
     planet_alloy:{x:-900,y:-2080,fan:[-165,25],rc:235,step:104,swirl:-1,pitch:38},
-    planet_next:{x:-40,y:-2700},
+    planet_808:{x:-60,y:-2980,fan:[-150,-20],rc:230,step:104,swirl:1,pitch:36},
+    planet_zephyr:{x:-1300,y:-3560,fan:[-235,-95],rc:235,step:106,swirl:-1,pitch:36},
+    planet_next:{x:-2150,y:-3000},
   };
 
   // a few trails are turned a little (degrees, + = clockwise) so neighbouring branches don't tangle

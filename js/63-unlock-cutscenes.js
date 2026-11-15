@@ -421,6 +421,38 @@
         [0,400,700,1200,1600,1900,2400].forEach((c2,i)=>inst(S,'cr_tenor',t+.2+1.1*(1-Math.pow(1-i/7,1.4)),c2-1200,.55));
         boom(S,t+1.4,.6);inst(S,'bz_gong',t+1.42,0,.85);inst(S,'ti_anvil',t+1.44,0,.6);
         const sc=[0,400,700,1100,1200,1400];for(let i=0;i<K;i++){inst(S,'cr_tenor',t+1.95+i*.2,sc[i%sc.length],.75);if(i===0)inst(S,'ti_anvil',t+1.95,0,.35);}}},
+    // v0.2.155 · Planet 808: a dark neon world covered in speaker cones that pump to a beat, sub-bass shockwaves
+    '808':{vol:.7,col:'#ff3a8a',atm:'#ff7ad8',base:'#4a1240',lite:'#b0408a',dark:'#0a020c',hues:[320,290,190],flavor:'808 sound',moon:'#ffb0e0',
+      init(st){st.cones=[];for(let i=0;i<11;i++)st.cones.push({lo:rnd(0,TAU),la:rnd(-1,1),ar:rnd(.12,.2)});st.leds=[];for(let i=0;i<40;i++)st.leds.push({lo:rnd(0,TAU),la:rnd(-1.2,1.2),ph:rnd(0,TAU)});st.waves=[];},
+      beat(t){return t<1.45?0:Math.pow(1-(((t-1.45)*2)%1),4);},          // a kick every half second after the arrival
+      surface(st,x,y,r,rot,tl,t){
+        [-.9,-.45,0,.45,.9].forEach(la=>{const pts=[];for(let j=0;j<=48;j++)pts.push(sph(j/48*TAU,la,rot,tl));line3(x,y,r,pts,'#ff4fb0',.35,Math.max(1,r*.008));});
+        const k=this.beat(t);
+        st.cones.forEach(c=>{const s2=sph(c.lo,c.la,rot,tl),pump=1+.12*k;patch(x,y,r,s2,c.ar*1.12,'#140410',.9);patch(x,y,r,s2,c.ar*.82*pump,'#3a1030',.95);patch(x,y,r,s2,c.ar*.42*pump,'#ff3a8a',.55+.35*k);patch(x,y,r,s2,c.ar*.16,'#ffd0f0',.9);});},
+      night(st,x,y,r,rot,tl,t){st.leds.forEach(l=>{const s2=sph(l.lo,l.la,rot,tl);if(s2.z<.1||lit(s2)>.05)return;spark(x+s2.x*r,y+s2.y*r,r*.03,(l.ph>3?'#7ff7ff':'#ff7ad8'),.5+.5*Math.sin(t*6+l.ph));});},
+      outer(st,x,y,r,t){if(t<1.45)return;const n=Math.floor((t-1.45)*2);if(n>=st.waves.length)st.waves.push(t);
+        st.waves.forEach(w=>{const q=(t-w)/1.1;if(q>1)return;ring(x,y,r*(1.05+q*.9),Math.max(2,r*.03*(1-q)),'#ff7ad8',.6*(1-q));});},
+      sound(S,K){const t=S.t;riser(S,t,1.35,40,140,.8);boom(S,t+1.4,.9);inst(S,'eo_sub',t+1.42,0,1);inst(S,'eo_bigclap',t+1.44,0,.7);
+        for(let i=0;i<6;i++){const b=t+1.95+i*.5;inst(S,'eo_kick',b,0,.8);inst(S,'eo_chh',b+.25,0,.5);if(i%2)inst(S,'eo_clap',b,0,.6);}
+        inst(S,'eo_roll',t+3.6,0,.5);
+        const sc=[0,300,500,700,1000,1200];for(let i=0;i<K;i++)inst(S,'eo_blip',t+1.95+i*.2,sc[i%sc.length]-1200,.6);}},
+    // v0.2.155 · Planet Zephyr: a pale sky world wrapped in racing wind bands; gusts curl round it
+    zephyr:{vol:.7,col:'#9fe0ff',atm:'#d8f4ff',base:'#3a7fae',lite:'#d8f2ff',dark:'#0b2238',hues:[195,210,160],flavor:'woodwind sound',moon:'#eef6ff',spec:1,
+      init(st){st.isl=[];for(let i=0;i<9;i++)st.isl.push({lo:rnd(0,TAU),la:rnd(-.9,.9),ar:rnd(.08,.16)});
+        st.band=[-1,-.62,-.25,.15,.55,.95].map((la,i)=>({la,sp:(i%2?1.9:1.5),w:rnd(.05,.09)}));
+        st.gust=[];for(let i=0;i<22;i++)st.gust.push({a:rnd(0,TAU),R:rnd(1.15,1.8),len:rnd(.5,1.1),v:rnd(.6,1.2),ph:rnd(0,1)});
+        st.leaf=[];for(let i=0;i<24;i++)st.leaf.push({a:rnd(0,TAU),R:rnd(1.2,2),v:rnd(.4,.9),s:rnd(.7,1.3),c:['#ffffff','#c8f0d8','#ffe6a8'][i%3]});},
+      surface(st,x,y,r,rot,tl){st.isl.forEach(b=>land(x,y,r,sph(b.lo,b.la,rot,tl),b.ar,'#8fd8a8','#e8fbff',.85));},
+      clouds(st,x,y,r,rot,tl){st.band.forEach(b=>{const pts=[];for(let j=0;j<=48;j++)pts.push(sph(j/48*TAU+Math.sin(j*.5)*.08,b.la+Math.sin(j*.7+rot*3)*.05,rot*b.sp,tl));line3(x,y,r,pts,'#ffffff',.42,Math.max(2,r*b.w));});},
+      outer(st,x,y,r,t){const ap=ss(1.45,1.9,t);if(ap<=0)return;g.lineCap='round';
+        st.gust.forEach(gu=>{const q=((t*gu.v*.5)+gu.ph)%1,a0=gu.a+t*gu.v*.6,R=r*gu.R;g.strokeStyle=rgba('#ffffff',.45*ap*Math.sin(q*Math.PI));g.lineWidth=Math.max(1.5,r*.012);
+          g.beginPath();g.ellipse(x,y,R,R*.42,-.2,a0,a0+gu.len);g.stroke();});
+        st.leaf.forEach(l=>{const a=l.a+t*l.v,R=r*l.R,px=x+Math.cos(a)*R,py=y+Math.sin(a)*R*.42-Math.sin(t*2+l.a)*r*.05;g.fillStyle=rgba(l.c,.8*ap);g.beginPath();g.ellipse(px,py,st.U*.011*l.s,st.U*.004*l.s,a*2,0,TAU);g.fill();});},
+      sound(S,K){const t=S.t;riser(S,t,1.35,60,200,.6);noise(S,t+.2,{type:'bandpass',f0:400,f1:2200,q:.8,a:.06,k:1.1,d:.4});
+        [0,200,400,500,700,900,1100,1200].forEach((c2,i)=>inst(S,'zp_flute',t+.25+1.1*(1-Math.pow(1-i/8,1.4)),c2-1200,.45));   // a flute run up into the arrival
+        boom(S,t+1.4,.5);inst(S,'zp_shaku',t+1.42,0,.8);inst(S,'zp_bassoon',t+1.45,0,.55);
+        const sc=[0,200,400,700,900,1200];for(let i=0;i<K;i++)inst(S,'zp_ocarina',t+1.95+i*.2,sc[i%sc.length],.6);
+        inst(S,'zp_clarinet',t+3.1,700,.4);}},
   };
   // a whole planet (v0.2.154): a two-layer atmosphere, a globe lit from the star (day side → crisp terminator → night
   // side), the theme's surface, clouds that drift faster than the ground, night-side lights, a sun glint on shiny

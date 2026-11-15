@@ -2,6 +2,16 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.144 - 2026-11-15 08:32
+
+- NEW: the groove. The background hum now plays on the title screen too (from your first tap there). Once the kick pad is yours, it grows into a groove of soft keys and bass (no drums, those are yours) to jam along with on the drum pads. It plays at 100 BPM; once the sequencer is unlocked it follows its BPM and, while it plays, lands right on its steps. It changes key with you when you pick one in KEY.
+- The ♪ button next to VIEW turns the groove on and off (same switch as GROOVE in Settings and the soundboard, which no longer disappear when the sequencer unlocks). Saves where the hum was switched off automatically when the sequencer unlocked get it back once.
+- NEW: a DRUMS | KEYS switch between VIEW and ♪ (once you own Buddy Keys). The little switch above the pads says DRUMS / KEYS now too.
+- ALIEN PARTY: pressing it drops the disco ball in every time. No more STOP or style chip: during a party the button shows the style with a dot per style you own. Tap for the next style (a tap on the last one ends the party), or press and hold to end it straight away.
+- The ALIEN PARTY shop card got a new party look (with a little disco ball) and lines up with PET ALIEN BUDDY beside it.
+- The first 20 instruments in the sound library are half price.
+- The SHOP arrow now only shows at 50,000 points if the shop has never been opened.
+
 ## v0.2.143 - 2026-11-14 22:22
 
 - NEW "level 1": your first buddy comes to you. At 500 points an egg rolls onto the drum pads screen next to the score, with a 1,000 price tag. It wobbles more the closer you get, and at 1,000 it glows and bounces. Tap it and it flies up to hatch.

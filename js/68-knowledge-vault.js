@@ -15,12 +15,16 @@ const VAULT_TABS=[
   {id:'buddies',name:'ALIEN BUDDIES',col:'#00ff88'},
   {id:'pads',   name:'DRUM PADS',    col:'#a0a8ff'},
   {id:'seq',    name:'SEQUENCER',    col:'#ff9a3c'},
-  {id:'piano',  name:'PIANO ROLL',   col:'#ff6bd6'},
-  {id:'sounds', name:'SOUNDS & INSTRUMENTS',col:'#5ad1ff'},
-  {id:'fx',     name:'EFFECTS & MIXING',col:'#b48cff'},
-  {id:'vocals', name:'VOCALS',       col:'#ff7a7a'},
-  {id:'words',  name:'MUSIC WORDS',  col:'#ffd23f'},
+  {id:'piano',  name:'PIANO ROLL',   col:'#ff6bd6',req:'sun_minigames'},
+  {id:'sounds', name:'SOUNDS & INSTRUMENTS',col:'#5ad1ff',req:'sun_planets'},
+  {id:'fx',     name:'EFFECTS & MIXING',col:'#b48cff',req:'sun_points'},
+  {id:'vocals', name:'VOCALS',       col:'#ff7a7a',req:'sun_aliens'},
+  {id:'words',  name:'MUSIC WORDS',  col:'#ffd23f',req:'core'},
 ];
+// v0.2.148: five tabs open with the skill tree's centre: the Tucana Core and each Quad Sun opens one
+const VAULT_REQ_NAME={core:'the Tucana Core',sun_planets:'Quad Sun I (Planet Atlas)',sun_points:'Quad Sun II (Musical Toolkit)',sun_minigames:'Quad Sun III (Minigame Nexus)',sun_aliens:'Quad Sun IV (Alien Evolution)'};
+function vaultTabOpen(id){const t=VAULT_TABS.find(t=>t.id===id);return !!t&&(!t.req||(typeof unlockedSkills!=='undefined'&&!!unlockedSkills[t.req])||false);}
+function vaultTipLocked(i){return !vaultTabOpen(VAULT_TIP_TAB[i]);}
 // which tab each buyable tip lives in (index = tip number − 1)
 const VAULT_TIP_TAB=['buddies','pads','pads','seq','seq','buddies','seq','seq','piano','sounds'];
 
@@ -131,8 +135,8 @@ function vaultTipsIn(tab){const r=[];for(let i=0;i<MAX_TIPS;i++)if(VAULT_TIP_TAB
 // tips can be bought in any order: everything up to the furthest one you own or can afford, plus one more, is visible
 function vaultTipFar(){let far=2;for(let i=0;i<MAX_TIPS;i++)if(tipHave(i)||score>=tipCost(i))far=Math.max(far,i+1);return Math.min(MAX_TIPS,far+1);}
 function vaultIsNew(e){return e.on()&&!vaultSeen.includes(e.id);}
-function vaultTabHasNew(tab){return vaultEntries(tab).some(vaultIsNew);}
-function vaultTabCanBuy(tab){const far=vaultTipFar();return vaultTipsIn(tab).some(i=>i<far&&!tipHave(i)&&score>=tipCost(i));}
+function vaultTabHasNew(tab){return vaultTabOpen(tab)&&vaultEntries(tab).some(vaultIsNew);}
+function vaultTabCanBuy(tab){if(!vaultTabOpen(tab))return false;const far=vaultTipFar();return vaultTipsIn(tab).some(i=>i<far&&!tipHave(i)&&score>=tipCost(i));}
 function vaultAnyNew(){return VAULT_TABS.some(t=>vaultTabHasNew(t.id));}
 
 // ── the page ──
@@ -172,6 +176,11 @@ body.desktop-mode #vaultBox{border-radius:20px;height:86vh;}
 .vb-word b{font-family:'Bebas Neue',sans-serif;font-weight:400;font-size:1.25rem;letter-spacing:.08em;color:#ffd23f;display:flex;align-items:center;gap:.5rem;}
 .vb-word span{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;font-size:1rem;line-height:1.45;color:#c9c9d4;}
 .vb-word .vb-tag{font-family:'Bebas Neue',sans-serif;font-size:.8rem;line-height:1.3;color:#fff;letter-spacing:.12em;}
+.vt-tab.locked{opacity:.55;border-style:dashed;}
+.vt-tab.locked.on{opacity:1;background:#101016;color:var(--c);border-style:dashed;}
+.vb-lockbox{margin-top:1.2rem;border:1px dashed var(--c);border-radius:14px;padding:1.6rem 1.2rem;display:flex;flex-direction:column;gap:.6rem;align-items:center;text-align:center;}
+.vb-lockbox b{font-family:'Bebas Neue',sans-serif;font-weight:400;font-size:1.5rem;letter-spacing:.12em;color:var(--c);}
+.vb-lockbox span{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;font-size:1rem;line-height:1.5;color:#a9a9b8;}
 .vb-locked{font-family:'Bebas Neue',sans-serif;font-size:1.05rem;letter-spacing:.1em;color:#55556a;text-align:center;padding:.9rem;border:1px dashed #26262e;border-radius:12px;}
 .vb-intro{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;font-size:.95rem;line-height:1.45;color:#8a8a9a;}
 #tipsBtn{position:relative;}
@@ -192,6 +201,7 @@ body.desktop-mode #vaultBox{border-radius:20px;height:86vh;}
 
 function openVault(){
   vaultSig='';
+  if(vaultTab&&!vaultTabOpen(vaultTab))vaultTab=null;
   if(!vaultTab){   // open on a tab with something to buy, else something new, else the basics
     const t=VAULT_TABS.find(t=>vaultTabCanBuy(t.id))||VAULT_TABS.find(t=>vaultTabHasNew(t.id));vaultTab=t?t.id:'basics';}
   document.getElementById('vaultModal').classList.add('open');
@@ -203,7 +213,7 @@ function closeVault(){
   if(typeof autoSave==='function')autoSave();
 }
 function vaultMarkSeen(tab){
-  if(!tab)return;let ch=false;
+  if(!tab||!vaultTabOpen(tab))return;let ch=false;
   vaultEntries(tab).forEach(e=>{if(e.on()&&!vaultSeen.includes(e.id)){vaultSeen.push(e.id);ch=true;}});
   return ch;
 }
@@ -225,6 +235,7 @@ function renderVault(scrollTab){
   VAULT_TABS.forEach(t=>{
     const b=document.createElement('button');b.type='button';b.className='vt-tab'+(t.id===vaultTab?' on':'');b.style.setProperty('--c',t.col);b.textContent=t.name;
     const any=vaultEntries(t.id).some(e=>e.on())||vaultTipsIn(t.id).some(i=>i<far);if(!any)b.classList.add('empty');
+    if(!vaultTabOpen(t.id)){b.classList.add('locked');b.textContent='🔒 '+t.name;}
     const buy=vaultTabCanBuy(t.id),nw=t.id!==vaultTab&&vaultTabHasNew(t.id);
     if(buy||nw){const d=document.createElement('i');d.className='vt-dot';b.appendChild(d);if(buy)b.classList.add('buy');}
     b.addEventListener('click',()=>{if(vaultTab===t.id)return;vaultMarkSeen(vaultTab);vaultTab=t.id;renderVault(true);body.scrollTop=0;});
@@ -237,6 +248,10 @@ function renderVault(scrollTab){
   const keepY=body.scrollTop;body.innerHTML='';
   const el=(tag,cls,html)=>{const e=document.createElement(tag);if(cls)e.className=cls;if(html!=null)e.innerHTML=html;return e;};
   const esc=s=>String(s).replace(/[&<>]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[ch]));
+  if(!vaultTabOpen(tab.id)){
+    const box=el('div','vb-lockbox');box.style.setProperty('--c',col);
+    box.innerHTML='<b>🔒 '+esc(tab.name)+'</b><span>Unlock '+esc(VAULT_REQ_NAME[tab.req]||'it')+' in the skill tree to open this part of the Vault.</span>';
+    body.appendChild(box);if(!scrollTab)body.scrollTop=keepY;return;}
   let locked=0;
   // TIPS in this tab
   const tips=vaultTipsIn(tab.id);

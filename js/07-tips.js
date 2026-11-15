@@ -41,7 +41,7 @@ document.getElementById('tipReaderClose')&&document.getElementById('tipReaderClo
 
 function tipHave(i){return tipsSet.includes(i);}
 // the cheapest tip you don't have yet (for the glow and the test bot)
-function nextTipIdx(){for(let i=0;i<MAX_TIPS;i++)if(!tipHave(i))return i;return -1;}
+function nextTipIdx(){for(let i=0;i<MAX_TIPS;i++)if(!tipHave(i)&&!(typeof vaultTipLocked==='function'&&vaultTipLocked(i)))return i;return -1;}   // (tips in a locked Vault tab wait)
 function buyTip(i){
   const cost=tipCost(i);
   if(tipHave(i)||score<cost||i>=MAX_TIPS)return false;
@@ -92,7 +92,7 @@ function buildTipsList(){
 // TIPS button glows while the next tip is affordable and still unbought/unread
 function updateTipsGlow(){
   const b=document.getElementById('tipsBtn');if(!b)return;
-  let can=false;for(let i=0;i<MAX_TIPS;i++)if(!tipHave(i)&&score>=tipCost(i)){can=true;break;}
+  let can=false;for(let i=0;i<MAX_TIPS;i++)if(!tipHave(i)&&score>=tipCost(i)&&!(typeof vaultTipLocked==='function'&&vaultTipLocked(i))){can=true;break;}
   b.classList.toggle('tips-glow',can);
 }
 function updateTipsLabel(){

@@ -2,6 +2,11 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.148 - 2026-11-15 10:00
+
+- Five Knowledge Vault tabs now open with the heart of the skill tree: the Tucana Core opens MUSIC WORDS, Quad Sun I (Planet Atlas) opens SOUNDS & INSTRUMENTS, Quad Sun II (Musical Toolkit) opens EFFECTS & MIXING, Quad Sun III (Minigame Nexus) opens PIANO ROLL and Quad Sun IV (Alien Evolution) opens VOCALS. Locked tabs show a 🔒 and say which node opens them.
+- GAME BASICS, ALIEN BUDDIES, DRUM PADS and SEQUENCER are open from the start. Tips inside a locked tab wait until it opens.
+
 ## v0.2.147 - 2026-11-15 09:45
 
 - NEW: the KNOWLEDGE VAULT. The bunker's TIPS button is now VAULT, opening a page with tabs: Game Basics, Alien Buddies, Drum Pads, Sequencer, Piano Roll, Sounds & Instruments, Effects & Mixing, Vocals and Music Words.

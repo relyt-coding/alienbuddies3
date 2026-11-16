@@ -19,6 +19,43 @@
 #gemInfoShop:active,#gemCounterBunker:active{background:rgba(93,255,192,.08);}
 .ss-gem-btn{display:block;width:100%;margin:.55rem 0 .2rem;font-family:'Bebas Neue',sans-serif;font-size:1.05rem;letter-spacing:.12em;padding:.55rem;
   border-radius:10px;border:1px solid #2f9a78;background:#06221a;color:#7affd6;cursor:pointer;}
+/* ── v0.2.163: the WATTS breakdown / GEM MATH window, in the game's own look (black, neon, Bebas, dark tiles) ── */
+#scoreStatsModal{background:rgba(0,0,0,.8);}
+#scoreStatsBox{--ssc:#e6ff4a;--ssg:rgba(230,255,74,.35);background:#07070b;border:1px solid #1c1c24;border-top:2px solid var(--ssc);
+  box-shadow:0 -10px 40px -12px var(--ssg);border-radius:20px 20px 0 0;}
+#scoreStatsBox.ss-gems{--ssc:#5dffc0;--ssg:rgba(93,255,192,.35);}
+#scoreStatsHeader{border-bottom:1px solid #16161e;padding:1rem 1.1rem .75rem;}
+#scoreStatsTitle{display:flex;align-items:center;gap:.6rem;font-family:'Bebas Neue',sans-serif;font-size:1.45rem;letter-spacing:.14em;color:var(--ssc);
+  text-shadow:0 0 14px var(--ssg);}
+#scoreStatsTitle .ss-pic{width:2.1rem;height:2.1rem;}
+#scoreStatsClose{min-width:2.6rem;min-height:2.6rem;border-radius:10px;border:1px solid #2a2a34;background:#101016;color:var(--ssc);font-size:1.05rem;}
+.ss-section-label{display:flex;align-items:center;gap:.6rem;font-family:'Bebas Neue',sans-serif;font-size:.95rem!important;letter-spacing:.2em!important;
+  color:var(--ssc)!important;opacity:.75;margin-top:.7rem!important;}
+.ss-section-label::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--ssg),transparent);}
+.ss-row{background:#0e0e14!important;border:1px solid #1a1a22!important;border-radius:12px!important;padding:.55rem .75rem!important;gap:.7rem!important;}
+.ss-row.active{background:#101018!important;border-color:#26262f!important;}
+.ss-icon{width:2.5rem!important;height:2.5rem;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:#15151d;border:1px solid #23232c;border-radius:10px;}
+.ss-row:not(.active) .ss-icon{opacity:.45;}
+.ss-pic{display:inline-flex;align-items:center;justify-content:center;width:1.95rem;height:1.95rem;flex-shrink:0;}
+.ss-pic canvas{width:100%;height:100%;image-rendering:pixelated;image-rendering:crisp-edges;}
+.ss-label{font-family:'Bebas Neue',sans-serif;font-size:1.12rem!important;letter-spacing:.08em!important;color:#5c5c6a!important;line-height:1.1;}
+.ss-label.active{color:#ececf4!important;}
+.ss-desc{font-family:system-ui,-apple-system,'Segoe UI',sans-serif!important;font-size:.76rem!important;letter-spacing:0!important;text-transform:none!important;
+  color:#4a4a56!important;line-height:1.3;margin-top:2px;}
+.ss-desc.active{color:#8c8c9c!important;}
+.ss-val{font-family:'Bebas Neue',sans-serif;font-size:1.5rem!important;color:#3c3c48!important;}
+.ss-val.active{color:#fff!important;}
+.ss-val.gold{color:var(--ssc)!important;text-shadow:0 0 12px var(--ssg);}
+.ss-val.green{color:#5dff9a!important;}
+.ss-total-row{background:linear-gradient(135deg,#101018,#07070b)!important;border:1px solid var(--ssc)!important;border-radius:14px!important;
+  box-shadow:0 0 24px -10px var(--ssg),inset 0 0 18px -12px var(--ssg);padding:.85rem 1rem!important;}
+.ss-total-label{font-family:'Bebas Neue',sans-serif;color:#ececf4!important;letter-spacing:.16em!important;font-size:1.05rem!important;}
+.ss-total-val{font-family:'Bebas Neue',sans-serif;color:var(--ssc)!important;font-size:2.3rem!important;text-shadow:0 0 16px var(--ssg);}
+#scoreStatsDone{font-family:'Bebas Neue',sans-serif;border:1px solid var(--ssc)!important;background:#101016!important;color:var(--ssc)!important;border-radius:12px!important;
+  letter-spacing:.2em;box-shadow:0 0 18px -8px var(--ssg);}
+.ss-gem-btn{border-color:#5dffc0;background:#07170f;color:#5dffc0;}
+/* the score: "WATTS" spelled out until 1 MW */
+.score .w-unit{font-size:.36em;letter-spacing:.08em;}
 /* PARTY in the corner */
 #partyBtn.pb-small.pb-corner{position:fixed!important;z-index:50;display:none;align-items:center;gap:.45rem;font-size:.98rem;letter-spacing:.1em;
   padding:.36rem .85rem .36rem .4rem;border-radius:50px;border-width:1px;background:#1a0418;border-color:#a0287f;color:#ff8ae6;
@@ -60,6 +97,10 @@ body:not(.desktop-mode) #seqPatternView .seq-bottom-row .keys-switch-seq button{
 #bkUnlockFx.out{opacity:0;transition:opacity .3s;}
 `;document.head.appendChild(css);
 
+  // the breakdown window's title: a black & white card picture + the name; gems get their own colour
+  function ssTitle(icon,text,gems){const t=$('scoreStatsTitle');if(!t)return;t.innerHTML='';
+    if(typeof ssIconEl==='function')t.appendChild(ssIconEl(icon));t.appendChild(document.createTextNode(text));
+    const bx=$('scoreStatsBox');if(bx)bx.classList.toggle('ss-gems',!!gems);}
   // ══════════ ALIEN GEM MATH ══════════
   const fx=v=>'×'+(Math.round(v*100)/100);
   const rate=v=>typeof fmtGemRate==='function'?fmtGemRate(v):String(Math.round(v*100)/100);
@@ -82,7 +123,7 @@ body:not(.desktop-mode) #seqPatternView .seq-bottom-row .keys-switch-seq button{
   }
   function openGemStats(){
     const list=$('scoreStatsList'),title=$('scoreStatsTitle');if(!list||typeof ssRow!=='function')return;
-    list.innerHTML='';title.textContent='💎 ALIEN GEM MATH';
+    list.innerHTML='';ssTitle('gem','ALIEN GEM MATH',true);
     gemRows(list);
     if(typeof skillTreeUnlocked!=='undefined'&&skillTreeUnlocked&&typeof openSkillTree==='function'){
       const b=document.createElement('button');b.type='button';b.className='ss-gem-btn';b.textContent='OPEN THE GALAXY MAP';
@@ -93,7 +134,7 @@ body:not(.desktop-mode) #seqPatternView .seq-bottom-row .keys-switch-seq button{
   window.openGemStats=openGemStats;
   // the WATTS breakdown (tap the score) gets the gem section at the bottom
   if(typeof buildScoreStats==='function'){const bs=buildScoreStats;window.buildScoreStats=buildScoreStats=function(){
-    const r=bs.apply(this,arguments);const t=$('scoreStatsTitle');if(t)t.textContent='⚡ WATTS BREAKDOWN';
+    const r=bs.apply(this,arguments);ssTitle('bolt','WATTS BREAKDOWN',false);
     try{if((typeof totalAliens!=='undefined'&&totalAliens>0)||alienGems>0)gemRows($('scoreStatsList'));}catch(e){}
     return r;};}
   ['gemInfoShop','gemCounterBunker'].forEach(id=>{const e=$(id);if(e)e.addEventListener('click',ev=>{ev.stopPropagation();openGemStats();});});

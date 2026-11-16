@@ -66,16 +66,16 @@ function renderUI(newlyLit){
   if(typeof checkContextualHints==='function')checkContextualHints();
   const mult=totalMultiplier();const cpt=clicksPerTap();
   // v0.2.162: the score is energy in watts: big number + unit (kW, MW, GW …), the exact watts underneath
-  {const wp=wParts(score,6),k=wp[0]+'|'+wp[1];if(scoreEl._wk!==k){scoreEl._wk=k;scoreEl.innerHTML=wp[0]+'<span class="w-unit">'+wp[1]+'</span>';}}
+  {const wp=scoreParts(score),k=wp[0]+'|'+wp[1];if(scoreEl._wk!==k){scoreEl._wk=k;scoreEl.innerHTML=wp[0]+'<span class="w-unit">'+wp[1]+'</span>';}}
   const scoreSubEl=document.getElementById('scoreSubEl');
   if(scoreSubEl){
     const full=formatFull(score),digits=full.replace(/,/g,'').length;
-    scoreSubEl.textContent=score>=1000?full+' W':'';
+    scoreSubEl.textContent=score>=1e6?full+' watts':'';
     scoreSubEl.style.fontSize=digits>13?Math.max(.38,Math.min(.65,3.5/Math.sqrt(digits)))+'rem':'';
   }
   multEl.textContent=cpt>1?`×${formatMult(mult)} × ${cpt} clicks per tap`:`×${formatMult(mult)} per tap`;
   const _sci=(n=>{if(n<1000)return '';const e=Math.floor(Math.log10(n));return ' ('+( n/Math.pow(10,e)).toFixed(2).replace(/\.?0+$/,'')+'E'+e+')'})(score);
-  balanceEl.textContent=fmtW(score,6);
+  balanceEl.textContent=fmtScore(score);
   const h=highestActive();
   const accent=color(Math.max(0,h)).hex,accentRgb=color(Math.max(0,h)).rgb;
   multEl.style.color=accent;

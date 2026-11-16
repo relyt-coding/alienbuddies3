@@ -213,6 +213,17 @@
     g.restore();const p=Math.max(2,Math.round(w*.03));g.fillStyle='#fff';[[.78,.18],[.22,.7]].forEach(([x,y])=>{g.fillRect(x*w-p/2,y*h-p*1.5,p,p*3);g.fillRect(x*w-p*1.5,y*h-p/2,p*3,p);});
     g.font='bold '+Math.round(h*.085)+'px "Bebas Neue"';g.textAlign='center';g.textBaseline='middle';const lab=ed==='foil'?'FOIL':'HOLO',tw=g.measureText(lab).width+w*.12;
     rrect(g,(w-tw)/2,h*.055,tw,h*.1,h*.04);g.fillStyle=ed==='foil'?'#4aa8ff':'#ff5fb8';g.fill();g.fillStyle=OUT;g.fillText(lab,w/2,h*.108);}
+  // v0.2.163: black & white versions of the card pictures, for menus that shouldn't use emoji (the WATTS breakdown).
+  //   matchIconBW('bolt', 64) → a canvas: the pixel sprite in greyscale with a little extra contrast.
+  const bwCache={};
+  window.matchIconBW=function(key,N){
+    N=N||64;const ck=key+'@'+N;if(bwCache[ck])return bwCache[ck];
+    const sp=spriteFor('i:'+key,N);if(!sp)return null;
+    const c=document.createElement('canvas');c.width=c.height=N;const x=c.getContext('2d');x.drawImage(sp,0,0);
+    try{const d=x.getImageData(0,0,N,N),a=d.data;
+      for(let i=0;i<a.length;i+=4){if(!a[i+3])continue;let l=.3*a[i]+.59*a[i+1]+.11*a[i+2];l=Math.max(0,Math.min(255,(l-128)*1.25+150));a[i]=a[i+1]=a[i+2]=l;}
+      x.putImageData(d,0,0);}catch(e){}
+    return bwCache[ck]=c;};
   window.drawMatchFace=function(cv,pattern){
     const w=cv.clientWidth||cv.parentNode.clientWidth||60,h=cv.clientHeight||cv.parentNode.clientHeight||w,dpr=Math.min(2,window.devicePixelRatio||1);
     cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);const g=cv.getContext('2d');g.setTransform(dpr,0,0,dpr,0,0);g.clearRect(0,0,w,h);

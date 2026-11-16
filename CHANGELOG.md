@@ -2,6 +2,10 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.163 - 2026-11-15 16:23
+- The Watts Breakdown and Alien Gem Math windows got a new look to match the rest of the game, with black-and-white pictures from the matching game instead of emoji.
+- The score spells out WATTS until you reach a million (7 digits), then switches to MW, GW and up.
+
 ## v0.2.162 - 2026-11-15 16:00
 - Your music now makes energy: the score is shown in watts with real units (W, kW, MW, GW and up), and shop prices and messages use watts too. Tap the score for the Watts Breakdown.
 - Alien Gem Math: tap the gem counter in the Bunker or the Shop to see where your gems come from (also at the bottom of the Watts Breakdown).

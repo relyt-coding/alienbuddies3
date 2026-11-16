@@ -220,7 +220,7 @@ document.getElementById('tipsBtn')&&document.getElementById('tipsBtn').addEventL
   buildTipsList();
   document.getElementById('tipsModal').style.display='flex';
   const tipsScoreEl=document.getElementById('tipsModalScore');
-  if(tipsScoreEl)tipsScoreEl.textContent=fmtW(score,6);
+  if(tipsScoreEl)tipsScoreEl.textContent=fmtScore(score);
 });
 document.getElementById('tipsModalClose')&&document.getElementById('tipsModalClose').addEventListener('click',()=>{
   document.getElementById('tipsModal').style.display='none';

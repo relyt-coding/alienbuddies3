@@ -20,9 +20,20 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&scoreStatsModal.cla
 scoreStatsModal&&scoreStatsModal.addEventListener('pointerdown',e=>{if(e.target===scoreStatsModal)closeScoreStats();}); // tap the dark area to close too
 document.getElementById('scoreSectionBtn')&&document.getElementById('scoreSectionBtn').addEventListener('click',openScoreStats);
 
+// v0.2.163: no emoji here: each row gets a black & white matching-card picture (js/48 matchIconBW) on a dark tile
+const SS_ICON_BY_LABEL={'WATTS':'bolt','WATTS PER TAP':'bulb','DRUMPAD TIERS':'battery','DRUM MACHINE':'robot','MULTI-CLICK':'magnet','TIER COMBINED':'dna','DRUM COMBINED':'dna',
+  'ENERGY':'battery','SEQUENCER EARNINGS':'sun','ALIEN POWER':'flask','MATCHING GAME':'star','SEQUENCER STEP VALUE':'comet','SEQUENCER':'satellite',
+  'GEMS':'gem','GEM HARVESTER':'asteroid','GALAXY BOOSTS':'galaxy','MINIGAMES':'ufo','GEMS PER MINUTE':'compass','BUDDIES':'alienplanet','ALIEN BOOST':'alienplanet'};
+const SS_ICON_BY_EMOJI={'⚡':'bolt','👆':'bulb','🥁':'atom','🖱':'magnet','🔗':'dna','🔋':'battery','💰':'sun','💉':'flask','🃏':'star','✖️':'comet','🎛':'satellite',
+  '💡':'bulb','📚':'telescope','💎':'gem','⛏':'asteroid','🌌':'galaxy','🎮':'ufo','⏱':'compass','🏆':'star'};
+function ssIconEl(key,px){const w=document.createElement('span');w.className='ss-pic';
+  const cv=typeof matchIconBW==='function'&&key?matchIconBW(key,64):null;
+  if(cv){const c=document.createElement('canvas');c.width=cv.width;c.height=cv.height;c.getContext('2d').drawImage(cv,0,0);if(px){c.style.width=c.style.height=px+'px';}w.appendChild(c);}
+  return w;}
+function ssIconKey(icon,label){const L=String(label||'').replace(/\s*\(.*$/,'').toUpperCase();return SS_ICON_BY_LABEL[L]||(/^DRUMPAD ×/.test(L)?'atom':/^SEQUENCER ×/.test(L)?'satellite':/^(SEQUENCER|DRUMPAD) TIER /.test(L)?'battery':/^TIPS/.test(L)?'bulb':/^VAULT/.test(L)?'telescope':SS_ICON_BY_EMOJI[icon])||'star';}
 function ssRow(icon,label,desc,val,isActive,colorClass){
   const row=document.createElement('div');row.className='ss-row'+(isActive?' active':'');
-  const ic=document.createElement('div');ic.className='ss-icon';if(icon==='BUDDY'&&typeof buddyIconEl==='function')ic.appendChild(buddyIconEl(24));else ic.textContent=icon==='BUDDY'?'🛸':icon;
+  const ic=document.createElement('div');ic.className='ss-icon';ic.appendChild(ssIconEl(ssIconKey(icon,label)));
   const info=document.createElement('div');info.className='ss-info';
   const lb=document.createElement('div');lb.className='ss-label'+(isActive?' active':'');lb.textContent=label;
   const ds=document.createElement('div');ds.className='ss-desc'+(isActive?' active':'');ds.textContent=desc;
@@ -51,7 +62,7 @@ function buildScoreStats(){
 
   // ── SCORE ──
   scoreStatsList.appendChild(ssLabel('ENERGY'));
-  scoreStatsList.appendChild(ssRow('⚡','WATTS','All the energy your music has made · '+formatFull(score)+' W',fmtW(score),true,'gold'));
+  scoreStatsList.appendChild(ssRow('⚡','WATTS','All the energy your music has made · '+formatFull(score)+' watts',fmtScore(score),true,'gold'));
 
   // ── PER TAP ──
   scoreStatsList.appendChild(ssLabel('PER TAP'));

@@ -83,7 +83,12 @@
   window.buddyPickFor=function(i){
     const used=new Set(),usedSp=new Set();
     alienData.forEach((a,k)=>{if(k!==i&&a&&a.base){if(a.base.sp!=null)usedSp.add(a.base.sp);else if(a.base.v!=null)used.add(a.base.v);}});
-    const spLeft=[...Array(SPECIALS.length).keys()].filter(k=>!usedSp.has(k)),nLeft=[...Array(VARIANTS.length).keys()].filter(k=>!used.has(k));
+    // v0.2.171: no pom colour repeats within 10 buddies in a row: skip the body colours of the 9 before this one
+    const recent=new Set();for(let k=Math.max(0,i-9);k<i;k++){try{const sp=window.buddyLookSpec?buddyLookSpec(k):null;if(sp&&sp.body)recent.add(sp.body.toLowerCase());}catch(e){}}
+    let spLeft=[...Array(SPECIALS.length).keys()].filter(k=>!usedSp.has(k)),nLeft=[...Array(VARIANTS.length).keys()].filter(k=>!used.has(k));
+    {const sF=spLeft.filter(k=>!recent.has(SPECIALS[k].body.toLowerCase())),nF=nLeft.filter(k=>!recent.has(VARIANTS[k].body.toLowerCase()));
+      if(nF.length)nLeft=nF;else{const anyF=[...Array(VARIANTS.length).keys()].filter(k=>!recent.has(VARIANTS[k].body.toLowerCase()));if(anyF.length)nLeft=anyF;}
+      spLeft=sF;}   // (a special whose colour was just used waits for a later buddy)
     const pick=a=>a[Math.floor(Math.random()*a.length)];
     if(spLeft.length&&(Math.random()<.05||!nLeft.length))return{sp:pick(spLeft)};
     return{v:pick(nLeft.length?nLeft:[...Array(VARIANTS.length).keys()])};

@@ -208,10 +208,10 @@
     document.getElementById('erTitle').textContent=st.special&&st.info?st.info.name+' BUDDY':(a.name?a.name:'ALIEN BUDDY');
     document.getElementById('erTitle').style.color=getAlienColor(st.idx);
     setTimeout(()=>{if(st)root.classList.add('show-btns');},1100);
-    // the buddy appears on screen now, popping in where it floats
-    reveal(st.idx);
+    // (v0.2.171: the buddy stays hidden until this card closes, then floats in from off screen: see reveal)
   }
-  function reveal(idx){if(typeof bouncers==='undefined')return;bouncers.forEach(b=>{if(b.idx===idx&&b.el.classList.contains('hatching')){b.el.classList.remove('hatching');b.el.classList.add('hatched');setTimeout(()=>b.el.classList.remove('hatched'),900);}});}
+  function reveal(idx){if(typeof bouncers==='undefined')return;bouncers.forEach(b=>{if(b.idx===idx&&b.el.classList.contains('hatching')){b.el.classList.remove('hatching');
+    if(typeof floatBuddiesIn==='function')try{floatBuddiesIn(b);}catch(e){}}});}
   function open(idx){
     if(!root)build();
     // (the first egg flies in from the drum pads screen: it opens already landed, and the canvas egg stays hidden

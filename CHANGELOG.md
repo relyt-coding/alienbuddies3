@@ -2,6 +2,11 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.171 - 2026-11-15 18:50
+- Fixed: a newly hatched buddy now floats in from off screen when you close its hatch card, instead of just appearing.
+- No two buddies in a row of 10 share the same pom colour.
+- Sequencer FILL: pick 1 to 8 to place a hit every that-many steps (1 = every step, 2 = every other, 8 = every 8th), or CLEAR to empty the track.
+
 ## v0.2.170 - 2026-11-15 18:36
 - Every buddy floats in from 150 pixels off screen: your first one, the group when you open a file, and any new one during play.
 - The hi-hat is 30% quieter by default.

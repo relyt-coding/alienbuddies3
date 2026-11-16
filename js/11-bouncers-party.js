@@ -234,7 +234,7 @@ function spawnBouncer(animate=true,idx){
     ...newTumble()};
   bouncers.push(nb);paintBouncerBuddy(nb);setHalo(nb,0);
   // v0.2.170: every buddy that shows up during play (a new hatch, one picked in the Bunker…) floats in from off screen too
-  {const bc=document.body.classList;if(bc.contains('game-active')&&!bc.contains('intro-run')&&!bc.contains('nav-locked')&&!bc.contains('buddy-hold')&&!partyMode)try{floatBuddiesIn(nb);}catch(e){}}
+  {const bc=document.body.classList;if(window._hatchingIdx!==idx&&bc.contains('game-active')&&!bc.contains('intro-run')&&!bc.contains('nav-locked')&&!bc.contains('buddy-hold')&&!partyMode)try{floatBuddiesIn(nb);}catch(e){}}
   if(window._hatchingIdx===idx)el.classList.add('hatching'); // _nameEl/_col live on the bouncer so renaming updates it instantly
 }
 // bounds are measured only now and then (every frame forced a layout read)

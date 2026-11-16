@@ -2,6 +2,9 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.164 - 2026-11-15 16:26
+- Prices under a million are written out in full: 5,000 W, 100,000 W. Units (MW, GW…) start at 1 MW.
+
 ## v0.2.163 - 2026-11-15 16:23
 - The Watts Breakdown and Alien Gem Math windows got a new look to match the rest of the game, with black-and-white pictures from the matching game instead of emoji.
 - The score spells out WATTS until you reach a million (7 digits), then switches to MW, GW and up.

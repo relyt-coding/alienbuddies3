@@ -152,7 +152,8 @@ function vaultFold(k){const i=vaultSeen.indexOf('c:'+k);if(i>=0)vaultSeen.splice
 function vaultFoldable(node,k){node.classList.add('vb-fold');if(vaultFolded(k))node.classList.add('folded');node.addEventListener('click',()=>vaultFold(k));}
 function vaultHasEntry(e){return vaultOwned.includes(e.id);}
 function vaultNice(n){if(n<100)return Math.round(n);const p=Math.pow(10,Math.floor(Math.log10(n))-1);return Math.round(n/p)*p;}
-function vaultEntryCost(){return vaultNice(250*Math.pow(1.35,vaultOwned.length));}
+// v0.2.176: spaced out: starts at 500 W and climbs ×1.6 per entry owned (5th ≈ 3,300 W, 10th ≈ 34,000 W, 20th ≈ 6 MW, 30th ≈ 700 MW…)
+function vaultEntryCost(){return vaultNice(500*Math.pow(1.6,vaultOwned.length));}
 function vaultBuyEntry(e,quiet){
   const c=vaultEntryCost();if(vaultHasEntry(e)||score<c||!e.on())return false;
   score-=c;vaultOwned.push(e.id);vaultMult=Math.pow(1.05,vaultOwned.length);if(!vaultSeen.includes(e.id))vaultSeen.push(e.id);

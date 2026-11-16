@@ -2,6 +2,9 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.176 - 2026-11-15 20:43
+- Knowledge Vault prices are spaced out: lessons and words start at 500 W and each one you own makes the next 60% pricier, so they last the whole game.
+
 ## v0.2.175 - 2026-11-15 20:35
 - The Knowledge Vault is a grid of boxes, 4 per row. Unlock a box and it opens in a pop-up; tap any box you own to read it again.
 - Cheaper sequencer progress: sequencer track 2 and the sequencer tracker are now 250,000 W each.

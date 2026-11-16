@@ -25,7 +25,7 @@ README.md covers the file layout, test mode and vocals in depth; this file is th
   MUSIC WORDS lists, and every skill-tree node's `fact` (`SKILL_TREE_NODES`, tab picked by `vaultTabForNode`). Add a `fact` to a node and it
   shows up in the Vault automatically. Five tabs need a skill node first (`req` in `VAULT_TABS`: Core → Music Words, Quad Suns →
   Sounds / Effects / Piano Roll / Vocals); tips in a locked tab can't be bought yet (`vaultTipLocked`). Since v0.2.159 tabs only appear when unlocked AND non-empty (`vaultTabShown`), nothing hints at locked content, and the boost explanation is the `vaultHelp()` pop-up behind the ? button only. Since v0.2.175 the Vault body is a 4-per-row grid of tiles (`.vb-grid` / `.vb-tile`); buying or tapping an owned tile opens `vaultPop()`. Lessons / facts / words cost points
-  (`vaultEntryCost`, ×1.35 per one owned) and give ×1.05 each (`vaultOwned`, `vaultMult` in `sharedMultiplier`). On phones the Vault is swipe
+  (`vaultEntryCost`: 500 W, ×1.6 per one owned since v0.2.176) and give ×1.05 each (`vaultOwned`, `vaultMult` in `sharedMultiplier`). On phones the Vault is swipe
   page 6 (`#vaultView`, body class `vault-open`); on desktop it's the `#vaultModal` window.
 - Upright phones get body class `thumb-nav` (js/69): BUNKER / SETTINGS / EDIT PADS / SHOP in one bottom row. The PARTY button (`.pb-small`) is
   placed next to ♪ by `placeViewButtons` (06-sequencer); tapping opens `openPartyMenu`. Level 1 egg / level 2 sequencer teaser live in

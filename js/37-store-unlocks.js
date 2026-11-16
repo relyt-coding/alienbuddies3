@@ -65,7 +65,8 @@ function partyOwnedStyles(){return PARTY_LADDER.slice(0,Math.max(0,shop.partyLev
     // ── party ──
     if(!shop.partySeen&&score>=PARTY_REVEAL_AT)shop.partySeen=true;
     const pl=shop.partyLevel||0;
-    partyCard.style.display=(shop.partySeen||pl>0)?'':'none';
+    // v0.2.166: two ways in: the disco ball on the drum page, or this card (shown as soon as the sequencer is in)
+    partyCard.style.display=(shop.partySeen||pl>0||(typeof drum!=='undefined'&&drum.seqTracks>=1))?'':'none';
     {const next=PARTY_LADDER[pl],can=!!next&&score>=next.cost;
       $('partyStoreCardNum').textContent=pl;
       $('partyStoreCardMain').textContent=!next?'EVERY STYLE':pl===0?'UNLOCK THE PARTY':'NEXT: '+next.main;

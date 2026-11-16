@@ -46,7 +46,27 @@ function keysVoiceOwned(i){return i<(shop.keysLevel||0);}
       return{stop:T=>release(g,os,T,rel)};};
   }
   const SYN={
-    ooh:vowel([[320,7,1],[800,9,.32],[2500,12,.07]],[0],.05,.52,.22),
+    // v0.2.166: the signature OOH. A soft, warm, choir-like "ooh": a pure sine core with a gently detuned triangle
+    // twin (a little width), a whisper of octave and fifth overtones for sweetness, a warm low-pass with an "oo"
+    // formant bump, a breath of air on the attack, a slow-blooming vibrato, and a short soft room so it glows
+    // instead of buzzing. Smooth attack, long gentle release: it should sound lovely on any note, even mashed.
+    ooh(t,f,vel,out){const c=getCtx(),g=c.createGain(),warm=c.createBiquadFilter(),oo=c.createBiquadFilter(),sum=c.createGain();
+      warm.type='lowpass';warm.frequency.value=Math.max(900,Math.min(2600,f*4.2));warm.Q.value=.4;
+      oo.type='peaking';oo.frequency.value=330;oo.Q.value=1.1;oo.gain.value=4;
+      sum.connect(oo);oo.connect(warm);warm.connect(g);g.connect(out);
+      // a soft little room: two short blurred echoes back into the output, quiet
+      const rIn=c.createGain(),d1=c.createDelay(.1),d2=c.createDelay(.1),rl=c.createBiquadFilter(),rg=c.createGain();
+      rIn.gain.value=1;d1.delayTime.value=.029;d2.delayTime.value=.047;rl.type='lowpass';rl.frequency.value=1800;rg.gain.value=.16;
+      warm.connect(rIn);rIn.connect(d1);rIn.connect(d2);d1.connect(rl);d2.connect(rl);rl.connect(rg);rg.connect(g);
+      const mk=(type,mul,det,lvl)=>{const o=c.createOscillator(),og=c.createGain();o.type=type;o.frequency.value=f*mul;o.detune.value=det;og.gain.value=lvl;o.connect(og);og.connect(sum);o.start(t);return o;};
+      const os=[mk('sine',1,0,.62),mk('triangle',1,-7,.3),mk('sine',1,6,.18),mk('sine',2,3,.1),mk('sine',3,-2,.035)];
+      // breath on the attack
+      const n=c.createBufferSource(),nb=c.createBuffer(1,c.sampleRate*.3|0,c.sampleRate),nd=nb.getChannelData(0);for(let i=0;i<nd.length;i++)nd[i]=(Math.random()*2-1)*(1-i/nd.length);
+      n.buffer=nb;const nbp=c.createBiquadFilter(),ng=c.createGain();nbp.type='bandpass';nbp.frequency.value=Math.min(4000,f*5);nbp.Q.value=1.2;ng.gain.value=.05*(.5+.5*vel);n.connect(nbp);nbp.connect(ng);ng.connect(warm);n.start(t);
+      {const l=c.createOscillator(),lg=c.createGain();l.frequency.value=5.1;lg.gain.setValueAtTime(0,t+.3);lg.gain.linearRampToValueAtTime(9,t+.8);   // vibrato in cents: every partial sways together
+        l.connect(lg);os.forEach(o=>lg.connect(o.detune));l.start(t);os.push(l);}
+      const pk=.28*(.65+.35*vel);g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(pk,t+.05);g.gain.setTargetAtTime(pk*.84,t+.05,.35);
+      return{stop:T=>release(g,os.concat([n]),T,.5)};},
     aah:vowel([[730,6,1],[1090,7,.5],[2440,9,.18]],[0],.05,.36,.22),
     choir:vowel([[650,5,1],[1080,6,.45],[2650,8,.14]],[-11,0,9],.16,.42,.45),
     bell(t,f,vel,out){const c=getCtx(),g=c.createGain(),car=c.createOscillator(),mod=c.createOscillator(),mg=c.createGain();g.connect(out);

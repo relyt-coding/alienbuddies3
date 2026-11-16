@@ -2,6 +2,12 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.166 - 2026-11-15 17:36
+- The quiet background hum is back on the file select screen (it starts with your first tap).
+- Two ways to unlock the Alien Party: the disco ball on the drum page, or its card in the Shop (shown as soon as you have the sequencer). The disco ball now hangs on the left, where the PARTY button appears.
+- Your buddies now float in from the edge of the screen at their normal speed, including your first buddy after the bunker and shop cutscene.
+- A brand new OOH voice for Buddy Keys: soft, warm and choir-like.
+
 ## v0.2.165 - 2026-11-15 17:16
 - Fixed: the sequencer could go silent (until you pressed pause and play) or double its hits after your phone paused the game's sound. Its timing now stays locked to the beat.
 - Numbers are written out up to the millions (1,000,000 W); short units start at a billion (1 GW).

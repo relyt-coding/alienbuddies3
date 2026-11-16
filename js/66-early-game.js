@@ -55,8 +55,8 @@
   function releaseBuddies(){
     clearTimeout(holdT);if(!B.contains('buddy-hold'))return;
     B.remove('buddy-hold');
-    document.querySelectorAll('#alienLayer .bouncer').forEach((el,i)=>{el.style.animationDelay=(i*.08)+'s';el.classList.remove('pop-in');void el.offsetWidth;el.classList.add('pop-in');
-      setTimeout(()=>{el.classList.remove('pop-in');el.style.animationDelay='';},900+i*80);});
+    // v0.2.166: it floats in from the edge at its normal speed (a natural entrance) instead of popping up
+    if(typeof floatBuddiesIn==='function')try{floatBuddiesIn();}catch(e){}
   }
   window.releaseBuddies=releaseBuddies;
   function revealNav(){

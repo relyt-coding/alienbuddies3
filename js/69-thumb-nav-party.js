@@ -158,9 +158,10 @@ body.phone-land #partyTeaser .pt-tag{font-size:12px;padding:2px 6px 1px;}
     let r;try{const rg=document.createRange();rg.selectNodeContents(se);r=rg.getBoundingClientRect();}catch(e){}
     if(!r||!r.width)r=se.getBoundingClientRect();
     const o=gv.getBoundingClientRect(),w=tz.offsetWidth||60,h=tz.offsetHeight||90,land=B.contains('phone-land');
-    let x=r.right+Math.max(16,Math.min(36,r.height*.45));
-    const gr=document.getElementById('gemRing'),ringOn=gr&&gr.classList.contains('on')&&!B.contains('desktop-mode');   // the gem ring holds the top-right: go left
-    if(land||ringOn||x+w>o.right-8)x=r.left-w-(land?10:18);
+    // v0.2.166: the disco ball hangs on the LEFT of the score, where the PARTY button will appear once it's bought
+    //   (only if there's no room there does it go to the right)
+    let x=r.left-w-(land?10:18);
+    if(x<o.left+4)x=r.right+Math.max(16,Math.min(36,r.height*.45));
     tz.style.left=(x-o.left).toFixed(1)+'px';tz.style.top=(r.top+r.height/2-h*.55-o.top).toFixed(1)+'px';
   }
   function show(on){

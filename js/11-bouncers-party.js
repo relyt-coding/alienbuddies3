@@ -262,10 +262,11 @@ addEventListener('resize',()=>{_bbCache=null;});
     return;}
   const minX=bounds.x,minY=bounds.y,maxX=bounds.x+bounds.w,maxY=bounds.y+bounds.h;
   for(const b of bouncers){
-    if(b._enter){   // v0.2.157: floating in from off screen after the opening (see floatBuddiesIn below)
-      const E=b._enter,p=Math.max(0,Math.min(1,(tnow-E.t0)/E.dur)),e=1-Math.pow(1-p,3);
-      b.x=E.sx+(E.tx-E.sx)*e;b.y=E.sy+(E.ty-E.sy)*e;
-      if(p>=1){b._enter=null;const a=Math.atan2(E.ty-E.sy,E.tx-E.sx),sp=.9+Math.random()*1.3;b.vx=Math.cos(a)*sp;b.vy=Math.sin(a)*sp;}
+    if(b._enter){   // floating in from off screen (floatBuddiesIn below): its normal drifting speed, no walls until it's inside
+      const E=b._enter;
+      if(tnow>=E.t0){b.x+=b.vx*mv;b.y+=b.vy*mv;}
+      const inside=b.x>=minX&&b.y>=minY&&b.x<=maxX-b.sz&&b.y<=maxY-b.sz-BOUNCER_NAME_PAD;
+      if(inside||tnow-E.t0>12000)b._enter=null;
       b.el.style.transform=`translate3d(${b.x.toFixed(1)}px,${b.y.toFixed(1)}px,0) scale(${b._scale||1})`;
       if(b.m&&b.w)b.m=buddyTumble.step(b.m,b.w,bdt);
       continue;
@@ -343,12 +344,16 @@ partyBtn.addEventListener('touchend',e=>{e.preventDefault();if(typeof partyBtnPr
 function floatBuddiesIn(){
   if(!bouncers.length||partyMode||document.body.classList.contains('buddy-hold'))return;   // (the first buddy pops in after its cutscene instead: js/66)
   const B=getBouncerBounds(),now=performance.now(),W=innerWidth,H=innerHeight;
+  // v0.2.166: each one starts just past a screen edge and drifts in at the same speed it floats around at
+  //   (it used to rush in and then slow down), aimed at a random spot inside, then simply carries on
   bouncers.forEach((b,i)=>{
     const tx=B.x+Math.random()*Math.max(1,B.w-b.sz),ty=B.y+Math.random()*Math.max(1,B.h-b.sz-BOUNCER_NAME_PAD);
-    const side=Math.floor(Math.random()*4),r=Math.random();
-    const sx=side===0?-b.sz-40:side===1?W+40:r*W, sy=side===2?-b.sz-60:side===3?H+40:r*H;
-    b.x=sx;b.y=sy;b.el.style.transform=`translate3d(${sx.toFixed(1)}px,${sy.toFixed(1)}px,0) scale(${b._scale||1})`;
-    b._enter={sx,sy,tx,ty,t0:now+Math.min(i,12)*140,dur:1700+Math.random()*700};
+    const side=Math.floor(Math.random()*4),r=.15+Math.random()*.7,pad=b.sz+14;
+    const sx=side===0?-pad:side===1?W+14:B.x+r*(B.w-b.sz), sy=side===2?-pad-BOUNCER_NAME_PAD:side===3?H+14:B.y+r*(B.h-b.sz);   // just off the SCREEN
+    const sp=Math.max(.9,Math.min(2.2,Math.hypot(b.vx,b.vy)||1.4)),a=Math.atan2(ty-sy,tx-sx);
+    b.x=sx;b.y=sy;b.vx=Math.cos(a)*sp;b.vy=Math.sin(a)*sp;
+    b.el.style.transform=`translate3d(${sx.toFixed(1)}px,${sy.toFixed(1)}px,0) scale(${b._scale||1})`;
+    b._enter={t0:now+Math.min(i,12)*220};
   });
 }
 window.floatBuddiesIn=floatBuddiesIn;

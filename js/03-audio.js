@@ -35,9 +35,12 @@ function noiseBuf(dur){const c=getCtx(),L=Math.round(c.sampleRate*dur),b=c.creat
 function distCurve(k=3){const v=new Float32Array(256);for(let i=0;i<256;i++){const x=i*2/256-1;v[i]=Math.tanh(x*k)*.88;}return v;}
 
 // Per-sound gain helper — applies masterVol and per-sound vol
+// v0.2.170: each sound's volume slider defaults to 75%, which plays it at its normal level; 100% is a third louder,
+//   so there's headroom to push a sound up in your mix
+const SOUND_VOL_DEFAULT=.75;
 function getSoundGainVal(id){
-  const sv=soundVols[id]!==undefined?soundVols[id]:1;
-  return sv*masterVol;
+  const sv=soundVols[id]!==undefined?soundVols[id]:SOUND_VOL_DEFAULT;
+  return sv/SOUND_VOL_DEFAULT*masterVol;
 }
 
 // ══════════════════════════════════════════════
@@ -60,7 +63,7 @@ const ALL_SOUNDS=[
     }
     drumMasterGain._hhLast={g,t};
     g.gain.setValueAtTime(0,t);
-    g.gain.linearRampToValueAtTime(.07*(gv??1),t+.003);
+    g.gain.linearRampToValueAtTime(.049*(gv??1),t+.003);   // v0.2.170: 30% quieter by default
     g.gain.exponentialRampToValueAtTime(.001,t+.065);
     const s=c.createBufferSource();s.buffer=noiseBuf(.06);
     // v0.2.168: softer, sweeter hat: same crisp top, but the piercing 9-14 kHz edge is tamed (a dip where it

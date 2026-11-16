@@ -2,6 +2,11 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.170 - 2026-11-15 18:36
+- Every buddy floats in from 150 pixels off screen: your first one, the group when you open a file, and any new one during play.
+- The hi-hat is 30% quieter by default.
+- Every sound's volume now starts at 75% in Edit Pads, so you can turn any sound up in your mix. Your saved volumes sound exactly the same as before.
+
 ## v0.2.169 - 2026-11-15 18:22
 - Fixed: after the bunker and shop cutscene, your buddy no longer pops up on the edge of the screen. It starts well off screen and floats all the way in.
 

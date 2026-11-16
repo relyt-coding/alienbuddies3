@@ -42,7 +42,7 @@ function autoSave(){
     mgBought:(typeof mgBought!=='undefined')?mgBought:undefined,bdProgress:(typeof bdProgress!=='undefined')?bdProgress:undefined,tipsOwned,tipsSet,tipsMult,vaultSeen,vaultOwned,drumTrackerActive,seqTrackerActive,shopOpenCount,hasSeenSeqHint,
     savedPatterns,savedArrangements,songSlots,
     padSounds:[...padSounds],
-    soundVols:{...soundVols},
+    soundVols:{...soundVols},soundVolsV:2,
     visiblePads,
     seqBpm,seqSteps:STEPS,seqKey,seqKeyMinor,trackFx,
     seqEnergy,energyEmptyHints,
@@ -266,6 +266,9 @@ updateMatchingBtn();
   }
   // Restore sound volumes
   if(data.soundVols)Object.assign(soundVols,data.soundVols);
+  // v0.2.170: every sound now sits at 75% by default (100% = a third louder). Older saves stored 100% = normal, so
+  //   scale their settings to keep everything sounding exactly the same.
+  if(data.soundVols&&!data.soundVolsV)for(const k in data.soundVols)soundVols[k]=Math.round(data.soundVols[k]*75)/100;
   // Restore visible pads
   if(data.visiblePads!==undefined)visiblePads=data.visiblePads;
   else visiblePads=drum.pads;

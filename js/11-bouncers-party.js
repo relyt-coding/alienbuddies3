@@ -233,6 +233,8 @@ function spawnBouncer(animate=true,idx){
   const nb={el,x,y,vx:Math.cos(ang)*spd,vy:Math.sin(ang)*spd,sz,idx,_nameEl:nameSpan,_col:col,_cv:emojiSpan,_halo:halo,
     ...newTumble()};
   bouncers.push(nb);paintBouncerBuddy(nb);setHalo(nb,0);
+  // v0.2.170: every buddy that shows up during play (a new hatch, one picked in the Bunker…) floats in from off screen too
+  {const bc=document.body.classList;if(bc.contains('game-active')&&!bc.contains('intro-run')&&!bc.contains('nav-locked')&&!bc.contains('buddy-hold')&&!partyMode)try{floatBuddiesIn(nb);}catch(e){}}
   if(window._hatchingIdx===idx)el.classList.add('hatching'); // _nameEl/_col live on the bouncer so renaming updates it instantly
 }
 // bounds are measured only now and then (every frame forced a layout read)
@@ -339,15 +341,15 @@ partyBtn.addEventListener('touchend',e=>{e.preventDefault();if(typeof partyBtnPr
 
 // v0.2.157: every buddy drifts in from just past a random screen edge to a spot inside, a little staggered
 //   (js/65 calls this the moment the opening's pages land)
-function floatBuddiesIn(){
-  if(!bouncers.length||partyMode||document.body.classList.contains('buddy-hold'))return;   // (the first buddy pops in after its cutscene instead: js/66)
-  const B=getBouncerBounds(),now=performance.now(),W=innerWidth,H=innerHeight;
+function floatBuddiesIn(only){
+  if(!bouncers.length||partyMode||document.body.classList.contains('buddy-hold'))return;   // (the first buddy floats in after its cutscene instead: js/66)
+  const B=getBouncerBounds(),now=performance.now(),W=innerWidth,H=innerHeight,list=only?[only]:bouncers;
   // v0.2.166: each one starts just past a screen edge and drifts in at the same speed it floats around at
   //   (it used to rush in and then slow down), aimed at a random spot inside, then simply carries on
-  bouncers.forEach((b,i)=>{
+  list.forEach((b,i)=>{
     const tx=B.x+Math.random()*Math.max(1,B.w-b.sz),ty=B.y+Math.random()*Math.max(1,B.h-b.sz-BOUNCER_NAME_PAD);
     // fully off the screen: the sprite overhangs its box by 13 px and the name hangs below it
-    const side=Math.floor(Math.random()*4),r=.15+Math.random()*.7,OV=13,M=200;   // v0.2.169: a good 200 px clear of the screen edge
+    const side=Math.floor(Math.random()*4),r=.15+Math.random()*.7,OV=13,M=150;   // v0.2.170: 150 px clear of the screen edge (every buddy, every time)
     const sx=side===0?-(b.sz+OV+M):side===1?W+OV+M:B.x+r*(B.w-b.sz), sy=side===2?-(b.sz+OV+BOUNCER_NAME_PAD+M):side===3?H+OV+M:B.y+r*(B.h-b.sz);
     const sp=Math.max(.9,Math.min(2.2,Math.hypot(b.vx,b.vy)||1.4)),a=Math.atan2(ty-sy,tx-sx);
     b.x=sx;b.y=sy;b.vx=Math.cos(a)*sp;b.vy=Math.sin(a)*sp;

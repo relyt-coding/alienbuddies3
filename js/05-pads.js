@@ -273,7 +273,7 @@ function buildPaList(){
       const k=groupKey(snd);
       if(k!==lastKey){lastKey=k;paGroupHeader(k==='SPACESHIP'?k:'🪐 '+k,ordered.filter(x=>groupKey(x)===k).length,snd.planet?snd.color:'');}
     }
-    if(soundVols[snd.id]===undefined)soundVols[snd.id]=1;
+    if(soundVols[snd.id]===undefined)soundVols[snd.id]=SOUND_VOL_DEFAULT;
     const currentSnd=padAssignIdx!==null?padSounds[padAssignIdx]:null;
     const item=document.createElement('div');item.className='pa-item'+(currentSnd===snd.id?' active':'');
     const dot=document.createElement('div');dot.className='pa-dot';dot.style.background=snd.color;

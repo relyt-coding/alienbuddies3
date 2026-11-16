@@ -84,8 +84,9 @@ function partyOwnedStyles(){return PARTY_LADDER.slice(0,Math.max(0,shop.partyLev
     const pl=shop.partyLevel||0,next=PARTY_LADDER[pl];if(!next||score<next.cost)return;
     score-=next.cost;shop.partyLevel=pl+1;
     if(typeof playSfxPurchase==='function')playSfxPurchase();if(typeof flashBuy==='function')flashBuy('#ff00cc');
-    if(pl===0){const toast=showToast,msg=()=>toast('ALIEN PARTY unlocked! Tap the button to get your aliens dancing.');
-      if(typeof playPartyUnlockFx==='function'){const fx=playPartyUnlockFx;setTimeout(()=>fx(msg),60);}else msg();}
+    // v0.2.174: unlocking the party starts it right away in the GLOW style (the party button is how you change or stop it)
+    if(pl===0){const go=()=>{try{if(typeof setPartyStyle==='function')setPartyStyle('glow');if(!partyMode&&typeof startParty==='function')startParty();if(typeof paintPartyBtn==='function')paintPartyBtn();}catch(e){}};
+      if(typeof playPartyUnlockFx==='function'){const fx=playPartyUnlockFx;setTimeout(()=>fx(go),60);}else go();}
     else{showToast(next.main+' unlocked! Pick it from the PARTY menu.');if(typeof setPartyStyle==='function'&&partyMode)setPartyStyle(next.style);}
     if(typeof refreshPartyAccess==='function')refreshPartyAccess();
     if(typeof renderUI==='function')renderUI();else renderStoreUnlocks();

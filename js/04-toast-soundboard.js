@@ -85,6 +85,14 @@ document.getElementById('saveQuitBtn')&&document.getElementById('saveQuitBtn').a
 
 // (the background hum / groove used to be switched off for good once the sequencer unlocked; now it follows the
 //  sequencer, and its setting stays: GROOVE in Settings and the soundboard, plus ♪ GROOVE next to VIEW)
+// v0.2.174: the background hum is the soundtrack of the early game. When the sequencer arrives it fades out (once,
+//   automatically) so your beat takes over. BACKGROUND HUM in Settings can still turn it back on.
+function seqMuteHum(){
+  if(typeof seqHasAutoMutedAmbience!=='undefined'&&seqHasAutoMutedAmbience)return;
+  seqHasAutoMutedAmbience=true;musicOn=false;
+  ['bgMusicToggle','settingsBgMusic'].forEach(id=>{const t=document.getElementById(id);if(t)t.checked=false;});
+  try{if(ambGain&&audioCtx){const now=audioCtx.currentTime;ambGain.gain.cancelScheduledValues(now);ambGain.gain.setValueAtTime(ambGain.gain.value,now);ambGain.gain.linearRampToValueAtTime(0,now+2.5);}}catch(e){}
+}
 function applyAmbienceLock(){
   ['settingsBgMusicRow','bgMusicToggleRow'].forEach(id=>{const r=document.getElementById(id);if(r)r.style.display='';});
 }

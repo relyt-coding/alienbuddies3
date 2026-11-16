@@ -196,7 +196,7 @@ body:not(.desktop-mode) #seqPatternView .seq-bottom-row .keys-switch-seq button{
   // ══════════ the hum on the file select screen (back since v0.2.166; it left with the groove in v0.2.157) ══════════
   // Browsers only allow sound after a tap, so it fades in with your first tap or key on the title / file screen.
   function titleHum(){
-    if(B.contains('game-active')||typeof musicOn==='undefined'||!musicOn)return;
+    if(B.contains('game-active'))return;   // (the file screen isn't part of any save: it always hums)
     try{getCtx();if(!ambStarted)startAmbience();
       if(ambGain&&audioCtx){const now=audioCtx.currentTime;if(ambGain.gain.value<AMB_LEVEL*.5){ambGain.gain.cancelScheduledValues(now);ambGain.gain.setValueAtTime(ambGain.gain.value,now);ambGain.gain.linearRampToValueAtTime(AMB_LEVEL,now+1.5);}}
     }catch(e){}

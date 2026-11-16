@@ -46,6 +46,7 @@ function buySeqTrack(){
   const tracks=drum.seqTracks;if(tracks>=MAX_SEQ_TRACKS)return;
   const cost=seqTrackCost(tracks);if(score<cost)return;
   score-=cost;drum.seqTracks++;
+  if(tracks===0&&typeof seqMuteHum==='function')seqMuteHum();   // the hum fades out as the sequencer arrives
   playSfxPurchase();flashBuy('#33ff99');
   if(tracks>0)showToast('Sequencer track unlocked — your Drum Multiplier increased by ×1.2!');
   if(tracks===0){

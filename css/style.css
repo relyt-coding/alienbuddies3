@@ -2510,9 +2510,10 @@ body.desktop-mode #partyFx{z-index:170;}
 .mp-fill-btn{flex:1 1 0;min-width:0;height:32px;padding:0;font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:.04em;line-height:1;border-radius:6px;border:1px solid #2a2a4a;background:#111124;color:#9a9ac0;cursor:pointer;touch-action:manipulation;-webkit-user-select:none;user-select:none;transition:background .1s,color .1s,border-color .1s;}
 .mp-fill-btn.all{flex:1.5 1 0;}
 /* v0.2.171: 1–8 in two rows, CLEAR tall on the right */
-.mp-fill-row.mp-fill-grid{display:grid;grid-template-columns:repeat(4,1fr) 1.35fr;grid-auto-rows:32px;gap:4px;}
+.mp-fill-row.mp-fill-grid{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:32px;gap:4px;}
 .mp-fill-grid .mp-fill-btn{height:auto;}
-.mp-fill-grid .mp-fill-btn.clear{grid-column:5;grid-row:1 / span 2;font-size:1rem;letter-spacing:.08em;color:#ff6b7a;border-color:#4a2230;background:#1a0d14;}
+.mp-fill-grid .mp-fill-btn.all{grid-column:1 / span 2;}
+.mp-fill-grid .mp-fill-btn.clear{grid-column:3 / span 2;font-size:1rem;letter-spacing:.08em;color:#ff6b7a;border-color:#4a2230;background:#1a0d14;}
 .mp-fill-grid .mp-fill-btn.clear:active{background:#2a1220;}
 .mp-fill-btn:active{transform:scale(.94);}
 .mp-fill-btn.on{background:var(--lc);border-color:var(--lc);color:#0a0a14;box-shadow:0 0 8px -2px var(--lc);}

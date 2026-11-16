@@ -2,6 +2,12 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.174 - 2026-11-15 19:43
+- The background hum fades out when you unlock the sequencer, so your beat takes over (you can turn it back on in Settings). It still plays on the file select screen.
+- Unlocking the Alien Party starts the party right away in the Glow style.
+- The party menu only shows the styles you own.
+- Sequencer FILL is back to 1 / 2 / 3 / 4 (each fills one spot in every beat), plus ALL and CLEAR.
+
 ## v0.2.173 - 2026-11-15 19:07
 - Matching game pictures are sharper (more detail) and the whitish edge around them is gone.
 

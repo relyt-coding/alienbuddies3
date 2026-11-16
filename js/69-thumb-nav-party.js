@@ -100,7 +100,7 @@ body.phone-land #partyTeaser .pt-tag{font-size:12px;padding:2px 6px 1px;}
         if(typeof paintPartyBtn==='function')paintPartyBtn();});
       menu.appendChild(b);});
     const total=typeof PARTY_LADDER!=='undefined'?PARTY_LADDER.length:list.length;
-    if(list.length<total){const m=document.createElement('div');m.className='pm-more';m.textContent=(total-list.length)+' MORE STYLE'+(total-list.length===1?'':'S')+' IN THE SHOP';menu.appendChild(m);}
+    // (v0.2.174: no "N more styles in the shop" line: new styles just appear here when you buy them)
     if(partyMode){const e=document.createElement('button');e.type='button';e.className='pm-end';e.textContent='END PARTY';
       e.addEventListener('click',ev=>{ev.stopPropagation();closeMenu();if(typeof stopParty==='function')stopParty();if(typeof paintPartyBtn==='function')paintPartyBtn();});menu.appendChild(e);}
     menu.classList.add('open');

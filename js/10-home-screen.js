@@ -118,10 +118,10 @@ function startGame(slotIndex){
   startGemInterval();
   if(!ambStarted)startAmbience();
   applyAmbienceLock();
-  // Restore the groove (BG music) setting. Saves from before the groove had the hum switched off automatically when
-  // the sequencer unlocked (not by choice), so those get it back once.
+  // Restore the background hum setting. v0.2.174: once you have the sequencer the hum is off (switched off once,
+  // automatically; saves from the groove days that never got that get it now). Settings can turn it back on.
   {let on=data.musicOn!==false;
-    if(!on&&data.seqHasAutoMutedAmbience&&!data.grooveV)on=true;
+    if(drum.seqTracks>=1&&!data.seqHasAutoMutedAmbience){on=false;seqHasAutoMutedAmbience=true;}
     musicOn=on;
     ['bgMusicToggle','settingsBgMusic'].forEach(id=>{const t=document.getElementById(id);if(t)t.checked=on;});
     if(ambGain&&audioCtx){const now=audioCtx.currentTime;ambGain.gain.cancelScheduledValues(now);ambGain.gain.setValueAtTime(on?AMB_LEVEL:0,now);}

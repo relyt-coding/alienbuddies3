@@ -2,6 +2,9 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.169 - 2026-11-15 18:22
+- Fixed: after the bunker and shop cutscene, your buddy no longer pops up on the edge of the screen. It starts well off screen and floats all the way in.
+
 ## v0.2.168 - 2026-11-15 18:13
 - The hi-hat sounds softer and sweeter: same crisp sparkle, without the harsh edge.
 

@@ -147,6 +147,7 @@ window.setBuddyHalo=setHalo;
 function clampBouncersToBounds(){
   const bounds=getBouncerBounds();
   for(const b of bouncers){
+    if(b._enter)continue;   // v0.2.169: a buddy still floating in from off screen isn't "lost": don't snap it onto the edge
     b.x=Math.min(Math.max(b.x,bounds.x),bounds.x+bounds.w-b.sz);
     b.y=Math.min(Math.max(b.y,bounds.y),bounds.y+bounds.h-b.sz-BOUNCER_NAME_PAD);
     if(b.el)b.el.style.transform=`translate(${b.x}px,${b.y}px) scale(${b._scale||1})`;
@@ -346,7 +347,7 @@ function floatBuddiesIn(){
   bouncers.forEach((b,i)=>{
     const tx=B.x+Math.random()*Math.max(1,B.w-b.sz),ty=B.y+Math.random()*Math.max(1,B.h-b.sz-BOUNCER_NAME_PAD);
     // fully off the screen: the sprite overhangs its box by 13 px and the name hangs below it
-    const side=Math.floor(Math.random()*4),r=.15+Math.random()*.7,OV=13,M=8;
+    const side=Math.floor(Math.random()*4),r=.15+Math.random()*.7,OV=13,M=200;   // v0.2.169: a good 200 px clear of the screen edge
     const sx=side===0?-(b.sz+OV+M):side===1?W+OV+M:B.x+r*(B.w-b.sz), sy=side===2?-(b.sz+OV+BOUNCER_NAME_PAD+M):side===3?H+OV+M:B.y+r*(B.h-b.sz);
     const sp=Math.max(.9,Math.min(2.2,Math.hypot(b.vx,b.vy)||1.4)),a=Math.atan2(ty-sy,tx-sx);
     b.x=sx;b.y=sy;b.vx=Math.cos(a)*sp;b.vy=Math.sin(a)*sp;

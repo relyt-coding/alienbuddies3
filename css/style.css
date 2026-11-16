@@ -1797,20 +1797,70 @@ body.phone-land .bunker-grid{max-width:480px;margin:0 auto;}
    SOLAR-SYSTEM SKILL TREE — orbit ring, docks, 3D view
    ══════════════════════════════════════════════ */
 #skillTreeInner{transform-style:preserve-3d;}
+#skillTreeGround{position:absolute;left:0;top:0;will-change:transform;pointer-events:none;}
 .st-orbit{position:absolute;border-radius:50%;border:2px dashed rgba(120,150,255,.28);box-shadow:0 0 30px -6px rgba(90,130,255,.35),inset 0 0 30px -6px rgba(90,130,255,.25);pointer-events:none;animation:stOrbitSpin 240s linear infinite;}
 @keyframes stOrbitSpin{to{transform:rotate(360deg);}}
 .st-dock{position:absolute;width:14px;height:14px;margin:-7px 0 0 -7px;border-radius:50%;border:2px solid #335;background:#05060c;pointer-events:none;box-shadow:0 0 10px -2px currentColor;}
-.st-node[data-sun]{z-index:3;padding:26px;margin:-26px 0 0 -26px;} /* extra room so the glow isn't clipped to a square in 3D */
-.st-node[data-sun] .st-node-circle{box-shadow:0 0 26px -2px rgba(255,200,80,.55);}
 #stViewToggle{position:absolute;left:max(14px,env(safe-area-inset-left,0px));bottom:max(14px,env(safe-area-inset-bottom,0px));z-index:6;font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:.12em;padding:.45rem .9rem;border-radius:50px;border:1px solid #2a2a5a;background:rgba(8,8,20,.85);color:#a0a8ff;cursor:pointer;touch-action:manipulation;box-shadow:0 0 14px -4px rgba(160,168,255,.5);}
 #stViewToggle:hover{border-color:#a0a8ff;color:#cfd3ff;}
-/* 3D: nodes and labels stand up off the plate and face the camera */
-#skillTreeModal.st-3d .st-node,#skillTreeModal.st-3d .st-branch-label{rotate:x -55deg;}
+/* every node is exactly as wide as its bubble, so the bubble sits dead on its map spot; the name hangs centred underneath */
+/* (the node box is 124px wide and centred on the spot, so a 120px name never sticks out of it: anything that overflows a node to the
+   left gets cut off once the node is its own 3D layer. Only the bubble, name and price catch taps, so the map still drags between them.) */
+.st-node{--nx:35px;--pad:0px;width:124px;box-sizing:content-box;padding:var(--pad);margin:calc(var(--pad) * -1) 0 0 calc((var(--pad) + var(--nx)) * -1);pointer-events:none;}
+.st-node.center{--nx:26px;}
+.st-node.hub{--nx:20px;}
+.st-node > *{pointer-events:auto;}
+.st-node-cost{white-space:nowrap;}
+/* 3D: nodes and labels stand up off the disc and face the camera (--st-bb = the camera's turn, undone; set by js/35) */
+#skillTreeModal.st-3d .st-node,#skillTreeModal.st-3d .st-branch-label{rotate:x -52deg;rotate:var(--st-bb,1 0 0 -52deg);}
 #skillTreeModal.st-3d .st-node{transform-origin:50% 27px;}
 #skillTreeModal.st-3d .st-node.center{transform-origin:50% 36px;}
-#skillTreeModal.st-3d .st-node[data-sun]{transform-origin:50% 53px;}
-#skillTreeModal.st-3d #skillTreeCanvas{background:radial-gradient(ellipse at 50% 70%,#0a1030 0%,#030510 60%);}
+#skillTreeModal.st-3d .st-node.hub{transform-origin:50% 42px;}
+#skillTreeModal.st-3d .st-node.st-body{transform-origin:50% 57px;}
+#skillTreeModal.st-3d .st-node.st-body.center{transform-origin:50% 66px;}
+#skillTreeModal.st-3d #skillTreeCanvas{background:radial-gradient(ellipse at 22% 18%,rgba(120,60,200,.16) 0%,rgba(120,60,200,0) 42%),radial-gradient(ellipse at 84% 30%,rgba(30,150,170,.13) 0%,rgba(30,150,170,0) 40%),radial-gradient(ellipse at 50% 72%,#0a1030 0%,#030510 62%);}
 #skillTreeModal.st-3d .st-line{height:3px;}
+/* sky: star layers that drift as you fly (hidden in the flat map), and a haze over the far edge of the disc */
+.st-sky,.st-haze{display:none;position:absolute;pointer-events:none;}
+#skillTreeModal.st-3d .st-sky,#skillTreeModal.st-3d .st-haze{display:block;}
+.st-sky{top:0;left:0;right:0;bottom:0;overflow:hidden;}
+.st-sky i{position:absolute;left:-256px;top:-256px;right:-256px;bottom:-256px;background-repeat:repeat;background-size:256px 256px;will-change:transform;}
+.st-haze{left:0;right:0;top:0;height:24%;z-index:2;background:linear-gradient(#030510 0%,rgba(3,5,16,.82) 30%,rgba(3,5,16,0) 100%);}
+.st-ground{fill:none;stroke:rgba(120,150,255,.13);stroke-width:2;stroke-dasharray:3 14;}
+.st-ground.far{stroke:rgba(120,150,255,.08);}
+/* compass: the needle shows where north is; tap = face north */
+#stCompass{display:none;position:absolute;left:max(14px,env(safe-area-inset-left,0px));bottom:calc(max(14px,env(safe-area-inset-bottom,0px)) + 3.1rem);z-index:6;width:2.9rem;height:2.9rem;border-radius:50%;border:1px solid #2a2a5a;background:rgba(8,8,20,.85);cursor:pointer;touch-action:manipulation;padding:0;box-shadow:0 0 14px -4px rgba(160,168,255,.5);transition:opacity .3s;}
+#skillTreeModal.st-3d #stCompass{display:block;}
+#stCompass.off{opacity:.45;}
+#stCompass .stc-needle{position:absolute;left:50%;top:50%;width:0;height:0;}
+#stCompass .stc-needle::before{content:'';position:absolute;left:-5px;top:-17px;border:5px solid transparent;border-bottom:15px solid #ff5a6a;border-top:0;}
+#stCompass .stc-needle::after{content:'';position:absolute;left:-5px;top:2px;border:5px solid transparent;border-top:15px solid #5a6088;border-bottom:0;}
+#stCompass .stc-n{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);text-align:center;font-family:'Bebas Neue',sans-serif;font-size:.8rem;line-height:1;color:#e8ecff;text-shadow:0 0 4px #000,0 0 4px #000;pointer-events:none;}
+/* ── bodies: the core is a star, Quad Suns are suns, planets and continents are lit spheres ──
+   (--pad = clear room round the bubble so its glow isn't cut to a square when the node becomes its own 3D layer) */
+.st-node.st-body{--pad:30px;}
+.st-node[data-sun]{z-index:3;}
+.st-node.st-sun .st-node-circle,.st-node.st-star .st-node-circle,.st-node.st-planet .st-node-circle{border:0;font-size:0;}
+.st-node.st-body.available .st-node-circle{opacity:.5;animation:none;}
+/* suns */
+.st-node.st-sun .st-node-circle{background:radial-gradient(circle at 38% 32%,#fffdf2 0%,var(--cl) 20%,var(--c) 58%,var(--cd) 100%);box-shadow:0 0 12px 1px var(--c),0 0 26px 8px var(--cg);}
+.st-node.st-sun.unlocked .st-node-circle::before,.st-node.st-star.unlocked .st-node-circle::before{content:'';position:absolute;top:-22px;left:-22px;right:-22px;bottom:-22px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,0) 50%,var(--cg) 58%,rgba(255,255,255,0) 71%);animation:stCorona 3.4s ease-in-out infinite;pointer-events:none;}
+@keyframes stCorona{0%,100%{transform:scale(.9);opacity:.55;}50%{transform:scale(1.08);opacity:1;}}
+/* the Tucana Core: a white-blue star with a four-point flare */
+.st-node.st-star{--cg:rgba(120,190,255,.38);}
+.st-node.st-star .st-node-circle{background:radial-gradient(circle at 40% 34%,#ffffff 0%,#dff1ff 24%,#6fb8ff 60%,#1a4a9a 100%);box-shadow:0 0 14px 2px #7fc4ff,0 0 28px 10px rgba(80,160,255,.35);}
+.st-node.st-star .st-node-circle::after{content:'';position:absolute;left:-26px;right:-26px;top:50%;height:2px;margin-top:-1px;background:linear-gradient(90deg,rgba(255,255,255,0),rgba(220,240,255,.9) 50%,rgba(255,255,255,0));box-shadow:none;pointer-events:none;}
+.st-node.st-star .st-node-check{z-index:1;}
+/* planets: sunlit top-left, night side bottom-right, a thin glowing atmosphere; some have cloud bands or a ring */
+.st-node.st-planet .st-node-circle{transform:scale(1.26);background:radial-gradient(circle at 31% 27%,rgba(255,255,255,.5) 0%,rgba(255,255,255,0) 26%),radial-gradient(circle at 34% 30%,var(--lite) 0%,var(--base) 46%,var(--dark) 92%);box-shadow:0 0 0 1.5px var(--atm),0 0 14px 1px var(--atm);}
+.st-node.st-planet.banded .st-node-circle{background:radial-gradient(circle at 31% 27%,rgba(255,255,255,.5) 0%,rgba(255,255,255,0) 26%),radial-gradient(circle at 30% 26%,rgba(0,0,0,0) 30%,var(--dark) 96%),repeating-linear-gradient(var(--band),var(--b1) 0,var(--b1) 6px,var(--b2) 9px,var(--b1) 13px),linear-gradient(var(--lite),var(--base));}
+.st-node.st-planet .st-node-label{margin-top:12px;}
+.st-node.st-planet.ringed .st-node-circle::before{content:'';position:absolute;left:-38%;right:-38%;top:34%;bottom:34%;border-radius:50%;border:3px solid var(--ringc);transform:rotate(-16deg);pointer-events:none;}
+.st-node.st-planet.ringed .st-node-circle::after{content:'';position:absolute;left:0;right:0;top:0;height:50%;border-radius:999px 999px 0 0;background:inherit;background-size:100% 200%;background-position:top;transform:rotate(-16deg);transform-origin:50% 100%;pointer-events:none;}
+.st-node.st-planet .st-node-check{z-index:1;}
+/* continents: small worlds in their planet's colours (they keep their icon) */
+.st-node.st-world .st-node-circle{border-color:var(--atm);background:radial-gradient(circle at 32% 27%,var(--lite) 0%,var(--base) 55%,var(--dark) 100%);}
+.st-node.st-world.unlocked .st-node-circle{border-color:#44eebb;}
 /* phone/tablet: the ACTIVATE hint arrow belongs to the main screen — never float it over the shop or bunker */
 body.store-open:not(.desktop-mode) #arrowActivate,body.bunker-open:not(.desktop-mode) #arrowActivate{display:none !important;}
 
@@ -2696,3 +2746,5 @@ body.phone-land .keys-switch-seq button{font-size:.72rem;padding:.2rem .42rem;}
   .ph-pad .ph-keys{color:#fff;}
   .bd-tw{background:#0f0f1a;}
 }
+/* very narrow phones (under 360px wide): the map's title makes way so the gem count and CLOSE both fit */
+@media (max-width:359px){#skillTreeTitle{display:none;}#skillTreeHeader{padding-left:.7rem;padding-right:.7rem;}}

@@ -215,7 +215,7 @@ function autoplayTick(){
     while(simmed<target&&performance.now()-now<budget){
       const dt=Math.min(target===Infinity?2:Math.max(.1,Math.min(2,target-simmed)),2);
       simStep(dt);simmed+=dt;
-      const s=snap();diffLog(run.snap,s);run.snap=s;sample();
+      const s=snap();diffLog(run.snap,s);run.snap=s;sample();if(window.__tmHook)window.__tmHook(run.gameT,pps());
       if((reason=stopReason()))break;
     }
   });

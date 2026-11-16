@@ -25,7 +25,7 @@ README.md covers the file layout, test mode and vocals in depth; this file is th
   MUSIC WORDS lists, and every skill-tree node's `fact` (`SKILL_TREE_NODES`, tab picked by `vaultTabForNode`). Add a `fact` to a node and it
   shows up in the Vault automatically. Five tabs need a skill node first (`req` in `VAULT_TABS`: Core → Music Words, Quad Suns →
   Sounds / Effects / Piano Roll / Vocals); tips in a locked tab can't be bought yet (`vaultTipLocked`). Since v0.2.159 tabs only appear when unlocked AND non-empty (`vaultTabShown`), nothing hints at locked content, and the boost explanation is the `vaultHelp()` pop-up behind the ? button only. Since v0.2.175 the Vault body is a 4-per-row grid of tiles (`.vb-grid` / `.vb-tile`); buying or tapping an owned tile opens `vaultPop()`. Lessons / facts / words cost points
-  (`vaultEntryCost`: 500 W, ×1.6 per one owned since v0.2.176) and give ×1.05 each (`vaultOwned`, `vaultMult` in `sharedMultiplier`). On phones the Vault is swipe
+  (`vaultEntryCost(e)`: a FIXED price per entry = about the watts a player holds when its feature unlocks, from the `VAULT_PRICE` table in js/74; buying never changes another price) and give ×1.05 each (`vaultOwned`, `vaultMult` in `sharedMultiplier`). On phones the Vault is swipe
   page 6 (`#vaultView`, body class `vault-open`); on desktop it's the `#vaultModal` window.
 - Upright phones get body class `thumb-nav` (js/69): BUNKER / SETTINGS / EDIT PADS / SHOP in one bottom row. The PARTY button (`.pb-small`) is
   placed next to ♪ by `placeViewButtons` (06-sequencer); tapping opens `openPartyMenu`. Level 1 egg / level 2 sequencer teaser live in
@@ -37,6 +37,15 @@ README.md covers the file layout, test mode and vocals in depth; this file is th
 - Buddy Keys (js/60): notes go through `playNote(id,t,f,vel)` = a per-note fade gain + reverb send; voices must `g.connect(out);g._out=out;` and return `{stop:T=>release(g,oscs,T,r)}` (never cancel the voice envelope: old Safari clicks). Scale is pentatonic (A minor pent with no song key). STARS is voice 0 since v0.2.177 (`keysV2` save flag shifts old saves up one).
 - Matching-card art: `ICONS` in `48-match-art.js`, drawn in a 100×100 box, then pixelated (alpha under ~100 is dropped, so use solid fills).
 
+- Skill tree 3D (js/35, real camera since v0.2.179): `stPanX / stPanY / stScale` keep their flat meaning; js/35 `stApply3D()` turns them into a camera
+  (target under `stAnchor()`, `stYaw`, `stTilt`) with `perspective` on `#skillTreeCanvas`. Move the map with `stPanBy(dx,dy)` (never `stPanX +=`), turn with `stTurn()`.
+  Use `scale3d`, not `scale`, on the map (a 2D scale squashes the upright bubbles). Flat things (links SVG, rings, glows, docks) are moved to `#skillTreeGround`
+  by `stSplitGround()` after every render so they never draw across the bubbles; bubbles face the camera through the `--st-bb` custom property (`rotate`).
+  `.st-node` is 124px wide and `pointer-events:none` (children catch taps): anything overflowing a node to the left is cut off in 3D.
+  Suns / planets / continents are dressed by `stDressNode` (`PLANET_LOOK` in js/35: add a new planet's colours there).
+- Vault content batches: js/73 pushes extra lessons and words onto `VAULT_LEARN` / `VAULT_WORDS` (writing rules in its header). 334 entries with everything
+  unlocked. After adding entries or changing the economy, rebuild the prices: `python3 tools/vault_prices.py` runs the test-mode bot (via the `window.__tmHook` call in js/28) and rewrites js/74. Until then a new entry costs the same as the one before it in its tab.
+
 ## Files 34–71 (34+ aren't listed in README) · plus 03c (Planet 808 + Planet Zephyr sounds)
 34 wide layouts (sideways phone / desktop DAW) · 35 solar skill tree · 36 party styles · 37 store unlock ladders · 38–39 Worm Whack ·
 40–41 Planet Hop · 42 shared minigame feel · 43 your beats as levels · 44 minigame hub + Cockpit · 45 Beat Defense · 46 buddy drawing ·
@@ -45,6 +54,7 @@ README.md covers the file layout, test mode and vocals in depth; this file is th
 61 keyboard steady · 62 tree layout · 63–64 unlock cutscenes · 65 new-file intro + unlock FX · 66 early game ("level 1") · 67 (removed in v0.2.157: the background groove) ·
 68 Knowledge Vault · 69 thumb nav (bottom row on upright phones) + PARTY menu + level 3 disco-ball teaser ·
 70 Alien Gem look (Gem Buddy) · 71 level 4 gem ring + gems flying off buddies + MY ACCOUNT sheet ·
+73 Vault big batch (lessons + music words) · 74 Vault price table (generated) ·
 72 watts/gem math/party corner + file-select hum (`titleHum`): `openGemStats()` (bunker + shop gem counters), PARTY pill top-left (`.pb-corner`), MY ACCOUNT in Settings only, sequencer tracker ACTIVATE (`seqTrackerActive`, `SEQ_TRACKER_COST`)
 
 ## Testing without a phone

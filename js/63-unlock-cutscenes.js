@@ -580,9 +580,9 @@
     const n=typeof SKILL_MAP!=='undefined'&&SKILL_MAP[id],cvs=document.getElementById('skillTreeCanvas');
     if(!n||!cvs||typeof applyStTransform!=='function')return;
     const W=cvs.clientWidth,H=cvs.clientHeight,s=stScale,d3=typeof stIs3D==='function'&&stIs3D();
-    // where the node lands on screen for a given pan: the 3D view is a plate tipped back in perspective (see applyStTransform)
-    let px=n.x,py=n.y;if(d3){const th=ST_TILT*Math.PI/180,w=1-n.y*Math.sin(th)/ST_PERSP;px=n.x/w;py=n.y*Math.cos(th)/w;}
-    const tx=W/2-s*px,ty=H*(d3?.55:.5)-s*py,fx=stPanX,fy=stPanY,t0=performance.now();
+    // the pan that puts the node under the camera's target (3D: js/35's anchor, a little below the middle; flat: the middle)
+    const px=n.x,py=n.y;if(typeof stCamStop==='function')stCamStop();
+    const tx=W/2-s*px,ty=H*(d3?ST_ANCHOR_Y:.5)-s*py,fx=stPanX,fy=stPanY,t0=performance.now();
     (function step(now){const k=cl((now-t0)/900,0,1),e=k<.5?4*k*k*k:1-Math.pow(-2*k+2,3)/2;stPanX=lerp(fx,tx,e);stPanY=lerp(fy,ty,e);applyStTransform();if(k<1)requestAnimationFrame(step);
       else{const el=document.querySelector('#skillTreeInner .st-node[data-node="'+id+'"]');if(el){el.classList.remove('st-fresh');void el.offsetWidth;el.classList.add('st-fresh');}}})(t0);
   };

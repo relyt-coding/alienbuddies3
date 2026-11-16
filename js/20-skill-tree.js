@@ -686,7 +686,7 @@ function updateSkillTreeBtn(){
 // ── Skill Tree Modal ──
 let stPanX = 0, stPanY = 0, stScale = 1;
 let stDragging = false, stLastX = 0, stLastY = 0;
-let stPinchDist = 0;
+let stPinchDist = 0, stPinchAng = null, stTurning = false;
 
 function openSkillTree(){
   const modal = document.getElementById('skillTreeModal');
@@ -698,12 +698,13 @@ function openSkillTree(){
   const canvas = document.getElementById('skillTreeCanvas');
   if(canvas){
     stPanX = canvas.clientWidth / 2;
-    stPanY = canvas.clientHeight * ((typeof stIs3D==='function'&&stIs3D()) ? 0.6 : 0.5); // 3D: most of the map lies "far away" (up), so sit the core a little low
+    stPanY = canvas.clientHeight * ((typeof stIs3D==='function'&&stIs3D()) ? ST_ANCHOR_Y : 0.5); // 3D: the camera looks at the core from a little below the middle
     // desktop: start at a zoom that matches the window scale
     stScale = (typeof IS_DESKTOP!=='undefined'&&IS_DESKTOP)?Math.max(.8,Math.min(1.35,parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--ds'))||1)):1;
     // 3D solar system on a narrow screen: start zoomed out enough that the whole sun orbit fits across
-    if(typeof stIs3D==='function'&&stIs3D()) stScale = Math.min(stScale, Math.max(ST_MIN_SCALE, canvas.clientWidth/720));
+    if(typeof stIs3D==='function'&&stIs3D()) stScale = Math.min(stScale, Math.max(ST_MIN_SCALE, Math.min(canvas.clientWidth/720, canvas.clientHeight/520))); // (a sideways phone is short: fit the orbit's height too)
     applyStTransform();
+    if(typeof stCamIntro==='function') stCamIntro(); // 3D: the camera swoops down into place
   }
 }
 function closeSkillTree(){
@@ -715,19 +716,27 @@ function closeSkillTree(){
 const ST_MIN_SCALE = 0.3, ST_MAX_SCALE = 2.5;
 function applyStTransform(){
   const inner = document.getElementById('skillTreeInner');
-  // 3D view (js/35-solar-tree.js): the map is a tilted plate seen in perspective, vanishing point at the core
-  if(inner) inner.style.transform = `translate(${stPanX}px,${stPanY}px) scale(${stScale})`+(typeof stIs3D==='function'&&stIs3D()?` perspective(${ST_PERSP}px) rotateX(${ST_TILT}deg)`:'');
+  // 3D view: js/35-solar-tree.js turns the pan / zoom into a camera (target, yaw, tilt); flat view: a plain pan + zoom
+  if(inner && !(typeof stApply3D==='function' && stApply3D())) inner.style.transform = `translate(${stPanX}px,${stPanY}px) scale(${stScale})`;
   const sl = document.getElementById('stZoomSlider');
   if(sl){ // slider position is on a log scale so each notch feels like the same amount of zoom
     const v = Math.log(stScale/ST_MIN_SCALE)/Math.log(ST_MAX_SCALE/ST_MIN_SCALE)*100;
     sl.value = String(Math.round(Math.min(100,Math.max(0,v))));
   }
 }
+// slide the map by a screen distance (3D: the ground under the camera's target follows, whichever way the camera faces)
+function stPanBy(dx, dy){
+  if(typeof stCamStop==='function') stCamStop();
+  const v = typeof stScreenToPan==='function' ? stScreenToPan(dx, dy) : {x:dx, y:dy};
+  stPanX += v.x; stPanY += v.y;
+}
 // zoom around the middle of the map (used by the slider, the +/- buttons and the keyboard)
 function stZoomTo(newScale){
   const canvas = document.getElementById('skillTreeCanvas'); if(!canvas) return;
   newScale = Math.min(ST_MAX_SCALE, Math.max(ST_MIN_SCALE, newScale));
-  const mx = canvas.clientWidth/2, my = canvas.clientHeight/2;
+  const _a = typeof stAnchor==='function' ? stAnchor(canvas) : {x:canvas.clientWidth/2, y:canvas.clientHeight/2};
+  const mx = _a.x, my = _a.y;
+  if(typeof stCamStop==='function') stCamStop();
   stPanX = mx - (mx - stPanX) * (newScale / stScale);
   stPanY = my - (my - stPanY) * (newScale / stScale);
   stScale = newScale;
@@ -755,6 +764,7 @@ function drawLinks(inner, stateOf){
   const svg=document.createElementNS(NS,'svg');
   svg.setAttribute('class','st-links');svg.setAttribute('viewBox',`${x0} ${y0} ${x1-x0} ${y1-y0}`);
   svg.style.cssText=`left:${x0}px;top:${y0}px;width:${x1-x0}px;height:${y1-y0}px;`;
+  if(typeof stDrawGround==='function') stDrawGround(svg);
   const groups={ghost:[],dim:[],lit:[],next:[]};
   SKILL_TREE_NODES.forEach(node=>node.requires.forEach(reqId=>{
     if(!SKILL_MAP[reqId]) return;
@@ -878,8 +888,10 @@ function renderSkillTree(){
 
     el.dataset.node = node.id;
     if(/^sun_/.test(node.id)) el.dataset.sun = node.id;
+    if(typeof stDressNode==='function') stDressNode(el, node, isUnlocked ? 'unlocked' : isAvailable ? 'available' : 'silhouette'); // suns, planets and continents become lit spheres
     inner.appendChild(el);
   });
+  if(typeof stSplitGround==='function') stSplitGround(); // links, rings and glows move to the ground layer under the bubbles (js/35)
   if(typeof stOrbitRefresh==='function') stOrbitRefresh();
 }
 
@@ -970,7 +982,7 @@ function openStDetail(id, fromEl){
     // no room anywhere (phones): slide the map so the bubble sits just above the popup at the bottom of the screen
     const wantSy = vh - M - ph - gap - labelH - nodeR;
     const topLimit = cr.top + nodeR + 4;
-    if(wantSy >= topLimit){ stPanY += wantSy - sy; applyStTransform(); left = clampX(sx - pw/2); top = vh - M - ph; }
+    if(wantSy >= topLimit){ stPanBy(0, wantSy - sy); applyStTransform(); left = clampX(sx - pw/2); top = vh - M - ph; }
     else { left = clampX((vw - pw)/2); top = clampY((vh - ph)/2); } // tiny screens: centre it
   }
   pop.style.left = left + 'px';
@@ -1000,10 +1012,10 @@ function closeStDetail(){
     const dt = Math.min(48, t - lastT || 16); lastT = t;
     const sp = 0.7 * dt; // px per frame-ms
     let moved = false;
-    if(held.ArrowLeft){ stPanX += sp; moved = true; }
-    if(held.ArrowRight){ stPanX -= sp; moved = true; }
-    if(held.ArrowUp){ stPanY += sp; moved = true; }
-    if(held.ArrowDown){ stPanY -= sp; moved = true; }
+    if(held.ArrowLeft){ stPanBy(sp, 0); moved = true; }
+    if(held.ArrowRight){ stPanBy(-sp, 0); moved = true; }
+    if(held.ArrowUp){ stPanBy(0, sp); moved = true; }
+    if(held.ArrowDown){ stPanBy(0, -sp); moved = true; }
     if(moved) applyStTransform();
     if(Object.keys(held).length) raf = requestAnimationFrame(step);
   }
@@ -1033,12 +1045,13 @@ function initSkillTreePan(){
   canvas.addEventListener('mousedown', e=>{
     if(e.target.closest('.st-node')) return;
     stDragging = true; stLastX = e.clientX; stLastY = e.clientY;
+    stTurning = (e.button === 2 || e.shiftKey) && typeof stIs3D==='function' && stIs3D(); // 3D: right-drag / shift-drag turns the camera
     canvas.classList.add('dragging');
   });
   window.addEventListener('mousemove', e=>{
     if(!stDragging) return;
-    stPanX += e.clientX - stLastX;
-    stPanY += e.clientY - stLastY;
+    if(stTurning){ if(typeof stCamStop==='function') stCamStop(); stTurn((e.clientX - stLastX) * -.35, (e.clientY - stLastY) * -.25); }
+    else stPanBy(e.clientX - stLastX, e.clientY - stLastY);
     stLastX = e.clientX; stLastY = e.clientY;
     applyStTransform();
   });
@@ -1055,12 +1068,12 @@ function initSkillTreePan(){
       const dx = e.touches[0].clientX - e.touches[1].clientX;
       const dy = e.touches[0].clientY - e.touches[1].clientY;
       stPinchDist = Math.sqrt(dx*dx+dy*dy);
+      stPinchAng = Math.atan2(dy, dx);
     }
   },{passive:true});
   canvas.addEventListener('touchmove', e=>{
     if(e.touches.length === 1 && stDragging){
-      stPanX += e.touches[0].clientX - stLastX;
-      stPanY += e.touches[0].clientY - stLastY;
+      stPanBy(e.touches[0].clientX - stLastX, e.touches[0].clientY - stLastY);
       stLastX = e.touches[0].clientX; stLastY = e.touches[0].clientY;
       applyStTransform();
     }
@@ -1069,14 +1082,23 @@ function initSkillTreePan(){
       const dy = e.touches[0].clientY - e.touches[1].clientY;
       const dist = Math.sqrt(dx*dx+dy*dy);
       if(stPinchDist > 0){
-        const delta = dist / stPinchDist;
-        stScale = Math.min(ST_MAX_SCALE, Math.max(ST_MIN_SCALE, stScale * delta));
+        // pinch zooms around the camera's target; twisting the two fingers turns the camera (3D only)
+        const newScale = Math.min(ST_MAX_SCALE, Math.max(ST_MIN_SCALE, stScale * dist / stPinchDist));
+        const a = typeof stAnchor==='function' ? stAnchor(canvas) : null;
+        if(a && typeof stIs3D==='function' && stIs3D()){
+          if(typeof stCamStop==='function') stCamStop();
+          stPanX = a.x - (a.x - stPanX) * (newScale / stScale); stPanY = a.y - (a.y - stPanY) * (newScale / stScale);
+          const ang = Math.atan2(dy, dx);
+          if(stPinchAng !== null){ let d = (ang - stPinchAng) * 180 / Math.PI; if(d > 180) d -= 360; if(d < -180) d += 360; if(Math.abs(d) < 40) stTurn(d); }
+          stPinchAng = ang;
+        }
+        stScale = newScale;
         applyStTransform();
       }
       stPinchDist = dist;
     }
   },{passive:true});
-  canvas.addEventListener('touchend', ()=>{ stDragging = false; stPinchDist = 0; },{passive:true});
+  canvas.addEventListener('touchend', ()=>{ stDragging = false; stPinchDist = 0; stPinchAng = null; },{passive:true});
 
   // Scroll wheel zoom (desktop)
   canvas.addEventListener('wheel', e=>{
@@ -1084,8 +1106,9 @@ function initSkillTreePan(){
     const delta = e.deltaY > 0 ? 0.9 : 1.1;
     // Zoom toward cursor position
     const r = canvas.getBoundingClientRect();
-    const mx = e.clientX - r.left;
-    const my = e.clientY - r.top;
+    let mx = e.clientX - r.left;
+    let my = e.clientY - r.top;
+    if(typeof stIs3D==='function' && stIs3D()){ const a = stAnchor(canvas); mx = a.x; my = a.y; if(typeof stCamStop==='function') stCamStop(); } // 3D: zoom towards what the camera looks at
     const newScale = Math.min(ST_MAX_SCALE, Math.max(ST_MIN_SCALE, stScale * delta));
     // Adjust pan so zoom centres on cursor
     stPanX = mx - (mx - stPanX) * (newScale / stScale);

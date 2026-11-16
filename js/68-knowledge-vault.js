@@ -143,19 +143,30 @@ function vaultTipsIn(tab){const r=[];for(let i=0;i<MAX_TIPS;i++)if(VAULT_TIP_TAB
 function vaultTipFar(){let far=2;for(let i=0;i<MAX_TIPS;i++)if(tipHave(i)||score>=tipCost(i))far=Math.max(far,i+1);return Math.min(MAX_TIPS,far+1);}
 function vaultIsNew(e){return e.on()&&!vaultSeen.includes(e.id);}
 function vaultTabHasNew(tab){return vaultTabOpen(tab)&&vaultEntries(tab).some(vaultIsNew);}
-function vaultTabCanBuy(tab){if(!vaultTabOpen(tab))return false;const far=vaultTipFar();return vaultTipsIn(tab).some(i=>i<far&&!tipHave(i)&&score>=tipCost(i))||(score>=vaultEntryCost()&&vaultEntries(tab).some(e=>e.on()&&!vaultHasEntry(e)));}
+function vaultTabCanBuy(tab){if(!vaultTabOpen(tab))return false;const far=vaultTipFar();return vaultTipsIn(tab).some(i=>i<far&&!tipHave(i)&&score>=tipCost(i))||vaultEntries(tab).some(e=>e.on()&&!vaultHasEntry(e)&&score>=vaultEntryCost(e));}
 // v0.2.149: lessons, facts and words cost points too. They show up (title only) once their feature is unlocked; buying one
-// reveals it and adds a permanent ×1.05. The price climbs with every one you own (×1.35 each), so order doesn't matter.
+// reveals it and adds a permanent ×1.05. (Prices are fixed per entry now: see vaultEntryCost.)
 // v0.2.161: tap a tip / lesson / word you own to fold it down to its title; tap again to open it (remembered in the save)
 function vaultFolded(k){return vaultSeen.includes('c:'+k);}
 function vaultFold(k){const i=vaultSeen.indexOf('c:'+k);if(i>=0)vaultSeen.splice(i,1);else vaultSeen.push('c:'+k);renderVault();if(typeof autoSave==='function')try{autoSave();}catch(e){}}
 function vaultFoldable(node,k){node.classList.add('vb-fold');if(vaultFolded(k))node.classList.add('folded');node.addEventListener('click',()=>vaultFold(k));}
 function vaultHasEntry(e){return vaultOwned.includes(e.id);}
 function vaultNice(n){if(n<100)return Math.round(n);const p=Math.pow(10,Math.floor(Math.log10(n))-1);return Math.round(n/p)*p;}
-// v0.2.176: spaced out: starts at 500 W and climbs ×1.6 per entry owned (5th ≈ 3,300 W, 10th ≈ 34,000 W, 20th ≈ 6 MW, 30th ≈ 700 MW…)
-function vaultEntryCost(){return vaultNice(500*Math.pow(1.6,vaultOwned.length));}
+// FIXED PRICES: every lesson / fact / word has its own price and buying one never changes another (until v0.2.178 the price climbed
+// ×1.6 with every entry you owned). The price is about how many watts a player is holding when the entry's feature unlocks, measured
+// with the test-mode bot: the table is VAULT_PRICE in js/74-vault-prices.js, rebuilt by tools/vault_prices.py. An entry the table
+// doesn't know yet (new content) costs the same as the one before it in its tab.
+const VAULT_PRICE_FIRST=50;
+let _vaultPrices=null;
+function vaultPrices(){
+  if(_vaultPrices)return _vaultPrices;
+  const m={},T=typeof VAULT_PRICE!=='undefined'?VAULT_PRICE:{};
+  VAULT_TABS.forEach(t=>{let prev=VAULT_PRICE_FIRST;vaultEntries(t.id).forEach(e=>{prev=m[e.id]=T[e.id]>0?T[e.id]:prev;});});
+  return _vaultPrices=m;
+}
+function vaultEntryCost(e){return e?(vaultPrices()[e.id]||VAULT_PRICE_FIRST):VAULT_PRICE_FIRST;}
 function vaultBuyEntry(e,quiet){
-  const c=vaultEntryCost();if(vaultHasEntry(e)||score<c||!e.on())return false;
+  const c=vaultEntryCost(e);if(vaultHasEntry(e)||score<c||!e.on())return false;
   score-=c;vaultOwned.push(e.id);vaultMult=Math.pow(1.05,vaultOwned.length);if(!vaultSeen.includes(e.id))vaultSeen.push(e.id);
   try{playSfxTierUnlock(Math.min(12,vaultOwned.length%12+1),0.3);}catch(err){}
   if(!quiet)showToast((e.kind==='word'?'New word: ':'Unlocked: ')+e.title+' · ×1.05 tap boost');
@@ -340,7 +351,7 @@ function vaultCounts(){
   return{have:vaultOwned.length+tipsOwned,all:Math.max(all,vaultOwned.length+tipsOwned)};
 }
 let vaultSig='';
-function vaultSigNow(){const far=vaultTipFar();let k=tipsOwned+':'+far+':'+vaultOwned.length+':'+(score>=vaultEntryCost()?1:0)+':';for(let i=0;i<far;i++)k+=(score>=tipCost(i)?1:0);return k;}
+function vaultSigNow(){const far=vaultTipFar();let k=tipsOwned+':'+far+':'+vaultOwned.length+':'+(vaultTab?vaultEntries(vaultTab).filter(e=>e.on()&&score>=vaultEntryCost(e)).length:0)+':';for(let i=0;i<far;i++)k+=(score>=tipCost(i)?1:0);return k;}
 function renderVault(scrollTab){
   vaultSig=vaultSigNow();
   const tabsEl=document.getElementById('vaultTabs'),body=document.getElementById('vaultBody');if(!tabsEl||!body)return;
@@ -389,9 +400,9 @@ function renderVault(scrollTab){
       buy:()=>{if(!buyTip(i))return false;try{playSfxTierUnlock(tipsOwned,0.4);}catch(e){}updateTipsLabel();renderUI();autoSave();return true;}});});
   // LEARN cards / WORDS (each one costs watts once its feature is unlocked)
   const entries=vaultEntries(tab.id),open=entries.filter(e=>e.on());locked+=entries.length-open.length;
-  const ec=vaultEntryCost(),canE=score>=ec;
-  (tab.id==='words'?open.slice().sort((a,b)=>a.title.localeCompare(b.title)):open).forEach(e=>{const own=vaultHasEntry(e);
-    tile({own,cost:ec,can:!own&&canE,col:tab.id==='words'?'#ffd23f':col,title:e.title,kind:tab.id==='words'?'MUSIC WORD':e.src?'FROM THE '+e.src:'LESSON',
+  // cheapest first (the MUSIC WORDS too), so the price climbs as you go down the page
+  open.map((e,i)=>[vaultEntryCost(e),i,e]).sort((a,b)=>a[0]-b[0]||a[1]-b[1]).map(x=>x[2]).forEach(e=>{const own=vaultHasEntry(e),ec=vaultEntryCost(e);
+    tile({own,cost:ec,can:!own&&score>=ec,col:tab.id==='words'?'#ffd23f':col,title:e.title,kind:tab.id==='words'?'MUSIC WORD':e.src?'FROM THE '+e.src:'LESSON',
       text:e.text,boost:'×1.05 tap boost',isNew:vaultIsNew(e),buy:()=>vaultBuyEntry(e,true)});});
   if(!open.length&&!shownTips.length)body.appendChild(el('div','vb-locked','NOTHING HERE YET'));
   if(!scrollTab)body.scrollTop=keepY;

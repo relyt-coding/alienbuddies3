@@ -1,0 +1,266 @@
+// ══════════════════════════════════════════════
+//  KNOWLEDGE VAULT: THE BIG BATCH (v0.2.179)
+//  More lessons for every Vault tab and a much bigger MUSIC WORDS list. Nothing new to wire: the entries are
+//  added to VAULT_LEARN / VAULT_WORDS (js/68), so they cost watts, give ×1.05 and show up once their feature
+//  is unlocked, exactly like the old ones.
+//
+//  Writing rules used here (keep them for the next batch):
+//   • plain words a 10-year-old can follow, one idea per entry, a real example or number where it helps;
+//   • music and science facts only: nothing here describes a button or a rule of the game that could change;
+//   • an entry appears when the thing it talks about is on screen (a pad count, the sequencer, a skill-tree node);
+//   • titles stay short (they sit on small tiles, 4 to a row). Word ids are 'w_' + the term, so terms must be unique.
+//  EFFECTS & MIXING and VOCALS had no lessons of their own before this (only skill-tree facts): now they do.
+// ══════════════════════════════════════════════
+(function(){
+  if(typeof VAULT_LEARN==='undefined'||typeof VAULT_WORDS==='undefined')return;
+  const yes=()=>true,has=id=>()=>_vHas(id),pads=n=>()=>_vPads(n),seq=()=>_vSeq(),piano=()=>_vPiano(),bud=n=>()=>_vBuddies(n);
+  const party=()=>typeof shop!=='undefined'&&(shop.partyLevel||0)>0;
+  const any=(...ids)=>()=>ids.some(_vHas);
+
+  const LEARN=[
+    // ── GAME BASICS ──
+    ['b_watt','basics','What Is a Watt?',"A watt measures how fast energy is being used or made. An LED light bulb uses about 10 W, a microwave oven about 1,000 W (1 kW), a big wind turbine makes a few megawatts and a large power station about a gigawatt. The unit is named after James Watt, the Scottish engineer who improved the steam engine in the 1700s.",yes],
+    ['b_soundpower','basics','Sound Is Energy',"Sound really does carry energy, just very little of it. A person talking puts out about a hundred-thousandth of a watt of sound, and a whole orchestra playing as loud as it can makes less than 100 watts. Your ears are astonishingly sensitive.",pads(2)],
+    ['b_compound','basics','Why Small Boosts Win',"A ×1.05 boost looks tiny, but boosts multiply each other. Fourteen of them together are about ×2, and twenty-eight are about ×4. Growth that multiplies like this is called compound growth, and it is the same maths that makes savings grow in a bank.",yes],
+    ['b_practice','basics','Little and Often',"Musicians get better faster with short practice every day than with one long session a week. Your brain keeps working on a new skill while you rest and sleep, so ten minutes today and ten tomorrow beats twenty minutes once.",pads(3)],
+    ['b_listen','basics','Active Listening',"Pick a song you love and listen to it four times. First follow only the drums, then only the bass, then the singer, then everything else. Producers call this active listening, and it is the fastest way to learn how songs are built.",seq],
+    ['b_party','basics','Dance Music',"People have danced to drums for as long as there have been drums. Music made for dancing keeps a steady, strong beat so a whole room can move together: that is true of a waltz, a samba, disco and house music alike.",party],
+
+    // ── ALIEN BUDDIES ──
+    ['a_golden','buddies','The Golden Record',"In 1977 NASA launched two Voyager spacecraft, each carrying a gold-plated record for anyone out there who finds it. It holds greetings in 55 languages and music from around the world, from Bach and Beethoven to Chuck Berry's \"Johnny B. Goode\". Both spacecraft have now left the solar system.",bud(5)],
+    ['a_space','buddies','Is Space Silent?',"Sound is a vibration, and it needs something to travel through: air, water or something solid. Space is almost completely empty, so sound cannot cross it. Astronauts talk by radio, which is a kind of light, not sound.",bud(10)],
+    ['a_choir','buddies','Singing Together',"When many voices sing the same note, no two are exactly alike: each is a hair higher or lower and starts a moment earlier or later. Those tiny differences are what make a choir sound big and warm instead of like one loud voice.",()=>_vKeys()],
+    ['a_penta','buddies','No Wrong Notes',"A pentatonic scale has just five notes, chosen so that none of them clash. Play them in any order and it sounds like a tune, which is why so much folk music, blues and rock around the world is built on it.",()=>_vKeys()],
+    ['a_animals','buddies','Animal Musicians',"Humans are not the only music makers. Humpback whales sing songs that last for minutes and slowly change from year to year, and many birds learn their songs from their parents, the way you learn to talk.",bud(20)],
+
+    // ── DRUM PADS ──
+    ['p_countin','pads','The Count-In',"Before a band starts, the drummer counts \"1, 2, 3, 4\" out loud or clicks the sticks together. The count-in tells everyone how fast the song goes and exactly when to come in.",pads(2)],
+    ['p_dynamics','pads','Loud and Soft',"Playing every hit at the same loudness sounds like a machine. Real drummers make some hits strong (accents) and others gentle, and that rise and fall is called dynamics. It is a big part of what makes a beat feel alive.",pads(2)],
+    ['p_downup','pads','Downbeat & Offbeat',"The downbeat is beat 1, the strong start of every bar. The offbeats are the spots halfway between the beats: count \"1 and 2 and 3 and 4 and\", and every \"and\" is an offbeat. Reggae and ska guitars play almost only on the offbeats.",pads(3)],
+    ['p_kit','pads','A Young Instrument',"The drum kit is only a little over 100 years old. In the early 1900s drummers in American theatres and dance bands started setting several drums around one chair, and in 1909 the Ludwig company sold a bass drum pedal that let one player do the work of three.",pads(3)],
+    ['p_ghost','pads','Ghost Notes',"Ghost notes are very quiet hits tucked between the main ones, usually on the snare. You almost feel them more than hear them, but take them away and a funky beat suddenly sounds stiff.",pads(4)],
+    ['p_fill','pads','Drum Fills',"A fill is a short burst of drumming, often at the end of every fourth or eighth bar, that breaks the pattern for a moment. It tells listeners that something new is coming, like a chorus.",pads(4)],
+    ['p_rudiments','pads','Rudiments',"Rudiments are the basic hand patterns drummers practise, like scales for a pianist. The most famous is the paradiddle: right, left, right, right, then left, right, left, left. Try tapping it on a table.",pads(4)],
+    ['p_hands','pads','Body Percussion',"You already own a drum kit: stomp for a kick, clap for a snare and click your fingers for a hi-hat. Body percussion is used in music all over the world, from flamenco hand claps to stepping and hambone.",pads(3)],
+
+    // ── SEQUENCER ──
+    ['s_four','seq','Four on the Floor',"Put a kick on every beat (steps 1, 5, 9 and 13) and you have \"four on the floor\", the heartbeat of disco, house and techno. It is the simplest dance beat there is, and one of the hardest to sit still to.",seq],
+    ['s_offhat','seq','Offbeat Hi-Hats',"Try a hi-hat on steps 3, 7, 11 and 15: halfway between the beats. With a kick on every beat underneath, that \"boots, cats, boots, cats\" bounce is the classic sound of house music.",seq],
+    ['s_sync','seq','Syncopation',"Syncopation means putting a strong hit where the ear does not expect one, between the beats instead of on them. Move one kick a step early or late and listen to how the whole beat starts to lean and bounce.",seq],
+    ['s_sub','seq','Splitting the Beat',"Every beat can be cut into smaller pieces. Split it in two and you get eighth notes, in four and you get sixteenth notes, the steps of this sequencer. Split it in three and you get triplets, which give music a rolling feel.",seq],
+    ['s_half','seq','Half-Time',"Move the snare from beats 2 and 4 to beat 3 only, and the beat feels half as fast even though the tempo has not changed. That is called half-time, and it is everywhere in trap, dubstep and rock breakdowns.",seq],
+    ['s_poly','seq','Polyrhythm',"A polyrhythm is two different rhythms played at the same time. The most common is \"3 against 2\": one hand taps three evenly spaced hits while the other taps two. It is at the heart of a lot of West African and Afro-Cuban music.",seq],
+    ['s_call','seq','Call and Response',"In call and response, one part plays a short idea and another part answers it, like a conversation. You can hear it in gospel choirs, in blues guitar answering the singer, and in a drum pattern that asks a question in bar 1 and answers it in bar 2.",seq],
+    ['s_phrase','seq','Counting in Fours',"Most popular music is built in groups of four: 4 beats in a bar, 4 bars in a phrase, and sections that last 8 or 16 bars. That is why you can often feel a change coming before it happens.",seq],
+    ['s_amen','seq','The Amen Break',"In 1969 Gregory Coleman played a few seconds of solo drums in the song \"Amen, Brother\" by The Winstons. Producers later sampled it, sped it up and chopped it, and it became one of the most reused recordings ever: the backbone of jungle and drum & bass.",seq],
+    ['s_metro','seq','The Metronome',"A metronome clicks at a steady tempo so you can practise in time. Johann Maelzel patented the wind-up kind in 1815, and Beethoven was one of the first composers to write metronome numbers on his music.",seq],
+    ['s_less','seq','Leave Some Space',"A beat with every step lit up is just noise. The gaps matter as much as the hits: silence gives the next sound room to land. When a pattern feels crowded, try taking notes out before adding any.",seq],
+    ['s_swing','seq','Swing',"Swing plays every second sixteenth note a little late, so the beat goes long-short, long-short instead of perfectly even. Drum machine designer Roger Linn made the amount adjustable in the 1980s, and that small delay is a big part of how hip-hop grooves.",has('mt_groove')],
+    ['s_tension','seq','Tension and Release',"Good songs build tension and then let it go. Taking the drums away, adding a rising sound or repeating a pattern faster and faster all build tension. Bringing the full beat back is the release, the moment everyone has been waiting for.",has('mt_arrangement')],
+    ['s_drop','seq','The Build and the Drop',"In dance music a build-up strips the beat back and winds the energy up, often with a drum roll that gets faster. Then comes the drop: the bass and the full beat land together. The quiet bar just before the drop makes it hit harder.",has('mt_arrangement')],
+
+    // ── PIANO ROLL ──
+    ['k_name','piano','Why "Piano"?',"Around 1700 an Italian instrument maker, Bartolomeo Cristofori, built a keyboard that could play both soft and loud depending on how hard you pressed. People called it the \"pianoforte\", Italian for \"soft-loud\", and later just the piano.",piano],
+    ['k_88','piano','88 Keys',"A full-size piano has 88 keys: 52 white and 36 black. The lowest note vibrates about 27 times a second and the highest more than 4,000 times a second.",piano],
+    ['k_middlec','piano','Middle C',"Middle C is the C nearest the centre of a piano. It vibrates about 262 times a second, and it is the note most people learn first, because it sits right between the low notes and the high notes.",piano],
+    ['k_sharp','piano','Sharps and Flats',"The black keys are named after their white neighbours. A sharp (♯) is one step higher and a flat (♭) is one step lower, so the black key between C and D can be called C♯ or D♭. Same key, same sound, two names.",piano],
+    ['k_steps','piano','Half Steps & Whole Steps',"A half step is the distance from one key to the very next one, black or white. Two half steps make a whole step. Every scale and chord is just a pattern of half steps and whole steps.",piano],
+    ['k_major','piano','The Major Scale',"A major scale follows the pattern whole, whole, half, whole, whole, whole, half. Start on C and that pattern lands on only white keys: C, D, E, F, G, A, B, C. Start on any other note and you will need some black keys.",has('mt_key')],
+    ['k_minor','piano','Major and Minor',"Music in a major key tends to sound bright or happy, and music in a minor key darker or sadder. The difference is small: a few notes of the scale are one half step lower in minor.",has('mt_key')],
+    ['k_triad','piano','Building a Chord',"The simplest chord is a triad: pick a note, skip one, play the next, skip one, play the next. C, E and G make a C major chord. A, C and E make an A minor chord.",piano],
+    ['k_prog','piano','The Four-Chord Song',"A chord progression is a row of chords that repeats. One of them, C, G, A minor, F (or the same shape in another key), has been used in hundreds of hit songs. Different melodies on top make them sound like different songs.",has('mt_key')],
+    ['k_black','piano','The Black-Key Trick',"Play only the black keys of a piano, in any order, and it sounds like a tune. The five black keys form a pentatonic scale, where no two notes clash.",piano],
+    ['k_interval','piano','Intervals',"An interval is the distance between two notes. Seven half steps is called a fifth, and it sounds so strong and stable that rock \"power chords\" are made of just that. One half step is the tense, scary sound of the Jaws theme.",piano],
+    ['k_root','piano','Bass Follows the Chord',"A simple way to write a bassline: play the note each chord is named after (its root), low down. Under a C chord play a low C, under an F chord a low F. Most basslines start from this idea.",has('mt_piano2')],
+    ['k_roll','piano','Reading a Piano Roll',"Almost every music program draws notes the same way. Higher notes sit higher up, time runs from left to right, and a longer bar is a longer note. Once you can read one piano roll you can read them all.",has('mt_piano')],
+    ['k_tuning','piano','Twelve Equal Steps',"On modern instruments every half step makes the pitch about 6% higher. Do that twelve times and you have exactly doubled it, which is one octave. Tuning this way lets a piano play in every key.",has('mt_key')],
+
+    // ── SOUNDS & INSTRUMENTS ──
+    ['i_wave','sounds','Shapes of Sound',"Synthesizers start from a few basic wave shapes. A sine wave is smooth and pure, like a whistle. A square wave is hollow, like old video game music. A sawtooth is bright and buzzy, and a triangle sits softly in between.",yes],
+    ['i_harm','sounds','Overtones',"Play one note on almost any instrument and you are really hearing many. Above the main pitch sit quieter ones at 2, 3, 4 times its frequency and more, called harmonics or overtones. Their mix is what gives each instrument its own colour.",yes],
+    ['i_adsr','sounds','The Shape of a Note',"Every sound has a shape in time. Attack is how fast it starts, decay is how quickly it settles, sustain is the level it holds, and release is how long it takes to fade. A drum has a fast attack and no sustain; a bowed violin can swell in slowly and hold.",yes],
+    ['i_range','sounds','What You Can Hear',"Young human ears hear from about 20 Hz (a deep rumble) up to about 20,000 Hz (a tiny hiss), and the top of that range fades as we get older. Dogs hear more than twice as high, and elephants talk in rumbles too low for us to hear.",yes],
+    ['i_db','sounds','Decibels',"Loudness is measured in decibels (dB). A whisper is about 30 dB, talking about 60 dB and a rock concert around 110 dB. Every extra 10 dB sounds roughly twice as loud. Long stretches above 85 dB can damage your hearing for good, so look after your ears.",yes],
+    ['i_speed','sounds','The Speed of Sound',"Sound moves through air at about 343 metres every second, far slower than light. That is why you see lightning before you hear thunder: count the seconds between them, and every 3 seconds is about 1 kilometre.",yes],
+    ['i_reson','sounds','Resonance',"A guitar string on its own is very quiet. The hollow wooden body picks up its vibration and shakes a lot more air, making the note louder and fuller. That boost is called resonance, and drum shells, violin bodies and your own chest all do it.",has('planet_timbra')],
+    ['i_four','sounds','How Instruments Vibrate',"One way to sort every instrument on Earth is by what vibrates. In idiophones the whole body rings (bells, xylophones). Membranophones have a stretched skin (drums). Chordophones have strings, and aerophones use a column of air (flutes, trumpets).",has('planet_timbra')],
+    ['i_bowl','sounds','Singing Bowls',"Rub a wet finger round the rim of a glass and it sings. A metal singing bowl works the same way: the mallet keeps catching and letting go of the rim, hundreds of times a second, and the whole bowl rings with a long, steady note.",has('planet_mantra')],
+    ['i_metal','sounds','Why Metal Rings',"Hit a block of wood and you get a short \"tok\". Hit a metal bar and it rings on and on. Metal is stiff and loses its energy very slowly, so the vibration lasts. Wood soaks the vibration up almost at once.",has('planet_alloy')],
+    ['i_sub','sounds','Sub-Bass',"The very lowest sounds, below about 60 Hz, are called sub-bass. You feel them in your chest as much as you hear them. Small phone speakers cannot play them at all, which is why producers check their songs on big speakers and tiny ones.",has('planet_808')],
+    ['i_tube','sounds','Longer Means Lower',"In a wind instrument the note depends on how long the tube of air is. A longer tube gives a lower note. Opening a finger hole makes the tube act shorter, so the note goes up. A piccolo is about half as long as a flute and plays an octave higher.",has('planet_zephyr')],
+    ['i_sampler','sounds','The First Samplers',"A sampler plays back recordings of real sounds. One of the first was the Mellotron (1963): every key pulled a strip of tape with a recorded flute, violin or choir on it. You can hear its flutes at the start of \"Strawberry Fields Forever\".",has('planet_hyphae')],
+    ['i_moog','sounds','The Synthesizer Arrives',"Robert Moog began selling his synthesizer in 1964. It made sound from electricity alone, shaped with knobs and cables. In 1968 Wendy Carlos used one to record \"Switched-On Bach\", and suddenly the whole world knew what a synthesizer was.",has('planet_808')],
+    ['i_theremin','sounds','Played Without Touching',"The theremin, invented in 1920 by Leon Theremin, is played without touching it. Moving one hand near an antenna changes the pitch and the other hand controls the volume. Its eerie wail became the sound of old science fiction films.",has('planet_alloy')],
+
+    // ── EFFECTS & MIXING ──
+    ['f_wetdry','fx','Wet and Dry',"A sound with no effect on it is called dry. The effected version is called wet. Most effects have a mix control that blends the two, and a little wet signal usually goes a long way.",has('mt_effects')],
+    ['f_chain','fx','Order Matters',"Effects work one after another, like a chain, and the order changes the result. Echo followed by distortion makes the echoes gritty too. Distortion followed by echo keeps the echoes clean copies of the gritty sound.",any('mt_echo','mt_reverb')],
+    ['f_plate','fx','Reverb in a Box',"Before computers, studios made reverb with real objects. A plate reverb (1957) was a steel sheet taller than a person, hung in a frame: sound made it shiver and microphones picked up the shimmer. Guitar amps use a small metal spring to do the same job.",has('mt_reverb')],
+    ['f_feedback','fx','Feedback',"Feedback means sending a sound's output back into its input. On an echo effect, the feedback control sets how many repeats you hear. Turn it too high and each repeat gets louder than the last, until it howls.",has('mt_echo')],
+    ['f_cutoff','fx','Cutoff and Resonance',"A filter has two main controls. Cutoff sets where it starts removing sound. Resonance adds a peak right at that spot, which gives a filter its whistling, \"talking\" sound when you sweep it.",has('mt_filter')],
+    ['f_drive','fx','Overdrive to Fuzz',"These are three strengths of the same idea: pushing a sound until its wave gets squashed. Overdrive is warm and gentle, distortion is thick and aggressive, and fuzz is wild and buzzy. The fuzz riff of \"Satisfaction\" (1965) made the effect famous.",has('mt_distortion')],
+    ['f_rate','fx','Sample Rate',"Digital sound is a row of snapshots, called samples. A CD takes 44,100 of them every second, enough to capture everything a human can hear. Take far fewer and the sound turns crunchy and metallic, which is what a bitcrusher does on purpose.",has('mt_bitcrusher')],
+    ['f_lfo','fx','The LFO',"An LFO (low-frequency oscillator) is a slow, repeating wave that moves a setting for you. Point it at the volume and you get tremolo. Point it at the pitch and you get vibrato. Point it at a filter and you get a wobble bass.",any('mt_tremolo','mt_phaser','mt_flanger','mt_chorus')],
+    ['f_spectrum','fx','Lows, Mids and Highs',"Engineers split sound into three rough zones. The lows (up to about 250 Hz) hold the kick and bass. The mids hold most of the voice and the instruments. The highs (above about 4,000 Hz) hold the sparkle of cymbals and the \"s\" sounds of speech.",has('mt_eq')],
+    ['f_cut','fx','Cut Before You Boost',"When a sound is hard to hear, it is tempting to turn it up. Mix engineers often do the opposite: they find what is covering it and turn that down a little. A mix where everything is boosted has nowhere left to go.",has('mt_eq')],
+    ['f_loud','fx','The Loudness War',"From the 1990s, records were squeezed harder and harder with compression so each would sound louder than the last. The cost was music with no quiet parts left. Today streaming services play every song at the same loudness, so there is nothing to win.",has('mt_compression')],
+    ['f_stereo','fx','Mono and Stereo',"Mono is one channel: the same sound from every speaker. Stereo is two, left and right, which lets a mix spread out like a stage. Stereo records went on sale in the late 1950s. Bass and kick usually stay in the middle, where both speakers can share the work.",has('mt_panning')],
+    ['f_clip','fx','Headroom and Clipping',"Every sound system has a ceiling. Push a signal past it and the tops of the waves get chopped off flat, which is called clipping and sounds harsh. Headroom is the safety gap you leave under the ceiling.",has('mt_mastering')],
+    ['f_ref','fx','Reference Tracks',"Professionals mix with a finished song they love playing next to their own, and keep switching between the two. It shows straight away if the bass is too loud or the top is too dull. It is not cheating; it is how ears stay honest.",has('mt_mastering')],
+    ['f_ears','fx','Rest Your Ears',"After a while your ears get used to whatever they are hearing and stop noticing problems. Take a short break, or listen quietly, and mistakes jump out again. Many engineers do their most important listening at low volume.",has('mt_mastering')],
+    ['f_duck','fx','Making Room for the Kick',"Kick and bass live in the same low zone and fight for space. Ducking the bass for a split second each time the kick hits lets both be heard. Turn the effect up far enough and the whole track seems to breathe in time with the beat.",has('mt_sidechain')],
+
+    // ── VOCALS ──
+    ['v_voice','vocals','How Your Voice Works',"Air from your lungs pushes through two small folds in your throat and makes them flutter. A low adult voice flutters about 100 times a second, a child's speaking voice about 300, and a soprano's highest notes more than 1,000.",has('mt_vocals')],
+    ['v_warm','vocals','Warming Up',"Singers warm up like athletes do. Humming, blowing air through loose lips like a motorboat, and sliding from low to high like a siren all get the voice moving gently. A glass of water helps too.",has('mt_vocals')],
+    ['v_breath','vocals','Breathing for Singing',"Good singing breath goes low: your belly moves out as you breathe in, and your shoulders stay still. The muscle doing the work is the diaphragm, under your lungs. A slow, steady stream of air holds a note much better than a big push.",has('mt_vocals')],
+    ['v_pop','vocals','Pops and the Pop Filter',"Say \"p\" or \"b\" with your hand in front of your mouth and you will feel a puff of air. That puff hits a microphone as a thump. A pop filter, the round screen in front of studio microphones, breaks the puff up and lets the sound through.",has('mt_vocals')],
+    ['v_close','vocals','Close to the Mic',"Most studio microphones add bass when you get very close to them. Radio presenters use this for a deep, warm voice. Move back a hand's width and the voice sounds lighter and more natural.",has('mt_vocals')],
+    ['v_room','vocals','The Room Matters',"A microphone hears the room as well as you. Hard, bare walls bounce the sound around and make a recording echoey. Soft things soak it up, which is why so many home recordings are made in a wardrobe full of clothes.",has('mt_vocals')],
+    ['v_phones','vocals','Why Headphones?',"If the beat played from speakers while you recorded, the microphone would pick it up along with your voice, and the two could never be separated again. Headphones keep the beat in your ears and out of the microphone.",has('mt_vocals')],
+    ['v_beatbox','vocals','Beatboxing',"Beatboxers play a whole drum kit with their mouth. The three basic sounds are a \"b\" for the kick, a \"t\" for the hi-hat and a \"k\" or \"pf\" for the snare. Say \"boots and cats and boots and cats\" in time and you are already doing it.",has('mt_vocals')],
+    ['v_register','vocals','Chest & Head Voice',"Low notes buzz in your chest: put a hand there and you can feel it. High notes feel like they ring in your head. Singers call these chest voice and head voice, and a lot of training is about moving smoothly between them.",has('mt_vocals')],
+    ['v_hook','vocals','The Hook',"A hook is the short bit of a song that sticks in your head, often the title line of the chorus. Hooks are usually simple, repeated a lot and easy to sing after one listen.",has('mt_vocals')],
+    ['v_words','vocals','Words Have Rhythm',"Lyrics are rhythm as well as meaning. Every word has strong and weak syllables, and they feel best when the strong ones land on the beat. Rappers call the way their syllables ride the beat their flow.",has('mt_vocals')],
+    ['v_thirds','vocals','Harmony in Thirds',"The simplest vocal harmony: sing the same melody starting two notes higher in the scale. This is called singing in thirds, and it is the sweet, close sound you hear in countless duets and pop choruses.",has('mt_vox4')],
+    ['v_adlib','vocals','Ad-Libs',"Ad-libs are the little extra shouts, echoes and \"yeah\"s around the main vocal. They fill the gaps between lines and add energy. In a lot of hip-hop, the ad-libs are as recognisable as the artist's voice.",has('mt_vox4')],
+    ['v_tight','vocals','Singing It Twice',"When you stack takes, the consonants give you away: ten \"t\"s that do not line up sound like a spray of clicks. Singers often leave the last consonant off the backing takes, so only the lead vocal says it.",has('mt_vox7')],
+    ['v_pitchfx','vocals','A Tool and a Sound',"Pitch correction can be used two ways. Set gently, it nudges a slightly off note into place and nobody notices. Set to snap instantly, it makes the voice jump between notes like a robot, a sound artists choose on purpose.",has('mt_autotune')],
+  ];
+
+  const WORDS=[
+    // rhythm
+    ['Rest',"A moment of silence that is counted, just like a note.",yes],
+    ['Accent',"A note played stronger than the ones around it.",pads(2)],
+    ['Dynamics',"How loud or soft music is played, and how that changes.",pads(2)],
+    ['Downbeat',"Beat 1: the first and strongest beat of a bar.",pads(3)],
+    ['Offbeat',"The spot halfway between two beats, the \"and\" when you count \"1 and 2 and\".",pads(3)],
+    ['Backbeat',"The strong hits on beats 2 and 4, usually played on the snare.",pads(3)],
+    ['Fill',"A short burst of drumming that leads from one part of a song into the next.",pads(4)],
+    ['Ghost Note',"A very quiet hit played between the main ones to add feel.",pads(4)],
+    ['Count-In',"The \"1, 2, 3, 4\" before a song starts, so everyone begins together.",pads(2)],
+    ['Quarter Note',"A note one beat long. Four of them fill a bar of 4/4.",seq],
+    ['Eighth Note',"A note half a beat long. Two fit in every beat.",seq],
+    ['Sixteenth Note',"A note a quarter of a beat long. Four fit in every beat.",seq],
+    ['Triplet',"Three evenly spaced notes squeezed into the space of two.",seq],
+    ['Subdivision',"Cutting each beat into smaller equal pieces.",seq],
+    ['Syncopation',"Putting strong notes between the beats instead of on them.",seq],
+    ['Polyrhythm',"Two different rhythms played at the same time, like 3 against 2.",seq],
+    ['Metronome',"A device that clicks at a steady tempo to help you keep time.",seq],
+    ['Four on the Floor',"A kick drum on every beat of the bar.",seq],
+    ['Half-Time',"A feel where the beat seems half as fast, though the tempo stays the same.",seq],
+    ['Swing',"Playing every second short note a little late, for a bouncing feel.",has('mt_groove')],
+    ['Quantize',"Snapping notes onto the nearest step so they are perfectly in time.",has('mt_groove')],
+    // song form
+    ['Phrase',"A musical sentence, usually 2 or 4 bars long.",seq],
+    ['Riff',"A short, catchy idea that repeats, usually on guitar, bass or keys.",seq],
+    ['Ostinato',"A pattern that keeps repeating while other parts change around it.",seq],
+    ['Hook',"The part of a song that sticks in your head.",seq],
+    ['Intro',"The opening of a song, before the main part begins.",has('mt_arrangement')],
+    ['Verse',"The part of a song that tells the story. The tune repeats; the words change.",has('mt_arrangement')],
+    ['Chorus (Section)',"The main part of a song that comes back with the same words and tune.",has('mt_arrangement')],
+    ['Bridge',"A contrasting section, usually late in a song, that leads back to the chorus.",has('mt_arrangement')],
+    ['Outro',"The ending of a song.",has('mt_arrangement')],
+    ['Build-Up',"A section that raises the energy before a big moment.",has('mt_arrangement')],
+    ['Drop',"The moment the full beat and bass come in after a build-up.",has('mt_arrangement')],
+    ['Breakdown',"A section where most instruments stop, leaving just a few.",has('mt_arrangement')],
+    ['Transition',"Any sound or change that carries the music from one section to the next.",has('mt_arrangement')],
+    // pitch & harmony
+    ['Half Step (Semitone)',"The distance from one key to the very next one on a keyboard.",piano],
+    ['Whole Step',"Two half steps.",piano],
+    ['Sharp (♯)',"One half step higher.",piano],
+    ['Flat (♭)',"One half step lower.",piano],
+    ['Interval',"The distance between two notes.",piano],
+    ['Unison',"Two or more parts playing exactly the same note.",piano],
+    ['Root',"The note a chord or scale is built on and named after.",piano],
+    ['Triad',"A chord made of three notes.",piano],
+    ['Arpeggio',"The notes of a chord played one after another instead of together.",piano],
+    ['Chord Progression',"A row of chords played in order, usually repeating.",piano],
+    ['Major',"A scale or chord with a bright, happy sound.",has('mt_key')],
+    ['Minor',"A scale or chord with a darker, sadder sound.",has('mt_key')],
+    ['Pentatonic',"A scale with five notes that sound good in any order.",piano],
+    ['Transpose',"To move a whole piece of music higher or lower, into a new key.",has('mt_key')],
+    ['Legato',"Notes played smoothly, flowing into each other.",piano],
+    ['Staccato',"Notes played short and separate.",piano],
+    ['Crescendo',"Gradually getting louder.",piano],
+    ['Forte',"Italian for loud.",piano],
+    ['Layer',"One part stacked on top of others to build a bigger sound.",has('mt_piano2')],
+    ['MIDI',"A language that tells electronic instruments which notes to play, how hard and for how long.",has('mt_midi')],
+    // sound
+    ['Frequency',"How fast something vibrates. Faster means a higher pitch.",yes],
+    ['Hertz (Hz)',"The unit of frequency: vibrations per second.",yes],
+    ['Decibel (dB)',"The unit for measuring loudness.",yes],
+    ['Waveform',"The shape of a sound wave, which decides its basic character.",pads(4)],
+    ['Harmonic (Overtone)',"A quieter, higher pitch that sounds along with the main note.",pads(3)],
+    ['Envelope',"The shape of a sound over time: how it starts, holds and fades.",pads(4)],
+    ['Attack',"How quickly a sound reaches full volume.",pads(4)],
+    ['Sustain',"The level a note holds at while it is kept going.",pads(4)],
+    ['Release',"How long a sound takes to fade after the note ends.",pads(4)],
+    ['Oscillator',"The part of a synthesizer that makes the raw sound wave.",pads(4)],
+    ['Noise',"A hissing sound with every frequency mixed together, used to build snares and hi-hats.",pads(3)],
+    ['Sampler',"An instrument that plays back recorded sounds.",pads(4)],
+    ['Sequencer',"A tool that plays notes or drum hits for you in a set order.",seq],
+    ['Track',"One lane of a song that holds a single instrument or sound.",seq],
+    ['Resonance',"When a hollow body or space vibrates along with a sound and makes it stronger.",has('planet_timbra')],
+    ['Idiophone',"An instrument whose whole body vibrates to make the sound, like a bell or a woodblock.",has('planet_timbra')],
+    ['Mallet',"A stick with a padded or rubber head, used to play bars, bells and gongs.",has('planet_timbra')],
+    ['Gamelan',"An orchestra of gongs and metal bars from Indonesia.",has('planet_alloy')],
+    ['Sub-Bass',"The very lowest sounds, which you feel as much as you hear.",has('planet_808')],
+    ['Embouchure',"The way a wind player shapes their lips and mouth to make a note.",has('planet_zephyr')],
+    // effects & mixing
+    ['Wet / Dry',"Dry is the untouched sound; wet is the sound with the effect on it.",has('mt_effects')],
+    ['Feedback',"Sending a sound's output back into its input.",has('mt_echo')],
+    ['Filter',"An effect that removes some frequencies and lets others pass.",has('mt_filter')],
+    ['Cutoff',"The point where a filter starts removing sound.",has('mt_filter')],
+    ['Low-Pass',"A filter that keeps the low sounds and removes the highs.",has('mt_filter')],
+    ['High-Pass',"A filter that keeps the high sounds and removes the lows.",has('mt_filter')],
+    ['Distortion',"Pushing a sound so hard that its wave is squashed, making it gritty.",has('mt_distortion')],
+    ['Chorus (Effect)',"An effect that makes one sound seem like several playing together.",has('mt_chorus')],
+    ['Flanger',"A sweeping, jet-plane whoosh made by mixing a sound with a slightly delayed copy.",has('mt_flanger')],
+    ['Phaser',"A gentle swirling sweep that moves through a sound.",has('mt_phaser')],
+    ['Tremolo',"A steady wobble in volume.",has('mt_tremolo')],
+    ['LFO',"Low-frequency oscillator: a slow wave that moves a setting up and down for you.",has('mt_tremolo')],
+    ['Bit Depth',"How many loudness steps a digital sound can use. Fewer steps sound crunchier.",has('mt_bitcrusher')],
+    ['Sample Rate',"How many snapshots of a sound are taken every second.",has('mt_bitcrusher')],
+    ['EQ',"Equalizer: a tool for turning certain frequencies up or down.",has('mt_eq')],
+    ['Compressor',"A tool that turns down the loudest moments so the volume is more even.",has('mt_compression')],
+    ['Panning',"Placing a sound to the left, the right or anywhere in between.",has('mt_panning')],
+    ['Stereo',"Sound in two channels, left and right.",has('mt_panning')],
+    ['Mono',"Sound in one channel, the same from every speaker.",has('mt_panning')],
+    ['Sidechain',"Letting one sound control an effect on another, like a kick ducking the bass.",has('mt_sidechain')],
+    ['Mastering',"The final polish on a finished mix before it is released.",has('mt_mastering')],
+    ['Headroom',"The safety gap between your loudest sound and the point where it distorts.",has('mt_mastering')],
+    ['Clipping',"Harsh distortion that happens when a signal is too loud for the system.",has('mt_mastering')],
+    ['Automation',"Recording changes to a setting so it moves by itself during the song.",has('mt_automation')],
+    // vocals
+    ['Lyrics',"The words of a song.",has('mt_vocals')],
+    ['A Cappella',"Singing with no instruments.",has('mt_vocals')],
+    ['Take',"One recorded attempt at a part.",has('mt_vocals')],
+    ['Range',"The span from the lowest note to the highest note a voice or instrument can reach.",has('mt_vocals')],
+    ['Falsetto',"A light, airy way of singing above your normal range.",has('mt_vocals')],
+    ['Plosive',"A consonant like \"p\" or \"b\" that sends a puff of air at the microphone.",has('mt_vocals')],
+    ['Pop Filter',"A screen in front of a microphone that stops puffs of air.",has('mt_vocals')],
+    ['Beatbox',"Making drum sounds with your mouth.",has('mt_vocals')],
+    ['Melisma',"Singing many notes on a single syllable.",has('mt_vocals')],
+    ['Backing Vocals',"Voices that support the lead singer.",has('mt_vox4')],
+    ['Ad-Lib',"A short extra vocal sound added around the main line.",has('mt_vox4')],
+    ['Double-Tracking',"Recording the same part twice and playing both together for a thicker sound.",has('mt_vox4')],
+    ['Soprano',"The highest of the four main voice types.",has('mt_vox10')],
+    ['Alto',"The lower of the two higher voice types.",has('mt_vox10')],
+    ['Tenor',"The higher of the two lower voice types.",has('mt_vox10')],
+    ['Bass (Voice)',"The lowest of the four main voice types.",has('mt_vox10')],
+    ['Comping',"Building one great vocal by joining the best bits of several takes.",has('mt_takes')],
+    ['Chop',"A short slice cut from a recording and played like an instrument.",has('mt_chops')],
+    ['Transient',"The sharp first instant of a sound.",has('mt_chopauto')],
+    ['Pitch Correction',"A tool that moves sung notes onto the right pitch.",has('mt_autotune')],
+    ['Formant',"The resonances of the throat and mouth that make each voice sound like itself.",has('mt_voicefx')],
+    ['Vocoder',"An effect that makes a synthesizer \"speak\" with the shape of a voice.",has('mt_vocoder')],
+    ['Latency',"The tiny delay between making a sound and hearing it back through a device.",has('mt_vocals')],
+  ];
+
+  // add them (skipping anything that already exists, so a double load or a later rename can't make twins)
+  const haveL={};VAULT_LEARN.forEach(e=>haveL[e[0]]=1);
+  LEARN.forEach(e=>{if(!haveL[e[0]]){haveL[e[0]]=1;VAULT_LEARN.push(e);}});
+  const haveW={};VAULT_WORDS.forEach(e=>haveW[e[0].toLowerCase()]=1);
+  WORDS.forEach(e=>{const k=e[0].toLowerCase();if(!haveW[k]){haveW[k]=1;VAULT_WORDS.push(e);}});
+})();

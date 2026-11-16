@@ -2,6 +2,14 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.179 - 2026-11-16 11:35
+- The galaxy map is a real 3D solar system now. Drag to fly over it, pinch to zoom, and twist two fingers to turn the view (on a computer: right-drag, or Q and E). A new compass shows which way is north; tap it to face north again. The flat map is still there behind the 3D button.
+- The Tucana Core is a star, the Quad Suns are glowing suns, and every planet is a lit world in its own colours (two have rings). Stars drift behind the map as you move.
+- Fixed on the map: bubbles no longer get squashed when you zoom, lines no longer cross over planets and names, and long names sit centred under their bubble.
+- Knowledge Vault: 214 new entries (93 lessons and 121 music words). Effects & Mixing and Vocals have their own lessons for the first time.
+- Vault prices are fixed now. Each lesson, fact and word has its own price, about what you're earning when its feature unlocks, and buying one no longer makes the others cost more. Each page runs from cheapest to most expensive.
+- Very small phones: the CLOSE button on the galaxy map fits on screen.
+
 ## v0.2.178 - 2026-11-16 07:55
 - The sequencer tracker now counts on every other step, right along with the hi-hat (8th notes), so it moves at the pace of the song. You earn the same watts per second as before, and the tracker dots fill at half the old speed.
 

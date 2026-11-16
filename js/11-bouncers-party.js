@@ -155,10 +155,7 @@ function clampBouncersToBounds(){
 
 // Get the bounds bouncers should stay within — game view column on desktop, full screen on mobile
 function getBouncerBounds(){
-  if(document.body.classList.contains('desktop-mode')){
-    const gv=document.getElementById('gameView');
-    if(gv){const r=gv.getBoundingClientRect();return{x:r.left,y:r.top,w:r.width,h:r.height};}
-  }
+  // v0.2.167: everywhere (desktop too) the buddies roam the WHOLE screen, over the bunker and shop columns as well
   return{x:0,y:0,w:window.innerWidth,h:window.innerHeight};
 }
 
@@ -348,8 +345,9 @@ function floatBuddiesIn(){
   //   (it used to rush in and then slow down), aimed at a random spot inside, then simply carries on
   bouncers.forEach((b,i)=>{
     const tx=B.x+Math.random()*Math.max(1,B.w-b.sz),ty=B.y+Math.random()*Math.max(1,B.h-b.sz-BOUNCER_NAME_PAD);
-    const side=Math.floor(Math.random()*4),r=.15+Math.random()*.7,pad=b.sz+14;
-    const sx=side===0?-pad:side===1?W+14:B.x+r*(B.w-b.sz), sy=side===2?-pad-BOUNCER_NAME_PAD:side===3?H+14:B.y+r*(B.h-b.sz);   // just off the SCREEN
+    // fully off the screen: the sprite overhangs its box by 13 px and the name hangs below it
+    const side=Math.floor(Math.random()*4),r=.15+Math.random()*.7,OV=13,M=8;
+    const sx=side===0?-(b.sz+OV+M):side===1?W+OV+M:B.x+r*(B.w-b.sz), sy=side===2?-(b.sz+OV+BOUNCER_NAME_PAD+M):side===3?H+OV+M:B.y+r*(B.h-b.sz);
     const sp=Math.max(.9,Math.min(2.2,Math.hypot(b.vx,b.vy)||1.4)),a=Math.atan2(ty-sy,tx-sx);
     b.x=sx;b.y=sy;b.vx=Math.cos(a)*sp;b.vy=Math.sin(a)*sp;
     b.el.style.transform=`translate3d(${sx.toFixed(1)}px,${sy.toFixed(1)}px,0) scale(${b._scale||1})`;

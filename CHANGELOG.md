@@ -2,6 +2,10 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.167 - 2026-11-15 18:10
+- Buddies now start fully off screen and float all the way in (no more peeking in at the edge).
+- On a computer, your buddies float across the whole screen, over the bunker and shop too.
+
 ## v0.2.166 - 2026-11-15 17:36
 - The quiet background hum is back on the file select screen (it starts with your first tap).
 - Two ways to unlock the Alien Party: the disco ball on the drum page, or its card in the Shop (shown as soon as you have the sequencer). The disco ball now hangs on the left, where the PARTY button appears.

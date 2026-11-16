@@ -2,6 +2,9 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.168 - 2026-11-15 18:13
+- The hi-hat sounds softer and sweeter: same crisp sparkle, without the harsh edge.
+
 ## v0.2.167 - 2026-11-15 18:10
 - Buddies now start fully off screen and float all the way in (no more peeking in at the edge).
 - On a computer, your buddies float across the whole screen, over the bunker and shop too.

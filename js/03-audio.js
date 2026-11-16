@@ -60,12 +60,16 @@ const ALL_SOUNDS=[
     }
     drumMasterGain._hhLast={g,t};
     g.gain.setValueAtTime(0,t);
-    g.gain.linearRampToValueAtTime(.075*(gv??1),t+.002);
-    g.gain.exponentialRampToValueAtTime(.001,t+.06);
+    g.gain.linearRampToValueAtTime(.07*(gv??1),t+.003);
+    g.gain.exponentialRampToValueAtTime(.001,t+.065);
     const s=c.createBufferSource();s.buffer=noiseBuf(.06);
-    const f1=c.createBiquadFilter();f1.type='highpass';f1.frequency.value=7000;
-    const f2=c.createBiquadFilter();f2.type='bandpass';f2.frequency.value=10000;f2.Q.value=.5;
-    s.connect(f1);f1.connect(f2);f2.connect(g);
+    // v0.2.168: softer, sweeter hat: same crisp top, but the piercing 9-14 kHz edge is tamed (a dip where it
+    //   stabs, a gentle roll-off above) and a touch of shimmer lower down so it still cuts through
+    const f1=c.createBiquadFilter();f1.type='highpass';f1.frequency.value=6200;f1.Q.value=.5;
+    const f2=c.createBiquadFilter();f2.type='peaking';f2.frequency.value=10500;f2.Q.value=1.1;f2.gain.value=-5;
+    const f3=c.createBiquadFilter();f3.type='highshelf';f3.frequency.value=12500;f3.gain.value=-7;
+    const f4=c.createBiquadFilter();f4.type='peaking';f4.frequency.value=7600;f4.Q.value=1.2;f4.gain.value=2.5;
+    s.connect(f1);f1.connect(f2);f2.connect(f3);f3.connect(f4);f4.connect(g);
     s.start(t);s.stop(t+.07);
   }),
   mkSnd('snare','SNARE','drums','#ffcc44','Cracking rimshot snare',(t,gv)=>{const c=getCtx(),o=c.createOscillator(),og=c.createGain();o.type='triangle';o.frequency.value=200;o.connect(og);og.connect(drumMasterGain);og.gain.setValueAtTime(0,t);og.gain.linearRampToValueAtTime(.315*(gv??1),t+.002);og.gain.exponentialRampToValueAtTime(.001,t+.18);o.start(t);o.stop(t+.18);const s=c.createBufferSource();s.buffer=noiseBuf(.22);const f=c.createBiquadFilter();f.type='bandpass';f.frequency.value=1800;f.Q.value=.7;const ng=c.createGain();s.connect(f);f.connect(ng);ng.connect(drumMasterGain);ng.connect(rvbNode);ng.gain.setValueAtTime(0,t);ng.gain.linearRampToValueAtTime(.455*(gv??1),t+.002);ng.gain.exponentialRampToValueAtTime(.001,t+.22);s.start(t);s.stop(t+.22);}),

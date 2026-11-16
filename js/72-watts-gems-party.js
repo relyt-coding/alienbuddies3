@@ -55,7 +55,11 @@
   letter-spacing:.2em;box-shadow:0 0 18px -8px var(--ssg);}
 .ss-gem-btn{border-color:#5dffc0;background:#07170f;color:#5dffc0;}
 /* the score: "WATTS" spelled out until 1 MW */
-.score .w-unit{font-size:.36em;letter-spacing:.08em;}
+.score .w-unit{font-size:.36em;letter-spacing:.08em;white-space:nowrap;}
+.score{white-space:nowrap;}   /* v0.2.165: the WATTS label never wraps onto a hidden second line */
+/* the digit-milestone shimmer (js/25) paints the number with a clipped gradient; Safari dropped the WATTS label meanwhile */
+body.phone-land .score .w-unit{font-size:.48em;margin-left:.08em;letter-spacing:.02em;}   /* sideways: the header row is tight */
+.score.pl-milestone .w-unit{-webkit-text-fill-color:#fff;color:#fff;background:none;}
 /* PARTY in the corner */
 #partyBtn.pb-small.pb-corner{position:fixed!important;z-index:50;display:none;align-items:center;gap:.45rem;font-size:.98rem;letter-spacing:.1em;
   padding:.36rem .85rem .36rem .4rem;border-radius:50px;border-width:1px;background:#1a0418;border-color:#a0287f;color:#ff8ae6;
@@ -129,6 +133,7 @@ body:not(.desktop-mode) #seqPatternView .seq-bottom-row .keys-switch-seq button{
       const b=document.createElement('button');b.type='button';b.className='ss-gem-btn';b.textContent='OPEN THE GALAXY MAP';
       b.addEventListener('click',()=>{if(typeof closeScoreStats==='function')closeScoreStats();if(typeof closeStore==='function'&&B.contains('store-open'))closeStore();if(typeof closeBunker==='function'&&B.contains('bunker-open'))closeBunker();openSkillTree();});
       list.appendChild(b);}
+    trimLocked(list);
     $('scoreStatsModal').classList.add('open');B.add('stats-open');
   }
   window.openGemStats=openGemStats;
@@ -136,7 +141,16 @@ body:not(.desktop-mode) #seqPatternView .seq-bottom-row .keys-switch-seq button{
   if(typeof buildScoreStats==='function'){const bs=buildScoreStats;window.buildScoreStats=buildScoreStats=function(){
     const r=bs.apply(this,arguments);ssTitle('bolt','WATTS BREAKDOWN',false);
     try{if((typeof totalAliens!=='undefined'&&totalAliens>0)||alienGems>0)gemRows($('scoreStatsList'));}catch(e){}
+    try{trimLocked($('scoreStatsList'));}catch(e){}
     return r;};}
+  // v0.2.165: only what you've unlocked shows: rows that are still OFF / ×1 go, then any section left empty
+  function trimLocked(list){
+    if(!list)return;
+    [...list.querySelectorAll('.ss-row')].forEach(r=>{if(r.classList.contains('active'))return;
+      const v=(r.querySelector('.ss-val')||{}).textContent||'';if(/^(OFF|×1|x1|0|0\/MIN)$/i.test(v.trim()))r.remove();});
+    [...list.querySelectorAll('.ss-section-label')].forEach(l=>{let n=l.nextElementSibling;if(!n||n.classList.contains('ss-section-label')||!n.classList.contains('ss-row'))l.remove();});
+  }
+  window.trimLockedStats=trimLocked;
   ['gemInfoShop','gemCounterBunker'].forEach(id=>{const e=$(id);if(e)e.addEventListener('click',ev=>{ev.stopPropagation();openGemStats();});});
 
   // ══════════ PARTY in the corner ══════════

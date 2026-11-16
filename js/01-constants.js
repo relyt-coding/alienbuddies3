@@ -29,7 +29,7 @@ function formatNum(n){n=Math.floor(n);const T=1e12;function sci(x){const e=Math.
 //   wHtml(n)     → "2.5<small>MW</small>" (shop price tags: big number, small unit)
 const W_UNITS=['W','kW','MW','GW','TW','PW','EW','ZW','YW','RW','QW'];
 function wParts(n,sig){n=Math.max(0,Math.floor(n||0));sig=sig||4;
-  if(n<1e6)return[n.toLocaleString(),'W'];   // v0.2.164: thousands are written out (5,000 W, 100,000 W); units start at 1 MW
+  if(n<1e9)return[n.toLocaleString(),'W'];   // v0.2.165: written out up to the millions (1,000,000 W); units start at 1 GW
   const k=Math.floor(Math.log10(n)/3);
   if(k>=W_UNITS.length){const e=Math.floor(Math.log10(n));return[(n/Math.pow(10,e)).toFixed(2).replace(/\.?0+$/,'')+'e'+e,'W'];}
   let v=n/Math.pow(1000,k),t=v.toPrecision(sig);
@@ -38,8 +38,8 @@ function wParts(n,sig){n=Math.max(0,Math.floor(n||0));sig=sig||4;
   if(t.indexOf('.')>=0)t=t.replace(/0+$/,'').replace(/\.$/,'');
   return[t,W_UNITS[k]];}
 function fmtW(n,sig){const p=wParts(n,sig);return p[0]+' '+p[1];}
-// the score itself: spelled out in WATTS up to 999,999, then real units from 1 MW (7 digits) up
-function scoreParts(n){n=Math.max(0,Math.floor(n||0));return n<1e6?[n.toLocaleString(),'WATTS']:wParts(n,6);}
+// the score itself: spelled out in WATTS up to 999,999,999, then real units from 1 GW up
+function scoreParts(n){n=Math.max(0,Math.floor(n||0));return n<1e9?[n.toLocaleString(),'WATTS']:wParts(n,6);}
 function fmtScore(n){const p=scoreParts(n);return p[0]+' '+p[1];}
 function wHtml(n,sig){const p=wParts(n,sig);return p[0]+'<small>'+p[1]+'</small>';}
 function formatSci(n){n=Math.floor(n);if(n===0)return '0';const e=Math.floor(Math.log10(Math.max(1,n)));return (n/Math.pow(10,e)).toFixed(3).replace(/\.?0+$/,'')+'e'+e;}
@@ -75,7 +75,7 @@ function alienDiscount(n){
   return Math.pow(10,i<=k?ALIEN_L[i]:ALIEN_L[k]+(ALIEN_L[k]-ALIEN_L[k-1])*(i-k));
 }
 const _disc=c=>{const d=progressDiscount();return d>1?Math.max(1,Math.round(c/d)):c;};
-const GAME_VERSION='0.2.164'; // bump on every delivered build (shown in Settings and on the home screen)
+const GAME_VERSION='0.2.165'; // bump on every delivered build (shown in Settings and on the home screen)
 const BASE_CPS=5;
 const UNLOCK_COST=bump30(60000000);
 const ALIEN_POWER_UNLOCK_COST=bump30(600000000);

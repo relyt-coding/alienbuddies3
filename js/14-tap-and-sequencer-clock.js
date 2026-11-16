@@ -154,7 +154,7 @@ function scoreSeqStep(quiet){
 
 // Sequencer clock: one tick per 16th-note step. Runs in a Web Worker because browsers throttle normal timers
 // in hidden tabs but not worker timers. Falls back to setInterval if workers are unavailable.
-let _seqAudioNext=0,_seqClockWorker=null,_seqClockTimer=null,_seqNextDue=0,_seqRunning=false,_seqHidePaused=false;
+let _seqAudioNext=0,_seqLastAt=-1,_seqClockWorker=null,_seqClockTimer=null,_seqNextDue=0,_seqRunning=false,_seqHidePaused=false;
 function seqStepMs(){return (60/seqBpm/4)*1000;}
 function _seqMakeWorker(ms){ // ms = poll interval
   try{
@@ -170,6 +170,7 @@ function seqClockStart(){
   const ms=seqStepMs();
   _seqNextDue=performance.now()+SEQ_LOOKAHEAD_MS;
   _seqAudioNext=getCtx().currentTime+SEQ_LOOKAHEAD_MS/1000; // sound grid lives on the audio clock (sample-accurate)
+  _seqLastAt=-1;
   _seqRunning=true;
   const poll=Math.max(8,Math.min(SEQ_WORKER_TICK_MS,ms/2));
   _seqClockWorker=_seqMakeWorker(poll);
@@ -196,8 +197,15 @@ function _seqClockTick(){
     const delay=dues[i]-now;           // ms from now until this step should sound (performance clock)
     const late=delay<-40;              // steps already well in the past (frozen tab etc.) still score but stay silent
     // sounds use an evenly spaced grid on the audio clock so spacing is exact no matter when the tick ran
-    if(_seqAudioNext<ctxNow-0.04)_seqAudioNext=ctxNow+Math.max(0,delay)/1000; // fell behind: resync
-    const at=_seqAudioNext;_seqAudioNext+=ms/1000;
+    // v0.2.165: keep the audio grid glued to the real clock in BOTH directions. Phones' audio clocks can drift, stall
+    // or restart (a rebuilt sound engine starts again from 0), which used to leave notes scheduled seconds in the
+    // future (silence until you pressed pause / play) or bunched two hits together (a doubled hi-hat).
+    const want=ctxNow+Math.max(0,delay)/1000,stepS=ms/1000;
+    if(_seqLastAt>ctxNow+1)_seqLastAt=-1;                              // a fresh audio clock: forget the old one
+    let at=_seqAudioNext;
+    if(Math.abs(at-want)>0.06)at=want;                                 // drifted ahead or behind: snap back
+    if(_seqLastAt>=0&&at<_seqLastAt+stepS*.6)at=_seqLastAt+stepS;       // never two steps on top of each other
+    _seqLastAt=at;_seqAudioNext=at+stepS;
     seqRunStep(late,Math.max(0,(at-ctxNow)*1000),at);
     if(!studio)drainSeqEnergy(ms/1000);
   }

@@ -66,11 +66,11 @@ function renderUI(newlyLit){
   if(typeof checkContextualHints==='function')checkContextualHints();
   const mult=totalMultiplier();const cpt=clicksPerTap();
   // v0.2.162: the score is energy in watts: big number + unit (kW, MW, GW …), the exact watts underneath
-  {const wp=scoreParts(score),k=wp[0]+'|'+wp[1];if(scoreEl._wk!==k){scoreEl._wk=k;scoreEl.innerHTML=wp[0]+'<span class="w-unit">'+wp[1]+'</span>';}}
+  {/* sideways phones: the header row is short, so millions use MW there */const wp=(score>=1e6&&score<1e9&&document.body.classList.contains('phone-land'))?[String(+(score/1e6).toFixed(2)),'MW']:scoreParts(score),k=wp[0]+'|'+wp[1];if(scoreEl._wk!==k){scoreEl._wk=k;scoreEl.innerHTML=wp[0]+'<span class="w-unit">'+wp[1]+'</span>';}}
   const scoreSubEl=document.getElementById('scoreSubEl');
   if(scoreSubEl){
     const full=formatFull(score),digits=full.replace(/,/g,'').length;
-    scoreSubEl.textContent=score>=1e6?full+' watts':'';
+    scoreSubEl.textContent=score>=1e9?full+' watts':'';
     scoreSubEl.style.fontSize=digits>13?Math.max(.38,Math.min(.65,3.5/Math.sqrt(digits)))+'rem':'';
   }
   multEl.textContent=cpt>1?`×${formatMult(mult)} × ${cpt} clicks per tap`:`×${formatMult(mult)} per tap`;

@@ -139,7 +139,7 @@
     if(!egg)buildEgg();
     if(!eggPick&&typeof buddyPickFor==='function'){const a0=alienData[0];eggPick=a0&&a0.base?a0.base:buddyPickFor(0);}
     eggOn=true;eggCrack=-1;eggT0=performance.now();egg.style.display='';egg.className='rolling';
-    egg.querySelector('.pe-tag').textContent=eggCost().toLocaleString('en-US');
+    egg.querySelector('.pe-tag').textContent=fmtW(eggCost());
     paintEggCanvas(0);placeEgg();
     setTimeout(()=>{if(egg)egg.classList.remove('rolling');},1250);
     // a soft roll, and a little "tok" as it settles

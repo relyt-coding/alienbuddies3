@@ -24,6 +24,8 @@
     try{if(hadAmb&&typeof startAmbience==='function')startAmbience();}catch(e){}
     try{if(wasParty&&typeof startPartyMusic==='function')startPartyMusic();}catch(e){}
     try{if(typeof voxRouteAll==='function')voxRouteAll();}catch(e){}
+    // the sequencer's note grid lived on the old clock: put it on the new one (v0.2.165)
+    try{if(typeof seqPlaying!=='undefined'&&seqPlaying&&typeof seqClockStart==='function')seqClockStart();}catch(e){}
     window._audioRebuilds=(window._audioRebuilds||0)+1;
   }
   // is the audio clock actually ticking? (a frozen clock = silent, whatever state it claims)

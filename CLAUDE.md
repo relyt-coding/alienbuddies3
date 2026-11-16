@@ -52,9 +52,10 @@ Serve the folder (`python3 -m http.server`) and drive it with Playwright + `/usr
 `unlockedSkills.x=true`) and screenshot. The first tap on a new file plays an intro (tap a few times to skip).
 
 ## Watts
-The score is energy shown in watts since v0.2.162: use `fmtW(n)` / `wHtml(n)` / `wParts(n,sig)` (js/01) for anything that is score or a price. Never write 'pts' / 'points' in player-facing text. Gems keep `fmtGems`. The score itself uses `fmtScore` / `scoreParts` (spelled-out WATTS below 1e6, units from 1 MW). The breakdown window (13 + js/72 CSS) uses `ssIconEl(key)` = black & white match art (`matchIconBW` in js/48): no emoji there.
+The score is energy shown in watts since v0.2.162: use `fmtW(n)` / `wHtml(n)` / `wParts(n,sig)` (js/01) for anything that is score or a price. Never write 'pts' / 'points' in player-facing text. Gems keep `fmtGems`. The score itself uses `fmtScore` / `scoreParts` (spelled-out WATTS below 1e9, units from 1 GW; prices written out below 1e9 too; sideways phones show MW for millions). The breakdown window (13 + js/72 CSS) uses `ssIconEl(key)` = black & white match art (`matchIconBW` in js/48): no emoji there.
 
 ## Things that bite
+- Sequencer clock (js/14 `_seqClockTick`): the audio grid snaps back if it drifts >60 ms either way and never schedules two steps within 60% of a step; the audio wake-up rebuild (js/55) restarts the clock. Breakdown rows that are inactive and OFF/×1 are hidden (`trimLockedStats`, js/72).
 - Old Safari (iOS 15 / iPhone 7) has no CSS `color-mix()`: give every color-mix declaration a fallback (see the `@supports not` block at the end
   of css/style.css). Avoid canvas `shadowBlur` in per-frame cutscene drawing (it halved Magmora's frame rate); use a wide faint stroke instead.
 - Device smoke test: `/home/claude/preview/smoke.py`-style Playwright run over iPhone 7 (375×667, sideways 667×375), iPhone 14, iPad both ways,

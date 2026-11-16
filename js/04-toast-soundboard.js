@@ -16,6 +16,11 @@ function showToast(msg){
     const tr=tw&&tw.offsetParent!==null?tw.getBoundingClientRect():null;
     const top=tr&&tr.height>0?tr.bottom+6:r&&r.height>0?r.top:(sc?sc.getBoundingClientRect().bottom:0);
     if(top>0)el.style.top=(top+4)+'px';}catch(e){}
+  // v0.2.165: once the sequencer is in, the space under the trackers IS the sequencer: messages sit low instead,
+  //   just above the bottom buttons (over the pads, which still take taps right through the message)
+  try{const bc=document.body.classList;if(bc.contains('seq-on')&&!bc.contains('desktop-mode')){
+    const ref=['settingsOpenBtn','padEditToggleBtn','openBunkerBtn'].map(id=>document.getElementById(id)).find(e=>e&&e.getBoundingClientRect().height>0);
+    const rt=ref?ref.getBoundingClientRect().top:innerHeight-70,h=el.offsetHeight||60;el.style.top=Math.max(8,rt-h-14)+'px';}}catch(e){}
   el.classList.add('show');
   if(toastTimer)clearTimeout(toastTimer);
   toastTimer=setTimeout(()=>el.classList.remove('show'),2500);

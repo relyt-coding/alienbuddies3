@@ -2,6 +2,13 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.165 - 2026-11-15 17:16
+- Fixed: the sequencer could go silent (until you pressed pause and play) or double its hits after your phone paused the game's sound. Its timing now stays locked to the beat.
+- Numbers are written out up to the millions (1,000,000 W); short units start at a billion (1 GW).
+- Messages no longer cover the sequencer: once it's in, they show just above the bottom buttons.
+- The WATTS label no longer disappears when your score gains a digit.
+- The Watts Breakdown only shows what you've unlocked, so it starts simple.
+
 ## v0.2.164 - 2026-11-15 16:26
 - Prices under a million are written out in full: 5,000 W, 100,000 W. Units (MW, GW…) start at 1 MW.
 

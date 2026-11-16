@@ -58,6 +58,7 @@ The score is energy shown in watts since v0.2.162: use `fmtW(n)` / `wHtml(n)` / 
 ## Things that bite
 - Shop ladder boosts (v0.2.175): each ALIEN PARTY level and the first 3 SEQ_FEATS (BPM, 32, 64 steps) are ×1.5 watts (`shopLadderMult()` in `sharedMultiplier`, js/02).
 - Per-sound volume: `soundVols[id]` defaults to `SOUND_VOL_DEFAULT` (.75 = normal level, 1 = a third louder); gain = v/.75 (js/03 `getSoundGainVal`). Old saves are scaled ×.75 once (`soundVolsV:2` in the save).
+- Sequencer tracker (js/14 `scoreSeqStep`, v0.2.178): scores on every other step (8th notes); watts are banked in `_seqBank` and paid together (same income), dots fill at ×.5.
 - Sequencer clock (js/14 `_seqClockTick`): the audio grid snaps back if it drifts >60 ms either way and never schedules two steps within 60% of a step; the audio wake-up rebuild (js/55) restarts the clock. Breakdown rows that are inactive and OFF/×1 are hidden (`trimLockedStats`, js/72).
 - Old Safari (iOS 15 / iPhone 7) has no CSS `color-mix()`: give every color-mix declaration a fallback (see the `@supports not` block at the end
   of css/style.css). Avoid canvas `shadowBlur` in per-frame cutscene drawing (it halved Magmora's frame rate); use a wide faint stroke instead.

@@ -134,16 +134,21 @@ let _seqDotAccum=0;
 function seqStepScale(){return SEQ_BASE_BPM/Math.max(1,seqBpm);}
 function seqStepsPerSec(){return seqBpm/15;} // 16th-note steps
 function seqEarningsPerSec(){return seqStepsPerSec()*seqStepScale()*seqStepMultiplier()*clicksPerTap()*seqClicksPerStep();}
+// v0.2.178: the tracker counts on every OTHER step (steps 1, 3, 5... = the starter beat's hi-hats). Watts are banked on
+// the step in between and paid together, so income per second is unchanged; dots fill at half the old speed.
+let _seqBank=0;
 function scoreSeqStep(quiet){
   const cpt=clicksPerTap()*seqClicksPerStep(),sc=seqStepScale();
-  const gain=seqStepMultiplier()*cpt*sc;
-  score+=gain;if(typeof _rateAdd==='function')_rateAdd(gain);
+  _seqBank+=seqStepMultiplier()*cpt*sc;
   // dots advance by the same BPM-scaled amount so tier progress per second is BPM-independent too
-  _seqDotAccum+=cpt*sc;
+  _seqDotAccum+=cpt*sc*.5;
+  {const st=typeof seqMode==='undefined'||seqMode==='pattern'?seqStep:seqMode==='arrange'?arrBarStep:songArrBarStep;if((st|0)%2!==0)return;}
+  const gain=_seqBank;_seqBank=0;
+  score+=gain;if(typeof _rateAdd==='function')_rateAdd(gain);
   const anims=[];
   while(_seqDotAccum>=0.999999){_seqDotAccum-=1;addDotToAutoTier(0,anims);}
   if(quiet)return;
-  _autoParticleAccum+=Math.min(1,SEQ_PARTICLES_PER_SEC/seqStepsPerSec());
+  _autoParticleAccum+=Math.min(1,2*SEQ_PARTICLES_PER_SEC/seqStepsPerSec());   // called every other step now
   if(_autoParticleAccum>=1){
     _autoParticleAccum-=1;
     const pos=getElCenter('autoTiersContainer')||getElCenter('autoTiersCol')||getElCenter('tiersContainer');

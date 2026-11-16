@@ -153,11 +153,11 @@ function vaultFoldable(node,k){node.classList.add('vb-fold');if(vaultFolded(k))n
 function vaultHasEntry(e){return vaultOwned.includes(e.id);}
 function vaultNice(n){if(n<100)return Math.round(n);const p=Math.pow(10,Math.floor(Math.log10(n))-1);return Math.round(n/p)*p;}
 function vaultEntryCost(){return vaultNice(250*Math.pow(1.35,vaultOwned.length));}
-function vaultBuyEntry(e){
+function vaultBuyEntry(e,quiet){
   const c=vaultEntryCost();if(vaultHasEntry(e)||score<c||!e.on())return false;
   score-=c;vaultOwned.push(e.id);vaultMult=Math.pow(1.05,vaultOwned.length);if(!vaultSeen.includes(e.id))vaultSeen.push(e.id);
   try{playSfxTierUnlock(Math.min(12,vaultOwned.length%12+1),0.3);}catch(err){}
-  showToast((e.kind==='word'?'New word: ':'Unlocked: ')+e.title+' · ×1.05 tap boost');
+  if(!quiet)showToast((e.kind==='word'?'New word: ':'Unlocked: ')+e.title+' · ×1.05 tap boost');
   if(typeof renderUI==='function')renderUI();if(typeof autoSave==='function')autoSave();
   return true;
 }
@@ -175,6 +175,30 @@ body.desktop-mode #vaultBox{border-radius:20px;height:86vh;}
 #vaultHead{position:relative;display:flex;align-items:center;justify-content:center;padding:1rem 1.1rem .6rem;flex-shrink:0;min-height:3.4rem;}
 #vaultHead .vh-mid{display:flex;flex-direction:column;align-items:center;gap:.15rem;text-align:center;padding:0 5.4rem;}
 #vaultTitle{font-family:'Bebas Neue',sans-serif;font-size:clamp(1.15rem,5.2vw,1.6rem);letter-spacing:.12em;color:#ffd23f;line-height:1;white-space:nowrap;}
+.vb-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.45rem;}
+.vb-tile{position:relative;aspect-ratio:1/1.08;display:flex;flex-direction:column;justify-content:space-between;align-items:stretch;gap:.2rem;padding:.45rem .35rem .4rem;
+  border-radius:12px;border:1px solid #20202a;background:#0e0e14;color:#e8e8f0;cursor:pointer;font-family:'Bebas Neue',sans-serif;text-align:center;
+  -webkit-tap-highlight-color:transparent;touch-action:manipulation;overflow:hidden;}
+.vb-tile .vb-t-name{font-size:.86rem;letter-spacing:.05em;line-height:1.05;color:var(--c);overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;word-break:break-word;}
+.vb-tile .vb-t-foot{font-size:.74rem;letter-spacing:.06em;color:#6a6a78;white-space:nowrap;}
+.vb-tile.own{background:linear-gradient(160deg,#16161f,#0c0c12);border-color:#2c2c38;}
+.vb-tile.own .vb-t-foot{color:var(--c);opacity:.8;}
+.vb-tile.closed .vb-t-name{opacity:.7;}
+.vb-tile.closed.can{border-color:var(--c);box-shadow:0 0 12px -5px var(--c);}
+.vb-tile.closed.can .vb-t-foot{color:#fff;}
+.vb-tile.new::after{content:'';position:absolute;top:6px;right:6px;width:7px;height:7px;border-radius:50%;background:#ff4f7a;box-shadow:0 0 6px #ff4f7a;}
+.vb-tile:active{transform:scale(.95);}
+.vb-tile.nope{animation:vbNope .38s ease-in-out;}
+@keyframes vbNope{0%,100%{transform:translateX(0);}30%{transform:translateX(-5px);}65%{transform:translateX(4px);}}
+#vaultPop{position:fixed;inset:0;z-index:100000;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.6);padding:1.2rem;}
+#vaultPop.on{display:flex;}
+#vaultPop .vpp{width:100%;max-width:340px;background:#101016;border:1px solid var(--c);border-radius:16px;padding:1.1rem 1.2rem 1rem;text-align:center;
+  box-shadow:0 0 30px -10px var(--c),0 12px 40px rgba(0,0,0,.6);animation:vhpIn .3s cubic-bezier(.3,1.4,.5,1);}
+#vaultPop .vpp-k{font-family:'Bebas Neue',sans-serif;font-size:.85rem;letter-spacing:.18em;color:#8a8a9a;}
+#vaultPop b{display:block;font-family:'Bebas Neue',sans-serif;font-weight:400;font-size:1.6rem;letter-spacing:.08em;color:var(--c);margin:.15rem 0 .45rem;}
+#vaultPop p{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;color:#d0d0da;font-size:1rem;line-height:1.5;margin:0 0 .6rem;}
+#vaultPop .vpp-boost{font-family:'Bebas Neue',sans-serif;font-size:.95rem;letter-spacing:.12em;color:var(--c);opacity:.85;}
+#vaultPop button{margin-top:.8rem;font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:.14em;background:var(--c);color:#111;border:0;border-radius:10px;padding:.45rem 1.6rem;cursor:pointer;}
 #vaultHelpBtn{flex-shrink:0;width:2.1rem;height:2.1rem;border-radius:50%;border:1px solid #4a4a2a;background:#14140a;color:#d8d860;font-family:'Bebas Neue',sans-serif;font-size:1.25rem;line-height:1;padding:0;cursor:pointer;position:absolute;right:1.1rem;top:50%;transform:translateY(-40%);}
 #vaultHelp{position:fixed;inset:0;z-index:100000;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.55);padding:1.2rem;}
 #vaultHelp.on{display:flex;}
@@ -271,6 +295,16 @@ function vaultHelp(force){
     document.body.appendChild(h);}
   h.classList.add('on');if(typeof autoSave==='function')try{autoSave();}catch(e){}
 }
+// v0.2.175: one entry, read in a pop-up
+function vaultPop(o){
+  let h=document.getElementById('vaultPop');
+  if(!h){h=document.createElement('div');h.id='vaultPop';h.innerHTML='<div class="vpp"><div class="vpp-k"></div><b></b><p></p><div class="vpp-boost"></div><button type="button">GOT IT</button></div>';
+    h.addEventListener('click',e=>{if(e.target===h||e.target.tagName==='BUTTON')h.classList.remove('on');});document.body.appendChild(h);}
+  const box=h.querySelector('.vpp');box.style.setProperty('--c',o.col);
+  h.querySelector('.vpp-k').textContent=o.kind;h.querySelector('b').textContent=o.title;h.querySelector('p').textContent=o.text;
+  h.querySelector('.vpp-boost').textContent=o.boost+' · ACTIVE';
+  h.classList.remove('on');void h.offsetWidth;h.classList.add('on');
+}
 document.addEventListener('click',e=>{if(e.target&&e.target.id==='vaultHelpBtn'){e.stopPropagation();vaultHelp(true);}});
 function openVault(){
   if(vaultIsPage()&&typeof swipeNavGo==='function'){
@@ -335,47 +369,29 @@ function renderVault(scrollTab){
     box.innerHTML='<b>🔒 '+esc(tab.name)+'</b><span>Unlock '+esc(VAULT_REQ_NAME[tab.req]||'it')+' in the skill tree to open this part of the Vault.</span>';
     body.appendChild(box);if(!scrollTab)body.scrollTop=keepY;return;}
   let locked=0;
+  // v0.2.175: a GRID of boxes, 4 per row. Tap a box you own to read it in a pop-up; tap one you can afford to unlock
+  //   it (it opens straight away). Too expensive: the box gives a little shake.
+  const grid=el('div','vb-grid');body.appendChild(grid);
+  const tile=(o)=>{const t=el('button','vb-tile'+(o.own?' own':' closed')+(o.can?' can':'')+(o.isNew?' new':''));t.type='button';t.style.setProperty('--c',o.col);
+    t.appendChild(el('span','vb-t-name',esc(o.title)));
+    t.appendChild(el('span','vb-t-foot',o.own?(o.badge||'✓'):fmtW(o.cost)));
+    t.addEventListener('click',()=>{
+      if(o.own){vaultPop(o);return;}
+      if(!o.can){t.classList.remove('nope');void t.offsetWidth;t.classList.add('nope');return;}
+      if(o.buy()){vaultPop(o);renderVault();}});
+    grid.appendChild(t);};
   // TIPS in this tab
   const tips=vaultTipsIn(tab.id);
   const shownTips=tips.filter(i=>i<far);locked+=tips.length-shownTips.length;
-  if(shownTips.length){
-    shownTips.forEach(i=>{
-      const card=el('div','vb-card vb-tip');card.style.setProperty('--c','#e0e055');
-      const row=el('div','vb-row');row.appendChild(el('h4','',(tipHave(i)?'✓ ':'')+'TIP '+(i+1)));
-      if(tipHave(i)){row.appendChild(el('div','vb-act','×1.5 ACTIVE'));card.appendChild(row);card.appendChild(el('p','',esc(tipText(i))));vaultFoldable(card,'tip'+i);}
-      else{
-        const cost=tipCost(i),can=score>=cost,bt=el('button','vb-buy'+(can?' can':''),fmtW(cost));bt.type='button';
-        if(can)bt.addEventListener('click',()=>{
-          if(!buyTip(i))return;
-          showToast('Tip unlocked: your Tap Multiplier increased by ×1.5!');
-          try{playSfxTierUnlock(tipsOwned,0.4);}catch(e){}
-          updateTipsLabel();renderUI();autoSave();renderVault();
-        });
-        row.appendChild(bt);card.appendChild(row);
-      }
-      body.appendChild(card);
-    });
-  }
-  // LEARN cards / WORDS (each one costs points once its feature is unlocked)
+  shownTips.forEach(i=>{const own=tipHave(i),cost=tipCost(i);
+    tile({own,cost,can:!own&&score>=cost,col:'#e0e055',title:'TIP '+(i+1),kind:'TIP',badge:'×1.5',text:tipText(i),boost:'×1.5 tap boost',
+      buy:()=>{if(!buyTip(i))return false;try{playSfxTierUnlock(tipsOwned,0.4);}catch(e){}updateTipsLabel();renderUI();autoSave();return true;}});});
+  // LEARN cards / WORDS (each one costs watts once its feature is unlocked)
   const entries=vaultEntries(tab.id),open=entries.filter(e=>e.on());locked+=entries.length-open.length;
   const ec=vaultEntryCost(),canE=score>=ec;
-  const buyBtn=e=>{const bt=el('button','vb-buy'+(canE?' can':''),fmtW(ec));bt.type='button';
-    if(canE)bt.addEventListener('click',ev=>{ev.stopPropagation();if(vaultBuyEntry(e))renderVault();});return bt;};
-  const tag=e=>vaultIsNew(e)?' <span class="vb-tag">NEW</span>':'';
-  if(tab.id==='words'){
-    open.slice().sort((a,b)=>a.title.localeCompare(b.title)).forEach(e=>{
-      const w=el('div','vb-word'+(vaultHasEntry(e)?'':' vb-closed'));
-      if(vaultHasEntry(e)){w.appendChild(el('b','',esc(e.title)+tag(e)));w.appendChild(el('span','',esc(e.text)));vaultFoldable(w,e.id);}
-      else{const r=el('div','vb-row');r.appendChild(el('b','',esc(e.title)+tag(e)));r.appendChild(buyBtn(e));w.appendChild(r);}
-      body.appendChild(w);});
-  }else{
-    open.forEach(e=>{
-      const own=vaultHasEntry(e),card=el('div','vb-card'+(own?'':' vb-closed'));card.style.setProperty('--c',col);
-      const h=el('h4','',esc(e.title)+tag(e)+(e.src?' <span class="vb-src">· FROM THE '+e.src+'</span>':''));
-      if(own){card.appendChild(h);card.appendChild(el('p','',esc(e.text)));vaultFoldable(card,e.id);}
-      else{const r=el('div','vb-row');r.appendChild(h);r.appendChild(buyBtn(e));card.appendChild(r);}
-      body.appendChild(card);});
-  }
+  (tab.id==='words'?open.slice().sort((a,b)=>a.title.localeCompare(b.title)):open).forEach(e=>{const own=vaultHasEntry(e);
+    tile({own,cost:ec,can:!own&&canE,col:tab.id==='words'?'#ffd23f':col,title:e.title,kind:tab.id==='words'?'MUSIC WORD':e.src?'FROM THE '+e.src:'LESSON',
+      text:e.text,boost:'×1.05 tap boost',isNew:vaultIsNew(e),buy:()=>vaultBuyEntry(e,true)});});
   if(!open.length&&!shownTips.length)body.appendChild(el('div','vb-locked','NOTHING HERE YET'));
   if(!scrollTab)body.scrollTop=keepY;
 }

@@ -128,8 +128,12 @@ function drumMultiplier(){
 // (The skill tree only boosts Alien Gems, not points.)
 function sharedMultiplier(){
   // (Planet Hop / Worm Whack / Beat Defense boost Alien Gems instead; only the Matching Game gives point multipliers)
-  return alienMultiplier()*drumMultiplier()*matchingMultiplier*tipsMult*vaultMult;
+  return alienMultiplier()*drumMultiplier()*matchingMultiplier*tipsMult*vaultMult*shopLadderMult();
 }
+// v0.2.175: every ALIEN PARTY level (unlock + each style) and the BPM / 32 STEPS / 64 STEPS upgrades are each ×1.5
+function partyMult(){return typeof shop!=='undefined'?Math.pow(1.5,Math.max(0,shop.partyLevel||0)):1;}
+function seqFeatMult(){return typeof shop!=='undefined'?Math.pow(1.5,Math.min(3,Math.max(0,shop.seqFeat||0))):1;}
+function shopLadderMult(){return partyMult()*seqFeatMult();}
 // Each tracker keeps its own tier multipliers: DRUMPAD (left) for pad taps, SEQUENCER (right) for sequencer steps.
 function drumTierProduct(){return tiers.reduce((m,t,i)=>t.multiplierActive?m*tierMultValueFor('drum',i):m,1);}
 function seqTierProduct(){return autoTiers.reduce((m,t,i)=>t.multiplierActive?m*tierMultValueFor('seq',i):m,1);}

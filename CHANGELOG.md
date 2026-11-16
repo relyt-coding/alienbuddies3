@@ -2,6 +2,12 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.175 - 2026-11-15 20:35
+- The Knowledge Vault is a grid of boxes, 4 per row. Unlock a box and it opens in a pop-up; tap any box you own to read it again.
+- Cheaper sequencer progress: sequencer track 2 and the sequencer tracker are now 250,000 W each.
+- The Alien Party unlock and every party style now give ×1.5 watts, and so do the BPM, 32 steps and 64 steps upgrades.
+- Sound unlocks 3 to 20 are 45% cheaper.
+
 ## v0.2.174 - 2026-11-15 19:43
 - The background hum fades out when you unlock the sequencer, so your beat takes over (you can turn it back on in Settings). It still plays on the file select screen.
 - Unlocking the Alien Party starts the party right away in the Glow style.

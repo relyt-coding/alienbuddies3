@@ -23,7 +23,7 @@ document.getElementById('scoreSectionBtn')&&document.getElementById('scoreSectio
 // v0.2.163: no emoji here: each row gets a black & white matching-card picture (js/48 matchIconBW) on a dark tile
 const SS_ICON_BY_LABEL={'WATTS':'bolt','WATTS PER TAP':'bulb','DRUMPAD TIERS':'battery','DRUM MACHINE':'robot','MULTI-CLICK':'magnet','TIER COMBINED':'dna','DRUM COMBINED':'dna',
   'ENERGY':'battery','SEQUENCER EARNINGS':'sun','ALIEN POWER':'flask','MATCHING GAME':'star','SEQUENCER STEP VALUE':'comet','SEQUENCER':'satellite',
-  'GEMS':'gem','GEM HARVESTER':'asteroid','GALAXY BOOSTS':'galaxy','MINIGAMES':'ufo','GEMS PER MINUTE':'compass','BUDDIES':'alienplanet','ALIEN BOOST':'alienplanet'};
+  'GEMS':'gem','GEM HARVESTER':'asteroid','GALAXY BOOSTS':'galaxy','MINIGAMES':'ufo','GEMS PER MINUTE':'compass','BUDDIES':'alienplanet','ALIEN BOOST':'alienplanet','ALIEN PARTY':'ufo','SEQUENCER UPGRADES':'telescope'};
 const SS_ICON_BY_EMOJI={'⚡':'bolt','👆':'bulb','🥁':'atom','🖱':'magnet','🔗':'dna','🔋':'battery','💰':'sun','💉':'flask','🃏':'star','✖️':'comet','🎛':'satellite',
   '💡':'bulb','📚':'telescope','💎':'gem','⛏':'asteroid','🌌':'galaxy','🎮':'ufo','⏱':'compass','🏆':'star'};
 function ssIconEl(key,px){const w=document.createElement('span');w.className='ss-pic';

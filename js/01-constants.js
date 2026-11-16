@@ -75,7 +75,7 @@ function alienDiscount(n){
   return Math.pow(10,i<=k?ALIEN_L[i]:ALIEN_L[k]+(ALIEN_L[k]-ALIEN_L[k-1])*(i-k));
 }
 const _disc=c=>{const d=progressDiscount();return d>1?Math.max(1,Math.round(c/d)):c;};
-const GAME_VERSION='0.2.174'; // bump on every delivered build (shown in Settings and on the home screen)
+const GAME_VERSION='0.2.175'; // bump on every delivered build (shown in Settings and on the home screen)
 const BASE_CPS=5;
 const UNLOCK_COST=bump30(60000000);
 const ALIEN_POWER_UNLOCK_COST=bump30(600000000);
@@ -131,7 +131,7 @@ function _multiClickBase(lvl){if(lvl===0)return _disc(15000000);const k=Math.min
 function multiClickUpgradeAt(lvl){const clicks=lvl+2;return{effectMain:`${clicks}× CLICKS`,effectSub:`Each tap counts as ${clicks} clicks`,cost:multiClickUpgradeCost(lvl)};}
 
 // Pad button costs: 1 free, 2=5 (kick), 3=100 (snare), 4=3K, 5=2.5M ...
-const SEQ_TRACKER_COST=5e5;   // ACTIVATE for the sequencer's dot tracker (v0.2.172: 500,000 W)
+const SEQ_TRACKER_COST=2.5e5;   // ACTIVATE for the sequencer's dot tracker (v0.2.175: 250,000 W)
 const PAD_COSTS=[0,10,50,2500,2500000,9000000000,60000000000,450000000000].map(bump30); // pad 2 (kick) is just 10 pts so players find the drum pad fast
 const PAD_DEFAULT_SOUNDS=['hihat','kick','snare',null,null,null,null,null]; // null = no sound, must buy from library
 
@@ -146,6 +146,7 @@ function soundLibCost(idx){
   let c=5000;
   for(let i=0;i<idx;i++) c*=10;
   if(idx<20)c/=2;   // the first 20 instruments are half price: lots of new sounds to play with early on
+  if(idx>=2&&idx<20)c*=.55;   // v0.2.175: unlocks 3–20 a further 45% cheaper: more to unlock, sooner
   return _disc(bump30(c));
 }
 
@@ -161,7 +162,7 @@ function seqTrackCostOld(tracks){
 }
 function seqTrackCost(tracks){
   if(tracks===0)return 100000;
-  if(tracks===1)return bump30(25000000);
+  if(tracks===1)return 250000;   // v0.2.175: track 2 = 250,000 W
   if(tracks===2)return _disc(bump30(250000000));
   return _disc(bump30(seqTrackCostOld(tracks)));
 }

@@ -24,7 +24,7 @@ README.md covers the file layout, test mode and vocals in depth; this file is th
 - The Knowledge Vault (`68-knowledge-vault.js`) reads tips from `TIPS_DATA` (07-tips; tab per tip in `VAULT_TIP_TAB`), its own LEARN cards and
   MUSIC WORDS lists, and every skill-tree node's `fact` (`SKILL_TREE_NODES`, tab picked by `vaultTabForNode`). Add a `fact` to a node and it
   shows up in the Vault automatically. Five tabs need a skill node first (`req` in `VAULT_TABS`: Core → Music Words, Quad Suns →
-  Sounds / Effects / Piano Roll / Vocals); tips in a locked tab can't be bought yet (`vaultTipLocked`). Since v0.2.159 tabs only appear when unlocked AND non-empty (`vaultTabShown`), nothing hints at locked content, and the boost explanation is the `vaultHelp()` pop-up behind the ? button only. Owned entries fold/unfold on tap (`vaultFoldable`; folded keys stored as 'c:'+key in `vaultSeen`). Lessons / facts / words cost points
+  Sounds / Effects / Piano Roll / Vocals); tips in a locked tab can't be bought yet (`vaultTipLocked`). Since v0.2.159 tabs only appear when unlocked AND non-empty (`vaultTabShown`), nothing hints at locked content, and the boost explanation is the `vaultHelp()` pop-up behind the ? button only. Since v0.2.175 the Vault body is a 4-per-row grid of tiles (`.vb-grid` / `.vb-tile`); buying or tapping an owned tile opens `vaultPop()`. Lessons / facts / words cost points
   (`vaultEntryCost`, ×1.35 per one owned) and give ×1.05 each (`vaultOwned`, `vaultMult` in `sharedMultiplier`). On phones the Vault is swipe
   page 6 (`#vaultView`, body class `vault-open`); on desktop it's the `#vaultModal` window.
 - Upright phones get body class `thumb-nav` (js/69): BUNKER / SETTINGS / EDIT PADS / SHOP in one bottom row. The PARTY button (`.pb-small`) is
@@ -55,6 +55,7 @@ Serve the folder (`python3 -m http.server`) and drive it with Playwright + `/usr
 The score is energy shown in watts since v0.2.162: use `fmtW(n)` / `wHtml(n)` / `wParts(n,sig)` (js/01) for anything that is score or a price. Never write 'pts' / 'points' in player-facing text. Gems keep `fmtGems`. The score itself uses `fmtScore` / `scoreParts` (spelled-out WATTS below 1e9, units from 1 GW; prices written out below 1e9 too; sideways phones show MW for millions). The breakdown window (13 + js/72 CSS) uses `ssIconEl(key)` = black & white match art (`matchIconBW` in js/48): no emoji there.
 
 ## Things that bite
+- Shop ladder boosts (v0.2.175): each ALIEN PARTY level and the first 3 SEQ_FEATS (BPM, 32, 64 steps) are ×1.5 watts (`shopLadderMult()` in `sharedMultiplier`, js/02).
 - Per-sound volume: `soundVols[id]` defaults to `SOUND_VOL_DEFAULT` (.75 = normal level, 1 = a third louder); gain = v/.75 (js/03 `getSoundGainVal`). Old saves are scaled ×.75 once (`soundVolsV:2` in the save).
 - Sequencer clock (js/14 `_seqClockTick`): the audio grid snaps back if it drifts >60 ms either way and never schedules two steps within 60% of a step; the audio wake-up rebuild (js/55) restarts the clock. Breakdown rows that are inactive and OFF/×1 are hidden (`trimLockedStats`, js/72).
 - Old Safari (iOS 15 / iPhone 7) has no CSS `color-mix()`: give every color-mix declaration a fallback (see the `@supports not` block at the end

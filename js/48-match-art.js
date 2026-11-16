@@ -211,14 +211,7 @@
     const d=x.getImageData(0,0,N,N),a=d.data,op=new Uint8Array(N*N);
     for(let i=0;i<N*N;i++){const k=i*4;if(a[k+3]>100){a[k+3]=255;op[i]=1;for(let j=0;j<3;j++)a[k+j]=Math.min(255,Math.round(a[k+j]/22)*22+6);}else a[k+3]=0;}
     const o=new Uint8ClampedArray(a);
-    // v0.2.172 "one step better": pixel-art polish on every picture
-    //   · a light rim on the top-left edge of each shape and a soft shade on the bottom-right (a little bevel)
-    {const lit=(i,k)=>{const j=i*4;for(let c=0;c<3;c++)o[j+c]=Math.min(255,o[j+c]+(255-o[j+c])*k);},
-          dim=(i,k)=>{const j=i*4;for(let c=0;c<3;c++)o[j+c]=o[j+c]*(1-k);};
-      const T=t=>t>=0&&t<N*N&&op[t];
-      for(let y=0;y<N;y++)for(let X=0;X<N;X++){const i=y*N+X;if(!op[i])continue;
-        const up=y>0?op[i-N]:0,lf=X>0?op[i-1]:0,dn=y<N-1?op[i+N]:0,rt=X<N-1?op[i+1]:0;
-        if(!up||!lf)lit(i,.38);else if(!dn||!rt)dim(i,.22);}}
+    // (v0.2.173: the light rim on the edges is gone: it read as a whitish fringe)
     let m=op;for(let pass=0;pass<0;pass++){const nm=m.slice();   // (no extra outline: the creator prefers it without)
       for(let y=0;y<N;y++)for(let X=0;X<N;X++){const i=y*N+X;if(m[i])continue;
         if((X>0&&m[i-1])||(X<N-1&&m[i+1])||(y>0&&m[i-N])||(y<N-1&&m[i+N])){const k=i*4;o[k]=29;o[k+1]=21;o[k+2]=48;o[k+3]=255;nm[i]=1;}}m=nm;}
@@ -259,7 +252,7 @@
     let q=g.createLinearGradient(0,m,0,h-m);q.addColorStop(0,tint);q.addColorStop(1,OUT);g.fillStyle=q;g.fillRect(0,0,w,h);
     const st=Math.max(3,Math.min(7,Math.round(w*.05)));g.fillStyle='rgba(255,255,255,.12)';for(let y=0;y<h;y+=st)for(let x=((y/st)%2)*st;x<w;x+=st*2)g.fillRect(x,y,st*.5,st*.5);   // dither
     g.fillStyle='rgba(255,255,255,.2)';g.fillRect(0,m,w,h*.07);                       // top bevel
-    const sz0=Math.min(w,h)*.86,NN=Math.max(48,Math.min(132,Math.round(sz0*dpr/2.4/4)*4));
+    const sz0=Math.min(w,h)*.86,NN=Math.max(64,Math.min(192,Math.round(sz0*dpr/1.6/4)*4));
     const sp=spriteFor(pattern,NN);if(sp){g.imageSmoothingEnabled=false;const sz=sz0;
       if(!sp._sh){const c=document.createElement('canvas');c.width=sp.width;c.height=sp.height;const x=c.getContext('2d');x.drawImage(sp,0,0);x.globalCompositeOperation='source-in';x.fillStyle='rgba(20,10,40,.4)';x.fillRect(0,0,c.width,c.height);sp._sh=c;}
       // centre what's actually drawn (not the sprite's square), so every picture sits in the middle of its card

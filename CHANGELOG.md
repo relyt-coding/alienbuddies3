@@ -2,6 +2,9 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.173 - 2026-11-15 19:07
+- Matching game pictures are sharper (more detail) and the whitish edge around them is gone.
+
 ## v0.2.172 - 2026-11-15 19:02
 - Matching game art polished: softer light-and-shadow edges, bigger pictures, and a new moon, comet, galaxy, black hole and test tube.
 - Cheaper early unlocks: the snare is 50 W, the 4th pad 2,500 W, and the sequencer tracker 500,000 W.

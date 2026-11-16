@@ -2,6 +2,13 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.177 - 2026-11-16 07:05
+- Buddy Keys has a new first voice, STARS: a dreamy electric piano with a soft shimmer. If you already had Buddy Keys, you keep every voice you had and get STARS too.
+- Buddy Keys now plays only notes that always sound good together, so any key, any order, or a handful at once fits the beat. With no song key picked, the keys are A C D E G A C D.
+- No more clicking when you let go of a Buddy Keys note: every note now fades out smoothly.
+- Every Buddy Keys voice now has a little reverb, so it sounds bigger.
+- The starting beat no longer has a hi-hat on the very last step, so it's easier to play along.
+
 ## v0.2.176 - 2026-11-15 20:43
 - Knowledge Vault prices are spaced out: lessons and words start at 500 W and each one you own makes the next 60% pricier, so they last the whole game.
 

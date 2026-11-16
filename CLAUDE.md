@@ -34,6 +34,7 @@ README.md covers the file layout, test mode and vocals in depth; this file is th
 - Planets: nodes via `planet({...})` in 20-skill-tree (PLANET_TREE_2), sounds as `PLANET_SOUND_DEFS` entries (03b / 03c; pitched ones in
   `PITCHED_SOUNDS`), map spot in 62-tree-layout `PLANETS`, picker names in 05-pads `PA_PLANET_NAMES` / `PA_CONT_NAMES`, cutscene look in 63 `THEMES`
   (key = id without `planet_`). Order so far: Mantra → Hyphae → Timbra → Alloy → 808 → Zephyr → ??? (planet_next placeholder).
+- Buddy Keys (js/60): notes go through `playNote(id,t,f,vel)` = a per-note fade gain + reverb send; voices must `g.connect(out);g._out=out;` and return `{stop:T=>release(g,oscs,T,r)}` (never cancel the voice envelope: old Safari clicks). Scale is pentatonic (A minor pent with no song key). STARS is voice 0 since v0.2.177 (`keysV2` save flag shifts old saves up one).
 - Matching-card art: `ICONS` in `48-match-art.js`, drawn in a 100×100 box, then pixelated (alpha under ~100 is dropped, so use solid fills).
 
 ## Files 34–71 (34+ aren't listed in README) · plus 03c (Planet 808 + Planet Zephyr sounds)

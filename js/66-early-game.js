@@ -203,7 +203,7 @@
   }
 
   // ══════════ THE SEQUENCER TEASER ══════════
-  const STARTER=[0,2,4,6,8,10,12,14,15];   // hi-hats on every other step, plus the last two (the beat you'll get)
+  const STARTER=[0,2,4,6,8,10,12,14];   // hi-hats on every other step (the beat you'll get; v0.2.177: no extra last step)
   window.SEQ_STARTER_STEPS=STARTER;
   const tz=$('seqTeaser');
   let tzSteps=[],demo=false,tzReady=false,chaseT=0,chaseRaf=0;

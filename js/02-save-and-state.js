@@ -10,7 +10,7 @@ let activeSlot=-1;
 function defaultSave(){
   return{
     score:0,tiers:[],
-    shop:{seqMultLevel:-1,multLevel:-1,alienBoostLevel:-1,multiClickLevel:-1,seqMultiClickLevel:-1,seqMultiClickUnlocked:false,dismissed:[],alienBoostUnlocked:false,multiClickUnlocked:false,drumDotsUnlocked:false,seqDotsUnlocked:false,seqStepsLevel:0,partyLevel:0,partySeen:false,seqFeat:0,keysLevel:0,keysSeen:false,keysOn:false,keysVoice:0,keysOct:0},
+    shop:{seqMultLevel:-1,multLevel:-1,alienBoostLevel:-1,multiClickLevel:-1,seqMultiClickLevel:-1,seqMultiClickUnlocked:false,dismissed:[],alienBoostUnlocked:false,multiClickUnlocked:false,drumDotsUnlocked:false,seqDotsUnlocked:false,seqStepsLevel:0,partyLevel:0,partySeen:false,seqFeat:0,keysLevel:0,keysSeen:false,keysOn:false,keysVoice:0,keysOct:0,keysV2:true},
     totalAliens:0,
     drum:{pads:1,extraSounds:0,seqTracks:0},
     ts:Date.now()
@@ -35,7 +35,7 @@ function autoSave(){
   const seqLayersSnap=seqLayers.map(l=>({soundId:l.soundId,steps:[...l.steps],vols:[...l.vols],muted:l.muted}));
   writeSlot(activeSlot,{
     score,tiers,autoTiers,
-    shop:{seqMultLevel:shop.seqMultLevel,multLevel:shop.multLevel,alienBoostLevel:shop.alienBoostLevel,multiClickLevel:shop.multiClickLevel,seqMultiClickLevel:shop.seqMultiClickLevel,seqMultiClickUnlocked:shop.seqMultiClickUnlocked,dismissed:shop.dismissed||[],alienBoostUnlocked:shop.alienBoostUnlocked,multiClickUnlocked:shop.multiClickUnlocked,drumDotsUnlocked:shop.drumDotsUnlocked,seqDotsUnlocked:shop.seqDotsUnlocked,seqStepsLevel:shop.seqStepsLevel||0,partyLevel:shop.partyLevel||0,partySeen:!!shop.partySeen,seqFeat:shop.seqFeat||0,keysLevel:shop.keysLevel||0,keysSeen:!!shop.keysSeen,keysOn:!!shop.keysOn,keysVoice:shop.keysVoice||0,keysOct:shop.keysOct||0},
+    shop:{seqMultLevel:shop.seqMultLevel,multLevel:shop.multLevel,alienBoostLevel:shop.alienBoostLevel,multiClickLevel:shop.multiClickLevel,seqMultiClickLevel:shop.seqMultiClickLevel,seqMultiClickUnlocked:shop.seqMultiClickUnlocked,dismissed:shop.dismissed||[],alienBoostUnlocked:shop.alienBoostUnlocked,multiClickUnlocked:shop.multiClickUnlocked,drumDotsUnlocked:shop.drumDotsUnlocked,seqDotsUnlocked:shop.seqDotsUnlocked,seqStepsLevel:shop.seqStepsLevel||0,partyLevel:shop.partyLevel||0,partySeen:!!shop.partySeen,seqFeat:shop.seqFeat||0,keysLevel:shop.keysLevel||0,keysSeen:!!shop.keysSeen,keysOn:!!shop.keysOn,keysVoice:shop.keysVoice||0,keysOct:shop.keysOct||0,keysV2:true},
     totalAliens,alienData,
     drum:{pads:drum.pads,extraSounds:drum.extraSounds,seqTracks:drum.seqTracks},
     matchLevelsCompleted,matchingMultiplier,matchSavedState,wormMultiplier,wormProgress,phMultiplier,phProgress,
@@ -72,7 +72,7 @@ function autoSave(){
 // ══════════════════════════════════════════════
 let score=0,tiers=[],autoTiers=[];
 // multLevel = DRUMPAD ×4 dots (-1 / 0), seqMultLevel = SEQUENCER ×4 dots (-1 / 0)
-const shop={seqMultLevel:-1,multLevel:-1,alienBoostLevel:-1,multiClickLevel:-1,seqMultiClickLevel:-1,seqMultiClickUnlocked:false,dismissed:[],alienBoostUnlocked:false,multiClickUnlocked:false,drumDotsUnlocked:false,seqDotsUnlocked:false,seqStepsLevel:0,partyLevel:0,partySeen:false,seqFeat:0,keysLevel:0,keysSeen:false,keysOn:false,keysVoice:0,keysOct:0};
+const shop={seqMultLevel:-1,multLevel:-1,alienBoostLevel:-1,multiClickLevel:-1,seqMultiClickLevel:-1,seqMultiClickUnlocked:false,dismissed:[],alienBoostUnlocked:false,multiClickUnlocked:false,drumDotsUnlocked:false,seqDotsUnlocked:false,seqStepsLevel:0,partyLevel:0,partySeen:false,seqFeat:0,keysLevel:0,keysSeen:false,keysOn:false,keysVoice:0,keysOct:0,keysV2:true};
 let totalAliens=0,viewingBunker=0;
 let matchingLevel=0; // highest level unlocked (0=none, 1=level1 available, etc)
 let matchingMultiplier=1; // permanent multiplier from wins
@@ -198,6 +198,8 @@ function loadFromSave(data){
   // Store ladders (v0.2.92): Alien Party + Sequencer Upgrades
   shop.partyLevel=data.shop?.partyLevel||0;shop.partySeen=!!data.shop?.partySeen;shop.seqFeat=data.shop?.seqFeat||0;
   shop.keysLevel=data.shop?.keysLevel||0;shop.keysSeen=!!data.shop?.keysSeen;shop.keysOn=!!data.shop?.keysOn;shop.keysVoice=data.shop?.keysVoice||0;shop.keysOct=data.shop?.keysOct||0;
+  // v0.2.177: STARS became Buddy Keys' first voice; older saves keep every voice they had and get STARS on top
+  if(shop.keysLevel>0&&!data.shop?.keysV2){shop.keysLevel++;shop.keysVoice++;}
   // 32 / 64 steps, Arrangement and Song moved from the skill tree to the store: anyone who bought them keeps them
   // (the store ladder is filled up to the furthest one they owned, BPM included) and gets those gems back
   {const OLD={mt_steps32:[2,8000],mt_steps64:[3,12000],mt_arrange:[4,15000],mt_song:[5,20000]};let lv=0,refund=0;

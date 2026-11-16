@@ -4,10 +4,11 @@
 //  with one of your own buddies sitting on each key. Tap a key and its buddy hops and sings the note in the
 //  current voice. Every key tap earns exactly like a pad tap.
 //  The keys follow the song's KEY when one is set (Galaxies → Key), otherwise C major, so nothing sounds wrong.
-//  Ladder: level 1 = Buddy Keys with the OOH voice; levels 2–10 each add a voice (each +×1.2 tap mult, like sounds).
+//  Ladder: level 1 = Buddy Keys with the STARS voice (OOH before v0.2.177); levels 2–11 each add a voice (each +×1.2 tap mult, like sounds).
 //  Saved in shop.keysLevel / keysOn / keysVoice / keysOct.
 // ══════════════════════════════════════════════
 const KEYS_VOICES=[
+  {id:'stars',   name:'STARS',    color:'#5fe3d0'},   // v0.2.177: the new default (old saves are shifted up one, see js/02)
   {id:'ooh',     name:'OOH',      color:'#9d7bff'},
   {id:'aah',     name:'AAH',      color:'#ff7ac0'},
   {id:'bell',    name:'BELL',     color:'#ffd23f'},
@@ -30,15 +31,25 @@ function keysVoiceOwned(i){return i<(shop.keysLevel||0);}
   // ── voices ──
   // start(t,f,vel) → {stop(t)}: notes hold while the key is held, then fade with the voice's own release
   function env(g,t,a,peak,sus,d){g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(peak,t+a);g.gain.setTargetAtTime(peak*sus,t+a,d);}
-  function release(g,oscs,t,r){const c=getCtx();t=Math.max(t,c.currentTime);
-    // hold the level wherever the envelope is at t, then fade (never jump: .value can be stale before audio renders)
-    if(g.gain.cancelAndHoldAtTime)g.gain.cancelAndHoldAtTime(t);else g.gain.cancelScheduledValues(t);g.gain.setTargetAtTime(0,t,r/3);
-    oscs.forEach(o=>{try{o.stop(t+r*2.2);}catch(e){}});setTimeout(()=>{try{g.disconnect();}catch(e){}},(t-c.currentTime+r*2.5)*1000+80);}
+  // v0.2.177: no more clicks. Every note gets its own output gain (playNote) that only ever does one thing: sit at 1,
+  // then fade to 0 when the key lets go. The voice's own envelope is never cancelled or re-scheduled (old Safari has no
+  // cancelAndHoldAtTime, so cancelling made the level jump = a click), and the oscillators stop only once it's silent.
+  function release(g,oscs,t,r){const c=getCtx();t=Math.max(t,c.currentTime);const o=g._out;
+    if(o&&o._note){if(o._gone)return;o._gone=1;o.gain.setValueAtTime(1,t);o.gain.setTargetAtTime(0,t,r/3);}
+    else{if(g.gain.cancelAndHoldAtTime)g.gain.cancelAndHoldAtTime(t);else g.gain.cancelScheduledValues(t);g.gain.setTargetAtTime(0,t,r/3);}
+    const end=t+r*3;oscs.forEach(x=>{try{x.stop(end);}catch(e){}});
+    setTimeout(()=>{try{g.disconnect();}catch(e){}try{o&&o.disconnect();}catch(e){}},(end-c.currentTime)*1000+120);}
+  // one note: its own fade node into the music bus, plus a little of it into the built-in hall reverb
+  function playNote(id,t,f,vel){const c=getCtx(),o=c.createGain();o._note=1;o.gain.value=1;o.connect(drumMasterGain);
+    if(typeof rvbNode!=='undefined'&&rvbNode){const sg=c.createGain();sg.gain.value=REVERB_SEND[id]||.25;o.connect(sg);sg.connect(rvbNode);}
+    return SYN[id](t,f,vel,o);}
+  const REVERB_SEND={stars:.55,ooh:.35,aah:.3,choir:.45,bell:.45,marimba:.3,whistle:.3,chip:.12,robot:.1,kazoo:.12,bass:.05};
+  window._keysPlayNote=playNote;
   function vibrato(c,t,oscs,f,depth,delay){const l=c.createOscillator(),lg=c.createGain();l.frequency.value=5.3;lg.gain.setValueAtTime(0,t);lg.gain.setValueAtTime(0,t+delay);lg.gain.linearRampToValueAtTime(f*depth,t+delay+.35);
     l.connect(lg);oscs.forEach(o=>lg.connect(o.frequency));l.start(t);return l;}
   // a sung vowel: saws through the vowel's formant filters
   function vowel(F,detunes,atk,peak,rel){
-    return(t,f,vel,out)=>{const c=getCtx(),g=c.createGain(),lp=c.createBiquadFilter();lp.type='lowpass';lp.frequency.value=3600;lp.connect(g);g.connect(out);
+    return(t,f,vel,out)=>{const c=getCtx(),g=c.createGain(),lp=c.createBiquadFilter();lp.type='lowpass';lp.frequency.value=3600;lp.connect(g);g.connect(out);g._out=out;
       const mix=c.createGain();mix.gain.value=1/detunes.length;
       F.forEach(([fq,q,gn])=>{const bp=c.createBiquadFilter(),bg=c.createGain();bp.type='bandpass';bp.frequency.value=fq;bp.Q.value=q;bg.gain.value=gn*3;mix.connect(bp);bp.connect(bg);bg.connect(lp);});
       const os=detunes.map(dc=>{const o=c.createOscillator();o.type='sawtooth';o.frequency.value=f;o.detune.value=dc;o.connect(mix);o.start(t);return o;});
@@ -46,6 +57,31 @@ function keysVoiceOwned(i){return i<(shop.keysLevel||0);}
       return{stop:T=>release(g,os,T,rel)};};
   }
   const SYN={
+    // v0.2.177: STARS, the default voice. A dreamy electric piano: an FM "tine" (bright bell-ish strike that melts
+    // into a round tone), a soft sine body an octave down for warmth, two slightly detuned layers drifting apart for
+    // width, a slow shimmer (tremolo), and a good splash of the hall reverb (playNote). Every note in the scale sounds
+    // good over any beat, and mashed chords stay smooth.
+    stars(t,f,vel,out){const c=getCtx(),g=c.createGain(),lp=c.createBiquadFilter(),trem=c.createGain();
+      lp.type='lowpass';lp.Q.value=.3;lp.frequency.setValueAtTime(Math.min(9000,f*14),t);lp.frequency.setTargetAtTime(Math.max(1400,Math.min(5200,f*6)),t+.01,.35);
+      trem.gain.value=1;lp.connect(trem);trem.connect(g);g.connect(out);g._out=out;
+      const os=[];
+      const tine=(det,lvl,idx)=>{const car=c.createOscillator(),mod=c.createOscillator(),mg=c.createGain(),cg=c.createGain();
+        car.type='sine';car.frequency.value=f;car.detune.value=det;mod.type='sine';mod.frequency.value=f;mod.detune.value=det;
+        mg.gain.setValueAtTime(f*idx*(.7+.3*vel),t);mg.gain.setTargetAtTime(f*idx*.18,t,.28);mod.connect(mg);mg.connect(car.frequency);
+        cg.gain.value=lvl;car.connect(cg);cg.connect(lp);car.start(t);mod.start(t);os.push(car,mod);};
+      tine(-6,.42,1.6);tine(7,.36,1.3);
+      // the "ping" on top: a high FM partial that dies away fast
+      {const car=c.createOscillator(),mod=c.createOscillator(),mg=c.createGain(),cg=c.createGain();car.type='sine';car.frequency.value=f*2;mod.type='sine';mod.frequency.value=f*14;
+        mg.gain.setValueAtTime(f*1.4,t);mg.gain.setTargetAtTime(0,t,.05);mod.connect(mg);mg.connect(car.frequency);
+        cg.gain.setValueAtTime(.11*vel,t);cg.gain.setTargetAtTime(0,t,.12);car.connect(cg);cg.connect(lp);car.start(t);mod.start(t);os.push(car,mod);}
+      // warm body an octave down
+      {const o=c.createOscillator(),og=c.createGain();o.type='sine';o.frequency.value=f/2;og.gain.value=f<200?.08:.2;o.connect(og);og.connect(lp);o.start(t);os.push(o);}
+      // shimmer: a gentle tremolo that fades in while you hold
+      {const l=c.createOscillator(),lg=c.createGain();l.frequency.value=4.6;lg.gain.setValueAtTime(0,t);lg.gain.setValueAtTime(0,t+.25);lg.gain.linearRampToValueAtTime(.13,t+.9);
+        l.connect(lg);lg.connect(trem.gain);l.start(t);os.push(l);}
+      // piano-like: quick soft attack, a bright start that settles, then holds while the key is down
+      const pk=.3*(.7+.3*vel);g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(pk,t+.006);g.gain.setTargetAtTime(pk*.5,t+.006,.7);
+      return{stop:T=>release(g,os,T,.6)};},
     // v0.2.166: the signature OOH. A soft, warm, choir-like "ooh": a pure sine core with a gently detuned triangle
     // twin (a little width), a whisper of octave and fifth overtones for sweetness, a warm low-pass with an "oo"
     // formant bump, a breath of air on the attack, a slow-blooming vibrato, and a short soft room so it glows
@@ -53,7 +89,7 @@ function keysVoiceOwned(i){return i<(shop.keysLevel||0);}
     ooh(t,f,vel,out){const c=getCtx(),g=c.createGain(),warm=c.createBiquadFilter(),oo=c.createBiquadFilter(),sum=c.createGain();
       warm.type='lowpass';warm.frequency.value=Math.max(900,Math.min(2600,f*4.2));warm.Q.value=.4;
       oo.type='peaking';oo.frequency.value=330;oo.Q.value=1.1;oo.gain.value=4;
-      sum.connect(oo);oo.connect(warm);warm.connect(g);g.connect(out);
+      sum.connect(oo);oo.connect(warm);warm.connect(g);g.connect(out);g._out=out;
       // a soft little room: two short blurred echoes back into the output, quiet
       const rIn=c.createGain(),d1=c.createDelay(.1),d2=c.createDelay(.1),rl=c.createBiquadFilter(),rg=c.createGain();
       rIn.gain.value=1;d1.delayTime.value=.029;d2.delayTime.value=.047;rl.type='lowpass';rl.frequency.value=1800;rg.gain.value=.16;
@@ -69,27 +105,27 @@ function keysVoiceOwned(i){return i<(shop.keysLevel||0);}
       return{stop:T=>release(g,os.concat([n]),T,.5)};},
     aah:vowel([[730,6,1],[1090,7,.5],[2440,9,.18]],[0],.05,.36,.22),
     choir:vowel([[650,5,1],[1080,6,.45],[2650,8,.14]],[-11,0,9],.16,.42,.45),
-    bell(t,f,vel,out){const c=getCtx(),g=c.createGain(),car=c.createOscillator(),mod=c.createOscillator(),mg=c.createGain();g.connect(out);
+    bell(t,f,vel,out){const c=getCtx(),g=c.createGain(),car=c.createOscillator(),mod=c.createOscillator(),mg=c.createGain();g.connect(out);g._out=out;
       car.type='sine';car.frequency.value=f;mod.type='sine';mod.frequency.value=f*3.5;mg.gain.setValueAtTime(f*2.4*vel,t);mg.gain.setTargetAtTime(f*.2,t,.5);
       mod.connect(mg);mg.connect(car.frequency);car.connect(g);g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.34,t+.004);g.gain.setTargetAtTime(0,t+.004,.9);
       [car,mod].forEach(o=>o.start(t));return{stop:T=>release(g,[car,mod],T,.5)};},
-    marimba(t,f,vel,out){const c=getCtx(),g=c.createGain(),a=c.createOscillator(),b=c.createOscillator(),bg=c.createGain();g.connect(out);
+    marimba(t,f,vel,out){const c=getCtx(),g=c.createGain(),a=c.createOscillator(),b=c.createOscillator(),bg=c.createGain();g.connect(out);g._out=out;
       a.type='sine';a.frequency.value=f;b.type='sine';b.frequency.value=f*3.98;bg.gain.setValueAtTime(.3,t);bg.gain.setTargetAtTime(0,t,.03);b.connect(bg);bg.connect(g);a.connect(g);
       g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.5,t+.003);g.gain.setTargetAtTime(0,t+.003,.16);[a,b].forEach(o=>o.start(t));return{stop:T=>release(g,[a,b],T,.12)};},
-    whistle(t,f,vel,out){const c=getCtx(),g=c.createGain(),o=c.createOscillator();g.connect(out);o.type='sine';o.frequency.setValueAtTime(f*1.94,t);o.frequency.linearRampToValueAtTime(f*2,t+.06);o.connect(g);
+    whistle(t,f,vel,out){const c=getCtx(),g=c.createGain(),o=c.createOscillator();g.connect(out);g._out=out;o.type='sine';o.frequency.setValueAtTime(f*1.94,t);o.frequency.linearRampToValueAtTime(f*2,t+.06);o.connect(g);
       const n=c.createBufferSource(),buf=c.createBuffer(1,c.sampleRate*.5|0,c.sampleRate),d=buf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;n.buffer=buf;n.loop=true;
       const bp=c.createBiquadFilter(),ng=c.createGain();bp.type='bandpass';bp.frequency.value=f*2;bp.Q.value=4;ng.gain.value=.05;n.connect(bp);bp.connect(ng);ng.connect(g);n.start(t);
       o.start(t);const v=vibrato(c,t,[o],f*2,.012,.18);env(g,t,.04,.3,.9,.3);return{stop:T=>release(g,[o,n,v],T,.1)};},
-    chip(t,f,vel,out){const c=getCtx(),g=c.createGain(),o=c.createOscillator();g.connect(out);o.type='square';o.frequency.value=f*2;o.connect(g);o.start(t);
-      const v=vibrato(c,t,[o],f*2,.014,.25);g.gain.setValueAtTime(.22,t);g.gain.setValueAtTime(.17,t+.06);return{stop:T=>release(g,[o,v],T,.04)};},
+    chip(t,f,vel,out){const c=getCtx(),g=c.createGain(),o=c.createOscillator();g.connect(out);g._out=out;o.type='square';o.frequency.value=f*2;o.connect(g);o.start(t);
+      const v=vibrato(c,t,[o],f*2,.014,.25);g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.22,t+.003);g.gain.setValueAtTime(.22,t+.06);g.gain.linearRampToValueAtTime(.17,t+.08);return{stop:T=>release(g,[o,v],T,.04)};},
     robot(t,f,vel,out){const c=getCtx(),g=c.createGain(),am=c.createGain(),lp=c.createBiquadFilter(),a=c.createOscillator(),b=c.createOscillator(),l=c.createOscillator(),lg=c.createGain();
-      g.connect(out);lp.type='lowpass';lp.frequency.value=2400;lp.Q.value=3;a.type='square';b.type='sawtooth';a.frequency.value=f;b.frequency.value=f*1.006;
+      g.connect(out);g._out=out;lp.type='lowpass';lp.frequency.value=2400;lp.Q.value=3;a.type='square';b.type='sawtooth';a.frequency.value=f;b.frequency.value=f*1.006;
       a.connect(lp);b.connect(lp);lp.connect(am);am.connect(g);am.gain.value=.5;l.frequency.value=42;lg.gain.value=.5;l.connect(lg);lg.connect(am.gain);
       [a,b,l].forEach(o=>o.start(t));env(g,t,.01,.22,.9,.3);return{stop:T=>release(g,[a,b,l],T,.08)};},
-    kazoo(t,f,vel,out){const c=getCtx(),g=c.createGain(),o=c.createOscillator(),bp=c.createBiquadFilter(),bp2=c.createBiquadFilter(),g2=c.createGain();g.connect(out);
+    kazoo(t,f,vel,out){const c=getCtx(),g=c.createGain(),o=c.createOscillator(),bp=c.createBiquadFilter(),bp2=c.createBiquadFilter(),g2=c.createGain();g.connect(out);g._out=out;
       o.type='sawtooth';o.frequency.setValueAtTime(f*.93,t);o.frequency.exponentialRampToValueAtTime(f,t+.07);bp.type='bandpass';bp.frequency.value=1150;bp.Q.value=2.2;bp2.type='bandpass';bp2.frequency.value=2900;bp2.Q.value=5;g2.gain.value=.5;
       o.connect(bp);o.connect(bp2);bp2.connect(g2);bp.connect(g);g2.connect(g);o.start(t);const v=vibrato(c,t,[o],f,.02,.15);env(g,t,.02,.72,.85,.3);return{stop:T=>release(g,[o,v],T,.06)};},
-    bass(t,f,vel,out){const c=getCtx(),g=c.createGain(),lp=c.createBiquadFilter(),a=c.createOscillator(),b=c.createOscillator(),bg=c.createGain();g.connect(out);
+    bass(t,f,vel,out){const c=getCtx(),g=c.createGain(),lp=c.createBiquadFilter(),a=c.createOscillator(),b=c.createOscillator(),bg=c.createGain();g.connect(out);g._out=out;
       lp.type='lowpass';lp.Q.value=6;lp.frequency.setValueAtTime(1400,t);lp.frequency.setTargetAtTime(380,t+.01,.12);a.type='sawtooth';a.frequency.value=f/2;b.type='sine';b.frequency.value=f/4;bg.gain.value=.6;
       a.connect(lp);b.connect(bg);bg.connect(lp);lp.connect(g);[a,b].forEach(o=>o.start(t));env(g,t,.006,.3,.75,.2);return{stop:T=>release(g,[a,b],T,.08)};},
   };
@@ -97,9 +133,12 @@ function keysVoiceOwned(i){return i<(shop.keysLevel||0);}
   // ── notes ──
   const NOTE_NAMES=['C','C♯','D','E♭','E','F','F♯','G','A♭','A','B♭','B'];
   function scale(){
+    // v0.2.177: pentatonic (the 5 notes of a key that never clash), so any key, any order, any chord sounds right over
+    // the beat. With no song key set: A minor pentatonic (the same notes as C major pentatonic, so it also fits the
+    // C-based synth sounds). With a song key: that key's major or minor pentatonic.
     const on=typeof keyIsActive==='function'&&keyIsActive()&&seqKey!=null;
-    const tonic=on?seqKey:0,minor=on&&seqKeyMinor;
-    const steps=minor?[0,2,3,5,7,8,10,12]:MAJOR_SCALE.concat(12);
+    const tonic=on?seqKey:9,minor=on?!!seqKeyMinor:true;
+    const steps=minor?[0,3,5,7,10,12,15,17]:[0,2,4,7,9,12,14,16];
     let base=60+tonic;if(tonic>6)base-=12;               // keep the middle of the keyboard around middle C
     base+=12*(shop.keysOct||0);
     return steps.map(s=>base+s);
@@ -135,7 +174,7 @@ function keysVoiceOwned(i){return i<(shop.keysLevel||0);}
   }
   // ── v0.2.162: the unlock gets its own little show ──
   // The screen dims, eight glowing keys rise one by one with a buddy popping onto each, and every key sings the next
-  // note of the scale (OOH voice) up to a final chord. Then the shop closes and the keyboard is waiting. Tap to skip.
+  // note of the scale (default voice) up to a final chord. Then the shop closes and the keyboard is waiting. Tap to skip.
   function playKeysUnlockFx(){
     if(document.getElementById('bkUnlockFx'))return true;
     const wrap=document.createElement('div');wrap.id='bkUnlockFx';
@@ -151,7 +190,7 @@ function keysVoiceOwned(i){return i<(shop.keysLevel||0);}
     const STEP=.17,T0=.35,ENDK=T0+N*STEP,DUR=ENDK+1.9,col=KEYS_VOICES[0].color;
     let t0=performance.now(),done=false,raf=0;const played=new Array(N).fill(false);let chord=false;
     const c=getCtx(),sc=scale(),f=k=>440*Math.pow(2,(sc[k]-69)/12);
-    function sing(k,len,vel){try{const s=SYN.ooh(c.currentTime,f(k),vel||1,drumMasterGain);s.stop(c.currentTime+len);}catch(e){}}
+    function sing(k,len,vel){try{const s=playNote(KEYS_VOICES[0].id,c.currentTime,f(k),vel||1);s.stop(c.currentTime+len);}catch(e){}}
     const ease=x=>1-Math.pow(1-Math.max(0,Math.min(1,x)),3),pop=x=>{x=Math.max(0,Math.min(1,x));return x<.6?x/.6*1.15:1.15-.15*(x-.6)/.4;};
     function frame(now){
       if(done)return;const t=(now-t0)/1000;
@@ -199,7 +238,7 @@ function keysVoiceOwned(i){return i<(shop.keysLevel||0);}
   const area=document.querySelector('#gameView .pad-area')||document.querySelector('.pad-area');
   const grid=$('padGrid');
   const root=document.createElement('div');root.id='buddyKeys';root.setAttribute('aria-hidden','true');
-  root.innerHTML=`<div class="bk-bar"><button class="bk-arrow" id="bkPrev" aria-label="previous voice"></button><div class="bk-voice" id="bkVoice">OOH</div><button class="bk-arrow r" id="bkNext" aria-label="next voice"></button>
+  root.innerHTML=`<div class="bk-bar"><button class="bk-arrow" id="bkPrev" aria-label="previous voice"></button><div class="bk-voice" id="bkVoice">STARS</div><button class="bk-arrow r" id="bkNext" aria-label="next voice"></button>
     <div class="bk-oct"><button id="bkOctDn" aria-label="octave down">−</button><span id="bkOct">MID</span><button id="bkOctUp" aria-label="octave up">+</button></div></div><canvas id="bkCanvas"></canvas>`;
   if(area){area.appendChild(root);}
   // PADS | KEYS toggle: sits just above the top-right corner of the pads (or the keyboard), in both modes
@@ -314,7 +353,7 @@ function keysVoiceOwned(i){return i<(shop.keysLevel||0);}
     getCtx();const c=getCtx(),t=(typeof padTapTime==='function')?padTapTime(ev):c.currentTime;
     const v=voice(),f=440*Math.pow(2,(scale()[i]-69)/12);
     if(held[i]){held[i].n++;try{held[i].s.stop(t);}catch(e){}}else held[i]={n:1};
-    try{held[i].s=SYN[v.id](t,f,1,drumMasterGain);}catch(e){held[i].s={stop(){}};}
+    try{held[i].s=playNote(v.id,t,f,1);}catch(e){held[i].s={stop(){}};}
     hop[i]=performance.now()/1000;notes.push({i,t0:hop[i],col:v.color,dx:(Math.random()-.5)*.6});if(notes.length>24)notes.shift();
     window._lastPadHit=performance.now();
     if(typeof addSeqEnergy==='function')addSeqEnergy(SEQ_ENERGY_PER_TAP);
@@ -323,7 +362,7 @@ function keysVoiceOwned(i){return i<(shop.keysLevel||0);}
     kick();
   }
   function lift(i){const h=held[i];if(!h)return;h.n--;if(h.n<=0){try{h.s.stop(getCtx().currentTime);}catch(e){}delete held[i];kick();}}
-  function preview(){const c=getCtx();try{const s=SYN[voice().id](c.currentTime,440*Math.pow(2,(scale()[0]-69)/12),1,drumMasterGain);s.stop(c.currentTime+.35);}catch(e){}hop[0]=performance.now()/1000;kick();}
+  function preview(){const c=getCtx();try{const s=playNote(voice().id,c.currentTime,440*Math.pow(2,(scale()[0]-69)/12),1);s.stop(c.currentTime+.35);}catch(e){}hop[0]=performance.now()/1000;kick();}
   const fingers={};
   function relX(cx){return cx-cv.getBoundingClientRect().left;}
   cv.addEventListener('touchstart',e=>{if(e.cancelable)e.preventDefault();for(const tc of e.changedTouches){const i=keyAt(relX(tc.clientX));fingers[tc.identifier]=i;press(i,e);}},{passive:false});

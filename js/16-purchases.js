@@ -54,8 +54,9 @@ function buySeqTrack(){
     seqEnergy=SEQ_ENERGY_MAX;
     seqHidden=false;
     rebuildSeqUI();
-    // it starts with a beat already in it (hi-hats on every other step plus the last two), so it demos itself
-    {const L0=seqLayers[0];if(L0&&!L0.steps.some(Boolean))(window.SEQ_STARTER_STEPS||[0,2,4,6,8,10,12,14,15]).forEach(i=>{L0.steps[i]=true;L0.vols[i]=100;
+    // it starts with a beat already in it (hi-hats on every other step), so it demos itself
+    // (v0.2.177: no extra hit on the last step: an even 8th-note pulse is easier to play along with)
+    {const L0=seqLayers[0];if(L0&&!L0.steps.some(Boolean))(window.SEQ_STARTER_STEPS||[0,2,4,6,8,10,12,14]).forEach(i=>{L0.steps[i]=true;L0.vols[i]=100;
       [L0.stepEls[i],L0.fullStepEls&&L0.fullStepEls[i]].forEach(el=>{if(el){el.classList.add('on');el.style.opacity='1';}});});}
     applySeqView();
     // the sequencer boots up on screen first, then starts playing

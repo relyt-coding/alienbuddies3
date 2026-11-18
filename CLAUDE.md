@@ -54,8 +54,14 @@ README.md covers the file layout, test mode and vocals in depth; this file is th
 61 keyboard steady · 62 tree layout · 63–64 unlock cutscenes · 65 new-file intro + unlock FX · 66 early game ("level 1") · 67 (removed in v0.2.157: the background groove) ·
 68 Knowledge Vault · 69 thumb nav (bottom row on upright phones) + PARTY menu + level 3 disco-ball teaser ·
 70 Alien Gem look (Gem Buddy) · 71 level 4 gem ring + gems flying off buddies + MY ACCOUNT sheet ·
-73 Vault big batch (lessons + music words) · 74 Vault price table (generated) ·
+73 Vault big batch (lessons + music words) · 74 Vault price table (generated) · 75 whole-bunker scroll + floating games dock ·
 72 energy/gem math/party corner + file-select hum (`titleHum`): `openGemStats()` (bunker + shop gem counters), PARTY pill top-left (`.pb-corner`), MY ACCOUNT in Settings only, sequencer tracker ACTIVATE (`seqTrackerActive`, `SEQ_TRACKER_COST`)
+
+- Bunker (v0.2.181, js/75): `.bunker-body` is the scroll box (the grid wrapper no longer scrolls; it only clips the grid's pinch-zoom).
+  `#bunkerDock` (position:sticky; bottom:0) holds `#mgList` / `#bbOpenBtn` / `#mgGamesBtn` so they float while you scroll. The scroll box
+  ends ABOVE the bottom buttons (margin-bottom, not padding: sticky respects padding, so content would show through under the dock).
+  Matching Game: BUDDIES ON/OFF (`#matchBuddyBtn`, js/08) adds body class `match-hide-buddies`; remembered in localStorage `ab2_matchBuddiesOff`.
+- Skill-tree descriptions: `gemsOnly` (js/20) strips any written "×N Alien Gems" and appends the node's REAL `gemMult`, so never hand-write gem amounts.
 
 ## Testing without a phone
 Serve the folder (`python3 -m http.server`) and drive it with Playwright + `/usr/bin/google-chrome`, viewport 390×844 with an iPhone user agent

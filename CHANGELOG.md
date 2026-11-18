@@ -2,6 +2,12 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.181 - 2026-11-18 15:10
+- The whole bunker scrolls now, not just the grid of buddies. The Matching Game button (or GAMES, once the Cockpit is open) floats at the bottom while you scroll, so it's always in reach.
+- Matching Game: a new BUDDIES ON / OFF button hides the buddies floating over the cards, for when there are lots of them. The game remembers your choice.
+- The Matching Game shows your energy in joules, like everywhere else.
+- Skill tree: every upgrade now shows its real Alien Gem bonus, and none of them promise effects they don't have. Alien Awakening, DNA Splice and Egg Incubator (formerly Ascension) say what they'll become: they're coming soon.
+
 ## v0.2.180 - 2026-11-18 08:40
 - Your music now makes energy, counted in joules, the real unit for energy. A single tap starts tiny, at 0.1 millijoules (a thousandth of a joule is a millijoule), and you work your way up through joules, kilojoules, megajoules and beyond.
 - Everything costs the same as before compared with a tap, and your saves carry over exactly as they were.

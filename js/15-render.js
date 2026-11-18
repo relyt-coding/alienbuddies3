@@ -111,12 +111,8 @@ function renderUI(newlyLit){
     const el=document.getElementById('matchScoreDisplay');
     const modal=document.getElementById('matchingModal');
     if(el&&modal&&modal.style.display!=='none'){
-      const s=score;
-      if(s===0){el.textContent='';}
-      else{
-        const e=Math.floor(Math.log10(s));
-        el.textContent='★ '+(s/Math.pow(10,e)).toFixed(2).replace(/\.?0+$/,'')+'E'+e;
-      }
+      // your energy, in joules like everywhere else (it used to show the raw internal number, e.g. "1E40" for 1e36 J)
+      el.innerHTML=score>0?'★ '+fmtJh(score,3):'';
     }
   };
 })();

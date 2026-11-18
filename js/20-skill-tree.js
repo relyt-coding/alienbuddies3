@@ -467,7 +467,7 @@ const SKILL_TREE_NODES = [
 
   // ── QUAD SUN 2 — Musical Toolkit (↗) ──
   {id:'sun_points', icon:'☀', name:'Quad Sun II', desc:'The second Quad Sun. Opens the Musical Toolkit path: tools and features to make your music better. Grants ×2 points.', cost:150, requires:['core'], x:200, y:-200, branch:'points', mult:2},
-  {id:'neural_tap_1', icon:'🎼', name:'Tuning Fork', desc:'The first tool in your Musical Toolkit. Every point source earns ×1.5.', cost:200, requires:['sun_points'], x:340, y:-300, branch:'points', mult:1.5},
+  {id:'neural_tap_1', icon:'🎼', name:'Tuning Fork', desc:'The first tool in your Musical Toolkit: every music tool on this path grows from here.', cost:200, requires:['sun_points'], x:340, y:-300, branch:'points', mult:1.5},
   // ── Musical Toolkit (v0.2.90): each big HUB opens a new idea, and its small branches unlock the actual features.
   //    Hubs: ×1.5 Alien Gems + a music fact. Branches: ×1.2 Alien Gems. Sequencer features stay hidden until bought.
   ...MUSIC_TREE_NODES,
@@ -493,9 +493,9 @@ const SKILL_TREE_NODES = [
   {id:'buddy_designer', icon:'🎨', name:'Buddy Designer', desc:'Design your alien buddies: change the colours of their body, eyes, mouth, antennae, tips and feet, plus antenna length and eye size. Open any alien in the Bunker and tap DESIGN BUDDY.', cost:120, requires:['sun_aliens'], x:340, y:300, branch:'aliens', mult:1.5},
   {id:'gem_harvester_1', icon:'💎', name:'Gem Harvester I', desc:'Gem rate ×1.5 per alien per minute.', cost:200, requires:['buddy_designer'], x:460, y:360, branch:'aliens', mult:1.5},
   {id:'gem_harvester_2', icon:'💎', name:'Gem Harvester II', desc:'Gem rate ×2 per alien per minute.', cost:400, requires:['gem_harvester_1'], x:600, y:420, branch:'aliens', mult:1.5},
-  {id:'alien_awakening', icon:'🌟', name:'Alien Awakening', desc:'Bouncers glow and leave energy trails.', cost:350, requires:['gem_harvester_1'], x:680, y:340, branch:'aliens', mult:1.5},
-  {id:'dna_splice', icon:'🧬', name:'DNA Splice', desc:'Aliens occasionally double-tap automatically.', cost:600, requires:['alien_awakening'], x:800, y:440, branch:'aliens', mult:1.5},
-  {id:'ascension', icon:'🌠', name:'Ascension', desc:'All alien effects ×3 and your egg begins to incubate.', cost:900, requires:['dna_splice'], x:880, y:520, branch:'aliens', mult:1.5},
+  {id:'alien_awakening', icon:'🌟', name:'Alien Awakening', desc:'Coming soon: your buddies glow and leave trails, and you can turn up their speed from the party menu.', cost:350, requires:['gem_harvester_1'], x:680, y:340, branch:'aliens', mult:1.5},
+  {id:'dna_splice', icon:'🧬', name:'DNA Splice', desc:'Coming soon: mix the traits of two buddies to make a brand-new egg.', cost:600, requires:['alien_awakening'], x:800, y:440, branch:'aliens', mult:1.5},
+  {id:'ascension', icon:'🌠', name:'Egg Incubator', desc:'Coming soon: hatch special eggs into buddies that can race.', cost:900, requires:['dna_splice'], x:880, y:520, branch:'aliens', mult:1.5},
 ];
 // ── The skill tree only boosts Alien Gems (no point bonuses) ──
 // Balance (v0.2.113): every gem bonus multiplies your gems PER MINUTE (never the gems you already have), and the bonuses
@@ -514,8 +514,8 @@ const SKILL_TREE_NODES = [
     else if(n.mult>0)gm=n.branch==='planets'?1.01:1.02;
     n.mult=0;delete n.seqBoost;
     if(gm!==1)n.gemMult=gm;
-    let d=(n.desc||'').replace(/\s*Grants ×[\d.]+ points\.?/i,'').replace(/,?\s*×[\d.]+ points\.?/gi,'').trim();
-    if(gm!==1&&!/Alien Gems/.test(d))d=(d&&!/[.!?]$/.test(d)?d+'.':d)+' '+fmt(gm)+' Alien Gems.';
+    let d=(n.desc||'').replace(/\s*Grants ×[\d.]+ points\.?/i,'').replace(/,?\s*×[\d.]+ points\.?/gi,'').replace(/\s*×[\d.]+ Alien Gems\.?/gi,'').trim();
+    if(gm!==1)d=(d&&!/[.!?]$/.test(d)?d+'.':d)+' '+fmt(gm)+' Alien Gems.';
     d=d.trim();if(d&&!/[.!?]$/.test(d))d+='.';
     n.desc=d;
   });

@@ -2753,3 +2753,23 @@ body.phone-land .keys-switch-seq button{font-size:.72rem;padding:.2rem .42rem;}
 .ju{font-family:'Space Mono',monospace;font-weight:700;text-transform:none;letter-spacing:-.03em;}
 span.ju{font-size:.82em;}
 .score .w-unit.ju{font-size:.32em;letter-spacing:-.02em;}
+
+/* v0.2.181 matching game: BUDDIES OFF hides the buddies floating over the cards */
+body.match-open.match-hide-buddies #alienLayer{visibility:hidden;}
+
+/* v0.2.181: the whole bunker scrolls (js/75); the grid is full height and clips only for its pinch-zoom */
+.bunker-body{overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y;min-height:0;scrollbar-width:none;-ms-overflow-style:none;}
+.bunker-body::-webkit-scrollbar{display:none;width:0;height:0;}
+.bunker-grid-wrap{flex:none;overflow:hidden;}
+/* the games buttons float at the bottom while you scroll */
+#bunkerDock{position:-webkit-sticky;position:sticky;bottom:0;z-index:5;flex:none;margin:0 -1.1rem;padding:.9rem 0 .5rem;
+  background:linear-gradient(rgba(10,10,10,0),rgba(10,10,10,.9) 38%,rgba(10,10,10,.97));}
+#bunkerDock.empty{padding:0;background:none;}
+#bunkerDock #mgList{padding:0 1rem .15rem !important;}
+#bunkerDock #bbOpenBtn,#bunkerDock #mgGamesBtn{margin-top:.35rem;margin-bottom:.15rem;}
+/* the scroll area ends above the buttons that sit over the bottom of the bunker (SETTINGS etc.), so nothing scrolls behind them
+   and the floating dock lands right on top of them */
+body .bunker-body{padding-bottom:0;margin-bottom:5.5rem;}
+body.desktop-mode .bunker-body{padding-bottom:0;margin-bottom:5rem;}
+body.phone-land .bunker-body{padding-bottom:0;margin-bottom:1.5rem;}
+#bunkerView .bunker-progress-wrap{padding-bottom:.6rem;}

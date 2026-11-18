@@ -502,3 +502,15 @@ addEventListener('resize',()=>{if(matchResizeRAF)return;matchResizeRAF=requestAn
 
 // card sizes change with the window: repaint the drawn faces to stay crisp
 let _mfT=0;addEventListener('resize',()=>{clearTimeout(_mfT);_mfT=setTimeout(()=>{if(matchCardEls.length&&document.body.classList.contains('match-open'))paintMatchFaces();},200);});
+
+// ── Buddies over the cards: ON / OFF (v0.2.181) ──
+// The buddies float over the matching game on purpose, but with lots of them it gets busy. The header button hides them
+// while you play (the cards' own buddy art is unaffected). Remembered on this device.
+(function(){
+  const btn=document.getElementById('matchBuddyBtn');if(!btn)return;
+  let off=false;try{off=localStorage.getItem('ab2_matchBuddiesOff')==='1';}catch(e){}
+  function paint(){document.body.classList.toggle('match-hide-buddies',off);btn.textContent=off?'BUDDIES OFF':'BUDDIES ON';
+    btn.setAttribute('aria-pressed',off?'false':'true');btn.style.color=off?'#664444':'#33aa66';btn.style.borderColor=off?'#3a1a1a':'#1a3a2a';}
+  btn.addEventListener('click',()=>{off=!off;try{localStorage.setItem('ab2_matchBuddiesOff',off?'1':'0');}catch(e){}paint();});
+  paint();
+})();

@@ -490,7 +490,11 @@ const SKILL_TREE_NODES = [
 
   // ── QUAD SUN 4 — Alien Evolution (↘) ──
   {id:'sun_aliens', icon:'☀', name:'Quad Sun IV', desc:'The fourth Quad Sun. Opens the Alien Evolution path. Grants ×2 points.', cost:150, requires:['core'], x:200, y:200, branch:'aliens', mult:2},
-  {id:'buddy_designer', icon:'🎨', name:'Buddy Designer', desc:'Design your alien buddies: change the colours of their body, eyes, mouth, antennae, tips and feet, plus antenna length and eye size. Open any alien in the Bunker and tap DESIGN BUDDY.', cost:120, requires:['sun_aliens'], x:340, y:300, branch:'aliens', mult:1.5},
+  {id:'buddy_designer', icon:'🎨', name:'Alien Designer', desc:'Dress your alien buddies: hats, glasses and shoes. Comes with a starter piece of each; more come from the Best Buddy puzzles. Open any alien in the Bunker and tap ALIEN DESIGNER.', cost:120, requires:['sun_aliens'], x:340, y:300, branch:'aliens', mult:1.5},
+  {id:'pigment_lab', icon:'🧪', name:'Pigment Lab', desc:'Recolour your buddies in the Alien Designer: body, eyes, mouth, antennae, tips and feet.', cost:250, requires:['buddy_designer'], x:190, y:360, branch:'aliens',
+    fact:'Pigments make colour by soaking up some light and bouncing the rest back: a red pigment reflects red light and absorbs the others. That\'s why mixing paints makes colours darker, while mixing coloured lights makes them brighter.'},
+  {id:'shape_shifter', icon:'📏', name:'Shape Shifter', desc:'Change your buddies\' antenna length and eye size in the Alien Designer.', cost:400, requires:['pigment_lab'], x:110, y:450, branch:'aliens',
+    fact:'Real antennae are super-senses: insects use them to smell, touch and even hear. A male mosquito hears the hum of another mosquito\'s wings through the tiny hairs on its feathery antennae.'},
   {id:'gem_harvester_1', icon:'💎', name:'Gem Harvester I', desc:'Gem rate ×1.5 per alien per minute.', cost:200, requires:['buddy_designer'], x:460, y:360, branch:'aliens', mult:1.5},
   {id:'gem_harvester_2', icon:'💎', name:'Gem Harvester II', desc:'Gem rate ×2 per alien per minute.', cost:400, requires:['gem_harvester_1'], x:600, y:420, branch:'aliens', mult:1.5},
   {id:'alien_awakening', icon:'🌟', name:'Alien Awakening', desc:'Coming soon: your buddies glow and leave trails, and you can turn up their speed from the party menu.', cost:350, requires:['gem_harvester_1'], x:680, y:340, branch:'aliens', mult:1.5},

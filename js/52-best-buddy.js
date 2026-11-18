@@ -27,7 +27,9 @@ window._abSaveHooks=window._abSaveHooks||[];window._abLoadHooks=window._abLoadHo
 function bbOn(){return typeof unlockedSkills!=='undefined'&&!!unlockedSkills.best_buddy;}
 function bbAcc(i){const a=alienData[i];if(!a)return null;if(!a.acc)a.acc={h:null,e:null,s:null,p:null};return a.acc;}
 function bbIdx(){const n=typeof totalAliens!=='undefined'?totalAliens:0;let i=buddyExtras.best|0;if(i>=n)i=n-1;if(i<0)i=0;return i;}
-function bbItemOwned(k,i){return typeof unlockedSkills!=='undefined'&&!!unlockedSkills['acc_p'+(i+1)];}
+function bbItemOwned(k,i){if(typeof unlockedSkills==='undefined')return false;
+  if(window.buddyAcc&&buddyAcc.STARTER&&buddyAcc.STARTER[k]===i)return !!unlockedSkills.buddy_designer;   // the starter pieces come with ALIEN DESIGNER
+  return !!unlockedSkills['acc_p'+(i+1)];}
 
 (function(){
   const $=id=>document.getElementById(id);
@@ -117,7 +119,7 @@ function paintAccGrid(){
   const look=typeof buddyLook==='function'?buddyLook(i):null;
   const tiles=[];
   cat.list.forEach((it,j)=>{const own=bbItemOwned(bbCat,j),b=document.createElement('button');b.className='bb-tile'+(own?'':' locked')+(acc[bbCat]===j?' on':'');
-    const nm=document.createElement('small');nm.textContent=own?it.name:'PUZZLE '+(j+1);
+    const nm=document.createElement('small');nm.textContent=own?it.name:(buddyAcc.STARTER&&buddyAcc.STARTER[bbCat]===j?'ALIEN DESIGNER':'PUZZLE '+(j+1));
     if(own){tiles.push([b,j]);}else{const l=document.createElement('span');l.className='bb-lock';l.textContent='🔒';b.appendChild(l);}
     b.appendChild(nm);
     b.onclick=()=>{if(!own){showToast('🧩 Solve puzzle '+(j+1)+' on the Alien Evolution path to unlock '+it.name);return;}acc[bbCat]=acc[bbCat]===j?null:j;accChanged(i);};

@@ -17,7 +17,28 @@ function defaultSave(){
   };
 }
 function readSlot(i){try{const d=localStorage.getItem(SAVE_KEYS[i]);return d?JSON.parse(d):null;}catch(e){return null;}}
-function writeSlot(i,data){try{localStorage.setItem(SAVE_KEYS[i],JSON.stringify({...data,ts:Date.now()}));}catch(e){}}
+function writeSlot(i,data){try{localStorage.setItem(SAVE_KEYS[i],JSON.stringify({...data,run:OFFICIAL_RUN,ts:Date.now()}));}catch(e){}}
+// ── THE OFFICIAL RUN (v0.2.182) ──
+// Every save written from now on is stamped run:OFFICIAL_RUN. A 0.2 save without the stamp comes from the test period
+// before the game settled (v0.2.0–181); it is moved to a hidden backup key (ab2_prerun_slotN, never shown, kept in case a
+// file ever needs recovering) and its slot starts empty. 0.1 saves (ab_slot0..2) and test-mode saves are never touched,
+// and device settings live in other keys. The file-select screen shows a one-time note when this happened.
+const OFFICIAL_RUN=1;
+(function startOfficialRun(){
+  if(TEST_MODE)return;
+  let moved=0;
+  for(let i=0;i<SAVE_KEYS.length;i++){
+    try{
+      const raw=localStorage.getItem(SAVE_KEYS[i]);if(!raw)continue;
+      let d=null;try{d=JSON.parse(raw);}catch(e){}
+      if(d&&d.run>=OFFICIAL_RUN)continue;
+      const bk='ab2_prerun_slot'+i;if(!localStorage.getItem(bk))localStorage.setItem(bk,raw);
+      const nm=localStorage.getItem(SLOT_NAME_PREFIX+i);if(nm!=null&&!localStorage.getItem(bk+'_name'))localStorage.setItem(bk+'_name',nm);
+      localStorage.removeItem(SAVE_KEYS[i]);localStorage.removeItem(SLOT_NAME_PREFIX+i);moved++;
+    }catch(e){}
+  }
+  if(moved){try{localStorage.setItem('ab2_runNotice','1');}catch(e){}}
+})();
 function getSlotName(i){try{return localStorage.getItem(SLOT_NAME_PREFIX+i)||'';}catch(e){return'';}}
 function setSlotName(i,name){try{localStorage.setItem(SLOT_NAME_PREFIX+i,name);}catch(e){}}
 function deleteSlot(i){try{localStorage.removeItem(SAVE_KEYS[i]);localStorage.removeItem(SLOT_NAME_PREFIX+i);}catch(e){}}

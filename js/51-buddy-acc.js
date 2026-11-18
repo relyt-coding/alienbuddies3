@@ -283,6 +283,14 @@
     return cv;
   }
 
-  window.buddyAcc={HEAD,EYES,SHOES,PLAT,attach,shoe,shoeSpec,platform,icon,
+  // ── starter pieces (v0.2.182): one hat, one pair of glasses and one pair of shoes come free with the ALIEN DESIGNER node.
+  //    They're added at the END of each list so puzzle k still gives item k; STARTER says which index each one is.
+  HEAD.push({name:'Felt Bow',d(g,u,f){const c='#ff5fa2',d2='#c42a7c',x=f.fx*4*u;
+    poly(g,[[x,-3*u],[x-15*u,-12*u],[x-13*u,5*u]],LG(g,x-15*u,0,x,0,[lt(c,.25),c]));poly(g,[[x,-3*u],[x+15*u,-12*u],[x+13*u,5*u]],LG(g,x,0,x+15*u,0,[c,d2]));
+    LINE(g,[[x-11*u,-7*u],[x-5*u,-3*u]],'rgba(255,255,255,.35)',1.2*u);C(g,x,-3*u,4.2*u,RG(g,x-1.3*u,-4.3*u,0,4.5*u,[lt(c,.4),c,d2]));}});
+  EYES.push({name:'Doodle Specs',d(g,u,ex,f){[-1,1].forEach(s=>{lens(g,s*ex,8.5*u,'rgba(255,255,255,.07)','#2a2a33',1.5*u);glint(g,s*ex,8.5*u);});bridge(g,ex,8.5*u,'#2a2a33',1.4*u);}});
+  SHOES.push({name:'Craft Sneaks',top:'#4dc3ff',sole:'#f5f5fa',pat:'laces',pc:'#f5f5fa'});
+  const STARTER={h:HEAD.length-1,e:EYES.length-1,s:SHOES.length-1};
+  window.buddyAcc={HEAD,EYES,SHOES,PLAT,attach,shoe,shoeSpec,platform,icon,STARTER,
     CATS:[{k:'h',name:'HEAD',list:HEAD},{k:'e',name:'EYES',list:EYES},{k:'s',name:'SHOES',list:SHOES},{k:'p',name:'STAND',list:PLAT}]};
 })();

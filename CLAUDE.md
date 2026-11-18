@@ -49,7 +49,7 @@ README.md covers the file layout, test mode and vocals in depth; this file is th
 ## Files 34–71 (34+ aren't listed in README) · plus 03c (Planet 808 + Planet Zephyr sounds)
 34 wide layouts (sideways phone / desktop DAW) · 35 solar skill tree · 36 party styles · 37 store unlock ladders · 38–39 Worm Whack ·
 40–41 Planet Hop · 42 shared minigame feel · 43 your beats as levels · 44 minigame hub + Cockpit · 45 Beat Defense · 46 buddy drawing ·
-47 Buddy Designer · 48 matching art · 49 shop grid · 50 egg hatch reveal · 51 buddy accessories · 52 Best Buddy · 53 accessory puzzles ·
+47 Alien Designer (accessories / Pigment Lab / Shape Shifter) · 48 matching art · 49 shop grid · 50 egg hatch reveal · 51 buddy accessories · 52 Best Buddy · 53 accessory puzzles ·
 54 theme songs · 55 audio wake-up · 56 settings VIEW · 57 shop without emoji · 58 name card keyboard · 59 galaxy intro · 60 Buddy Keys ·
 61 keyboard steady · 62 tree layout · 63–64 unlock cutscenes · 65 new-file intro + unlock FX · 66 early game ("level 1") · 67 (removed in v0.2.157: the background groove) ·
 68 Knowledge Vault · 69 thumb nav (bottom row on upright phones) + PARTY menu + level 3 disco-ball teaser ·
@@ -61,6 +61,12 @@ README.md covers the file layout, test mode and vocals in depth; this file is th
   `#bunkerDock` (position:sticky; bottom:0) holds `#mgList` / `#bbOpenBtn` / `#mgGamesBtn` so they float while you scroll. The scroll box
   ends ABOVE the bottom buttons (margin-bottom, not padding: sticky respects padding, so content would show through under the dock).
   Matching Game: BUDDIES ON/OFF (`#matchBuddyBtn`, js/08) adds body class `match-hide-buddies`; remembered in localStorage `ab2_matchBuddiesOff`.
+- OFFICIAL RUN (v0.2.182, js/02 `startOfficialRun`): `writeSlot` stamps every save `run:OFFICIAL_RUN`. On load, any 0.2 slot without the stamp is
+  moved to `ab2_prerun_slotN` (+ `_name`; hidden, for recovery only) and the slot starts empty; js/10 shows a one-time `#runNotice`
+  (`ab2_runNotice`). 0.1 saves (`ab_slotN`), test-mode saves (`ab2t_*`) and device settings are never touched. Never write saves without writeSlot.
+- Designer split (v0.2.182, js/47): node `buddy_designer` is now ALIEN DESIGNER (HAT / GLASSES / SHOES tabs → `alienData[i].acc`),
+  `pigment_lab` adds the six colour tabs, `shape_shifter` adds SHAPE (antenna length, eye size); locked tabs are hidden. Starter pieces are
+  appended to the accessory lists (`buddyAcc.STARTER`, js/51) so puzzle k still gives item k; `bbItemOwned` (js/52) grants them with buddy_designer.
 - Skill-tree descriptions: `gemsOnly` (js/20) strips any written "×N Alien Gems" and appends the node's REAL `gemMult`, so never hand-write gem amounts.
 
 ## Testing without a phone

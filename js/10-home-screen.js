@@ -196,3 +196,13 @@ function checkForUpdate(){
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')checkForUpdate();});
 window.addEventListener('pageshow',e=>{if(e.persisted)checkForUpdate();});
 setTimeout(checkForUpdate,1500);
+
+// ── one-time note after the official-run fresh start (js/02 startOfficialRun) ──
+(function(){
+  let show=false;try{show=localStorage.getItem('ab2_runNotice')==='1';}catch(e){}
+  if(!show||!slotsContainer)return;
+  const n=document.createElement('div');n.id='runNotice';
+  n.innerHTML='<b>WELCOME TO THE OFFICIAL RUN!</b><span>Alien Buddies 0.2 has changed so much since testing began that every 0.2 save file starts fresh from here. Thank you for playing early!</span><button type="button" id="runNoticeOk">LET\'S GO</button>';
+  slotsContainer.parentNode.insertBefore(n,slotsContainer);
+  document.getElementById('runNoticeOk').addEventListener('click',()=>{try{localStorage.removeItem('ab2_runNotice');}catch(e){}n.remove();});
+})();

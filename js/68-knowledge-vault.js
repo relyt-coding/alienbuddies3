@@ -49,7 +49,7 @@ const VAULT_LEARN=[
   // ALIEN BUDDIES
   ['l_hatch','buddies','Hatching','Every alien buddy hatches from an egg, and no two games hatch them in the same order. Every 10th buddy comes from a special egg.',()=>_vBuddies(1)],
   ['l_bunker','buddies','The Bunker','The bunker is your buddies\' home: 100 buddies fit in each bunker. Tap any buddy to see it up close and give it a name.',()=>_vBuddies(1)],
-  ['l_designer','buddies','Buddy Designer','With the Buddy Designer you can change your buddies\' colours: body, eyes, antennae and shoes.',()=>_vHas('buddy_designer')],
+  ['l_designer','buddies','Alien Designer','In the Alien Designer you can dress your buddies in hats, glasses and shoes. Every buddy keeps its own outfit, and it shows everywhere that buddy goes.',()=>_vHas('buddy_designer')],
   // DRUM PADS
   ['l_kit','pads','The Drum Kit','Most beats are built from three drums. The KICK is the low thump you feel in your chest, the SNARE is the sharp crack, and the HI-HAT is the light tick that keeps time between them.',()=>_vPads(2)],
   ['l_backbeat','pads','The Backbeat','Count "1, 2, 3, 4" along with a song. In most pop, rock and hip-hop the kick lands on 1 and 3 and the snare on 2 and 4. That snare on 2 and 4 is called the backbeat, and it\'s what makes you want to nod your head.',()=>_vPads(3)],

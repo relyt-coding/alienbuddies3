@@ -2,6 +2,14 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.182 - 2026-11-18 16:05
+- The official run starts here! Alien Buddies 0.2 has changed so much since testing began that every 0.2 save file starts fresh with this version. Thank you for playing early. (Your 0.1 saves are untouched.)
+- The Buddy Designer is now three upgrades on the Alien Evolution path:
+  - ALIEN DESIGNER: dress your buddies in hats, glasses and shoes. It comes with a starter Felt Bow, Doodle Specs and Craft Sneaks; more come from the Best Buddy puzzles.
+  - PIGMENT LAB: recolour your buddies' body, eyes, mouth, antennae, tips and feet.
+  - SHAPE SHIFTER: change antenna length and eye size.
+- Two new science facts in the Knowledge Vault, about pigments and about real insect antennae.
+
 ## v0.2.181 - 2026-11-18 15:10
 - The whole bunker scrolls now, not just the grid of buddies. The Matching Game button (or GAMES, once the Cockpit is open) floats at the bottom while you scroll, so it's always in reach.
 - Matching Game: a new BUDDIES ON / OFF button hides the buddies floating over the cards, for when there are lots of them. The game remembers your choice.

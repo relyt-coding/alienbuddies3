@@ -1,7 +1,7 @@
 
 // ══════════════════════════════════════════════
 //  SIDEWAYS PHONE + DESKTOP DAW LAYOUTS
-//  phone-land : phone held sideways — slim header (score + pts/sec), sequencer fills the middle, pads in one row
+//  phone-land : phone held sideways — slim header (score + energy per second), sequencer fills the middle, pads in one row
 //  daw-wide   : desktop with the sequencer unlocked and both side panels closed — the game column spreads
 //               across the whole window. With exactly one panel open, an opt-in ⤢ FILL button stretches
 //               it into the empty side; opening or closing any panel resets that choice.
@@ -13,12 +13,12 @@
   // ── points per second (real gains over the last few seconds; spending is ignored) ──
   const rateBuckets=[0,0,0,0,0];let rateNow=0;
   window._rateAdd=function(n){if(n>0&&isFinite(n))rateBuckets[rateBuckets.length-1]+=n;};
-  const rateEl=document.createElement('span');rateEl.id='landRateEl';rateEl.className='land-rate';rateEl.textContent='0 /SEC';
+  const rateEl=document.createElement('span');rateEl.id='landRateEl';rateEl.className='land-rate';rateEl.innerHTML='+0 <span class="ju">mJ/s</span>';
   const scoreEl0=$('scoreEl');if(scoreEl0)scoreEl0.after(rateEl);
   setInterval(()=>{
     rateNow=rateBuckets.reduce((a,b)=>a+b,0)/rateBuckets.length;
     rateBuckets.shift();rateBuckets.push(0);
-    if(B.classList.contains('phone-land'))rateEl.textContent='+'+(typeof formatRate==='function'?formatRate(rateNow):Math.round(rateNow))+' /SEC';
+    if(B.classList.contains('phone-land'))rateEl.innerHTML='+'+fmtJpsH(rateNow);
   },1000);
 
   function isPhoneLand(){

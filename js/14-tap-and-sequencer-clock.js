@@ -6,7 +6,7 @@ const PARTICLE_CAP=IS_MOBILE_DEVICE?8:20;
 function spawnParticle(x,y,text,hex){
   const existing=document.querySelectorAll('.particle');
   if(existing.length>=PARTICLE_CAP)existing[0].remove();
-  const el=document.createElement('div');el.className='particle';el.textContent=text;el.style.color=hex;el.style.left=(x-20+Math.random()*20-10)+'px';el.style.top=(y-40)+'px';document.body.appendChild(el);setTimeout(()=>el.remove(),800);}
+  const el=document.createElement('div');el.className='particle';if(String(text).indexOf('class="ju"')>=0)el.innerHTML=text;else el.textContent=text;el.style.color=hex;el.style.left=(x-20+Math.random()*20-10)+'px';el.style.top=(y-40)+'px';document.body.appendChild(el);setTimeout(()=>el.remove(),800);}
 function gameViewCenter(){
   if(document.body.classList.contains('desktop-mode')){
     const gv=document.getElementById('gameView');
@@ -25,7 +25,7 @@ function doTap(coords){
   requestRender(anims[anims.length-1]);
   const h=highestActive();
   if(!coords.silent){
-    spawnParticle(coords.x||window.innerWidth/2,coords.y||window.innerHeight/2,`+${formatNum(mult*cpt)}`,coords.hex||color(Math.max(0,h)).hex);
+    spawnParticle(coords.x||window.innerWidth/2,coords.y||window.innerHeight/2,`+${fmtJh(mult*cpt,3)}`,coords.hex||color(Math.max(0,h)).hex);
   }
 }
 function getElCenter(id){
@@ -67,7 +67,7 @@ function addDotToAutoTier(i,anims){
 // ══════════════════════════════════════════════
 //  SEQUENCER = METRONOME AUTO-CLICKER
 //  Every sequencer step scores while it plays (notes or no notes). Each step is worth 100/BPM of a click,
-//  so raising or lowering the BPM never changes points per second. Steps feed the SEQUENCER tracker (right).
+//  so raising or lowering the BPM never changes energy per second. Steps feed the SEQUENCER tracker (right).
 // ══════════════════════════════════════════════
 const SEQ_BASE_BPM=100;
 const SEQ_PARTICLES_PER_SEC=IS_MOBILE_DEVICE?3:5;
@@ -134,7 +134,7 @@ let _seqDotAccum=0;
 function seqStepScale(){return SEQ_BASE_BPM/Math.max(1,seqBpm);}
 function seqStepsPerSec(){return seqBpm/15;} // 16th-note steps
 function seqEarningsPerSec(){return seqStepsPerSec()*seqStepScale()*seqStepMultiplier()*clicksPerTap()*seqClicksPerStep();}
-// v0.2.178: the tracker counts on every OTHER step (steps 1, 3, 5... = the starter beat's hi-hats). Watts are banked on
+// v0.2.178: the tracker counts on every OTHER step (steps 1, 3, 5... = the starter beat's hi-hats). Energy is banked on
 // the step in between and paid together, so income per second is unchanged; dots fill at half the old speed.
 let _seqBank=0;
 function scoreSeqStep(quiet){
@@ -152,7 +152,7 @@ function scoreSeqStep(quiet){
   if(_autoParticleAccum>=1){
     _autoParticleAccum-=1;
     const pos=getElCenter('autoTiersContainer')||getElCenter('autoTiersCol')||getElCenter('tiersContainer');
-    if(pos){const h=highestActiveSeq();spawnParticle(pos.x,pos.y,`+${formatRate(gain)}`,color(Math.max(0,h)).hex);}
+    if(pos){const h=highestActiveSeq();spawnParticle(pos.x,pos.y,`+${fmtJh(gain,3)}`,color(Math.max(0,h)).hex);}
   }
   requestRender(anims[anims.length-1]);
 }

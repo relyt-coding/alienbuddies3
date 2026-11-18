@@ -5,7 +5,7 @@
 let toastTimer=null;
 function showToast(msg){
   const el=document.getElementById('toast');
-  el.textContent=msg;
+  if(String(msg).indexOf('class="ju"')>=0)el.innerHTML=msg;else el.textContent=msg;   // energy amounts carry their unit as HTML (js/01 fmtJh)
   // sit just under the score numbers (covering the energy meter, which matters less)
   try{const em=document.getElementById('energyMeter'),sc=document.getElementById('scoreSectionBtn');
     let r=em&&em.offsetParent!==null?em.getBoundingClientRect():null;

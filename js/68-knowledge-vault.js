@@ -42,10 +42,10 @@ const _vPiano=()=>_vHas('mt_piano')||_vKeys();
 // ── LEARN cards: [id, tab, title, text, unlocked?] ──
 const VAULT_LEARN=[
   // GAME BASICS
-  ['l_points','basics','Watts & Multipliers','Every hit of a drum pad makes energy, counted in watts (W). 1,000 W is a kilowatt (kW), 1,000 kW is a megawatt (MW), then gigawatts (GW) and up. Multipliers stack by multiplying: a ×2 and a ×3 together make ×6, which is why small boosts add up fast.',()=>true],
+  ['l_points','basics','Joules & Multipliers','Every hit of a drum pad makes a little energy, counted in joules (J). A plain tap makes 0.1 millijoules (mJ), and a millijoule is a thousandth of a joule. 1,000 J is a kilojoule (kJ), 1,000 kJ is a megajoule (MJ), then gigajoules (GJ) and up. Multipliers stack by multiplying: a ×2 and a ×3 together make ×6, which is why small boosts add up fast.',()=>true],
   ['l_gems','basics','Alien Gems','Each alien buddy makes 1 Alien Gem every minute, even while you\'re busy doing something else. Gems are spent in the skill tree.',()=>_vBuddies(1)],
   ['l_tree','basics','The Skill Tree','The skill tree is a map of galaxies. Every node you unlock opens a new sound, feature or minigame, and many of them teach you a new music fact. You\'ll find those facts again here in the Vault.',()=>_vTree()],
-  ['l_match','basics','Minigames','The Matching Game gives you permanent watt multipliers. The minigames in the Cockpit (Planet Hop, Worm Whack and more) boost your Alien Gems instead.',()=>_vBuddies(1)],
+  ['l_match','basics','Minigames','The Matching Game gives you permanent energy multipliers. The minigames in the Cockpit (Planet Hop, Worm Whack and more) boost your Alien Gems instead.',()=>_vBuddies(1)],
   // ALIEN BUDDIES
   ['l_hatch','buddies','Hatching','Every alien buddy hatches from an egg, and no two games hatch them in the same order. Every 10th buddy comes from a special egg.',()=>_vBuddies(1)],
   ['l_bunker','buddies','The Bunker','The bunker is your buddies\' home: 100 buddies fit in each bunker. Tap any buddy to see it up close and give it a name.',()=>_vBuddies(1)],
@@ -153,7 +153,7 @@ function vaultFoldable(node,k){node.classList.add('vb-fold');if(vaultFolded(k))n
 function vaultHasEntry(e){return vaultOwned.includes(e.id);}
 function vaultNice(n){if(n<100)return Math.round(n);const p=Math.pow(10,Math.floor(Math.log10(n))-1);return Math.round(n/p)*p;}
 // FIXED PRICES: every lesson / fact / word has its own price and buying one never changes another (until v0.2.178 the price climbed
-// ×1.6 with every entry you owned). The price is about how many watts a player is holding when the entry's feature unlocks, measured
+// ×1.6 with every entry you owned). The price is about how much energy a player is holding when the entry's feature unlocks, measured
 // with the test-mode bot: the table is VAULT_PRICE in js/74-vault-prices.js, rebuilt by tools/vault_prices.py. An entry the table
 // doesn't know yet (new content) costs the same as the one before it in its tab.
 const VAULT_PRICE_FIRST=50;
@@ -386,7 +386,7 @@ function renderVault(scrollTab){
   const grid=el('div','vb-grid');body.appendChild(grid);
   const tile=(o)=>{const t=el('button','vb-tile'+(o.own?' own':' closed')+(o.can?' can':'')+(o.isNew?' new':''));t.type='button';t.style.setProperty('--c',o.col);
     t.appendChild(el('span','vb-t-name',esc(o.title)));
-    t.appendChild(el('span','vb-t-foot',o.own?(o.badge||'✓'):fmtW(o.cost)));
+    t.appendChild(el('span','vb-t-foot',o.own?(o.badge||'✓'):fmtJh(o.cost)));
     t.addEventListener('click',()=>{
       if(o.own){vaultPop(o);return;}
       if(!o.can){t.classList.remove('nope');void t.offsetWidth;t.classList.add('nope');return;}
@@ -398,7 +398,7 @@ function renderVault(scrollTab){
   shownTips.forEach(i=>{const own=tipHave(i),cost=tipCost(i);
     tile({own,cost,can:!own&&score>=cost,col:'#e0e055',title:'TIP '+(i+1),kind:'TIP',badge:'×1.5',text:tipText(i),boost:'×1.5 tap boost',
       buy:()=>{if(!buyTip(i))return false;try{playSfxTierUnlock(tipsOwned,0.4);}catch(e){}updateTipsLabel();renderUI();autoSave();return true;}});});
-  // LEARN cards / WORDS (each one costs watts once its feature is unlocked)
+  // LEARN cards / WORDS (each one costs energy once its feature is unlocked)
   const entries=vaultEntries(tab.id),open=entries.filter(e=>e.on());locked+=entries.length-open.length;
   // cheapest first (the MUSIC WORDS too), so the price climbs as you go down the page
   open.map((e,i)=>[vaultEntryCost(e),i,e]).sort((a,b)=>a[0]-b[0]||a[1]-b[1]).map(x=>x[2]).forEach(e=>{const own=vaultHasEntry(e),ec=vaultEntryCost(e);

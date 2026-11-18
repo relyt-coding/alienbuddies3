@@ -2,6 +2,13 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.180 - 2026-11-18 08:40
+- Your music now makes energy, counted in joules, the real unit for energy. A single tap starts tiny, at 0.1 millijoules (a thousandth of a joule is a millijoule), and you work your way up through joules, kilojoules, megajoules and beyond.
+- Everything costs the same as before compared with a tap, and your saves carry over exactly as they were.
+- Energy units are written in their real letters, so you can tell millijoules (mJ) from megajoules (MJ).
+- Knowledge Vault: new lesson "Joules and Watts". Joules are how much energy you have; watts are how fast it flows.
+- The Quad Sun unlock scenes now show what the suns really give: ×1.5 Alien Gems.
+
 ## v0.2.179 - 2026-11-16 11:35
 - The galaxy map is a real 3D solar system now. Drag to fly over it, pinch to zoom, and twist two fingers to turn the view (on a computer: right-drag, or Q and E). A new compass shows which way is north; tap it to face north again. The flat map is still there behind the 3D button.
 - The Tucana Core is a star, the Quad Suns are glowing suns, and every planet is a lit world in its own colours (two have rings). Stars drift behind the map as you move.

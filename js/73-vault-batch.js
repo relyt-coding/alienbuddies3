@@ -1,7 +1,7 @@
 // ══════════════════════════════════════════════
 //  KNOWLEDGE VAULT: THE BIG BATCH (v0.2.179)
 //  More lessons for every Vault tab and a much bigger MUSIC WORDS list. Nothing new to wire: the entries are
-//  added to VAULT_LEARN / VAULT_WORDS (js/68), so they cost watts, give ×1.05 and show up once their feature
+//  added to VAULT_LEARN / VAULT_WORDS (js/68), so they cost energy, give ×1.05 and show up once their feature
 //  is unlocked, exactly like the old ones.
 //
 //  Writing rules used here (keep them for the next batch):
@@ -19,7 +19,7 @@
 
   const LEARN=[
     // ── GAME BASICS ──
-    ['b_watt','basics','What Is a Watt?',"A watt measures how fast energy is being used or made. An LED light bulb uses about 10 W, a microwave oven about 1,000 W (1 kW), a big wind turbine makes a few megawatts and a large power station about a gigawatt. The unit is named after James Watt, the Scottish engineer who improved the steam engine in the 1700s.",yes],
+    ['b_watt','basics','Joules and Watts',"Joules measure how much energy there is; watts measure how fast it flows. One watt is one joule every second. Picture a bucket and a hose: the water in the bucket is joules, and how fast the hose pours is watts. A 10 W LED bulb uses 10 joules every second, and a 1,000 W microwave uses 1,000. The watt is named after James Watt, who improved the steam engine, and the joule after James Joule, who showed that heat and movement are both forms of energy.",yes],
     ['b_soundpower','basics','Sound Is Energy',"Sound really does carry energy, just very little of it. A person talking puts out about a hundred-thousandth of a watt of sound, and a whole orchestra playing as loud as it can makes less than 100 watts. Your ears are astonishingly sensitive.",pads(2)],
     ['b_compound','basics','Why Small Boosts Win',"A ×1.05 boost looks tiny, but boosts multiply each other. Fourteen of them together are about ×2, and twenty-eight are about ×4. Growth that multiplies like this is called compound growth, and it is the same maths that makes savings grow in a bank.",yes],
     ['b_practice','basics','Little and Often',"Musicians get better faster with short practice every day than with one long session a week. Your brain keeps working on a new skill while you rest and sleep, so ten minutes today and ten tomorrow beats twenty minutes once.",pads(3)],

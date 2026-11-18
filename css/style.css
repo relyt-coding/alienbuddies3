@@ -2748,3 +2748,8 @@ body.phone-land .keys-switch-seq button{font-size:.72rem;padding:.2rem .42rem;}
 }
 /* very narrow phones (under 360px wide): the map's title makes way so the gem count and CLOSE both fit */
 @media (max-width:359px){#skillTreeTitle{display:none;}#skillTreeHeader{padding-left:.7rem;padding-right:.7rem;}}
+
+/* v0.2.180: energy unit symbols (mJ, J, kJ, MJ …) in Space Mono: Bebas Neue has no lowercase, so "mJ" would read as megajoules */
+.ju{font-family:'Space Mono',monospace;font-weight:700;text-transform:none;letter-spacing:-.03em;}
+span.ju{font-size:.82em;}
+.score .w-unit.ju{font-size:.32em;letter-spacing:-.02em;}

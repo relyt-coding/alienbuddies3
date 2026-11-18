@@ -139,7 +139,7 @@
     if(!egg)buildEgg();
     if(!eggPick&&typeof buddyPickFor==='function'){const a0=alienData[0];eggPick=a0&&a0.base?a0.base:buddyPickFor(0);}
     eggOn=true;eggCrack=-1;eggT0=performance.now();egg.style.display='';egg.className='rolling';
-    egg.querySelector('.pe-tag').textContent=fmtW(eggCost());
+    egg.querySelector('.pe-tag').innerHTML=fmtJh(eggCost());
     paintEggCanvas(0);placeEgg();
     setTimeout(()=>{if(egg)egg.classList.remove('rolling');},1250);
     // a soft roll, and a little "tok" as it settles
@@ -243,7 +243,7 @@
       if(eggOn)setTimeout(()=>{paintEggCanvas(eggCrack<0?0:eggCrack);placeEgg();},0);}
     if(hold){tzHoldSeen=true;return;}
     const c=tzCost(),ready=score>=c;
-    const pt=wHtml(c);if(pt!==tzPrice){tzPrice=pt;$('seqTeaserPrice').innerHTML=pt;}
+    const pt=jHtml(c);if(pt!==tzPrice){tzPrice=pt;$('seqTeaserPrice').innerHTML=pt;}
     $('seqTeaserFill').style.width=(Math.min(1,score/c)*100).toFixed(2)+'%';
     if(ready!==tzReady){tzReady=ready;tz.classList.toggle('ready',ready);if(ready)startChase();else stopChase();}
   }

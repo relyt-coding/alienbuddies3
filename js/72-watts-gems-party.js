@@ -1,8 +1,8 @@
 // ══════════════════════════════════════════════
 //  v0.2.162 · ENERGY, GEM MATH, PARTY CORNER
-//  • The score is energy in watts (formatting lives in js/01: fmtW / wHtml / wParts).
+//  • The score is energy in joules (formatting lives in js/01: fmtJ / jHtml / jParts).
 //  • ALIEN GEM MATH: tap the gem counter in the BUNKER or the SHOP for a breakdown of where your gems come from;
-//    the same section is added to the bottom of the WATTS breakdown (tap the score). The gem ring stays the
+//    the same section is added to the bottom of the ENERGY breakdown (tap the score). The gem ring stays the
 //    skill tree button (js/71).
 //  • PARTY sits in the top-left corner (where MY ACCOUNT was) on upright phones, and in the bottom row after
 //    EDIT PADS on a computer. MY ACCOUNT now lives in Settings only. Sideways phones keep PARTY in the header (js/34).
@@ -54,10 +54,10 @@
 #scoreStatsDone{font-family:'Bebas Neue',sans-serif;border:1px solid var(--ssc)!important;background:#101016!important;color:var(--ssc)!important;border-radius:12px!important;
   letter-spacing:.2em;box-shadow:0 0 18px -8px var(--ssg);}
 .ss-gem-btn{border-color:#5dffc0;background:#07170f;color:#5dffc0;}
-/* the score: "WATTS" spelled out until 1 MW */
+/* the score: MILLIJOULES / JOULES spelled out until 1 kJ */
 .score .w-unit{font-size:.36em;letter-spacing:.08em;white-space:nowrap;}
-.score{white-space:nowrap;}   /* v0.2.165: the WATTS label never wraps onto a hidden second line */
-/* the digit-milestone shimmer (js/25) paints the number with a clipped gradient; Safari dropped the WATTS label meanwhile */
+.score{white-space:nowrap;}   /* v0.2.165: the unit label never wraps onto a hidden second line */
+/* the digit-milestone shimmer (js/25) paints the number with a clipped gradient; Safari dropped the unit label meanwhile */
 body.phone-land .score .w-unit{font-size:.48em;margin-left:.08em;letter-spacing:.02em;}   /* sideways: the header row is tight */
 .score.pl-milestone .w-unit{-webkit-text-fill-color:#fff;color:#fff;background:none;}
 /* PARTY in the corner */
@@ -137,9 +137,9 @@ body:not(.desktop-mode) #seqPatternView .seq-bottom-row .keys-switch-seq button{
     $('scoreStatsModal').classList.add('open');B.add('stats-open');
   }
   window.openGemStats=openGemStats;
-  // the WATTS breakdown (tap the score) gets the gem section at the bottom
+  // the ENERGY breakdown (tap the score) gets the gem section at the bottom
   if(typeof buildScoreStats==='function'){const bs=buildScoreStats;window.buildScoreStats=buildScoreStats=function(){
-    const r=bs.apply(this,arguments);ssTitle('bolt','WATTS BREAKDOWN',false);
+    const r=bs.apply(this,arguments);ssTitle('bolt','ENERGY BREAKDOWN',false);
     // v0.2.175: the shop ladders' ×1.5s, listed just before the gem section
     try{const L=$('scoreStatsList'),pm=typeof partyMult==='function'?partyMult():1,sm=typeof seqFeatMult==='function'?seqFeatMult():1;
       if(pm>1||sm>1){L.appendChild(ssLabel('SHOP UPGRADES'));
@@ -183,7 +183,7 @@ body:not(.desktop-mode) #seqPatternView .seq-bottom-row .keys-switch-seq button{
 
   // ══════════ the sequencer tracker's ACTIVATE ══════════
   const ov=$('seqTrackerOverlay'),ab=$('seqTrackerActivateBtn');
-  if(ab)ab.textContent=fmtW(SEQ_TRACKER_COST)+' — ACTIVATE';
+  if(ab)ab.innerHTML=fmtJh(SEQ_TRACKER_COST)+' — ACTIVATE';
   function paintSeqTracker(){
     if(!ov)return;const need=typeof drum!=='undefined'&&drum.seqTracks>=1&&!seqTrackerActive;
     ov.classList.toggle('on',need);if(need&&ab)ab.classList.toggle('can',score>=SEQ_TRACKER_COST);

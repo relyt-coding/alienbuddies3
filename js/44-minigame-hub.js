@@ -109,7 +109,7 @@ function mgBuy(k){
   }
   alienGems-=price;mgBought[k]=true;
   try{playSfxPurchase&&playSfxPurchase();}catch(e){}
-  showToast(k==='ph'?'🪐 PLANET HOP unlocked! Levels 1–5 · each win boosts your Alien Gems':'MATCHING GAME unlocked! Each level gives a permanent watt multiplier');
+  showToast(k==='ph'?'🪐 PLANET HOP unlocked! Levels 1–5 · each win boosts your Alien Gems':'MATCHING GAME unlocked! Each level gives a permanent energy multiplier');
   if(typeof autoSave==='function')autoSave();if(typeof renderUI==='function')renderUI();
   mgRefresh();return false;   // (the matching game then opens straight away: see openMatchingGame)
 }

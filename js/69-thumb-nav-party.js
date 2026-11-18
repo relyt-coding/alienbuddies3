@@ -180,7 +180,7 @@ body.phone-land #partyTeaser .pt-tag{font-size:12px;padding:2px 6px 1px;}
     const want=!owned&&performance.now()-seqSeenAt>=30000&&!(typeof overlayUp==='function'&&overlayUp())&&!B.contains('roll-full')&&!B.contains('vox-full');
     show(want);if(!want)return;
     const c=cost(),ready=score>=c;tz.classList.toggle('ready',ready);
-    tagTxt.textContent=fmtW(c);fill.style.width=(Math.min(1,score/c)*100).toFixed(1)+'%';
+    tagTxt.innerHTML=fmtJh(c);fill.style.width=(Math.min(1,score/c)*100).toFixed(1)+'%';
     if((++tf)%5===0)place();
   }
   let seqWasLoaded=false;

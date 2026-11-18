@@ -175,7 +175,7 @@
         <div class="multiplier" id="multEl">×1 per tap</div>
         <div class="auto-info" id="autoInfo">
           <div class="auto-info-row"><span class="auto-pulse" id="autoPulse"></span>SEQUENCER: <span id="autoCpsDisplay">0</span> STEPS/SEC</div>
-          <div class="auto-info-row">EARNING <span id="autoEarnDisplay">—</span>/SEC</div>
+          <div class="auto-info-row">EARNING <span id="autoEarnDisplay">—</span>/s</div>
         </div>
         <div class="energy-meter" id="energyMeter" style="display:none;">
           <div class="energy-segs" id="energySegs"></div>
@@ -192,14 +192,14 @@
             <div class="tiers-container" id="tiersContainer"></div>
           </div>
           <div id="drumTrackerOverlay" style="position:absolute;top:0;right:0;bottom:0;left:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.72);border-radius:6px;-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);z-index:5;">
-            <button id="drumTrackerActivateBtn" style="font-family:'Bebas Neue',sans-serif;font-size:.65rem;letter-spacing:.1em;padding:.3rem .7rem;border-radius:8px;border:1px solid #3a6a4a;background:#041a0d;color:#00ff88;cursor:pointer;touch-action:manipulation;white-space:nowrap;box-shadow:0 0 12px -3px rgba(0,255,136,.4);">25 W — ACTIVATE</button>
+            <button id="drumTrackerActivateBtn" style="font-family:'Bebas Neue',sans-serif;font-size:.65rem;letter-spacing:.1em;padding:.3rem .7rem;border-radius:8px;border:1px solid #3a6a4a;background:#041a0d;color:#00ff88;cursor:pointer;touch-action:manipulation;white-space:nowrap;box-shadow:0 0 12px -3px rgba(0,255,136,.4);">2.5 <span class="ju">mJ</span> — ACTIVATE</button>
           </div>
         </div>
         <div class="tiers-divider" id="tiersDivider" style="display:none;"></div>
         <div class="tiers-col" id="autoTiersCol" style="display:none;position:relative;">
           <div class="tiers-col-label" style="color:#4488cc;">SEQUENCER</div>
           <div class="tiers-container" id="autoTiersContainer"></div>
-          <div id="seqTrackerOverlay"><button id="seqTrackerActivateBtn" type="button">500,000 W — ACTIVATE</button></div>
+          <div id="seqTrackerOverlay"><button id="seqTrackerActivateBtn" type="button">50 <span class="ju">J</span> — ACTIVATE</button></div>
         </div>
       </div>
 
@@ -438,7 +438,7 @@
           <div class="card-lock-overlay" id="multiClickLock">
             <div class="lock-icon">🔒</div>
             <div class="lock-label">UNLOCK FOR</div>
-            <div class="lock-cost" id="multiClickLockCost">20,000,000 W</div>
+            <div class="lock-cost" id="multiClickLockCost">2 <span class="ju">kJ</span></div>
             <button class="lock-btn" id="multiClickUnlockBtn">UNLOCK</button>
           </div>
         </div>
@@ -458,7 +458,7 @@
           <div class="card-lock-overlay" id="alienBoostLock">
             <div class="lock-icon">🔒</div>
             <div class="lock-label">UNLOCK FOR</div>
-            <div class="lock-cost" id="alienBoostLockCost">20,000,000 W</div>
+            <div class="lock-cost" id="alienBoostLockCost">2 <span class="ju">kJ</span></div>
             <button class="lock-btn" id="alienBoostUnlockBtn">UNLOCK</button>
           </div>
         </div>
@@ -483,7 +483,7 @@
           <div class="card-lock-overlay" id="drumDotsLock">
             <div class="lock-icon">🔒</div>
             <div class="lock-label">UNLOCK FOR</div>
-            <div class="lock-cost" id="drumDotsLockCost">1.3B W</div>
+            <div class="lock-cost" id="drumDotsLockCost">130 <span class="ju">kJ</span></div>
             <button class="lock-btn" id="drumDotsUnlockBtn">UNLOCK</button>
           </div>
         </div>
@@ -503,7 +503,7 @@
           <div class="card-lock-overlay" id="seqDotsLock">
             <div class="lock-icon">🔒</div>
             <div class="lock-label">UNLOCK FOR</div>
-            <div class="lock-cost" id="seqDotsLockCost">1.3B W</div>
+            <div class="lock-cost" id="seqDotsLockCost">130 <span class="ju">kJ</span></div>
             <button class="lock-btn" id="seqDotsUnlockBtn">UNLOCK</button>
           </div>
         </div>
@@ -527,7 +527,7 @@
           <div class="card-lock-overlay" id="seqMultiClickLock">
             <div class="lock-icon">🔒</div>
             <div class="lock-label">UNLOCK FOR</div>
-            <div class="lock-cost" id="seqMultiClickLockCost">1T W</div>
+            <div class="lock-cost" id="seqMultiClickLockCost">100 <span class="ju">MJ</span></div>
             <button class="lock-btn" id="seqMultiClickUnlockBtn">UNLOCK</button>
           </div>
         </div>
@@ -689,7 +689,7 @@
   <div id="scoreStatsModal">
     <div id="scoreStatsBox">
       <div id="scoreStatsHeader">
-        <div id="scoreStatsTitle">⚡ WATTS BREAKDOWN</div>
+        <div id="scoreStatsTitle">⚡ ENERGY BREAKDOWN</div>
         <button id="scoreStatsClose">✕</button>
       </div>
       <div id="scoreStatsList"></div>

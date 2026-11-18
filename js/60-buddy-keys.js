@@ -161,7 +161,7 @@ function keysVoiceOwned(i){return i<(shop.keysLevel||0);}
     $('keysCardNum').textContent=lv;const nx=nextStep(),btn=$('keysCardBtn'),pr=$('keysCardPrice');
     if(!nx){btn.className='drum-buy-btn maxed';$('keysCardMain').textContent='EVERY VOICE';$('keysCardSub2').textContent='All '+KEYS_VOICES.length+' voices · change voice with the arrows above the keys';pr.className='drum-price';pr.textContent='MAX';return;}
     const can=score>=nx.cost;btn.className='drum-buy-btn '+(can?'buyable':'locked');
-    $('keysCardMain').textContent=nx.main;$('keysCardSub2').textContent=nx.sub;pr.className='drum-price'+(can?'':' cant-afford');pr.innerHTML=`${wHtml(nx.cost)}`;
+    $('keysCardMain').textContent=nx.main;$('keysCardSub2').textContent=nx.sub;pr.className='drum-price'+(can?'':' cant-afford');pr.innerHTML=`${jHtml(nx.cost)}`;
   }
   function buy(){
     const nx=nextStep();if(!nx||score<nx.cost)return;

@@ -21,7 +21,7 @@ scoreStatsModal&&scoreStatsModal.addEventListener('pointerdown',e=>{if(e.target=
 document.getElementById('scoreSectionBtn')&&document.getElementById('scoreSectionBtn').addEventListener('click',openScoreStats);
 
 // v0.2.163: no emoji here: each row gets a black & white matching-card picture (js/48 matchIconBW) on a dark tile
-const SS_ICON_BY_LABEL={'WATTS':'bolt','WATTS PER TAP':'bulb','DRUMPAD TIERS':'battery','DRUM MACHINE':'robot','MULTI-CLICK':'magnet','TIER COMBINED':'dna','DRUM COMBINED':'dna',
+const SS_ICON_BY_LABEL={'ENERGY':'bolt','ENERGY PER TAP':'bulb','DRUMPAD TIERS':'battery','DRUM MACHINE':'robot','MULTI-CLICK':'magnet','TIER COMBINED':'dna','DRUM COMBINED':'dna',
   'ENERGY':'battery','SEQUENCER EARNINGS':'sun','ALIEN POWER':'flask','MATCHING GAME':'star','SEQUENCER STEP VALUE':'comet','SEQUENCER':'satellite',
   'GEMS':'gem','GEM HARVESTER':'asteroid','GALAXY BOOSTS':'galaxy','MINIGAMES':'ufo','GEMS PER MINUTE':'compass','BUDDIES':'alienplanet','ALIEN BOOST':'alienplanet','ALIEN PARTY':'ufo','SEQUENCER UPGRADES':'telescope'};
 const SS_ICON_BY_EMOJI={'⚡':'bolt','👆':'bulb','🥁':'atom','🖱':'magnet','🔗':'dna','🔋':'battery','💰':'sun','💉':'flask','🃏':'star','✖️':'comet','🎛':'satellite',
@@ -38,7 +38,7 @@ function ssRow(icon,label,desc,val,isActive,colorClass){
   const lb=document.createElement('div');lb.className='ss-label'+(isActive?' active':'');lb.textContent=label;
   const ds=document.createElement('div');ds.className='ss-desc'+(isActive?' active':'');ds.textContent=desc;
   info.appendChild(lb);info.appendChild(ds);
-  const vl=document.createElement('div');vl.className='ss-val'+(isActive?' active':'')+(colorClass?' '+colorClass:'');vl.textContent=val;
+  const vl=document.createElement('div');vl.className='ss-val'+(isActive?' active':'')+(colorClass?' '+colorClass:'');if(String(val).indexOf('class="ju"')>=0)vl.innerHTML=val;else vl.textContent=val;
   row.appendChild(ic);row.appendChild(info);row.appendChild(vl);
   return row;
 }
@@ -62,12 +62,12 @@ function buildScoreStats(){
 
   // ── SCORE ──
   scoreStatsList.appendChild(ssLabel('ENERGY'));
-  scoreStatsList.appendChild(ssRow('⚡','WATTS','All the energy your music has made · '+formatFull(score)+' watts',fmtScore(score),true,'gold'));
+  scoreStatsList.appendChild(ssRow('⚡','ENERGY','All the energy your music has made · '+fmtJoulesExact(score),scoreHtml(score),true,'gold'));
 
   // ── PER TAP ──
   scoreStatsList.appendChild(ssLabel('PER TAP'));
-  const ptVal=fmtW(Math.floor(mult*cpt));
-  scoreStatsList.appendChild(ssRow('👆','WATTS PER TAP',`×${formatMult(mult)} × ${cpt} click${cpt>1?'s':''}`,ptVal,true,'green'));
+  const ptVal=fmtJh(mult*cpt);
+  scoreStatsList.appendChild(ssRow('👆','ENERGY PER TAP',`×${formatMult(mult)} × ${cpt} click${cpt>1?'s':''}`,ptVal,true,'green'));
   if(cpt>1){
     scoreStatsList.appendChild(ssRow('🖱','MULTI-CLICK',`Tap counts as ${cpt} clicks`,`×${cpt}`,true));
   }
@@ -136,7 +136,7 @@ function buildScoreStats(){
   scoreStatsList.appendChild(ssLabel('SEQUENCER'));
   if(drum.seqTracks>=1){
     scoreStatsList.appendChild(ssRow('🎛','SEQUENCER',seqPlaying?`Playing · ${seqBpm} BPM`:'Paused · press play to earn',`${formatRate(seqPlaying?seqStepsPerSec():0)} steps/sec`,seqPlaying));
-    scoreStatsList.appendChild(ssRow('💰','SEQUENCER EARNINGS','Every step makes watts · BPM never changes the watts per second',formatRate(seqPlaying?seqEarningsPerSec():0)+'/s',seqPlaying,'gold'));
+    scoreStatsList.appendChild(ssRow('💰','SEQUENCER EARNINGS','Every step makes energy · BPM never changes the energy per second',fmtJpsH(seqPlaying?seqEarningsPerSec():0),seqPlaying,'gold'));
     scoreStatsList.appendChild(ssRow('🔋','ENERGY',`Pad hits recharge it · drains 1 section per ${SEQ_ENERGY_SEC_PER_SECTION}s while the sequencer plays`,`${Math.ceil(seqEnergy-1e-9)}/${SEQ_ENERGY_MAX}`,seqEnergy>0));
     scoreStatsList.appendChild(ssRow('✖️','SEQUENCER STEP VALUE','Sequencer tiers × shared boosts',`×${formatMult(seqStepMultiplier())}`,true));
     autoTiers.forEach((t,i)=>{if(t.multiplierActive)scoreStatsList.appendChild(ssRow('⚡',`SEQUENCER TIER ${i+1}`,'Dot streak reward · stacks',`×${tierMultValueFor('seq',i).toLocaleString()}`,true));});

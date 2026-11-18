@@ -23,25 +23,45 @@ const ALIEN_TINTS=['hue-rotate(0deg)','hue-rotate(40deg)','hue-rotate(80deg)','h
 const PARTY_COLORS=['#ff0044','#ff8800','#ffee00','#00ff88','#00ccff','#aa44ff','#ff00cc','#ffffff'];
 
 function formatNum(n){n=Math.floor(n);const T=1e12;function sci(x){const e=Math.floor(Math.log10(x));return (x/Math.pow(10,e)).toFixed(3).replace(/\.?0+$/,'')+'e'+e;}return n<T?n.toLocaleString():sci(n);}
-// ── v0.2.162: the score is ENERGY, shown in watts with real units (W, kW, MW, GW …), like a power meter ──
-//   fmtW(n)      → "2.5 MW"   (prices, messages; 4 significant digits)
-//   fmtW(n,6)    → "520.526 kW" (the big score: more digits so each tap visibly moves it)
-//   wHtml(n)     → "2.5<small>MW</small>" (shop price tags: big number, small unit)
-const W_UNITS=['W','kW','MW','GW','TW','PW','EW','ZW','YW','RW','QW'];
-function wParts(n,sig){n=Math.max(0,Math.floor(n||0));sig=sig||4;
-  if(n<1e9)return[n.toLocaleString(),'W'];   // v0.2.165: written out up to the millions (1,000,000 W); units start at 1 GW
-  const k=Math.floor(Math.log10(n)/3);
-  if(k>=W_UNITS.length){const e=Math.floor(Math.log10(n));return[(n/Math.pow(10,e)).toFixed(2).replace(/\.?0+$/,'')+'e'+e,'W'];}
-  let v=n/Math.pow(1000,k),t=v.toPrecision(sig);
-  if(parseFloat(t)>=1000&&k+1<W_UNITS.length)return wParts(Math.pow(1000,k+1),sig);   // 999,999 W → "1 MW", not "1000 kW"
+// ── v0.2.180: the score is ENERGY in JOULES (v0.2.162–179 showed it as watts). Energy is what you collect and spend; watts are
+//   how fast it flows (1 W = 1 joule every second), so rates like the sequencer's earnings are joules per second.
+//   The game's internal numbers did NOT change: 1 internal unit = 0.1 mJ (J_PER_UNIT), so one plain tap on a new save
+//   makes 0.1 millijoules and every price keeps exactly the same ratio to a tap. Old saves need no conversion.
+//   fmtJ(n)      → "2.5 kJ"    (prices, messages; 4 significant digits)
+//   fmtJ(n,6)    → "520.526 J" (the big score: more digits so each tap visibly moves it)
+//   jHtml(n)     → "2.5<small>kJ</small>" (shop price tags: big number, small unit)
+//   fmtJps(n)    → "0.4 mJ/s"  (a rate in internal units per second)
+const J_PER_UNIT=1e-4;
+const J_UNITS=['mJ','J','kJ','MJ','GJ','TJ','PJ','EJ','ZJ','YJ','RJ','QJ'];   // J_UNITS[k] = 1000^(k-1) joules
+function jParts(n,sig){n=Math.max(0,+n||0);sig=sig||4;
+  const j=n*J_PER_UNIT;
+  if(j<=0)return['0','mJ'];
+  const k=Math.max(0,Math.floor(Math.log10(j)/3)+1);
+  if(k>=J_UNITS.length){const e=Math.floor(Math.log10(j));return[(j/Math.pow(10,e)).toFixed(2).replace(/\.?0+$/,'')+'e'+e,'J'];}
+  let v=j/Math.pow(1000,k-1),t=v.toPrecision(sig);
+  if(parseFloat(t)>=1000&&k+1<J_UNITS.length)return jParts(Math.pow(1000,k)/J_PER_UNIT,sig);   // 999.99 mJ → "1 J", not "1000 mJ"
   if(t.indexOf('e')>=0)t=String(Math.round(v));
   if(t.indexOf('.')>=0)t=t.replace(/0+$/,'').replace(/\.$/,'');
-  return[t,W_UNITS[k]];}
-function fmtW(n,sig){const p=wParts(n,sig);return p[0]+' '+p[1];}
-// the score itself: spelled out in WATTS up to 999,999,999, then real units from 1 GW up
-function scoreParts(n){n=Math.max(0,Math.floor(n||0));return n<1e9?[n.toLocaleString(),'WATTS']:wParts(n,6);}
+  return[t,J_UNITS[k]];}
+function fmtJ(n,sig){const p=jParts(n,sig);return p[0]+' '+p[1];}
+// The game's Bebas Neue font has no lowercase, so "mJ" would show as "MJ" (megajoules!). Anything on screen uses the HTML
+// versions below, which draw the unit symbol in Space Mono (class "ju") so mJ / kJ / MJ keep their real case.
+function jHtml(n,sig){const p=jParts(n,sig);return p[0]+'<small class="ju">'+p[1]+'</small>';}
+function fmtJh(n,sig){const p=jParts(n,sig);return p[0]+' <span class="ju">'+p[1]+'</span>';}
+function fmtJpsH(n,sig){const p=jParts(n,sig||3);return p[0]+' <span class="ju">'+p[1]+'/s</span>';}
+function fmtJps(n,sig){return fmtJ(n,sig||3)+'/s';}
+// the score itself: MILLIJOULES and JOULES spelled out (so new players learn the word), then kJ, MJ, GJ … from 1 kJ up
+function scoreParts(n){n=Math.max(0,Math.floor(n||0));const p=jParts(n,6);
+  if(n*J_PER_UNIT>=1000)return p;
+  if(p[1]==='mJ')return[p[0],p[0]==='1'?'MILLIJOULE':'MILLIJOULES'];
+  if(p[1]==='J')return[p[0],p[0]==='1'?'JOULE':'JOULES'];
+  return p;}
 function fmtScore(n){const p=scoreParts(n);return p[0]+' '+p[1];}
-function wHtml(n,sig){const p=wParts(n,sig);return p[0]+'<small>'+p[1]+'</small>';}
+function scoreHtml(n){const p=scoreParts(n);return p[0]+' '+(/^[A-Z]+$/.test(p[1])?p[1]:'<span class="ju">'+p[1]+'</span>');}
+// the exact energy in joules (the small line under the score once it's in kJ and up)
+function fmtJoulesExact(n){n=Math.max(0,Math.floor(n||0));const v=n*J_PER_UNIT;return v.toLocaleString('en-US',{maximumFractionDigits:n<1e12?4:0})+(v===1?' joule':' joules');}
+// old names (v0.2.162–179), kept so nothing that still calls them breaks
+const fmtW=fmtJ,wHtml=jHtml,wParts=jParts;
 function formatSci(n){n=Math.floor(n);if(n===0)return '0';const e=Math.floor(Math.log10(Math.max(1,n)));return (n/Math.pow(10,e)).toFixed(3).replace(/\.?0+$/,'')+'e'+e;}
 function formatFull(n){n=Math.floor(n);return n.toLocaleString();}
 function formatStore(n){n=Math.floor(n);const T=1e12;function sci(x){const e=Math.floor(Math.log10(x));return (x/Math.pow(10,e)).toFixed(2).replace(/\.?0+$/,'')+'E'+e;}if(n<T){if(n>=1e9)return(n/1e9).toFixed(2).replace(/\.?0+$/,'')+'B';if(n>=1e6)return(n/1e6).toFixed(2).replace(/\.?0+$/,'')+'M';if(n>=1e3)return(n/1e3).toFixed(0)+'K';return n.toLocaleString();}return sci(n);}
@@ -75,7 +95,7 @@ function alienDiscount(n){
   return Math.pow(10,i<=k?ALIEN_L[i]:ALIEN_L[k]+(ALIEN_L[k]-ALIEN_L[k-1])*(i-k));
 }
 const _disc=c=>{const d=progressDiscount();return d>1?Math.max(1,Math.round(c/d)):c;};
-const GAME_VERSION='0.2.179'; // bump on every delivered build (shown in Settings and on the home screen)
+const GAME_VERSION='0.2.180'; // bump on every delivered build (shown in Settings and on the home screen)
 const BASE_CPS=5;
 const UNLOCK_COST=bump30(60000000);
 const ALIEN_POWER_UNLOCK_COST=bump30(600000000);

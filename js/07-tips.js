@@ -4,7 +4,7 @@
 // ══════════════════════════════════════════════
 const MAX_TIPS = 10;
 const TIPS_DATA = [
-  {cost:25,           text:"Buying Alien Buddies increases your watt multiplier."},
+  {cost:25,           text:"Buying Alien Buddies increases your energy multiplier."},
   {cost:50000,        text:"If you want 1 big clicker button, click 'Edit Pads' and select 1 for a single drum pad."},
   {cost:250000,       text:"Change the volume of individual sounds in the Edit Pads menu."},
   {cost:12500000,     text:"You can save patterns you create on your sequencer to make an arrangement!"},
@@ -74,7 +74,7 @@ function buildTipsList(){
     } else {
       const btn=document.createElement('button');
       btn.style.cssText=`font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:.1em;padding:.32rem .8rem;border-radius:6px;border:1px solid ${canBuy?'#aaaa33':'#2a2a1a'};background:${canBuy?'#1a1a04':'transparent'};color:${canBuy?'#cccc44':'#444'};cursor:${canBuy?'pointer':'default'};touch-action:manipulation;`;
-      btn.textContent=fmtW(cost);
+      btn.innerHTML=fmtJh(cost);
       if(canBuy)btn.addEventListener('click',()=>{
         if(!buyTip(i))return;
         showToast(`Tip purchased — your Tap Multiplier increased by ×1.5!`);
@@ -207,7 +207,7 @@ function updateDrumTrackerOverlay(){
 
 document.getElementById('drumTrackerActivateBtn')&&document.getElementById('drumTrackerActivateBtn').addEventListener('click',()=>{
   if(drumTrackerActive)return;
-  if(score<25){showToast('Need 25 W to activate the drum tracker!');return;}
+  if(score<25){showToast('Need '+fmtJh(25)+' to activate the drum tracker!');return;}
   score-=25;
   drumTrackerActive=true;
   playSfxTierUnlock(0);
@@ -220,7 +220,7 @@ document.getElementById('tipsBtn')&&document.getElementById('tipsBtn').addEventL
   buildTipsList();
   document.getElementById('tipsModal').style.display='flex';
   const tipsScoreEl=document.getElementById('tipsModalScore');
-  if(tipsScoreEl)tipsScoreEl.textContent=fmtScore(score);
+  if(tipsScoreEl)tipsScoreEl.innerHTML=scoreHtml(score);
 });
 document.getElementById('tipsModalClose')&&document.getElementById('tipsModalClose').addEventListener('click',()=>{
   document.getElementById('tipsModal').style.display='none';

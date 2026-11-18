@@ -25,7 +25,7 @@ README.md covers the file layout, test mode and vocals in depth; this file is th
   MUSIC WORDS lists, and every skill-tree node's `fact` (`SKILL_TREE_NODES`, tab picked by `vaultTabForNode`). Add a `fact` to a node and it
   shows up in the Vault automatically. Five tabs need a skill node first (`req` in `VAULT_TABS`: Core → Music Words, Quad Suns →
   Sounds / Effects / Piano Roll / Vocals); tips in a locked tab can't be bought yet (`vaultTipLocked`). Since v0.2.159 tabs only appear when unlocked AND non-empty (`vaultTabShown`), nothing hints at locked content, and the boost explanation is the `vaultHelp()` pop-up behind the ? button only. Since v0.2.175 the Vault body is a 4-per-row grid of tiles (`.vb-grid` / `.vb-tile`); buying or tapping an owned tile opens `vaultPop()`. Lessons / facts / words cost points
-  (`vaultEntryCost(e)`: a FIXED price per entry = about the watts a player holds when its feature unlocks, from the `VAULT_PRICE` table in js/74; buying never changes another price) and give ×1.05 each (`vaultOwned`, `vaultMult` in `sharedMultiplier`). On phones the Vault is swipe
+  (`vaultEntryCost(e)`: a FIXED price per entry = about the energy a player holds when its feature unlocks, from the `VAULT_PRICE` table in js/74; buying never changes another price) and give ×1.05 each (`vaultOwned`, `vaultMult` in `sharedMultiplier`). On phones the Vault is swipe
   page 6 (`#vaultView`, body class `vault-open`); on desktop it's the `#vaultModal` window.
 - Upright phones get body class `thumb-nav` (js/69): BUNKER / SETTINGS / EDIT PADS / SHOP in one bottom row. The PARTY button (`.pb-small`) is
   placed next to ♪ by `placeViewButtons` (06-sequencer); tapping opens `openPartyMenu`. Level 1 egg / level 2 sequencer teaser live in
@@ -55,20 +55,29 @@ README.md covers the file layout, test mode and vocals in depth; this file is th
 68 Knowledge Vault · 69 thumb nav (bottom row on upright phones) + PARTY menu + level 3 disco-ball teaser ·
 70 Alien Gem look (Gem Buddy) · 71 level 4 gem ring + gems flying off buddies + MY ACCOUNT sheet ·
 73 Vault big batch (lessons + music words) · 74 Vault price table (generated) ·
-72 watts/gem math/party corner + file-select hum (`titleHum`): `openGemStats()` (bunker + shop gem counters), PARTY pill top-left (`.pb-corner`), MY ACCOUNT in Settings only, sequencer tracker ACTIVATE (`seqTrackerActive`, `SEQ_TRACKER_COST`)
+72 energy/gem math/party corner + file-select hum (`titleHum`): `openGemStats()` (bunker + shop gem counters), PARTY pill top-left (`.pb-corner`), MY ACCOUNT in Settings only, sequencer tracker ACTIVATE (`seqTrackerActive`, `SEQ_TRACKER_COST`)
 
 ## Testing without a phone
 Serve the folder (`python3 -m http.server`) and drive it with Playwright + `/usr/bin/google-chrome`, viewport 390×844 with an iPhone user agent
 (otherwise it's treated as a too-small desktop). `startGame(slot)` opens a save slot; set state directly (`score`, `drum.pads`, `totalAliens`,
 `unlockedSkills.x=true`) and screenshot. The first tap on a new file plays an intro (tap a few times to skip).
 
-## Watts
-The score is energy shown in watts since v0.2.162: use `fmtW(n)` / `wHtml(n)` / `wParts(n,sig)` (js/01) for anything that is score or a price. Never write 'pts' / 'points' in player-facing text. Gems keep `fmtGems`. The score itself uses `fmtScore` / `scoreParts` (spelled-out WATTS below 1e9, units from 1 GW; prices written out below 1e9 too; sideways phones show MW for millions). The breakdown window (13 + js/72 CSS) uses `ssIconEl(key)` = black & white match art (`matchIconBW` in js/48): no emoji there.
+## Energy (joules)
+Since v0.2.180 the score is ENERGY in joules (v0.2.162–179 called it watts). Watts are a rate (1 W = 1 J per second), so per-second numbers are J/s.
+Internal numbers did NOT change: 1 internal unit = 0.1 mJ (`J_PER_UNIT` in js/01), so a plain tap on a new save is 0.1 mJ and every price keeps its
+ratio to a tap; old saves need no conversion and the Vault price table (js/74) stays in internal units.
+- Use `fmtJh(n)` / `jHtml(n)` / `scoreHtml(n)` / `fmtJpsH(n)` for anything on screen. Bebas Neue has NO lowercase, so a plain-text "mJ" renders as
+  "MJ" (megajoules); the HTML versions put the unit in `.ju` (Space Mono) to keep its case. Set them with innerHTML. `showToast`, `spawnParticle`
+  and `ssRow` switch to innerHTML automatically when the text contains a `.ju` span. Plain `fmtJ` / `fmtScore` / `fmtJps` are for console and test mode.
+- The score spells out MILLIJOULES / JOULES below 1 kJ, then kJ, MJ … QJ, then scientific. Sideways phones use the short symbols.
+  `fmtJoulesExact(n)` is the exact line under the score from 1 kJ up. Never write 'pts', 'points' or 'watts' for the score in player-facing text.
+- Old names `fmtW` / `wHtml` / `wParts` are aliases of the joule versions. Gems keep `fmtGems`. The breakdown window (13 + js/72 CSS) uses
+  `ssIconEl(key)` = black & white match art (`matchIconBW` in js/48): no emoji there.
 
 ## Things that bite
-- Shop ladder boosts (v0.2.175): each ALIEN PARTY level and the first 3 SEQ_FEATS (BPM, 32, 64 steps) are ×1.5 watts (`shopLadderMult()` in `sharedMultiplier`, js/02).
+- Shop ladder boosts (v0.2.175): each ALIEN PARTY level and the first 3 SEQ_FEATS (BPM, 32, 64 steps) are ×1.5 energy (`shopLadderMult()` in `sharedMultiplier`, js/02).
 - Per-sound volume: `soundVols[id]` defaults to `SOUND_VOL_DEFAULT` (.75 = normal level, 1 = a third louder); gain = v/.75 (js/03 `getSoundGainVal`). Old saves are scaled ×.75 once (`soundVolsV:2` in the save).
-- Sequencer tracker (js/14 `scoreSeqStep`, v0.2.178): scores on every other step (8th notes); watts are banked in `_seqBank` and paid together (same income), dots fill at ×.5.
+- Sequencer tracker (js/14 `scoreSeqStep`, v0.2.178): scores on every other step (8th notes); energy is banked in `_seqBank` and paid together (same income), dots fill at ×.5.
 - Sequencer clock (js/14 `_seqClockTick`): the audio grid snaps back if it drifts >60 ms either way and never schedules two steps within 60% of a step; the audio wake-up rebuild (js/55) restarts the clock. Breakdown rows that are inactive and OFF/×1 are hidden (`trimLockedStats`, js/72).
 - Old Safari (iOS 15 / iPhone 7) has no CSS `color-mix()`: give every color-mix declaration a fallback (see the `@supports not` block at the end
   of css/style.css). Avoid canvas `shadowBlur` in per-frame cutscene drawing (it halved Magmora's frame rate); use a wide faint stroke instead.

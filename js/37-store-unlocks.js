@@ -7,19 +7,19 @@
 //                    → Arrangement tab → Song tab. (These used to be skill-tree nodes.)
 // ══════════════════════════════════════════════
 const PARTY_LADDER=[
-  {style:'glow',  cost:1e6,  main:'ALIEN PARTY',        sub:'Adds the ALIEN PARTY button: your aliens glow and bounce to the beat · ×1.5 watts'},
-  {style:'orbit', cost:5e7,  main:'DISCO ORBIT',      sub:'New party style: aliens spin in a ring around your score · ×1.5 watts'},
-  {style:'conga', cost:5e8,  main:'CONGA LINE',       sub:'New party style: a figure-8 conga line, hopping on the beat · ×1.5 watts'},
-  {style:'eq',    cost:5e9,  main:'EQ BARS',          sub:'New party style: aliens line up as a live EQ meter for your music · ×1.5 watts'},
-  {style:'bounce',cost:5e10, main:'BOUNCE HOUSE',     sub:'New party style: each instrument gets its own aliens, who jump when it plays · ×1.5 watts'},
-  {style:'galaxy',cost:5e11, main:'GALAXY',           sub:'New party style: a spinning spiral galaxy that breathes with the bar · ×1.5 watts'},
-  {style:'hop',   cost:5e12, main:'PLANET HOP',       sub:'New party style: your aliens run along the sequencer, hopping on every beat and double jumping on beat 4 · ×1.5 watts'},
+  {style:'glow',  cost:1e6,  main:'ALIEN PARTY',        sub:'Adds the ALIEN PARTY button: your aliens glow and bounce to the beat · ×1.5 energy'},
+  {style:'orbit', cost:5e7,  main:'DISCO ORBIT',      sub:'New party style: aliens spin in a ring around your score · ×1.5 energy'},
+  {style:'conga', cost:5e8,  main:'CONGA LINE',       sub:'New party style: a figure-8 conga line, hopping on the beat · ×1.5 energy'},
+  {style:'eq',    cost:5e9,  main:'EQ BARS',          sub:'New party style: aliens line up as a live EQ meter for your music · ×1.5 energy'},
+  {style:'bounce',cost:5e10, main:'BOUNCE HOUSE',     sub:'New party style: each instrument gets its own aliens, who jump when it plays · ×1.5 energy'},
+  {style:'galaxy',cost:5e11, main:'GALAXY',           sub:'New party style: a spinning spiral galaxy that breathes with the bar · ×1.5 energy'},
+  {style:'hop',   cost:5e12, main:'PLANET HOP',       sub:'New party style: your aliens run along the sequencer, hopping on every beat and double jumping on beat 4 · ×1.5 energy'},
 ];
 const PARTY_REVEAL_AT=1e6;   // (v0.2.149: the party is "level 3" at 1M, teased on screen by js/69)
 const SEQ_FEATS=[
-  {id:'bpm',    cost:1e7,   main:'BPM CONTROL',      sub:'Speed the sequencer up or slow it down (− / + next to play) · ×1.5 watts'},
-  {id:'steps32',cost:3.2e7, main:'32 STEPS',         sub:'Double the loop to 2 bars · switch with the STEPS button · ×1.5 watts'},
-  {id:'steps64',cost:6.4e7, main:'64 STEPS',         sub:'A full 4-bar loop · ×1.5 watts'},
+  {id:'bpm',    cost:1e7,   main:'BPM CONTROL',      sub:'Speed the sequencer up or slow it down (− / + next to play) · ×1.5 energy'},
+  {id:'steps32',cost:3.2e7, main:'32 STEPS',         sub:'Double the loop to 2 bars · switch with the STEPS button · ×1.5 energy'},
+  {id:'steps64',cost:6.4e7, main:'64 STEPS',         sub:'A full 4-bar loop · ×1.5 energy'},
   {id:'arrange',cost:1e10,  main:'ARRANGEMENT TAB',  sub:'Chain saved patterns into an arrangement (PAT / ARR switch)'},
   {id:'song',   cost:1e13,  main:'SONG TAB',         sub:'Line up whole arrangements into a song'},
 ];
@@ -59,7 +59,7 @@ function partyOwnedStyles(){return PARTY_LADDER.slice(0,Math.max(0,shop.partyLev
     btn.className='drum-buy-btn '+(can?'buyable':'locked');
     $(pre+'Main').textContent=next.main;$(pre+'Sub2').textContent=next.sub;
     pr.className='drum-price'+(can?'':' cant-afford');
-    pr.innerHTML=`${wHtml(next.cost)}`;
+    pr.innerHTML=`${jHtml(next.cost)}`;
   }
   window.renderStoreUnlocks=function(){
     // ── party ──
@@ -73,7 +73,7 @@ function partyOwnedStyles(){return PARTY_LADDER.slice(0,Math.max(0,shop.partyLev
       partyCard.title=next?next.sub:'All '+PARTY_LADDER.length+' styles unlocked · pick one from the PARTY menu';
       partyCard.className='alien-store-card party-store-card '+(!next?'maxed':can?'buyable':'locked');
       const pr=$('partyStoreCardPrice');pr.className='alien-card-price'+(!next||can?'':' cant-afford');
-      pr.innerHTML=next?`${wHtml(next.cost)}`:'MAX';}
+      pr.innerHTML=next?`${jHtml(next.cost)}`:'MAX';}
     // ── sequencer ──
     const sf=shop.seqFeat||0;
     seqUpCard.style.display=(typeof drum!=='undefined'&&drum.seqTracks>0)?'':'none';

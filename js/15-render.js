@@ -65,17 +65,17 @@ function renderUI(newlyLit){
   if(typeof updateGemDisplays==='function')updateGemDisplays();
   if(typeof checkContextualHints==='function')checkContextualHints();
   const mult=totalMultiplier();const cpt=clicksPerTap();
-  // v0.2.162: the score is energy in watts: big number + unit (kW, MW, GW …), the exact watts underneath
-  {/* sideways phones: the header row is short, so millions use MW there */const wp=(score>=1e6&&score<1e9&&document.body.classList.contains('phone-land'))?[String(+(score/1e6).toFixed(2)),'MW']:scoreParts(score),k=wp[0]+'|'+wp[1];if(scoreEl._wk!==k){scoreEl._wk=k;scoreEl.innerHTML=wp[0]+'<span class="w-unit">'+wp[1]+'</span>';}}
+  // v0.2.180: the score is energy in joules: big number + unit (MILLIJOULES, JOULES, then kJ, MJ …), the exact joules underneath
+  {/* sideways phones: the header row is short, so short units and fewer digits there */const wp=document.body.classList.contains('phone-land')?jParts(Math.floor(score),4):scoreParts(score),k=wp[0]+'|'+wp[1];if(scoreEl._wk!==k){scoreEl._wk=k;scoreEl.innerHTML=wp[0]+'<span class="w-unit'+(/^[A-Z]+$/.test(wp[1])?'':' ju')+'">'+wp[1]+'</span>';}}
   const scoreSubEl=document.getElementById('scoreSubEl');
   if(scoreSubEl){
-    const full=formatFull(score),digits=full.replace(/,/g,'').length;
-    scoreSubEl.textContent=score>=1e9?full+' watts':'';
+    const full=fmtJoulesExact(score),digits=full.replace(/[^0-9]/g,'').length;
+    scoreSubEl.textContent=score>=1e7?full:'';   // from 1 kJ up
     scoreSubEl.style.fontSize=digits>13?Math.max(.38,Math.min(.65,3.5/Math.sqrt(digits)))+'rem':'';
   }
   multEl.textContent=cpt>1?`×${formatMult(mult)} × ${cpt} clicks per tap`:`×${formatMult(mult)} per tap`;
   const _sci=(n=>{if(n<1000)return '';const e=Math.floor(Math.log10(n));return ' ('+( n/Math.pow(10,e)).toFixed(2).replace(/\.?0+$/,'')+'E'+e+')'})(score);
-  balanceEl.textContent=fmtScore(score);
+  balanceEl.innerHTML=scoreHtml(score);
   const h=highestActive();
   const accent=color(Math.max(0,h)).hex,accentRgb=color(Math.max(0,h)).rgb;
   multEl.style.color=accent;
@@ -84,7 +84,7 @@ function renderUI(newlyLit){
     autoInfo.classList.add('visible');
     const _sAcc=color(Math.max(0,highestActiveSeq())).hex;
     autoCpsDisplay.textContent=seqPlaying?formatRate(seqStepsPerSec()):'0';
-    autoEarnDisplay.textContent=seqPlaying?formatRate(seqEarningsPerSec()):'0';
+    autoEarnDisplay.innerHTML=fmtJh(seqPlaying?seqEarningsPerSec():0,3);
     autoCpsDisplay.style.color=_sAcc;autoEarnDisplay.style.color=_sAcc;autoPulse.style.background=seqPlaying?_sAcc:'#444';
   }else autoInfo.classList.remove('visible');
   if(totalAliens>0){alienMultInfo.classList.add('visible');alienMultDisplay.textContent=`×${formatMult(alienMultiplier())}`;}
@@ -142,7 +142,7 @@ function renderStore(){
     document.getElementById('padButtonsSub2').textContent=padDescs[nextPadIdx];
     const btn=document.getElementById('padButtonsBtn');btn.className='drum-buy-btn '+(canBuy?'buyable':'locked');
     const pr=document.getElementById('padButtonsPrice');pr.className='drum-price'+(canBuy?'':' cant-afford');
-    pr.innerHTML=canBuy?`${wHtml(cost)}`:`${wHtml(cost)}`;
+    pr.innerHTML=canBuy?`${jHtml(cost)}`:`${jHtml(cost)}`;
   }
   // ── DRUM: SOUND LIBRARY ──
   const totalSounds=8+drum.extraSounds;const nextSoundIdx=drum.extraSounds;
@@ -160,7 +160,7 @@ function renderStore(){
     document.getElementById('soundLibSub2').textContent=(nextSnd?nextSnd.desc:'New sound for your pads')+' · +×1.2 tap mult';
     const btn=document.getElementById('soundLibBtn');btn.className='drum-buy-btn '+(canBuy?'buyable':'locked');
     const pr=document.getElementById('soundLibPrice');pr.className='drum-price'+(canBuy?'':' cant-afford');
-    pr.innerHTML=canBuy?`${wHtml(cost)}`:`${wHtml(cost)}`;
+    pr.innerHTML=canBuy?`${jHtml(cost)}`:`${jHtml(cost)}`;
   }
   // ── DRUM: SEQUENCER ──
   const tracks=drum.seqTracks;const atMaxTracks=tracks>=MAX_SEQ_TRACKS;
@@ -176,7 +176,7 @@ function renderStore(){
     document.getElementById('seqSub2').textContent=(tracks===0?'1-track loop · every step earns while it plays':`Add track ${tracks+1} of 6 — layer more sounds`)+' · +×1.2 tap mult';
     const btn=document.getElementById('seqBtn');btn.className='drum-buy-btn '+(canBuy?'buyable':'locked');
     const pr=document.getElementById('seqPrice');pr.className='drum-price'+(canBuy?'':' cant-afford');
-    pr.innerHTML=canBuy?`${wHtml(cost)}`:`${wHtml(cost)}`;
+    pr.innerHTML=canBuy?`${jHtml(cost)}`:`${jHtml(cost)}`;
   }
   // ── DRUMPAD / SEQUENCER dot-base upgrades ──
   (function(){
@@ -191,7 +191,7 @@ function renderStore(){
       document.getElementById(pre+'EffectSub').textContent=maxed?`×${cur*u[0]} · ×${cur*u[1]} · ×${cur*u[2]} · ×${cur*u[3]}…`:`×${cur*u[0]} · ×${cur*u[1]} · ×${cur*u[2]} → ×${nxt*u[0]} · ×${nxt*u[1]} · ×${nxt*u[2]}`;
       document.getElementById(pre+'Btn').className='upgrade-buy-btn '+(maxed?'maxed':(can?'buyable':'locked'));
       const pr=document.getElementById(pre+'Price');pr.className='upgrade-price'+((maxed||can)?'':' cant-afford');
-      pr.innerHTML=maxed?'MAX':`${wHtml(cost)}`;
+      pr.innerHTML=maxed?'MAX':`${jHtml(cost)}`;
     }
     // 1B unlock lock (same style as Multi-Click / Alien Power); cards already owned count as unlocked
     function lockFor(pre,unlocked){
@@ -200,7 +200,7 @@ function renderStore(){
       lk.classList.remove('unlocked');
       const can=score>=DOT_UNLOCK_COST&&(pre!=='seqDots'||drum.seqTracks>=1);
       const cost=document.getElementById(pre+'LockCost');
-      cost.textContent=(pre==='seqDots'&&drum.seqTracks<1)?'unlock the sequencer first':fmtW(DOT_UNLOCK_COST);
+      cost.innerHTML=(pre==='seqDots'&&drum.seqTracks<1)?'unlock the sequencer first':fmtJh(DOT_UNLOCK_COST);
       cost.className='lock-cost'+(can?' affordable':'');
       document.getElementById(pre+'UnlockBtn').className='lock-btn'+(can?' affordable':'');
     }
@@ -212,14 +212,14 @@ function renderStore(){
   // ── MULTI-CLICK ──
   const mcUnlocked=shop.multiClickUnlocked;const mcLock=document.getElementById('multiClickLock');
   if(mcUnlocked){mcLock.classList.add('unlocked');}
-  else{mcLock.classList.remove('unlocked');const canUnlock=score>=UNLOCK_COST;document.getElementById('multiClickLockCost').textContent=fmtW(UNLOCK_COST);document.getElementById('multiClickLockCost').className='lock-cost'+(canUnlock?' affordable':'');document.getElementById('multiClickUnlockBtn').className='lock-btn'+(canUnlock?' affordable':'');}
+  else{mcLock.classList.remove('unlocked');const canUnlock=score>=UNLOCK_COST;document.getElementById('multiClickLockCost').innerHTML=fmtJh(UNLOCK_COST);document.getElementById('multiClickLockCost').className='lock-cost'+(canUnlock?' affordable':'');document.getElementById('multiClickUnlockBtn').className='lock-btn'+(canUnlock?' affordable':'');}
   const mcLvl=shop.multiClickLevel+1,nextMC=multiClickUpgradeAt(mcLvl),canMC=score>=nextMC.cost;
   document.getElementById('multiClickCardSub').textContent=shop.multiClickLevel>=0?`Active: each tap = ${shop.multiClickLevel+2} clicks`:'Each tap counts as multiple clicks';
   document.getElementById('multiClickCounterNum').textContent=Math.max(0,mcLvl);
   document.getElementById('multiClickEffectMain').textContent=nextMC.effectMain;document.getElementById('multiClickEffectSub').textContent=nextMC.effectSub;
   const mcBtn=document.getElementById('multiClickNextBtn');mcBtn.className='upgrade-buy-btn '+(canMC?'buyable':'locked');mcBtn.style.borderColor=canMC?'#cc88ff':'';
   const mcP=document.getElementById('multiClickPrice');mcP.className='upgrade-price'+(canMC?'':' cant-afford');
-  mcP.innerHTML=canMC?`${wHtml(nextMC.cost)}`:`${wHtml(nextMC.cost)}`;
+  mcP.innerHTML=canMC?`${jHtml(nextMC.cost)}`:`${jHtml(nextMC.cost)}`;
   // ── TIER 3: SEQUENCER MULTI-CLICK ──
   (function(){
     const lock=document.getElementById('seqMultiClickLock');if(!lock)return;
@@ -230,7 +230,7 @@ function renderStore(){
       lock.classList.remove('unlocked');
       const can=hasSeq&&score>=SEQ_MC_UNLOCK_COST;
       const lc=document.getElementById('seqMultiClickLockCost');
-      lc.textContent=hasSeq?fmtW(SEQ_MC_UNLOCK_COST):'UNLOCK THE SEQUENCER FIRST';
+      lc.innerHTML=hasSeq?fmtJh(SEQ_MC_UNLOCK_COST):'UNLOCK THE SEQUENCER FIRST';
       lc.className='lock-cost'+(can?' affordable':'');
       document.getElementById('seqMultiClickUnlockBtn').className='lock-btn'+(can?' affordable':'');
     }
@@ -241,12 +241,12 @@ function renderStore(){
     document.getElementById('seqMultiClickEffectSub').textContent=maxed?'Every step counts as 8 clicks':up.effectSub;
     const b=document.getElementById('seqMultiClickNextBtn');b.className='upgrade-buy-btn '+(maxed?'maxed':(can?'buyable':'locked'));b.style.borderColor=can?'#ff88cc':'';
     const pr=document.getElementById('seqMultiClickPrice');pr.className='upgrade-price'+(can?'':' cant-afford');
-    pr.innerHTML=maxed?'MAX':`${wHtml(up.cost)}`;
+    pr.innerHTML=maxed?'MAX':`${jHtml(up.cost)}`;
   })();
   // ── ALIEN BOOST ──
   const abUnlocked=shop.alienBoostUnlocked;const abLock=document.getElementById('alienBoostLock');
   if(abUnlocked){abLock.classList.add('unlocked');}
-  else{abLock.classList.remove('unlocked');const canUnlockAB=score>=ALIEN_POWER_UNLOCK_COST;document.getElementById('alienBoostLockCost').textContent=fmtW(ALIEN_POWER_UNLOCK_COST);document.getElementById('alienBoostLockCost').className='lock-cost'+(canUnlockAB?' affordable':'');document.getElementById('alienBoostUnlockBtn').className='lock-btn'+(canUnlockAB?' affordable':'');}
+  else{abLock.classList.remove('unlocked');const canUnlockAB=score>=ALIEN_POWER_UNLOCK_COST;document.getElementById('alienBoostLockCost').innerHTML=fmtJh(ALIEN_POWER_UNLOCK_COST);document.getElementById('alienBoostLockCost').className='lock-cost'+(canUnlockAB?' affordable':'');document.getElementById('alienBoostUnlockBtn').className='lock-btn'+(canUnlockAB?' affordable':'');}
   const abLvl=shop.alienBoostLevel+1,nextAB=alienBoostUpgradeAt(abLvl),canAB=score>=nextAB.cost;
   const currentPerAlien=(1.1+(shop.alienBoostLevel>=0?(shop.alienBoostLevel+1)*0.3:0)).toFixed(1);
   document.getElementById('alienBoostCardSub').textContent=shop.alienBoostLevel>=0?`Active: ×${currentPerAlien} per alien`:'Boost your alien buddy multiplier';
@@ -254,7 +254,7 @@ function renderStore(){
   document.getElementById('alienBoostEffectMain').textContent=nextAB.effectMain;document.getElementById('alienBoostEffectSub').textContent=nextAB.effectSub;
   const abBtn=document.getElementById('alienBoostNextBtn');abBtn.className='upgrade-buy-btn '+(canAB?'buyable':'locked');abBtn.style.borderColor=canAB?'#00ccff':'';
   const abP=document.getElementById('alienBoostPrice');abP.className='upgrade-price'+(canAB?'':' cant-afford');
-  abP.innerHTML=canAB?`${wHtml(nextAB.cost)}`:`${wHtml(nextAB.cost)}`;
+  abP.innerHTML=canAB?`${jHtml(nextAB.cost)}`:`${jHtml(nextAB.cost)}`;
   // ── ALIEN ──
   const nc=alienCost(totalAliens),canAl=score>=nc;
   const perAlienBase=(1.1+(shop.alienBoostLevel>=0?(shop.alienBoostLevel+1)*0.3:0)).toFixed(1);
@@ -264,7 +264,7 @@ function renderStore(){
   if(totalAliens>=BUNKER_SIZE){ab2.style.display='none';}
   else{ab2.style.display='';ab2.className='alien-store-card '+(canAl?'buyable':'locked');}
   const ap2=document.getElementById('alienCardPrice');ap2.className='alien-card-price'+(canAl?'':' cant-afford');
-  ap2.innerHTML=canAl?`${wHtml(nc)}`:`${wHtml(nc)}`;
+  ap2.innerHTML=canAl?`${jHtml(nc)}`:`${jHtml(nc)}`;
   updateShopDismiss();
 }
 

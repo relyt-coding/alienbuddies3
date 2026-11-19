@@ -55,7 +55,7 @@ README.md covers the file layout, test mode and vocals in depth; this file is th
 68 Knowledge Vault · 69 thumb nav (bottom row on upright phones) + PARTY menu + level 3 disco-ball teaser ·
 70 Alien Gem look (Gem Buddy) · 71 level 4 gem ring + gems flying off buddies + MY ACCOUNT sheet ·
 73 Vault big batch (lessons + music words) · 74 Vault price table (generated) · 75 whole-bunker scroll + floating games dock ·
-76 Alien Awakening trails + speed · 77 Egg Incubator + racers · 78 DNA Splice ·
+76 Alien Awakening trails + speed · 77 Egg Incubator + racers · 78 DNA Splice · 79 Buddy Race + Gold Records ·
 72 energy/gem math/party corner + file-select hum (`titleHum`): `openGemStats()` (bunker + shop gem counters), PARTY pill top-left (`.pb-corner`), MY ACCOUNT in Settings only, sequencer tracker ACTIVATE (`seqTrackerActive`, `SEQ_TRACKER_COST`)
 
 - Bunker (v0.2.181, js/75): `.bunker-body` is the scroll box (the grid wrapper no longer scrolls; it only clips the grid's pinch-zoom).
@@ -84,6 +84,10 @@ README.md covers the file layout, test mode and vocals in depth; this file is th
   `makeChild(A,B)` picks each of `SPLICE_GENES` from one parent (12% blend), ant / eyeSize from one, a parent's fx 35%. The egg (kind 'splice') carries
   look / pal / label / name / gen / need (1500 s × 1.5^(gen-1)) / power (1 + .5(gen-1)) / parents; js/77 `incKindOf(e)` lays those over `EGG_KINDS.splice`
   and racers keep look / gen / parents. Price `spliceCost()` = 1,500 💎 × 1.5^spliceCount (saved in js/02). `window.__splice` is a test hook.
+- Buddy Race (v0.2.187, js/79): `#raceBtn` under `#racerRow`; `#raceOverlay` = lobby / race canvas / results. 110 BPM, 64 beats, the same obstacles
+  (on beats / half-beats) in all 4 lanes, equal speed; a miss = exactly one lost beat (`stumbleTo`), so obstacles stay on the beat. Jump = 0.9 beat in the air.
+  CPUs miss 8 / 13 / 18%. Ties = random PHOTO FINISH. 1st place → `goldRecords` +1 (the rare money; nothing spends it yet) and `raceStats` (both js/02).
+  The main sequencer is stopped during a race and restarted after. `drawGoldRecord(g,x,y,r,rot)` draws the record icon. `window.__race` is a test hook.
 - Skill-tree descriptions: `gemsOnly` (js/20) strips any written "×N Alien Gems" and appends the node's REAL `gemMult`, so never hand-write gem amounts.
 
 ## Testing without a phone

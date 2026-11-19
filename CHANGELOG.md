@@ -2,6 +2,14 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.187 - 2026-11-18 21:40
+- BUDDY RACE is here! Once you have a racer, a BUDDY RACE button appears under your racers in the Bunker.
+  - Pick your racer and race three rival buddies over hilly ground. Tap (or press Space) to jump the crystals and holes.
+  - Everyone runs at exactly the same speed. The track is laid out on the beat, so every jump lands on the music.
+  - A trip costs you one beat, and the music never stops. Ties are a photo finish.
+  - Your racer's egg beat plays on top of the race groove.
+- GOLD RECORDS: a new, very rare currency. Only 1st place wins one. Hang on to them: they'll be worth a lot.
+
 ## v0.2.186 - 2026-11-18 20:55
 - DNA SPLICE is here (Alien Evolution path, right after the Egg Incubator). A DNA SPLICE button appears under your heat lamps.
   - Pick any two buddies or racers as parents and splice them into a brand-new egg. The parents stay with you.

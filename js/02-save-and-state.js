@@ -69,7 +69,7 @@ function autoSave(){
     seqEnergy,energyEmptyHints,
     seqMode,
     trailsOn,alienSpeed:alienSpeedMult,
-    incEggs,incRacers,incLampsBought,incAllow,founderEggGiven,spliceCount,
+    incEggs,incRacers,incLampsBought,incAllow,founderEggGiven,spliceCount,goldRecords,raceStats,
     arrangement:[...arrangement],
     arrangeBars,
     seqLayersSnap,
@@ -110,7 +110,8 @@ let trailsOn=true;      // v0.2.183 Alien Awakening: all buddy trails on/off (Al
 let alienSpeedMult=1;
 // v0.2.184 Egg Incubator (js/77): eggs (tray + lamps), hatched racers, shop lamps / allowance, the 0.1 founder egg flag
 let incEggs=[],incRacers=[],incLampsBought=0,incAllow=0,founderEggGiven=false;
-let spliceCount=0;   // v0.2.186 DNA Splice (js/78): splices made on this file (each one costs more gems)  // v0.2.183: floating-buddy speed ×0.5 … ×3 (looks only, js/76 + js/11)
+let spliceCount=0;
+let goldRecords=0,raceStats={races:0,wins:0};   // v0.2.187 Buddy Race (js/79): GOLD RECORDS = the rare money, 1 per race won   // v0.2.186 DNA Splice (js/78): splices made on this file (each one costs more gems)  // v0.2.183: floating-buddy speed ×0.5 … ×3 (looks only, js/76 + js/11)
 let drumTrackerActive=false; // paid 25pts to activate drum dot tracker
 let seqTrackerActive=false; // v0.2.162: the sequencer's dot tracker is its own 1 MW ACTIVATE (js/72)
 let shopOpenCount=0;
@@ -253,7 +254,7 @@ function loadFromSave(data){
   vaultSeen=Array.isArray(data.vaultSeen)?data.vaultSeen.filter(x=>typeof x==='string'):[];
   vaultOwned=Array.isArray(data.vaultOwned)?data.vaultOwned.filter(x=>typeof x==='string'):[];vaultMult=Math.pow(1.05,vaultOwned.length);
   incEggs=Array.isArray(data.incEggs)?data.incEggs.filter(e=>e&&typeof e==='object'):[];incRacers=Array.isArray(data.incRacers)?data.incRacers.filter(e=>e&&typeof e==='object'):[];
-  incLampsBought=Math.max(0,Math.min(6,+data.incLampsBought||0));incAllow=Math.max(0,Math.min(3,+data.incAllow||0));founderEggGiven=!!data.founderEggGiven;spliceCount=Math.max(0,+data.spliceCount||0);
+  incLampsBought=Math.max(0,Math.min(6,+data.incLampsBought||0));incAllow=Math.max(0,Math.min(3,+data.incAllow||0));founderEggGiven=!!data.founderEggGiven;spliceCount=Math.max(0,+data.spliceCount||0);goldRecords=Math.max(0,Math.floor(+data.goldRecords||0));raceStats=data.raceStats&&typeof data.raceStats==='object'?{races:+data.raceStats.races||0,wins:+data.raceStats.wins||0}:{races:0,wins:0};
   trailsOn=data.trailsOn!==false;alienSpeedMult=Math.min(3,Math.max(.5,+data.alienSpeed||1));
   drumTrackerActive=data.drumTrackerActive||false;
   seqTrackerActive=data.seqTrackerActive!==undefined?!!data.seqTrackerActive:((data.drum&&data.drum.seqTracks)||0)>=1;   // old saves that had it keep it

@@ -45,7 +45,7 @@ function closeStore(){
   if(typeof fitPadArea==='function')fitPadArea(); // lay the pads out NOW so they don't jump after the slide-back
 }
 function openBunker(){
-  viewingBunker=Math.max(0,Math.floor((Math.max(0,totalAliens-1))/BUNKER_SIZE));
+  viewingBunker=typeof bunkersOwned==='number'?Math.max(0,Math.min(bunkersOwned-1,viewingBunker|0)):0;   // v0.2.188: stay on the bunker you were looking at
   if(document.body.classList.contains('desktop-mode')){
     const bv=document.getElementById('bunkerView');
     bv.classList.remove('sidebar-collapsed');

@@ -55,7 +55,7 @@ README.md covers the file layout, test mode and vocals in depth; this file is th
 68 Knowledge Vault · 69 thumb nav (bottom row on upright phones) + PARTY menu + level 3 disco-ball teaser ·
 70 Alien Gem look (Gem Buddy) · 71 level 4 gem ring + gems flying off buddies + MY ACCOUNT sheet ·
 73 Vault big batch (lessons + music words) · 74 Vault price table (generated) · 75 whole-bunker scroll + floating games dock ·
-76 Alien Awakening trails + speed · 77 Egg Incubator + racers · 78 DNA Splice · 79 Buddy Race + Gold Records ·
+76 Alien Awakening trails + speed · 77 Egg Incubator + racers · 78 DNA Splice · 79 Buddy Race + Gold Records · 80 extra bunkers ·
 72 energy/gem math/party corner + file-select hum (`titleHum`): `openGemStats()` (bunker + shop gem counters), PARTY pill top-left (`.pb-corner`), MY ACCOUNT in Settings only, sequencer tracker ACTIVATE (`seqTrackerActive`, `SEQ_TRACKER_COST`)
 
 - Bunker (v0.2.181, js/75): `.bunker-body` is the scroll box (the grid wrapper no longer scrolls; it only clips the grid's pinch-zoom).
@@ -88,6 +88,11 @@ README.md covers the file layout, test mode and vocals in depth; this file is th
   (on beats / half-beats) in all 4 lanes, equal speed; a miss = exactly one lost beat (`stumbleTo`), so obstacles stay on the beat. Jump = 0.9 beat in the air.
   CPUs miss 8 / 13 / 18%. Ties = random PHOTO FINISH. 1st place → `goldRecords` +1 (the rare money; nothing spends it yet) and `raceStats` (both js/02).
   The main sequencer is stopped during a race and restarted after. `drawGoldRecord(g,x,y,r,rot)` draws the record icon. `window.__race` is a test hook.
+- Extra bunkers (v0.2.188, js/80): Tier 3 card `#bxShopCard` (shows at 99 buddies) raises `bunkersOwned` (1–10, js/02); `bunkerMeta[v]={name,theme}`;
+  `alienData[i].box` = bunker (missing → floor(i/99)). Use `bunkerIds(v)` / `bunkerOf(i)` / `bunkerCapacity()`; js/12 renderBunkerView draws `bunkerIds(viewingBunker)`
+  and finds cells by `cell._globalIdx` (never by index maths). js/16 buyAlien calls `bunkerAssign`. Past 99: `alienCost(n)` = alienCost(98)×1.12^(n-98) and
+  `alienMultiplier()` counts only the first 99 at full strength (+×1.01 each after), because the old curves overflow to Infinity. `#bxNav` (‹ name n/N › theme)
+  replaces `#bunkerNumberLabel` when there's more than one bunker; `#anmMoveRow` on the buddy card moves buddies.
 - Skill-tree descriptions: `gemsOnly` (js/20) strips any written "×N Alien Gems" and appends the node's REAL `gemMult`, so never hand-write gem amounts.
 
 ## Testing without a phone

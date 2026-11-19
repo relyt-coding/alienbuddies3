@@ -137,14 +137,14 @@ function fitCellName(nameEl){
 }
 
 function renderBunkerView(){
-  const idx=viewingBunker,inThis=Math.max(0,Math.min(BUNKER_SIZE,totalAliens-idx*BUNKER_SIZE));
-  const completed=Math.floor(totalAliens/BUNKER_SIZE);
+  const idx=viewingBunker,ids=typeof bunkerIds==='function'?bunkerIds(idx):[...Array(Math.max(0,Math.min(BUNKER_SIZE,totalAliens-idx*BUNKER_SIZE))).keys()].map(i=>idx*BUNKER_SIZE+i),inThis=ids.length;
+  const completed=typeof bunkerIds==='function'&&typeof bunkersOwned==='number'?[...Array(bunkersOwned).keys()].filter(v=>bunkerIds(v).length>=BUNKER_SIZE).length:Math.floor(totalAliens/BUNKER_SIZE);
   document.getElementById('statTotal').textContent=totalAliens.toLocaleString();
   updateBouncerToggleVisibility();
   document.getElementById('statBunkers').textContent=completed;
   document.getElementById('statCurrent').textContent=inThis;
   // two pieces that each stay whole, so on a narrow phone it wraps between them instead of running under BACK
-  document.getElementById('bunkerSubEl').innerHTML=`<span>${inThis} / ${BUNKER_SIZE} ALIENS ·</span> <span>BUNKER #${idx+1}</span>`;
+  document.getElementById('bunkerSubEl').innerHTML=`<span>${inThis} / ${BUNKER_SIZE} ALIENS ·</span> <span>${typeof bunkerName==='function'?bunkerName(idx):'BUNKER #'+(idx+1)}</span>`;
   document.getElementById('bunkerNumberLabel').textContent=`BUNKER #${idx+1}`;
   const banner=document.getElementById('bunkerFullBanner');
   if(inThis>=BUNKER_SIZE){
@@ -162,9 +162,9 @@ function renderBunkerView(){
   else banner.classList.remove('show');
   for(let i=0;i<BUNKER_SIZE;i++){
     const cell=document.getElementById(`bcell-${i}`);if(!cell)continue;
-    const globalIdx=idx*BUNKER_SIZE+i;
+    const globalIdx=ids[i];
     if(i<inThis){
-      if(!cell.classList.contains('occupied')){
+      if(!cell.classList.contains('occupied')||cell._globalIdx!==globalIdx){
         cell.classList.add('occupied');
         const col=getAlienColor(globalIdx);
         cell.style.borderColor=col;cell.style.boxShadow=`0 0 6px -2px ${col}`;
@@ -183,7 +183,7 @@ function renderBunkerView(){
         const nameDiv=cell.querySelector('.alien-cell-name');
         // names always visible in bunker grid
       }
-    }else{cell.classList.remove('occupied');cell.textContent='';cell.style.borderColor='';cell.style.boxShadow='';cell.onclick=null;}
+    }else{cell._globalIdx=null;cell.classList.remove('occupied');cell.textContent='';cell.style.borderColor='';cell.style.boxShadow='';cell.onclick=null;}
   }
   refreshBunkerMarks();
   const pct=(inThis/BUNKER_SIZE)*100;document.getElementById('bunkerProgressBar').style.width=pct+'%';document.getElementById('progLabel').textContent=`${inThis} / ${BUNKER_SIZE} SLOTS FILLED`;document.getElementById('progPct').textContent=Math.floor(pct)+'%';
@@ -331,7 +331,7 @@ function paintCellBuddy(cv,idx){
   drawBuddy(g,w/2,h*.56,w*.68,{view:'turn',angle:18,idx,lite:true,antenna:1,t:1});
 }
 function refreshBunkerBuddy(idx){
-  const cellIdx=idx-viewingBunker*BUNKER_SIZE,cell=document.getElementById(`bcell-${cellIdx}`);if(!cell||!cell.classList.contains('occupied'))return;
+  const cell=[...bunkerGrid.children].find(c=>c._globalIdx===idx);if(!cell||!cell.classList.contains('occupied'))return;
   const col=getAlienColor(idx);cell.style.borderColor=col;cell.style.boxShadow=`0 0 6px -2px ${col}`;
   const nm=cell.querySelector('.alien-cell-name');if(nm)nm.style.color=col;
   const cv=cell.querySelector('.cell-buddy');if(cv)paintCellBuddy(cv,idx);
@@ -397,10 +397,8 @@ function saveAlienName(){
   }
 
   // Update bunker grid cell if it's currently visible
-  const bunkerPage=viewingBunker||0;
-  const cellIdx=alienProfileIdx-(bunkerPage*BUNKER_SIZE);
-  if(cellIdx>=0&&cellIdx<100){
-    const cell=document.getElementById(`bcell-${cellIdx}`);
+  {
+    const cell=[...bunkerGrid.children].find(c=>c._globalIdx===alienProfileIdx);
     if(cell){
       const nd=cell.querySelector('.alien-cell-name');
       if(nd){

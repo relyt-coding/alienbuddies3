@@ -97,7 +97,7 @@ function buildScoreStats(){
   // Alien multiplier
   if(totalAliens>0){
     const perAlien=1.1+(shop.alienBoostLevel>=0?(shop.alienBoostLevel+1)*0.3:0);
-    scoreStatsList.appendChild(ssRow('BUDDY','ALIEN BOOST',`${totalAliens} alien${totalAliens>1?'s':''} · ×${perAlien.toFixed(1)}/alien`,`×${formatMult(alienMult)}`,true,'green'));
+    scoreStatsList.appendChild(ssRow('BUDDY','ALIEN BOOST',`${totalAliens} alien${totalAliens>1?'s':''} · ×${perAlien.toFixed(1)}/alien`+(totalAliens>99?` · ×1.01 each after 99`:''),`×${formatMult(alienMult)}`,true,'green'));
     if(shop.alienBoostLevel>=0){
       scoreStatsList.appendChild(ssRow('💉','ALIEN POWER',`Boost level ${shop.alienBoostLevel+1} · ×${perAlien.toFixed(1)} per alien`,`+${(perAlien-1.1).toFixed(1)}/alien`,true));
     }

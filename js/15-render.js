@@ -257,7 +257,7 @@ function renderStore(){
   const cb=alienMultiplier(),nb=Math.pow(parseFloat(perAlienBase),totalAliens+1);
   document.getElementById('alienCountStat').textContent=totalAliens;
   const ab2=document.getElementById('alienBuyBtn');
-  if(totalAliens>=BUNKER_SIZE){ab2.style.display='none';}
+  if(totalAliens>=(typeof bunkerCapacity==='function'?bunkerCapacity():BUNKER_SIZE)){ab2.style.display='none';}
   else{ab2.style.display='';ab2.className='alien-store-card '+(canAl?'buyable':'locked');}
   const ap2=document.getElementById('alienCardPrice');ap2.className='alien-card-price'+(canAl?'':' cant-afford');
   ap2.innerHTML=canAl?`${jHtml(nc)}`:`${jHtml(nc)}`;

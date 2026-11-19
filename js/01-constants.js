@@ -95,7 +95,7 @@ function alienDiscount(n){
   return Math.pow(10,i<=k?ALIEN_L[i]:ALIEN_L[k]+(ALIEN_L[k]-ALIEN_L[k-1])*(i-k));
 }
 const _disc=c=>{const d=progressDiscount();return d>1?Math.max(1,Math.round(c/d)):c;};
-const GAME_VERSION='0.2.187'; // bump on every delivered build (shown in Settings and on the home screen)
+const GAME_VERSION='0.2.188'; // bump on every delivered build (shown in Settings and on the home screen)
 const BASE_CPS=5;
 const UNLOCK_COST=bump30(60000000);
 const ALIEN_POWER_UNLOCK_COST=bump30(600000000);
@@ -119,6 +119,7 @@ function seqMultiClickCost(lvl){return Math.round(_disc(5e12*Math.pow(1e8,lvl))*
 function seqMultiClickUpgradeAt(lvl){const clicks=lvl+2;return{effectMain:`${clicks}× CLICKS`,effectSub:`Each sequencer step counts as ${clicks} clicks`,cost:seqMultiClickCost(lvl)};}
 function dotUpgradeCost(n){return Math.round(_disc(DOT_COSTS[Math.min(n,DOT_COSTS.length-1)])*_p75(n));}
 function alienCost(n){
+  if(n>98)return alienCost(98)*Math.pow(1.12,n-98);   // v0.2.188 extra bunkers: buddy 100+ costs 12% more each (the old curve hits Infinity near #180)
   if(n===0)return 1000;       // alien 1: 1,000
   if(n===1)return 100000;     // alien 2: 100,000
   if(n===2)return 1000000;    // alien 3: 1,000,000

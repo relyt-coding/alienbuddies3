@@ -2,6 +2,13 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.188 - 2026-11-18 22:20
+- EXTRA BUNKERS: once your first bunker is full, the Shop's Tier 3 section sells more bunkers, up to 10 (room for 990 buddies).
+  - Flip between bunkers with the ‹ › arrows at the top of the Bunker, or swipe the bar.
+  - Tap a bunker's name to rename it, and tap the coloured dot to give it a colour theme (Cosmic, Ocean, Sunset, Lava, Ice, Candy, Gold).
+  - Tap any buddy and use MOVE TO to sort it into another bunker.
+  - Buddies past the first 99 cost a bit more each. They add a smaller energy boost each and still bring their Alien Gems.
+
 ## v0.2.187 - 2026-11-18 21:40
 - BUDDY RACE is here! Once you have a racer, a BUDDY RACE button appears under your racers in the Bunker.
   - Pick your racer and race three rival buddies over hilly ground. Tap (or press Space) to jump the crystals and holes.

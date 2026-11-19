@@ -2926,3 +2926,18 @@ body.splice-open #alienLayer{opacity:0;visibility:hidden;}
 #raceOverlay .res-row small{font-size:.75rem;letter-spacing:.1em;color:#8a7a4a;}
 #raceOverlay .rl-btns{display:flex;gap:.6rem;margin-top:.4rem;}
 body.race-open #alienLayer{visibility:hidden;}
+
+/* v0.2.188 extra bunkers (js/80) */
+#bxNav{display:flex;align-items:center;gap:.4rem;margin:0 0 .45rem;padding:.25rem .3rem;border:1px solid var(--bx-edge,#1a2a1f);border-radius:12px;background:rgba(0,0,0,.25);}
+#bxNav .bx-arrow{font-family:'Bebas Neue',sans-serif;font-size:1.5rem;line-height:1;width:2.2rem;height:2.2rem;border-radius:10px;border:1px solid var(--bx-edge,#1a3a2a);background:#0a1a0f;color:var(--bx-acc,#00ff88);cursor:pointer;touch-action:manipulation;flex-shrink:0;}
+#bxNav #bxName{flex:1;min-width:0;font-family:'Bebas Neue',sans-serif;font-size:1.15rem;letter-spacing:.14em;text-align:center;background:transparent;border:0;border-bottom:1px dashed var(--bx-edge,#1a3a2a);outline:none;color:var(--bx-acc,#00ff88);padding:.1rem 0;}
+#bxNav #bxCount{font-family:'Bebas Neue',sans-serif;font-size:.9rem;letter-spacing:.1em;color:#7fc79a;white-space:nowrap;}
+#bxNav #bxTheme{width:1.6rem;height:1.6rem;border-radius:50%;border:2px solid rgba(255,255,255,.6);cursor:pointer;flex-shrink:0;}
+#bunkerView.bx-themed .page-title{color:var(--bx-acc)!important;}
+#bunkerView.bx-themed .bunker-grid .alien-cell:not(.occupied){background:var(--bx-bg);border-color:var(--bx-edge);}
+#bunkerView.bx-themed .bunker-grid .alien-cell.occupied{background:var(--bx-bg);}
+#bunkerView.bx-themed .bunker-progress-bar{background:var(--bx-acc);}
+#anmMoveRow{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:.3rem;margin:.3rem 0;}
+#anmMoveRow span{font-family:'Bebas Neue',sans-serif;font-size:.8rem;letter-spacing:.14em;color:#7fc79a;margin-right:.2rem;}
+#anmMoveRow .anm-bx{font-family:'Bebas Neue',sans-serif;font-size:.95rem;width:2rem;height:2rem;border-radius:8px;border:1px solid #1a3a2a;background:#0a1a0f;color:#cfe;cursor:pointer;touch-action:manipulation;}
+#anmMoveRow .anm-bx:disabled{opacity:.3;}

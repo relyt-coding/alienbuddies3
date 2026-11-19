@@ -858,6 +858,7 @@ function renderSkillTree(){
     const isHub = !!node.hub;
     const r = isCenter ? 36 : isHub ? 42 : 27;
     el.style.cssText = `left:${node.x - r}px;top:${node.y - r}px;`;
+    el._mx = node.x; el._my = node.y;   // map position, for the 3D view's off-screen culling (js/81)
 
     const circle = document.createElement('div');
     circle.className = 'st-node-circle';

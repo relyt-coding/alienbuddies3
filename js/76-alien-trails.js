@@ -181,14 +181,17 @@ function trailOf(i){const a=typeof alienData!=='undefined'&&alienData[i];const i
 
   // ── the loop ──
   const HIST_S=.42;   // seconds of path each buddy remembers
-  let lastT=0,dirty=false,visCheck=0,layerVisible=true;
-  function active(){return typeof unlockedSkills!=='undefined'&&unlockedSkills.alien_awakening&&typeof trailsOn!=='undefined'&&trailsOn&&typeof showBouncers!=='undefined'&&showBouncers;}
+  let lastT=0,dirty=false,visCheck=0,layerVisible=true,offAt=0;
+  function active(){return !document.body.classList.contains('tree-open')&&typeof unlockedSkills!=='undefined'&&unlockedSkills.alien_awakening&&typeof trailsOn!=='undefined'&&trailsOn&&typeof showBouncers!=='undefined'&&showBouncers;}
   function frame(now){
     requestAnimationFrame(frame);
     const dt=Math.min(.1,(now-(lastT||now))/1000);lastT=now;
-    if(now-visCheck>400){visCheck=now;layerVisible=getComputedStyle(layer).visibility!=='hidden';if(cv.width!==Math.round(layer.clientWidth*DPR))fit();}
+    if(now-visCheck>400){visCheck=now;layerVisible=getComputedStyle(layer).visibility!=='hidden';if(cv.width>1&&cv.width!==Math.round(layer.clientWidth*DPR))fit();}
     const on=!document.hidden&&active()&&layerVisible&&typeof bouncers!=='undefined'&&bouncers.length;
-    if(!on){if(dirty){g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,cv.width,cv.height);dirty=false;parts.length=0;}musicOff();return;}
+    if(!on){if(dirty){g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,cv.width,cv.height);dirty=false;parts.length=0;offAt=now;}
+      if(cv.width>1&&now-offAt>1500){cv.width=1;cv.height=1;}   // give the memory back while nothing draws (v0.2.190)
+      musicOff();return;}
+    if(cv.width<=1)fit();
     // quality: slow frames (over ~24 ms) for a while → lighter; fast for a while → back up
     if(dt>.024){slowAcc+=dt;fastAcc=0;if(slowAcc>.5){Q=Math.max(.25,Q-.15);slowAcc=0;}}else{fastAcc+=dt;slowAcc=0;if(fastAcc>3){Q=Math.min(LEGACY?.6:1,Q+.05);fastAcc=0;}}
     g.setTransform(DPR,0,0,DPR,0,0);g.clearRect(0,0,W,H);dirty=true;

@@ -1824,7 +1824,7 @@ body.phone-land .bunker-grid{max-width:480px;margin:0 auto;}
 .st-sky,.st-haze{display:none;position:absolute;pointer-events:none;}
 #skillTreeModal.st-3d .st-sky,#skillTreeModal.st-3d .st-haze{display:block;}
 .st-sky{top:0;left:0;right:0;bottom:0;overflow:hidden;}
-.st-sky i{position:absolute;left:-256px;top:-256px;right:-256px;bottom:-256px;background-repeat:repeat;background-size:256px 256px;will-change:transform;}
+.st-sky i{position:absolute;left:-256px;top:-256px;right:0;bottom:0;background-repeat:repeat;background-size:256px 256px;will-change:transform;}
 .st-haze{left:0;right:0;top:0;height:24%;z-index:2;background:linear-gradient(#030510 0%,rgba(3,5,16,.82) 30%,rgba(3,5,16,0) 100%);}
 .st-ground{fill:none;stroke:rgba(120,150,255,.13);stroke-width:2;stroke-dasharray:3 14;}
 .st-ground.far{stroke:rgba(120,150,255,.08);}
@@ -2941,3 +2941,7 @@ body.race-open #alienLayer{visibility:hidden;}
 #anmMoveRow span{font-family:'Bebas Neue',sans-serif;font-size:.8rem;letter-spacing:.14em;color:#7fc79a;margin-right:.2rem;}
 #anmMoveRow .anm-bx{font-family:'Bebas Neue',sans-serif;font-size:.95rem;width:2rem;height:2rem;border-radius:8px;border:1px solid #1a3a2a;background:#0a1a0f;color:#cfe;cursor:pointer;touch-action:manipulation;}
 #anmMoveRow .anm-bx:disabled{opacity:.3;}
+
+/* v0.2.190 memory diet (js/81): far-away bubbles in the 3D tree are not drawn at all; buddies underneath an open tree stop drawing */
+#skillTreeModal.st-3d .st-cull{display:none!important;}
+body.tree-open #alienLayer{visibility:hidden;}

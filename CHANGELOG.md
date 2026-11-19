@@ -2,6 +2,9 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.190 - 2026-11-19 08:10
+- Fixed: on iPhone, opening the skill tree could make Safari reload the game back to the file select. The 3D galaxy map used too much memory. It now only draws the bubbles near where you're looking, and the floating buddies take a break while the map is open. The game also uses less memory in general.
+
 ## v0.2.189 - 2026-11-18 21:10
 - Gold Records are now GOLD RECORD COINS: tiny gold records struck as coins, with a ridged rim, record grooves and a music note in the middle. Win races to save them up. They'll be worth a lot later.
 

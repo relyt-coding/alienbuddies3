@@ -2,6 +2,14 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.183 - 2026-11-18 18:53
+- ALIEN AWAKENING is here (Alien Evolution path, after Gem Harvester I). Your buddies wake up and leave a glowing trail as they float.
+  - The Alien Party menu gets a TRAILS ON/OFF switch (it works with or without a party) and a SPEED slider from ×0.5 to ×3. Speed is just for looks: it never changes your energy or gems.
+  - The Alien Designer gets a TRAIL tab: pick a trail for each buddy, or none.
+- 19 more trails to unlock in a new lane after Alien Awakening: Comet Tail, Moon Dust, Frost Crystals, Fire Wake, Stardust, Bubble Trail, Rainbow Ribbon, Neon Line, Pixel Trail, Paint Drips, Confetti, Hearts, Petal Drift, Lightning Zap, Aurora Veil, Echo, and at the end three that move to your music: Music Notes, Soundwave and Equalizer Bars.
+- New science facts in the Knowledge Vault about comets, snowflakes, soap bubbles, lightning, auroras, sound waves and equalizers.
+- Trails turn themselves down automatically on slower phones so the game stays smooth.
+
 ## v0.2.182 - 2026-11-18 16:05
 - The official run starts here! Alien Buddies 0.2 has changed so much since testing began that every 0.2 save file starts fresh with this version. Thank you for playing early. (Your 0.1 saves are untouched.)
 - The Buddy Designer is now three upgrades on the Alien Evolution path:

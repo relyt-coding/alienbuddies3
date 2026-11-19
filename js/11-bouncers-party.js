@@ -252,7 +252,8 @@ addEventListener('resize',()=>{_bbCache=null;});
   {const bc=document.body.classList;if(bc.contains('bestbuddy-open')&&!bc.contains('desktop-mode')){tickBouncers._t=now;return;}}
   const bounds=cachedBouncerBounds(now||performance.now());
   const tnow=now||performance.now(),bdt=Math.min(.1,(tnow-(tickBouncers._t||tnow))/1000);tickBouncers._t=tnow;
-  const mv=bdt>0?Math.min(4,bdt*60):1;   // velocities are in px per 60fps-frame
+  let mv=bdt>0?Math.min(4,bdt*60):1;   // velocities are in px per 60fps-frame
+  if(typeof alienSpeedMult==='number'&&alienSpeedMult!==1&&typeof unlockedSkills!=='undefined'&&unlockedSkills.alien_awakening)mv*=alienSpeedMult;   // Alien Awakening SPEED slider (js/76): looks only
   // party styles (js/36-party-modes.js) choreograph the aliens instead of free bouncing
   if(partyMode&&typeof partyChoreo==='function'&&partyChoreo(now||performance.now(),bounds)){
     const bud=document.body.classList.contains('desktop-mode')?6:(bdt>.028?1:2);genRunFrames(bud);

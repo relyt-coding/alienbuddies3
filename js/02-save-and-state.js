@@ -68,6 +68,7 @@ function autoSave(){
     seqBpm,seqSteps:STEPS,seqKey,seqKeyMinor,trackFx,
     seqEnergy,energyEmptyHints,
     seqMode,
+    trailsOn,alienSpeed:alienSpeedMult,
     arrangement:[...arrangement],
     arrangeBars,
     seqLayersSnap,
@@ -104,6 +105,8 @@ let tipsMult=1; // permanent ×1.5 per tip
 let vaultSeen=[]; // Knowledge Vault entries already seen (js/68)
 let vaultOwned=[]; // Knowledge Vault lessons / words bought with points (×1.05 each, js/68)
 let vaultMult=1;
+let trailsOn=true;      // v0.2.183 Alien Awakening: all buddy trails on/off (Alien Party menu, js/76)
+let alienSpeedMult=1;  // v0.2.183: floating-buddy speed ×0.5 … ×3 (looks only, js/76 + js/11)
 let drumTrackerActive=false; // paid 25pts to activate drum dot tracker
 let seqTrackerActive=false; // v0.2.162: the sequencer's dot tracker is its own 1 MW ACTIVATE (js/72)
 let shopOpenCount=0;
@@ -245,6 +248,7 @@ function loadFromSave(data){
   tipsMult=data.tipsMult||1;
   vaultSeen=Array.isArray(data.vaultSeen)?data.vaultSeen.filter(x=>typeof x==='string'):[];
   vaultOwned=Array.isArray(data.vaultOwned)?data.vaultOwned.filter(x=>typeof x==='string'):[];vaultMult=Math.pow(1.05,vaultOwned.length);
+  trailsOn=data.trailsOn!==false;alienSpeedMult=Math.min(3,Math.max(.5,+data.alienSpeed||1));
   drumTrackerActive=data.drumTrackerActive||false;
   seqTrackerActive=data.seqTrackerActive!==undefined?!!data.seqTrackerActive:((data.drum&&data.drum.seqTracks)||0)>=1;   // old saves that had it keep it
   shopOpenCount=data.shopOpenCount||0;

@@ -55,6 +55,7 @@ README.md covers the file layout, test mode and vocals in depth; this file is th
 68 Knowledge Vault · 69 thumb nav (bottom row on upright phones) + PARTY menu + level 3 disco-ball teaser ·
 70 Alien Gem look (Gem Buddy) · 71 level 4 gem ring + gems flying off buddies + MY ACCOUNT sheet ·
 73 Vault big batch (lessons + music words) · 74 Vault price table (generated) · 75 whole-bunker scroll + floating games dock ·
+76 Alien Awakening trails + speed ·
 72 energy/gem math/party corner + file-select hum (`titleHum`): `openGemStats()` (bunker + shop gem counters), PARTY pill top-left (`.pb-corner`), MY ACCOUNT in Settings only, sequencer tracker ACTIVATE (`seqTrackerActive`, `SEQ_TRACKER_COST`)
 
 - Bunker (v0.2.181, js/75): `.bunker-body` is the scroll box (the grid wrapper no longer scrolls; it only clips the grid's pinch-zoom).
@@ -67,6 +68,11 @@ README.md covers the file layout, test mode and vocals in depth; this file is th
 - Designer split (v0.2.182, js/47): node `buddy_designer` is now ALIEN DESIGNER (HAT / GLASSES / SHOES tabs → `alienData[i].acc`),
   `pigment_lab` adds the six colour tabs, `shape_shifter` adds SHAPE (antenna length, eye size); locked tabs are hidden. Starter pieces are
   appended to the accessory lists (`buddyAcc.STARTER`, js/51) so puzzle k still gives item k; `bbItemOwned` (js/52) grants them with buddy_designer.
+- Alien Awakening (v0.2.183, js/76): `#trailCanvas` is the first child of #alienLayer; each bouncer keeps a path history (`b._trH`) and draws its trail
+  (`alienData[i].trail`, default 'glow', 'none' = off; picked in the designer's TRAIL tab). `trailsOn` / `alienSpeedMult` are saved (js/02); js/11 multiplies
+  the float step by `alienSpeedMult`. TRAILS + SPEED are appended to `openPartyMenu` by a wrapper. The 19 `trail_<id>` nodes are pushed by js/76 AFTER js/20's
+  costBalance/gemsOnly, so their prices (×8 already) and "×1.02 Alien Gems" text are written there. Music trails open their own analyser only while on screen.
+  Quality `Q` drops on slow frames (fewer particles, thinner lines, no soft glow passes).
 - Skill-tree descriptions: `gemsOnly` (js/20) strips any written "×N Alien Gems" and appends the node's REAL `gemMult`, so never hand-write gem amounts.
 
 ## Testing without a phone

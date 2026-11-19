@@ -10,6 +10,7 @@
     {id:'acc_h',label:'HAT',    acc:'h',need:'buddy_designer'},
     {id:'acc_e',label:'GLASSES',acc:'e',need:'buddy_designer'},
     {id:'acc_s',label:'SHOES',  acc:'s',need:'buddy_designer'},
+    {id:'trail',label:'TRAIL',  need:'alien_awakening'},
     {id:'body', label:'BODY',   part:'body', key:'body',need:'pigment_lab'},
     {id:'eye',  label:'EYES',   part:'bead', key:'eye',need:'pigment_lab'},
     {id:'mouth',label:'MOUTH',  part:'bead', key:'mouth',need:'pigment_lab'},
@@ -83,6 +84,7 @@
     root.querySelectorAll('#bdTabs button').forEach(b=>{const T0=TABS.find(t=>t.id===b.dataset.tab);b.style.display=tabOn(T0)?'':'none';b.classList.toggle('on',b.dataset.tab===tab);});
     const T=TABS.find(t=>t.id===tab),sw=root.querySelector('#bdSwatches'),op=root.querySelector('#bdOpts');
     if(T.acc){renderAcc(T);return;}
+    if(T.id==='trail'){renderTrail();return;}
     if(T.id==='shape'){
       root.querySelector('#bdPick').textContent='SHAPE';sw.innerHTML='';sw.classList.remove('bd-accs');op.innerHTML='';
       shapeRow('ANTENNA LENGTH',ANT,'ant');shapeRow('EYE SIZE',EYE,'eyeSize');return;}
@@ -111,17 +113,31 @@
       tile(it.name,cur===j,b=>{try{b.appendChild(buddyAcc.icon(c,j,44,look));}catch(e){}}).onclick=()=>{acc[c]=acc[c]===j?null:j;accChanged();};});
     if(locked){const m=document.createElement('div');m.className='bd-more';m.textContent=locked+' MORE TO FIND';sw.appendChild(m);}
   }
+  // TRAIL tab (Alien Awakening): this buddy's trail, from the ones you own (js/76)
+  function renderTrail(){
+    const sw=root.querySelector('#bdSwatches'),a=alienData[idx]||{},cur=a.trail==='none'?'none':(a.trail&&trailOwned(a.trail)?a.trail:'glow');
+    root.querySelector('#bdOpts').innerHTML='';sw.innerHTML='';sw.classList.add('bd-accs');
+    root.querySelector('#bdPick').textContent='TRAIL: '+(cur==='none'?'NONE':TRAIL_MAP[cur].name.toUpperCase())+(typeof trailsOn!=='undefined'&&!trailsOn?' · TRAILS ARE OFF':'');
+    const col=(()=>{try{return buddyLookSpec(idx).tip;}catch(e){return '#ffd23f';}})();
+    const tile=(label,on,fill,fn)=>{const b=document.createElement('button');b.className='bd-acc'+(on?' on':'');fill(b);const s=document.createElement('small');s.textContent=label;b.appendChild(s);b.onclick=fn;sw.appendChild(b);};
+    tile('NONE',cur==='none',b=>{const x=document.createElement('span');x.className='bd-none';x.textContent='✕';b.appendChild(x);},()=>{alienData[idx].trail='none';accChanged();});
+    let locked=0;
+    TRAILS.forEach(t=>{if(!trailOwned(t.id)){locked++;return;}
+      tile(t.name,cur===t.id,b=>{try{b.appendChild(trailIcon(t.id,44,col));}catch(e){}},()=>{alienData[idx].trail=t.id;accChanged();});});
+    if(locked){const m=document.createElement('div');m.className='bd-more';m.textContent=locked+' MORE TO FIND';sw.appendChild(m);}
+  }
   function accChanged(){refreshEverywhere();render();if(typeof autoSave==='function')autoSave();}
   // RANDOM / ORIGINAL only change what you've unlocked: outfits always, colours with Pigment Lab, shape with Shape Shifter
   function randomize(){
     const P=BUDDY_PARTS,pk=a=>a[Math.floor(Math.random()*a.length)][0];
     const acc=accOf(idx);['h','e','s'].forEach(c=>{const cat=buddyAcc.CATS.find(x=>x.k===c),own=cat.list.map((_,j)=>j).filter(j=>owns(c,j));acc[c]=Math.random()<.35||!own.length?null:own[Math.floor(Math.random()*own.length)];});
+    if(has('alien_awakening')&&typeof TRAILS!=='undefined'){const own=TRAILS.filter(t=>trailOwned(t.id));if(own.length)alienData[idx].trail=own[Math.floor(Math.random()*own.length)].id;}
     if(has('pigment_lab')){spec=Object.assign({},spec,{body:pk(P.body),eye:pk(P.bead),mouth:pk(P.bead),stem:pk(P.stem),tip:pk(P.tip),foot:pk(P.foot)});if(spec.mouth===spec.eye)spec.mouth=pk(P.bead);}
     if(has('shape_shifter')){spec.ant=ANT[Math.floor(Math.random()*ANT.length)][1];spec.eyeSize=EYE[Math.floor(Math.random()*EYE.length)][1];}
     save();render();
   }
   function reset(){
-    if(idx===null)return;const acc=accOf(idx);acc.h=acc.e=acc.s=null;
+    if(idx===null)return;const acc=accOf(idx);acc.h=acc.e=acc.s=null;if(alienData[idx])delete alienData[idx].trail;
     if(alienData[idx]&&alienData[idx].look){const L=alienData[idx].look;delete alienData[idx].look;const base=Object.assign({ant:1.35,eyeSize:1},buddyLookSpec(idx));alienData[idx].look=L;   // the look it was born with
       if(has('pigment_lab'))['body','eye','mouth','stem','tip','foot'].forEach(k=>{L[k]=base[k];});
       if(has('shape_shifter')){L.ant=base.ant;L.eyeSize=base.eyeSize;}}

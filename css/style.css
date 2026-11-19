@@ -2789,3 +2789,11 @@ body.phone-land .bunker-body{padding-bottom:0;margin-bottom:1.5rem;}
 .bd-acc canvas{width:44px;height:44px;}
 .bd-none{font-size:1.2rem;color:#5f8f78;line-height:44px;height:44px;}
 .bd-more{width:100%;text-align:center;font-family:'Bebas Neue',sans-serif;font-size:.8rem;letter-spacing:.14em;color:#3f8a66;margin-top:.2rem;}
+
+/* v0.2.183 Alien Awakening: the trail canvas sits behind every buddy; the party menu gets TRAILS + SPEED */
+#trailCanvas{position:absolute;left:0;top:0;pointer-events:none;}
+#partyMenu .pm-awake{border-top:1px solid rgba(255,255,255,.12);margin-top:.35rem;padding-top:.4rem;display:flex;flex-direction:column;gap:.3rem;}
+#partyMenu .pm-sub{font-family:'Bebas Neue',sans-serif;font-size:.8rem;letter-spacing:.2em;color:#7fe0c0;text-align:center;}
+#partyMenu .pm-speed{display:flex;align-items:center;gap:.5rem;padding:.3rem .6rem;font-family:'Bebas Neue',sans-serif;letter-spacing:.12em;color:#cfe;font-size:1rem;touch-action:none;}
+#partyMenu .pm-speed input{flex:1;min-width:110px;accent-color:#44eebb;}
+#partyMenu .pm-speed b{font-weight:normal;min-width:2.6em;text-align:right;color:#44eebb;}

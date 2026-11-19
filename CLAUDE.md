@@ -86,8 +86,8 @@ README.md covers the file layout, test mode and vocals in depth; this file is th
   and racers keep look / gen / parents. Price `spliceCost()` = 1,500 💎 × 1.5^spliceCount (saved in js/02). `window.__splice` is a test hook.
 - Buddy Race (v0.2.187, js/79): `#raceBtn` under `#racerRow`; `#raceOverlay` = lobby / race canvas / results. 110 BPM, 64 beats, the same obstacles
   (on beats / half-beats) in all 4 lanes, equal speed; a miss = exactly one lost beat (`stumbleTo`), so obstacles stay on the beat. Jump = 0.9 beat in the air.
-  CPUs miss 8 / 13 / 18%. Ties = random PHOTO FINISH. 1st place → `goldRecords` +1 (the rare money; nothing spends it yet) and `raceStats` (both js/02).
-  The main sequencer is stopped during a race and restarted after. `drawGoldRecord(g,x,y,r,rot)` draws the record icon. `window.__race` is a test hook.
+  CPUs miss 8 / 13 / 18%. Ties = random PHOTO FINISH. 1st place → `goldRecords` +1 = GOLD RECORD COINS (the rare money, saved up for now; nothing spends it yet. The creator wants to make them as real coins one day, so keep the drawn design to one metal + relief) and `raceStats` (both js/02).
+  The main sequencer is stopped during a race and restarted after. `drawGoldRecord(g,x,y,r,rot)` draws the coin (reeded rim, grooves, embossed ♪ label). `window.__race` is a test hook.
 - Extra bunkers (v0.2.188, js/80): Tier 3 card `#bxShopCard` (shows at 99 buddies) raises `bunkersOwned` (1–10, js/02); `bunkerMeta[v]={name,theme}`;
   `alienData[i].box` = bunker (missing → floor(i/99)). Use `bunkerIds(v)` / `bunkerOf(i)` / `bunkerCapacity()`; js/12 renderBunkerView draws `bunkerIds(viewingBunker)`
   and finds cells by `cell._globalIdx` (never by index maths). js/16 buyAlien calls `bunkerAssign`. Past 99: `alienCost(n)` = alienCost(98)×1.12^(n-98) and

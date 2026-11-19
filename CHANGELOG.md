@@ -2,6 +2,9 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.189 - 2026-11-18 21:10
+- Gold Records are now GOLD RECORD COINS: tiny gold records struck as coins, with a ridged rim, record grooves and a music note in the middle. Win races to save them up. They'll be worth a lot later.
+
 ## v0.2.188 - 2026-11-18 22:20
 - EXTRA BUNKERS: once your first bunker is full, the Shop's Tier 3 section sells more bunkers, up to 10 (room for 990 buddies).
   - Flip between bunkers with the ‹ › arrows at the top of the Bunker, or swipe the bar.

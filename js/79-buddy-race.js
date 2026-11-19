@@ -1,7 +1,7 @@
 // ══════════════════════════════════════════════
 //  BUDDY RACE (v0.2.187)
 //  Your racers (js/77) race three CPU buddies over hilly Planet Hop-style ground. A BUDDY RACE button appears under the
-//  racer row in the Bunker once you have a racer. Only 1st place pays: 1 GOLD RECORD, the game's rare money
+//  racer row in the Bunker once you have a racer. Only 1st place pays: 1 GOLD RECORD COIN (a tiny gold record, designed to be made as a real coin one day), the game's rare money
 //  (goldRecords, js/02). Nothing to spend it on yet: it will be the hard-to-get currency.
 //
 //  FAIR, NO STATS: every racer runs at exactly the same speed. The track is laid out in BEATS (110 BPM, 64 beats), the
@@ -23,12 +23,26 @@
   const lookOf=r=>{try{return makeBuddyLook(incKindOf(r).look);}catch(e){return null;}};
 
   // ── gold record icon (a little gold vinyl) ──
-  window.drawGoldRecord=function(g,x,y,r,rot){g.save();g.translate(x,y);g.rotate(rot||0);
-    const k=g.createRadialGradient(-r*.3,-r*.3,r*.1,0,0,r);k.addColorStop(0,'#fff3a0');k.addColorStop(.45,'#ffd23f');k.addColorStop(1,'#a8740a');
-    g.fillStyle=k;g.beginPath();g.arc(0,0,r,0,TAU);g.fill();
-    g.strokeStyle='rgba(120,80,0,.45)';g.lineWidth=Math.max(.6,r*.04);for(let i=1;i<4;i++){g.beginPath();g.arc(0,0,r*(.45+i*.15),0,TAU);g.stroke();}
-    g.fillStyle='#ff4fa8';g.beginPath();g.arc(0,0,r*.32,0,TAU);g.fill();g.fillStyle='#2a1a00';g.beginPath();g.arc(0,0,r*.07,0,TAU);g.fill();
-    g.strokeStyle='rgba(255,255,255,.6)';g.lineWidth=Math.max(.8,r*.07);g.beginPath();g.arc(0,0,r*.8,-2.4,-1.7);g.stroke();g.restore();};
+  // GOLD RECORD COIN: a tiny gold record struck as a coin (raised reeded rim, record grooves, embossed ♪ on the label).
+  // Kept to shapes a real coin die can carry: one metal, relief only, so it can be made for real one day.
+  window.drawGoldRecord=function(g,x,y,r,rot){if(!(r>0))return;g.save();g.translate(x,y);g.rotate(rot||0);
+    const face=g.createRadialGradient(-r*.35,-r*.35,r*.05,0,0,r);face.addColorStop(0,'#fff6c0');face.addColorStop(.5,'#f2c230');face.addColorStop(1,'#9a6a08');
+    // rim + reeding
+    g.fillStyle='#b8860b';g.beginPath();g.arc(0,0,r,0,TAU);g.fill();
+    if(r>9){g.strokeStyle='rgba(90,60,0,.55)';g.lineWidth=Math.max(.5,r*.025);const n=Math.round(Math.min(72,r*2.4));
+      for(let i=0;i<n;i++){const a=i/n*TAU;g.beginPath();g.moveTo(Math.cos(a)*r*.9,Math.sin(a)*r*.9);g.lineTo(Math.cos(a)*r,Math.sin(a)*r);g.stroke();}}
+    const rim=g.createLinearGradient(-r,-r,r,r);rim.addColorStop(0,'#fff0a0');rim.addColorStop(1,'#8a5a00');g.strokeStyle=rim;g.lineWidth=r*.09;g.beginPath();g.arc(0,0,r*.86,0,TAU);g.stroke();
+    // the record face with grooves
+    g.fillStyle=face;g.beginPath();g.arc(0,0,r*.81,0,TAU);g.fill();
+    g.strokeStyle='rgba(110,70,0,.4)';g.lineWidth=Math.max(.5,r*.022);const gr=r>14?5:3;for(let i=0;i<gr;i++){g.beginPath();g.arc(0,0,r*(.42+i*(.36/gr)),0,TAU);g.stroke();}
+    // raised centre label with an embossed eighth note
+    const lab=g.createRadialGradient(-r*.1,-r*.1,0,0,0,r*.36);lab.addColorStop(0,'#ffe680');lab.addColorStop(1,'#c9930f');g.fillStyle=lab;g.beginPath();g.arc(0,0,r*.34,0,TAU);g.fill();
+    g.strokeStyle='rgba(255,250,220,.7)';g.lineWidth=Math.max(.5,r*.025);g.beginPath();g.arc(0,0,r*.34,Math.PI*1.05,Math.PI*1.7);g.stroke();
+    if(r>6){const s=r*.34;g.fillStyle='#8a5a00';g.beginPath();g.ellipse(-s*.18,s*.32,s*.22,s*.16,-.4,0,TAU);g.fill();
+      g.fillRect(-s*.0,-s*.5,s*.09,s*.82);g.beginPath();g.moveTo(s*.09,-s*.5);g.quadraticCurveTo(s*.55,-s*.25,s*.38,s*.12);g.quadraticCurveTo(s*.4,-s*.18,s*.09,-s*.22);g.closePath();g.fill();}
+    // shine
+    g.strokeStyle='rgba(255,255,255,.55)';g.lineWidth=Math.max(.8,r*.06);g.beginPath();g.arc(0,0,r*.7,-2.5,-1.8);g.stroke();
+    g.restore();};
   function recIcon(px){const c=document.createElement('canvas'),d=2;c.width=c.height=px*d;c.style.cssText=`width:${px}px;height:${px}px;vertical-align:middle`;
     const g=c.getContext('2d');g.scale(d,d);drawGoldRecord(g,px/2,px/2,px*.46,.3);return c;}
 
@@ -68,7 +82,7 @@
     incRacers.forEach(r=>{const b=document.createElement('button');b.className='rl-card'+(r.id===mine?' on':'');b.appendChild(mini(lookOf(r),64));const s=document.createElement('small');s.textContent=r.name||'RACER';b.appendChild(s);
       b.addEventListener('click',()=>{mine=r.id;paintLobby();});pk.appendChild(b);});
     const rv=$('rlRivals');rv.innerHTML='';rivals.forEach(c=>{const d=document.createElement('div');d.className='rl-card cpu';d.appendChild(mini(c.look,52));const s=document.createElement('small');s.textContent=c.name;d.appendChild(s);rv.appendChild(d);});
-    const pz=$('rlPrize');pz.innerHTML='1ST PLACE WINS ';pz.appendChild(recIcon(18));pz.appendChild(document.createTextNode(' 1 GOLD RECORD'));
+    const pz=$('rlPrize');pz.innerHTML='1ST PLACE WINS ';pz.appendChild(recIcon(18));pz.appendChild(document.createTextNode(' 1 GOLD RECORD COIN'));
   }
   function closeAll(){stopRace();ov.classList.remove('on');document.body.classList.remove('race-open');if(resumeSeq&&typeof startSeq==='function'){resumeSeq=false;try{startSeq();}catch(e){}}}
   $('rlBack').addEventListener('click',closeAll);$('resBack').addEventListener('click',closeAll);

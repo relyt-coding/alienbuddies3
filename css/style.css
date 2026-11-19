@@ -2797,3 +2797,59 @@ body.phone-land .bunker-body{padding-bottom:0;margin-bottom:1.5rem;}
 #partyMenu .pm-speed{display:flex;align-items:center;gap:.5rem;padding:.3rem .6rem;font-family:'Bebas Neue',sans-serif;letter-spacing:.12em;color:#cfe;font-size:1rem;touch-action:none;}
 #partyMenu .pm-speed input{flex:1;min-width:110px;accent-color:#44eebb;}
 #partyMenu .pm-speed b{font-weight:normal;min-width:2.6em;text-align:right;color:#44eebb;}
+
+/* v0.2.184 Egg Incubator (js/77): lamps at the top of the bunker, waiting eggs, racer row, egg page, racer card, shop cards */
+#incubatorSection{display:none!important;}
+#eggArea{margin:.1rem 0 .6rem;}
+#eggArea .inc-strip{display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x mandatory;padding:2px 2px 6px;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+#eggArea .inc-strip::-webkit-scrollbar{display:none;}
+#eggArea .inc-card{flex:0 0 calc((100% - 16px)/3);max-width:150px;scroll-snap-align:start;background:#06140d;border:1px solid #1f6a45;border-radius:12px;padding:0 0 .5rem;cursor:pointer;touch-action:manipulation;text-align:center;position:relative;}
+#eggArea .inc-card.empty{border-color:#164030;}
+#eggArea .inc-card.ready{border-color:#ffd23f;box-shadow:0 0 14px -4px rgba(255,210,63,.6);}
+#eggArea .inc-art{display:block;width:100%;}
+#eggArea .inc-lbl{font-family:'Bebas Neue',sans-serif;font-size:.78rem;letter-spacing:.08em;color:#5fbf8f;line-height:1.1;padding:0 .3rem;min-height:1.7em;display:flex;align-items:center;justify-content:center;}
+#eggArea .inc-bar{height:6px;margin:.25rem .55rem 0;border-radius:3px;background:#0e2a1c;overflow:hidden;}
+#eggArea .inc-bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#ff8a3d,#ffd23f);border-radius:3px;}
+#eggArea .inc-info{font-family:'Bebas Neue',sans-serif;font-size:.7rem;letter-spacing:.08em;color:#7fc7a2;margin-top:.25rem;min-height:1.1em;padding:0 .2rem;}
+#eggArea .inc-power{font-family:'Bebas Neue',sans-serif;font-size:.72rem;letter-spacing:.1em;color:#ffb35a;text-align:center;margin:.1rem 0 .35rem;}
+#eggArea .inc-tray-wrap{margin-top:.2rem;}
+#eggArea .inc-sub{font-family:'Bebas Neue',sans-serif;font-size:.8rem;letter-spacing:.14em;color:#2f9a68;margin:0 0 .2rem .1rem;}
+#eggArea .inc-tray{display:flex;gap:.4rem;overflow-x:auto;background:#071a10;border:1px solid #164030;border-radius:10px;padding:.35rem;}
+#eggArea .inc-tray-egg{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;background:none;border:1px solid transparent;border-radius:8px;padding:.1rem .3rem;cursor:pointer;color:#ffd23f;touch-action:manipulation;}
+#eggArea .inc-tray-egg small{font-family:'Bebas Neue',sans-serif;font-size:.6rem;letter-spacing:.06em;white-space:nowrap;}
+#eggArea .inc-need{font-family:'Bebas Neue',sans-serif;font-size:.7rem;letter-spacing:.12em;color:#3f8a66;margin-top:.3rem;text-align:center;}
+#eggArea .inc-shake{animation:incShake .28s;}
+@keyframes incShake{0%,100%{transform:none}25%{transform:translateX(-4px) rotate(-1.5deg)}75%{transform:translateX(4px) rotate(1.5deg)}}
+.racer-row{margin:0 0 .5rem;}
+.racer-cell{position:relative;}
+.racer-cell .racer-shoe{position:absolute;right:1px;top:1px;width:11px;height:8px;opacity:.9;background:no-repeat center/contain url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 14'><path d='M2 3c2 0 4 1 5 3l4 2c3 1 7 1 9 3v2H2z' fill='%23ffd23f'/><path d='M2 12h18' stroke='%23fff' stroke-width='1.5'/></svg>");}
+#eggPage,#racerCard{position:fixed;inset:0;z-index:330;display:none;align-items:center;justify-content:center;background:rgba(3,8,6,.94);}
+#eggPage.on,#racerCard.on{display:flex;}
+#eggPage .ep-box{width:min(420px,94vw);max-height:96vh;overflow:auto;display:flex;flex-direction:column;align-items:center;gap:.45rem;padding:.6rem 0 1rem;}
+#eggPage .ep-hdr{width:100%;display:flex;align-items:center;justify-content:space-between;}
+#eggPage .ep-hdr button,#eggPage .ep-ctrls button,#racerCard button{font-family:'Bebas Neue',sans-serif;letter-spacing:.12em;font-size:.95rem;padding:.45rem .9rem;border-radius:10px;border:1px solid #1f6a45;background:#06140d;color:#9fe8c4;cursor:pointer;touch-action:manipulation;}
+#eggPage .ep-title{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:.14em;}
+#eggPage .ep-bar{width:70%;height:7px;border-radius:4px;background:#0e2a1c;overflow:hidden;}
+#eggPage .ep-bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#ff8a3d,#ffd23f);}
+#eggPage .ep-info{font-family:'Bebas Neue',sans-serif;font-size:.85rem;letter-spacing:.12em;color:#7fc7a2;}
+#eggPage .ep-grid{display:grid;grid-template-columns:repeat(16,1fr);gap:2px;width:100%;}
+#eggPage .ep-cell{aspect-ratio:1;border:0;border-radius:3px;background:#0b2418;padding:0;cursor:pointer;touch-action:manipulation;}
+#eggPage .ep-cell.beat{background:#123a28;}
+#eggPage .ep-cell.on{background:var(--c);}
+#eggPage .ep-cell.now{outline:2px solid #fff;outline-offset:-2px;}
+#eggPage .ep-pads{display:flex;gap:.5rem;width:100%;}
+#eggPage .ep-padw{flex:1;display:flex;flex-direction:column;gap:.3rem;}
+#eggPage .ep-pad{height:min(26vw,110px);border-radius:14px;border:2px solid var(--c);background:#0a0f0c;color:var(--c);font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:.1em;cursor:pointer;touch-action:none;-webkit-user-select:none;user-select:none;}
+#eggPage .ep-pad.hit{animation:epHit .18s;}
+@keyframes epHit{0%{background:var(--c);color:#000}100%{background:#0a0f0c}}
+#eggPage .ep-swap{font-size:1rem;padding:.2rem;border-radius:8px;border:1px solid #1f3a2c;background:#06140d;color:#7fc7a2;cursor:pointer;}
+#eggPage .ep-ctrls{display:flex;gap:.5rem;}
+#eggPage .ep-rec{color:#ff6a6a!important;border-color:#5a1f1f!important;}
+#eggPage .ep-rec.on{background:#3a0a0a!important;}
+#racerCard .rc-box{width:min(380px,92vw);display:flex;flex-direction:column;align-items:center;gap:.5rem;background:#06140d;border:1px solid #1f6a45;border-radius:16px;padding:1rem .8rem;}
+#racerCard .rc-kick{font-family:'Bebas Neue',sans-serif;font-size:.9rem;letter-spacing:.2em;color:#7fe0c0;}
+#racerCard input{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:.12em;text-align:center;background:transparent;border:0;border-bottom:1px dashed #1f6a45;width:80%;outline:none;}
+#racerCard .rc-kind{font-family:'Bebas Neue',sans-serif;font-size:.75rem;letter-spacing:.12em;color:#5fbf8f;text-align:center;}
+#racerCard .rc-btns{display:flex;gap:.5rem;}
+.inc-shop.inc-cant .upgrade-price{color:#666;}
+body.phone-land #eggArea .inc-card{max-width:118px;}

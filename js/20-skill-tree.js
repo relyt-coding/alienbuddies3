@@ -498,8 +498,9 @@ const SKILL_TREE_NODES = [
   {id:'gem_harvester_1', icon:'💎', name:'Gem Harvester I', desc:'Gem rate ×1.5 per alien per minute.', cost:200, requires:['buddy_designer'], x:460, y:360, branch:'aliens', mult:1.5},
   {id:'gem_harvester_2', icon:'💎', name:'Gem Harvester II', desc:'Gem rate ×2 per alien per minute.', cost:400, requires:['gem_harvester_1'], x:600, y:420, branch:'aliens', mult:1.5},
   {id:'alien_awakening', icon:'🌟', name:'Alien Awakening', desc:'Coming soon: your buddies glow and leave trails, and you can turn up their speed from the party menu.', cost:350, requires:['gem_harvester_1'], x:680, y:340, branch:'aliens', mult:1.5},
-  {id:'dna_splice', icon:'🧬', name:'DNA Splice', desc:'Coming soon: mix the traits of two buddies to make a brand-new egg.', cost:600, requires:['alien_awakening'], x:800, y:440, branch:'aliens', mult:1.5},
-  {id:'ascension', icon:'🌠', name:'Egg Incubator', desc:'Coming soon: hatch special eggs into buddies that can race.', cost:900, requires:['dna_splice'], x:880, y:520, branch:'aliens', mult:1.5},
+  // v0.2.184: the Egg Incubator now comes BEFORE DNA Splice (spliced eggs need somewhere to warm). Ids unchanged.
+  {id:'ascension', icon:'🥚', name:'Egg Incubator', desc:'Three heat lamps appear at the top of your Bunker. They warm special eggs with your energy, and what hatches becomes a racer.', cost:600, requires:['alien_awakening'], x:800, y:440, branch:'aliens', mult:1.5},
+  {id:'dna_splice', icon:'🧬', name:'DNA Splice', desc:'Coming soon: mix the traits of two buddies to make a brand-new egg.', cost:900, requires:['ascension'], x:880, y:520, branch:'aliens', mult:1.5},
 ];
 // ── The skill tree only boosts Alien Gems (no point bonuses) ──
 // Balance (v0.2.113): every gem bonus multiplies your gems PER MINUTE (never the gems you already have), and the bonuses
@@ -1363,7 +1364,7 @@ eggRewardClose&&eggRewardClose.addEventListener('click',()=>{
   buildIncubatorGrid();
   updateIncubatorVisibility();
   autoSave();
-  showToast('🥚 Egg added to your Incubator in the Bunker!');
+  showToast('Your light egg is waiting at the top of the Bunker!');
 });
 // Close on backdrop tap
 const eggModal=document.getElementById('eggRewardModal');

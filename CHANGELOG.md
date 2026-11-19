@@ -2,6 +2,17 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.184 - 2026-11-18 20:05
+- The EGG INCUBATOR is here (Alien Evolution path, right after Alien Awakening; DNA Splice now comes after it).
+  - Three heat lamps appear at the top of your Bunker. Slide sideways to see them all.
+  - Lamps run on live power: while an egg warms, each lamp takes a slice of the energy your music is making. No music, no heat. A first egg takes about 20 minutes.
+  - Eggs only crack once they are fully warm. Then tap one 3 times to hatch it.
+  - Tap a warming egg to open its page: three pads with the egg's own instruments (swap them with ⟳), and RECORD with a 4-beat count-in that loops 16 steps. Only the egg's sounds play there. The egg keeps its beat.
+- Hatched buddies are RACERS. They sit in their own row with a little shoe, outside your 99 bunker slots. Tap one to name it and watch it run. Races come in a later update.
+- Filling your bunker (99 aliens) now gives a LIGHT EGG. It hatches a glowing see-through buddy with its own prism trail.
+- Played 0.1 and filled its bunker on this device? Every save file gets the golden 0.1 FOUNDER EGG.
+- New in the Shop: HEAT LAMPS (up to 9) and WATT ALLOWANCE (how many lamps can run at full heat). They are very expensive on purpose.
+
 ## v0.2.183 - 2026-11-18 18:53
 - ALIEN AWAKENING is here (Alien Evolution path, after Gem Harvester I). Your buddies wake up and leave a glowing trail as they float.
   - The Alien Party menu gets a TRAILS ON/OFF switch (it works with or without a party) and a SPEED slider from ×0.5 to ×3. Speed is just for looks: it never changes your energy or gems.

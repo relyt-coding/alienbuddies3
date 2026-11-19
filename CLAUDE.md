@@ -55,7 +55,7 @@ README.md covers the file layout, test mode and vocals in depth; this file is th
 68 Knowledge Vault · 69 thumb nav (bottom row on upright phones) + PARTY menu + level 3 disco-ball teaser ·
 70 Alien Gem look (Gem Buddy) · 71 level 4 gem ring + gems flying off buddies + MY ACCOUNT sheet ·
 73 Vault big batch (lessons + music words) · 74 Vault price table (generated) · 75 whole-bunker scroll + floating games dock ·
-76 Alien Awakening trails + speed ·
+76 Alien Awakening trails + speed · 77 Egg Incubator + racers ·
 72 energy/gem math/party corner + file-select hum (`titleHum`): `openGemStats()` (bunker + shop gem counters), PARTY pill top-left (`.pb-corner`), MY ACCOUNT in Settings only, sequencer tracker ACTIVATE (`seqTrackerActive`, `SEQ_TRACKER_COST`)
 
 - Bunker (v0.2.181, js/75): `.bunker-body` is the scroll box (the grid wrapper no longer scrolls; it only clips the grid's pinch-zoom).
@@ -73,6 +73,13 @@ README.md covers the file layout, test mode and vocals in depth; this file is th
   the float step by `alienSpeedMult`. TRAILS + SPEED are appended to `openPartyMenu` by a wrapper. The 19 `trail_<id>` nodes are pushed by js/76 AFTER js/20's
   costBalance/gemsOnly, so their prices (×8 already) and "×1.02 Alien Gems" text are written there. Music trails open their own analyser only while on screen.
   Quality `Q` drops on slow frames (fewer particles, thinner lines, no soft glow passes).
+- Egg Incubator (v0.2.184, js/77; node id is still `ascension`, now BEFORE dna_splice): `#eggArea` (lamps strip + waiting tray) is inserted at the top of
+  `.bunker-body`, `#racerRow` just above the grid; hidden until an egg exists or the node is owned. State (js/02): `incEggs` (slot -1 = tray, heat 0..1, taps,
+  beat {s:[3 sound ids], p:3×16}), `incRacers`, `incLampsBought` (0–6), `incAllow` (0–3), `founderEggGiven`. Egg kinds in `EGG_KINDS` (founder from a 0.1
+  `ab_slotN` that filled its bunker; light from the 99-alien reward via `#eggRewardClose`). Warming draws `INC_LAMP_FRAC` (10%) of live income per lamp
+  (income = js/34 `_rateAdd` gains over 10 s, wrapped) and covers 3+2×incAllow lamps at full speed. Shop cards (`#incLampCard` / `#incAllowCard`) are priced
+  off `alienCost(98)`. The egg page fades `drumMasterReal` and plays egg sounds via `SOUND_MAP[id].fn` with `drumMasterGain` swapped to a private bus.
+  `window.__inc` is a test hook (set `__inc.income`). The light buddy look uses `fx.glass` (see-through fur) and `fx.halo` (js/46).
 - Skill-tree descriptions: `gemsOnly` (js/20) strips any written "×N Alien Gems" and appends the node's REAL `gemMult`, so never hand-write gem amounts.
 
 ## Testing without a phone

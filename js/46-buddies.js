@@ -377,7 +377,7 @@
     before.sort((a,b)=>a.z-b.z).forEach(d=>d.f());
     strayHairs(g,B,R,CY,rot,true);
     if(B.fx)specialFx(g,B,u,R,CY,t,'back',rot);
-    const ball=furBall(B,o.furPx||Math.max(16,Math.ceil(u*50/12)*12));if(o.furPx){g.imageSmoothingEnabled=true;g.imageSmoothingQuality='high';}g.drawImage(ball,-u*50,-u*50+u*2,u*100,u*100);
+    const ball=furBall(B,o.furPx||Math.max(16,Math.ceil(u*50/12)*12));if(o.furPx){g.imageSmoothingEnabled=true;g.imageSmoothingQuality='high';}{const ga0=g.globalAlpha;if(B.fx&&B.fx.glass)g.globalAlpha=ga0*B.fx.glass;g.drawImage(ball,-u*50,-u*50+u*2,u*100,u*100);g.globalAlpha=ga0;}
     if(B.fx)specialFx(g,B,u,R,CY,t,'sheen',rot);
     if(!LITE)furFibres(g,B,R,CY,rot);
     {g.save();g.beginPath();g.arc(0,CY,R*1.01,0,Math.PI*2);g.clip();
@@ -446,7 +446,7 @@
     before.sort((a,b)=>a.z-b.z).forEach(d=>d.f());
     strayHairs(g,B,R,CY,rot,true);
     if(B.fx)specialFx(g,B,u,R,CY,o.t!=null?o.t:1,'back',rot);
-    const ball=furBall(B,Math.max(16,Math.ceil(u*50/12)*12));g.drawImage(ball,-u*50,-u*50,u*100,u*100);
+    const ball=furBall(B,Math.max(16,Math.ceil(u*50/12)*12));{const ga0=g.globalAlpha;if(B.fx&&B.fx.glass)g.globalAlpha=ga0*B.fx.glass;g.drawImage(ball,-u*50,-u*50,u*100,u*100);g.globalAlpha=ga0;}
     if(B.fx)specialFx(g,B,u,R,CY,o.t!=null?o.t:1,'sheen',rot);
     if(!LITE)furFibres(g,B,R,CY,rot);
     strayHairs(g,B,R,CY,rot,false);
@@ -470,6 +470,10 @@
   //    (the ring is a real 3D circle around the pom, tilted, so it turns with the buddy)
   function specialFx(g,B,u,R,CY,t,part,rot){
     const F=B.fx;
+    // fx.halo (v0.2.184, the Light buddy): a soft glow behind the pom that breathes; fx.glass (in drawModel/drawFloat) makes the fur see-through
+    if(part==='back'&&F.halo){const hr=R*(2.1+.15*Math.sin(t*2)),hg=g.createRadialGradient(0,CY,R*.3,0,CY,hr);hg.addColorStop(0,F.halo);hg.addColorStop(1,'rgba(255,255,255,0)');
+      g.save();g.globalAlpha=.55;g.fillStyle=hg;g.fillRect(-hr,CY-hr,hr*2,hr*2);g.restore();}
+    if(part==='back'&&!F.ring)return;if(part==='front'&&!F.ring&&!F.spark)return;if(part==='sheen'&&!F.sheen)return;
     if(part==='sheen'){
       g.save();g.beginPath();g.arc(0,CY,R*.99,0,Math.PI*2);g.clip();
       const a=t*.7,x0=Math.cos(a)*R,y0=Math.sin(a)*R,k=g.createLinearGradient(-x0,CY-y0,x0,CY+y0);

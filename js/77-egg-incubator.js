@@ -78,7 +78,7 @@ function incAllowPrice(l){return incPriceBase()*8*Math.pow(100,l);}
 
   // ── the light egg: the 99-alien reward (js/12 shows the modal, js/20 claims it; we add the egg) ──
   const claim=$('eggRewardClose');
-  if(claim)claim.addEventListener('click',()=>{if(!incEggs.some(e=>e.kind==='light')&&!incRacers.some(r=>r.kind==='light')){incEggs.push(incNewEgg('light'));save();refresh(true);}});
+  if(claim)claim.addEventListener('click',()=>{if(!incEggs.some(e=>e.kind==='light')&&!incRacers.some(r=>r.kind==='light')){incEggs.push(incNewEgg('light'));save();refresh(true);}setTimeout(()=>{try{bannerText();}catch(e){}},0);});
   // the modal's big emoji egg becomes the real (glowing) light egg
   (function(){const m=$('eggRewardModal');if(!m)return;const d=[...m.querySelectorAll('div')].find(x=>x.textContent.trim()==='🥚');if(!d)return;
     d.textContent='';const c=document.createElement('canvas'),k=2,S=120;c.width=S*k;c.height=S*1.25*k;c.style.cssText=`width:${S}px;height:${S*1.25}px;display:block`;d.appendChild(c);
@@ -86,7 +86,10 @@ function incAllowPrice(l){return incPriceBase()*8*Math.pow(100,l);}
   // the old incubator box under the grid is gone; the banner points to the top instead
   window.updateIncubatorVisibility=function(){};
   if(typeof renderBunkerView==='function'){const rb=window.renderBunkerView;window.renderBunkerView=function(){const r=rb.apply(this,arguments);
-    try{const s=$('bunkerFullSub');if(s&&typeof hasReceivedEgg!=='undefined'&&hasReceivedEgg)s.textContent='Your light egg is at the top of the Bunker';}catch(e){}refresh();return r;};}
+    try{bannerText();}catch(e){}refresh();return r;};}
+  // the BUNKER FULL banner follows the light egg: claim it → it's waiting at the top → (hatched) all 99 found
+  function bannerText(){const s=$('bunkerFullSub');if(!s||typeof hasReceivedEgg==='undefined'||!hasReceivedEgg)return;
+    s.textContent=incEggs.some(e=>e.kind==='light')?'Your light egg is at the top of the Bunker':'All 99 buddies found!';}
 
   // ══ BUNKER: egg area (top) + racer row (above the grid) ══
   const body=document.querySelector('#bunkerView .bunker-body');
@@ -147,7 +150,7 @@ function incAllowPrice(l){return incPriceBase()*8*Math.pow(100,l);}
     const k=K(egg),r={id:'r'+Date.now().toString(36),kind:egg.kind,name:k.name,beat:egg.beat,born:Date.now()};
     incEggs=incEggs.filter(e=>e!==egg);incRacers.push(r);
     try{if(typeof playSfxTierUnlock==='function')playSfxTierUnlock(4,1);}catch(e){}
-    save();refresh(true);setTimeout(()=>openRacer(r.id,true),250);
+    save();refresh(true);try{bannerText();}catch(e){}setTimeout(()=>openRacer(r.id,true),250);
   }
   function fmtMin(s){if(!isFinite(s))return '';const m=Math.ceil(s/60);return m>=60?'~'+(m/60).toFixed(m>=600?0:1)+' H':'~'+m+' MIN';}
   function paintInfo(){
@@ -279,8 +282,8 @@ function incAllowPrice(l){return incPriceBase()*8*Math.pow(100,l);}
   let rcId=null,rcRaf=0;const trailPts=[];
   function openRacer(id,isNew){const r=incRacers.find(x=>x.id===id);if(!r)return;rcId=id;const k=EGG_KINDS[r.kind]||EGG_KINDS.light;
     $('rcKick').textContent=isNew?'A NEW RACER HATCHED!':'RACER';$('rcName').value=r.name||'';$('rcName').style.color=k.col;$('rcKind').textContent=k.title+' · RACES COME IN A LATER UPDATE';
-    rc.classList.add('on');trailPts.length=0;cancelAnimationFrame(rcRaf);rcRaf=requestAnimationFrame(rcFrame);}
-  function closeRacer(){if(E.on){eStop();muteMain(false);}rc.classList.remove('on');cancelAnimationFrame(rcRaf);const r=incRacers.find(x=>x.id===rcId);
+    rc.classList.add('on');document.body.classList.add('racer-open');trailPts.length=0;cancelAnimationFrame(rcRaf);rcRaf=requestAnimationFrame(rcFrame);}
+  function closeRacer(){if(E.on){eStop();muteMain(false);}rc.classList.remove('on');document.body.classList.remove('racer-open');cancelAnimationFrame(rcRaf);const r=incRacers.find(x=>x.id===rcId);
     if(r){const v=$('rcName').value.trim().toUpperCase().slice(0,14);if(v)r.name=v;}rcId=null;$('rcBeat').textContent='▶ ITS BEAT';save();refresh(true);}
   $('rcClose').addEventListener('click',closeRacer);
   rc.addEventListener('click',e=>{if(e.target===rc)closeRacer();});

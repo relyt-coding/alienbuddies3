@@ -2,6 +2,11 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.185 - 2026-11-18 20:15
+- On phones, your floating buddies now fade out while the Bunker, Shop or Knowledge Vault is open, so they never sit on top of what you're trying to tap. They float back in when you return.
+- Buddies also step aside while an egg's page or a racer's card is open.
+- The BUNKER FULL banner now keeps up: it points you to your light egg, and once it hatches it says you've found all 99 buddies.
+
 ## v0.2.184 - 2026-11-18 20:05
 - The EGG INCUBATOR is here (Alien Evolution path, right after Alien Awakening; DNA Splice now comes after it).
   - Three heat lamps appear at the top of your Bunker. Slide sideways to see them all.

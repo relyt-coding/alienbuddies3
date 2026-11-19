@@ -2853,3 +2853,9 @@ body.phone-land .bunker-body{padding-bottom:0;margin-bottom:1.5rem;}
 #racerCard .rc-btns{display:flex;gap:.5rem;}
 .inc-shop.inc-cant .upgrade-price{color:#666;}
 body.phone-land #eggArea .inc-card{max-width:118px;}
+
+/* v0.2.184+ polish: on phones the floating buddies fade out over full pages (bunker, shop, vault) so they never cover what you tap;
+   on every device they hide behind the egg page and the racer card. They keep floating underneath and fade back in on the main screen. */
+#alienLayer{transition:opacity .3s,visibility 0s;}
+body:not(.desktop-mode).bunker-open #alienLayer,body:not(.desktop-mode).store-open #alienLayer,body:not(.desktop-mode).vault-open #alienLayer,
+body.egg-page-open #alienLayer,body.racer-open #alienLayer{opacity:0;visibility:hidden;transition:opacity .3s,visibility 0s .3s;}

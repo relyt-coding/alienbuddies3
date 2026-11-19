@@ -2,6 +2,16 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.186 - 2026-11-18 20:55
+- DNA SPLICE is here (Alien Evolution path, right after the Egg Incubator). A DNA SPLICE button appears under your heat lamps.
+  - Pick any two buddies or racers as parents and splice them into a brand-new egg. The parents stay with you.
+  - Every colour (body, eyes, mouth, antennae, tips, feet) comes from one parent, and sometimes two colours blend into a new one. The splice screen shows the choices for each colour and which one the egg got.
+  - Antenna length and eye size come from one parent too, and a special buddy's shine can pass on.
+  - Each splice costs more Alien Gems than the last (starting at 1,500).
+  - Spliced eggs go to your waiting eggs and hatch into racers with a name made from their parents' names.
+  - Splicing racers that were spliced themselves makes a new generation: those eggs take longer and use more power to warm.
+- New science fact in the Knowledge Vault about how you get half your DNA from each parent.
+
 ## v0.2.185 - 2026-11-18 20:15
 - On phones, your floating buddies now fade out while the Bunker, Shop or Knowledge Vault is open, so they never sit on top of what you're trying to tap. They float back in when you return.
 - Buddies also step aside while an egg's page or a racer's card is open.

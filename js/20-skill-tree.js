@@ -500,7 +500,7 @@ const SKILL_TREE_NODES = [
   {id:'alien_awakening', icon:'🌟', name:'Alien Awakening', desc:'Coming soon: your buddies glow and leave trails, and you can turn up their speed from the party menu.', cost:350, requires:['gem_harvester_1'], x:680, y:340, branch:'aliens', mult:1.5},
   // v0.2.184: the Egg Incubator now comes BEFORE DNA Splice (spliced eggs need somewhere to warm). Ids unchanged.
   {id:'ascension', icon:'🥚', name:'Egg Incubator', desc:'Three heat lamps appear at the top of your Bunker. They warm special eggs with your energy, and what hatches becomes a racer.', cost:600, requires:['alien_awakening'], x:800, y:440, branch:'aliens', mult:1.5},
-  {id:'dna_splice', icon:'🧬', name:'DNA Splice', desc:'Coming soon: mix the traits of two buddies to make a brand-new egg.', cost:900, requires:['ascension'], x:880, y:520, branch:'aliens', mult:1.5},
+  {id:'dna_splice', icon:'🧬', name:'DNA Splice', desc:'Mix two buddies into a brand-new egg: every colour comes from one parent, and sometimes two blend. Each splice costs more Alien Gems, and spliced eggs need more heat.', fact:'You get half of your DNA from each parent. That is why you can have one parent\'s eyes and the other\'s hair, and why brothers and sisters can look so different.', cost:900, requires:['ascension'], x:880, y:520, branch:'aliens', mult:1.5},
 ];
 // ── The skill tree only boosts Alien Gems (no point bonuses) ──
 // Balance (v0.2.113): every gem bonus multiplies your gems PER MINUTE (never the gems you already have), and the bonuses

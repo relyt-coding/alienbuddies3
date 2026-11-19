@@ -2859,3 +2859,36 @@ body.phone-land #eggArea .inc-card{max-width:118px;}
 #alienLayer{transition:opacity .3s,visibility 0s;}
 body:not(.desktop-mode).bunker-open #alienLayer,body:not(.desktop-mode).store-open #alienLayer,body:not(.desktop-mode).vault-open #alienLayer,
 body.egg-page-open #alienLayer,body.racer-open #alienLayer{opacity:0;visibility:hidden;transition:opacity .3s,visibility 0s .3s;}
+
+/* v0.2.186 DNA Splice (js/78) */
+#eggArea .inc-splice-btn{display:flex;align-items:center;justify-content:center;gap:.45rem;width:100%;margin-top:.5rem;font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:.16em;padding:.55rem;border-radius:12px;border:1px solid #3a6a1f;background:#0a1a06;color:#9dff3f;cursor:pointer;touch-action:manipulation;}
+#eggArea .dna-ico{width:14px;height:18px;background:no-repeat center/contain url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 20'><path d='M2 1c0 6 10 6 10 12s-10 4-10 6M12 1c0 6-10 6-10 12s10 4 10 6' fill='none' stroke='%239dff3f' stroke-width='1.6'/><path d='M4 5h6M3 9h8M3 13h8M4 17h6' stroke='%239dff3f' stroke-width='1' opacity='.6'/></svg>");}
+#spliceView,#splicePick{position:fixed;inset:0;z-index:330;display:none;align-items:center;justify-content:center;background:rgba(3,8,4,.98);}
+#spliceView.on,#splicePick.on{display:flex;}
+#splicePick{z-index:335;}
+#spliceView .sv-box{width:min(430px,94vw);max-height:96vh;overflow:auto;display:flex;flex-direction:column;align-items:center;gap:.55rem;padding:.6rem 0 1rem;}
+#spliceView .sv-hdr,#splicePick .sv-hdr{width:100%;display:flex;align-items:center;justify-content:space-between;gap:.5rem;}
+#spliceView button,#splicePick .sv-hdr button{font-family:'Bebas Neue',sans-serif;letter-spacing:.12em;font-size:.95rem;padding:.45rem .9rem;border-radius:10px;border:1px solid #3a6a1f;background:#0a1a06;color:#c6ff9a;cursor:pointer;touch-action:manipulation;}
+#spliceView .sv-title,#splicePick .sv-title{font-family:'Bebas Neue',sans-serif;font-size:1.35rem;letter-spacing:.18em;color:#9dff3f;}
+#spliceView .sv-parents{display:flex;align-items:center;justify-content:center;gap:.4rem;width:100%;}
+#spliceView .sv-par{flex:1;display:flex;flex-direction:column;align-items:center;gap:.2rem;padding:.4rem .2rem!important;border-style:dashed!important;min-height:120px;justify-content:center;}
+#spliceView .sv-par.set{border-style:solid!important;}
+#spliceView .sv-par b{font-weight:normal;font-size:.85rem;letter-spacing:.08em;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+#spliceView .sv-genes{display:flex;flex-direction:column;gap:.25rem;width:100%;}
+#spliceView .sv-gene{display:flex;align-items:center;gap:.45rem;font-family:'Bebas Neue',sans-serif;letter-spacing:.1em;color:#7fc79a;font-size:.85rem;}
+#spliceView .sv-gene span{width:5.2rem;}
+#spliceView .sv-gene em{font-style:normal;font-size:.7rem;color:#3f7a4f;}
+#spliceView .sv-gene small{font-size:.7rem;color:#ffd23f;letter-spacing:.12em;}
+#spliceView .sv-chip{display:inline-block;width:26px;height:18px;border-radius:5px;border:2px solid rgba(255,255,255,.12);opacity:.55;}
+#spliceView .sv-chip.on{opacity:1;border-color:#fff;box-shadow:0 0 8px rgba(255,255,255,.35);transform:scale(1.15);}
+#spliceView .sv-genes.done .sv-chip:not(.on){opacity:.2;}
+#spliceView .sv-note{font-family:'Bebas Neue',sans-serif;font-size:.8rem;letter-spacing:.1em;color:#7fc79a;text-align:center;line-height:1.35;}
+#spliceView .sv-go{font-size:1.15rem!important;padding:.65rem 1.4rem!important;border-color:#9dff3f!important;color:#9dff3f!important;}
+#spliceView .sv-go.cant,#spliceView .sv-go:disabled{opacity:.45;}
+#splicePick .sp-box{width:min(460px,94vw);max-height:92vh;display:flex;flex-direction:column;gap:.5rem;}
+#splicePick .sp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:4px;overflow:auto;padding-bottom:1rem;}
+#splicePick .sp-cell{display:flex;flex-direction:column;align-items:center;background:#0a1a0f;border:1px solid #1a3a24;border-radius:8px;padding:.2rem 0;cursor:pointer;touch-action:manipulation;color:#7fc79a;}
+#splicePick .sp-cell.racer{border-color:#ffd23f;}
+#splicePick .sp-cell:disabled{opacity:.25;}
+#splicePick .sp-cell small{font-family:'Bebas Neue',sans-serif;font-size:.6rem;letter-spacing:.05em;max-width:60px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+body.splice-open #alienLayer{opacity:0;visibility:hidden;}

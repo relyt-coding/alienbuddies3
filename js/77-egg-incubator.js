@@ -31,7 +31,14 @@ const EGG_KINDS={
     look:{name:'FOUNDER',body:'#7cd94a',eye:'#141419',mouth:'#2a2a33',stem:'#e8c25a',tip:'#fff3a0',foot:'#c9a227',eyeSize:1.6,ant:1.45,fx:{sheen:['#e8ffb0','#9dff3f','#ffd23f'],spark:'#fff3a0',ring:'#d9b23a'}},trail:'gold'},
   light:{label:'LIGHT EGG',name:'LUMEN',title:'LIGHT BUDDY',col:'#fff3a0',need:1200,special:false,pal:['#fffbe0','#bfeaff','#ffffff','#ffd0ea'],sounds:['bell','marimba','shaker'],
     look:{name:'LIGHT',body:'#fff1c2',eye:'#2f80ff',mouth:'#ff9f5a',stem:'#ffffff',tip:'#fffbe0',foot:'#ffe14d',fx:{sheen:['#ffffff','#fff3a0','#bfeaff','#ffd0ea'],spark:'#ffffff',ring:'#fff3a0',glass:.62,halo:'rgba(255,246,190,.9)'}},trail:'prism'},
+  // DNA Splice eggs (js/78) carry their own look / pal / label / name / need / power / gen on the egg itself; these are only fallbacks
+  splice:{label:'SPLICED EGG',name:'SPLICE',title:'SPLICED BUDDY',col:'#9dff3f',need:1500,special:false,pal:['#7fe3c0','#ff9ccf','#9fc5ff','#ffd27a'],sounds:['kick','clap','shaker'],
+    look:{body:'#7fe3c0',eye:'#141419',mouth:'#ff8a3d',stem:'#ffe14d',tip:'#ff9ccf',foot:'#4dc3ff'},trail:'spark'},
 };
+// an egg's (or racer's) kind data, with whatever the egg carries itself (spliced eggs) laid on top
+function incKindOf(e){const b=EGG_KINDS[e&&e.kind]||EGG_KINDS.splice;if(!e||!e.look)return b;
+  let col=b.col;try{col=makeBuddyLook(e.look).accent||col;}catch(x){}
+  return Object.assign({},b,{look:e.look,pal:e.pal||b.pal,label:e.label||b.label,name:e.name||b.name,special:!!e.special,col});}
 const INC_NODE='ascension',INC_LAMP_FRAC=.10,INC_MAX_LAMPS=9;
 function incHas(){return typeof unlockedSkills!=='undefined'&&!!unlockedSkills[INC_NODE];}
 function incLamps(){return incHas()?Math.min(INC_MAX_LAMPS,3+(incLampsBought|0)):0;}
@@ -45,8 +52,8 @@ function incAllowPrice(l){return incPriceBase()*8*Math.pow(100,l);}
 
 (function(){
   const $=id=>document.getElementById(id),TAU=Math.PI*2;
-  const K=e=>EGG_KINDS[e.kind]||EGG_KINDS.light;
-  const lookOf=kind=>{try{return makeBuddyLook((EGG_KINDS[kind]||EGG_KINDS.light).look);}catch(e){return null;}};
+  const K=incKindOf;
+  const lookOf=r=>{try{return makeBuddyLook(incKindOf(r).look);}catch(e){return null;}};
   const save=()=>{if(typeof autoSave==='function')autoSave();};
   const toast=m=>{if(typeof showToast==='function')showToast(m);};
 
@@ -63,7 +70,7 @@ function incAllowPrice(l){return incPriceBase()*8*Math.pow(100,l);}
     W.draw=0;W.n=0;
     if(typeof activeSlot==='undefined'||activeSlot<0||!document.body.classList.contains('game-active')||!incHas())return;
     const L=incLamps(),warm=incEggs.filter(e=>e.slot>=0&&e.slot<L&&e.heat<1);W.n=warm.length;if(!warm.length)return;
-    const share=Math.min(1,incCovered()/warm.length),rate=warm.length*INC_LAMP_FRAC*income*share,want=rate*dt;
+    const share=Math.min(1,incCovered()/warm.length),rate=warm.reduce((s,e)=>s+(e.power||1),0)*INC_LAMP_FRAC*income*share,want=rate*dt;
     let p=0;if(want>0){const pay=Math.min(want,Math.max(0,score));score-=pay;p=pay/want;}
     W.draw=rate;W.paid=p;W.share=share;
     warm.forEach(e=>{e.heat=Math.min(1,e.heat+dt/(e.need||K(e).need)*share*p);
@@ -125,11 +132,11 @@ function incAllowPrice(l){return incPriceBase()*8*Math.pow(100,l);}
       b.appendChild(cv);const s=document.createElement('small');s.textContent=K(e).label;b.appendChild(s);b.addEventListener('click',()=>place(e));tray.appendChild(b);});
     // racers
     racerRow.innerHTML='';
-    incRacers.forEach(r=>{const c=document.createElement('div');c.className='alien-cell occupied racer-cell';const col=EGG_KINDS[r.kind]?EGG_KINDS[r.kind].col:'#ffd23f';c.style.borderColor=col;
+    incRacers.forEach(r=>{const c=document.createElement('div');c.className='alien-cell occupied racer-cell';const col=incKindOf(r).col;c.style.borderColor=col;
       const cv=document.createElement('canvas');cv.className='cell-buddy';const nm=document.createElement('div');nm.className='alien-cell-name';nm.textContent=r.name||'';nm.style.color=col;
       const shoe=document.createElement('span');shoe.className='racer-shoe';c.appendChild(cv);c.appendChild(nm);c.appendChild(shoe);c.addEventListener('click',()=>openRacer(r.id));racerRow.appendChild(c);
       requestAnimationFrame(()=>{try{const cw=c.clientWidth||36,w=Math.max(18,cw)*.9,h=w*.8,d=Math.min(2,devicePixelRatio||1);cv.width=Math.round(w*d);cv.height=Math.round(h*d);cv.style.width=w+'px';cv.style.height=h+'px';
-        const g=cv.getContext('2d');g.setTransform(d,0,0,d,0,0);drawBuddy(g,w/2,h*.56,w*.68,{view:'turn',angle:18,look:lookOf(r.kind),lite:true,antenna:1,t:1,A:null});}catch(x){}});});
+        const g=cv.getContext('2d');g.setTransform(d,0,0,d,0,0);drawBuddy(g,w/2,h*.56,w*.68,{view:'turn',angle:18,look:lookOf(r),lite:true,antenna:1,t:1,A:null});}catch(x){}});});
   }
   function place(e){
     if(!incHas()){toast('Eggs need the Egg Incubator from the skill tree.');return;}
@@ -148,6 +155,7 @@ function incAllowPrice(l){return incPriceBase()*8*Math.pow(100,l);}
       g.gain.setValueAtTime(.16,t);g.gain.exponentialRampToValueAtTime(.001,t+.12);o.connect(g);g.connect(masterGainNode);o.start(t);o.stop(t+.13);}catch(e){}}
   function hatch(egg){
     const k=K(egg),r={id:'r'+Date.now().toString(36),kind:egg.kind,name:k.name,beat:egg.beat,born:Date.now()};
+    if(egg.look){r.look=egg.look;r.gen=egg.gen|0;r.parents=egg.parents||null;}
     incEggs=incEggs.filter(e=>e!==egg);incRacers.push(r);
     try{if(typeof playSfxTierUnlock==='function')playSfxTierUnlock(4,1);}catch(e){}
     save();refresh(true);try{bannerText();}catch(e){}setTimeout(()=>openRacer(r.id,true),250);
@@ -280,7 +288,7 @@ function incAllowPrice(l){return incPriceBase()*8*Math.pow(100,l);}
     <div class="rc-btns"><button id="rcBeat">▶ ITS BEAT</button><button id="rcClose">CLOSE</button></div></div>`;
   document.body.appendChild(rc);
   let rcId=null,rcRaf=0;const trailPts=[];
-  function openRacer(id,isNew){const r=incRacers.find(x=>x.id===id);if(!r)return;rcId=id;const k=EGG_KINDS[r.kind]||EGG_KINDS.light;
+  function openRacer(id,isNew){const r=incRacers.find(x=>x.id===id);if(!r)return;rcId=id;const k=incKindOf(r);
     $('rcKick').textContent=isNew?'A NEW RACER HATCHED!':'RACER';$('rcName').value=r.name||'';$('rcName').style.color=k.col;$('rcKind').textContent=k.title+' · RACES COME IN A LATER UPDATE';
     rc.classList.add('on');document.body.classList.add('racer-open');trailPts.length=0;cancelAnimationFrame(rcRaf);rcRaf=requestAnimationFrame(rcFrame);}
   function closeRacer(){if(E.on){eStop();muteMain(false);}rc.classList.remove('on');document.body.classList.remove('racer-open');cancelAnimationFrame(rcRaf);const r=incRacers.find(x=>x.id===rcId);
@@ -302,16 +310,16 @@ function incAllowPrice(l){return incPriceBase()*8*Math.pow(100,l);}
     g.strokeStyle='rgba(120,255,190,.25)';g.lineWidth=1;g.setLineDash([6,8]);g.beginPath();g.moveTo(0,gy+2);g.lineTo(Wd,gy+2);g.stroke();g.setLineDash([]);
     if(trailPts.length&&x<trailPts[trailPts.length-1].x)trailPts.length=0;
     trailPts.push({x:x-sz*.18,y:y-sz*.42,t});while(trailPts.length&&t-trailPts[0].t>.6)trailPts.shift();
-    const kind=(EGG_KINDS[r.kind]||{}).trail;
+    const kind=incKindOf(r).trail,sp=kind==='spark'?[incKindOf(r).look.tip,'#ffffff']:['#ffd23f','#fff3a0'];
     if(kind==='prism'&&trailPts.length>1){g.lineCap='round';
       // white beam close to the buddy, splitting into six colours further back
       for(let i=1;i<trailPts.length;i++){const p=trailPts[i-1],q=trailPts[i],fr=i/(trailPts.length-1),split=(1-fr)*11;
         g.globalAlpha=fr*.9;g.strokeStyle='#ffffff';g.lineWidth=2+fr*3;g.beginPath();g.moveTo(p.x,p.y);g.lineTo(q.x,q.y);g.stroke();
         PRISM.forEach((col,j)=>{const o=(j-2.5)*split*.5;g.globalAlpha=fr*.75*(1-fr*.6);g.strokeStyle=col;g.lineWidth=2;g.beginPath();g.moveTo(p.x,p.y+o);g.lineTo(q.x,q.y+o);g.stroke();});}
       g.globalAlpha=1;}
-    else if(trailPts.length>1){trailPts.forEach((p,i)=>{const fr=i/trailPts.length;g.globalAlpha=fr;g.fillStyle=i%2?'#ffd23f':'#fff3a0';const s=1.5+fr*2.5;
+    else if(trailPts.length>1){trailPts.forEach((p,i)=>{const fr=i/trailPts.length;g.globalAlpha=fr;g.fillStyle=sp[i%2];const s=1.5+fr*2.5;
       g.beginPath();g.moveTo(p.x,p.y-s);g.lineTo(p.x+s*.3,p.y-s*.3);g.lineTo(p.x+s,p.y);g.lineTo(p.x+s*.3,p.y+s*.3);g.lineTo(p.x,p.y+s);g.lineTo(p.x-s*.3,p.y+s*.3);g.lineTo(p.x-s,p.y);g.lineTo(p.x-s*.3,p.y-s*.3);g.fill();});g.globalAlpha=1;}
-    try{drawBuddy(g,x,y,sz,{look:lookOf(r.kind),view:'side',face:1,run:(t*2.2)%1,air:hop>.25,t,speed:1,A:null});}catch(e){}}
+    try{drawBuddy(g,x,y,sz,{look:lookOf(r),view:'side',face:1,run:(t*2.2)%1,air:hop>.25,t,speed:1,A:null});}catch(e){}}
 
   // ══ SHOP: HEAT LAMPS + WATT ALLOWANCE (shown once the Egg Incubator is owned) ══
   (function shop(){
@@ -353,6 +361,7 @@ function incAllowPrice(l){return incPriceBase()*8*Math.pow(100,l);}
     window.incShopPaint=paint;
   })();
 
+  window.incAddEgg=function(e){incEggs.push(e);save();refresh(true);};
   // test hook
   window.__inc={W,get income(){return income;},set income(v){income=v;buckets.length=0;for(let i=0;i<10;i++)buckets.push(v);},openEggPage,openRacer,closeEggPage,hatch,newEgg:incNewEgg,refresh};
 })();

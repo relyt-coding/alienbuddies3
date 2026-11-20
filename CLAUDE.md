@@ -125,7 +125,7 @@ ratio to a tap; old saves need no conversion and the Vault price table (js/74) s
 - Use `fmtJh(n)` / `jHtml(n)` / `scoreHtml(n)` / `fmtJpsH(n)` for anything on screen. Bebas Neue has NO lowercase, so a plain-text "mJ" renders as
   "MJ" (megajoules); the HTML versions put the unit in `.ju` (Space Mono) to keep its case. Set them with innerHTML. `showToast`, `spawnParticle`
   and `ssRow` switch to innerHTML automatically when the text contains a `.ju` span. Plain `fmtJ` / `fmtScore` / `fmtJps` are for console and test mode.
-- The score spells out MILLIJOULES / JOULES (each until 10,000 of it, so up to 9,999 J), then kJ, MJ … QJ, then scientific. Sideways phones use the short symbols.
+- Everything under 100 J shows in mJ (jParts, v0.2.195: "5,000 mJ"); the score spells out MILLIJOULES (up to 99,999) / JOULES (up to 9,999), then kJ, MJ … QJ, then scientific. Sideways phones use the short symbols.
   `fmtJoulesExact(n)` is the exact line under the score from 1 kJ up. Never write 'pts', 'points' or 'watts' for the score in player-facing text.
 - Old names `fmtW` / `wHtml` / `wParts` are aliases of the joule versions. Gems keep `fmtGems`. The breakdown window (13 + js/72 CSS) uses
   `ssIconEl(key)` = black & white match art (`matchIconBW` in js/48): no emoji there.

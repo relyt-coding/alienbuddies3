@@ -36,6 +36,8 @@ const J_UNITS=['mJ','J','kJ','MJ','GJ','TJ','PJ','EJ','ZJ','YJ','RJ','QJ'];   //
 function jParts(n,sig){n=Math.max(0,+n||0);sig=sig||4;
   const j=n*J_PER_UNIT;
   if(j<=0)return['0','mJ'];
+  // v0.2.195: anything under 100 J stays in millijoules (5,000 mJ, not 5 J): bigger numbers feel better
+  if(j<100){const m=j*1000;return[m>=1000?Math.floor(m).toLocaleString('en-US'):String(Math.round(m*100)/100),'mJ'];}
   const k=Math.max(0,Math.floor(Math.log10(j)/3)+1);
   if(k>=J_UNITS.length){const e=Math.floor(Math.log10(j));return[(j/Math.pow(10,e)).toFixed(2).replace(/\.?0+$/,'')+'e'+e,'J'];}
   let v=j/Math.pow(1000,k-1),t=v.toPrecision(sig);
@@ -54,8 +56,8 @@ function fmtJps(n,sig){return fmtJ(n,sig||3)+'/s';}
 // v0.2.193: the score stays in a unit until it reaches 10,000 of it (5,874 MILLIJOULES, not 5.8742 JOULES), with at most 2 decimals
 function scoreParts(n){n=Math.max(0,Math.floor(n||0));const j=n*J_PER_UNIT;
   if(j<=0)return['0','MILLIJOULES'];
-  let k=0;while(k+1<J_UNITS.length&&j/Math.pow(1000,k-1)>=10000)k++;
-  const v=j/Math.pow(1000,k-1);if(v>=10000)return jParts(n,6);   // past QJ: scientific
+  let k=0;while(k+1<J_UNITS.length&&j/Math.pow(1000,k-1)>=(k===0?100000:10000))k++;   // mJ until 100 J (v0.2.195), then each unit until 10,000 of it
+  const v=j/Math.pow(1000,k-1);if(v>=(k===0?100000:10000))return jParts(n,6);   // past QJ: scientific
   const t=v>=1000?Math.floor(v).toLocaleString('en-US'):String(Math.floor(v*100+1e-9)/100);
   if(k===0)return[t,t==='1'?'MILLIJOULE':'MILLIJOULES'];
   if(k===1)return[t,t==='1'?'JOULE':'JOULES'];
@@ -103,7 +105,7 @@ function alienDiscount(n){
   return Math.pow(10,i<=k?ALIEN_L[i]:ALIEN_L[k]+(ALIEN_L[k]-ALIEN_L[k-1])*(i-k));
 }
 const _disc=c=>{const d=progressDiscount();return d>1?Math.max(1,Math.round(c/d)):c;};
-const GAME_VERSION='0.2.194'; // bump on every delivered build (shown in Settings and on the home screen)
+const GAME_VERSION='0.2.195'; // bump on every delivered build (shown in Settings and on the home screen)
 const BASE_CPS=5;
 const UNLOCK_COST=Math.round((bump30(60000000))*SHOP_SALE);
 const ALIEN_POWER_UNLOCK_COST=Math.round((bump30(600000000))*SHOP_SALE);

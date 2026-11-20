@@ -2,6 +2,9 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.195 - 2026-11-19 21:45
+- Energy now stays in millijoules until it reaches 100 joules. The sequencer reads 5,000 mJ instead of 5 J, and your energy counts all the way up to 99,999 MILLIJOULES.
+
 ## v0.2.194 - 2026-11-19 22:00
 - STORE SALE: everything in the store now costs half (sounds, sequencer tracks, upgrades, party levels, buddies from #4 on), so the start moves faster. Your first sound is 125 mJ, the shaker 4 J and the sequencer 5 J.
 - The Knowledge Vault has been emptied. New entries will be added a few at a time.

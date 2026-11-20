@@ -110,6 +110,7 @@ function overlayUp(){
   const vm=document.getElementById('vaultModal');if(vm&&vm.classList.contains('open'))return true;
   if(bc.contains('vault-open'))return true;
   const st=document.getElementById('skillTreeModal');if(st&&st.classList.contains('open'))return true;
+  const pa=document.getElementById('padAssignModal');if(pa&&pa.classList.contains('open'))return true;   // the pad sound list (v0.2.197)
   const er=document.getElementById('eggReveal');if(er&&er.classList.contains('on'))return true;
   return false;
 }
@@ -237,3 +238,5 @@ document.getElementById('tipsModal')&&document.getElementById('tipsModal').addEv
 
 // v0.2.196: re-check the arrows twice a second too, so a page opening on top of them hides them straight away
 setInterval(()=>{try{updateOnboardingArrows();}catch(e){}},500);
+// v0.2.197: …and right after every tap, since a tap is what opens a page over them
+document.addEventListener('pointerdown',()=>{setTimeout(()=>{try{updateOnboardingArrows();}catch(e){}},30);setTimeout(()=>{try{updateOnboardingArrows();}catch(e){}},200);},true);

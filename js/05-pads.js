@@ -1,3 +1,10 @@
+// v0.2.197: after a full-screen list closes on finger-DOWN, the browser still sends that tap's "click" a moment later, to
+// whatever is now under the finger (it pressed the drum dots' ACTIVATE button). swallowTaps(ms) eats clicks for that long.
+let _swallowTapsUntil=0;
+function swallowTaps(ms){_swallowTapsUntil=Math.max(_swallowTapsUntil,performance.now()+(ms||400));}
+document.addEventListener('click',e=>{if(performance.now()<_swallowTapsUntil){e.stopPropagation();e.preventDefault();}},true);
+// (a finger held down longer still sends its click when it lifts: the guard stretches to just after that lift)
+document.addEventListener('pointerup',()=>{if(performance.now()<_swallowTapsUntil)_swallowTapsUntil=performance.now()+350;},true);
 
 // ══════════════════════════════════════════════
 //  PAD GRID
@@ -322,11 +329,13 @@ function openPadPicker(padIdx){
     if(isDesktop) updateKeybindDisplay(padIdx);
   }
   padAssignModal.classList.add('open');
+  try{updateOnboardingArrows();}catch(e){}   // v0.2.197: the ACTIVATE arrow hides the moment the list opens
   const _rem=document.getElementById('editModeReminder');
   if(_rem)_rem.style.visibility='hidden';
 }
 function closePadAssignModal(){
   padAssignModal.classList.remove('open');
+  swallowTaps(1500);   // v0.2.197: the list closes on finger-down, so the tap's click must not land on what was underneath (it pressed ACTIVATE)
   const _rem=document.getElementById('editModeReminder');
   if(_rem)_rem.style.visibility='';
   padAssignIdx=null;

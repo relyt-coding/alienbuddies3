@@ -140,6 +140,8 @@ ratio to a tap; old saves need no conversion and the Vault price table (js/74) s
 - Device smoke test: `/home/claude/preview/smoke.py`-style Playwright run over iPhone 7 (375×667, sideways 667×375), iPhone 14, iPad both ways,
   1280×720 and 1920×1080, checking page errors and overlapping buttons. Old-Safari syntax/API scan: parse js/ with acorn at ES2021.
 - Must run on old iPhones (a playtester uses an iPhone 7): `21-legacy-safari.js` has fallbacks; keep effects cheap.
+- Lists that close on finger-DOWN (js/05 pad sound list) leave a stray click for whatever is underneath: call `swallowTaps(ms)` (js/05) when closing them.
+  Onboarding arrows (js/07) only show when `arrowTargetSeen(button)` and are re-checked on every tap.
 - iPhone only shows the keyboard if `focus()` happens inside the tap itself, so open text boxes synchronously (no setTimeout).
 - No 👽 emoji anywhere: buddies are drawn (46-buddies). The shop has no emoji except 💎, and js/70 draws every 💎 on screen as the
   Gem Buddy (`span.agem`; `.gem-icon` slots and `makeLiveAlienGem()` give the bobbing one). Keep writing 💎 in code: it's swapped automatically.

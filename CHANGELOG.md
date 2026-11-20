@@ -2,6 +2,10 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.197 - 2026-11-19 22:05
+- The ACTIVATE arrow now disappears the instant the pad sound list opens, instead of lingering on top of it.
+- Fixed: picking a sound from the pad sound list could also press the button underneath it (it activated the drum pad dots by accident).
+
 ## v0.2.196 - 2026-11-19 21:55
 - Fixed: the green ACTIVATE arrow could float over other pages (like the pad sounds list) if you hadn't activated the drum pad dots yet. Arrows now only show while the button they point at is actually on screen.
 

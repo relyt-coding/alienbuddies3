@@ -94,7 +94,7 @@ function autoSave(){
 //  GAME STATE
 // ══════════════════════════════════════════════
 let score=0,tiers=[],autoTiers=[];
-// multLevel = DRUMPAD ×4 dots (-1 / 0), seqMultLevel = SEQUENCER ×4 dots (-1 / 0)
+// multLevel = DRUMPAD ×3 dots (-1 / 0), seqMultLevel = SEQUENCER ×3 dots (-1 / 0)
 const shop={seqMultLevel:-1,multLevel:-1,alienBoostLevel:-1,multiClickLevel:-1,seqMultiClickLevel:-1,seqMultiClickUnlocked:false,dismissed:[],alienBoostUnlocked:false,multiClickUnlocked:false,drumDotsUnlocked:false,seqDotsUnlocked:false,seqStepsLevel:0,partyLevel:0,partySeen:false,seqFeat:0,keysLevel:0,keysSeen:false,keysOn:false,keysVoice:0,keysOct:0,keysV2:true};
 let totalAliens=0,viewingBunker=0;
 let matchingLevel=0; // highest level unlocked (0=none, 1=level1 available, etc)
@@ -138,7 +138,7 @@ const TIER_MULT_BASE=[3,9,18,27,36,42,51,60];
 // Dot-row multipliers scale with the owned level: level -1 = ×3 pattern, level 0 = ×4, 1 = ×5 ... up to ×10.
 // Pattern per row = base × [1,3,6,9,12,14,17,20] (so ×4 gives 4,12,24,36,48,56,68,80).
 const TIER_MULT_UNITS=[1,3,6,9,12,14,17,20];
-function dotBase(level){return level<0?3:4+level;}
+function dotBase(level){return level<0?2:3+level;}   // v0.2.191: ×2 dots to start (was ×3), each shop upgrade +1
 function tierMultValueFor(kind,i){
   const lvl=kind==='seq'?shop.seqMultLevel:shop.multLevel;
   const u=TIER_MULT_UNITS[i]||TIER_MULT_UNITS[TIER_MULT_UNITS.length-1];

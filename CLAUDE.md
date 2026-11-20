@@ -55,7 +55,7 @@ README.md covers the file layout, test mode and vocals in depth; this file is th
 68 Knowledge Vault · 69 thumb nav (bottom row on upright phones) + PARTY menu + level 3 disco-ball teaser ·
 70 Alien Gem look (Gem Buddy) · 71 level 4 gem ring + gems flying off buddies + MY ACCOUNT sheet ·
 73 Vault big batch (lessons + music words) · 74 Vault price table (generated) · 75 whole-bunker scroll + floating games dock ·
-76 Alien Awakening trails + speed · 77 Egg Incubator + racers · 78 DNA Splice · 79 Buddy Race + Gold Records · 80 extra bunkers · 81 memory diet (3D tree culling) ·
+76 Alien Awakening trails + speed · 77 Egg Incubator + racers · 78 DNA Splice · 79 Buddy Race + Gold Records · 80 extra bunkers · 81 memory diet (3D tree culling) · 82 name-your-file card ·
 72 energy/gem math/party corner + file-select hum (`titleHum`): `openGemStats()` (bunker + shop gem counters), PARTY pill top-left (`.pb-corner`), MY ACCOUNT in Settings only, sequencer tracker ACTIVATE (`seqTrackerActive`, `SEQ_TRACKER_COST`)
 
 - Bunker (v0.2.181, js/75): `.bunker-body` is the scroll box (the grid wrapper no longer scrolls; it only clips the grid's pinch-zoom).
@@ -97,6 +97,9 @@ README.md covers the file layout, test mode and vocals in depth; this file is th
   on a 3× iPhone, so js/81 hides (`.st-cull`, display:none) bubbles/labels farther than ~1.3 screens from the camera target and caps phones at the 70 nearest
   (nodes carry `el._mx/_my`, set in js/20 renderSkillTree). `body.tree-open` hides #alienLayer under the tree; the trail canvas (js/76) and the intro canvas
   (js/65) shrink to 1×1 / 0×0 when idle. Keep new full-screen canvases and per-element 3D transforms in mind: they all cost memory on phones.
+- Early economy (v0.2.191): PAD_COSTS pads 2–5 = 5 / 20 / 25 / 100 units (0.5 / 2 / 2.5 / 10 mJ); alienCost(1) = 50,000 (5 J); soundLibCost(2) (shaker) = 80,000 (8 J);
+  `dotBase(-1)` = 2 (dot rows ×2, ×6, ×12…), each DOTS upgrade +1. The Vault price table (js/74) was built on the old pace: rerun tools/vault_prices.py if it feels off.
+  js/82 asks an unnamed slot "what's your name?" once at 25 J (small bottom card, `ab2_nameAsked_N`). Vault BACK sits top-right like the Bunker's.
 - Skill-tree descriptions: `gemsOnly` (js/20) strips any written "×N Alien Gems" and appends the node's REAL `gemMult`, so never hand-write gem amounts.
 
 ## Testing without a phone

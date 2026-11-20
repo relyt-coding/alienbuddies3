@@ -2,6 +2,13 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.191 - 2026-11-19 20:55
+- New drum pads come much sooner: pad 2 costs 0.5 mJ, pad 3 costs 2 mJ, pad 4 costs 2.5 mJ and pad 5 costs 10 mJ. More sounds to play with right from the start.
+- Your second buddy's egg now costs 5 J (was 10 J), and the shaker costs 8 J.
+- Dot rows now climb in ×2s to start (×2, ×6, ×12…) instead of ×3s. The DOTS upgrades in the Shop move them to ×3s, then ×4s, and so on.
+- The Knowledge Vault's BACK button is now on the right, in the same spot as the Bunker's, so you can tap twice to get out of both.
+- When your save file reaches 25 J without a name, a little card asks what your name is and names your file. It doesn't stop the music, and LATER closes it.
+
 ## v0.2.190 - 2026-11-19 08:10
 - Fixed: on iPhone, opening the skill tree could make Safari reload the game back to the file select. The 3D galaxy map used too much memory. It now only draws the bubbles near where you're looking, and the floating buddies take a break while the map is open. The game also uses less memory in general.
 

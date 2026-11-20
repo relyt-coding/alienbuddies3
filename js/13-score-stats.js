@@ -91,7 +91,7 @@ function buildScoreStats(){
   if(shop.multLevel>=0){
     scoreStatsList.appendChild(ssRow('🥁',`DRUMPAD ×${dotBase(shop.multLevel)} DOTS`,`Shop upgrade · pad dot rows climb in ×${dotBase(shop.multLevel)}s`,'ACTIVE',true));
   } else {
-    scoreStatsList.appendChild(ssRow('🥁','DRUMPAD ×4 DOTS','Unlock in shop · pad dot rows climb in ×4s','OFF',false));
+    scoreStatsList.appendChild(ssRow('🥁','DRUMPAD ×3 DOTS','Unlock in shop · pad dot rows climb in ×3s','OFF',false));
   }
 
   // Alien multiplier
@@ -140,7 +140,7 @@ function buildScoreStats(){
     scoreStatsList.appendChild(ssRow('🔋','ENERGY',`Pad hits recharge it · drains 1 section per ${SEQ_ENERGY_SEC_PER_SECTION}s while the sequencer plays`,`${Math.ceil(seqEnergy-1e-9)}/${SEQ_ENERGY_MAX}`,seqEnergy>0));
     scoreStatsList.appendChild(ssRow('✖️','SEQUENCER STEP VALUE','Sequencer tiers × shared boosts',`×${formatMult(seqStepMultiplier())}`,true));
     autoTiers.forEach((t,i)=>{if(t.multiplierActive)scoreStatsList.appendChild(ssRow('⚡',`SEQUENCER TIER ${i+1}`,'Dot streak reward · stacks',`×${tierMultValueFor('seq',i).toLocaleString()}`,true));});
-    scoreStatsList.appendChild(ssRow('🎛',shop.seqMultLevel>=0?`SEQUENCER ×${dotBase(shop.seqMultLevel)} DOTS`:'SEQUENCER ×4 DOTS',shop.seqMultLevel>=0?`Shop upgrade · sequencer dot rows climb in ×${dotBase(shop.seqMultLevel)}s`:'Unlock in shop · sequencer dot rows climb in ×4s',shop.seqMultLevel>=0?'ACTIVE':'OFF',shop.seqMultLevel>=0));
+    scoreStatsList.appendChild(ssRow('🎛',shop.seqMultLevel>=0?`SEQUENCER ×${dotBase(shop.seqMultLevel)} DOTS`:'SEQUENCER ×3 DOTS',shop.seqMultLevel>=0?`Shop upgrade · sequencer dot rows climb in ×${dotBase(shop.seqMultLevel)}s`:'Unlock in shop · sequencer dot rows climb in ×4s',shop.seqMultLevel>=0?'ACTIVE':'OFF',shop.seqMultLevel>=0));
   } else {
     scoreStatsList.appendChild(ssRow('🎛','SEQUENCER','Unlock in shop · a metronome that earns while it plays','OFF',false));
   }

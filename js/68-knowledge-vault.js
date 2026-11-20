@@ -211,7 +211,7 @@ body.desktop-mode #vaultBox{border-radius:20px;height:86vh;}
 #vaultPop p{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;color:#d0d0da;font-size:1rem;line-height:1.5;margin:0 0 .6rem;}
 #vaultPop .vpp-boost{font-family:'Bebas Neue',sans-serif;font-size:.95rem;letter-spacing:.12em;color:var(--c);opacity:.85;}
 #vaultPop button{margin-top:.8rem;font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:.14em;background:var(--c);color:#111;border:0;border-radius:10px;padding:.45rem 1.6rem;cursor:pointer;}
-#vaultHelpBtn{flex-shrink:0;width:2.1rem;height:2.1rem;border-radius:50%;border:1px solid #4a4a2a;background:#14140a;color:#d8d860;font-family:'Bebas Neue',sans-serif;font-size:1.25rem;line-height:1;padding:0;cursor:pointer;position:absolute;right:1.1rem;top:50%;transform:translateY(-40%);}
+#vaultHelpBtn{flex-shrink:0;width:2.1rem;height:2.1rem;border-radius:50%;border:1px solid #4a4a2a;background:#14140a;color:#d8d860;font-family:'Bebas Neue',sans-serif;font-size:1.25rem;line-height:1;padding:0;cursor:pointer;position:absolute;left:1.1rem;top:50%;transform:translateY(-40%);}
 #vaultHelp{position:fixed;inset:0;z-index:100000;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.55);padding:1.2rem;}
 #vaultHelp.on{display:flex;}
 #vaultHelp .vhp{max-width:330px;background:#101016;border:1px solid #e0e055;border-radius:16px;padding:1.1rem 1.2rem;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,.6);animation:vhpIn .3s cubic-bezier(.3,1.4,.5,1);}
@@ -221,7 +221,7 @@ body.desktop-mode #vaultBox{border-radius:20px;height:86vh;}
 #vaultHelp button{margin-top:.7rem;font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:.12em;background:#e0e055;color:#111;border:0;border-radius:10px;padding:.45rem 1.6rem;cursor:pointer;}
 @keyframes vhpIn{from{opacity:0;transform:scale(.85);}to{opacity:1;transform:none;}}
 #vaultSub{font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:.1em;color:#8a8a6a;white-space:nowrap;}
-#vaultClose{position:absolute;left:1.1rem;top:50%;transform:translateY(-35%);white-space:nowrap;font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:.1em;padding:.4rem .9rem;border-radius:8px;border:1px solid #3a3a1a;background:#0d0d02;color:#aaaa33;cursor:pointer;touch-action:manipulation;}
+#vaultClose{position:absolute;right:1.1rem;top:50%;transform:translateY(-35%);white-space:nowrap;font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:.1em;padding:.4rem .9rem;border-radius:8px;border:1px solid #3a3a1a;background:#0d0d02;color:#aaaa33;cursor:pointer;touch-action:manipulation;}
 #vaultTabs{display:flex;gap:.45rem;overflow-x:auto;padding:.3rem 1.1rem .7rem;flex-shrink:0;scrollbar-width:none;-webkit-overflow-scrolling:touch;border-bottom:1px solid #1a1a12;touch-action:pan-x;}
 #vaultTabs::-webkit-scrollbar{display:none;}
 .vt-tab{position:relative;flex-shrink:0;font-family:'Bebas Neue',sans-serif;font-size:1.05rem;letter-spacing:.1em;padding:.42rem .85rem;border-radius:20px;border:1px solid #26262e;background:#101016;color:#777;cursor:pointer;touch-action:manipulation;white-space:nowrap;}
@@ -272,7 +272,7 @@ body.vault-open #soundboardBtn,body.vault-open #padEditToggleBtn,body.vault-open
 `;document.head.appendChild(css);
   const m=document.createElement('div');m.id='vaultModal';
   m.innerHTML=`<div id="vaultBox">
-    <div id="vaultHead"><button id="vaultClose">← BACK</button><div class="vh-mid"><div id="vaultTitle">KNOWLEDGE VAULT</div><div id="vaultSub"></div></div><button id="vaultHelpBtn" type="button" aria-label="How the Vault works">?</button></div>
+    <div id="vaultHead"><button id="vaultClose">BACK →</button><div class="vh-mid"><div id="vaultTitle">KNOWLEDGE VAULT</div><div id="vaultSub"></div></div><button id="vaultHelpBtn" type="button" aria-label="How the Vault works">?</button></div>
     <div id="vaultTabs"></div><div id="vaultBody"></div></div>`;
   document.body.appendChild(m);
   const pg=document.createElement('div');pg.className='view';pg.id='vaultView';

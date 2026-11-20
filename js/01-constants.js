@@ -95,7 +95,7 @@ function alienDiscount(n){
   return Math.pow(10,i<=k?ALIEN_L[i]:ALIEN_L[k]+(ALIEN_L[k]-ALIEN_L[k-1])*(i-k));
 }
 const _disc=c=>{const d=progressDiscount();return d>1?Math.max(1,Math.round(c/d)):c;};
-const GAME_VERSION='0.2.190'; // bump on every delivered build (shown in Settings and on the home screen)
+const GAME_VERSION='0.2.191'; // bump on every delivered build (shown in Settings and on the home screen)
 const BASE_CPS=5;
 const UNLOCK_COST=bump30(60000000);
 const ALIEN_POWER_UNLOCK_COST=bump30(600000000);
@@ -121,7 +121,7 @@ function dotUpgradeCost(n){return Math.round(_disc(DOT_COSTS[Math.min(n,DOT_COST
 function alienCost(n){
   if(n>98)return alienCost(98)*Math.pow(1.12,n-98);   // v0.2.188 extra bunkers: buddy 100+ costs 12% more each (the old curve hits Infinity near #180)
   if(n===0)return 1000;       // alien 1: 1,000
-  if(n===1)return 100000;     // alien 2: 100,000
+  if(n===1)return 50000;      // alien 2: 5 J (v0.2.191, was 10 J)
   if(n===2)return 1000000;    // alien 3: 1,000,000
   if(n===3)return 2500000;    // alien 4: 2,500,000
   // alien 5+ — existing growth curve starting from 10M
@@ -153,7 +153,7 @@ function multiClickUpgradeAt(lvl){const clicks=lvl+2;return{effectMain:`${clicks
 
 // Pad button costs: 1 free, 2=5 (kick), 3=100 (snare), 4=3K, 5=2.5M ...
 const SEQ_TRACKER_COST=2.5e5;   // ACTIVATE for the sequencer's dot tracker (v0.2.175: 250,000 W)
-const PAD_COSTS=[0,10,50,2500,2500000,9000000000,60000000000,450000000000].map(bump30); // pad 2 (kick) is just 10 pts so players find the drum pad fast
+const PAD_COSTS=[0,5,20,25,100,9000000000,60000000000,450000000000].map(bump30); // v0.2.191: pads 2–5 cost 0.5 / 2 / 2.5 / 10 mJ, so non-drummers get sounds to play with right away
 const PAD_DEFAULT_SOUNDS=['hihat','kick','snare',null,null,null,null,null]; // null = no sound, must buy from library
 
 // Sound library unlocks: first = 5M, each ×25
@@ -163,6 +163,7 @@ const EXTRA_SOUNDS_ORDER=[
   'riser','downlift','glitch','junglesnare','choir','vinyl','zap','marimba','thud',
 ];
 function soundLibCost(idx){
+  if(idx===2)return 80000;   // v0.2.191: the shaker (3rd sound) is 8 J
   // idx 0 = 5,000, idx 1 = 50,000, idx 2 = 500,000, each ×10 after
   let c=5000;
   for(let i=0;i<idx;i++) c*=10;

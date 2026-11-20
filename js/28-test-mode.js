@@ -151,7 +151,7 @@ function simStep(dt){
   if(opts.autoTap){const taps=opts.tapRate*dt;score+=totalMultiplier()*cpt*taps;dotAcc+=cpt*taps;const n=Math.floor(dotAcc);dotAcc-=n;if(drumTrackerActive&&n)addRows(tiers,ensureTiers,n);}
   if(drum.seqTracks>=1){score+=seqEarningsPerSec()*dt;simAcc+=seqStepsPerSec()*seqStepScale()*cpt*seqClicksPerStep()*dt;const n=Math.floor(simAcc);simAcc-=n;if(n)addRows(autoTiers,ensureAutoTiers,n);}
   if(totalAliens>0)alienGems+=gpm()/60*dt;
-  if(!drumTrackerActive&&score>=25){score-=25;drumTrackerActive=true;}
+  if(!drumTrackerActive&&score>=DRUM_TRACKER_COST){score-=DRUM_TRACKER_COST;drumTrackerActive=true;}
   if(opts.buySkills)buyCheapestGems();
   if(opts.buyShop||opts.buyTips)buyCheapestPoints();
   // minigames: buy the Matching Game (1 gem) in the bunker as soon as possible (Planet Hop comes with the Cockpit), and assume a

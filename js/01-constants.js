@@ -95,7 +95,7 @@ function alienDiscount(n){
   return Math.pow(10,i<=k?ALIEN_L[i]:ALIEN_L[k]+(ALIEN_L[k]-ALIEN_L[k-1])*(i-k));
 }
 const _disc=c=>{const d=progressDiscount();return d>1?Math.max(1,Math.round(c/d)):c;};
-const GAME_VERSION='0.2.191'; // bump on every delivered build (shown in Settings and on the home screen)
+const GAME_VERSION='0.2.192'; // bump on every delivered build (shown in Settings and on the home screen)
 const BASE_CPS=5;
 const UNLOCK_COST=bump30(60000000);
 const ALIEN_POWER_UNLOCK_COST=bump30(600000000);
@@ -152,8 +152,9 @@ function _multiClickBase(lvl){if(lvl===0)return _disc(15000000);const k=Math.min
 function multiClickUpgradeAt(lvl){const clicks=lvl+2;return{effectMain:`${clicks}× CLICKS`,effectSub:`Each tap counts as ${clicks} clicks`,cost:multiClickUpgradeCost(lvl)};}
 
 // Pad button costs: 1 free, 2=5 (kick), 3=100 (snare), 4=3K, 5=2.5M ...
+const DRUM_TRACKER_COST=10;    // v0.2.192: ACTIVATE for the drum pad dot tracker = 1 mJ (was 2.5 mJ)
 const SEQ_TRACKER_COST=2.5e5;   // ACTIVATE for the sequencer's dot tracker (v0.2.175: 250,000 W)
-const PAD_COSTS=[0,5,20,25,100,9000000000,60000000000,450000000000].map(bump30); // v0.2.191: pads 2–5 cost 0.5 / 2 / 2.5 / 10 mJ, so non-drummers get sounds to play with right away
+const PAD_COSTS=[0,5,10,25,100,9000000000,60000000000,450000000000].map(bump30); // v0.2.192: pads 2–5 cost 0.5 / 1 / 2.5 / 10 mJ, so non-drummers get sounds to play with right away
 const PAD_DEFAULT_SOUNDS=['hihat','kick','snare',null,null,null,null,null]; // null = no sound, must buy from library
 
 // Sound library unlocks: first = 5M, each ×25

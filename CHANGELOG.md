@@ -2,6 +2,9 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.192 - 2026-11-19 20:50
+- The 3rd drum pad now costs 1 mJ (was 2 mJ), and activating the drum pad dots costs 1 mJ (was 2.5 mJ).
+
 ## v0.2.191 - 2026-11-19 20:55
 - New drum pads come much sooner: pad 2 costs 0.5 mJ, pad 3 costs 2 mJ, pad 4 costs 2.5 mJ and pad 5 costs 10 mJ. More sounds to play with right from the start.
 - Your second buddy's egg now costs 5 J (was 10 J), and the shaker costs 8 J.

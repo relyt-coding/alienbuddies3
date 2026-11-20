@@ -121,11 +121,11 @@ function updateOnboardingArrows(){
     document.body.classList.remove('arrow-act');
     return;
   }
-  // Arrow pointing at ACTIVATE button — shows at 50pts if tracker not yet active
+  // Arrow pointing at ACTIVATE button — shows at twice its price if the tracker is not yet active
   const arrowAct=document.getElementById('arrowActivate');
   const activateBtn=document.getElementById('drumTrackerActivateBtn');
   if(arrowAct){
-    if(!drumTrackerActive&&score>=50&&activateBtn){
+    if(!drumTrackerActive&&score>=DRUM_TRACKER_COST*2&&activateBtn){
       // make room above the tracker so the arrow sits under the score instead of covering it
       // v0.2.125: the arrow points at the button from the side, so nothing on the screen has to move to make room for it
       const rect=activateBtn.getBoundingClientRect();
@@ -198,7 +198,7 @@ function updateDrumTrackerOverlay(){
   document.body.classList.toggle('drum-overlay',!drumTrackerActive); // gives the ACTIVATE button room so it never covers the score text
   const btn=document.getElementById('drumTrackerActivateBtn');
   if(btn&&!drumTrackerActive){
-    const canAfford=score>=25;
+    const canAfford=score>=DRUM_TRACKER_COST;
     btn.style.transform=canAfford?'scale(1.25)':'scale(1)';
     btn.style.transition='transform .3s cubic-bezier(.34,1.56,.64,1)';
     btn.style.boxShadow=canAfford?'0 0 20px -2px rgba(0,255,136,.7)':'0 0 12px -3px rgba(0,255,136,.4)';
@@ -207,8 +207,8 @@ function updateDrumTrackerOverlay(){
 
 document.getElementById('drumTrackerActivateBtn')&&document.getElementById('drumTrackerActivateBtn').addEventListener('click',()=>{
   if(drumTrackerActive)return;
-  if(score<25){showToast('Need '+fmtJh(25)+' to activate the drum tracker!');return;}
-  score-=25;
+  if(score<DRUM_TRACKER_COST){showToast('Need '+fmtJh(DRUM_TRACKER_COST)+' to activate the drum tracker!');return;}
+  score-=DRUM_TRACKER_COST;
   drumTrackerActive=true;
   playSfxTierUnlock(0);
   updateDrumTrackerOverlay();

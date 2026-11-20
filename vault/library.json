@@ -1,0 +1,2892 @@
+{
+"tabs": [
+{
+"id": "basics",
+"name": "GAME BASICS",
+"col": "#cccc44",
+"req": null
+},
+{
+"id": "buddies",
+"name": "ALIEN BUDDIES",
+"col": "#00ff88",
+"req": null
+},
+{
+"id": "pads",
+"name": "DRUM PADS",
+"col": "#a0a8ff",
+"req": null
+},
+{
+"id": "seq",
+"name": "SEQUENCER",
+"col": "#ff9a3c",
+"req": null
+},
+{
+"id": "piano",
+"name": "PIANO ROLL",
+"col": "#ff6bd6",
+"req": "Quad Sun III (Minigame Nexus)"
+},
+{
+"id": "sounds",
+"name": "SOUNDS & INSTRUMENTS",
+"col": "#5ad1ff",
+"req": "Quad Sun I (Planet Atlas)"
+},
+{
+"id": "fx",
+"name": "EFFECTS & MIXING",
+"col": "#b48cff",
+"req": "Quad Sun II (Musical Toolkit)"
+},
+{
+"id": "vocals",
+"name": "VOCALS",
+"col": "#ff7a7a",
+"req": "Quad Sun IV (Alien Evolution)"
+},
+{
+"id": "words",
+"name": "MUSIC WORDS",
+"col": "#ffd23f",
+"req": "the Tucana Core"
+}
+],
+"items": [
+{
+"id": "l_points",
+"name": "Joules & Multipliers",
+"tab": "basics",
+"text": "Every hit of a drum pad makes a little energy, counted in joules (J). A plain tap makes 0.1 millijoules (mJ), and a millijoule is a thousandth of a joule. 1,000 J is a kilojoule (kJ), 1,000 kJ is a megajoule (MJ), then gigajoules (GJ) and up. Multipliers stack by multiplying: a ×2 and a ×3 together make ×6, which is why small boosts add up fast.",
+"price": 50,
+"kind": "LESSON"
+},
+{
+"id": "l_gems",
+"name": "Alien Gems",
+"tab": "basics",
+"text": "Each alien buddy makes 1 Alien Gem every minute, even while you're busy doing something else. Gems are spent in the skill tree.",
+"price": 50,
+"kind": "LESSON"
+},
+{
+"id": "l_tree",
+"name": "The Skill Tree",
+"tab": "basics",
+"text": "The skill tree is a map of galaxies. Every node you unlock opens a new sound, feature or minigame, and many of them teach you a new music fact. You'll find those facts again here in the Vault.",
+"price": 4500000000000000,
+"kind": "LESSON"
+},
+{
+"id": "l_match",
+"name": "Minigames",
+"tab": "basics",
+"text": "The Matching Game gives you permanent energy multipliers. The minigames in the Cockpit (Planet Hop, Worm Whack and more) boost your Alien Gems instead.",
+"price": 86,
+"kind": "LESSON"
+},
+{
+"id": "b_watt",
+"name": "Joules and Watts",
+"tab": "basics",
+"text": "Joules measure how much energy there is; watts measure how fast it flows. One watt is one joule every second. Picture a bucket and a hose: the water in the bucket is joules, and how fast the hose pours is watts. A 10 W LED bulb uses 10 joules every second, and a 1,000 W microwave uses 1,000. The watt is named after James Watt, who improved the steam engine, and the joule after James Joule, who showed that heat and movement are both forms of energy.",
+"price": 61,
+"kind": "LESSON"
+},
+{
+"id": "b_soundpower",
+"name": "Sound Is Energy",
+"tab": "basics",
+"text": "Sound really does carry energy, just very little of it. A person talking puts out about a hundred-thousandth of a watt of sound, and a whole orchestra playing as loud as it can makes less than 100 watts. Your ears are astonishingly sensitive.",
+"price": 73,
+"kind": "LESSON"
+},
+{
+"id": "b_compound",
+"name": "Why Small Boosts Win",
+"tab": "basics",
+"text": "A ×1.05 boost looks tiny, but boosts multiply each other. Fourteen of them together are about ×2, and twenty-eight are about ×4. Growth that multiplies like this is called compound growth, and it is the same maths that makes savings grow in a bank.",
+"price": 89,
+"kind": "LESSON"
+},
+{
+"id": "b_practice",
+"name": "Little and Often",
+"tab": "basics",
+"text": "Musicians get better faster with short practice every day than with one long session a week. Your brain keeps working on a new skill while you rest and sleep, so ten minutes today and ten tomorrow beats twenty minutes once.",
+"price": 110,
+"kind": "LESSON"
+},
+{
+"id": "b_listen",
+"name": "Active Listening",
+"tab": "basics",
+"text": "Pick a song you love and listen to it four times. First follow only the drums, then only the bass, then the singer, then everything else. Producers call this active listening, and it is the fastest way to learn how songs are built.",
+"price": 1200,
+"kind": "LESSON"
+},
+{
+"id": "b_party",
+"name": "Dance Music",
+"tab": "basics",
+"text": "People have danced to drums for as long as there have been drums. Music made for dancing keeps a steady, strong beat so a whole room can move together: that is true of a waltz, a samba, disco and house music alike.",
+"price": 1000000,
+"kind": "LESSON"
+},
+{
+"id": "l_hatch",
+"name": "Hatching",
+"tab": "buddies",
+"text": "Every alien buddy hatches from an egg, and no two games hatch them in the same order. Every 10th buddy comes from a special egg.",
+"price": 150,
+"kind": "LESSON"
+},
+{
+"id": "l_bunker",
+"name": "The Bunker",
+"tab": "buddies",
+"text": "The bunker is your buddies' home: 100 buddies fit in each bunker. Tap any buddy to see it up close and give it a name.",
+"price": 250,
+"kind": "LESSON"
+},
+{
+"id": "l_designer",
+"name": "Alien Designer",
+"tab": "buddies",
+"text": "In the Alien Designer you can dress your buddies in hats, glasses and shoes. Every buddy keeps its own outfit, and it shows everywhere that buddy goes.",
+"price": 2.7e+50,
+"kind": "LESSON"
+},
+{
+"id": "a_golden",
+"name": "The Golden Record",
+"tab": "buddies",
+"text": "In 1977 NASA launched two Voyager spacecraft, each carrying a gold-plated record for anyone out there who finds it. It holds greetings in 55 languages and music from around the world, from Bach and Beethoven to Chuck Berry's \"Johnny B. Goode\". Both spacecraft have now left the solar system.",
+"price": 2100000,
+"kind": "LESSON"
+},
+{
+"id": "a_space",
+"name": "Is Space Silent?",
+"tab": "buddies",
+"text": "Sound is a vibration, and it needs something to travel through: air, water or something solid. Space is almost completely empty, so sound cannot cross it. Astronauts talk by radio, which is a kind of light, not sound.",
+"price": 290000000000000,
+"kind": "LESSON"
+},
+{
+"id": "a_choir",
+"name": "Singing Together",
+"tab": "buddies",
+"text": "When many voices sing the same note, no two are exactly alike: each is a hair higher or lower and starts a moment earlier or later. Those tiny differences are what make a choir sound big and warm instead of like one loud voice.",
+"price": 21000000,
+"kind": "LESSON"
+},
+{
+"id": "a_penta",
+"name": "No Wrong Notes",
+"tab": "buddies",
+"text": "A pentatonic scale has just five notes, chosen so that none of them clash. Play them in any order and it sounds like a tune, which is why so much folk music, blues and rock around the world is built on it.",
+"price": 210000000,
+"kind": "LESSON"
+},
+{
+"id": "a_animals",
+"name": "Animal Musicians",
+"tab": "buddies",
+"text": "Humans are not the only music makers. Humpback whales sing songs that last for minutes and slowly change from year to year, and many birds learn their songs from their parents, the way you learn to talk.",
+"price": 7.9e+27,
+"kind": "LESSON"
+},
+{
+"id": "s_pigment_lab",
+"name": "Pigment Lab",
+"tab": "buddies",
+"text": "Pigments make colour by soaking up some light and bouncing the rest back: a red pigment reflects red light and absorbs the others. That's why mixing paints makes colours darker, while mixing coloured lights makes them brighter.",
+"price": 7.9e+27,
+"kind": "SKILL TREE FACT"
+},
+{
+"id": "s_shape_shifter",
+"name": "Shape Shifter",
+"tab": "buddies",
+"text": "Real antennae are super-senses: insects use them to smell, touch and even hear. A male mosquito hears the hum of another mosquito's wings through the tiny hairs on its feathery antennae.",
+"price": 7.9e+27,
+"kind": "SKILL TREE FACT"
+},
+{
+"id": "s_dna_splice",
+"name": "DNA Splice",
+"tab": "buddies",
+"text": "You get half of your DNA from each parent. That is why you can have one parent's eyes and the other's hair, and why brothers and sisters can look so different.",
+"price": 7.9e+27,
+"kind": "SKILL TREE FACT"
+},
+{
+"id": "s_trail_comet",
+"name": "Comet Tail",
+"tab": "buddies",
+"text": "A comet's tail always points away from the Sun, even when the comet is moving away from it: sunlight and the solar wind push the dust and gas behind it.",
+"price": 7.9e+27,
+"kind": "SKILL TREE FACT"
+},
+{
+"id": "s_trail_frost",
+"name": "Frost Crystals",
+"tab": "buddies",
+"text": "Every snowflake has six sides, because water molecules lock together in a six-sided pattern when they freeze.",
+"price": 7.9e+27,
+"kind": "SKILL TREE FACT"
+},
+{
+"id": "s_trail_bubbles",
+"name": "Bubble Trail",
+"tab": "buddies",
+"text": "The swirling colours on a soap bubble come from light bouncing off the inside and outside of a film thinner than a hair. The colours change as the film gets thinner.",
+"price": 7.9e+27,
+"kind": "SKILL TREE FACT"
+},
+{
+"id": "s_trail_lightning",
+"name": "Lightning Zap",
+"tab": "buddies",
+"text": "Lightning heats the air around it to about 30,000 °C, five times hotter than the surface of the Sun. The air expands so fast it makes a boom: thunder.",
+"price": 7.9e+27,
+"kind": "SKILL TREE FACT"
+},
+{
+"id": "s_trail_aurora",
+"name": "Aurora Veil",
+"tab": "buddies",
+"text": "Auroras glow when particles from the Sun crash into gases high in the air: oxygen glows green and red, nitrogen glows blue and purple.",
+"price": 7.9e+27,
+"kind": "SKILL TREE FACT"
+},
+{
+"id": "s_trail_soundwave",
+"name": "Soundwave",
+"tab": "buddies",
+"text": "Sound travels as a wave of squeezed and stretched air. A picture of that wave going up and down over time is called a waveform.",
+"price": 7.9e+27,
+"kind": "SKILL TREE FACT"
+},
+{
+"id": "s_trail_eq",
+"name": "Equalizer Bars",
+"tab": "buddies",
+"text": "An equalizer splits sound into bands, from low bass to high treble, and shows (or changes) how loud each band is.",
+"price": 7.9e+27,
+"kind": "SKILL TREE FACT"
+},
+{
+"id": "l_kit",
+"name": "The Drum Kit",
+"tab": "pads",
+"text": "Most beats are built from three drums. The KICK is the low thump you feel in your chest, the SNARE is the sharp crack, and the HI-HAT is the light tick that keeps time between them.",
+"price": 130,
+"kind": "LESSON"
+},
+{
+"id": "l_backbeat",
+"name": "The Backbeat",
+"tab": "pads",
+"text": "Count \"1, 2, 3, 4\" along with a song. In most pop, rock and hip-hop the kick lands on 1 and 3 and the snare on 2 and 4. That snare on 2 and 4 is called the backbeat, and it's what makes you want to nod your head.",
+"price": 160,
+"kind": "LESSON"
+},
+{
+"id": "l_editpads",
+"name": "Edit Pads",
+"tab": "pads",
+"text": "EDIT PADS lets you set how many pads are on screen, change each pad's sound and volume, and (on a computer) bind keyboard keys to the pads so you can play them like an instrument.",
+"price": 190,
+"kind": "LESSON"
+},
+{
+"id": "l_finger",
+"name": "Finger Drumming",
+"tab": "pads",
+"text": "Finger drummers play beats on pads like these with their fingertips. Try using two fingers: one for the kick, one for the snare, and keep a steady pulse going.",
+"price": 430,
+"kind": "LESSON"
+},
+{
+"id": "p_countin",
+"name": "The Count-In",
+"tab": "pads",
+"text": "Before a band starts, the drummer counts \"1, 2, 3, 4\" out loud or clicks the sticks together. The count-in tells everyone how fast the song goes and exactly when to come in.",
+"price": 230,
+"kind": "LESSON"
+},
+{
+"id": "p_dynamics",
+"name": "Loud and Soft",
+"tab": "pads",
+"text": "Playing every hit at the same loudness sounds like a machine. Real drummers make some hits strong (accents) and others gentle, and that rise and fall is called dynamics. It is a big part of what makes a beat feel alive.",
+"price": 280,
+"kind": "LESSON"
+},
+{
+"id": "p_downup",
+"name": "Downbeat & Offbeat",
+"tab": "pads",
+"text": "The downbeat is beat 1, the strong start of every bar. The offbeats are the spots halfway between the beats: count \"1 and 2 and 3 and 4 and\", and every \"and\" is an offbeat. Reggae and ska guitars play almost only on the offbeats.",
+"price": 340,
+"kind": "LESSON"
+},
+{
+"id": "p_kit",
+"name": "A Young Instrument",
+"tab": "pads",
+"text": "The drum kit is only a little over 100 years old. In the early 1900s drummers in American theatres and dance bands started setting several drums around one chair, and in 1909 the Ludwig company sold a bass drum pedal that let one player do the work of three.",
+"price": 410,
+"kind": "LESSON"
+},
+{
+"id": "p_ghost",
+"name": "Ghost Notes",
+"tab": "pads",
+"text": "Ghost notes are very quiet hits tucked between the main ones, usually on the snare. You almost feel them more than hear them, but take them away and a funky beat suddenly sounds stiff.",
+"price": 740,
+"kind": "LESSON"
+},
+{
+"id": "p_fill",
+"name": "Drum Fills",
+"tab": "pads",
+"text": "A fill is a short burst of drumming, often at the end of every fourth or eighth bar, that breaks the pattern for a moment. It tells listeners that something new is coming, like a chorus.",
+"price": 1300,
+"kind": "LESSON"
+},
+{
+"id": "p_rudiments",
+"name": "Rudiments",
+"tab": "pads",
+"text": "Rudiments are the basic hand patterns drummers practise, like scales for a pianist. The most famous is the paradiddle: right, left, right, right, then left, right, left, left. Try tapping it on a table.",
+"price": 2200,
+"kind": "LESSON"
+},
+{
+"id": "p_hands",
+"name": "Body Percussion",
+"tab": "pads",
+"text": "You already own a drum kit: stomp for a kick, clap for a snare and click your fingers for a hi-hat. Body percussion is used in music all over the world, from flamenco hand claps to stepping and hambone.",
+"price": 500,
+"kind": "LESSON"
+},
+{
+"id": "l_stepseq",
+"name": "The Step Sequencer",
+"tab": "seq",
+"text": "A step sequencer plays a loop of steps over and over. Light up a step and that sound plays when the beat reaches it. Drum machines like the Roland TR-808 (1980) worked exactly like this.",
+"price": 1700,
+"kind": "LESSON"
+},
+{
+"id": "l_16",
+"name": "16 Steps = 1 Bar",
+"tab": "seq",
+"text": "The 16 steps make one bar (or measure) of music in 4/4 time: 4 beats, each split into 4 sixteenth notes. Steps 1, 5, 9 and 13 are the four beats you'd tap your foot to.",
+"price": 2300,
+"kind": "LESSON"
+},
+{
+"id": "l_bpm",
+"name": "Tempo & BPM",
+"tab": "seq",
+"text": "Tempo is how fast music goes, measured in BPM (beats per minute). 60 BPM is one beat per second. Hip-hop often sits around 85–95 BPM, house music around 120–128, drum & bass around 170.",
+"price": 3100,
+"kind": "LESSON"
+},
+{
+"id": "l_loop",
+"name": "Loops & Patterns",
+"tab": "seq",
+"text": "A pattern is a short loop of music. Songs are built by repeating patterns and changing them from section to section, so the music feels familiar and still keeps moving.",
+"price": 4200,
+"kind": "LESSON"
+},
+{
+"id": "s_four",
+"name": "Four on the Floor",
+"tab": "seq",
+"text": "Put a kick on every beat (steps 1, 5, 9 and 13) and you have \"four on the floor\", the heartbeat of disco, house and techno. It is the simplest dance beat there is, and one of the hardest to sit still to.",
+"price": 5700,
+"kind": "LESSON"
+},
+{
+"id": "s_offhat",
+"name": "Offbeat Hi-Hats",
+"tab": "seq",
+"text": "Try a hi-hat on steps 3, 7, 11 and 15: halfway between the beats. With a kick on every beat underneath, that \"boots, cats, boots, cats\" bounce is the classic sound of house music.",
+"price": 7700,
+"kind": "LESSON"
+},
+{
+"id": "s_sync",
+"name": "Syncopation",
+"tab": "seq",
+"text": "Syncopation means putting a strong hit where the ear does not expect one, between the beats instead of on them. Move one kick a step early or late and listen to how the whole beat starts to lean and bounce.",
+"price": 10000,
+"kind": "LESSON"
+},
+{
+"id": "s_sub",
+"name": "Splitting the Beat",
+"tab": "seq",
+"text": "Every beat can be cut into smaller pieces. Split it in two and you get eighth notes, in four and you get sixteenth notes, the steps of this sequencer. Split it in three and you get triplets, which give music a rolling feel.",
+"price": 14000,
+"kind": "LESSON"
+},
+{
+"id": "s_half",
+"name": "Half-Time",
+"tab": "seq",
+"text": "Move the snare from beats 2 and 4 to beat 3 only, and the beat feels half as fast even though the tempo has not changed. That is called half-time, and it is everywhere in trap, dubstep and rock breakdowns.",
+"price": 19000,
+"kind": "LESSON"
+},
+{
+"id": "s_poly",
+"name": "Polyrhythm",
+"tab": "seq",
+"text": "A polyrhythm is two different rhythms played at the same time. The most common is \"3 against 2\": one hand taps three evenly spaced hits while the other taps two. It is at the heart of a lot of West African and Afro-Cuban music.",
+"price": 26000,
+"kind": "LESSON"
+},
+{
+"id": "s_call",
+"name": "Call and Response",
+"tab": "seq",
+"text": "In call and response, one part plays a short idea and another part answers it, like a conversation. You can hear it in gospel choirs, in blues guitar answering the singer, and in a drum pattern that asks a question in bar 1 and answers it in bar 2.",
+"price": 36000,
+"kind": "LESSON"
+},
+{
+"id": "s_phrase",
+"name": "Counting in Fours",
+"tab": "seq",
+"text": "Most popular music is built in groups of four: 4 beats in a bar, 4 bars in a phrase, and sections that last 8 or 16 bars. That is why you can often feel a change coming before it happens.",
+"price": 49000,
+"kind": "LESSON"
+},
+{
+"id": "s_amen",
+"name": "The Amen Break",
+"tab": "seq",
+"text": "In 1969 Gregory Coleman played a few seconds of solo drums in the song \"Amen, Brother\" by The Winstons. Producers later sampled it, sped it up and chopped it, and it became one of the most reused recordings ever: the backbone of jungle and drum & bass.",
+"price": 66000,
+"kind": "LESSON"
+},
+{
+"id": "s_metro",
+"name": "The Metronome",
+"tab": "seq",
+"text": "A metronome clicks at a steady tempo so you can practise in time. Johann Maelzel patented the wind-up kind in 1815, and Beethoven was one of the first composers to write metronome numbers on his music.",
+"price": 90000,
+"kind": "LESSON"
+},
+{
+"id": "s_less",
+"name": "Leave Some Space",
+"tab": "seq",
+"text": "A beat with every step lit up is just noise. The gaps matter as much as the hits: silence gives the next sound room to land. When a pattern feels crowded, try taking notes out before adding any.",
+"price": 120000,
+"kind": "LESSON"
+},
+{
+"id": "s_swing",
+"name": "Swing",
+"tab": "seq",
+"text": "Swing plays every second sixteenth note a little late, so the beat goes long-short, long-short instead of perfectly even. Drum machine designer Roger Linn made the amount adjustable in the 1980s, and that small delay is a big part of how hip-hop grooves.",
+"price": 3.5e+88,
+"kind": "LESSON"
+},
+{
+"id": "s_tension",
+"name": "Tension and Release",
+"tab": "seq",
+"text": "Good songs build tension and then let it go. Taking the drums away, adding a rising sound or repeating a pattern faster and faster all build tension. Bringing the full beat back is the release, the moment everyone has been waiting for.",
+"price": 1.8e+116,
+"kind": "LESSON"
+},
+{
+"id": "s_drop",
+"name": "The Build and the Drop",
+"tab": "seq",
+"text": "In dance music a build-up strips the beat back and winds the energy up, often with a drum roll that gets faster. Then comes the drop: the bass and the full beat land together. The quiet bar just before the drop makes it hit harder.",
+"price": 2.7e+116,
+"kind": "LESSON"
+},
+{
+"id": "s_mt_groove",
+"name": "Groove",
+"tab": "seq",
+"text": "Groove is the feel that makes music move: tiny differences in timing and loudness between notes. Two drummers can play the same pattern and sound totally different because of it.",
+"price": 1.1e+89,
+"kind": "SKILL TREE FACT"
+},
+{
+"id": "s_mt_velocity",
+"name": "Velocity",
+"tab": "seq",
+"text": "Velocity comes from MIDI keyboards: it measures how fast a key is pressed, which is why harder hits play louder.",
+"price": 1.4e+90,
+"kind": "SKILL TREE FACT"
+},
+{
+"id": "s_mt_arrangement",
+"name": "Arrangement",
+"tab": "seq",
+"text": "Arrangement is deciding what plays when: intro, verse, chorus, drop, outro. Most pop songs reuse only a handful of patterns, just in a smart order.",
+"price": 3.9e+116,
+"kind": "SKILL TREE FACT"
+},
+{
+"id": "l_notes",
+"name": "The 12 Notes",
+"tab": "piano",
+"text": "Western music uses 12 different notes: C, C♯, D, D♯, E, F, F♯, G, G♯, A, A♯ and B. After B the pattern starts again at the next C, higher up.",
+"price": 5.6e+45,
+"kind": "LESSON"
+},
+{
+"id": "l_octave",
+"name": "Octaves",
+"tab": "piano",
+"text": "An octave is the jump from one note to the next note with the same name, like C to the next C. The higher note vibrates exactly twice as fast, which is why the two sound so alike.",
+"price": 8.8e+45,
+"kind": "LESSON"
+},
+{
+"id": "l_melody",
+"name": "Melody, Bass & Chords",
+"tab": "piano",
+"text": "The melody is the part you sing along to. The bassline sits low and holds the song up. Chords are three or more notes played together that colour the mood: happy, sad, tense or dreamy.",
+"price": 1.4e+46,
+"kind": "LESSON"
+},
+{
+"id": "k_name",
+"name": "Why \"Piano\"?",
+"tab": "piano",
+"text": "Around 1700 an Italian instrument maker, Bartolomeo Cristofori, built a keyboard that could play both soft and loud depending on how hard you pressed. People called it the \"pianoforte\", Italian for \"soft-loud\", and later just the piano.",
+"price": 2.2e+46,
+"kind": "LESSON"
+},
+{
+"id": "k_88",
+"name": "88 Keys",
+"tab": "piano",
+"text": "A full-size piano has 88 keys: 52 white and 36 black. The lowest note vibrates about 27 times a second and the highest more than 4,000 times a second.",
+"price": 3.5e+46,
+"kind": "LESSON"
+},
+{
+"id": "k_middlec",
+"name": "Middle C",
+"tab": "piano",
+"text": "Middle C is the C nearest the centre of a piano. It vibrates about 262 times a second, and it is the note most people learn first, because it sits right between the low notes and the high notes.",
+"price": 5.6e+46,
+"kind": "LESSON"
+},
+{
+"id": "k_sharp",
+"name": "Sharps and Flats",
+"tab": "piano",
+"text": "The black keys are named after their white neighbours. A sharp (♯) is one step higher and a flat (♭) is one step lower, so the black key between C and D can be called C♯ or D♭. Same key, same sound, two names.",
+"price": 8.8e+46,
+"kind": "LESSON"
+},
+{
+"id": "k_steps",
+"name": "Half Steps & Whole Steps",
+"tab": "piano",
+"text": "A half step is the distance from one key to the very next one, black or white. Two half steps make a whole step. Every scale and chord is just a pattern of half steps and whole steps.",
+"price": 1.4e+47,
+"kind": "LESSON"
+},
+{
+"id": "k_major",
+"name": "The Major Scale",
+"tab": "piano",
+"text": "A major scale follows the pattern whole, whole, half, whole, whole, whole, half. Start on C and that pattern lands on only white keys: C, D, E, F, G, A, B, C. Start on any other note and you will need some black keys.",
+"price": 2.4e+80,
+"kind": "LESSON"
+},
+{
+"id": "k_minor",
+"name": "Major and Minor",
+"tab": "piano",
+"text": "Music in a major key tends to sound bright or happy, and music in a minor key darker or sadder. The difference is small: a few notes of the scale are one half step lower in minor.",
+"price": 4e+80,
+"kind": "LESSON"
+},
+{
+"id": "k_triad",
+"name": "Building a Chord",
+"tab": "piano",
+"text": "The simplest chord is a triad: pick a note, skip one, play the next, skip one, play the next. C, E and G make a C major chord. A, C and E make an A minor chord.",
+"price": 2.2e+47,
+"kind": "LESSON"
+},
+{
+"id": "k_prog",
+"name": "The Four-Chord Song",
+"tab": "piano",
+"text": "A chord progression is a row of chords that repeats. One of them, C, G, A minor, F (or the same shape in another key), has been used in hundreds of hit songs. Different melodies on top make them sound like different songs.",
+"price": 6.6e+80,
+"kind": "LESSON"
+},
+{
+"id": "k_black",
+"name": "The Black-Key Trick",
+"tab": "piano",
+"text": "Play only the black keys of a piano, in any order, and it sounds like a tune. The five black keys form a pentatonic scale, where no two notes clash.",
+"price": 3.5e+47,
+"kind": "LESSON"
+},
+{
+"id": "k_interval",
+"name": "Intervals",
+"tab": "piano",
+"text": "An interval is the distance between two notes. Seven half steps is called a fifth, and it sounds so strong and stable that rock \"power chords\" are made of just that. One half step is the tense, scary sound of the Jaws theme.",
+"price": 5.6e+47,
+"kind": "LESSON"
+},
+{
+"id": "k_root",
+"name": "Bass Follows the Chord",
+"tab": "piano",
+"text": "A simple way to write a bassline: play the note each chord is named after (its root), low down. Under a C chord play a low C, under an F chord a low F. Most basslines start from this idea.",
+"price": 6.4e+80,
+"kind": "LESSON"
+},
+{
+"id": "k_roll",
+"name": "Reading a Piano Roll",
+"tab": "piano",
+"text": "Almost every music program draws notes the same way. Higher notes sit higher up, time runs from left to right, and a longer bar is a longer note. Once you can read one piano roll you can read them all.",
+"price": 6.3e+80,
+"kind": "LESSON"
+},
+{
+"id": "k_tuning",
+"name": "Twelve Equal Steps",
+"tab": "piano",
+"text": "On modern instruments every half step makes the pitch about 6% higher. Do that twelve times and you have exactly doubled it, which is one octave. Tuning this way lets a piano play in every key.",
+"price": 1.1e+81,
+"kind": "LESSON"
+},
+{
+"id": "s_mt_key",
+"name": "Key",
+"tab": "piano",
+"text": "A key is the set of notes a song is built from. Every major key has a \"relative minor\" that uses the exact same 7 notes: C major and A minor share every note, they just feel at home on a different one.",
+"price": 1.8e+81,
+"kind": "SKILL TREE FACT"
+},
+{
+"id": "s_mt_piano",
+"name": "Piano Roll",
+"tab": "piano",
+"text": "The name comes from player pianos: they read songs from long rolls of paper with holes punched in them, one hole per note. Music software still draws notes the same way.",
+"price": 6.3e+82,
+"kind": "SKILL TREE FACT"
+},
+{
+"id": "s_mt_piano2",
+"name": "Roll Layer 2",
+"tab": "piano",
+"text": "A melody needs something under it: most songs layer a bassline, chords and a lead, each on its own instrument.",
+"price": 6.4e+81,
+"kind": "SKILL TREE FACT"
+},
+{
+"id": "s_mt_midi",
+"name": "MIDI Keyboard",
+"tab": "piano",
+"text": "MIDI (1983) lets instruments from any brand talk to each other. The same 5-pin standard still works today, now mostly over USB.",
+"price": 7.4e+80,
+"kind": "SKILL TREE FACT"
+},
+{
+"id": "l_sound",
+"name": "What Is Sound?",
+"tab": "sounds",
+"text": "Sound is vibration travelling through the air. The faster something vibrates, the higher the pitch. Pitch is measured in hertz (Hz): the A that orchestras tune to vibrates 440 times every second.",
+"price": 7.9e+37,
+"kind": "LESSON"
+},
+{
+"id": "l_families",
+"name": "Instrument Families",
+"tab": "sounds",
+"text": "Instruments are grouped by how they make sound: PERCUSSION (hit or shaken), STRINGS (plucked or bowed), WOODWINDS and BRASS (blown), KEYBOARDS, and ELECTRONIC sounds made by synthesizers and samplers.",
+"price": 1.3e+38,
+"kind": "LESSON"
+},
+{
+"id": "l_timbre",
+"name": "Timbre",
+"tab": "sounds",
+"text": "Timbre (say \"TAM-ber\") is the colour of a sound: why a piano and a flute playing the very same note still sound different. It comes from the mix of quieter, higher tones (overtones) hiding inside every note.",
+"price": 2.2e+38,
+"kind": "LESSON"
+},
+{
+"id": "l_planets",
+"name": "Planet Sounds",
+"tab": "sounds",
+"text": "Each planet in the galaxy has its own family of sounds, many based on real instruments from around the world. Unlock continents in the skill tree to collect them.",
+"price": 3.7e+38,
+"kind": "LESSON"
+},
+{
+"id": "i_wave",
+"name": "Shapes of Sound",
+"tab": "sounds",
+"text": "Synthesizers start from a few basic wave shapes. A sine wave is smooth and pure, like a whistle. A square wave is hollow, like old video game music. A sawtooth is bright and buzzy, and a triangle sits softly in between.",
+"price": 6.1e+38,
+"kind": "LESSON"
+},
+{
+"id": "i_harm",
+"name": "Overtones",
+"tab": "sounds",
+"text": "Play one note on almost any instrument and you are really hearing many. Above the main pitch sit quieter ones at 2, 3, 4 times its frequency and more, called harmonics or overtones. Their mix is what gives each instrument its own colour.",
+"price": 1e+39,
+"kind": "LESSON"
+},
+{
+"id": "i_adsr",
+"name": "The Shape of a Note",
+"tab": "sounds",
+"text": "Every sound has a shape in time. Attack is how fast it starts, decay is how quickly it settles, sustain is the level it holds, and release is how long it takes to fade. A drum has a fast attack and no sustain; a bowed violin can swell in slowly and hold.",
+"price": 1.7e+39,
+"kind": "LESSON"
+},
+{
+"id": "i_range",
+"name": "What You Can Hear",
+"tab": "sounds",
+"text": "Young human ears hear from about 20 Hz (a deep rumble) up to about 20,000 Hz (a tiny hiss), and the top of that range fades as we get older. Dogs hear more than twice as high, and elephants talk in rumbles too low for us to hear.",
+"price": 2.8e+39,
+"kind": "LESSON"
+},
+{
+"id": "i_db",
+"name": "Decibels",
+"tab": "sounds",
+"text": "Loudness is measured in decibels (dB). A whisper is about 30 dB, talking about 60 dB and a rock concert around 110 dB. Every extra 10 dB sounds roughly twice as loud. Long stretches above 85 dB can damage your hearing for good, so look after your ears.",
+"price": 4.7e+39,
+"kind": "LESSON"
+},
+{
+"id": "i_speed",
+"name": "The Speed of Sound",
+"tab": "sounds",
+"text": "Sound moves through air at about 343 metres every second, far slower than light. That is why you see lightning before you hear thunder: count the seconds between them, and every 3 seconds is about 1 kilometre.",
+"price": 7.9e+39,
+"kind": "LESSON"
+},
+{
+"id": "i_reson",
+"name": "Resonance",
+"tab": "sounds",
+"text": "A guitar string on its own is very quiet. The hollow wooden body picks up its vibration and shakes a lot more air, making the note louder and fuller. That boost is called resonance, and drum shells, violin bodies and your own chest all do it.",
+"price": 2.7e+80,
+"kind": "LESSON"
+},
+{
+"id": "i_four",
+"name": "How Instruments Vibrate",
+"tab": "sounds",
+"text": "One way to sort every instrument on Earth is by what vibrates. In idiophones the whole body rings (bells, xylophones). Membranophones have a stretched skin (drums). Chordophones have strings, and aerophones use a column of air (flutes, trumpets).",
+"price": 8.5e+80,
+"kind": "LESSON"
+},
+{
+"id": "i_bowl",
+"name": "Singing Bowls",
+"tab": "sounds",
+"text": "Rub a wet finger round the rim of a glass and it sings. A metal singing bowl works the same way: the mallet keeps catching and letting go of the rim, hundreds of times a second, and the whole bowl rings with a long, steady note.",
+"price": 1.7e+64,
+"kind": "LESSON"
+},
+{
+"id": "i_metal",
+"name": "Why Metal Rings",
+"tab": "sounds",
+"text": "Hit a block of wood and you get a short \"tok\". Hit a metal bar and it rings on and on. Metal is stiff and loses its energy very slowly, so the vibration lasts. Wood soaks the vibration up almost at once.",
+"price": 3.4e+80,
+"kind": "LESSON"
+},
+{
+"id": "i_sub",
+"name": "Sub-Bass",
+"tab": "sounds",
+"text": "The very lowest sounds, below about 60 Hz, are called sub-bass. You feel them in your chest as much as you hear them. Small phone speakers cannot play them at all, which is why producers check their songs on big speakers and tiny ones.",
+"price": 4.1e+80,
+"kind": "LESSON"
+},
+{
+"id": "i_tube",
+"name": "Longer Means Lower",
+"tab": "sounds",
+"text": "In a wind instrument the note depends on how long the tube of air is. A longer tube gives a lower note. Opening a finger hole makes the tube act shorter, so the note goes up. A piccolo is about half as long as a flute and plays an octave higher.",
+"price": 4.6e+80,
+"kind": "LESSON"
+},
+{
+"id": "i_sampler",
+"name": "The First Samplers",
+"tab": "sounds",
+"text": "A sampler plays back recordings of real sounds. One of the first was the Mellotron (1963): every key pulled a strip of tape with a recorded flute, violin or choir on it. You can hear its flutes at the start of \"Strawberry Fields Forever\".",
+"price": 3.3e+80,
+"kind": "LESSON"
+},
+{
+"id": "i_moog",
+"name": "The Synthesizer Arrives",
+"tab": "sounds",
+"text": "Robert Moog began selling his synthesizer in 1964. It made sound from electricity alone, shaped with knobs and cables. In 1968 Wendy Carlos used one to record \"Switched-On Bach\", and suddenly the whole world knew what a synthesizer was.",
+"price": 1.3e+81,
+"kind": "LESSON"
+},
+{
+"id": "i_theremin",
+"name": "Played Without Touching",
+"tab": "sounds",
+"text": "The theremin, invented in 1920 by Leon Theremin, is played without touching it. Moving one hand near an antenna changes the pitch and the other hand controls the volume. Its eerie wail became the sound of old science fiction films.",
+"price": 3.4e+81,
+"kind": "LESSON"
+},
+{
+"id": "s_cont_rosewood",
+"name": "Rosewood",
+"tab": "sounds",
+"text": "Concert marimba bars are usually rosewood. The tube hanging under each bar is cut to that bar's note, so the sound rings longer and louder.",
+"price": 8.8e+80,
+"kind": "SKILL TREE FACT"
+},
+{
+"id": "s_cont_bamboo",
+"name": "Bamboo",
+"tab": "sounds",
+"text": "An angklung group from Indonesia gives each player just one or two notes. Shaking them at the right moments, the group plays whole songs together, like a hand-bell choir.",
+"price": 9.1e+80,
+"kind": "SKILL TREE FACT"
+},
+{
+"id": "s_cont_oak",
+"name": "Oak",
+"tab": "sounds",
+"text": "The cajón comes from Peru, where it began as a simple wooden box to sit on and slap. Hit the middle for a deep bass, the top edge for a sharp snap.",
+"price": 9.4e+80,
+"kind": "SKILL TREE FACT"
+},
+{
+"id": "s_cont_ebony",
+"name": "Ebony",
+"tab": "sounds",
+"text": "Claves play the clave rhythm, a pattern of five hits that holds Cuban son and salsa together.",
+"price": 9.7e+80,
+"kind": "SKILL TREE FACT"
+},
+{
+"id": "s_cont_cedar",
+"name": "Cedar",
+"tab": "sounds",
+"text": "Many Native American flutes are carved from cedar. They have two chambers: a block on top steers your breath out of the first one and across a sharp edge into the second.",
+"price": 1e+81,
+"kind": "SKILL TREE FACT"
+},
+{
+"id": "s_cont_chrome",
+"name": "Chrome",
+"tab": "sounds",
+"text": "The steel pan was invented in Trinidad and Tobago in the 1930s and 40s, hammered out of old oil drums. Every bump on its surface is tuned to its own note.",
+"price": 1.1e+81,
+"kind": "SKILL TREE FACT"
+},
+{
+"id": "s_cont_cobalt",
+"name": "Cobalt",
+"tab": "sounds",
+"text": "Orchestras use tubular bells whenever a piece needs church bells: real church bells are far too heavy to bring on stage.",
+"price": 1.1e+81,
+"kind": "SKILL TREE FACT"
+},
+{
+"id": "s_cont_titan",
+"name": "Titan",
+"tab": "sounds",
+"text": "Verdi's opera Il Trovatore (1853) has a famous Anvil Chorus: a camp of singers keeps time by hammering on anvils.",
+"price": 1.1e+81,
+"kind": "SKILL TREE FACT"
+},
+{
+"id": "s_cont_nickel",
+"name": "Nickel",
+"tab": "sounds",
+"text": "The kalimba is a modern cousin of the mbira, a thumb piano from Zimbabwe that has been played for many centuries.",
+"price": 1.2e+81,
+"kind": "SKILL TREE FACT"
+},
+{
+"id": "s_cont_bronze",
+"name": "Bronze",
+"tab": "sounds",
+"text": "In Balinese gamelan, the instruments come in pairs tuned slightly apart. Played together they make a fast shimmer called ombak, which means \"wave\".",
+"price": 1.2e+81,
+"kind": "SKILL TREE FACT"
+},
+{
+"id": "s_cont_subquake",
+"name": "Subquake",
+"tab": "sounds",
+"text": "The Roland TR-808 drum machine came out in 1980 and sold poorly at first, because its drums didn't sound like real ones. Its long, booming bass drum later became the foundation of hip-hop and trap.",
+"price": 1.3e+81,
+"kind": "SKILL TREE FACT"
+},
+{
+"id": "s_cont_claptrap",
+"name": "Claptrap",
+"tab": "sounds",
+"text": "The 808's handclap isn't a recording. It's a burst of filtered noise fired a few times in a row, so it sounds like several people clapping a split second apart.",
+"price": 1.4e+81,
+"kind": "SKILL TREE FACT"
+},
+{
+"id": "s_cont_hatstack",
+"name": "Hatstack",
+"tab": "sounds",
+"text": "Trap producers program hi-hat rolls: fast runs of 16th, 32nd and even 64th notes between the main hits. The 808's hats are made from six square waves at clashing pitches, which gives them that metallic sizzle.",
+"price": 1.4e+81,
+"kind": "SKILL TREE FACT"
+},
+{
+"id": "s_cont_tomtom",
+"name": "Tomtom",
+"tab": "sounds",
+"text": "Right after a drum is hit, its pitch drops a little: the hit stretches the skin tighter for a moment. The 808 copies this with a quick downward pitch sweep on its toms, congas and kick.",
+"price": 1.4e+81,
+"kind": "SKILL TREE FACT"
+},
+{
+"id": "s_cont_cowbella",
+"name": "Cowbella",
+"tab": "sounds",
+"text": "The 808 cowbell is just two square waves, about 540 and 800 Hz, played together through a filter. Their clashing pitches give it its famous clanky sound.",
+"price": 1.4e+81,
+"kind": "SKILL TREE FACT"
+},
+{
+"id": "s_cont_fluterra",
+"name": "Fluterra",
+"tab": "sounds",
+"text": "A flute has no reed. You blow across a hole, and the air splits on its sharp edge, just like blowing over the top of a bottle.",
+"price": 1.5e+81,
+"kind": "SKILL TREE FACT"
+},
+{
+"id": "s_cont_clarion",
+"name": "Clarion",
+"tab": "sounds",
+"text": "A clarinet has one reed, and its tube is closed at the reed end, so it plays mostly odd harmonics. That gives it its hollow, woody sound.",
+"price": 1.5e+81,
+"kind": "SKILL TREE FACT"
+},
+{
+"id": "s_cont_reedwood",
+"name": "Reedwood",
+"tab": "sounds",
+"text": "Before a concert the whole orchestra tunes to an A played by the oboe, because its clear, steady sound carries over everyone else.",
+"price": 1.5e+81,
+"kind": "SKILL TREE FACT"
+},
+{
+"id": "s_cont_saxony",
+"name": "Saxony",
+"tab": "sounds",
+"text": "The saxophone is made of brass but counts as a woodwind, because it makes its sound with a reed. Adolphe Sax invented it in the 1840s.",
+"price": 1.5e+81,
+"kind": "SKILL TREE FACT"
+},
+{
+"id": "s_cont_windlands",
+"name": "Windlands",
+"tab": "sounds",
+"text": "Vessel flutes like the ocarina are some of the oldest instruments people make: clay whistles like them have been found from thousands of years ago.",
+"price": 1.6e+81,
+"kind": "SKILL TREE FACT"
+},
+{
+"id": "f_wetdry",
+"name": "Wet and Dry",
+"tab": "fx",
+"text": "A sound with no effect on it is called dry. The effected version is called wet. Most effects have a mix control that blends the two, and a little wet signal usually goes a long way.",
+"price": 1.4e+51,
+"kind": "LESSON"
+},
+{
+"id": "f_chain",
+"name": "Order Matters",
+"tab": "fx",
+"text": "Effects work one after another, like a chain, and the order changes the result. Echo followed by distortion makes the echoes gritty too. Distortion followed by echo keeps the echoes clean copies of the gritty sound.",
+"price": 2.1e+51,
+"kind": "LESSON"
+},
+{
+"id": "f_plate",
+"name": "Reverb in a Box",
+"tab": "fx",
+"text": "Before computers, studios made reverb with real objects. A plate reverb (1957) was a steel sheet taller than a person, hung in a frame: sound made it shiver and microphones picked up the shimmer. Guitar amps use a small metal spring to do the same job.",
+"price": 9.6e+51,
+"kind": "LESSON"
+},
+{
+"id": "f_feedback",
+"name": "Feedback",
+"tab": "fx",
+"text": "Feedback means sending a sound's output back into its input. On an echo effect, the feedback control sets how many repeats you hear. Turn it too high and each repeat gets louder than the last, until it howls.",
+"price": 2.7e+51,
+"kind": "LESSON"
+},
+{
+"id": "f_cutoff",
+"name": "Cutoff and Resonance",
+"tab": "fx",
+"text": "A filter has two main controls. Cutoff sets where it starts removing sound. Resonance adds a peak right at that spot, which gives a filter its whistling, \"talking\" sound when you sweep it.",
+"price": 2.2e+54,
+"kind": "LESSON"
+},
+{
+"id": "f_drive",
+"name": "Overdrive to Fuzz",
+"tab": "fx",
+"text": "These are three strengths of the same idea: pushing a sound until its wave gets squashed. Overdrive is warm and gentle, distortion is thick and aggressive, and fuzz is wild and buzzy. The fuzz riff of \"Satisfaction\" (1965) made the effect famous.",
+"price": 1.1e+56,
+"kind": "LESSON"
+},
+{
+"id": "f_rate",
+"name": "Sample Rate",
+"tab": "fx",
+"text": "Digital sound is a row of snapshots, called samples. A CD takes 44,100 of them every second, enough to capture everything a human can hear. Take far fewer and the sound turns crunchy and metallic, which is what a bitcrusher does on purpose.",
+"price": 2.2e+80,
+"kind": "LESSON"
+},
+{
+"id": "f_lfo",
+"name": "The LFO",
+"tab": "fx",
+"text": "An LFO (low-frequency oscillator) is a slow, repeating wave that moves a setting for you. Point it at the volume and you get tremolo. Point it at the pitch and you get vibrato. Point it at a filter and you get a wobble bass.",
+"price": 6e+79,
+"kind": "LESSON"
+},
+{
+"id": "f_spectrum",
+"name": "Lows, Mids and Highs",
+"tab": "fx",
+"text": "Engineers split sound into three rough zones. The lows (up to about 250 Hz) hold the kick and bass. The mids hold most of the voice and the instruments. The highs (above about 4,000 Hz) hold the sparkle of cymbals and the \"s\" sounds of speech.",
+"price": 4.1e+103,
+"kind": "LESSON"
+},
+{
+"id": "f_cut",
+"name": "Cut Before You Boost",
+"tab": "fx",
+"text": "When a sound is hard to hear, it is tempting to turn it up. Mix engineers often do the opposite: they find what is covering it and turn that down a little. A mix where everything is boosted has nowhere left to go.",
+"price": 1.9e+104,
+"kind": "LESSON"
+},
+{
+"id": "f_loud",
+"name": "The Loudness War",
+"tab": "fx",
+"text": "From the 1990s, records were squeezed harder and harder with compression so each would sound louder than the last. The cost was music with no quiet parts left. Today streaming services play every song at the same loudness, so there is nothing to win.",
+"price": 3.4e+105,
+"kind": "LESSON"
+},
+{
+"id": "f_stereo",
+"name": "Mono and Stereo",
+"tab": "fx",
+"text": "Mono is one channel: the same sound from every speaker. Stereo is two, left and right, which lets a mix spread out like a stage. Stereo records went on sale in the late 1950s. Bass and kick usually stay in the middle, where both speakers can share the work.",
+"price": 8.5e+106,
+"kind": "LESSON"
+},
+{
+"id": "f_clip",
+"name": "Headroom and Clipping",
+"tab": "fx",
+"text": "Every sound system has a ceiling. Push a signal past it and the tops of the waves get chopped off flat, which is called clipping and sounds harsh. Headroom is the safety gap you leave under the ceiling.",
+"price": 2.5e+101,
+"kind": "LESSON"
+},
+{
+"id": "f_ref",
+"name": "Reference Tracks",
+"tab": "fx",
+"text": "Professionals mix with a finished song they love playing next to their own, and keep switching between the two. It shows straight away if the bass is too loud or the top is too dull. It is not cheating; it is how ears stay honest.",
+"price": 4.8e+101,
+"kind": "LESSON"
+},
+{
+"id": "f_ears",
+"name": "Rest Your Ears",
+"tab": "fx",
+"text": "After a while your ears get used to whatever they are hearing and stop noticing problems. Take a short break, or listen quietly, and mistakes jump out again. Many engineers do their most important listening at low volume.",
+"price": 9.3e+101,
+"kind": "LESSON"
+},
+{
+"id": "f_duck",
+"name": "Making Room for the Kick",
+"tab": "fx",
+"text": "Kick and bass live in the same low zone and fight for space. Ducking the bass for a split second each time the kick hits lets both be heard. Turn the effect up far enough and the whole track seems to breathe in time with the beat.",
+"price": 5.4e+109,
+"kind": "LESSON"
+},
+{
+"id": "s_mt_effects",
+"name": "Effects",
+"tab": "fx",
+"text": "Effects (FX) change a sound after it is made. Reverb and echo are \"time-based\" effects: they add copies of the sound that arrive a little later, so it feels like it is happening in a real space.",
+"price": 6.3e+51,
+"kind": "SKILL TREE FACT"
+},
+{
+"id": "s_mt_reverb",
+"name": "Reverb",
+"tab": "fx",
+"text": "Reverb is the wash of thousands of tiny reflections bouncing off walls. A cathedral can ring for 5+ seconds.",
+"price": 4.5e+52,
+"kind": "SKILL TREE FACT"
+},
+{
+"id": "s_mt_echo",
+"name": "Echo",
+"tab": "fx",
+"text": "Echo (also called delay) repeats a sound in time with the beat. Dub producers in 1970s Jamaica turned it into an instrument of its own.",
+"price": 1.3e+52,
+"kind": "SKILL TREE FACT"
+},
+{
+"id": "s_mt_pingpong",
+"name": "Ping-Pong",
+"tab": "fx",
+"text": "Ping-pong delay bounces each echo between the left and right speakers. It sounds best on headphones.",
+"price": 2.5e+56,
+"kind": "SKILL TREE FACT"
+},
+{
+"id": "s_mt_filter",
+"name": "Filter",
+"tab": "fx",
+"text": "A low-pass filter lets low sounds through and cuts the highs. Slowly opening one up is the classic way DJs build tension before a drop.",
+"price": 5.6e+54,
+"kind": "SKILL TREE FACT"
+},
+{
+"id": "s_mt_distortion",
+"name": "Distortion",
+"tab": "fx",
+"text": "Distorted guitar started with damaged amps and torn speakers in the 1950s. Players loved the sound, so pedals were built to do it on purpose.",
+"price": 1.1e+57,
+"kind": "SKILL TREE FACT"
+},
+{
+"id": "s_mt_chorus",
+"name": "Chorus",
+"tab": "fx",
+"text": "Chorus copies a sound and wobbles the copy's timing a tiny bit. Roland's Juno synths had it built in, and it became part of their famous 80s sound.",
+"price": 6e+80,
+"kind": "SKILL TREE FACT"
+},
+{
+"id": "s_mt_bitcrusher",
+"name": "Bitcrusher",
+"tab": "fx",
+"text": "Bit depth is how many steps a sound wave can use. The E-mu SP-1200 sampler only had 12 bits, which is a big part of classic 90s hip-hop grit.",
+"price": 1e+81,
+"kind": "SKILL TREE FACT"
+},
+{
+"id": "s_mt_flanger",
+"name": "Flanger",
+"tab": "fx",
+"text": "Flanging was first made with two tape machines: pressing a finger on the rim (the flange) of one reel slowed it down for a sweeping whoosh.",
+"price": 5.2e+80,
+"kind": "SKILL TREE FACT"
+},
+{
+"id": "s_mt_phaser",
+"name": "Phaser",
+"tab": "fx",
+"text": "Phasers took off in the 1970s. The swooshing sweep on funk guitar and space-rock keyboards is very often a phaser.",
+"price": 5.4e+80,
+"kind": "SKILL TREE FACT"
+},
+{
+"id": "s_mt_tremolo",
+"name": "Tremolo",
+"tab": "fx",
+"text": "Tremolo is a volume wobble. Lots of guitar amps from the 1950s and 60s had it built in.",
+"price": 5.6e+80,
+"kind": "SKILL TREE FACT"
+},
+{
+"id": "s_mt_mastering",
+"name": "Mastering",
+"tab": "fx",
+"text": "Mixing is balancing every track against the others. Mastering is the final polish on the whole song, so it sounds good everywhere, from phone speakers to club systems.",
+"price": 1.8e+102,
+"kind": "SKILL TREE FACT"
+},
+{
+"id": "s_mt_eq",
+"name": "EQ",
+"tab": "fx",
+"text": "EQ (equalization) turns certain frequencies up or down. Cutting a little low end from everything except the kick and bass is one of the oldest mixing tricks.",
+"price": 8.9e+104,
+"kind": "SKILL TREE FACT"
+},
+{
+"id": "s_mt_compression",
+"name": "Compression",
+"tab": "fx",
+"text": "A compressor turns down the loudest moments so quiet and loud parts sit closer together. Almost every song on the radio uses it.",
+"price": 3.4e+106,
+"kind": "SKILL TREE FACT"
+},
+{
+"id": "s_mt_panning",
+"name": "Panning",
+"tab": "fx",
+"text": "Panning places a sound between the left and right speakers. Some early stereo mixes put the whole band on one side and the singer on the other.",
+"price": 2.7e+107,
+"kind": "SKILL TREE FACT"
+},
+{
+"id": "s_mt_sidechain",
+"name": "Sidechain",
+"tab": "fx",
+"text": "Sidechain makes other sounds duck every time the kick hits, creating the \"pumping\" feel of dance music. Stardust's \"Music Sounds Better With You\" (1998) made it famous.",
+"price": 5.4e+110,
+"kind": "SKILL TREE FACT"
+},
+{
+"id": "s_mt_automation",
+"name": "Automation",
+"tab": "fx",
+"text": "Automation lets settings move by themselves during a song, like a filter slowly opening before the drop. Big mixing desks of the late 1970s added motorized faders that could replay every move.",
+"price": 1.2e+122,
+"kind": "SKILL TREE FACT"
+},
+{
+"id": "v_voice",
+"name": "How Your Voice Works",
+"tab": "vocals",
+"text": "Air from your lungs pushes through two small folds in your throat and makes them flutter. A low adult voice flutters about 100 times a second, a child's speaking voice about 300, and a soprano's highest notes more than 1,000.",
+"price": 3.8e+120,
+"kind": "LESSON"
+},
+{
+"id": "v_warm",
+"name": "Warming Up",
+"tab": "vocals",
+"text": "Singers warm up like athletes do. Humming, blowing air through loose lips like a motorboat, and sliding from low to high like a siren all get the voice moving gently. A glass of water helps too.",
+"price": 4.8e+120,
+"kind": "LESSON"
+},
+{
+"id": "v_breath",
+"name": "Breathing for Singing",
+"tab": "vocals",
+"text": "Good singing breath goes low: your belly moves out as you breathe in, and your shoulders stay still. The muscle doing the work is the diaphragm, under your lungs. A slow, steady stream of air holds a note much better than a big push.",
+"price": 5.9e+120,
+"kind": "LESSON"
+},
+{
+"id": "v_pop",
+"name": "Pops and the Pop Filter",
+"tab": "vocals",
+"text": "Say \"p\" or \"b\" with your hand in front of your mouth and you will feel a puff of air. That puff hits a microphone as a thump. A pop filter, the round screen in front of studio microphones, breaks the puff up and lets the sound through.",
+"price": 7.4e+120,
+"kind": "LESSON"
+},
+{
+"id": "v_close",
+"name": "Close to the Mic",
+"tab": "vocals",
+"text": "Most studio microphones add bass when you get very close to them. Radio presenters use this for a deep, warm voice. Move back a hand's width and the voice sounds lighter and more natural.",
+"price": 9.2e+120,
+"kind": "LESSON"
+},
+{
+"id": "v_room",
+"name": "The Room Matters",
+"tab": "vocals",
+"text": "A microphone hears the room as well as you. Hard, bare walls bounce the sound around and make a recording echoey. Soft things soak it up, which is why so many home recordings are made in a wardrobe full of clothes.",
+"price": 1.1e+121,
+"kind": "LESSON"
+},
+{
+"id": "v_phones",
+"name": "Why Headphones?",
+"tab": "vocals",
+"text": "If the beat played from speakers while you recorded, the microphone would pick it up along with your voice, and the two could never be separated again. Headphones keep the beat in your ears and out of the microphone.",
+"price": 1.4e+121,
+"kind": "LESSON"
+},
+{
+"id": "v_beatbox",
+"name": "Beatboxing",
+"tab": "vocals",
+"text": "Beatboxers play a whole drum kit with their mouth. The three basic sounds are a \"b\" for the kick, a \"t\" for the hi-hat and a \"k\" or \"pf\" for the snare. Say \"boots and cats and boots and cats\" in time and you are already doing it.",
+"price": 1.8e+121,
+"kind": "LESSON"
+},
+{
+"id": "v_register",
+"name": "Chest & Head Voice",
+"tab": "vocals",
+"text": "Low notes buzz in your chest: put a hand there and you can feel it. High notes feel like they ring in your head. Singers call these chest voice and head voice, and a lot of training is about moving smoothly between them.",
+"price": 2.2e+121,
+"kind": "LESSON"
+},
+{
+"id": "v_hook",
+"name": "The Hook",
+"tab": "vocals",
+"text": "A hook is the short bit of a song that sticks in your head, often the title line of the chorus. Hooks are usually simple, repeated a lot and easy to sing after one listen.",
+"price": 2.8e+121,
+"kind": "LESSON"
+},
+{
+"id": "v_words",
+"name": "Words Have Rhythm",
+"tab": "vocals",
+"text": "Lyrics are rhythm as well as meaning. Every word has strong and weak syllables, and they feel best when the strong ones land on the beat. Rappers call the way their syllables ride the beat their flow.",
+"price": 3.4e+121,
+"kind": "LESSON"
+},
+{
+"id": "v_thirds",
+"name": "Harmony in Thirds",
+"tab": "vocals",
+"text": "The simplest vocal harmony: sing the same melody starting two notes higher in the scale. This is called singing in thirds, and it is the sweet, close sound you hear in countless duets and pop choruses.",
+"price": 5e+120,
+"kind": "LESSON"
+},
+{
+"id": "v_adlib",
+"name": "Ad-Libs",
+"tab": "vocals",
+"text": "Ad-libs are the little extra shouts, echoes and \"yeah\"s around the main vocal. They fill the gaps between lines and add energy. In a lot of hip-hop, the ad-libs are as recognisable as the artist's voice.",
+"price": 1.3e+121,
+"kind": "LESSON"
+},
+{
+"id": "v_tight",
+"name": "Singing It Twice",
+"tab": "vocals",
+"text": "When you stack takes, the consonants give you away: ten \"t\"s that do not line up sound like a spray of clicks. Singers often leave the last consonant off the backing takes, so only the lead vocal says it.",
+"price": 3.2e+120,
+"kind": "LESSON"
+},
+{
+"id": "v_pitchfx",
+"name": "A Tool and a Sound",
+"tab": "vocals",
+"text": "Pitch correction can be used two ways. Set gently, it nudges a slightly off note into place and nobody notices. Set to snap instantly, it makes the voice jump between notes like a robot, a sound artists choose on purpose.",
+"price": 6.2e+120,
+"kind": "LESSON"
+},
+{
+"id": "s_mt_vocals",
+"name": "Vocals",
+"tab": "vocals",
+"text": "Multitrack recording puts every part on its own track, so each one can be redone or changed later. Guitarist Les Paul pioneered it in the 1940s and 50s, stacking his guitar and Mary Ford's voice again and again on modified tape machines.",
+"price": 4.3e+121,
+"kind": "SKILL TREE FACT"
+},
+{
+"id": "s_mt_vox4",
+"name": "Backing Vocals",
+"tab": "vocals",
+"text": "Double-tracking means singing the same part twice on two tracks: the tiny differences make a voice sound bigger. The Beatles did it so often that Abbey Road engineers invented ADT (artificial double tracking) in 1966 to fake it.",
+"price": 3.2e+121,
+"kind": "SKILL TREE FACT"
+},
+{
+"id": "s_mt_vox7",
+"name": "Vocal Stack",
+"tab": "vocals",
+"text": "Stacking means recording the same line many times and layering the takes. Big pop choruses often hide 10 or more vocal takes behind the lead.",
+"price": 3.2e+122,
+"kind": "SKILL TREE FACT"
+},
+{
+"id": "s_mt_vox10",
+"name": "Choir",
+"tab": "vocals",
+"text": "A classic choir has four parts: soprano, alto, tenor and bass (SATB). With 10 layers you can sing all four and still double them.",
+"price": 1.1e+121,
+"kind": "SKILL TREE FACT"
+},
+{
+"id": "s_mt_takes",
+"name": "Multiple Takes",
+"tab": "vocals",
+"text": "Comping (from \"compiling\") means recording several takes and stitching the best moments together. Most lead vocals you hear are comped from many passes.",
+"price": 4.9e+120,
+"kind": "SKILL TREE FACT"
+},
+{
+"id": "s_mt_fades",
+"name": "Microfade Edits",
+"tab": "vocals",
+"text": "Cutting audio in the middle of a wave makes a click. Engineers add tiny fades of a few milliseconds to every edit so nobody hears the joins.",
+"price": 2.2e+121,
+"kind": "SKILL TREE FACT"
+},
+{
+"id": "s_mt_chops",
+"name": "Vocal Chops",
+"tab": "vocals",
+"text": "Chopping means slicing a recording into short pieces and playing them back in a new order. Vocal chops are all over house, hip-hop and future bass.",
+"price": 1.9e+121,
+"kind": "SKILL TREE FACT"
+},
+{
+"id": "s_mt_chopauto",
+"name": "Auto Slice",
+"tab": "vocals",
+"text": "A transient is the sharp start of a sound, like a consonant or a drum hit. Samplers look for them to cut a recording right where each syllable begins.",
+"price": 2e+121,
+"kind": "SKILL TREE FACT"
+},
+{
+"id": "s_mt_choptricks",
+"name": "Chop Tricks",
+"tab": "vocals",
+"text": "Backwards vocals are an old studio trick: The Beatles ended \"Rain\" (1966) with a vocal played in reverse.",
+"price": 7.1e+121,
+"kind": "SKILL TREE FACT"
+},
+{
+"id": "s_mt_chopkeys",
+"name": "Chop Keys",
+"tab": "vocals",
+"text": "Playing one recorded sound across a whole keyboard is how early samplers like the Fairlight CMI turned a single voice into a choir.",
+"price": 1.2e+122,
+"kind": "SKILL TREE FACT"
+},
+{
+"id": "s_mt_chopbank",
+"name": "Bigger Chop Bank",
+"tab": "vocals",
+"text": "Akai's MPC samplers put 16 pads under your fingers, and that 4×4 grid became the classic way to play chops.",
+"price": 7.1e+121,
+"kind": "SKILL TREE FACT"
+},
+{
+"id": "s_mt_autotune",
+"name": "Autotune",
+"tab": "vocals",
+"text": "Auto-Tune was invented by Andy Hildebrand, an engineer who used the same math to read oil-field seismic data. Cher's \"Believe\" (1998) made its instant, robotic setting famous.",
+"price": 6.2e+121,
+"kind": "SKILL TREE FACT"
+},
+{
+"id": "s_mt_harmonizer",
+"name": "Harmonizer",
+"tab": "vocals",
+"text": "Eventide's H910 Harmonizer (1975) was one of the first digital pitch shifters. Studios used it to thicken voices and to make new harmonies from a single take.",
+"price": 2.8e+121,
+"kind": "SKILL TREE FACT"
+},
+{
+"id": "s_mt_voicefx",
+"name": "Voice Changer",
+"tab": "vocals",
+"text": "Formants are the resonances of your throat and mouth: they make a voice sound like you. Shift them up and a voice sounds tiny, shift them down and it sounds huge, even at the same pitch.",
+"price": 6.2e+120,
+"kind": "SKILL TREE FACT"
+},
+{
+"id": "s_mt_vocoder",
+"name": "Vocoder",
+"tab": "vocals",
+"text": "The vocoder was invented at Bell Labs in the 1930s by Homer Dudley, to squeeze speech down phone lines. Decades later, bands like Kraftwerk made it sing.",
+"price": 1.3e+121,
+"kind": "SKILL TREE FACT"
+},
+{
+"id": "w_Beat",
+"name": "Beat",
+"tab": "words",
+"text": "The steady pulse of music: the thing you tap your foot to.",
+"price": 5.6e+25,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Rhythm",
+"name": "Rhythm",
+"tab": "words",
+"text": "The pattern of long and short sounds and silences in time.",
+"price": 5.9e+25,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Pitch",
+"name": "Pitch",
+"tab": "words",
+"text": "How high or low a sound is.",
+"price": 6.3e+25,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Volume",
+"name": "Volume",
+"tab": "words",
+"text": "How loud or quiet a sound is. Musicians call changes in volume dynamics.",
+"price": 6.7e+25,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Kick",
+"name": "Kick",
+"tab": "words",
+"text": "The bass drum: the lowest, deepest drum in a kit.",
+"price": 7.1e+25,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Snare",
+"name": "Snare",
+"tab": "words",
+"text": "A drum with metal wires underneath that give it a sharp, crackling snap.",
+"price": 7.6e+25,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Hi-hat",
+"name": "Hi-hat",
+"tab": "words",
+"text": "Two cymbals on a stand that click together. Usually plays the fast, steady part of a beat.",
+"price": 8e+25,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Percussion",
+"name": "Percussion",
+"tab": "words",
+"text": "Instruments you hit, shake or scrape to make a sound.",
+"price": 8.6e+25,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Tempo",
+"name": "Tempo",
+"tab": "words",
+"text": "How fast or slow a piece of music is.",
+"price": 9.1e+25,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_BPM",
+"name": "BPM",
+"tab": "words",
+"text": "Beats per minute: the number that measures tempo.",
+"price": 9.7e+25,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Bar (Measure)",
+"name": "Bar (Measure)",
+"tab": "words",
+"text": "A small group of beats. In 4/4 time, each bar has 4 beats.",
+"price": 1e+26,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Time Signature",
+"name": "Time Signature",
+"tab": "words",
+"text": "The two numbers at the start of music (like 4/4): how many beats are in each bar, and which note gets one beat.",
+"price": 1.1e+26,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Step",
+"name": "Step",
+"tab": "words",
+"text": "One slot in a step sequencer. In a 16-step bar, each step is a sixteenth note.",
+"price": 1.2e+26,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Loop",
+"name": "Loop",
+"tab": "words",
+"text": "A piece of music that repeats over and over without a gap.",
+"price": 1.2e+26,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Pattern",
+"name": "Pattern",
+"tab": "words",
+"text": "A short loop of notes or drum hits that can be reused and combined into songs.",
+"price": 1.3e+26,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Groove",
+"name": "Groove",
+"tab": "words",
+"text": "The feel that makes music move, from small changes in timing and loudness.",
+"price": 3.5e+89,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Velocity",
+"name": "Velocity",
+"tab": "words",
+"text": "How hard a note is played, which decides how loud it sounds.",
+"price": 1.4e+92,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Note",
+"name": "Note",
+"tab": "words",
+"text": "A single sound with a pitch. Notes are named with the letters A to G.",
+"price": 1.4e+26,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Octave",
+"name": "Octave",
+"tab": "words",
+"text": "The distance from one note to the next note with the same name.",
+"price": 1.5e+26,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Melody",
+"name": "Melody",
+"tab": "words",
+"text": "A line of single notes that makes a tune.",
+"price": 1.6e+26,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Bassline",
+"name": "Bassline",
+"tab": "words",
+"text": "The lowest melody in a song, usually played by a bass instrument.",
+"price": 1.7e+26,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Chord",
+"name": "Chord",
+"tab": "words",
+"text": "Three or more notes played at the same time.",
+"price": 1.8e+26,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Harmony",
+"name": "Harmony",
+"tab": "words",
+"text": "Different notes sounding together, like chords or backing vocals.",
+"price": 1.9e+26,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Key",
+"name": "Key",
+"tab": "words",
+"text": "The family of notes a song is built from, named after its home note (like C major).",
+"price": 3.1e+81,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Scale",
+"name": "Scale",
+"tab": "words",
+"text": "The notes of a key lined up in order, from low to high.",
+"price": 5.1e+81,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Timbre",
+"name": "Timbre",
+"tab": "words",
+"text": "The colour or character of a sound, which makes instruments sound different from each other.",
+"price": 2e+26,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Sample",
+"name": "Sample",
+"tab": "words",
+"text": "A recorded sound that can be played back, chopped up or played on pads or keys.",
+"price": 2.1e+26,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Synthesizer",
+"name": "Synthesizer",
+"tab": "words",
+"text": "An electronic instrument that creates sound from scratch with electricity.",
+"price": 2.3e+26,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Effect (FX)",
+"name": "Effect (FX)",
+"tab": "words",
+"text": "Something that changes a sound after it's made, like reverb or echo.",
+"price": 2.9e+52,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Reverb",
+"name": "Reverb",
+"tab": "words",
+"text": "The echoey wash of sound bouncing around a room.",
+"price": 2.1e+53,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Delay (Echo)",
+"name": "Delay (Echo)",
+"tab": "words",
+"text": "Copies of a sound repeated a little later, often in time with the beat.",
+"price": 5.9e+52,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Mixing",
+"name": "Mixing",
+"tab": "words",
+"text": "Balancing the volume, tone and position of every track so they sound good together.",
+"price": 3.5e+102,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Arrangement",
+"name": "Arrangement",
+"tab": "words",
+"text": "Deciding which parts play when: intro, verse, chorus, bridge, outro.",
+"price": 5.7e+116,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_808",
+"name": "808",
+"tab": "words",
+"text": "The booming bass and drums of the Roland TR-808 drum machine (1980). Today \"808\" usually means a long, low bass note in hip-hop and trap.",
+"price": 4.1e+81,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Drum Machine",
+"name": "Drum Machine",
+"tab": "words",
+"text": "An electronic instrument that plays drum patterns you program step by step, like the sequencer in this game.",
+"price": 1.3e+82,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Woodwind",
+"name": "Woodwind",
+"tab": "words",
+"text": "An instrument you blow into, where the sound starts at a reed or a sharp edge: flutes, clarinets, oboes, bassoons and saxophones.",
+"price": 1.5e+81,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Reed",
+"name": "Reed",
+"tab": "words",
+"text": "A thin strip of cane that vibrates when you blow past it. Clarinets and saxophones use one reed; oboes and bassoons use two.",
+"price": 4.6e+81,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Vibrato",
+"name": "Vibrato",
+"tab": "words",
+"text": "A gentle, regular wobble in pitch that makes a held note sound alive. Singers and wind players add it as the note goes on.",
+"price": 1.5e+82,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_DAW",
+"name": "DAW",
+"tab": "words",
+"text": "Digital Audio Workstation: software for recording, building and mixing music. This game is slowly turning into one!",
+"price": 2.4e+26,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Rest",
+"name": "Rest",
+"tab": "words",
+"text": "A moment of silence that is counted, just like a note.",
+"price": 2.5e+26,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Accent",
+"name": "Accent",
+"tab": "words",
+"text": "A note played stronger than the ones around it.",
+"price": 2.7e+26,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Dynamics",
+"name": "Dynamics",
+"tab": "words",
+"text": "How loud or soft music is played, and how that changes.",
+"price": 2.9e+26,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Downbeat",
+"name": "Downbeat",
+"tab": "words",
+"text": "Beat 1: the first and strongest beat of a bar.",
+"price": 3.1e+26,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Offbeat",
+"name": "Offbeat",
+"tab": "words",
+"text": "The spot halfway between two beats, the \"and\" when you count \"1 and 2 and\".",
+"price": 3.2e+26,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Backbeat",
+"name": "Backbeat",
+"tab": "words",
+"text": "The strong hits on beats 2 and 4, usually played on the snare.",
+"price": 3.4e+26,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Fill",
+"name": "Fill",
+"tab": "words",
+"text": "A short burst of drumming that leads from one part of a song into the next.",
+"price": 3.7e+26,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Ghost Note",
+"name": "Ghost Note",
+"tab": "words",
+"text": "A very quiet hit played between the main ones to add feel.",
+"price": 3.9e+26,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Count-In",
+"name": "Count-In",
+"tab": "words",
+"text": "The \"1, 2, 3, 4\" before a song starts, so everyone begins together.",
+"price": 4.1e+26,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Quarter Note",
+"name": "Quarter Note",
+"tab": "words",
+"text": "A note one beat long. Four of them fill a bar of 4/4.",
+"price": 4.4e+26,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Eighth Note",
+"name": "Eighth Note",
+"tab": "words",
+"text": "A note half a beat long. Two fit in every beat.",
+"price": 4.7e+26,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Sixteenth Note",
+"name": "Sixteenth Note",
+"tab": "words",
+"text": "A note a quarter of a beat long. Four fit in every beat.",
+"price": 5e+26,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Triplet",
+"name": "Triplet",
+"tab": "words",
+"text": "Three evenly spaced notes squeezed into the space of two.",
+"price": 5.3e+26,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Subdivision",
+"name": "Subdivision",
+"tab": "words",
+"text": "Cutting each beat into smaller equal pieces.",
+"price": 5.6e+26,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Syncopation",
+"name": "Syncopation",
+"tab": "words",
+"text": "Putting strong notes between the beats instead of on them.",
+"price": 5.9e+26,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Polyrhythm",
+"name": "Polyrhythm",
+"tab": "words",
+"text": "Two different rhythms played at the same time, like 3 against 2.",
+"price": 6.3e+26,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Metronome",
+"name": "Metronome",
+"tab": "words",
+"text": "A device that clicks at a steady tempo to help you keep time.",
+"price": 6.7e+26,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Four on the Floor",
+"name": "Four on the Floor",
+"tab": "words",
+"text": "A kick drum on every beat of the bar.",
+"price": 7.1e+26,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Half-Time",
+"name": "Half-Time",
+"tab": "words",
+"text": "A feel where the beat seems half as fast, though the tempo stays the same.",
+"price": 7.6e+26,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Swing",
+"name": "Swing",
+"tab": "words",
+"text": "Playing every second short note a little late, for a bouncing feel.",
+"price": 1.1e+90,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Quantize",
+"name": "Quantize",
+"tab": "words",
+"text": "Snapping notes onto the nearest step so they are perfectly in time.",
+"price": 3.5e+90,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Phrase",
+"name": "Phrase",
+"tab": "words",
+"text": "A musical sentence, usually 2 or 4 bars long.",
+"price": 8e+26,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Riff",
+"name": "Riff",
+"tab": "words",
+"text": "A short, catchy idea that repeats, usually on guitar, bass or keys.",
+"price": 8.6e+26,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Ostinato",
+"name": "Ostinato",
+"tab": "words",
+"text": "A pattern that keeps repeating while other parts change around it.",
+"price": 9.1e+26,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Hook",
+"name": "Hook",
+"tab": "words",
+"text": "The part of a song that sticks in your head.",
+"price": 9.7e+26,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Intro",
+"name": "Intro",
+"tab": "words",
+"text": "The opening of a song, before the main part begins.",
+"price": 8.4e+116,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Verse",
+"name": "Verse",
+"tab": "words",
+"text": "The part of a song that tells the story. The tune repeats; the words change.",
+"price": 1.2e+117,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Chorus (Section)",
+"name": "Chorus (Section)",
+"tab": "words",
+"text": "The main part of a song that comes back with the same words and tune.",
+"price": 1.8e+117,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Bridge",
+"name": "Bridge",
+"tab": "words",
+"text": "A contrasting section, usually late in a song, that leads back to the chorus.",
+"price": 2.7e+117,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Outro",
+"name": "Outro",
+"tab": "words",
+"text": "The ending of a song.",
+"price": 3.9e+117,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Build-Up",
+"name": "Build-Up",
+"tab": "words",
+"text": "A section that raises the energy before a big moment.",
+"price": 5.7e+117,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Drop",
+"name": "Drop",
+"tab": "words",
+"text": "The moment the full beat and bass come in after a build-up.",
+"price": 8.4e+117,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Breakdown",
+"name": "Breakdown",
+"tab": "words",
+"text": "A section where most instruments stop, leaving just a few.",
+"price": 1.2e+118,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Transition",
+"name": "Transition",
+"tab": "words",
+"text": "Any sound or change that carries the music from one section to the next.",
+"price": 1.8e+118,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Half Step (Semitone)",
+"name": "Half Step (Semitone)",
+"tab": "words",
+"text": "The distance from one key to the very next one on a keyboard.",
+"price": 1e+27,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Whole Step",
+"name": "Whole Step",
+"tab": "words",
+"text": "Two half steps.",
+"price": 1.1e+27,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Sharp (♯)",
+"name": "Sharp (♯)",
+"tab": "words",
+"text": "One half step higher.",
+"price": 1.2e+27,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Flat (♭)",
+"name": "Flat (♭)",
+"tab": "words",
+"text": "One half step lower.",
+"price": 1.2e+27,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Interval",
+"name": "Interval",
+"tab": "words",
+"text": "The distance between two notes.",
+"price": 1.3e+27,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Unison",
+"name": "Unison",
+"tab": "words",
+"text": "Two or more parts playing exactly the same note.",
+"price": 1.4e+27,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Root",
+"name": "Root",
+"tab": "words",
+"text": "The note a chord or scale is built on and named after.",
+"price": 1.5e+27,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Triad",
+"name": "Triad",
+"tab": "words",
+"text": "A chord made of three notes.",
+"price": 1.6e+27,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Arpeggio",
+"name": "Arpeggio",
+"tab": "words",
+"text": "The notes of a chord played one after another instead of together.",
+"price": 1.7e+27,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Chord Progression",
+"name": "Chord Progression",
+"tab": "words",
+"text": "A row of chords played in order, usually repeating.",
+"price": 1.8e+27,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Major",
+"name": "Major",
+"tab": "words",
+"text": "A scale or chord with a bright, happy sound.",
+"price": 8.6e+81,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Minor",
+"name": "Minor",
+"tab": "words",
+"text": "A scale or chord with a darker, sadder sound.",
+"price": 1.4e+82,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Pentatonic",
+"name": "Pentatonic",
+"tab": "words",
+"text": "A scale with five notes that sound good in any order.",
+"price": 1.9e+27,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Transpose",
+"name": "Transpose",
+"tab": "words",
+"text": "To move a whole piece of music higher or lower, into a new key.",
+"price": 2.4e+82,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Legato",
+"name": "Legato",
+"tab": "words",
+"text": "Notes played smoothly, flowing into each other.",
+"price": 2e+27,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Staccato",
+"name": "Staccato",
+"tab": "words",
+"text": "Notes played short and separate.",
+"price": 2.1e+27,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Crescendo",
+"name": "Crescendo",
+"tab": "words",
+"text": "Gradually getting louder.",
+"price": 2.3e+27,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Forte",
+"name": "Forte",
+"tab": "words",
+"text": "Italian for loud.",
+"price": 2.4e+27,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Layer",
+"name": "Layer",
+"tab": "words",
+"text": "One part stacked on top of others to build a bigger sound.",
+"price": 6.4e+82,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_MIDI",
+"name": "MIDI",
+"tab": "words",
+"text": "A language that tells electronic instruments which notes to play, how hard and for how long.",
+"price": 7.4e+82,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Frequency",
+"name": "Frequency",
+"tab": "words",
+"text": "How fast something vibrates. Faster means a higher pitch.",
+"price": 2.5e+27,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Hertz (Hz)",
+"name": "Hertz (Hz)",
+"tab": "words",
+"text": "The unit of frequency: vibrations per second.",
+"price": 2.7e+27,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Decibel (dB)",
+"name": "Decibel (dB)",
+"tab": "words",
+"text": "The unit for measuring loudness.",
+"price": 2.9e+27,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Waveform",
+"name": "Waveform",
+"tab": "words",
+"text": "The shape of a sound wave, which decides its basic character.",
+"price": 3.1e+27,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Harmonic (Overtone)",
+"name": "Harmonic (Overtone)",
+"tab": "words",
+"text": "A quieter, higher pitch that sounds along with the main note.",
+"price": 3.2e+27,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Envelope",
+"name": "Envelope",
+"tab": "words",
+"text": "The shape of a sound over time: how it starts, holds and fades.",
+"price": 3.4e+27,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Attack",
+"name": "Attack",
+"tab": "words",
+"text": "How quickly a sound reaches full volume.",
+"price": 3.7e+27,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Sustain",
+"name": "Sustain",
+"tab": "words",
+"text": "The level a note holds at while it is kept going.",
+"price": 3.9e+27,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Release",
+"name": "Release",
+"tab": "words",
+"text": "How long a sound takes to fade after the note ends.",
+"price": 4.1e+27,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Oscillator",
+"name": "Oscillator",
+"tab": "words",
+"text": "The part of a synthesizer that makes the raw sound wave.",
+"price": 4.4e+27,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Noise",
+"name": "Noise",
+"tab": "words",
+"text": "A hissing sound with every frequency mixed together, used to build snares and hi-hats.",
+"price": 4.7e+27,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Sampler",
+"name": "Sampler",
+"tab": "words",
+"text": "An instrument that plays back recorded sounds.",
+"price": 5e+27,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Sequencer",
+"name": "Sequencer",
+"tab": "words",
+"text": "A tool that plays notes or drum hits for you in a set order.",
+"price": 5.3e+27,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Track",
+"name": "Track",
+"tab": "words",
+"text": "One lane of a song that holds a single instrument or sound.",
+"price": 5.6e+27,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Resonance",
+"name": "Resonance",
+"tab": "words",
+"text": "When a hollow body or space vibrates along with a sound and makes it stronger.",
+"price": 2.7e+81,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Idiophone",
+"name": "Idiophone",
+"tab": "words",
+"text": "An instrument whose whole body vibrates to make the sound, like a bell or a woodblock.",
+"price": 8.5e+81,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Mallet",
+"name": "Mallet",
+"tab": "words",
+"text": "A stick with a padded or rubber head, used to play bars, bells and gongs.",
+"price": 2.7e+82,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Gamelan",
+"name": "Gamelan",
+"tab": "words",
+"text": "An orchestra of gongs and metal bars from Indonesia.",
+"price": 3.4e+82,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Sub-Bass",
+"name": "Sub-Bass",
+"tab": "words",
+"text": "The very lowest sounds, which you feel as much as you hear.",
+"price": 4.1e+82,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Embouchure",
+"name": "Embouchure",
+"tab": "words",
+"text": "The way a wind player shapes their lips and mouth to make a note.",
+"price": 4.6e+82,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Wet / Dry",
+"name": "Wet / Dry",
+"tab": "words",
+"text": "Dry is the untouched sound; wet is the sound with the effect on it.",
+"price": 1.4e+53,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Feedback",
+"name": "Feedback",
+"tab": "words",
+"text": "Sending a sound's output back into its input.",
+"price": 2.7e+53,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Filter",
+"name": "Filter",
+"tab": "words",
+"text": "An effect that removes some frequencies and lets others pass.",
+"price": 1.4e+55,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Cutoff",
+"name": "Cutoff",
+"tab": "words",
+"text": "The point where a filter starts removing sound.",
+"price": 3.5e+55,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Low-Pass",
+"name": "Low-Pass",
+"tab": "words",
+"text": "A filter that keeps the low sounds and removes the highs.",
+"price": 8.9e+55,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_High-Pass",
+"name": "High-Pass",
+"tab": "words",
+"text": "A filter that keeps the high sounds and removes the lows.",
+"price": 2.2e+56,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Distortion",
+"name": "Distortion",
+"tab": "words",
+"text": "Pushing a sound so hard that its wave is squashed, making it gritty.",
+"price": 1.1e+58,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Chorus (Effect)",
+"name": "Chorus (Effect)",
+"tab": "words",
+"text": "An effect that makes one sound seem like several playing together.",
+"price": 6e+81,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Flanger",
+"name": "Flanger",
+"tab": "words",
+"text": "A sweeping, jet-plane whoosh made by mixing a sound with a slightly delayed copy.",
+"price": 5.2e+82,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Phaser",
+"name": "Phaser",
+"tab": "words",
+"text": "A gentle swirling sweep that moves through a sound.",
+"price": 5.4e+82,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Tremolo",
+"name": "Tremolo",
+"tab": "words",
+"text": "A steady wobble in volume.",
+"price": 5.6e+81,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_LFO",
+"name": "LFO",
+"tab": "words",
+"text": "Low-frequency oscillator: a slow wave that moves a setting up and down for you.",
+"price": 5.6e+82,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Bit Depth",
+"name": "Bit Depth",
+"tab": "words",
+"text": "How many loudness steps a digital sound can use. Fewer steps sound crunchier.",
+"price": 4.7e+81,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Sample Rate",
+"name": "Sample Rate",
+"tab": "words",
+"text": "How many snapshots of a sound are taken every second.",
+"price": 2.2e+82,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_EQ",
+"name": "EQ",
+"tab": "words",
+"text": "Equalizer: a tool for turning certain frequencies up or down.",
+"price": 4.1e+105,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Compressor",
+"name": "Compressor",
+"tab": "words",
+"text": "A tool that turns down the loudest moments so the volume is more even.",
+"price": 3.4e+107,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Panning",
+"name": "Panning",
+"tab": "words",
+"text": "Placing a sound to the left, the right or anywhere in between.",
+"price": 8.5e+107,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Stereo",
+"name": "Stereo",
+"tab": "words",
+"text": "Sound in two channels, left and right.",
+"price": 2.7e+108,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Mono",
+"name": "Mono",
+"tab": "words",
+"text": "Sound in one channel, the same from every speaker.",
+"price": 8.5e+108,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Sidechain",
+"name": "Sidechain",
+"tab": "words",
+"text": "Letting one sound control an effect on another, like a kick ducking the bass.",
+"price": 5.4e+111,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Mastering",
+"name": "Mastering",
+"tab": "words",
+"text": "The final polish on a finished mix before it is released.",
+"price": 6.7e+102,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Headroom",
+"name": "Headroom",
+"tab": "words",
+"text": "The safety gap between your loudest sound and the point where it distorts.",
+"price": 1.3e+103,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Clipping",
+"name": "Clipping",
+"tab": "words",
+"text": "Harsh distortion that happens when a signal is too loud for the system.",
+"price": 2.5e+103,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Automation",
+"name": "Automation",
+"tab": "words",
+"text": "Recording changes to a setting so it moves by itself during the song.",
+"price": 1.2e+124,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Lyrics",
+"name": "Lyrics",
+"tab": "words",
+"text": "The words of a song.",
+"price": 5.3e+121,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_A Cappella",
+"name": "A Cappella",
+"tab": "words",
+"text": "Singing with no instruments.",
+"price": 6.6e+121,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Take",
+"name": "Take",
+"tab": "words",
+"text": "One recorded attempt at a part.",
+"price": 8.2e+121,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Range",
+"name": "Range",
+"tab": "words",
+"text": "The span from the lowest note to the highest note a voice or instrument can reach.",
+"price": 1e+122,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Falsetto",
+"name": "Falsetto",
+"tab": "words",
+"text": "A light, airy way of singing above your normal range.",
+"price": 1.3e+122,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Plosive",
+"name": "Plosive",
+"tab": "words",
+"text": "A consonant like \"p\" or \"b\" that sends a puff of air at the microphone.",
+"price": 1.6e+122,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Pop Filter",
+"name": "Pop Filter",
+"tab": "words",
+"text": "A screen in front of a microphone that stops puffs of air.",
+"price": 2e+122,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Beatbox",
+"name": "Beatbox",
+"tab": "words",
+"text": "Making drum sounds with your mouth.",
+"price": 2.5e+122,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Melisma",
+"name": "Melisma",
+"tab": "words",
+"text": "Singing many notes on a single syllable.",
+"price": 3.1e+122,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Backing Vocals",
+"name": "Backing Vocals",
+"tab": "words",
+"text": "Voices that support the lead singer.",
+"price": 8e+121,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Ad-Lib",
+"name": "Ad-Lib",
+"tab": "words",
+"text": "A short extra vocal sound added around the main line.",
+"price": 2e+122,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Double-Tracking",
+"name": "Double-Tracking",
+"tab": "words",
+"text": "Recording the same part twice and playing both together for a thicker sound.",
+"price": 5e+122,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Soprano",
+"name": "Soprano",
+"tab": "words",
+"text": "The highest of the four main voice types.",
+"price": 3.4e+121,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Alto",
+"name": "Alto",
+"tab": "words",
+"text": "The lower of the two higher voice types.",
+"price": 1.1e+122,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Tenor",
+"name": "Tenor",
+"tab": "words",
+"text": "The higher of the two lower voice types.",
+"price": 3.4e+122,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Bass (Voice)",
+"name": "Bass (Voice)",
+"tab": "words",
+"text": "The lowest of the four main voice types.",
+"price": 1.1e+123,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Comping",
+"name": "Comping",
+"tab": "words",
+"text": "Building one great vocal by joining the best bits of several takes.",
+"price": 4.9e+122,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Chop",
+"name": "Chop",
+"tab": "words",
+"text": "A short slice cut from a recording and played like an instrument.",
+"price": 1.9e+123,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Transient",
+"name": "Transient",
+"tab": "words",
+"text": "The sharp first instant of a sound.",
+"price": 2e+123,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Pitch Correction",
+"name": "Pitch Correction",
+"tab": "words",
+"text": "A tool that moves sung notes onto the right pitch.",
+"price": 6.2e+122,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Formant",
+"name": "Formant",
+"tab": "words",
+"text": "The resonances of the throat and mouth that make each voice sound like itself.",
+"price": 6.2e+122,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Vocoder",
+"name": "Vocoder",
+"tab": "words",
+"text": "An effect that makes a synthesizer \"speak\" with the shape of a voice.",
+"price": 1.3e+123,
+"kind": "MUSIC WORD"
+},
+{
+"id": "w_Latency",
+"name": "Latency",
+"tab": "words",
+"text": "The tiny delay between making a sound and hearing it back through a device.",
+"price": 3.8e+122,
+"kind": "MUSIC WORD"
+},
+{
+"id": "tip1",
+"name": "Tip 1",
+"tab": "buddies",
+"text": "Buying Alien Buddies increases your energy multiplier.",
+"price": 25,
+"kind": "TIP"
+},
+{
+"id": "tip2",
+"name": "Tip 2",
+"tab": "pads",
+"text": "If you want 1 big clicker button, click 'Edit Pads' and select 1 for a single drum pad.",
+"price": 50000,
+"kind": "TIP"
+},
+{
+"id": "tip3",
+"name": "Tip 3",
+"tab": "pads",
+"text": "Change the volume of individual sounds in the Edit Pads menu.",
+"price": 750000,
+"kind": "TIP"
+},
+{
+"id": "tip4",
+"name": "Tip 4",
+"tab": "seq",
+"text": "You can save patterns you create on your sequencer to make an arrangement!",
+"price": 14625000000,
+"kind": "TIP"
+},
+{
+"id": "tip5",
+"name": "Tip 5",
+"tab": "seq",
+"text": "You can save arrangements you create to make a song!",
+"price": 438750000000,
+"kind": "TIP"
+},
+{
+"id": "tip6",
+"name": "Tip 6",
+"tab": "buddies",
+"text": "You can give your alien buddies a name by clicking on their square in the bunker!",
+"price": 13162500000000,
+"kind": "TIP"
+},
+{
+"id": "tip7",
+"name": "Tip 7",
+"tab": "seq",
+"text": "Double click on the BPM number on the sequencer to manually enter any value between 50 and 250!",
+"price": 394875000000000,
+"kind": "TIP"
+},
+{
+"id": "tip8",
+"name": "Tip 8",
+"tab": "seq",
+"text": "Tap VELOCITY on the sequencer, then tap any lit step to change that note's volume!",
+"price": 11846250000000000,
+"kind": "TIP"
+},
+{
+"id": "tip9",
+"name": "Tip 9",
+"tab": "piano",
+"text": "Every note in the Piano Roll follows the song's KEY, so the notes you place always fit together. Change the key and the whole song moves with it!",
+"price": 355387500000000000,
+"kind": "TIP"
+},
+{
+"id": "tip10",
+"name": "Tip 10",
+"tab": "sounds",
+"text": "Use the planet filter in the sound picker to see every sound from one planet. Mixing sounds from different planets is a great way to find your own style!",
+"price": 10661625000000000000,
+"kind": "TIP"
+}
+]
+}

@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Vault Editor · Alien Buddies</title>
+<!--
+  VAULT EDITOR (v0.2.194) · alienbuddies.space/vault
+  Pick what goes into the game's Knowledge Vault: name, price, category (tab) and info for each entry.
+  • Your work saves as a draft in this browser automatically.
+  • PREVIEW ON THIS DEVICE makes the game (same browser) use the draft, so you can test before publishing.
+  • PUBLISH writes vault/entries.json to GitHub (relyt-coding/alienbuddies3, main) with your own access token; Netlify then
+    redeploys and every player gets it within a minute or two. No token? DOWNLOAD entries.json and send it over instead.
+  • LIBRARY = everything the Vault used to hold (vault/library.json): tap ADD to copy one in, then edit it.
+  Prices are typed with a unit (0.5 mJ, 25 J, 3 kJ, 1.2 MJ…) and stored in the game's internal units (1 = 0.1 mJ).
+-->
+<style>
+@font-face{font-family:'Bebas Neue';font-display:swap;src:url(/fonts/bebas-neue-latin-400-normal.woff2) format('woff2');}
+@font-face{font-family:'Space Mono';font-display:swap;src:url(/fonts/space-mono-latin-400-normal.woff2) format('woff2');}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:#07090a;color:#e8f2ec;font-family:'Space Mono',monospace;font-size:14px;min-height:100vh;padding:env(safe-area-inset-top) 0 7rem;}
+h1,h2,.b{font-family:'Bebas Neue',sans-serif;letter-spacing:.1em;font-weight:normal;}
+header{position:sticky;top:0;z-index:5;background:#07090aee;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border-bottom:1px solid #1a2a22;padding:.7rem 1rem;display:flex;align-items:center;gap:.8rem;flex-wrap:wrap;}
+header h1{font-size:1.6rem;color:#ffe066;}
+header .st{font-size:.75rem;color:#7fa892;flex:1;min-width:10rem;}
+main{display:grid;grid-template-columns:1fr 1fr;gap:1rem;padding:1rem;max-width:1300px;margin:0 auto;}
+@media(max-width:860px){main{grid-template-columns:1fr;}}
+section{background:#0c1210;border:1px solid #1a2a22;border-radius:14px;padding:.8rem;min-width:0;}
+section h2{font-size:1.25rem;color:#00ff88;display:flex;align-items:center;gap:.6rem;margin-bottom:.6rem;}
+section h2 small{font-family:'Space Mono',monospace;font-size:.7rem;color:#6a8a7a;letter-spacing:0;}
+button{font-family:'Bebas Neue',sans-serif;letter-spacing:.1em;font-size:1rem;padding:.45rem .9rem;border-radius:10px;border:1px solid #2a4a3a;background:#0d1a14;color:#bfeed7;cursor:pointer;touch-action:manipulation;}
+button.go{border-color:#00ff88;color:#00ff88;}
+button.gold{border-color:#ffd23f;color:#ffd23f;}
+button.warn{border-color:#5a2020;color:#ff8080;}
+button:disabled{opacity:.4;cursor:default;}
+input,select,textarea{font-family:'Space Mono',monospace;font-size:14px;background:#050807;color:#e8f2ec;border:1px solid #23392e;border-radius:8px;padding:.45rem .55rem;width:100%;}
+textarea{min-height:5.5rem;resize:vertical;line-height:1.45;}
+label{display:block;font-family:'Bebas Neue',sans-serif;letter-spacing:.12em;font-size:.85rem;color:#7fa892;margin:.35rem 0 .15rem;}
+.row{display:flex;gap:.5rem;align-items:center;}
+.row>*{min-width:0;}
+.card{border:1px solid #1d3329;border-radius:12px;padding:.6rem .7rem;margin-bottom:.6rem;background:#08100c;border-left:4px solid var(--c,#00ff88);}
+.card .top{display:flex;gap:.4rem;align-items:center;}
+.card .top .num{font-family:'Bebas Neue',sans-serif;color:#567;font-size:1.1rem;width:1.6rem;}
+.card .top input{font-family:'Bebas Neue',sans-serif;font-size:1.25rem;letter-spacing:.06em;}
+.card .tools{display:flex;gap:.3rem;}
+.card .tools button{padding:.3rem .55rem;font-size:.9rem;}
+.price-show{font-size:.75rem;color:#ffd23f;white-space:nowrap;}
+.bad{border-color:#a33!important;}
+.lock{font-size:.7rem;color:#b48aff;}
+.lib-tools{display:flex;gap:.5rem;margin-bottom:.6rem;flex-wrap:wrap;}
+.lib-tools input{flex:2;min-width:9rem;}.lib-tools select{flex:1;min-width:8rem;}
+.lib{max-height:70vh;overflow:auto;}
+.li{display:flex;gap:.6rem;align-items:flex-start;border-bottom:1px solid #14221b;padding:.5rem .2rem;}
+.li .t{flex:1;min-width:0;}
+.li .t b{font-family:'Bebas Neue',sans-serif;font-weight:normal;letter-spacing:.06em;font-size:1.1rem;color:var(--c,#cfe);}
+.li .t span{display:block;font-size:.72rem;color:#6a8a7a;margin:.1rem 0;}
+.li .t p{font-size:.78rem;color:#a9bdb2;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.li.used{opacity:.4;}
+.empty{color:#567;text-align:center;padding:1.5rem .5rem;font-size:.85rem;}
+footer{position:fixed;left:0;right:0;bottom:0;z-index:6;background:#07090af2;border-top:1px solid #1a2a22;padding:.6rem 1rem calc(.6rem + env(safe-area-inset-bottom));display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;justify-content:center;}
+footer .tog{display:flex;align-items:center;gap:.4rem;font-family:'Bebas Neue',sans-serif;letter-spacing:.1em;color:#bfeed7;}
+footer .tog input{width:auto;}
+dialog{background:#0c1210;color:#e8f2ec;border:1px solid #2a4a3a;border-radius:14px;padding:1rem;max-width:min(520px,92vw);}
+dialog::backdrop{background:#000a;}
+dialog p{font-size:.8rem;line-height:1.5;color:#a9bdb2;margin:.4rem 0;}
+dialog a{color:#00ff88;}
+#toast{position:fixed;left:50%;top:1rem;transform:translate(-50%,-150%);transition:transform .3s;background:#0d1a14;border:1px solid #00ff88;color:#00ff88;padding:.5rem 1rem;border-radius:10px;z-index:9;font-family:'Bebas Neue',sans-serif;letter-spacing:.1em;}
+#toast.on{transform:translate(-50%,0);}
+</style>
+</head>
+<body>
+<header>
+  <h1>VAULT EDITOR</h1>
+  <div class="st" id="status">Loading…</div>
+  <a href="/" style="color:#7fa892;font-size:.8rem;">← back to the game</a>
+</header>
+<main>
+  <section>
+    <h2>IN THE VAULT <small id="count"></small></h2>
+    <div id="entries"></div>
+    <button class="go" id="addNew" style="width:100%;">+ NEW ENTRY</button>
+  </section>
+  <section>
+    <h2>LIBRARY <small>everything the Vault used to hold · tap ADD to copy one in</small></h2>
+    <div class="lib-tools"><input id="q" placeholder="search…"><select id="libTab"></select><select id="libKind"></select></div>
+    <div class="lib" id="lib"></div>
+  </section>
+</main>
+<footer>
+  <button class="gold" id="publish">PUBLISH TO THE GAME</button>
+  <button id="download">DOWNLOAD entries.json</button>
+  <label class="tog"><input type="checkbox" id="preview"> PREVIEW ON THIS DEVICE</label>
+  <button id="revert" class="warn">UNDO ALL CHANGES</button>
+  <button id="settings">⚙</button>
+</footer>
+<dialog id="dlg">
+  <h2 class="b" style="color:#ffd23f;font-size:1.4rem;">PUBLISHING</h2>
+  <p>PUBLISH saves <b>vault/entries.json</b> straight to GitHub (repo <b>relyt-coding/alienbuddies3</b>, branch <b>main</b>). Netlify redeploys and every player sees the new Vault in a minute or two.</p>
+  <p>It needs a GitHub <b>fine-grained personal access token</b> with <b>Contents: Read and write</b> on that one repo. Make one at <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">github.com/settings/personal-access-tokens</a>. It's stored only in this browser.</p>
+  <label>Token</label><input id="tok" type="password" autocomplete="off" placeholder="github_pat_…">
+  <label>Repo</label><input id="repo" value="relyt-coding/alienbuddies3">
+  <div class="row" style="margin-top:.8rem;justify-content:flex-end;"><button id="forget" class="warn">FORGET TOKEN</button><button class="go" id="saveTok">SAVE</button></div>
+</dialog>
+<div id="toast"></div>
+<script>
+(function(){
+const $=id=>document.getElementById(id);
+const DRAFT='ab2_vaultDraft',PREV='ab2_vaultPreview',TOK='ab2_vaultToken',REPO='ab2_vaultRepo';
+const UNIT=1e-4;   // 1 game unit = 0.1 mJ = 0.0001 J
+let TABS=[],LIB=[],published=[],entries=[],dirty=false;
+const toast=m=>{const t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('on'),2200);};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+// ── prices: "0.5 mJ", "25 J", "3 kJ", "1.2 MJ"… (lower-case "mj" = millijoules, upper-case "MJ" = megajoules) ──
+const UNITS=[['mJ',1e-3],['J',1],['kJ',1e3],['MJ',1e6],['GJ',1e9],['TJ',1e12],['PJ',1e15],['EJ',1e18],['ZJ',1e21],['YJ',1e24],['RJ',1e27],['QJ',1e30]];
+function parsePrice(s){s=String(s||'').trim().replace(/,/g,'');const m=s.match(/^([0-9]*\.?[0-9]+(?:e[+-]?\d+)?)\s*([a-zA-Z]*)$/);if(!m)return null;
+  let v=parseFloat(m[1]),u=m[2]||'J';if(u==='mj')u='mJ';if(u==='j')u='J';if(/^k[jJ]$/.test(u))u='kJ';
+  const f=UNITS.find(x=>x[0]===u)||UNITS.find(x=>x[0].toLowerCase()===u.toLowerCase());if(!f||!(v>0))return null;
+  return Math.max(1,Math.round(v*f[1]/UNIT));}
+function fmtPrice(n){const j=n*UNIT;let k=0;while(k<UNITS.length-1&&j>=UNITS[k+1][1])k++;const v=j/UNITS[k][1];return String(Math.round(v*100)/100)+' '+UNITS[k][0];}
+const tabOf=id=>TABS.find(t=>t.id===id)||TABS[0];
+const slug=s=>String(s).toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'').slice(0,24)||'entry';
+function newId(name){let b=slug(name),id=b,i=2;while(entries.some(e=>e.id===id))id=b+'_'+i++;return id;}
+// ── load ──
+Promise.all([fetch('/vault/library.json').then(r=>r.json()),fetch('/vault/entries.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.json()).catch(()=>({entries:[]}))]).then(([lib,pub])=>{
+  TABS=lib.tabs;LIB=lib.items;published=(pub.entries||[]);
+  let d=null;try{d=JSON.parse(localStorage.getItem(DRAFT)||'null');}catch(e){}
+  entries=(d&&Array.isArray(d.entries))?d.entries:JSON.parse(JSON.stringify(published));
+  dirty=!!d&&JSON.stringify(d.entries)!==JSON.stringify(published);
+  $('preview').checked=localStorage.getItem(PREV)==='1';
+  $('libTab').innerHTML='<option value="">every category</option>'+TABS.map(t=>`<option value="${t.id}">${esc(t.name)}</option>`).join('');
+  const kinds=[...new Set(LIB.map(x=>x.kind))];$('libKind').innerHTML='<option value="">every kind</option>'+kinds.map(k=>`<option>${esc(k)}</option>`).join('');
+  renderEntries();renderLib();status();
+}).catch(e=>{$('status').textContent='Could not load: '+e.message;});
+function status(){$('status').textContent=(dirty?'Draft saved in this browser · not published yet':'Matches the published Vault')+' · '+entries.length+' entr'+(entries.length===1?'y':'ies');}
+function save(){try{localStorage.setItem(DRAFT,JSON.stringify({entries,at:Date.now()}));}catch(e){}dirty=JSON.stringify(entries)!==JSON.stringify(published);status();}
+// ── the entries ──
+function renderEntries(){
+  const box=$('entries');box.innerHTML='';$('count').textContent=entries.length?entries.length+' entr'+(entries.length===1?'y':'ies'):'';
+  if(!entries.length){box.innerHTML='<div class="empty">The Vault is empty. Add something from the LIBRARY, or make a NEW ENTRY.</div>';return;}
+  entries.forEach((e,i)=>{
+    const t=tabOf(e.tab),c=document.createElement('div');c.className='card';c.style.setProperty('--c',t.col);
+    c.innerHTML=`<div class="top"><span class="num">${i+1}</span><input class="nm" value="${esc(e.name)}" placeholder="Name"><div class="tools"><button class="up" title="Move up">↑</button><button class="dn" title="Move down">↓</button><button class="warn del" title="Remove">✕</button></div></div>
+      <div class="row"><div style="flex:1"><label>Price</label><div class="row"><input class="pr" value="${esc(fmtPrice(e.price))}" placeholder="e.g. 5 mJ"><span class="price-show"></span></div></div>
+      <div style="flex:1.3"><label>Category</label><select class="tb">${TABS.map(x=>`<option value="${x.id}"${x.id===e.tab?' selected':''}>${esc(x.name)}</option>`).join('')}</select></div></div>
+      <div class="lock">${t.req?'Players see this category once they unlock '+esc(t.req)+'.':''}</div>
+      <label>Info</label><textarea class="tx" placeholder="What players read when they open it">${esc(e.text)}</textarea>`;
+    const q=s=>c.querySelector(s);
+    q('.nm').addEventListener('input',ev=>{e.name=ev.target.value;save();});
+    const pr=q('.pr'),ps=q('.price-show');const showP=()=>{const v=parsePrice(pr.value);pr.classList.toggle('bad',v==null);ps.textContent=v==null?'?':'= '+fmtPrice(v);};showP();
+    pr.addEventListener('input',()=>{const v=parsePrice(pr.value);if(v!=null){e.price=v;save();}showP();});
+    q('.tb').addEventListener('change',ev=>{e.tab=ev.target.value;save();renderEntries();});
+    q('.tx').addEventListener('input',ev=>{e.text=ev.target.value;save();});
+    q('.up').addEventListener('click',()=>{if(i>0){[entries[i-1],entries[i]]=[entries[i],entries[i-1]];save();renderEntries();}});
+    q('.dn').addEventListener('click',()=>{if(i<entries.length-1){[entries[i+1],entries[i]]=[entries[i],entries[i+1]];save();renderEntries();}});
+    q('.del').addEventListener('click',()=>{if(!confirm('Remove "'+e.name+'" from the Vault?'))return;entries.splice(i,1);save();renderEntries();renderLib();});
+    box.appendChild(c);
+  });
+}
+$('addNew').addEventListener('click',()=>{entries.push({id:newId('new entry'),name:'New entry',tab:TABS[0].id,text:'',price:50});save();renderEntries();
+  const all=document.querySelectorAll('#entries .card');const last=all[all.length-1];if(last){last.scrollIntoView({behavior:'smooth',block:'center'});last.querySelector('.nm').select();}});
+// ── the library ──
+function renderLib(){
+  const q=$('q').value.trim().toLowerCase(),tb=$('libTab').value,kd=$('libKind').value,used=new Set(entries.map(e=>e.from||e.id));
+  const list=LIB.filter(x=>(!tb||x.tab===tb)&&(!kd||x.kind===kd)&&(!q||(x.name+' '+x.text).toLowerCase().includes(q)));
+  const box=$('lib');box.innerHTML=list.length?'':'<div class="empty">Nothing matches.</div>';
+  list.slice(0,300).forEach(x=>{const t=tabOf(x.tab),d=document.createElement('div');d.className='li'+(used.has(x.id)?' used':'');d.style.setProperty('--c',t.col);
+    d.innerHTML=`<div class="t"><b>${esc(x.name)}</b><span>${esc(x.kind)} · ${esc(t.name)} · was ${esc(fmtPrice(x.price))}</span><p>${esc(x.text)}</p></div><button class="go">${used.has(x.id)?'ADDED':'ADD'}</button>`;
+    const b=d.querySelector('button');if(used.has(x.id))b.disabled=true;
+    b.addEventListener('click',()=>{entries.push({id:newId(x.name),from:x.id,name:x.name,tab:x.tab,text:x.text,price:x.price});save();renderEntries();renderLib();toast('Added: '+x.name);});
+    box.appendChild(d);});
+  if(list.length>300)box.insertAdjacentHTML('beforeend','<div class="empty">…and '+(list.length-300)+' more: search to narrow it down.</div>');
+}
+['q','libTab','libKind'].forEach(id=>$(id).addEventListener('input',renderLib));
+// ── preview / download / revert ──
+$('preview').addEventListener('change',ev=>{try{localStorage.setItem(PREV,ev.target.checked?'1':'0');}catch(e){}toast(ev.target.checked?'The game on this device now uses your draft':'The game uses the published Vault again');});
+function fileText(){return JSON.stringify({updated:new Date().toISOString().slice(0,10),entries:entries.map(e=>Object.assign({id:e.id,name:e.name.trim(),tab:e.tab,price:e.price,text:e.text.trim()},e.from?{from:e.from}:{}))},null,1)+'\n';}
+$('download').addEventListener('click',()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([fileText()],{type:'application/json'}));a.download='entries.json';a.click();});
+$('revert').addEventListener('click',()=>{if(!confirm('Throw away the draft and go back to the published Vault?'))return;entries=JSON.parse(JSON.stringify(published));save();renderEntries();renderLib();});
+// ── publish to GitHub ──
+$('settings').addEventListener('click',()=>{$('tok').value=localStorage.getItem(TOK)||'';$('repo').value=localStorage.getItem(REPO)||'relyt-coding/alienbuddies3';$('dlg').showModal();});
+$('saveTok').addEventListener('click',()=>{localStorage.setItem(TOK,$('tok').value.trim());localStorage.setItem(REPO,$('repo').value.trim());$('dlg').close();toast('Saved');});
+$('forget').addEventListener('click',()=>{localStorage.removeItem(TOK);$('tok').value='';toast('Token forgotten');});
+const b64=s=>btoa(unescape(encodeURIComponent(s)));
+$('publish').addEventListener('click',async()=>{
+  const bad=entries.find(e=>!e.name.trim()||!(e.price>0));if(bad){toast('Every entry needs a name and a price');return;}
+  const tok=localStorage.getItem(TOK),repo=localStorage.getItem(REPO)||'relyt-coding/alienbuddies3';
+  if(!tok){$('settings').click();return;}
+  const btn=$('publish');btn.disabled=true;btn.textContent='PUBLISHING…';
+  try{
+    const url='https://api.github.com/repos/'+repo+'/contents/vault/entries.json',H={Authorization:'Bearer '+tok,Accept:'application/vnd.github+json'};
+    const cur=await fetch(url+'?ref=main',{headers:H});let sha;if(cur.ok)sha=(await cur.json()).sha;else if(cur.status!==404)throw new Error('GitHub said '+cur.status+(cur.status===401?' (check the token)':''));
+    const put=await fetch(url,{method:'PUT',headers:H,body:JSON.stringify({message:'Vault: '+entries.length+' entries (from the Vault editor)',content:b64(fileText()),sha,branch:'main'})});
+    if(!put.ok)throw new Error('GitHub said '+put.status+' '+((await put.json().catch(()=>({}))).message||''));
+    published=JSON.parse(JSON.stringify(entries));save();toast('Published! Live in a minute or two');
+  }catch(e){alert('Publishing failed: '+e.message+'\n\nYou can DOWNLOAD entries.json instead and send it over.');}
+  btn.disabled=false;btn.textContent='PUBLISH TO THE GAME';
+});
+})();
+</script>
+</body>
+</html>

@@ -2,6 +2,10 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.194 - 2026-11-19 22:00
+- STORE SALE: everything in the store now costs half (sounds, sequencer tracks, upgrades, party levels, buddies from #4 on), so the start moves faster. Your first sound is 125 mJ, the shaker 4 J and the sequencer 5 J.
+- The Knowledge Vault has been emptied. New entries will be added a few at a time.
+
 ## v0.2.193 - 2026-11-19 21:20
 - Your first egg now rolls in at 10 mJ and hatches at 25 mJ.
 - 10 seconds after your first buddy hatches, two more eggs roll in, one on each side of your energy. They're 50 mJ each and each holds a different buddy, so you choose which one comes first.

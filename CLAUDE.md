@@ -55,7 +55,7 @@ README.md covers the file layout, test mode and vocals in depth; this file is th
 68 Knowledge Vault · 69 thumb nav (bottom row on upright phones) + PARTY menu + level 3 disco-ball teaser ·
 70 Alien Gem look (Gem Buddy) · 71 level 4 gem ring + gems flying off buddies + MY ACCOUNT sheet ·
 73 Vault big batch (lessons + music words) · 74 Vault price table (generated) · 75 whole-bunker scroll + floating games dock ·
-76 Alien Awakening trails + speed · 77 Egg Incubator + racers · 78 DNA Splice · 79 Buddy Race + Gold Records · 80 extra bunkers · 81 memory diet (3D tree culling) · 82 name-your-file card · 83 two eggs after the first hatch ·
+76 Alien Awakening trails + speed · 77 Egg Incubator + racers · 78 DNA Splice · 79 Buddy Race + Gold Records · 80 extra bunkers · 81 memory diet (3D tree culling) · 82 name-your-file card · 83 two eggs after the first hatch · 84 hand-picked Vault (editor at /vault) ·
 72 energy/gem math/party corner + file-select hum (`titleHum`): `openGemStats()` (bunker + shop gem counters), PARTY pill top-left (`.pb-corner`), MY ACCOUNT in Settings only, sequencer tracker ACTIVATE (`seqTrackerActive`, `SEQ_TRACKER_COST`)
 
 - Bunker (v0.2.181, js/75): `.bunker-body` is the scroll box (the grid wrapper no longer scrolls; it only clips the grid's pinch-zoom).
@@ -104,6 +104,13 @@ README.md covers the file layout, test mode and vocals in depth; this file is th
   (once nav-locked / buddy-hold are gone) two `.twinEgg`s roll in either side of the score, each a different `buddyPickFor` pick, alienCost(1)=alienCost(2)=500
   (50 mJ); tapping one writes its pick to alienData[n].base and calls buyAlien. Score text (`scoreParts`) stays in a unit until 10,000 of it; jParts /
   formatMult / fmtJoulesExact never show more than 2 decimals.
+- STORE SALE (v0.2.194): `SHOP_SALE`=.5 in js/01 multiplies the unlock constants and, via wrappers at the end of js/01, alienCost (except buddies 1–3 and
+  100+, which derive from 98), soundLibCost, seqTrackCost, alienBoost / multiClick / dot / seqMultiClick costs; js/37 halves PARTY_LADDER + SEQ_FEATS.
+  Pads and the first three buddies are hand-set and NOT on sale. Prices quoted elsewhere in these notes are from before the sale.
+- VAULT CONTENT (v0.2.194, js/84): the Vault shows ONLY /vault/entries.json ({id,name,tab,price in units,text}), written by the editor at /vault
+  (vault/index.html: library = vault/library.json, the old content; PUBLISH commits entries.json via the GitHub API with the creator's token; PREVIEW
+  makes the game on that browser use the draft, localStorage ab2_vaultPreview / ab2_vaultDraft). js/84 overrides vaultEntries / vaultTipsIn /
+  vaultEntryCost / vaultCounts; ids are 'c_'+id. js/68 / 73 / 74 content is no longer read.
 - Skill-tree descriptions: `gemsOnly` (js/20) strips any written "×N Alien Gems" and appends the node's REAL `gemMult`, so never hand-write gem amounts.
 
 ## Testing without a phone

@@ -24,7 +24,8 @@
     if(typeof score!=='number'||score<AT||document.body.classList.contains('intro-run'))return;
     let asked=false;try{asked=!!localStorage.getItem(key());}catch(e){}
     if(asked||(typeof getSlotName==='function'&&getSlotName(activeSlot)))return;
-    if(typeof overlayUp==='function'&&overlayUp())return;   // wait until nothing covers the pads
+    if(typeof overlayUp==='function'&&overlayUp())return;
+    if(['store-open','bunker-open','vault-open','cockpit-open','race-open','egg-page-open'].some(c=>document.body.classList.contains(c)))return;   // only on the pads screen   // wait until nothing covers the pads
     try{localStorage.setItem(key(),'1');}catch(e){}
     inp.value='';card.classList.add('on');
   },1500);

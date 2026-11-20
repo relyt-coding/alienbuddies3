@@ -23,6 +23,8 @@ const SEQ_FEATS=[
   {id:'arrange',cost:1e10,  main:'ARRANGEMENT TAB',  sub:'Chain saved patterns into an arrangement (PAT / ARR switch)'},
   {id:'song',   cost:1e13,  main:'SONG TAB',         sub:'Line up whole arrangements into a song'},
 ];
+// v0.2.194 STORE SALE: the party levels and sequencer features cost half too (SHOP_SALE, js/01)
+PARTY_LADDER.forEach(x=>x.cost=Math.round(x.cost*SHOP_SALE));SEQ_FEATS.forEach(x=>x.cost=Math.round(x.cost*SHOP_SALE));
 function seqFeatHas(id){const i=SEQ_FEATS.findIndex(f=>f.id===id);return i>=0&&(shop.seqFeat||0)>i;}
 function bpmLocked(){return !seqFeatHas('bpm');}
 function partyOwnedStyles(){return PARTY_LADDER.slice(0,Math.max(0,shop.partyLevel||0)).map(l=>l.style);}

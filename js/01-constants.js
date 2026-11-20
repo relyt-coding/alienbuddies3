@@ -77,6 +77,10 @@ function formatMult(n){if(n<100000)return n.toLocaleString(undefined,{maximumFra
 // ══════════════════════════════════════════════
 // Unlock prices over 5 million are 30% pricier (a longer grind for the big unlocks); cheap early unlocks are untouched.
 function bump30(c){return c>5e6?Math.round(c*1.3):c;}
+// v0.2.194 STORE SALE: dot rows climb in ×2s now (were ×3s), so early income is lower; everything in the store costs half to keep the
+// start moving. Applied to the unlock constants below and, at the end of this file, to every store price function.
+// (Not to the drum pads and the first three buddies, which were hand-set, nor to the late grind items priced off alienCost(98).)
+const SHOP_SALE=.5;
 // ── Progress discount (the skill tree no longer boosts points) ──
 // Point prices get cheaper as you collect aliens, by the same amount the old skill-tree point bonuses used to add at that
 // stage (measured with the test-mode bot: none until alien 24, about ×10^8 by alien 50, ×10^13 by 60, ×10^14 at 79).
@@ -99,22 +103,22 @@ function alienDiscount(n){
   return Math.pow(10,i<=k?ALIEN_L[i]:ALIEN_L[k]+(ALIEN_L[k]-ALIEN_L[k-1])*(i-k));
 }
 const _disc=c=>{const d=progressDiscount();return d>1?Math.max(1,Math.round(c/d)):c;};
-const GAME_VERSION='0.2.193'; // bump on every delivered build (shown in Settings and on the home screen)
+const GAME_VERSION='0.2.194'; // bump on every delivered build (shown in Settings and on the home screen)
 const BASE_CPS=5;
-const UNLOCK_COST=bump30(60000000);
-const ALIEN_POWER_UNLOCK_COST=bump30(600000000);
+const UNLOCK_COST=Math.round((bump30(60000000))*SHOP_SALE);
+const ALIEN_POWER_UNLOCK_COST=Math.round((bump30(600000000))*SHOP_SALE);
 
 // 0.2: the Auto Clicker is now the sequencer (metronome). These two one-time upgrades switch a tracker's dot rows from the ×3 pattern to the ×4 pattern.
 // Cost of the next dot-base upgrade (n = how many have been bought already): 100M, 100M, then x1000 each (100B, 100T, 100Qa ...). Max ×10.
 const DOT_MAX_LEVEL=6; // level 6 = ×10
 // Endgame dot upgrades. Each card (DRUMPAD / SEQUENCER) first has to be unlocked for 1B, then upgraded.
 // Upgrade prices (n = upgrades already bought; each tracker pays separately): ×4 5B, then x1000 per level.
-const DOT_UNLOCK_COST=bump30(1e9);
+const DOT_UNLOCK_COST=Math.round((bump30(1e9))*SHOP_SALE);
 // Longer sequencer loops (bought after the first track): level 1 = 32 steps, level 2 = 64 steps
 // (32 / 64 steps are skill-tree nodes now: mt_steps32 / mt_steps64)
 const DOT_COSTS=[5e10,5e17,5e24,5e31,5e38,5e45,5e52]; // v0.2.80: first upgrade unchanged, every level after is x10,000,000 (was x10,000)
 // v0.2.80: TIER 3 — Sequencer Multi-Click (costs more than the dot upgrades, and more to unlock)
-const SEQ_MC_UNLOCK_COST=1e12;
+const SEQ_MC_UNLOCK_COST=Math.round((1e12)*SHOP_SALE);
 const SEQ_MC_MAX_LEVEL=6; // level 6 = 8 clicks per step
 // v0.2.92: Tier 2, the dot multipliers and Tier 3 cost +75% per level, stacking (1st level ×1.75, 2nd ×3.06, 3rd ×5.36…)
 // so buys stop landing back to back. (One-time unlock gates keep their price.)
@@ -156,7 +160,7 @@ function multiClickUpgradeAt(lvl){const clicks=lvl+2;return{effectMain:`${clicks
 
 // Pad button costs: 1 free, 2=5 (kick), 3=100 (snare), 4=3K, 5=2.5M ...
 const DRUM_TRACKER_COST=10;    // v0.2.192: ACTIVATE for the drum pad dot tracker = 1 mJ (was 2.5 mJ)
-const SEQ_TRACKER_COST=2.5e5;   // ACTIVATE for the sequencer's dot tracker (v0.2.175: 250,000 W)
+const SEQ_TRACKER_COST=Math.round((2.5e5)*SHOP_SALE);   // ACTIVATE for the sequencer's dot tracker (v0.2.175: 250,000 W)
 const PAD_COSTS=[0,5,10,25,100,9000000000,60000000000,450000000000].map(bump30); // v0.2.192: pads 2–5 cost 0.5 / 1 / 2.5 / 10 mJ, so non-drummers get sounds to play with right away
 const PAD_DEFAULT_SOUNDS=['hihat','kick','snare',null,null,null,null,null]; // null = no sound, must buy from library
 
@@ -193,3 +197,10 @@ function seqTrackCost(tracks){
   return _disc(bump30(seqTrackCostOld(tracks)));
 }
 const MAX_SEQ_TRACKS=6;
+
+// v0.2.194 STORE SALE (see SHOP_SALE above): every store price function costs half. alienCost keeps the hand-set first three
+// buddies; buddies past 99 are priced from alienCost(98), which is already on sale, so they aren't halved twice.
+(function(){
+  const w=(name,keep)=>{const f=window[name];if(typeof f!=='function')return;window[name]=function(n){const c=f.apply(this,arguments);return keep&&keep(n)?c:Math.max(1,Math.round(c*SHOP_SALE));};};
+  w('alienCost',n=>n<3||n>98);w('soundLibCost');w('seqTrackCost');w('alienBoostUpgradeCost');w('multiClickUpgradeCost');w('dotUpgradeCost');w('seqMultiClickCost');
+})();

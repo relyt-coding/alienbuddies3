@@ -96,7 +96,7 @@
   }
 
   // ══════════ THE FIRST EGG, ON THE DRUM PADS SCREEN ══════════
-  const EGG_AT=500;
+  const EGG_AT=100;   // v0.2.193: the egg rolls in at 10 mJ and hatches at 25 mJ (alienCost(0))
   let egg=null,eggOn=false,eggPick=null,eggRaf=0,eggCrack=-1,eggReady=false,eggShake=0,eggT0=0,eggFlying=false;
   function eggCost(){return typeof alienCost==='function'?alienCost(0):1000;}
   function eggPal(){

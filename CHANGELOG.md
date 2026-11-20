@@ -2,6 +2,11 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.193 - 2026-11-19 21:20
+- Your first egg now rolls in at 10 mJ and hatches at 25 mJ.
+- 10 seconds after your first buddy hatches, two more eggs roll in, one on each side of your energy. They're 50 mJ each and each holds a different buddy, so you choose which one comes first.
+- Your energy stays in millijoules until it's a big number (5,874 MILLIJOULES instead of 5.8742 JOULES). Each unit stays until you have 10,000 of it, and numbers never show more than 2 decimal places, including the "per tap" multiplier.
+
 ## v0.2.192 - 2026-11-19 20:50
 - The 3rd drum pad now costs 1 mJ (was 2 mJ), and activating the drum pad dots costs 1 mJ (was 2.5 mJ).
 

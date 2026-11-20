@@ -2958,3 +2958,18 @@ body.tree-open #alienLayer{visibility:hidden;}
 #nameAsk .na-later{font-family:'Bebas Neue',sans-serif;font-size:.85rem;letter-spacing:.14em;background:none;border:0;color:#4f8a6a;cursor:pointer;padding:.2rem .6rem;}
 #nameAsk .na-x{position:absolute;right:.4rem;top:.3rem;background:none;border:0;color:#4f8a6a;font-size:1rem;cursor:pointer;padding:.2rem .4rem;}
 body.desktop-mode #nameAsk{bottom:2rem;}
+
+/* v0.2.193 the two eggs after the first hatch (js/83): same look as the first egg (#padEgg) */
+.twinEgg{position:absolute;z-index:6;display:flex;flex-direction:column;align-items:center;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;}
+.twinEgg .pe-body{transform-origin:50% 88%;will-change:transform;}
+.twinEgg canvas{display:block;}
+.twinEgg .pe-glow{position:absolute;left:50%;top:44%;width:96px;height:96px;margin:-48px 0 0 -48px;border-radius:50%;pointer-events:none;opacity:0;transition:opacity .4s;
+  background:radial-gradient(circle,rgba(0,255,136,.42) 0%,rgba(0,255,136,.14) 45%,rgba(0,255,136,0) 70%);}
+.twinEgg.ready .pe-glow{opacity:1;animation:peGlow 1.5s ease-in-out infinite;}
+.twinEgg .pe-tag{margin-top:-2px;font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:.08em;line-height:1;padding:3px 8px 2px;border-radius:999px;color:#c9c2a8;background:rgba(20,18,12,.85);border:1px solid rgba(255,240,200,.25);white-space:nowrap;}
+.twinEgg.ready .pe-tag{color:#00ff88;border-color:rgba(0,255,136,.7);box-shadow:0 0 10px -2px rgba(0,255,136,.7);}
+.twinEgg .pe-tag.bump{animation:peBump .4s cubic-bezier(.3,1.6,.5,1);}
+.twinEgg.rolling{animation:peRoll 1.2s cubic-bezier(.25,.7,.35,1) both;}
+.twinEgg.rolling .pe-tag{animation:peTagIn .35s .95s both;}
+body.intro-run .twinEgg,body.store-open:not(.desktop-mode) .twinEgg,body.bunker-open:not(.desktop-mode) .twinEgg,body.vault-open:not(.desktop-mode) .twinEgg{visibility:hidden;}
+body.phone-land .twinEgg .pe-tag{font-size:12px;padding:2px 6px 1px;}

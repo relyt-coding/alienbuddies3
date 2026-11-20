@@ -55,7 +55,7 @@ README.md covers the file layout, test mode and vocals in depth; this file is th
 68 Knowledge Vault · 69 thumb nav (bottom row on upright phones) + PARTY menu + level 3 disco-ball teaser ·
 70 Alien Gem look (Gem Buddy) · 71 level 4 gem ring + gems flying off buddies + MY ACCOUNT sheet ·
 73 Vault big batch (lessons + music words) · 74 Vault price table (generated) · 75 whole-bunker scroll + floating games dock ·
-76 Alien Awakening trails + speed · 77 Egg Incubator + racers · 78 DNA Splice · 79 Buddy Race + Gold Records · 80 extra bunkers · 81 memory diet (3D tree culling) · 82 name-your-file card ·
+76 Alien Awakening trails + speed · 77 Egg Incubator + racers · 78 DNA Splice · 79 Buddy Race + Gold Records · 80 extra bunkers · 81 memory diet (3D tree culling) · 82 name-your-file card · 83 two eggs after the first hatch ·
 72 energy/gem math/party corner + file-select hum (`titleHum`): `openGemStats()` (bunker + shop gem counters), PARTY pill top-left (`.pb-corner`), MY ACCOUNT in Settings only, sequencer tracker ACTIVATE (`seqTrackerActive`, `SEQ_TRACKER_COST`)
 
 - Bunker (v0.2.181, js/75): `.bunker-body` is the scroll box (the grid wrapper no longer scrolls; it only clips the grid's pinch-zoom).
@@ -100,6 +100,10 @@ README.md covers the file layout, test mode and vocals in depth; this file is th
 - Early economy (v0.2.191): PAD_COSTS pads 2–5 = 5 / 10 / 25 / 100 units (0.5 / 1 / 2.5 / 10 mJ); drum tracker ACTIVATE = `DRUM_TRACKER_COST` (10 = 1 mJ, v0.2.192); alienCost(1) = 50,000 (5 J); soundLibCost(2) (shaker) = 80,000 (8 J);
   `dotBase(-1)` = 2 (dot rows ×2, ×6, ×12…), each DOTS upgrade +1. The Vault price table (js/74) was built on the old pace: rerun tools/vault_prices.py if it feels off.
   js/82 asks an unnamed slot "what's your name?" once at 25 J (small bottom card, `ab2_nameAsked_N`). Vault BACK sits top-right like the Bunker's.
+- First eggs (v0.2.193): the level-1 egg rolls in at `EGG_AT`=100 (10 mJ, js/66) and costs alienCost(0)=250 (25 mJ). js/83: 10 s after the first hatch
+  (once nav-locked / buddy-hold are gone) two `.twinEgg`s roll in either side of the score, each a different `buddyPickFor` pick, alienCost(1)=alienCost(2)=500
+  (50 mJ); tapping one writes its pick to alienData[n].base and calls buyAlien. Score text (`scoreParts`) stays in a unit until 10,000 of it; jParts /
+  formatMult / fmtJoulesExact never show more than 2 decimals.
 - Skill-tree descriptions: `gemsOnly` (js/20) strips any written "×N Alien Gems" and appends the node's REAL `gemMult`, so never hand-write gem amounts.
 
 ## Testing without a phone
@@ -114,7 +118,7 @@ ratio to a tap; old saves need no conversion and the Vault price table (js/74) s
 - Use `fmtJh(n)` / `jHtml(n)` / `scoreHtml(n)` / `fmtJpsH(n)` for anything on screen. Bebas Neue has NO lowercase, so a plain-text "mJ" renders as
   "MJ" (megajoules); the HTML versions put the unit in `.ju` (Space Mono) to keep its case. Set them with innerHTML. `showToast`, `spawnParticle`
   and `ssRow` switch to innerHTML automatically when the text contains a `.ju` span. Plain `fmtJ` / `fmtScore` / `fmtJps` are for console and test mode.
-- The score spells out MILLIJOULES / JOULES below 1 kJ, then kJ, MJ … QJ, then scientific. Sideways phones use the short symbols.
+- The score spells out MILLIJOULES / JOULES (each until 10,000 of it, so up to 9,999 J), then kJ, MJ … QJ, then scientific. Sideways phones use the short symbols.
   `fmtJoulesExact(n)` is the exact line under the score from 1 kJ up. Never write 'pts', 'points' or 'watts' for the score in player-facing text.
 - Old names `fmtW` / `wHtml` / `wParts` are aliases of the joule versions. Gems keep `fmtGems`. The breakdown window (13 + js/72 CSS) uses
   `ssIconEl(key)` = black & white match art (`matchIconBW` in js/48): no emoji there.

@@ -41,7 +41,7 @@ function jParts(n,sig){n=Math.max(0,+n||0);sig=sig||4;
   let v=j/Math.pow(1000,k-1),t=v.toPrecision(sig);
   if(parseFloat(t)>=1000&&k+1<J_UNITS.length)return jParts(Math.pow(1000,k)/J_PER_UNIT,sig);   // 999.99 mJ → "1 J", not "1000 mJ"
   if(t.indexOf('e')>=0)t=String(Math.round(v));
-  if(t.indexOf('.')>=0)t=t.replace(/0+$/,'').replace(/\.$/,'');
+  if(t.indexOf('.')>=0)t=String(Math.round(parseFloat(t)*100)/100);   // v0.2.193: never more than 2 decimals
   return[t,J_UNITS[k]];}
 function fmtJ(n,sig){const p=jParts(n,sig);return p[0]+' '+p[1];}
 // The game's Bebas Neue font has no lowercase, so "mJ" would show as "MJ" (megajoules!). Anything on screen uses the HTML
@@ -51,22 +51,26 @@ function fmtJh(n,sig){const p=jParts(n,sig);return p[0]+' <span class="ju">'+p[1
 function fmtJpsH(n,sig){const p=jParts(n,sig||3);return p[0]+' <span class="ju">'+p[1]+'/s</span>';}
 function fmtJps(n,sig){return fmtJ(n,sig||3)+'/s';}
 // the score itself: MILLIJOULES and JOULES spelled out (so new players learn the word), then kJ, MJ, GJ … from 1 kJ up
-function scoreParts(n){n=Math.max(0,Math.floor(n||0));const p=jParts(n,6);
-  if(n*J_PER_UNIT>=1000)return p;
-  if(p[1]==='mJ')return[p[0],p[0]==='1'?'MILLIJOULE':'MILLIJOULES'];
-  if(p[1]==='J')return[p[0],p[0]==='1'?'JOULE':'JOULES'];
-  return p;}
+// v0.2.193: the score stays in a unit until it reaches 10,000 of it (5,874 MILLIJOULES, not 5.8742 JOULES), with at most 2 decimals
+function scoreParts(n){n=Math.max(0,Math.floor(n||0));const j=n*J_PER_UNIT;
+  if(j<=0)return['0','MILLIJOULES'];
+  let k=0;while(k+1<J_UNITS.length&&j/Math.pow(1000,k-1)>=10000)k++;
+  const v=j/Math.pow(1000,k-1);if(v>=10000)return jParts(n,6);   // past QJ: scientific
+  const t=v>=1000?Math.floor(v).toLocaleString('en-US'):String(Math.floor(v*100+1e-9)/100);
+  if(k===0)return[t,t==='1'?'MILLIJOULE':'MILLIJOULES'];
+  if(k===1)return[t,t==='1'?'JOULE':'JOULES'];
+  return[t,J_UNITS[k]];}
 function fmtScore(n){const p=scoreParts(n);return p[0]+' '+p[1];}
 function scoreHtml(n){const p=scoreParts(n);return p[0]+' '+(/^[A-Z]+$/.test(p[1])?p[1]:'<span class="ju">'+p[1]+'</span>');}
 // the exact energy in joules (the small line under the score once it's in kJ and up)
-function fmtJoulesExact(n){n=Math.max(0,Math.floor(n||0));const v=n*J_PER_UNIT;return v.toLocaleString('en-US',{maximumFractionDigits:n<1e12?4:0})+(v===1?' joule':' joules');}
+function fmtJoulesExact(n){n=Math.max(0,Math.floor(n||0));const v=n*J_PER_UNIT;return v.toLocaleString('en-US',{maximumFractionDigits:n<1e12?2:0})+(v===1?' joule':' joules');}
 // old names (v0.2.162–179), kept so nothing that still calls them breaks
 const fmtW=fmtJ,wHtml=jHtml,wParts=jParts;
 function formatSci(n){n=Math.floor(n);if(n===0)return '0';const e=Math.floor(Math.log10(Math.max(1,n)));return (n/Math.pow(10,e)).toFixed(3).replace(/\.?0+$/,'')+'e'+e;}
 function formatFull(n){n=Math.floor(n);return n.toLocaleString();}
 function formatStore(n){n=Math.floor(n);const T=1e12;function sci(x){const e=Math.floor(Math.log10(x));return (x/Math.pow(10,e)).toFixed(2).replace(/\.?0+$/,'')+'E'+e;}if(n<T){if(n>=1e9)return(n/1e9).toFixed(2).replace(/\.?0+$/,'')+'B';if(n>=1e6)return(n/1e6).toFixed(2).replace(/\.?0+$/,'')+'M';if(n>=1e3)return(n/1e3).toFixed(0)+'K';return n.toLocaleString();}return sci(n);}
 function formatRate(n){if(n<1e15){return n<1000?(Math.round(n*100)/100).toString():Math.floor(n).toLocaleString();}const e=Math.floor(Math.log10(n));return (n/Math.pow(10,e)).toFixed(2)+'E'+e;}
-function formatMult(n){if(n<100000)return n.toLocaleString(undefined,{maximumSignificantDigits:5});const e=Math.floor(Math.log10(n));return (n/Math.pow(10,e)).toFixed(2)+'E'+e;}
+function formatMult(n){if(n<100000)return n.toLocaleString(undefined,{maximumFractionDigits:2});/* v0.2.193: 2 decimals at most */const e=Math.floor(Math.log10(n));return (n/Math.pow(10,e)).toFixed(2)+'E'+e;}
 
 // ══════════════════════════════════════════════
 //  UPGRADE DEFS
@@ -95,7 +99,7 @@ function alienDiscount(n){
   return Math.pow(10,i<=k?ALIEN_L[i]:ALIEN_L[k]+(ALIEN_L[k]-ALIEN_L[k-1])*(i-k));
 }
 const _disc=c=>{const d=progressDiscount();return d>1?Math.max(1,Math.round(c/d)):c;};
-const GAME_VERSION='0.2.192'; // bump on every delivered build (shown in Settings and on the home screen)
+const GAME_VERSION='0.2.193'; // bump on every delivered build (shown in Settings and on the home screen)
 const BASE_CPS=5;
 const UNLOCK_COST=bump30(60000000);
 const ALIEN_POWER_UNLOCK_COST=bump30(600000000);
@@ -120,9 +124,8 @@ function seqMultiClickUpgradeAt(lvl){const clicks=lvl+2;return{effectMain:`${cli
 function dotUpgradeCost(n){return Math.round(_disc(DOT_COSTS[Math.min(n,DOT_COSTS.length-1)])*_p75(n));}
 function alienCost(n){
   if(n>98)return alienCost(98)*Math.pow(1.12,n-98);   // v0.2.188 extra bunkers: buddy 100+ costs 12% more each (the old curve hits Infinity near #180)
-  if(n===0)return 1000;       // alien 1: 1,000
-  if(n===1)return 50000;      // alien 2: 5 J (v0.2.191, was 10 J)
-  if(n===2)return 1000000;    // alien 3: 1,000,000
+  if(n===0)return 250;        // alien 1: 25 mJ (v0.2.193; its egg rolls in at 10 mJ, js/66)
+  if(n===1||n===2)return 500; // aliens 2 + 3: 50 mJ each, the two eggs that roll in after the first hatch (js/83)
   if(n===3)return 2500000;    // alien 4: 2,500,000
   // alien 5+ — existing growth curve starting from 10M
   let c=10000000;

@@ -2,6 +2,9 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.196 - 2026-11-19 21:55
+- Fixed: the green ACTIVATE arrow could float over other pages (like the pad sounds list) if you hadn't activated the drum pad dots yet. Arrows now only show while the button they point at is actually on screen.
+
 ## v0.2.195 - 2026-11-19 21:45
 - Energy now stays in millijoules until it reaches 100 joules. The sequencer reads 5,000 mJ instead of 5 J, and your energy counts all the way up to 99,999 MILLIJOULES.
 

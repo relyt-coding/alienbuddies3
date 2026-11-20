@@ -113,6 +113,12 @@ function overlayUp(){
   const er=document.getElementById('eggReveal');if(er&&er.classList.contains('on'))return true;
   return false;
 }
+// v0.2.196: an arrow only shows while its button is really on screen and nothing (Edit Pads, Settings, any page) covers it
+function arrowTargetSeen(el){
+  const r=el.getBoundingClientRect();if(!r.width||!r.height||r.bottom<0||r.top>innerHeight||r.right<0||r.left>innerWidth)return false;
+  const hit=document.elementFromPoint(Math.min(innerWidth-1,Math.max(0,r.left+r.width/2)),Math.min(innerHeight-1,Math.max(0,r.top+r.height/2)));
+  return !!hit&&(hit===el||el.contains(hit)||hit.contains(el));
+}
 function updateOnboardingArrows(){
   // Arrows only belong to a running game — never on the home screen (they pointed at hidden buttons there)
   // …and never over another screen (shop, bunker, best buddy, minigames) — they used to peek through on top
@@ -125,7 +131,7 @@ function updateOnboardingArrows(){
   const arrowAct=document.getElementById('arrowActivate');
   const activateBtn=document.getElementById('drumTrackerActivateBtn');
   if(arrowAct){
-    if(!drumTrackerActive&&score>=DRUM_TRACKER_COST*2&&activateBtn){
+    if(!drumTrackerActive&&score>=DRUM_TRACKER_COST*2&&activateBtn&&arrowTargetSeen(activateBtn)){
       // make room above the tracker so the arrow sits under the score instead of covering it
       // v0.2.125: the arrow points at the button from the side, so nothing on the screen has to move to make room for it
       const rect=activateBtn.getBoundingClientRect();
@@ -148,7 +154,7 @@ function updateOnboardingArrows(){
   const isDesktop=document.body.classList.contains('desktop-mode');
   const shopBtn=isDesktop?document.getElementById('collapseShopBtn'):document.getElementById('openStoreBtn');
   if(arrowShop){
-    if(shopOpenCount===0&&score>=50000&&shopBtn&&!document.body.classList.contains('nav-locked')){
+    if(shopOpenCount===0&&score>=50000&&shopBtn&&!document.body.classList.contains('nav-locked')&&arrowTargetSeen(shopBtn)){
       const rect=shopBtn.getBoundingClientRect();
       arrowShop.style.display='flex';
       if(isDesktop){
@@ -228,3 +234,6 @@ document.getElementById('tipsModalClose')&&document.getElementById('tipsModalClo
 document.getElementById('tipsModal')&&document.getElementById('tipsModal').addEventListener('click',e=>{
   if(e.target===document.getElementById('tipsModal'))document.getElementById('tipsModal').style.display='none';
 });
+
+// v0.2.196: re-check the arrows twice a second too, so a page opening on top of them hides them straight away
+setInterval(()=>{try{updateOnboardingArrows();}catch(e){}},500);

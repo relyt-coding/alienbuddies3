@@ -2973,3 +2973,6 @@ body.desktop-mode #nameAsk{bottom:2rem;}
 .twinEgg.rolling .pe-tag{animation:peTagIn .35s .95s both;}
 body.intro-run .twinEgg,body.store-open:not(.desktop-mode) .twinEgg,body.bunker-open:not(.desktop-mode) .twinEgg,body.vault-open:not(.desktop-mode) .twinEgg{visibility:hidden;}
 body.phone-land .twinEgg .pe-tag{font-size:12px;padding:2px 6px 1px;}
+
+/* v0.2.196: the onboarding arrows never catch taps (and never hide their own button from the on-screen check) */
+#arrowActivate,#arrowShop{pointer-events:none;}

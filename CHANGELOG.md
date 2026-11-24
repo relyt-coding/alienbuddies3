@@ -2,6 +2,10 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.198 - 2026-11-24 00:12
+- You can now always buy your next egg from the drum screen. After your first three buddies, one egg stays beside your energy with the next buddy inside it, at the same price as the Shop.
+- The egg goes away only when every bunker slot is filled.
+
 ## v0.2.197 - 2026-11-19 22:05
 - The ACTIVATE arrow now disappears the instant the pad sound list opens, instead of lingering on top of it.
 - Fixed: picking a sound from the pad sound list could also press the button underneath it (it activated the drum pad dots by accident).

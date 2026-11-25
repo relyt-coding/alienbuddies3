@@ -323,6 +323,18 @@ function fitPadArea(){
   let W=(padH/ratio)*cols+(cols-1)*gap;
   W=Math.max(PAD_GRID_MIN_W,Math.min(cap,W));
   grid.style.maxWidth=Math.floor(W)+'px';
+  // v0.2.198: never past the bottom of the window. The estimate above can overshoot (early game forces ~40% of the column,
+  // short browser windows), so measure where the pads really end and shrink the grid until the last row fits.
+  for(let k=0;k<6;k++){
+    const gr=grid.getBoundingClientRect();if(!gr.height)break;
+    const ar=app.getBoundingClientRect(),limit=Math.min(innerHeight,ar.bottom||innerHeight)-24;
+    const spill=app.scrollHeight-app.clientHeight,over=gr.bottom-limit;if(over<=1&&spill<=1)break;
+    // the column is centred, so once it overflows, shrinking by d only lifts the bottom about d/2: take off twice the
+    // overshoot, and at least the amount the column spills (that spill is what pushes the title off the top)
+    const nh=Math.max(rows*60,gr.height-Math.max(over*(spill>1?2:1),spill));
+    const w2=Math.floor(Math.max(120,Math.min(W,gr.width*nh/gr.height)));if(w2>=Math.floor(gr.width))break;
+    grid.style.maxWidth=w2+'px';W=w2;
+  }
 }
 (function(){
   let raf=0;

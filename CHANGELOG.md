@@ -2,6 +2,12 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.199 - 2026-11-24 22:45
+- Every price in the Shop now has a power bar with a percentage, so you can see how close you are to affording it at a glance.
+- After your first buddy hatches, eggs now come one at a time in the top-left corner instead of beside your energy. A new one rolls in after each hatch until you have 10 buddies, then you buy them in the Shop.
+- The PET ALIEN BUDDY card in the Shop now shows the next egg wiggling (it glows when you can afford it), and buying there hatches that same buddy.
+- On computers, the drum pads shrink to fit the window, so a 2×2 grid no longer runs off the bottom of the screen.
+
 ## v0.2.198 - 2026-11-24 00:12
 - You can now always buy your next egg from the drum screen. After your first three buddies, one egg stays beside your energy with the next buddy inside it, at the same price as the Shop.
 - The egg goes away only when every bunker slot is filled.

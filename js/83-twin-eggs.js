@@ -111,7 +111,7 @@
       if(getComputedStyle(card).position==='static')card.style.position='relative';}
     const on=totalAliens>=1&&card.style.display!=='none';
     shopEgg.style.display=on?'':'none';if(!on)return;
-    const S=B.contains('phone-land')?{w:22,h:28}:{w:30,h:38};
+    const S=B.contains('phone-land')?{w:20,h:26}:{w:27,h:34};
     if(shopEgg._n!==totalAliens||shopEgg._w!==S.w){shopEgg._n=totalAliens;shopEgg._w=S.w;paintTo(shopEgg.querySelector('canvas'),curPick(),S);}
     if(shopEgg.offsetParent&&!raf){t0=performance.now();raf=requestAnimationFrame(frame);}
   }
@@ -129,11 +129,12 @@
     n.addEventListener('pointerdown',bye);setTimeout(bye,7000);
   }
   const css=document.createElement('style');css.textContent=`
-#shopEgg{position:absolute;right:12px;bottom:11px;pointer-events:none;z-index:1;}
+#shopEgg{position:absolute;right:8px;bottom:4px;pointer-events:none;z-index:1;}
 #shopEgg .se-body{transform-origin:50% 88%;will-change:transform;}
 #shopEgg canvas{display:block;filter:drop-shadow(0 0 0 rgba(0,255,136,0));transition:filter .4s;}
 #shopEgg.ready canvas{filter:drop-shadow(0 0 7px rgba(0,255,136,.75));}
-body.phone-land #shopEgg{right:8px;bottom:9px;}
+body.phone-land #shopEgg{right:6px;bottom:4px;}
+#alienBuyBtn *{pointer-events:none;}   /* the whole green card is one button: taps never land on its text */
 .cornerEgg.fix{position:fixed;z-index:40;}
 .cornerEgg.land{flex-direction:row;gap:4px;}
 .cornerEgg.land .pe-tag{margin-top:0;}

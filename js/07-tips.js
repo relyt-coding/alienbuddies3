@@ -139,20 +139,25 @@ function updateOnboardingArrows(){
       if(!arrowAct._side){arrowAct._side=1;const svg=arrowAct.querySelector('svg'),w=document.createElement('span');w.style.cssText='display:block;transform:rotate(-90deg);margin:-6px 0;';
         svg.parentNode.insertBefore(w,svg);w.appendChild(svg);}
       arrowAct.style.display='flex';
-      const aw=arrowAct.offsetWidth||48,ah=arrowAct.offsetHeight||60;
-      if(rect.left-aw-18>4){arrowAct.style.left=(rect.left-aw-18)+'px';
-        // line the arrow itself (not arrow + label) up with the middle of the button
-        const lb0=arrowAct.firstElementChild;
-        const place=()=>{const sp=arrowAct.querySelector('span'),cy=rect.top+rect.height/2;let top=cy-(arrowAct.offsetHeight||ah)/2;arrowAct.style.top=top+'px';
-          if(sp){const r=sp.getBoundingClientRect();top+=cy-(r.top+r.height/2);arrowAct.style.top=top+'px';}};
-        // v0.2.200: the ACTIVATE word sits above the arrow; if that runs into the score, the word goes beside the arrow instead (ACTIVATE ➜)
-        arrowAct.style.flexDirection='column';arrowAct.style.gap='';if(lb0)lb0.style.marginBottom='';arrowAct.style.left=(rect.left-aw-18)+'px';place();
-        const lb=arrowAct.firstElementChild,se=document.getElementById('scoreEl');
-        if(lb&&se){let sr=null;try{const rg=document.createRange();rg.selectNodeContents(se);sr=rg.getBoundingClientRect();}catch(e){}if(!sr||!sr.width)sr=se.getBoundingClientRect();
+      // v0.2.201: on computers (and once the word has ever run into the score) the arrow is always "ACTIVATE ➜" in one row,
+      // so it never flips between the two layouts as the score's width changes
+      const lb=arrowAct.firstElementChild,row=document.body.classList.contains('desktop-mode')||arrowAct._row;
+      const setMode=r=>{arrowAct.style.flexDirection=r?'row':'column';arrowAct.style.gap=r?'16px':'';if(lb)lb.style.marginBottom=r?'0':'';};
+      const place=()=>{const aw=arrowAct.offsetWidth||48,ah=arrowAct.offsetHeight||60;
+        if(rect.left-aw-(row||arrowAct._row?26:18)>4){arrowAct.style.left=(rect.left-aw-(arrowAct._row||row?26:18))+'px';
+          // line the arrow itself (not arrow + label) up with the middle of the button
+          const sp=arrowAct.querySelector('span'),cy=rect.top+rect.height/2;let top=cy-ah/2;arrowAct.style.top=top+'px';
+          if(sp){const r=sp.getBoundingClientRect();top+=cy-(r.top+r.height/2);arrowAct.style.top=top+'px';}return true;}
+        // no room to the left: the word on top, the arrow pointing DOWN at the button
+        setMode(false);const sw=arrowAct.querySelector('span');if(sw)sw.style.transform='none';
+        const aw2=arrowAct.offsetWidth||48,ah2=arrowAct.offsetHeight||60;
+        arrowAct.style.left=Math.max(4,rect.left+rect.width/2-aw2/2)+'px';arrowAct.style.top=(rect.top-ah2-4)+'px';return false;};
+      {const sw=arrowAct.querySelector('span');if(sw)sw.style.transform='rotate(-90deg)';}
+      setMode(row);const beside=place();
+      if(!row&&beside&&lb){const se=document.getElementById('scoreEl');
+        if(se){let sr=null;try{const rg=document.createRange();rg.selectNodeContents(se);sr=rg.getBoundingClientRect();}catch(e){}if(!sr||!sr.width)sr=se.getBoundingClientRect();
           const lr=lb.getBoundingClientRect();
-          if(lr.right>sr.left-10&&lr.left<sr.right+10&&lr.bottom>sr.top-4&&lr.top<sr.bottom+4){arrowAct.style.flexDirection='row';arrowAct.style.gap='16px';lb.style.marginBottom='0';
-            arrowAct.style.left=Math.max(4,rect.left-arrowAct.offsetWidth-26)+'px';place();}}}
-      else{arrowAct.style.left=Math.max(4,rect.left+rect.width/2-aw/2)+'px';arrowAct.style.top=(rect.top-ah-4)+'px';}
+          if(lr.right>sr.left-10&&lr.left<sr.right+10&&lr.bottom>sr.top-4&&lr.top<sr.bottom+4){arrowAct._row=true;setMode(true);place();}}}
     } else {
       arrowAct.style.display='none';
     }

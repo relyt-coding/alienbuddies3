@@ -56,8 +56,8 @@ function fmtJps(n,sig){return fmtJ(n,sig||3)+'/s';}
 // v0.2.193: the score stays in a unit until it reaches 10,000 of it (5,874 MILLIJOULES, not 5.8742 JOULES), with at most 2 decimals
 function scoreParts(n){n=Math.max(0,Math.floor(n||0));const j=n*J_PER_UNIT;
   if(j<=0)return['0','MILLIJOULES'];
-  let k=0;while(k+1<J_UNITS.length&&j/Math.pow(1000,k-1)>=(k===0?100000:10000))k++;   // mJ until 100 J (v0.2.195), then each unit until 10,000 of it
-  const v=j/Math.pow(1000,k-1);if(v>=(k===0?100000:10000))return jParts(n,6);   // past QJ: scientific
+  let k=0;while(k+1<J_UNITS.length&&j/Math.pow(1000,k-1)>=(k===0?10000:10000))k++;   // mJ until 10 J (v0.2.201), then each unit until 10,000 of it
+  const v=j/Math.pow(1000,k-1);if(v>=10000)return jParts(n,6);   // past QJ: scientific
   const t=v>=1000?Math.floor(v).toLocaleString('en-US'):String(Math.floor(v*100+1e-9)/100);
   if(k===0)return[t,t==='1'?'MILLIJOULE':'MILLIJOULES'];
   if(k===1)return[t,t==='1'?'JOULE':'JOULES'];
@@ -105,7 +105,7 @@ function alienDiscount(n){
   return Math.pow(10,i<=k?ALIEN_L[i]:ALIEN_L[k]+(ALIEN_L[k]-ALIEN_L[k-1])*(i-k));
 }
 const _disc=c=>{const d=progressDiscount();return d>1?Math.max(1,Math.round(c/d)):c;};
-const GAME_VERSION='0.2.200'; // bump on every delivered build (shown in Settings and on the home screen)
+const GAME_VERSION='0.2.201'; // bump on every delivered build (shown in Settings and on the home screen)
 const BASE_CPS=5;
 const UNLOCK_COST=Math.round((bump30(60000000))*SHOP_SALE);
 const ALIEN_POWER_UNLOCK_COST=Math.round((bump30(600000000))*SHOP_SALE);

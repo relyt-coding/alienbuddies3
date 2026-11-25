@@ -150,8 +150,16 @@
     asteroid(g){glow(g,50,52,42,'rgb(255,170,110)',.2);
       g.beginPath();[[50,18],[72,24],[84,46],[78,70],[56,84],[30,80],[16,58],[22,32]].forEach(([x,y],i)=>i?g.lineTo(x,y):g.moveTo(x,y));g.closePath();g.fillStyle=rg(g,46,46,38,['#d8b9a0','#9a6a4a','#4f3020']);g.fill();ink(g);
       [[40,40,7],[62,58,9],[36,66,5],[66,34,4]].forEach(([x,y,r])=>{g.fillStyle='rgba(60,30,20,.5)';g.beginPath();g.arc(x,y,r,0,TAU);g.fill();g.fillStyle='rgba(255,230,210,.35)';g.beginPath();g.arc(x-1.5,y-1.5,r*.55,0,TAU);g.fill();});shine(g,34,30,4);},
-    bolt(g){glow(g,50,50,46,'rgb(255,230,80)',.45);g.beginPath();g.moveTo(58,8);g.lineTo(24,56);g.lineTo(46,56);g.lineTo(38,92);g.lineTo(76,40);g.lineTo(54,40);g.closePath();
-      g.fillStyle=lg(g,30,10,70,90,['#fffbe0','#ffe14d','#f08a10']);g.fill();ink(g);g.strokeStyle='rgba(255,255,255,.7)';g.lineWidth=3;g.beginPath();g.moveTo(52,18);g.lineTo(34,46);g.stroke();},
+    bolt(g){   // v0.2.201: a chunkier, cleaner bolt: one bold shape, a lighter left facet, a darker right facet, no thin lines
+      glow(g,50,50,46,'rgb(255,230,80)',.4);
+      const P=[[42,6],[72,6],[58,38],[78,38],[34,95],[45,55],[24,55]];
+      const path=()=>{g.beginPath();P.forEach(([x,y],i)=>i?g.lineTo(x,y):g.moveTo(x,y));g.closePath();};
+      g.save();g.translate(3,3);path();g.fillStyle='rgba(60,20,40,.45)';g.fill();g.restore();
+      path();g.fillStyle='#ffd21f';g.fill();
+      g.save();path();g.clip();
+      g.fillStyle='#fff3a6';g.beginPath();g.moveTo(42,6);g.lineTo(55,6);g.lineTo(37,55);g.lineTo(24,55);g.closePath();g.fill();     // lit left edge
+      g.fillStyle='#f39a12';g.beginPath();g.moveTo(58,38);g.lineTo(78,38);g.lineTo(34,95);g.lineTo(52,50);g.closePath();g.fill();  // shaded lower right
+      g.restore();path();ink(g,4);},
     compass(g){glow(g,50,50,44,'rgb(255,210,90)',.3);ball(g,50,50,34,['#fff1a8','#e8c25a','#8a6418']);
       g.beginPath();g.arc(50,50,26,0,TAU);g.fillStyle=rg(g,50,50,26,['#ffffff','#f2f2f7','#c0c8d8']);g.fill();ink(g,2.6);
       g.save();g.translate(50,50);g.rotate(.6);g.beginPath();g.moveTo(0,-22);g.lineTo(6,0);g.lineTo(-6,0);g.closePath();g.fillStyle='#ff2b2b';g.fill();ink(g,2.2);

@@ -2,6 +2,16 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.201 - 2026-11-25 11:05
+- The skill tree's middle is now YOUR SHIP instead of the Tucana Core. The four Quad Suns orbit around it, and it flies off to whatever you unlock and circles it. Tap the ship to bring it home.
+- Your energy now switches from millijoules to joules at 10 J, always with at most 2 decimals.
+- Past 4 drum pads, new pad outlines keep appearing around the square: 5th bottom-right, 6th top-right, 7th bottom-left, 8th top-left.
+- The sequencer's dots now come free with the sequencer, with no separate unlock.
+- The ACTIVATE arrow stays in one layout instead of flipping back and forth, and points down at the button when there's no room beside it.
+- A little more space between your energy and the 1 mJ ACTIVATE button.
+- The egg on the PET ALIEN BUDDY card sits lower so it doesn't cover the name, and the whole green card buys it.
+- Cleaner lightning card in the Matching Game.
+
 ## v0.2.200 - 2026-11-24 22:52
 - The Shop's power bars are now just the bar, with no percentage on them.
 - The egg on the PET ALIEN BUDDY card sits lower.

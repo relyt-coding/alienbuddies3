@@ -55,7 +55,7 @@ README.md covers the file layout, test mode and vocals in depth; this file is th
 68 Knowledge Vault · 69 thumb nav (bottom row on upright phones) + PARTY menu + level 3 disco-ball teaser ·
 70 Alien Gem look (Gem Buddy) · 71 level 4 gem ring + gems flying off buddies + MY ACCOUNT sheet ·
 73 Vault big batch (lessons + music words) · 74 Vault price table (generated) · 75 whole-bunker scroll + floating games dock ·
-76 Alien Awakening trails + speed · 77 Egg Incubator + racers · 78 DNA Splice · 79 Buddy Race + Gold Records · 80 extra bunkers · 81 memory diet (3D tree culling) · 82 name-your-file card · 83 corner egg (one at a time to 10 buddies) · 84 hand-picked Vault (editor at /vault) · 85 shop power bars ·
+76 Alien Awakening trails + speed · 77 Egg Incubator + racers · 78 DNA Splice · 79 Buddy Race + Gold Records · 80 extra bunkers · 81 memory diet (3D tree culling) · 82 name-your-file card · 83 corner egg (one at a time to 10 buddies) · 84 hand-picked Vault (editor at /vault) · 85 shop power bars · 86 v0.2.201 touches (free sequencer dots, tracker gap) · 87 YOUR SHIP (skill-tree middle) ·
 72 energy/gem math/party corner + file-select hum (`titleHum`): `openGemStats()` (bunker + shop gem counters), PARTY pill top-left (`.pb-corner`), MY ACCOUNT in Settings only, sequencer tracker ACTIVATE (`seqTrackerActive`, `SEQ_TRACKER_COST`)
 
 - Bunker (v0.2.181, js/75): `.bunker-body` is the scroll box (the grid wrapper no longer scrolls; it only clips the grid's pinch-zoom).
@@ -118,6 +118,12 @@ README.md covers the file layout, test mode and vocals in depth; this file is th
   gets a 7px strip (`.spb`, no number) at the bottom of its button / card (host gets +7px bottom padding). 💎 prices fill against alienGems. MAX / text = no bar.
 - Desktop pad fit (v0.2.199, js/18 fitPadArea): after the size estimate, it measures the real grid bottom and shrinks until it ends 24px above the window
   and the centred column no longer spills.
+- YOUR SHIP (v0.2.201, js/87): the 'core' node is now the ship: owned free once skillTreeUnlocked (so the Quad Suns are the first buys), drawn as an SVG
+  ship (`.st-ship`), moved with CSS `translate` (+ `el._mx/_my` for js/81). `shipFlyTo(id)`; wraps stFocusNode / openStDetail (owned nodes) /
+  renderSkillTree; it circles its target (suns: chases the orbit). Tap = fly home.
+- Pads 5–8 (v0.2.201, js/05 rebuildPadGrid): outlines come two at a time and pads are placed by grid-row/column: 5 BR, 6 TR, 7 BL, 8 TL around the 2×2.
+- Sequencer dots (v0.2.201, js/86): owning a sequencer track sets `seqTrackerActive` and `shop.seqDotsUnlocked`; `#seqTrackerOverlay` is hidden.
+- Score unit (v0.2.201): scoreParts shows MILLIJOULES below 10 J, then JOULES (≤2 decimals).
 - Skill-tree descriptions: `gemsOnly` (js/20) strips any written "×N Alien Gems" and appends the node's REAL `gemMult`, so never hand-write gem amounts.
 
 ## Testing without a phone

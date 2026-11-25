@@ -97,8 +97,10 @@ function rebuildPadGrid(){
   // Pad 3 (the snare) does the same once pad 2 is owned, so the way forward is always visible
   // v0.2.160: with 2 or 3 pads owned, BOTH the snare (3rd) and the 4th pad show as outlines, so the grid is a roomy 2×2
   //   instead of three small pads in a row (three in a row now only happens if you pick 3 in EDIT PADS)
-  const _ghost=((drum.pads>=1&&drum.pads<=3)&&visiblePads>=drum.pads);
-  const _ghostN=!_ghost?0:drum.pads===1?1:4-drum.pads;
+  // v0.2.201: past 4 pads the outlines keep coming, around the 2×2: 5th bottom-right, 6th top-right, 7th bottom-left, 8th top-left
+  //   (two at a time, like the 3rd + 4th, so the grid always has whole columns)
+  const _ghost=((drum.pads>=1&&drum.pads<=7)&&visiblePads>=drum.pads);
+  const _ghostN=!_ghost?0:drum.pads===1?1:drum.pads<=3?4-drum.pads:drum.pads<=5?6-drum.pads:8-drum.pads;
   padGridEl.setAttribute('data-pads',_showPads+_ghostN);
   for(let i=0;i<_showPads;i++){
     const sndId=padSounds[i];
@@ -138,6 +140,12 @@ function rebuildPadGrid(){
     g.addEventListener('pointerdown',e=>{e.preventDefault();if(!k){unlockGhostPad();return;}g.classList.remove('nope');void g.offsetWidth;g.classList.add('nope');});
     padGridEl.appendChild(g); // not added to padEls, so pad indexes stay correct
   }
+  // place pads 1–4 as the middle 2×2 and 5–8 around it (bottom-right, top-right, bottom-left, top-left)
+  const _tot=_showPads+_ghostN;
+  if(_tot>=5&&_showPads>=4){
+    const c0=_tot>=7?1:0,POS=[[1,1+c0],[1,2+c0],[2,1+c0],[2,2+c0],[2,3+c0],[1,3+c0],[2,1],[1,1]];
+    [...padGridEl.children].forEach((el,i)=>{const p=POS[i];if(p){el.style.gridRow=String(p[0]);el.style.gridColumn=String(p[1]);}});
+  }
   if(_ghostN)updateGhostPad();
   if(typeof fitPadAreaSoon==='function')fitPadAreaSoon(); // keep the grid inside the free vertical space
   updatePadClickHint();
@@ -148,7 +156,7 @@ function updatePadClickHint(){
   if(hint)hint.style.display=(score===0&&drum.pads<=1&&!(typeof seqPlaying!=='undefined'&&seqPlaying))?'flex':'none';
 }
 function unlockGhostPad(){
-  if(drum.pads<1||drum.pads>3)return;
+  if(drum.pads<1||drum.pads>7)return;
   const cost=PAD_COSTS[drum.pads];
   if(score<cost){showToast(`Need ${fmtJh(cost)} — keep tapping!`);return;}
   buyNextPad();

@@ -2,6 +2,12 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.200 - 2026-11-24 22:52
+- The Shop's power bars are now just the bar, with no percentage on them.
+- The egg on the PET ALIEN BUDDY card sits lower.
+- On computers, the corner egg now sits in the top-left of the drum pad area, so it never covers the Bunker.
+- On computers, the ACTIVATE arrow's label moves beside the arrow when it would run into your energy number.
+
 ## v0.2.199 - 2026-11-24 22:45
 - Every price in the Shop now has a power bar with a percentage, so you can see how close you are to affording it at a glance.
 - After your first buddy hatches, eggs now come one at a time in the top-left corner instead of beside your energy. A new one rolls in after each hatch until you have 10 buddies, then you buy them in the Shop.

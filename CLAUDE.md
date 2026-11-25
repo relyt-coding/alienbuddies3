@@ -111,11 +111,11 @@ README.md covers the file layout, test mode and vocals in depth; this file is th
   (vault/index.html: library = vault/library.json, the old content; PUBLISH commits entries.json via the GitHub API with the creator's token; PREVIEW
   makes the game on that browser use the draft, localStorage ab2_vaultPreview / ab2_vaultDraft). js/84 overrides vaultEntries / vaultTipsIn /
   vaultEntryCost / vaultCounts; ids are 'c_'+id. js/68 / 73 / 74 content is no longer read.
-- Corner egg (v0.2.199, js/83, replaces the two eggs and v0.2.198's always-on egg): after the first hatch (+10 s) ONE egg sits top-left (`.cornerEgg`; fixed on desktop, after EDIT PADS on
+- Corner egg (v0.2.199, js/83, replaces the two eggs and v0.2.198's always-on egg): after the first hatch (+10 s) ONE egg sits top-left (`.cornerEgg`; fixed on desktop at the top-left of `#gameView .app`, after EDIT PADS on
   sideways phones, under the PARTY pill if that's in the corner) until 10 buddies (`LAST`); then `#eggShopNote` once per slot (`ab2_eggShopNote_N`).
   `#shopEgg` wiggles on the Shop's PET ALIEN BUDDY card; both eggs share one pick per buddy number and a capture listener on #alienBuyBtn sets `alienData[n].base`.
 - Shop power bars (v0.2.199, js/85): jHtml / fmtJh are wrapped to tag the unit span with `data-u` (raw units). Any visible price with a class in its `SEL`
-  gets a 14px strip (`.spb`, "62%") at the bottom of its button / card (host gets +14px bottom padding). 💎 prices fill against alienGems. MAX / text = no bar.
+  gets a 7px strip (`.spb`, no number) at the bottom of its button / card (host gets +7px bottom padding). 💎 prices fill against alienGems. MAX / text = no bar.
 - Desktop pad fit (v0.2.199, js/18 fitPadArea): after the size estimate, it measures the real grid bottom and shrinks until it ends 24px above the window
   and the centred column no longer spills.
 - Skill-tree descriptions: `gemsOnly` (js/20) strips any written "×N Alien Gems" and appends the node's REAL `gemMult`, so never hand-write gem amounts.

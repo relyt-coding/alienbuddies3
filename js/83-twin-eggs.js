@@ -8,7 +8,7 @@
 //  card says that from now on they're bought in the Shop (once per slot, localStorage ab2_eggShopNote_N).
 //  The Shop's green PET ALIEN BUDDY card shows the same egg wiggling (#shopEgg), and buying there hatches that same
 //  pick too (a capture listener sets the base just before js/16's buyAlien runs).
-//  If the PARTY pill sits in the corner (js/72) the egg waits just under it.
+//  If the PARTY pill sits in the corner (js/72) the egg waits just under it. On computers it's the top-left of the drum pad column.
 // ══════════════════════════════════════════════
 (function(){
   const B=document.body.classList,$=id=>document.getElementById(id);
@@ -41,6 +41,10 @@
     const home=desk?document.body:gv;if(egg.parentNode!==home)home.appendChild(egg);egg.classList.toggle('fix',desk);egg.classList.toggle('land',land);
     const o=desk?{left:0,top:0}:(egg.offsetParent||gv).getBoundingClientRect();
     let x=desk?18:10,y=desk?16:12;
+    if(desk){   // computer: the top-left of the drum pad column, never over the Bunker / Shop panels
+      const ap=gv.querySelector('.app'),r=(ap&&ap.getBoundingClientRect().width?ap:gv).getBoundingClientRect();
+      if(r.width){x=Math.max(0,r.left)+16;y=Math.max(0,r.top)+14;}
+    }
     y+=safeTop();
     if(land){   // sideways phone: the top-left is the BUNKER / SETTINGS / EDIT PADS row, so the egg waits right after it
       const ep=$('padEditToggleBtn'),r=ep&&ep.getBoundingClientRect();
@@ -125,11 +129,11 @@
     n.addEventListener('pointerdown',bye);setTimeout(bye,7000);
   }
   const css=document.createElement('style');css.textContent=`
-#shopEgg{position:absolute;right:12px;bottom:26px;pointer-events:none;z-index:1;}
+#shopEgg{position:absolute;right:12px;bottom:11px;pointer-events:none;z-index:1;}
 #shopEgg .se-body{transform-origin:50% 88%;will-change:transform;}
 #shopEgg canvas{display:block;filter:drop-shadow(0 0 0 rgba(0,255,136,0));transition:filter .4s;}
 #shopEgg.ready canvas{filter:drop-shadow(0 0 7px rgba(0,255,136,.75));}
-body.phone-land #shopEgg{right:8px;bottom:20px;}
+body.phone-land #shopEgg{right:8px;bottom:9px;}
 .cornerEgg.fix{position:fixed;z-index:40;}
 .cornerEgg.land{flex-direction:row;gap:4px;}
 .cornerEgg.land .pe-tag{margin-top:0;}

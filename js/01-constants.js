@@ -105,7 +105,7 @@ function alienDiscount(n){
   return Math.pow(10,i<=k?ALIEN_L[i]:ALIEN_L[k]+(ALIEN_L[k]-ALIEN_L[k-1])*(i-k));
 }
 const _disc=c=>{const d=progressDiscount();return d>1?Math.max(1,Math.round(c/d)):c;};
-const GAME_VERSION='0.2.211'; // bump on every delivered build (shown in Settings and on the home screen)
+const GAME_VERSION='0.2.212'; // bump on every delivered build (shown in Settings and on the home screen)
 const BASE_CPS=5;
 const UNLOCK_COST=Math.round((bump30(60000000))*SHOP_SALE);
 const ALIEN_POWER_UNLOCK_COST=Math.round((bump30(600000000))*SHOP_SALE);
@@ -131,7 +131,8 @@ function dotUpgradeCost(n){return Math.round(_disc(DOT_COSTS[Math.min(n,DOT_COST
 function alienCost(n){
   if(n>98)return alienCost(98)*Math.pow(1.12,n-98);   // v0.2.188 extra bunkers: buddy 100+ costs 12% more each (the old curve hits Infinity near #180)
   if(n===0)return 250;        // alien 1: 25 mJ (v0.2.193; its egg rolls in at 10 mJ, js/66)
-  if(n===1||n===2)return 500; // aliens 2 + 3: 50 mJ each, the two eggs that roll in after the first hatch (js/83)
+  if(n===1)return 500;        // alien 2: 50 mJ (the corner egg after the first hatch, js/83)
+  if(n===2)return 1000;       // alien 3: 100 mJ (v0.2.212: no two 50 mJ eggs back to back; 25 → 50 → 100 mJ)
   if(n===3)return 2500000;    // alien 4: 2,500,000
   // alien 5+ — existing growth curve starting from 10M
   let c=10000000;

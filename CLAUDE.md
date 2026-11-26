@@ -101,8 +101,7 @@ README.md covers the file layout, test mode and vocals in depth; this file is th
   `dotBase(-1)` = 2 (dot rows ×2, ×6, ×12…), each DOTS upgrade +1. The Vault price table (js/74) was built on the old pace: rerun tools/vault_prices.py if it feels off.
   js/82 asks an unnamed slot "what's your name?" once at 25 J (small bottom card, `ab2_nameAsked_N`). Vault BACK sits top-right like the Bunker's.
 - First eggs (v0.2.193): the level-1 egg rolls in at `EGG_AT`=100 (10 mJ, js/66) and costs alienCost(0)=250 (25 mJ). js/83: 10 s after the first hatch
-  (once nav-locked / buddy-hold are gone) two `.twinEgg`s roll in either side of the score, each a different `buddyPickFor` pick, alienCost(1)=alienCost(2)=500
-  (50 mJ); tapping one writes its pick to alienData[n].base and calls buyAlien. Score text (`scoreParts`) stays in a unit until 10,000 of it; jParts /
+  (once nav-locked / buddy-hold are gone) two `.twinEgg`s roll in either side of the score, each a different `buddyPickFor` pick, alienCost(1)=500 (50 mJ), alienCost(2)=1000 (100 mJ, v0.2.212); tapping one writes its pick to alienData[n].base and calls buyAlien. Score text (`scoreParts`) stays in a unit until 10,000 of it; jParts /
   formatMult / fmtJoulesExact never show more than 2 decimals.
 - STORE SALE (v0.2.194): `SHOP_SALE`=.5 in js/01 multiplies the unlock constants and, via wrappers at the end of js/01, alienCost (except buddies 1–3 and
   100+, which derive from 98), soundLibCost, seqTrackCost, alienBoost / multiClick / dot / seqMultiClick costs; js/37 halves PARTY_LADDER + SEQ_FEATS.
@@ -163,6 +162,8 @@ README.md covers the file layout, test mode and vocals in depth; this file is th
 - v0.2.211 SINGING: js/90 buddyVoice → `sing(i)` sets `BUDDY_SING[i]`; js/46 `buddySing(i)` = {m mouth 0..1, h hop 0..1} for 0.6 s and drawBuddy reads it
   for any call with an idx (mouth bead hole ×2.5, hop −10% size; float view skips the hop: floating sprites are repainted for 0.6 s + CSS `.bd-sing` hop).
   Calls without an idx pass `o.sing` themselves (js/47 designer).
+- v0.2.212: drum ACTIVATE is `.act-btn` (index.html: dots / ACTIVATE / #drumActPrice / `.spb.ab-bar`); js/07 updateDrumTrackerOverlay toggles `.can`
+  and fills the bar (every 250 ms); styles at the end of css/style.css. alienCost(2) = 1000 (100 mJ): first eggs 25 → 50 → 100 mJ, then 125 J.
 - Skill-tree descriptions: `gemsOnly` (js/20) strips any written "×N Alien Gems" and appends the node's REAL `gemMult`, so never hand-write gem amounts.
 
 ## Testing without a phone

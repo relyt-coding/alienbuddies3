@@ -2991,3 +2991,28 @@ body.pad-squeeze:not(.desktop-mode) .game-header,body.pad-squeeze:not(.desktop-m
 /* v0.2.210: the next drum pad's energy bar (same look as the Fusebox power bars, js/85 .spb) */
 .pad.ghost-pad .gp-bar{height:7px;border-radius:0 0 12px 12px;z-index:3;}
 .pad.ghost-pad.ghost-later .gp-bar{display:none;}
+
+/* v0.2.212: the drum tracker's ACTIVATE (testers weren't noticing it). Dark while you save up (with an energy strip);
+   bright green, glowing and pulsing once you can afford it, with the five dots it switches on lighting up in a chase. */
+#drumTrackerActivateBtn.act-btn{position:relative;overflow:hidden;display:inline-flex;align-items:center;gap:.5rem;font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:.12em;
+  padding:.45rem 1rem calc(.45rem + 6px);border-radius:12px;border:1.5px solid rgba(0,255,136,.45);background:linear-gradient(180deg,#0b2a17,#04140a);color:#7dffbf;cursor:pointer;
+  touch-action:manipulation;white-space:nowrap;box-shadow:0 0 14px -4px rgba(0,255,136,.45),inset 0 1px 0 rgba(255,255,255,.08);transition:transform .3s cubic-bezier(.34,1.56,.64,1),background .3s,color .3s,box-shadow .3s;}
+#drumTrackerActivateBtn .ab-dots{display:inline-flex;gap:3px;}
+#drumTrackerActivateBtn .ab-dots i{width:6px;height:6px;border-radius:50%;background:rgba(0,255,136,.28);}
+#drumTrackerActivateBtn .ab-price{font-size:.85em;opacity:.8;padding-left:.45rem;border-left:1px solid rgba(0,255,136,.3);}
+#drumTrackerActivateBtn .ab-bar{height:5px;border-radius:0 0 10px 10px;}
+#drumTrackerActivateBtn.can{background:linear-gradient(180deg,#5dffb0,#00d870);color:#02200f;border-color:#b6ffd9;transform:scale(1.12);
+  animation:abPulse 1.4s ease-in-out infinite;}
+#drumTrackerActivateBtn.can .ab-price{opacity:1;border-left-color:rgba(2,32,15,.35);}
+#drumTrackerActivateBtn.can .ab-dots i{background:rgba(2,32,15,.3);animation:abDot 1.1s steps(1) infinite;}
+#drumTrackerActivateBtn.can .ab-dots i:nth-child(2){animation-delay:.15s;}#drumTrackerActivateBtn.can .ab-dots i:nth-child(3){animation-delay:.3s;}
+#drumTrackerActivateBtn.can .ab-dots i:nth-child(4){animation-delay:.45s;}#drumTrackerActivateBtn.can .ab-dots i:nth-child(5){animation-delay:.6s;}
+@keyframes abDot{0%{background:#ffe14d;box-shadow:0 0 6px #ffe14d;}40%{background:rgba(2,32,15,.3);box-shadow:none;}}
+#drumTrackerActivateBtn.can::after{content:'';position:absolute;top:0;bottom:0;width:40%;left:-60%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.55),transparent);animation:abShine 2.2s ease-in-out infinite;}
+@keyframes abShine{0%,55%{left:-60%;}100%{left:130%;}}
+@keyframes abPulse{0%,100%{box-shadow:0 0 18px -2px rgba(0,255,136,.75),0 0 0 0 rgba(0,255,136,.55);}50%{box-shadow:0 0 28px 2px rgba(0,255,136,.9),0 0 0 9px rgba(0,255,136,0);}}
+#drumTrackerActivateBtn:active{transform:scale(.96);}
+body.phone-land #drumTrackerActivateBtn.act-btn{font-size:.72rem !important;padding:.22rem .6rem calc(.22rem + 4px) !important;gap:.35rem;}
+body.phone-land #drumTrackerActivateBtn .ab-dots i{width:4px;height:4px;}
+body.phone-land #drumTrackerActivateBtn .ab-bar{height:3px;}
+body.phone-land #drumTrackerActivateBtn.act-btn.can{animation:abPulse 1.4s ease-in-out infinite !important;}

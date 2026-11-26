@@ -219,13 +219,15 @@ function updateDrumTrackerOverlay(){
   document.body.classList.toggle('drum-overlay',!drumTrackerActive); // gives the ACTIVATE button room so it never covers the score text
   const btn=document.getElementById('drumTrackerActivateBtn');
   if(btn&&!drumTrackerActive){
+    // v0.2.212: a bigger ACTIVATE with an energy strip; once you can afford it, it turns bright green and pulses (css: .act-btn)
     const canAfford=score>=DRUM_TRACKER_COST;
-    btn.style.transform=canAfford?'scale(1.25)':'scale(1)';
-    btn.style.transition='transform .3s cubic-bezier(.34,1.56,.64,1)';
-    btn.style.boxShadow=canAfford?'0 0 20px -2px rgba(0,255,136,.7)':'0 0 12px -3px rgba(0,255,136,.4)';
+    btn.classList.toggle('can',canAfford);
+    const bar=btn.querySelector('.ab-bar');if(bar){bar.firstChild.style.width=(Math.min(1,Math.max(0,score/DRUM_TRACKER_COST))*100).toFixed(1)+'%';bar.classList.toggle('full',canAfford);}
+    const pr=document.getElementById('drumActPrice'),h=fmtJh(DRUM_TRACKER_COST);if(pr&&pr._h!==h){pr._h=h;pr.innerHTML=h;}
   }
 }
 
+setInterval(()=>{if(typeof drumTrackerActive!=='undefined'&&!drumTrackerActive&&document.body.classList.contains('game-active'))updateDrumTrackerOverlay();},250);   // v0.2.212: keep its bar filling
 document.getElementById('drumTrackerActivateBtn')&&document.getElementById('drumTrackerActivateBtn').addEventListener('click',()=>{
   if(drumTrackerActive)return;
   if(score<DRUM_TRACKER_COST){showToast('Need '+fmtJh(DRUM_TRACKER_COST)+' to activate the drum tracker!');return;}

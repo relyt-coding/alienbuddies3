@@ -2,6 +2,14 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.204 - 2026-11-26 08:40
+- Everything you buy with Alien Gems in the galaxies is now bought by holding its button down: it fills up, hums higher and higher, and bursts when it's yours.
+- Tapping the Alien Gem counter on the drum pads screen opens the Alien Gem math, with a reminder to hold gem buttons to unlock them.
+- The ALIEN PARTY unlock song now plays in time with your sequencer, and it's a brand-new spacey festival drop.
+- Naming yourself with the "what's your name?" card now shows your name under the title right away.
+- The disco ball no longer sits on top of your energy when there's room beside it.
+- On computers, the DRUMPAD and SEQUENCER dot trackers sit closer to your energy, and the corner egg stays in the top-left in the wide layout too.
+
 ## v0.2.203 - 2026-11-26 08:05
 - The glowing ring on the Hi-Hat pad now only shows on a brand-new game, and it keeps pulsing until your very first press. It no longer comes back after the Bunker and Shop open up.
 - EDIT PADS now appears once you unlock your 3rd drum pad.

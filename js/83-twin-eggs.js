@@ -44,9 +44,7 @@
     if(desk){   // computer: the top-left of the drum pad column, never over the Bunker / Shop panels
       const ap=gv.querySelector('.app'),r=(ap&&ap.getBoundingClientRect().width?ap:gv).getBoundingClientRect();
       if(r.width){x=Math.max(0,r.left)+16;y=Math.max(0,r.top)+14;}
-      // wide DAW layout (sequencer on, panels shut): the drum tracker owns that corner, so the egg waits just above the pads' top-left
-      const pg=document.getElementById('padGrid'),gr=B.contains('daw-wide')&&pg&&pg.getBoundingClientRect();
-      if(gr&&gr.width){const eh=egg.offsetHeight||90;if(gr.top-eh-10>120){x=gr.left;y=gr.top-eh-10;}}
+      // (v0.2.204: in the wide layout too: the dot trackers now sit in towards the score, so the corner is free)
     }
     y+=safeTop();
     if(land){   // sideways phone: the top-left is the BUNKER / SETTINGS / EDIT PADS row, so the egg waits right after it

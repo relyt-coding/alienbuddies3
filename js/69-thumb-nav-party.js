@@ -160,7 +160,11 @@ body.phone-land #partyTeaser .pt-tag{font-size:12px;padding:2px 6px 1px;}
     const o=gv.getBoundingClientRect(),w=tz.offsetWidth||60,h=tz.offsetHeight||90,land=B.contains('phone-land');
     // v0.2.166: the disco ball hangs on the LEFT of the score, where the PARTY button will appear once it's bought
     //   (only if there's no room there does it go to the right)
-    let x=r.left-w-(land?10:18);
+    // v0.2.204: clear everything under the score too (the energy bar, the exact line, ×N per tap), not just the number
+    let left=r.left;['energyMeter','scoreSubEl','multEl'].forEach(id=>{const e=$(id);if(!e||!e.offsetParent)return;
+      let q=e.getBoundingClientRect();if(id!=='energyMeter'){try{const rg=document.createRange();rg.selectNodeContents(e);q=rg.getBoundingClientRect();}catch(_){}}
+      if(q.width&&q.top<r.bottom+h)left=Math.min(left,q.left);});
+    let x=left-w-(land?10:18);
     if(x<o.left+4)x=r.right+Math.max(16,Math.min(36,r.height*.45));
     tz.style.left=(x-o.left).toFixed(1)+'px';tz.style.top=(r.top+r.height/2-h*.55-o.top).toFixed(1)+'px';
   }

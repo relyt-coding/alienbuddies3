@@ -295,17 +295,68 @@
       cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);cv.style.width=W+'px';cv.style.height=H+'px';
       P=Object.assign({t0:performance.now(),sp,g,W,H,U,dpr,spots:mkSpots(),onDone,partyOn:false,landed:false,fx},MODES.unlock);
       fx.classList.add('on');
-      snd((S,t)=>{const{tone,noise,inst}=K;
-        noise(S,t,{f0:3000,f1:300,q:2,a:.08,d:.3});tone(S,t,900,{f1:180,gl:.3,a:.05,d:.2});   // a record scratch into the drop
-        const B=60/124,T=t+.5;for(let b=0;b<6;b++){const s=T+b*B;inst(S,'kick',s,0,.8);noise(S,s+B/2,{type:'highpass',f0:7000,a:.07,d:.16});if(b%2)inst(S,'clap',s,0,.6);
-          // octave-bouncing bass in D (up to G for the last two beats) and an offbeat minor-7 stab
-          const up=b>=4?500:0;inst(S,'basenote',s,up,.7);inst(S,'basenote',s+B/2,1200+up,.5);
-          if(b%2===0)[200,500,900,1200].forEach(x=>inst(S,'stab',s+B*.75,x+up,.16));}
-        // ta-da as the button lands
-        inst(S,'kick',T+B*6,0,.8);[587.33,739.99,880,1174.66].forEach((f,i)=>tone(S,T+B*6+i*.05,f,{a:.035,d:.9,rv:.6}));},.5);
+      // v0.2.204: the celebration plays IN TIME with your sequencer (its tempo, landing on its next beat) and sounds like a
+      //   2015 spacey festival drop: a filtered build with a snare roll and riser, then wide pumping supersaw chords, a
+      //   sub, a plucky lead with echoes, big reverb, and a ta-da chord as the PARTY button lands. The light show stretches to fit.
+      let endAt=3.4;
+      snd((S,t)=>{endAt=partySong(S,t)-t+.35;},.38);
+      if(endAt>3.4){const f=endAt/3.4;['drop0','drop1','up0','up1','on0','on1','off0','off1','dim0','dim1','dur','land'].forEach(k=>P[k]=MODES.unlock[k]*f);P.pOn=.45*f;P.pOff=3.25*f;}
       P.raf=requestAnimationFrame(partyFrame);
     },sp);
   };
+  // ── the party unlock song: returns the audio time of the final ta-da ──
+  function partySong(S,t0){
+    const{tone,noise,inst}=K,c=S.c;
+    const bpm=(typeof seqBpm==='number'&&seqBpm>=50)?seqBpm:110,B=60/bpm,st=B/4;
+    // lock to the sequencer's grid: the drop's first beat is a real beat of the beat you're playing
+    let T=t0+.45;
+    const m=window._seqMark;
+    if(typeof seqPlaying!=='undefined'&&seqPlaying&&m&&typeof m.at==='number'&&Math.abs(m.at-t0)<2){
+      let k=1;while(((m.st+k)%4)!==0)k++;let tb=m.at+k*st;while(tb<t0+.4)tb+=B;T=tb;}
+    // two build beats, four drop beats, then the ta-da
+    const D=T+2*B;
+    // a little stereo-ish width: a feedback echo on its own bus (dotted 8th, very 2015)
+    const echo=c.createDelay(2),fb=c.createGain(),eo=c.createGain();echo.delayTime.value=B*.75;fb.gain.value=.38;eo.gain.value=.5;
+    echo.connect(fb);fb.connect(echo);echo.connect(eo);eo.connect(S.out);eo.connect(S.send);
+    // supersaw chord: 5 detuned saws per note, a lowpass that can sweep, and a sidechain-style pump on every beat
+    function saw(notes,a,b,o){o=o||{};const lp=c.createBiquadFilter(),g=c.createGain();lp.type='lowpass';lp.Q.value=.7;
+      lp.frequency.setValueAtTime(o.f0||5200,a);if(o.f1)lp.frequency.exponentialRampToValueAtTime(o.f1,b);
+      lp.connect(g);g.connect(S.out);const sv=c.createGain();sv.gain.value=o.rv||.55;g.connect(sv);sv.connect(S.send);
+      const lvl=(o.a||.05)/notes.length;g.gain.setValueAtTime(0,a);
+      if(o.pump){for(let x=a;x<b-.01;x+=B){g.gain.setValueAtTime(lvl*.12,x);g.gain.linearRampToValueAtTime(lvl,x+B*.42);}}
+      else g.gain.linearRampToValueAtTime(lvl,a+(o.k||.02));
+      g.gain.setValueAtTime(lvl,b-.02);g.gain.linearRampToValueAtTime(0,b+(o.rel||.12));
+      notes.forEach(f=>[-17,-8,0,8,17].forEach(dt=>{const x=c.createOscillator();x.type='sawtooth';x.frequency.value=f;x.detune.value=dt;x.connect(lp);x.start(a);x.stop(b+(o.rel||.12)+.05);}));}
+    const N=n=>440*Math.pow(2,(n-69)/12);   // MIDI note → Hz
+    // chords (D minor colours): Bbmaj7 → C(add9) | Dm9 → F(add9)
+    const CH=[[58,62,65,69],[60,64,67,74],[62,65,69,76],[65,69,72,79]];
+    // BUILD (2 beats): filtered chord opening up, a white-noise riser, a snare roll that speeds up, a pitch-up blip
+    noise(S,t0,{f0:3000,f1:300,q:2,a:.07,d:.3});tone(S,t0,900,{f1:180,gl:.3,a:.045,d:.2});   // record scratch into the build
+    saw(CH[0].map(N),t0+.05,D,{a:.05,f0:450,f1:3800,k:.2,rv:.7});
+    noise(S,t0+.05,{type:'highpass',f0:400,f1:6000,q:.6,a:.06,k:Math.max(.2,(D-t0)*.95),d:.1,rv:.5});
+    for(let i=0;i<8;i++){const x=T+i*st;if(i<4)inst(S,'snare',x,0,.18+i*.04);else{inst(S,'snare',x,0,.3+i*.05);inst(S,'snare',x+st/2,0,.28+i*.05);}}
+    tone(S,T,220,{f1:880,gl:2*B,a:.025,k:.05,d:2*B,type:'square'});
+    // DROP (4 beats): kick every beat, clap on 2 and 4, open hats on the offbeats, sub bass, pumping chords, pluck lead
+    inst(S,'kick',D,0,1);noise(S,D,{type:'lowpass',f0:9000,f1:300,q:.6,a:.12,d:1.2,rv:.9});   // impact
+    for(let b=0;b<4;b++){const x=D+b*B;
+      inst(S,'kick',x,0,.95);if(b%2)inst(S,'clap',x,0,.7);
+      noise(S,x+B/2,{type:'highpass',f0:8000,a:.06,k:.004,d:.18});
+      const ch=CH[b];saw(ch.map(N),x,x+B,{a:.075,pump:true,f0:4200,rv:.5});
+      tone(S,x+B*.04,N(ch[0]-24),{a:.22,k:.01,hold:B*.55,d:.18});   // sub
+    }
+    // pluck lead (pentatonic, chopped like a vocal sample) into the echo
+    const lead=[74,77,81,79,77,74,76,72];
+    lead.forEach((n,i)=>{const x=D+i*B/2+(i%2?B*.25:0);const o=tone(S,x,N(n),{type:'triangle',a:.045,k:.004,d:.28,rv:.4});
+      const sq=c.createOscillator(),v=c.createGain();sq.type='square';sq.frequency.value=N(n+12);v.gain.setValueAtTime(0,x);v.gain.linearRampToValueAtTime(.012,x+.004);v.gain.exponentialRampToValueAtTime(.0005,x+.2);
+      sq.connect(v);v.connect(S.out);v.connect(echo);sq.start(x);sq.stop(x+.25);});
+    // ta-da as the button lands: a big wide Dm(add9) with a sparkle on top and a long reverb tail
+    const E=D+4*B;
+    inst(S,'kick',E,0,.9);saw([62,65,69,76].map(N),E,E+.9,{a:.07,f0:6000,f1:900,rel:1.2,rv:.9});
+    [86,88,93].forEach((n,i)=>tone(S,E+i*.06,N(n),{a:.02,d:1.2,rv:.8}));
+    noise(S,E,{type:'highpass',f0:5000,a:.05,d:1.4,rv:.9});
+    setTimeout(()=>{try{fb.disconnect();echo.disconnect();eo.disconnect();}catch(e){}},(E-c.currentTime+4)*1000);
+    return E;
+  }
   let P=null;
   const BALL_C=['#ff5fb8','#3fe6ff','#ffd23f','#5fe07a','#b38cff','#ff8a3d'];
   // unlock: the full show (dims the screen, runs a short party with its own groove, the button lands at the end)
@@ -336,8 +387,8 @@
     if(P.mode==='start'&&typeof partyMode!=='undefined'&&!partyMode&&t>.1){endParty();return;}   // stopped the party: lights off
     g.setTransform(P.dpr,0,0,P.dpr,0,0);g.clearRect(0,0,W,H);
     g.fillStyle=`rgba(4,2,12,${P.dimMax*dim})`;g.fillRect(0,0,W,H);
-    if(t>.45&&!P.partyOn){P.partyOn=true;P.wasParty=typeof partyMode!=='undefined'&&partyMode;if(!P.wasParty&&typeof startParty==='function')try{startParty();}catch(e){}}
-    if(t>3.25&&!P.partyOff){P.partyOff=true;if(!P.wasParty&&typeof stopParty==='function')try{stopParty();}catch(e){}}
+    if(t>(P.pOn||.45)&&!P.partyOn){P.partyOn=true;P.wasParty=typeof partyMode!=='undefined'&&partyMode;if(!P.wasParty&&typeof startParty==='function')try{startParty();}catch(e){}}
+    if(t>(P.pOff||3.25)&&!P.partyOff){P.partyOff=true;if(!P.wasParty&&typeof stopParty==='function')try{stopParty();}catch(e){}}
     // beams and light spots from the ball
     const on=ss(P.on0,P.on1,t)*(1-ss(P.off0,P.off1,t));
     if(on>0){g.globalCompositeOperation='lighter';

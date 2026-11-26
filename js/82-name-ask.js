@@ -15,7 +15,9 @@
   const inp=card.querySelector('#naInput');
   function close(){card.classList.remove('on');try{inp.blur();}catch(e){}}
   function done(){const v=inp.value.trim().toUpperCase().slice(0,16);if(!v){inp.focus();return;}
-    if(typeof setSlotName==='function')setSlotName(activeSlot,v);close();if(typeof showToast==='function')showToast('Nice to meet you, '+v+'!');}
+    if(typeof setSlotName==='function')setSlotName(activeSlot,v);
+    {const st=document.getElementById('slotSubtitle');if(st)st.textContent=v;}   // v0.2.204: the name under the title updates right away
+    close();if(typeof showToast==='function')showToast('Nice to meet you, '+v+'!');}
   card.querySelector('#naOk').addEventListener('click',done);
   inp.addEventListener('keydown',e=>{if(e.key==='Enter')done();});
   card.querySelector('.na-x').addEventListener('click',close);card.querySelector('.na-later').addEventListener('click',close);

@@ -26,6 +26,8 @@
 .trk-wrap{margin-top:10px;}
 body.desktop-mode .trk-wrap{margin-top:16px;}
 body.phone-land .trk-wrap{margin-top:4px;}
+/* v0.2.204: the DRUMPAD / SEQUENCER dot trackers sit in towards the score instead of out at the edges */
+body.seq-on.desktop-mode:not(.narrow-center) #scoreRow .score-section{flex:0 1 560px !important;}
 body.edit-pads-off #padEditToggleBtn{display:none !important;}
 body.desktop-mode.pads-wide:not(.daw-wide) #gameView .app{justify-content:flex-start;gap:clamp(14px,3.2vh,34px);}
 /* the wide DAW row keeps pads in one line, in order (js/05 places 5–8 around the 2×2 everywhere else) */

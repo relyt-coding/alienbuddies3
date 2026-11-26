@@ -189,7 +189,12 @@
     const c=document.getElementById('introCatch');if(c)c.classList.remove('on');
     const sw=document.getElementById('introSweep');if(sw){sw.classList.remove('go');void sw.offsetWidth;sw.classList.add('go');}
     const pad=[...document.querySelectorAll('#gameView .pad-grid > .pad')].find(p=>vis(p)&&!p.classList.contains('ghost-pad'));
-    if(pad){pad.classList.remove('intro-hi');void pad.offsetWidth;pad.classList.add('intro-hi');setTimeout(()=>pad.classList.remove('intro-hi'),2400);}
+    // v0.2.203: the hi-hat only radiates on a brand-new file, before its very first press, and then keeps calling until you press
+    //   (not after the BUNKER / SHOP cutscene or any later file open)
+    const fresh=I&&I.M===IMODES.pads&&typeof totalAliens==='number'&&totalAliens<1&&typeof score==='number'&&score<=0;
+    if(pad&&fresh){pad.classList.add('intro-hi');
+      const stop=()=>{pad.classList.remove('intro-hi');document.removeEventListener('pointerdown',stop,true);document.removeEventListener('keydown',stop,true);};
+      document.addEventListener('pointerdown',stop,true);document.addEventListener('keydown',stop,true);}
     BC.add('intro-ui-in');setTimeout(()=>BC.remove('intro-ui-in'),1400);
   }
   function cleanParts(){if(!I)return;I.parts.forEach(e=>{e.classList.remove('ib','ib-pop','ib-drop','ib-rise','ib-slide');e.style.removeProperty('--ibd');});I.parts=[];}

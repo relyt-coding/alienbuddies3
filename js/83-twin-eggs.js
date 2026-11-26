@@ -50,7 +50,8 @@
     }
     y+=safeTop();
     if(land){   // sideways phone: the top-left is the BUNKER / SETTINGS / EDIT PADS row, so the egg waits right after it
-      const ep=$('padEditToggleBtn'),r=ep&&ep.getBoundingClientRect();
+      // (EDIT PADS only shows from the 3rd pad, v0.2.203: use the last button of that row that's on screen)
+      const ep=['padEditToggleBtn','settingsOpenBtn','accountBtn','openBunkerBtn'].map($).find(e=>e&&e.getBoundingClientRect().width>0),r=ep&&ep.getBoundingClientRect();
       if(r&&r.width){x=r.right+10;y=Math.max(2,r.top+r.height/2-(egg.offsetHeight||40)/2);}
     }
     const pb=$('partyBtn');

@@ -2,6 +2,10 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.203 - 2026-11-26 08:05
+- The glowing ring on the Hi-Hat pad now only shows on a brand-new game, and it keeps pulsing until your very first press. It no longer comes back after the Bunker and Shop open up.
+- EDIT PADS now appears once you unlock your 3rd drum pad.
+
 ## v0.2.202 - 2026-11-25 21:20
 - Pads 6, 7 and 8 now cost 2,500 mJ, 25 J and 250 J (the 6th was over a megajoule before).
 - On computers, once you have 5 or more pads the screen stacks from the top, so the pads sit right under the sequencer instead of down at the bottom.

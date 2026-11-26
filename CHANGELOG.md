@@ -2,6 +2,10 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.213 - 2026-11-26 13:35
+- Messages no longer cover the ACTIVATE button: they show up just below it.
+- On computers, click a drum pad's little hotkey letter to open that pad's edit window (its sound and its hotkey) without playing it.
+
 ## v0.2.212 - 2026-11-26 13:30
 - The ACTIVATE button is bigger and easier to spot: it has an energy bar that fills as you save up, and once you can afford it, it turns bright green, glows, pulses and its five dots light up.
 - Your 3rd buddy now costs 100 mJ (it was 50 mJ, the same as your 2nd), so the first eggs go 25 → 50 → 100 mJ.

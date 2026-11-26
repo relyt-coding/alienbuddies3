@@ -13,7 +13,10 @@ function showToast(msg){
     // (before it's on, the ACTIVATE box sits there instead: go under that)
     const ov=document.getElementById('drumTrackerOverlay');
     const tw=typeof drumTrackerActive!=='undefined'&&drumTrackerActive?document.getElementById('tiersWrap'):(ov&&getComputedStyle(ov).display!=='none'?ov:null);
-    const tr=tw&&tw.offsetParent!==null?tw.getBoundingClientRect():null;
+    let tr=tw&&tw.offsetParent!==null?tw.getBoundingClientRect():null;
+    // v0.2.213: the bigger ACTIVATE button (it grows when you can afford it) reaches below its dark box: clear the button too
+    const ab=document.getElementById('drumTrackerActivateBtn');
+    if(tr&&tw===ov&&ab&&ab.offsetParent!==null){const q=ab.getBoundingClientRect();if(q.height&&q.bottom>tr.bottom)tr={height:tr.height,bottom:q.bottom+8};}
     const top=tr&&tr.height>0?tr.bottom+6:r&&r.height>0?r.top:(sc?sc.getBoundingClientRect().bottom:0);
     if(top>0)el.style.top=(top+4)+'px';}catch(e){}
   // v0.2.165: once the sequencer is in, the space under the trackers IS the sequencer: messages sit low instead,

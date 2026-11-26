@@ -117,6 +117,8 @@ function rebuildPadGrid(){
     const idx=i;
     el.addEventListener('pointerdown',e=>{
       e.preventDefault();
+      // v0.2.213: the hotkey badge is a button: it opens this pad's edit window (sound + hotkey) instead of playing the pad
+      if(e.target&&e.target.closest&&e.target.closest('.pad-key:not(.ghost-key)')){e.stopPropagation();openPadPicker(idx);return;}
       if(e.pointerType==='touch'&&!padEditMode&&sndId){padTouchFire(idx,e,'ptr');return;}   // one hit per finger (see below)
       if(padEditMode){
         // In edit mode: always open picker regardless of whether sound assigned

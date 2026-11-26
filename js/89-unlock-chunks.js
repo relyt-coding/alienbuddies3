@@ -57,7 +57,7 @@
     try{const k=window.US_KIT;if(k&&k.mixer){const S=k.mixer(.6);if(S){k.noise(S,S.t,{type:'lowpass',f0:600,f1:120,a:.12,d:.6});   // the heavy door
       [523.25,659.25,783.99,1046.5,1318.5].forEach((f,i)=>k.tone(S,S.t+.35+i*.07,f,{type:'triangle',a:.045,d:1.1,rv:.7}));}}}catch(e){}
     const b=$('tipsBtn');if(b){b.classList.add('vault-new','vault-arrive');setTimeout(()=>b.classList.remove('vault-arrive'),2600);}
-    if(typeof showToast==='function')showToast('THE VAULT is open! Find it next to your energy.');
+    if(typeof showToast==='function')showToast('THE VAULT is open! Find it at the top of your Bunker.');
     if(typeof renderUI==='function')renderUI();if(typeof autoSave==='function')autoSave();
   });
 

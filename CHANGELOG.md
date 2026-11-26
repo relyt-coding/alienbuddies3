@@ -2,6 +2,15 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.207 - 2026-11-26 11:00
+- Fixed: on a sideways iPad, the drum pads were too big and ran under the bottom buttons.
+- Fixed: on a sideways phone, the corner egg could sit on top of your energy; it now finds a free spot in the top row.
+- Fixed: the corner egg could hide behind the PARTY button on iPads.
+- On computers, the dot trackers and the sequencer now make room for the corner egg instead of sitting under it.
+- On computers, the Alien Gem counter moves to the top-right corner when it would bump into the SEQUENCER dots, and stays clear of the energy bar.
+- The ACTIVATE arrow no longer pokes out over an open Bunker.
+- The Vault unlock message now tells you it's at the top of your Bunker.
+
 ## v0.2.206 - 2026-11-26 09:30
 - On computers, the next drum pad to unlock now shows its key in the corner, and pressing that key unlocks it (if you have the energy; otherwise it shakes).
 

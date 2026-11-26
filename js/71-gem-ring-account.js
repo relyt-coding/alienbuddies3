@@ -112,11 +112,21 @@ body.desktop-mode #accountBox{border-radius:20px;}
     const W=innerWidth;
     if(land){   // next to SHOP in the header row
       const sb=$('openStoreBtn'),r=sb&&sb.getBoundingClientRect();const w=ring.offsetWidth||90,h=ring.offsetHeight||34;
-      const right=r&&r.width?r.left-10:W-12;ring.style.left=(right-w)+'px';ring.style.top=((r&&r.width?r.top+r.height/2:22)-h/2)+'px';ring.style.right='auto';return;}
+      const right=r&&r.width?r.left-10:W-12;ring.style.left=(right-w)+'px';ring.style.top=Math.max(2,(r&&r.width?r.top+r.height/2:22)-h/2)+'px';ring.style.right='auto';return;}
     if(desk){   // beside the score
       const se=$('scoreEl');let r=null;try{const rg=document.createRange();rg.selectNodeContents(se);r=rg.getBoundingClientRect();}catch(e){}
       if(!r||!r.width)r=se?se.getBoundingClientRect():null;
-      const h=ring.offsetHeight||50;if(r){ring.style.left=(r.right+26)+'px';ring.style.top=(r.top+r.height/2-h/2)+'px';ring.style.right='auto';}return;}
+      const h=ring.offsetHeight||50;const em=$('energyMeter'),emr=em&&em.offsetParent?em.getBoundingClientRect():null;   // (v0.2.207: clear of the energy bar under the score too)
+      if(r){const w=ring.offsetWidth||150,lx=Math.max(r.right,emr&&emr.width?emr.right:0)+26,ty=r.top+r.height/2-h/2;
+        // v0.2.207: if that runs into the SEQUENCER tracker (narrow column, a panel open), it goes to the column's top-right corner instead
+        const at=$('autoTiersCol'),q=at&&at.offsetParent?at.getBoundingClientRect():null;
+        const hit=q&&q.width&&lx<q.right&&lx+w>q.left-8&&ty<q.bottom&&ty+h>q.top;
+        if(!hit){ring.style.left=lx+'px';ring.style.top=ty+'px';}
+        else{const ap=document.querySelector('#gameView .app'),cr=ap?ap.getBoundingClientRect():{right:innerWidth,top:0};
+          let right=cr.right-14;const fr=$('dawFillBtnR'),fq=fr&&fr.classList.contains('show')?fr.getBoundingClientRect():null;
+          if(fq&&fq.width&&right>fq.left-8)right=fq.left-10;
+          ring.style.left=(right-w)+'px';ring.style.top=(Math.max(0,cr.top)+10)+'px';}
+        ring.style.right='auto';}return;}
     // upright phone: top-right corner
     ring.style.left='auto';ring.style.right='10px';ring.style.top='calc(env(safe-area-inset-top,0px) + 8px)';
   }
@@ -224,7 +234,7 @@ body.desktop-mode #accountBox{border-radius:20px;}
     partySeenAt=0;partyWasLoaded=typeof shop!=='undefined'&&(shop.partyLevel||0)>=1;lastFloor=null;shownCount=null;setShown(false);return r;};}
   setInterval(()=>{try{
     setShown(wantShown());placeAccount();
-    if(shown){watchGems();paint();if((++tf)%4===0)layout();}else lastFloor=null;
+    if(shown){watchGems();paint();if((++tf)%2===0)layout();}else lastFloor=null;
   }catch(e){console.warn('gem ring / account',e);}},250);
   addEventListener('resize',()=>{if(shown)layout();placeAccount();});
 })();

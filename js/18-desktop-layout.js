@@ -277,11 +277,13 @@ function fitPadArea(){
   if(!document.body.classList.contains('desktop-mode')||app.offsetHeight===0){
     grid.style.maxWidth='';grid.style.marginTop='';grid.style.marginLeft='';grid.style.marginRight='';clearPhoneBalance();
     // phone layout: size the pads to the space left above the SETTINGS / EDIT PADS buttons so they never overlap
-    const sb=document.getElementById('soundboardBtn');
+    // v0.2.207: the bottom limit is whichever bottom-row button is really on screen (iPads use the thumb row, where the
+    //   old SETTINGS button is hidden, so the pads used to run under the row on a sideways iPad)
+    const sb=['soundboardBtn','settingsOpenBtn','openBunkerBtn','padEditToggleBtn'].map(id=>document.getElementById(id)).find(e=>{if(!e)return false;const r=e.getBoundingClientRect();return r.width>0&&r.top>innerHeight*.5;})||document.getElementById('soundboardBtn');
     const nPads=Math.max(1,Math.min(8,parseInt(grid.getAttribute('data-pads'))||1));
     const seqOn=document.body.classList.contains('seq-on');
     // tablets held sideways / short computer windows: wide pads would eat the sequencer's room, so keep the pad grid about screen-height wide
-    if(seqOn&&innerWidth>innerHeight&&grid.parentElement){const cap=Math.round(Math.min(grid.parentElement.clientWidth,innerHeight*0.8));if(cap<grid.parentElement.clientWidth-20){grid.style.maxWidth=cap+'px';grid.style.marginLeft='auto';grid.style.marginRight='auto';}}
+    if(innerWidth>innerHeight&&grid.parentElement){const cap=Math.round(Math.min(grid.parentElement.clientWidth,innerHeight*0.8));if(cap<grid.parentElement.clientWidth-20){grid.style.maxWidth=cap+'px';grid.style.marginLeft='auto';grid.style.marginRight='auto';}}
     if((seqOn||nPads>=2)&&sb&&grid.offsetParent!==null&&!document.body.classList.contains('store-open')&&!document.body.classList.contains('bunker-open')){
       const gt=grid.getBoundingClientRect().top;
       const nn=Math.max(1,Math.min(8,parseInt(grid.getAttribute('data-pads'))||1));

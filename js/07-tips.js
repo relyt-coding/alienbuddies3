@@ -144,7 +144,8 @@ function updateOnboardingArrows(){
       const lb=arrowAct.firstElementChild,row=document.body.classList.contains('desktop-mode')||arrowAct._row;
       const setMode=r=>{arrowAct.style.flexDirection=r?'row':'column';arrowAct.style.gap=r?'16px':'';if(lb)lb.style.marginBottom=r?'0':'';};
       const place=()=>{const aw=arrowAct.offsetWidth||48,ah=arrowAct.offsetHeight||60;
-        if(rect.left-aw-(row||arrowAct._row?26:18)>4){arrowAct.style.left=(rect.left-aw-(arrowAct._row||row?26:18))+'px';
+        const _ap=document.querySelector('#gameView .app'),_cl=document.body.classList.contains('desktop-mode')&&_ap?_ap.getBoundingClientRect().left:0;   // (v0.2.207: never out over an open Bunker panel)
+        if(rect.left-aw-(row||arrowAct._row?26:18)>_cl+4){arrowAct.style.left=(rect.left-aw-(arrowAct._row||row?26:18))+'px';
           // line the arrow itself (not arrow + label) up with the middle of the button
           const sp=arrowAct.querySelector('span'),cy=rect.top+rect.height/2;let top=cy-ah/2;arrowAct.style.top=top+'px';
           if(sp){const r=sp.getBoundingClientRect();top+=cy-(r.top+r.height/2);arrowAct.style.top=top+'px';}return true;}

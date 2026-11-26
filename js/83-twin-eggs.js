@@ -52,11 +52,22 @@
     if(land){   // sideways phone: the top-left is the BUNKER / SETTINGS / EDIT PADS row, so the egg waits right after it
       // (EDIT PADS only shows from the 3rd pad, v0.2.203: use the last button of that row that's on screen)
       const ep=['padEditToggleBtn','settingsOpenBtn','accountBtn','openBunkerBtn'].map($).find(e=>e&&e.getBoundingClientRect().width>0),r=ep&&ep.getBoundingClientRect();
-      if(r&&r.width){x=r.right+10;y=Math.max(2,r.top+r.height/2-(egg.offsetHeight||40)/2);}
+      if(r&&r.width){x=r.right+10;y=Math.max(2,r.top+r.height/2-(egg.offsetHeight||40)/2);
+        // v0.2.207: that row also holds the score: if the egg would sit on it (or on ACTIVATE), it moves to the right end of the
+        // row instead, just left of the gem ring / FUSEBOX, and if that's taken too, just under the BUNKER button
+        const ew=egg.offsetWidth||80,eh=egg.offsetHeight||40,vis=e=>{if(!e)return null;const q=e.getBoundingClientRect();return q.width>2&&getComputedStyle(e).visibility!=='hidden'?q:null;};
+        const txt=e=>{if(!e)return null;try{const rg=document.createRange();rg.selectNodeContents(e);const q=rg.getBoundingClientRect();return q.width?q:null;}catch(_){return null;}};
+        const busy=[txt($('scoreEl')),vis($('landRateEl')),vis($('drumTrackerActivateBtn')),vis($('gemRing')),vis($('openStoreBtn')),vis($('partyBtn')),vis($('partyTeaser'))].filter(Boolean);
+        const hits=(x0,y0)=>busy.some(q=>x0<q.right+6&&x0+ew>q.left-6&&y0<q.bottom&&y0+eh>q.top);
+        if(hits(x,y)){const right=Math.min(innerWidth-8,...[vis($('gemRing')),vis($('openStoreBtn'))].filter(Boolean).map(q=>q.left-10));
+          const x2=right-ew;if(!hits(x2,y)&&x2>r.right)x=x2;
+          else{const bb=vis($('openBunkerBtn'));x=bb?bb.left:10;y=(bb?bb.bottom:r.bottom)+6;}}}
     }
     const pb=$('partyBtn');
-    if(pb&&pb.classList.contains('pb-corner')&&pb.offsetParent){const r=pb.getBoundingClientRect();if(r.width&&r.top<120&&r.left<80)y=r.bottom+8;}
+    if(pb&&pb.classList.contains('pb-corner')&&getComputedStyle(pb).display!=='none'){   // (fixed: no offsetParent, v0.2.207)
+      const r=pb.getBoundingClientRect();if(r.width&&r.top<120&&r.left<80)y=r.bottom+8;}
     lastXY=[x,y];egg.style.left=(x-o.left).toFixed(1)+'px';egg.style.top=(y-o.top).toFixed(1)+'px';
+    if(desk)nudgeTrackers();
   }
   function want(){
     return B.contains('game-active')&&typeof totalAliens==='number'&&totalAliens>=1&&totalAliens<LAST&&
@@ -82,7 +93,25 @@
     const tg=egg.querySelector('.pe-tag'),h=fmtJh(cost());if(tg._h!==h){tg._h=h;tg.innerHTML=h;}
     place();if(!raf){t0=performance.now();raf=requestAnimationFrame(frame);}
   }
-  function clear(){if(egg){egg.remove();egg=null;}}
+  function clear(){if(egg){egg.remove();egg=null;}setEggPad(0);}
+  // v0.2.207: on computers the DRUMPAD tracker (and its ACTIVATE arrow) can sit right where the egg is. Rather than move
+  // the egg out of its corner, the score row makes room: it gets extra left padding until they no longer touch.
+  let eggPad=0,padKey='';
+  let eggDrop=0;
+  function setEggPad(v){v=Math.max(0,Math.min(320,Math.round(v)));if(v!==eggPad){eggPad=v;const sr=$('scoreRow');if(sr)sr.style.paddingLeft=v?v+'px':'';}
+    if(!v&&eggDrop){eggDrop=0;const sa=$('seqArea');if(sa)sa.style.marginTop='';}}
+  function setEggDrop(v){v=Math.max(0,Math.min(140,Math.round(v)));if(v===eggDrop)return;eggDrop=v;const sa=$('seqArea');if(sa)sa.style.setProperty('margin-top',v?v+'px':'','important');}
+  function nudgeTrackers(){
+    const key=document.body.className+'|'+innerWidth+'x'+innerHeight;if(key!==padKey){padKey=key;setEggPad(0);return;}
+    const er=egg.getBoundingClientRect();if(!er.width)return;
+    const tc=$('manualTiersCol'),blk=tc&&tc.parentElement,a=$('arrowActivate');
+    const rs=[blk&&blk.getBoundingClientRect(),a&&getComputedStyle(a).display!=='none'?a.getBoundingClientRect():null].filter(q=>q&&q.width);
+    let need=0;rs.forEach(q=>{if(er.left<q.right&&er.right+14>q.left&&er.top<q.bottom&&er.bottom>q.top)need=Math.max(need,er.right+14-q.left);});
+    if(need>0)setEggPad(eggPad+need*2);
+    // …and the sequencer (PAUSE / track names) moves down if the egg's price tag reaches it
+    const sa=$('seqArea'),sq=sa&&sa.offsetParent&&sa.getBoundingClientRect();
+    if(sq&&sq.width&&er.left<sq.right&&er.right>sq.left&&er.bottom+8>sq.top&&er.top<sq.bottom)setEggDrop(eggDrop+er.bottom+8-sq.top);
+  }
   function wob(body,t,ready,p,shake){
     let rot=0,y=0;
     if(ready){const ph=t%1.5;rot=Math.sin(t*9)*7*(ph<.6?1:.25);y=ph<.35?-Math.sin(ph/.35*Math.PI)*9:0;}

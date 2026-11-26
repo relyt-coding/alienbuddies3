@@ -137,7 +137,7 @@ function rebuildPadGrid(){
     g.style.setProperty('--pc',_gi===1?'#ff7a50':((_gs&&_gs.color)||'#ffcc44'));
     // v0.2.206: the NEXT pad (not the dim one after it) shows its key on computers; pressing that key unlocks it
     const _gk=k?'':keyHintFor(_gi);
-    g.innerHTML=`<div class="pad-name">${(_gs&&_gs.name)||'NEW PAD'}</div><div class="ghost-cost"${k?'':' id="ghostPadSub"'}>${fmtJh(PAD_COSTS[_gi])}</div>`+(_gk?`<div class="pad-key ghost-key" data-pad="${_gi}">${_gk}</div>`:'');
+    g.innerHTML=`<div class="pad-name">${(_gs&&_gs.name)||'NEW PAD'}</div><div class="ghost-cost"${k?'':' id="ghostPadSub"'}>${fmtJh(PAD_COSTS[_gi])}</div>`+(_gk?`<div class="pad-key ghost-key" data-pad="${_gi}">${_gk}</div>`:'')+(k?'':'<div class="spb gp-bar"><i></i></div>');   // v0.2.210: energy bar on the next pad
     // the next one buys; a later one just shakes (pads unlock in order)
     g.addEventListener('pointerdown',e=>{e.preventDefault();if(!k){unlockGhostPad();return;}g.classList.remove('nope');void g.offsetWidth;g.classList.add('nope');});
     padGridEl.appendChild(g); // not added to padEls, so pad indexes stay correct
@@ -166,8 +166,11 @@ function unlockGhostPad(){
 function updateGhostPad(){
   const g=document.getElementById('ghostPad');
   if(!g)return;
-  g.classList.toggle('affordable',score>=PAD_COSTS[drum.pads]);
+  const c=PAD_COSTS[drum.pads],ok=score>=c;
+  g.classList.toggle('affordable',ok);
+  const b=g.querySelector('.gp-bar');if(b){b.firstChild.style.width=(Math.min(1,Math.max(0,score/c))*100).toFixed(1)+'%';b.classList.toggle('full',ok);}
 }
+setInterval(()=>{if(document.getElementById('ghostPad'))updateGhostPad();},250);   // v0.2.210: keep the next pad's bar filling as energy comes in
 
 // ── Pad Assign Modal ──
 let padAssignIdx=null;

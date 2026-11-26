@@ -2,6 +2,10 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.210 - 2026-11-26 13:20
+- The next drum pad you can unlock now has a little energy bar along its bottom that fills up as you save, and turns green when you can afford it.
+- On computers, the space bar unlocks the next thing on screen: whatever you can afford first out of ACTIVATE, the next drum pad, the egg, the sequencer, the fusebox and the disco ball. On the hatch screen it taps the egg.
+
 ## v0.2.209 - 2026-11-26 13:40
 - Fixed: playing Buddy Keys really fast could overload the sound and cut the audio out for a while, which also froze the party dancers. Notes now share the load (the oldest note fades out when you play a lot at once), and the party keeps dancing even if the sound hiccups.
 - Eggs have a new look: wavy painted ribbons and little sparkles instead of dots.

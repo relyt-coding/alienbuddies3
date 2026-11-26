@@ -2987,3 +2987,7 @@ body.pad-squeeze:not(.desktop-mode) .score,body.pad-squeeze:not(.desktop-mode).s
 body.pad-squeeze:not(.desktop-mode) .game-title{font-size:min(1.15rem,3.2vh) !important;}
 body.pad-squeeze:not(.desktop-mode) .score-sub{font-size:.6rem !important;min-height:0;}
 body.pad-squeeze:not(.desktop-mode) .game-header,body.pad-squeeze:not(.desktop-mode) .score-section{margin-top:0 !important;margin-bottom:0 !important;padding-top:2px !important;padding-bottom:2px !important;}
+
+/* v0.2.210: the next drum pad's energy bar (same look as the Fusebox power bars, js/85 .spb) */
+.pad.ghost-pad .gp-bar{height:7px;border-radius:0 0 12px 12px;z-index:3;}
+.pad.ghost-pad.ghost-later .gp-bar{display:none;}

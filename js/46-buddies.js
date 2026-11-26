@@ -367,7 +367,7 @@
     else{const ex=u*13.2*(.85+ES*.15),ey=-u*1.2,er=u*(EST==='plush'?7.6:7.4)*ES;[-1,1].forEach(sd=>{const lx=sd*ex,lat=Math.asin(ey/R),lon=Math.asin(lx/(R*Math.cos(lat)));
       const nx=Math.sin(lon)*Math.cos(lat),ny=Math.sin(lat),nz=Math.cos(lon)*Math.cos(lat),n=rot(nx,ny,nz),p=rot(nx*R*.95,ny*R*.95,nz*R*.95);if(n.z<-.75)return;
       (p.z>-u*2?after:before).push({z:p.z+R,f:()=>{const by=CY+p.y,fa=Math.max(0,Math.min(1,(n.z-.02)/.3));if(fa<=0)return;g.save();g.globalAlpha*=fa;if(blink<1){g.translate(0,by);g.scale(1,blink);g.translate(0,-by);}domeEye(g,{x:p.x,y:by},n,er,B.eye,B,EST,sd);g.restore();}});});}
-    bead(0,u*(EST==='bead'?13.1:14.2),u*6.72,u*6,u*2.64,B.mouth,1,'opaque',8);
+    {const SG=o.sing||0;bead(0,u*(EST==='bead'?13.1:14.2)+u*1.2*SG,u*6.72*(1+.28*SG),u*6,u*2.64*(1+1.5*SG),B.mouth,1,'opaque',8);}   // v0.2.211: mouth opens when singing
     if(o.A&&window.buddyAcc)buddyAcc.attach({g,u,R,CY,rot,B,t,lite:LITE,A:o.A,put:(z,f,fn)=>(f?after:before).push({z,f:fn}),eyeY:EST==='bead'?-u*3.6:-u*1.2,eyeX:EST==='bead'?u*11.96*(.85+ES*.15):u*13.2*(.85+ES*.15),eyeR:u*7*ES});
     const ACC=o.A&&window.buddyAcc?o.A:null,SHOE=ACC?buddyAcc.shoeSpec(ACC,B):null;
     feet(g,u,B,th,step,1,SHOE,t);
@@ -427,7 +427,7 @@
     else{const ex=u*13.2*(.85+ES*.15),ey=-u*1.2,er=u*(EST==='plush'?7.6:7.4)*ES;[-1,1].forEach(sd=>{const yy=ey-2*u,lat=Math.asin(yy/R),lon=Math.asin(sd*ex/(R*Math.cos(lat)));
       const nx=Math.sin(lon)*Math.cos(lat),ny=Math.sin(lat),nz=Math.cos(lon)*Math.cos(lat),n=rot(nx,ny,nz),p=rot(nx*R*.95,ny*R*.95,nz*R*.95);if(n.z<-.75)return;
       put(p.z+R,p.z>-u*2,()=>domeEye(g,{x:p.x,y:p.y},n,er,B.eye,B,EST,sd));});}
-    bead(0,u*(EST==='bead'?13.1:14.2),u*6.72,u*6,u*2.64,B.mouth,'opaque',8);
+    {const SG=o.sing||0;bead(0,u*(EST==='bead'?13.1:14.2)+u*1.2*SG,u*6.72*(1+.28*SG),u*6,u*2.64*(1+1.5*SG),B.mouth,'opaque',8);}
     const ACC=o.A&&window.buddyAcc?o.A:null,SHOE=ACC?buddyAcc.shoeSpec(ACC,B):null,BF=SHOE&&SHOE.B?SHOE.B:B;
     if(ACC)buddyAcc.attach({g,u,R,CY,rot,B,t:o.t||0,lite:LITE,A:ACC,put,eyeY:(EST==='bead'?-u*3.6:-u*1.2)-2*u,eyeX:EST==='bead'?u*11.96*(.85+ES*.15):u*13.2*(.85+ES*.15),eyeR:u*7*ES,float:true});
     // feet: the two flat duck-shaped sticks, as real 3D slabs under the pom (whichever face points at you is drawn last)
@@ -495,8 +495,16 @@
       const sa=(.4+.6*tw)*sstep(0,.25,tw);if(sa<=0)continue;g.globalAlpha=sa;g.beginPath();g.moveTo(x,y-s*2);g.quadraticCurveTo(x,y,x+s*2,y);g.quadraticCurveTo(x,y,x,y+s*2);g.quadraticCurveTo(x,y,x-s*2,y);g.quadraticCurveTo(x,y,x,y-s*2);g.fill();}
     g.restore();
   }
+  // v0.2.211 SINGING: while a buddy plays its sound (js/90 buddyVoice sets BUDDY_SING[idx]) its mouth opens wider and it
+  //   does a little squash-and-hop. Every drawBuddy with an idx (bunker card, hatch screen, floating buddies) picks it up;
+  //   pass o.sing (0..1) yourself where there's no idx (the designer). buddySing(i) → {m: mouth 0..1, h: hop 0..1}.
+  window.BUDDY_SING=window.BUDDY_SING||{};
+  window.buddySing=function(i){const t0=BUDDY_SING[i];if(!t0)return null;const a=(performance.now()-t0)/1000;if(a<0||a>.6)return null;
+    const m=Math.sin(Math.min(1,a/.07)*Math.PI/2)*(a<.18?1:Math.max(0,1-(a-.18)/.38));
+    const h=a<.38?Math.sin(a/.38*Math.PI):0;return{m,h};};
   window.drawBuddy=function(g,x,y,size,o){
     o=o||{};const B=o.look||(o.idx!=null?buddyLook(o.idx):BUDDIES[o.id||current]||BUDDIES.chloe),u=size/100;
+    if(o.sing==null&&o.idx!=null){const sg=buddySing(o.idx);if(sg){o=Object.assign({},o,{sing:sg.m});if(o.view!=='float')y-=size*.1*sg.h;}}   // (floating sprites hop with CSS instead: no room in their canvas)
     if(o.A===undefined){const ad=o.idx!=null&&typeof alienData!=='undefined'&&alienData[o.idx];o=Object.assign({},o,{A:ad&&ad.acc||null});}
     const angle=o.view==='turn'?(o.angle||0)*Math.PI/180:o.view==='side'?((o.face||1)<0?-Math.PI/2:Math.PI/2):0;
     if(o.view==='float'){g.save();g.translate(x,y);drawFloat(g,B,u,o);g.restore();return;}

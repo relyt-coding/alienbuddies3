@@ -51,8 +51,21 @@
     const id=buddySoundOf(i);if(!id||!SOUND_MAP[id])return;
     let c=null;try{c=typeof getCtx==='function'?getCtx():null;}catch(e){}
     const t0=c?c.currentTime+.03:0,G=gap||.42;
-    for(let k=0;k<(times||1);k++){try{playSound(id,.95,c?t0+k*G:undefined);}catch(e){}}
+    for(let k=0;k<(times||1);k++){try{playSound(id,.95,c?t0+k*G:undefined);}catch(e){}
+      setTimeout(()=>sing(i),k*G*1000+30);}   // v0.2.211: the mouth opens and it hops with every note
   };
+  // v0.2.211: singing look. js/46 drawBuddy reads BUDDY_SING[i] (mouth + hop) wherever the buddy is drawn every frame;
+  //   a floating buddy's sprite is only redrawn when it turns, so it's repainted for the half second, plus a CSS squash-hop.
+  function sing(i){
+    if(window.BUDDY_SING)BUDDY_SING[i]=performance.now();
+    if(typeof bouncers==='undefined')return;
+    bouncers.forEach(b=>{if(b.idx!==i||!b.el)return;
+      const art=b.el.querySelector('.bouncer-buddy')||b.el.firstElementChild;
+      if(art){art.classList.remove('bd-sing');void art.offsetWidth;art.classList.add('bd-sing');setTimeout(()=>art.classList.remove('bd-sing'),500);}
+      if(typeof paintBouncerBuddy!=='function')return;
+      const end=performance.now()+620;(function f(){if(performance.now()>end){paintBouncerBuddy(b);return;}paintBouncerBuddy(b);requestAnimationFrame(f);})();});
+  }
+  window.buddySingNow=sing;
 
   // ── tapping a buddy floating across the screen ──
   // #alienLayer lets taps through, so we look at what's really under the finger: any button / pad / clickable thing wins.
@@ -75,8 +88,6 @@
       const r=el.getBoundingClientRect();if(!r.width)continue;
       if(x>=r.left-8&&x<=r.right+8&&y>=r.top-8&&y<=r.bottom+8){
         buddyVoice(b.idx,1);
-        const art=el.querySelector('.bouncer-buddy')||el.firstElementChild;
-        if(art){art.classList.remove('bd-sing');void art.offsetWidth;art.classList.add('bd-sing');setTimeout(()=>art.classList.remove('bd-sing'),500);}
         break;
       }
     }
@@ -84,8 +95,7 @@
 
   // ── its card in the Bunker ──
   const prev=document.getElementById('alienNamePreview');
-  if(prev){prev.style.cursor='pointer';prev.addEventListener('click',()=>{if(typeof alienProfileIdx==='number'){buddyVoice(alienProfileIdx,1);
-    prev.classList.remove('bd-sing');void prev.offsetWidth;prev.classList.add('bd-sing');}});}
+  if(prev){prev.style.cursor='pointer';prev.addEventListener('click',()=>{if(typeof alienProfileIdx==='number'){buddyVoice(alienProfileIdx,1);}});}   // (the card's buddy opens its mouth and hops: js/46)
 
   // ── the Alien Designer: a tap (not a spin-drag) on the buddy ──
   let down=null;
@@ -99,6 +109,6 @@
 
   const css=document.createElement('style');css.textContent=`
 .bd-sing{animation:bdSing .45s cubic-bezier(.3,1.6,.5,1);}
-@keyframes bdSing{0%{transform:scale(1);}35%{transform:scale(1.22,.86);}65%{transform:scale(.92,1.12);}100%{transform:scale(1);}}`;
+@keyframes bdSing{0%{transform:none;}18%{transform:translateY(2px) scale(1.16,.86);}48%{transform:translateY(-9px) scale(.92,1.1);}78%{transform:translateY(0) scale(1.06,.95);}100%{transform:none;}}`;
   document.head.appendChild(css);
 })();

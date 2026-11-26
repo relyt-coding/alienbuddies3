@@ -2,6 +2,9 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.211 - 2026-11-26 13:25
+- Your buddies sing! When a buddy plays its sound, its mouth opens wide and it does a little squash-and-hop: on the hatch screen, floating around, in its Bunker card and in the Alien Designer.
+
 ## v0.2.210 - 2026-11-26 13:20
 - The next drum pad you can unlock now has a little energy bar along its bottom that fills up as you save, and turns green when you can afford it.
 - On computers, the space bar unlocks the next thing on screen: whatever you can afford first out of ACTIVATE, the next drum pad, the egg, the sequencer, the fusebox and the disco ball. On the hatch screen it taps the egg.

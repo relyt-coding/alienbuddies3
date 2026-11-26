@@ -155,7 +155,8 @@
       g.setTransform(dpr,0,0,dpr,0,0);g.clearRect(0,0,S,S);
       const bg=g.createRadialGradient(S/2,S*.45,S*.05,S/2,S*.5,S*.7);bg.addColorStop(0,'rgba(68,238,187,.10)');bg.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=bg;g.fillRect(0,0,S,S);
       slow=dt>.035?Math.min(30,slow+1):Math.max(0,slow-1);   // old phones: lighter drawing while frames run slow
-      drawBuddy(g,S/2,S*.53,S*.55,{view:'turn',angle,look,t,lite:slow>8,pulse:Math.pow(1-((t/.6)%1),3),A:(alienData[idx]&&alienData[idx].acc)||null});
+      const _sg=typeof buddySing==='function'?buddySing(idx):null;   // v0.2.211: sings when tapped
+      drawBuddy(g,S/2,S*.53-(_sg?S*.05*_sg.h:0),S*.55,{view:'turn',angle,look,t,lite:slow>8,pulse:Math.pow(1-((t/.6)%1),3),A:(alienData[idx]&&alienData[idx].acc)||null,sing:_sg?_sg.m:0});
       raf=requestAnimationFrame(f);})(last);
   }
   function open(i){

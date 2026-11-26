@@ -160,6 +160,9 @@ README.md covers the file layout, test mode and vocals in depth; this file is th
 - v0.2.210: the next ghost pad has `.gp-bar` (a `.spb` strip, js/05 updateGhostPad, refreshed every 250 ms). js/91 SPACE = press the cheapest affordable
   on-screen unlock (drum/seq tracker ACTIVATE, #ghostPad, #padEgg / .cornerEgg, #seqTeaser, #fuseTeaser, #partyTeaser) through its own handler; none
   affordable = the cheapest shakes; on #eggReveal it taps the egg / presses AWESOME. Skips text boxes, Buddy Race and the Cockpit. Add new teasers to its list.
+- v0.2.211 SINGING: js/90 buddyVoice → `sing(i)` sets `BUDDY_SING[i]`; js/46 `buddySing(i)` = {m mouth 0..1, h hop 0..1} for 0.6 s and drawBuddy reads it
+  for any call with an idx (mouth bead hole ×2.5, hop −10% size; float view skips the hop: floating sprites are repainted for 0.6 s + CSS `.bd-sing` hop).
+  Calls without an idx pass `o.sing` themselves (js/47 designer).
 - Skill-tree descriptions: `gemsOnly` (js/20) strips any written "×N Alien Gems" and appends the node's REAL `gemMult`, so never hand-write gem amounts.
 
 ## Testing without a phone

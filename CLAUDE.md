@@ -166,6 +166,8 @@ README.md covers the file layout, test mode and vocals in depth; this file is th
   and fills the bar (every 250 ms); styles at the end of css/style.css. alienCost(2) = 1000 (100 mJ): first eggs 25 → 50 → 100 mJ, then 125 J.
 - v0.2.213: showToast (js/04) also clears the ACTIVATE button's own rect (it's taller than #drumTrackerOverlay). Desktop `.pad-key` (not `.ghost-key`) is clickable:
   the pad's pointerdown opens openPadPicker(idx) when the target is the badge.
+- v0.2.214: alienCost(3/4/5) = 10,000 / 50,000 / 250,000 (0.5 / 2.5 / 12.5 J on sale); n≥6 = `_alienCurve(n-3)` (the old curve, shifted 3 buddies later),
+  so alienCost(98) = the old alienCost(95) (incubator lamps, extra bunkers and 100+ buddies are cheaper). Rerun tools/vault_prices.py if the Vault pace feels off.
 - Skill-tree descriptions: `gemsOnly` (js/20) strips any written "×N Alien Gems" and appends the node's REAL `gemMult`, so never hand-write gem amounts.
 
 ## Testing without a phone

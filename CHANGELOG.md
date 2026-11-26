@@ -2,6 +2,9 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.214 - 2026-11-26 13:45
+- Smoother early buddies: after the 3rd (100 mJ), buddies cost 0.5 J, 2.5 J and 12.5 J before reaching 125 J, instead of jumping straight from 100 mJ to 125 J. The corner egg's energy cord now fills up at a steady pace. Every buddy after that costs a bit less than before.
+
 ## v0.2.213 - 2026-11-26 13:35
 - Messages no longer cover the ACTIVATE button: they show up just below it.
 - On computers, click a drum pad's little hotkey letter to open that pad's edit window (its sound and its hotkey) without playing it.

@@ -105,7 +105,7 @@ function alienDiscount(n){
   return Math.pow(10,i<=k?ALIEN_L[i]:ALIEN_L[k]+(ALIEN_L[k]-ALIEN_L[k-1])*(i-k));
 }
 const _disc=c=>{const d=progressDiscount();return d>1?Math.max(1,Math.round(c/d)):c;};
-const GAME_VERSION='0.2.213'; // bump on every delivered build (shown in Settings and on the home screen)
+const GAME_VERSION='0.2.214'; // bump on every delivered build (shown in Settings and on the home screen)
 const BASE_CPS=5;
 const UNLOCK_COST=Math.round((bump30(60000000))*SHOP_SALE);
 const ALIEN_POWER_UNLOCK_COST=Math.round((bump30(600000000))*SHOP_SALE);
@@ -133,8 +133,16 @@ function alienCost(n){
   if(n===0)return 250;        // alien 1: 25 mJ (v0.2.193; its egg rolls in at 10 mJ, js/66)
   if(n===1)return 500;        // alien 2: 50 mJ (the corner egg after the first hatch, js/83)
   if(n===2)return 1000;       // alien 3: 100 mJ (v0.2.212: no two 50 mJ eggs back to back; 25 → 50 → 100 mJ)
-  if(n===3)return 2500000;    // alien 4: 2,500,000
-  // alien 5+ — existing growth curve starting from 10M
+  // v0.2.214: buddies 4–6 bridge the old wall (100 mJ → 125 J) with ×5 steps: 0.5 J / 2.5 J / 12.5 J after the Fusebox sale,
+  //   then the old curve carries on from buddy 7 (= the old buddy 4), three buddies later than before
+  if(n===3)return 10000;
+  if(n===4)return 50000;
+  if(n===5)return 250000;
+  return _alienCurve(n-3);
+}
+function _alienCurve(n){
+  if(n===3)return 2500000;    // (old alien 4: 2,500,000 = 125 J on sale)
+  // the original growth curve starting from 10M
   let c=10000000;
   for(let i=3;i<n;i++){
     let m=12+i*3;

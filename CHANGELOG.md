@@ -2,6 +2,9 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.206 - 2026-11-26 09:30
+- On computers, the next drum pad to unlock now shows its key in the corner, and pressing that key unlocks it (if you have the energy; otherwise it shakes).
+
 ## v0.2.205 - 2026-11-26 09:10
 - The Shop is now the FUSEBOX: you invest your energy into your power supply to unlock new music features and multipliers.
 - New screens arrive one at a time: your first buddy opens the Bunker, and the sequencer opens the Fusebox, each with its own cutscene.

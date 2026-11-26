@@ -361,6 +361,8 @@ body.desktop-mode .pad-grid[data-pads="7"],body.desktop-mode .pad-grid[data-pads
 .pad-name{max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:'Bebas Neue',sans-serif;font-size:clamp(.65rem,1.8vw,.88rem);letter-spacing:.09em;color:var(--pc);line-height:1;position:relative;z-index:1;}
 .pad-key{position:absolute;top:.5rem;left:.6rem;z-index:2;min-width:1.35rem;height:1.35rem;padding:0 .3rem;box-sizing:border-box;display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,.2);border-radius:5px;font-family:'Bebas Neue',sans-serif;font-size:.78rem;letter-spacing:.04em;color:rgba(255,255,255,.6);background:rgba(0,0,0,.3);line-height:1;pointer-events:none;}
 body:not(.desktop-mode) .pad-key{display:none!important;}
+.ghost-pad .ghost-key{border-color:color-mix(in srgb,var(--pc) 60%,transparent);color:var(--pc);background:rgba(0,0,0,.35);}
+@supports not (color: color-mix(in srgb, red, blue)){.ghost-pad .ghost-key{border-color:rgba(255,204,68,.5);}}
 .pad-sub{font-size:.48rem;letter-spacing:.12em;color:#444;text-transform:uppercase;margin-top:.1rem;position:relative;z-index:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;}
 .pad-click-hint{position:absolute;top:0;right:0;bottom:0;left:0;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:clamp(.9rem,3vw,1.3rem);letter-spacing:.1em;color:rgba(255,255,255,.85);text-shadow:0 0 12px rgba(255,255,255,.4);pointer-events:none;z-index:2;text-align:center;padding:.3rem;}
 .pad.no-sound{border-color:#2a1a1a;}

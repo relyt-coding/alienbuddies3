@@ -135,7 +135,9 @@ function rebuildPadGrid(){
     const _gi=drum.pads+k,_gs=SOUND_MAP[PAD_DEFAULT_SOUNDS[_gi]];
     g.className='pad ghost-pad'+(k?' ghost-later':'');g.id=k?'ghostPad'+(k+1):'ghostPad';
     g.style.setProperty('--pc',_gi===1?'#ff7a50':((_gs&&_gs.color)||'#ffcc44'));
-    g.innerHTML=`<div class="pad-name">${(_gs&&_gs.name)||'NEW PAD'}</div><div class="ghost-cost"${k?'':' id="ghostPadSub"'}>${fmtJh(PAD_COSTS[_gi])}</div>`;
+    // v0.2.206: the NEXT pad (not the dim one after it) shows its key on computers; pressing that key unlocks it
+    const _gk=k?'':keyHintFor(_gi);
+    g.innerHTML=`<div class="pad-name">${(_gs&&_gs.name)||'NEW PAD'}</div><div class="ghost-cost"${k?'':' id="ghostPadSub"'}>${fmtJh(PAD_COSTS[_gi])}</div>`+(_gk?`<div class="pad-key ghost-key" data-pad="${_gi}">${_gk}</div>`:'');
     // the next one buys; a later one just shakes (pads unlock in order)
     g.addEventListener('pointerdown',e=>{e.preventDefault();if(!k){unlockGhostPad();return;}g.classList.remove('nope');void g.offsetWidth;g.classList.add('nope');});
     padGridEl.appendChild(g); // not added to padEls, so pad indexes stay correct
@@ -475,7 +477,11 @@ window.addEventListener('keydown',e=>{
   Object.entries(padBindings).forEach(([idx,b])=>{
     if(b.key&&e.code===b.key){
       e.preventDefault();
-      firePad(parseInt(idx),e);
+      const i=parseInt(idx);
+      // the next pad's key buys it (v0.2.206); not enough energy yet: the outline shakes
+      if(i===drum.pads&&i<visiblePads+1){const g=document.getElementById('ghostPad');
+        if(g){if(score>=PAD_COSTS[i])unlockGhostPad();else{g.classList.remove('nope');void g.offsetWidth;g.classList.add('nope');}}return;}
+      firePad(i,e);
     }
   });
 },false);

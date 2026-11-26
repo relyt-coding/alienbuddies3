@@ -135,6 +135,7 @@ README.md covers the file layout, test mode and vocals in depth; this file is th
 - FILL (v0.2.205, js/34): `#dawFillBtn` (top-left) / `#dawFillBtnR` (top-right) per empty side; one side filled with the other empty = '0px 2fr 1fr'
   (game 2/3, a blank 1/3 kept for future side-by-side views), both = `daw-full`; hold 2 s = both. Closing both panels never auto-fills.
 - Heat lamp (v0.2.205, js/50): `lampState/drawLampCone/drawLamp` in the egg reveal; taps wait LAMP_T (1.5 s) from `st.lampT0`; sways ±1.5°.
+- Ghost pad key (v0.2.206, js/05): the next ghost pad shows `.pad-key.ghost-key` for index drum.pads; the global keydown buys it (unlockGhostPad) or shakes it.
 - Score unit (v0.2.201): scoreParts shows MILLIJOULES below 10 J, then JOULES (≤2 decimals).
 - Skill-tree descriptions: `gemsOnly` (js/20) strips any written "×N Alien Gems" and appends the node's REAL `gemMult`, so never hand-write gem amounts.
 

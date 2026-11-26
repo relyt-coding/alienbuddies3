@@ -121,7 +121,8 @@ README.md covers the file layout, test mode and vocals in depth; this file is th
 - YOUR SHIP (v0.2.201, js/87): the 'core' node is now the ship: owned free once skillTreeUnlocked (so the Quad Suns are the first buys), drawn as an SVG
   ship (`.st-ship`), moved with CSS `translate` (+ `el._mx/_my` for js/81). `shipFlyTo(id)`; wraps stFocusNode / openStDetail (owned nodes) /
   renderSkillTree; it circles its target (suns: chases the orbit). Tap = fly home.
-- Pads 5–8 (v0.2.201, js/05 rebuildPadGrid): outlines come two at a time and pads are placed by grid-row/column: 5 BR, 6 TR, 7 BL, 8 TL around the 2×2.
+- Pads 5–8 (v0.2.201, js/05 rebuildPadGrid): outlines come two at a time and pads are placed by grid-row/column: 5 BR, 6 TR, 7 BL, 8 TL around the 2×2
+  (not in daw-wide: one row there, js/86). PAD_COSTS 6–8 = 2.5 / 25 / 250 J (v0.2.202). `body.pads-wide` (5+ pads) makes the desktop column stack from the top.
 - Sequencer dots (v0.2.201, js/86): owning a sequencer track sets `seqTrackerActive` and `shop.seqDotsUnlocked`; `#seqTrackerOverlay` is hidden.
 - Score unit (v0.2.201): scoreParts shows MILLIJOULES below 10 J, then JOULES (≤2 decimals).
 - Skill-tree descriptions: `gemsOnly` (js/20) strips any written "×N Alien Gems" and appends the node's REAL `gemMult`, so never hand-write gem amounts.

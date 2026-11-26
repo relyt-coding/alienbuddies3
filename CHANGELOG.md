@@ -2,6 +2,11 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.202 - 2026-11-25 21:20
+- Pads 6, 7 and 8 now cost 2,500 mJ, 25 J and 250 J (the 6th was over a megajoule before).
+- On computers, once you have 5 or more pads the screen stacks from the top, so the pads sit right under the sequencer instead of down at the bottom.
+- In the wide computer layout the pads stay in one row, and the egg waits just above them.
+
 ## v0.2.201 - 2026-11-25 11:05
 - The skill tree's middle is now YOUR SHIP instead of the Tucana Core. The four Quad Suns orbit around it, and it flies off to whatever you unlock and circles it. Tap the ship to bring it home.
 - Your energy now switches from millijoules to joules at 10 J, always with at most 2 decimals.

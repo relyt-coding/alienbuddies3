@@ -143,7 +143,7 @@ body:not(.desktop-mode) #seqPatternView .seq-bottom-row .keys-switch-seq button{
     // v0.2.175: the shop ladders' ×1.5s, listed just before the gem section
     try{const L=$('scoreStatsList'),pm=typeof partyMult==='function'?partyMult():1,sm=typeof seqFeatMult==='function'?seqFeatMult():1;
       if(pm>1||sm>1){L.appendChild(ssLabel('FUSEBOX UPGRADES'));
-        if(pm>1)L.appendChild(ssRow('🃏','ALIEN PARTY',(shop.partyLevel||0)+' level'+((shop.partyLevel||0)===1?'':'s')+' · ×1.5 each','×'+formatMult(pm),true,'green'));
+        if(pm>1)L.appendChild(ssRow('🃏','ALIEN PARTY',(shop.partyLevel||0)+' level'+((shop.partyLevel||0)===1?'':'s')+' · ×2, then ×1.5 each','×'+formatMult(pm),true,'green'));
         if(sm>1)L.appendChild(ssRow('🎛','SEQUENCER UPGRADES','BPM, 32 and 64 steps · ×1.5 each','×'+formatMult(sm),true,'green'));}}catch(e){}
     try{if((typeof totalAliens!=='undefined'&&totalAliens>0)||alienGems>0)gemRows($('scoreStatsList'));}catch(e){}
     try{trimLocked($('scoreStatsList'));}catch(e){}

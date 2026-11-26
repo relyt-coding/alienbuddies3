@@ -125,7 +125,7 @@ function buildScoreStats(){
   scoreStatsList.appendChild(ssLabel('DRUM MACHINE'));
   if(drumTotal>0){
     if(extraPads>0)scoreStatsList.appendChild(ssRow('🥁',`EXTRA PADS (${extraPads})`,`${extraPads} unlocked pad${extraPads>1?'s':''} · ×1.5 each`,`×${formatMult(Math.pow(1.5,extraPads))}`,true,'green'));
-    if(drum.extraSounds>0)scoreStatsList.appendChild(ssRow('🎵',`EXTRA SOUNDS (${drum.extraSounds})`,`${drum.extraSounds} sound${drum.extraSounds>1?'s':''} unlocked · ×1.5 each`,`×${formatMult(Math.pow(1.5,drum.extraSounds))}`,true,'green'));
+    if(drum.extraSounds>0)scoreStatsList.appendChild(ssRow('🎵',`BUDDY SOUNDS (${drum.extraSounds})`,`${drum.extraSounds} sound${drum.extraSounds>1?'s':''} from your buddies · ×1.2 each`,`×${formatMult(Math.pow(1.2,drum.extraSounds))}`,true,'green'));
     if(drum.seqTracks>0)scoreStatsList.appendChild(ssRow('🎛',`SEQUENCER TRACKS (${drum.seqTracks})`,`${drum.seqTracks} track${drum.seqTracks>1?'s':''} · ×1.5 each`,`×${formatMult(Math.pow(1.5,drum.seqTracks))}`,true,'green'));
     if(drumTotal>1)scoreStatsList.appendChild(ssRow('🔗','DRUM COMBINED','All drum upgrades multiplied',`×${formatMult(drumMult)}`,true,'green'));
   } else {

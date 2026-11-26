@@ -69,7 +69,7 @@ function autoSave(){
     seqEnergy,energyEmptyHints,
     seqMode,
     trailsOn,alienSpeed:alienSpeedMult,
-    incEggs,incRacers,incLampsBought,incAllow,founderEggGiven,spliceCount,goldRecords,raceStats,bunkersOwned,bunkerMeta,vaultUnlocked,
+    incEggs,incRacers,incLampsBought,incAllow,founderEggGiven,spliceCount,goldRecords,raceStats,bunkersOwned,bunkerMeta,vaultUnlocked,fuseboxOwned,
     arrangement:[...arrangement],
     arrangeBars,
     seqLayersSnap,
@@ -113,6 +113,7 @@ let incEggs=[],incRacers=[],incLampsBought=0,incAllow=0,founderEggGiven=false;
 let spliceCount=0;
 let bunkersOwned=1,bunkerMeta=[];   // v0.2.188 extra bunkers (js/80): how many bunkers (1–10), [{name,theme}] per bunker; alienData[i].box = which bunker
 let vaultUnlocked=false;   // v0.2.205: the Vault is bought in the Fusebox (js/89)
+let fuseboxOwned=false;    // v0.2.208: the Fusebox is earned after the sequencer (js/89 teaser); older saves with the sequencer keep it
 let goldRecords=0,raceStats={races:0,wins:0};   // v0.2.187 Buddy Race (js/79): GOLD RECORDS = the rare money, 1 per race won   // v0.2.186 DNA Splice (js/78): splices made on this file (each one costs more gems)  // v0.2.183: floating-buddy speed ×0.5 … ×3 (looks only, js/76 + js/11)
 let drumTrackerActive=false; // paid 25pts to activate drum dot tracker
 let seqTrackerActive=false; // v0.2.162: the sequencer's dot tracker is its own 1 MW ACTIVATE (js/72)
@@ -163,7 +164,8 @@ function sharedMultiplier(){
   return alienMultiplier()*drumMultiplier()*matchingMultiplier*tipsMult*vaultMult*shopLadderMult();
 }
 // v0.2.175: every ALIEN PARTY level (unlock + each style) and the BPM / 32 STEPS / 64 STEPS upgrades are each ×1.5
-function partyMult(){return typeof shop!=='undefined'?Math.pow(1.5,Math.max(0,shop.partyLevel||0)):1;}
+// v0.2.208: the ALIEN PARTY itself is ×2 energy; each party style after it adds ×1.5 on top
+function partyMult(){const l=typeof shop!=='undefined'?Math.max(0,shop.partyLevel||0):0;return l?2*Math.pow(1.5,l-1):1;}
 function seqFeatMult(){return typeof shop!=='undefined'?Math.pow(1.5,Math.min(3,Math.max(0,shop.seqFeat||0))):1;}
 function shopLadderMult(){return partyMult()*seqFeatMult();}
 // Each tracker keeps its own tier multipliers: DRUMPAD (left) for pad taps, SEQUENCER (right) for sequencer steps.
@@ -257,7 +259,7 @@ function loadFromSave(data){
   vaultSeen=Array.isArray(data.vaultSeen)?data.vaultSeen.filter(x=>typeof x==='string'):[];
   vaultOwned=Array.isArray(data.vaultOwned)?data.vaultOwned.filter(x=>typeof x==='string'):[];vaultMult=Math.pow(1.05,vaultOwned.length);
   incEggs=Array.isArray(data.incEggs)?data.incEggs.filter(e=>e&&typeof e==='object'):[];incRacers=Array.isArray(data.incRacers)?data.incRacers.filter(e=>e&&typeof e==='object'):[];
-  incLampsBought=Math.max(0,Math.min(6,+data.incLampsBought||0));incAllow=Math.max(0,Math.min(3,+data.incAllow||0));founderEggGiven=!!data.founderEggGiven;spliceCount=Math.max(0,+data.spliceCount||0);goldRecords=Math.max(0,Math.floor(+data.goldRecords||0));vaultUnlocked=!!data.vaultUnlocked;bunkersOwned=Math.max(1,Math.min(10,Math.floor(+data.bunkersOwned||1)));bunkerMeta=Array.isArray(data.bunkerMeta)?data.bunkerMeta.slice(0,10).map(m=>m&&typeof m==='object'?{name:String(m.name||'').slice(0,14),theme:String(m.theme||'')}:{}):[];raceStats=data.raceStats&&typeof data.raceStats==='object'?{races:+data.raceStats.races||0,wins:+data.raceStats.wins||0}:{races:0,wins:0};
+  incLampsBought=Math.max(0,Math.min(6,+data.incLampsBought||0));incAllow=Math.max(0,Math.min(3,+data.incAllow||0));founderEggGiven=!!data.founderEggGiven;spliceCount=Math.max(0,+data.spliceCount||0);goldRecords=Math.max(0,Math.floor(+data.goldRecords||0));vaultUnlocked=!!data.vaultUnlocked;fuseboxOwned=data.fuseboxOwned!==undefined?!!data.fuseboxOwned:!!(data.drum&&data.drum.seqTracks>=1);bunkersOwned=Math.max(1,Math.min(10,Math.floor(+data.bunkersOwned||1)));bunkerMeta=Array.isArray(data.bunkerMeta)?data.bunkerMeta.slice(0,10).map(m=>m&&typeof m==='object'?{name:String(m.name||'').slice(0,14),theme:String(m.theme||'')}:{}):[];raceStats=data.raceStats&&typeof data.raceStats==='object'?{races:+data.raceStats.races||0,wins:+data.raceStats.wins||0}:{races:0,wins:0};
   trailsOn=data.trailsOn!==false;alienSpeedMult=Math.min(3,Math.max(.5,+data.alienSpeed||1));
   drumTrackerActive=data.drumTrackerActive||false;
   seqTrackerActive=data.seqTrackerActive!==undefined?!!data.seqTrackerActive:((data.drum&&data.drum.seqTracks)||0)>=1;   // old saves that had it keep it

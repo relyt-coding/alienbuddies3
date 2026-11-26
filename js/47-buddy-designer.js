@@ -169,6 +169,7 @@
     if(typeof autoSave==='function')autoSave();
   }
   window.openBuddyDesigner=open;
+  window.bdCurrentIdx=()=>root&&root.classList.contains('open')?idx:null;   // v0.2.208: js/90 plays the buddy's sound when you tap it here
   const btn=document.getElementById('anmDesignBtn');
   if(btn)btn.addEventListener('click',()=>{if(typeof alienProfileIdx!=='undefined'&&alienProfileIdx!==null)open(alienProfileIdx);});
 })();

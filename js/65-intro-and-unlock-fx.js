@@ -236,22 +236,24 @@
       inst(S,'hihat',t+ZOOM[1]+.35,0,.7);},1.35);return;}
     if(mode==='nav'){snd((S,t)=>{const{tone,noise}=K;
       noise(S,t,{f0:3000,f1:500,q:1,a:.05,k:.6,d:.25});tone(S,t,520,{f1:260,gl:.9,a:.025,k:.3,d:.4,rv:.5});   // pulling back
-      [['b',FLY.b[1]],['s',FLY.s[1]]].forEach(([k,land],i)=>{noise(S,t+FLY[k][0],{f0:500,f1:2600,q:1.4,a:.05,k:.6,d:.2});tone(S,t+land,240-i*30,{f1:150,gl:.05,a:.12,d:.12});noise(S,t+land,{type:'highpass',f0:3500,a:.05,d:.03});});
-      [0,2,4,7,9,12,14,16,19,21,24].forEach((s2,i)=>tone(S,t+BUILD.b+.35+i*.07,523.25*Math.pow(2,s2/12),{a:.022,d:.35,rv:.5}));
-      for(let i=0;i<6;i++)noise(S,t+BUILD.s+.15+i*.13,{f0:1800,f1:900,q:2,a:.035,d:.1});
-      tone(S,t+BUILD.s+1.0,1318.5,{a:.04,d:.5,rv:.5});tone(S,t+BUILD.s+1.08,1975.5,{a:.03,d:.6,rv:.5});
+      // v0.2.208: navB (bunker only) / navS (fusebox only) have just one flying page, so only play the parts that exist
+      //   (the bunker cutscene used to throw on FLY.s and play nothing at all)
+      ['b','s'].filter(k=>FLY[k]).forEach((k,i)=>{const land=FLY[k][1];noise(S,t+FLY[k][0],{f0:500,f1:2600,q:1.4,a:.05,k:.6,d:.2});tone(S,t+land,240-i*30,{f1:150,gl:.05,a:.12,d:.12});noise(S,t+land,{type:'highpass',f0:3500,a:.05,d:.03});});
+      if(BUILD.b!=null)[0,2,4,7,9,12,14,16,19,21,24].forEach((s2,i)=>tone(S,t+BUILD.b+.35+i*.07,523.25*Math.pow(2,s2/12),{a:.022,d:.35,rv:.5}));
+      if(BUILD.s!=null){for(let i=0;i<6;i++)noise(S,t+BUILD.s+.15+i*.13,{f0:1800,f1:900,q:2,a:.035,d:.1});
+        tone(S,t+BUILD.s+1.0,1318.5,{a:.04,d:.5,rv:.5});tone(S,t+BUILD.s+1.08,1975.5,{a:.03,d:.6,rv:.5});}
       noise(S,t+ZOOM[0],{f0:400,f1:4000,q:1,a:.06,k:.8,d:.12});
       [[0,659.25],[.4,987.77]].forEach(([d,f])=>{tone(S,t+ZOOM[1]+d,f,{type:'triangle',a:.05,d:.5,rv:.5});tone(S,t+ZOOM[1]+d+.06,f*1.5,{a:.025,d:.5,rv:.5});});},1.35);return;}
     snd((S,t)=>{const{tone,noise,inst}=K;
       // space: a soft swell
       tone(S,t,110,{a:.035,k:1.2,hold:4.5,d:1.8,rv:.6});tone(S,t,164.8,{a:.022,k:1.6,hold:4,d:1.8,rv:.6});tone(S,t+2.5,220,{a:.015,k:1.5,hold:2,d:1.5,rv:.6});
       // the pages fly in and click into line
-      [['b',1.25],['s',1.45],['h',1.65]].forEach(([k,land],i)=>{noise(S,t+FLY[k][0],{f0:500,f1:2600,q:1.4,a:.05,k:.7,d:.2});tone(S,t+land,240-i*30,{f1:150,gl:.05,a:.12,d:.12});noise(S,t+land,{type:'highpass',f0:3500,a:.05,d:.03});});
+      [['b',1.25],['s',1.45],['h',1.65]].filter(([k])=>FLY[k]).forEach(([k,land],i)=>{noise(S,t+FLY[k][0],{f0:500,f1:2600,q:1.4,a:.05,k:.7,d:.2});tone(S,t+land,240-i*30,{f1:150,gl:.05,a:.12,d:.12});noise(S,t+land,{type:'highpass',f0:3500,a:.05,d:.03});});
       // the bunker builds: a soft climbing chime, one per row of the grid
       [0,2,4,7,9,12,14,16,19,21,24].forEach((s,i)=>tone(S,t+BUILD.b+.35+i*.07,523.25*Math.pow(2,s/12),{a:.022,d:.35,rv:.5}));
       // the shop: shelves sliding in, and a little till chime
-      for(let i=0;i<6;i++)noise(S,t+BUILD.s+.15+i*.13,{f0:1800,f1:900,q:2,a:.035,d:.1});
-      tone(S,t+BUILD.s+1.0,1318.5,{a:.04,d:.5,rv:.5});tone(S,t+BUILD.s+1.08,1975.5,{a:.03,d:.6,rv:.5});
+      if(BUILD.s!=null){for(let i=0;i<6;i++)noise(S,t+BUILD.s+.15+i*.13,{f0:1800,f1:900,q:2,a:.035,d:.1});
+      tone(S,t+BUILD.s+1.0,1318.5,{a:.04,d:.5,rv:.5});tone(S,t+BUILD.s+1.08,1975.5,{a:.03,d:.6,rv:.5});}
       // the pads pop in with a few drum hits
       ['kick','hihat','snare','hihat'].forEach((id,i)=>inst(S,id,t+BUILD.h+.45+i*.09*2,0,.45));
       tone(S,t+BUILD.h+.2,880,{a:.04,d:.4,rv:.5});

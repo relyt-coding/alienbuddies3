@@ -243,7 +243,10 @@
     st.fx=st.fx.filter(p=>{const a=(now-p.t0)/1000;if(a>p.life)return false;p.vy+=(p.conf?260:700)*dt;p.vx*=p.conf?.985:1;p.x+=p.vx*dt;p.y+=p.vy*dt;p.r+=p.vr*dt;
       g.save();g.globalAlpha=Math.min(1,(p.life-a)*2);g.translate(p.x,p.y);g.rotate(p.r);g.fillStyle=p.c;if(p.conf)g.fillRect(-p.s,-p.s*.5,p.s*2,p.s);else{g.beginPath();g.moveTo(-p.s,-p.s);g.lineTo(p.s,-p.s*.4);g.lineTo(-p.s*.2,p.s);g.closePath();g.fill();}g.restore();return true;});}
   function tap(){
-    if(!st||st.phase==='open')return;
+    if(!st)return;
+    // v0.2.208: once hatched, tapping the buddy makes it sing its sound (js/90)
+    if(st.phase==='open'){if((performance.now()-st.hatchT)>500&&typeof buddyVoice==='function'){buddyVoice(st.idx,1);st.shake=.6;
+      const W=S;burst(5,W/2+(Math.random()-.5)*W*.3,W*1.12*.42,['#00ff88','#ff9ccf','#9fc5ff','#ffd27a'],140,.8);}return;}
     const t=(performance.now()-st.t0)/1000;if(t<.6||(performance.now()-st.lampT0)/1000<LAMP_T)return;   // let it land and the lamp warm it first
     st.taps++;st.shake=1;document.getElementById('erHint').classList.remove('on');sfx('crack');
     const W=S,cx=W/2,cy=W*1.12*.55;
@@ -257,10 +260,14 @@
     burst(st.special?70:40,cx,cy,st.special?['#ffd23f','#ff4fa8','#3fe6ff','#9dff3f','#ffffff','#b06bff']:['#00ff88','#ff9ccf','#9fc5ff','#ffd27a','#ffffff'],st.special?420:320,2.2);
     root.classList.add('open-burst');if(st.special)root.classList.add('special-burst');
     const a=alienData[st.idx]||{};
-    document.getElementById('erKicker').textContent=st.special?'★ SPECIAL BUDDY ★':(st.idx===0?'YOUR FIRST':'NEW BUDDY');
+    // v0.2.208: say which sound this buddy brings (js/90)
+    const snd=typeof buddySoundOf==='function'?buddySoundOf(st.idx):null,sn=snd&&SOUND_MAP[snd]?' · BRINGS '+SOUND_MAP[snd].name.toUpperCase():'';
+    document.getElementById('erKicker').textContent=(st.special?'★ SPECIAL BUDDY ★':(st.idx===0?'YOUR FIRST':'NEW BUDDY'))+sn;
     document.getElementById('erTitle').textContent=st.special&&st.info?st.info.name+' BUDDY':(a.name?a.name:'ALIEN BUDDY');
     document.getElementById('erTitle').style.color=getAlienColor(st.idx);
     setTimeout(()=>{if(st)root.classList.add('show-btns');},1100);
+    // v0.2.208: the new buddy says hello in its own sound, twice (that's the sound it brings: js/90)
+    const hi=st.idx;setTimeout(()=>{if(st&&st.idx===hi&&typeof buddyVoice==='function')buddyVoice(hi,2,.45);},st.special?1500:1050);
     // (v0.2.171: the buddy stays hidden until this card closes, then floats in from off screen: see reveal)
   }
   function reveal(idx){if(typeof bouncers==='undefined')return;bouncers.forEach(b=>{if(b.idx===idx&&b.el.classList.contains('hatching')){b.el.classList.remove('hatching');

@@ -2,6 +2,16 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.208 - 2026-11-26 12:45
+- Sounds now come from your alien buddies! Every buddy brings one sound when it hatches (your first brings the Clap). It sings it twice when it hatches, and again whenever you tap it: on the hatch screen, floating across the screen (taps on a drum pad still play the pad), in its Bunker card and in the Alien Designer. The Fusebox no longer sells sounds.
+- The Fusebox is now something you earn: after the sequencer, a little fusebox appears next to your energy. Save up 15 J and tap it to flip the switch on.
+- The Bunker, Fusebox and Vault open by themselves the moment you unlock them, and on computers every screen you've unlocked starts open.
+- The ALIEN PARTY is now ×2 energy (each party style after it is still ×1.5 more).
+- The disco ball now arrives after the Fusebox, and it no longer covers the dot trackers (on computers it hangs above your energy; on sideways phones it sits to the right of it).
+- Fixed: the Bunker unlock cutscene had no sound.
+- Fixed: on Samsung folding phones (and phones with a big text size), the drum pads could be pushed almost completely off the bottom of the screen. The top of the screen now shrinks to make room, and the pads always fit.
+- Sound polish: evened out the volume of every buddy sound (Pad, Bass Note and Bell were much too loud; Glitch, Choir, Shaker and Arp too quiet), plus a gentle overall EQ that removes rumble and softens harsh highs.
+
 ## v0.2.207 - 2026-11-26 11:00
 - Fixed: on a sideways iPad, the drum pads were too big and ran under the bottom buttons.
 - Fixed: on a sideways phone, the corner egg could sit on top of your energy; it now finds a free spot in the top row.

@@ -135,7 +135,7 @@ function startGame(slotIndex){
   {const isMobile=!document.body.classList.contains('desktop-mode');
     const verb=isMobile?'Press':'Click';
     const hint=isNewFile?()=>showToast(verb+' the Hi-Hat button to make energy!'):()=>{};
-    if(typeof playNewFileIntro==='function'&&!window.__noIntro&&!document.body.classList.contains('mobile-view-mode'))introOn=()=>{if(!playNewFileIntro({tuck:true,onDone:()=>setTimeout(hint,250)}))setTimeout(hint,500);};
+    if(typeof playNewFileIntro==='function'&&!window.__noIntro&&!document.body.classList.contains('mobile-view-mode'))introOn=()=>{if(!playNewFileIntro({onDone:()=>setTimeout(hint,250)}))setTimeout(hint,500);};
     else if(isNewFile)setTimeout(hint,800);
   }
   // start sequencer if tracks exist
@@ -144,8 +144,10 @@ function startGame(slotIndex){
   if(document.body.classList.contains('desktop-mode')){
     const sv=document.getElementById('storeView');
     const bv=document.getElementById('bunkerView');
-    if(sv){sv.classList.add('sidebar-collapsed');updateCollapseBtn('shop',true);}
-    if(bv){bv.classList.add('sidebar-collapsed');updateCollapseBtn('bunker',true);}
+    // v0.2.208: every screen you've unlocked starts open; locked ones stay tucked away
+    const sLock=!(typeof fuseboxOwned!=='undefined'&&fuseboxOwned),bLock=!(totalAliens>=1);
+    if(sv){sv.classList.toggle('sidebar-collapsed',sLock);updateCollapseBtn('shop',sLock);}
+    if(bv){bv.classList.toggle('sidebar-collapsed',bLock);updateCollapseBtn('bunker',bLock);}
     renderStore();
     // Delay bunker render slightly to ensure buildBunkerGrid() DOM is ready
     setTimeout(()=>{renderBunkerView();repositionCollapseButtons();},60);

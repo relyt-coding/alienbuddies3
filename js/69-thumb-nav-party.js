@@ -164,9 +164,15 @@ body.phone-land #partyTeaser .pt-tag{font-size:12px;padding:2px 6px 1px;}
     let left=r.left;['energyMeter','scoreSubEl','multEl'].forEach(id=>{const e=$(id);if(!e||!e.offsetParent)return;
       let q=e.getBoundingClientRect();if(id!=='energyMeter'){try{const rg=document.createRange();rg.selectNodeContents(e);q=rg.getBoundingClientRect();}catch(_){}}
       if(q.width&&q.top<r.bottom+h)left=Math.min(left,q.left);});
+    // v0.2.208: sideways phone = a flat row left of the whole score row; upright phone = bottom level with the number;
+    //   desktop = js/89 tzPlace hangs it above the score (left of its middle), clear of the drum tracker
+    const desk=B.contains('desktop-mode');
+    if(land){const sr=$('scoreRow');if(sr){const q=sr.getBoundingClientRect();if(q.width)left=Math.min(left,q.left);}}
     let x=left-w-(land?10:18);
-    if(x<o.left+4)x=r.right+Math.max(16,Math.min(36,r.height*.45));
-    tz.style.left=(x-o.left).toFixed(1)+'px';tz.style.top=(r.top+r.height/2-h*.55-o.top).toFixed(1)+'px';
+    if(x<o.left+4)x=land||desk?r.right+Math.max(16,Math.min(36,r.height*.45)):o.left+4;
+    const y0=desk||land?r.top+r.height/2-h*.55:r.bottom-h+4;
+    const p=typeof tzPlace==='function'?tzPlace('L',x,y0,w,h,r):{x,y:y0};
+    tz.style.left=(p.x-o.left).toFixed(1)+'px';tz.style.top=(p.y-o.top).toFixed(1)+'px';
   }
   function show(on){
     if(on===tzOn)return;tzOn=on;
@@ -174,10 +180,10 @@ body.phone-land #partyTeaser .pt-tag{font-size:12px;padding:2px 6px 1px;}
       setTimeout(place,60);
       // a little shimmer as it lowers in
       try{const k=window.US_KIT;if(k&&k.mixer&&!(typeof sfxOn!=='undefined'&&!sfxOn)){const S=k.mixer(.5);if(S)[0,.12,.24,.36].forEach((d,i)=>k.tone(S,S.t+.5+d,[1568,1976,2349,3136][i],{type:'triangle',a:.03,d:.35,rv:.6}));}}catch(e){}}
-    else{tz.classList.remove('on','ready');cancelAnimationFrame(raf);raf=0;}
+    else{tz.classList.remove('on','ready');cancelAnimationFrame(raf);raf=0;if(typeof tzRelease==='function')tzRelease('L');}
   }
   function tick(){
-    const active=B.contains('game-active'),seq=typeof drum!=='undefined'&&drum.seqTracks>=1,owned=typeof shop!=='undefined'&&(shop.partyLevel||0)>=1;
+    const active=B.contains('game-active'),seq=typeof drum!=='undefined'&&drum.seqTracks>=1&&!(typeof fuseboxOwned!=='undefined'&&!fuseboxOwned),owned=typeof shop!=='undefined'&&(shop.partyLevel||0)>=1;
     if(!active||!seq){seqSeenAt=0;show(false);return;}
     if(!seqSeenAt)seqSeenAt=performance.now()-(seqWasLoaded?60000:0);   // loaded with the sequencer already: no wait
     seqWasLoaded=false;
@@ -188,7 +194,7 @@ body.phone-land #partyTeaser .pt-tag{font-size:12px;padding:2px 6px 1px;}
     if((++tf)%5===0)place();
   }
   let seqWasLoaded=false;
-  if(typeof startGame==='function'){const sg=window.startGame;window.startGame=function(){const r=sg.apply(this,arguments);seqSeenAt=0;seqWasLoaded=typeof drum!=='undefined'&&drum.seqTracks>=1;show(false);thumbNav();return r;};}
+  if(typeof startGame==='function'){const sg=window.startGame;window.startGame=function(){const r=sg.apply(this,arguments);seqSeenAt=0;seqWasLoaded=typeof drum!=='undefined'&&drum.seqTracks>=1&&!(typeof fuseboxOwned!=='undefined'&&!fuseboxOwned);show(false);thumbNav();return r;};}
   tz.addEventListener('click',e=>{e.stopPropagation();
     if(score>=cost()&&typeof buyPartyNext==='function'){show(false);buyPartyNext();return;}
     tz.classList.remove('nope');void tz.offsetWidth;tz.classList.add('nope');setTimeout(()=>tz.classList.remove('nope'),500);

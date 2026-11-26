@@ -10,7 +10,11 @@ let musicOn=true;
 // builds the music graph (volume knob, music bus, built-in reverb, master effects + limiter) on a context.
 // The game's live AudioContext uses it once; WAV export builds a second copy on an OfflineAudioContext.
 function _initAudioGraph(c,vol){
-  masterGainNode=c.createGain();masterGainNode.gain.value=vol;masterGainNode.connect(c.destination);
+  masterGainNode=c.createGain();masterGainNode.gain.value=vol;
+  // v0.2.208 polish EQ on everything: clear the sub-rumble nobody hears (it only eats headroom) and soften the top-end fizz a little
+  {const hp=c.createBiquadFilter();hp.type='highpass';hp.frequency.value=28;hp.Q.value=.6;
+   const hs=c.createBiquadFilter();hs.type='highshelf';hs.frequency.value=9000;hs.gain.value=-2.5;
+   masterGainNode.connect(hp);hp.connect(hs);hs.connect(c.destination);}
   ambGain=c.createGain();ambGain.gain.value=AMB_LEVEL;ambGain.connect(masterGainNode);
   drumMasterGain=c.createGain();drumMasterGain.gain.value=1;drumMasterGain.connect(masterGainNode);drumMasterReal=drumMasterGain;
   // Reverb
@@ -38,9 +42,13 @@ function distCurve(k=3){const v=new Float32Array(256);for(let i=0;i<256;i++){con
 // v0.2.170: each sound's volume slider defaults to 75%, which plays it at its normal level; 100% is a third louder,
 //   so there's headroom to push a sound up in your mix
 const SOUND_VOL_DEFAULT=.75;
+// v0.2.208: level trims so every buddy sound sits at about the same loudness next to the drums (measured in Chrome:
+//   peaks for hits, average level for held notes). The volume sliders still work on top of this.
+const SOUND_TRIM={pad:.42,basenote:.55,bell:.6,wobble:.7,stab:.75,downlift:.8,cowbell:.8,rimshot:.6,junglesnare:.82,riser:.88,
+  clap:1.4,shaker:1.6,vinyl:1.4,choir:2.2,glitch:2.6,arp:1.8,lead:1.4,chord:1.2,pluck:1.1};
 function getSoundGainVal(id){
   const sv=soundVols[id]!==undefined?soundVols[id]:SOUND_VOL_DEFAULT;
-  return sv/SOUND_VOL_DEFAULT*masterVol;
+  return sv/SOUND_VOL_DEFAULT*masterVol*(SOUND_TRIM[id]||1);
 }
 
 // ══════════════════════════════════════════════

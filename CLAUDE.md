@@ -55,7 +55,7 @@ README.md covers the file layout, test mode and vocals in depth; this file is th
 68 Knowledge Vault · 69 thumb nav (bottom row on upright phones) + PARTY menu + level 3 disco-ball teaser ·
 70 Alien Gem look (Gem Buddy) · 71 level 4 gem ring + gems flying off buddies + MY ACCOUNT sheet ·
 73 Vault big batch (lessons + music words) · 74 Vault price table (generated) · 75 whole-bunker scroll + floating games dock ·
-76 Alien Awakening trails + speed · 77 Egg Incubator + racers · 78 DNA Splice · 79 Buddy Race + Gold Records · 80 extra bunkers · 81 memory diet (3D tree culling) · 82 name-your-file card · 83 corner egg (one at a time to 10 buddies) · 84 hand-picked Vault (editor at /vault) · 85 shop power bars · 86 v0.2.201 touches (free sequencer dots, tracker gap) · 87 YOUR SHIP (skill-tree middle) · 88 hold-to-buy with gems + gem ring opens the gem math · 89 one screen at a time (Fusebox lock, Vault card) ·
+76 Alien Awakening trails + speed · 77 Egg Incubator + racers · 78 DNA Splice · 79 Buddy Race + Gold Records · 80 extra bunkers · 81 memory diet (3D tree culling) · 82 name-your-file card · 83 corner egg (one at a time to 10 buddies) · 84 hand-picked Vault (editor at /vault) · 85 shop power bars · 86 v0.2.201 touches (free sequencer dots, tracker gap) · 87 YOUR SHIP (skill-tree middle) · 88 hold-to-buy with gems + gem ring opens the gem math · 89 one screen at a time (Fusebox lock + teaser, Vault card) · 90 buddy sounds ·
 72 energy/gem math/party corner + file-select hum (`titleHum`): `openGemStats()` (bunker + shop gem counters), PARTY pill top-left (`.pb-corner`), MY ACCOUNT in Settings only, sequencer tracker ACTIVATE (`seqTrackerActive`, `SEQ_TRACKER_COST`)
 
 - Bunker (v0.2.181, js/75): `.bunker-body` is the scroll box (the grid wrapper no longer scrolls; it only clips the grid's pinch-zoom).
@@ -141,6 +141,14 @@ README.md covers the file layout, test mode and vocals in depth; this file is th
   Fixes: js/18 phone pad sizing uses the real bottom-row button (sideways iPad); js/83 egg avoids the score on sideways phones and pads the score row /
   drops the sequencer on desktop to make room (`setEggPad` / `setEggDrop`); js/71 desktop gem ring falls back to the column's top-right.
 - Score unit (v0.2.201): scoreParts shows MILLIJOULES below 10 J, then JOULES (≤2 decimals).
+- v0.2.208: BUDDY SOUNDS (js/90): every buddy brings `alienData[i].snd` (default EXTRA_SOUNDS_ORDER[i], cycles); `unlockedSounds` = pad sounds + buddy
+  sounds + planets; `drum.extraSounds` is synced to the distinct buddy-sound count (still ×1.2 each); #soundLibCard hidden. `buddyVoice(i,times)` plays it
+  (hatch ×2 from js/50, hatch-screen taps, floating taps unless the target is clickable, #alienNamePreview, designer canvas via `bdCurrentIdx`).
+  Future: an unlock to change a buddy's sound; planet/continent eggs that bring planet sounds. `SOUND_TRIM` (js/03) = per-sound level trims; master has a
+  28 Hz high-pass + −2.5 dB shelf at 9 kHz. FUSEBOX is bought from `#fuseTeaser` (js/89, FUSE_COST 15 J, save `fuseboxOwned`); disco ball waits for it.
+  `tzPlace` (js/89) places both teasers (desktop: hanging above the score). `openNewlyUnlocked('bunker'|'fuse'|'vault')` opens a page after its unlock;
+  desktop file open leaves unlocked panels open. partyMult = 2×1.5^(lvl-1). js/18 phone pads: `body.pad-squeeze` shrinks the header when pads don't fit
+  (Galaxy Fold / big system font); the grid is always clamped to the room left. audit.py now includes Fold / Flip sizes (Android UA).
 - Skill-tree descriptions: `gemsOnly` (js/20) strips any written "×N Alien Gems" and appends the node's REAL `gemMult`, so never hand-write gem amounts.
 
 ## Testing without a phone

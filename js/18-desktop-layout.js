@@ -279,23 +279,32 @@ function fitPadArea(){
     // phone layout: size the pads to the space left above the SETTINGS / EDIT PADS buttons so they never overlap
     // v0.2.207: the bottom limit is whichever bottom-row button is really on screen (iPads use the thumb row, where the
     //   old SETTINGS button is hidden, so the pads used to run under the row on a sideways iPad)
-    const sb=['soundboardBtn','settingsOpenBtn','openBunkerBtn','padEditToggleBtn'].map(id=>document.getElementById(id)).find(e=>{if(!e)return false;const r=e.getBoundingClientRect();return r.width>0&&r.top>innerHeight*.5;})||document.getElementById('soundboardBtn');
+    const sb=['soundboardBtn','settingsOpenBtn','openBunkerBtn','padEditToggleBtn'].map(id=>document.getElementById(id)).find(e=>{if(!e)return false;const r=e.getBoundingClientRect();return r.width>0&&r.top>innerHeight*.5;})||null;
+    // v0.2.208 (Galaxy Fold): no bottom button on screen = use the bottom of the window (minus the thumb row's height)
+    const sbTop=()=>sb?sb.getBoundingClientRect().top:innerHeight-64;
     const nPads=Math.max(1,Math.min(8,parseInt(grid.getAttribute('data-pads'))||1));
     const seqOn=document.body.classList.contains('seq-on');
     // tablets held sideways / short computer windows: wide pads would eat the sequencer's room, so keep the pad grid about screen-height wide
     if(innerWidth>innerHeight&&grid.parentElement){const cap=Math.round(Math.min(grid.parentElement.clientWidth,innerHeight*0.8));if(cap<grid.parentElement.clientWidth-20){grid.style.maxWidth=cap+'px';grid.style.marginLeft='auto';grid.style.marginRight='auto';}}
-    if((seqOn||nPads>=2)&&sb&&grid.offsetParent!==null&&!document.body.classList.contains('store-open')&&!document.body.classList.contains('bunker-open')){
-      const gt=grid.getBoundingClientRect().top;
+    if(grid.offsetParent!==null&&!document.body.classList.contains('store-open')&&!document.body.classList.contains('bunker-open')){
       const nn=Math.max(1,Math.min(8,parseInt(grid.getAttribute('data-pads'))||1));
       const colsN=nn<=1?1:(nn===3?3:(nn<=4?2:(nn<=6?3:4)));
       const rowsN=Math.ceil(nn/colsN);
       const natural=rowsN*((grid.clientWidth-(colsN-1)*6)/colsN/1.4)+(rowsN-1)*6;
-      const room=sb.getBoundingClientRect().top-10-gt;
-      // sequencer on: never taller than natural; sequencer off: let pads grow (up to 35% taller) to fill the free space
-      const want=seqOn?Math.min(natural,room):Math.min(natural*1.35,room);
-      if(room>0){document.body.classList.add('pad-fit');grid.style.height=Math.floor(Math.max(want,Math.min(natural,rowsN*52)))+'px';centerPhonePads(grid,sb,seqOn);return;}
+      // v0.2.208 (Galaxy Fold / big system font): a tall header used to push the pads under the bottom buttons with only their
+      //   tops showing. Measure with the normal header; if the pads would get squashed, shrink the header (body.pad-squeeze) and measure again.
+      const B=document.body.classList;
+      const roomNow=()=>sbTop()-10-grid.getBoundingClientRect().top;
+      B.remove('pad-squeeze');let room=roomNow();
+      if(room<Math.min(natural,rowsN*90)){B.add('pad-squeeze');room=roomNow();}
+      if(seqOn||nPads>=2||room<natural){
+        // sequencer on: never taller than natural; sequencer off: let pads grow (up to 35% taller) to fill the free space
+        const want=seqOn?Math.min(natural,room):Math.min(natural*1.35,room);
+        // always fit what's left (never below ~40px a row: they stay tappable)
+        document.body.classList.add('pad-fit');grid.style.height=Math.floor(Math.max(want,rowsN*40))+'px';centerPhonePads(grid,sb||document.getElementById('soundboardBtn'),seqOn);return;
+      }
     }
-    document.body.classList.remove('pad-fit');grid.style.height='';centerPhonePads(grid,sb,seqOn);
+    document.body.classList.remove('pad-fit','pad-squeeze');grid.style.height='';centerPhonePads(grid,sb||document.getElementById('soundboardBtn'),seqOn);
     return;
   }
   document.body.classList.remove('pad-fit');grid.style.height='';grid.style.marginTop='';

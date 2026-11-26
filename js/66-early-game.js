@@ -63,7 +63,7 @@
     bunkerNew=true;holdT=setTimeout(releaseBuddies,15000);   // (never stuck hidden)
     // v0.2.156: the BUNKER and SHOP get their own cutscene: the camera pulls back from the pads and the two pages fly
     // in and build themselves on either side (js/65, 'nav' mode). The buttons are simply there when it hands back.
-    if(typeof playNewFileIntro==='function'&&!(typeof unlockCutsceneRunning==='function'&&unlockCutsceneRunning())&&playNewFileIntro({mode:'nav',onDone:()=>{setTimeout(releaseBuddies,150);if(isDesk()&&typeof repositionCollapseButtons==='function')repositionCollapseButtons();}}))return;
+    if(typeof playNewFileIntro==='function'&&!(typeof unlockCutsceneRunning==='function'&&unlockCutsceneRunning())&&playNewFileIntro({mode:'navB',onDone:()=>{setTimeout(releaseBuddies,150);if(isDesk()&&typeof repositionCollapseButtons==='function')repositionCollapseButtons();}}))return;
     setTimeout(releaseBuddies,400);
     B.remove('nav-reveal');void document.body.offsetWidth;B.add('nav-reveal');
     setTimeout(()=>B.remove('nav-reveal'),1600);

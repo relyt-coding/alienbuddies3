@@ -2,6 +2,13 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.205 - 2026-11-26 09:10
+- The Shop is now the FUSEBOX: you invest your energy into your power supply to unlock new music features and multipliers.
+- New screens arrive one at a time: your first buddy opens the Bunker, and the sequencer opens the Fusebox, each with its own cutscene.
+- The Vault is now something you unlock in the Fusebox, under the Alien Buddies, for 100 J.
+- Every egg is now warmed by a heat lamp: it drops in on its wire, flickers on and lights up the egg, then keeps swaying overhead and spotlights your new buddy as it hatches.
+- On computers, closing both side panels now keeps a slim view. A FILL button sits in each top corner: one press stretches the game to 2/3 of the screen, the second fills it all, and holding either for 2 seconds goes straight to full screen. SHRINK gives the space back.
+
 ## v0.2.204 - 2026-11-26 08:40
 - Everything you buy with Alien Gems in the galaxies is now bought by holding its button down: it fills up, hums higher and higher, and bursts when it's yours.
 - Tapping the Alien Gem counter on the drum pads screen opens the Alien Gem math, with a reminder to hold gem buttons to unlock them.

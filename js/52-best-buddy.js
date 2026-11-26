@@ -39,7 +39,7 @@ function bbItemOwned(k,i){if(typeof unlockedSkills==='undefined')return false;
       <div class="page-title-wrap"><div class="page-title" style="color:#ffd23f">BEST BUDDY</div><div class="page-sub" id="bbSub">HANGING OUT</div></div>
       <button class="back-btn" id="closeBestBuddyBtn">BACK</button>
     </div>
-    <div class="bb-stage" id="bbStage"><canvas id="bbCanvas"></canvas><div class="bb-empty" id="bbEmpty">Hatch an alien buddy first!<br><small>Buy one in the shop</small></div></div>
+    <div class="bb-stage" id="bbStage"><canvas id="bbCanvas"></canvas><div class="bb-empty" id="bbEmpty">Hatch an alien buddy first!<br><small>Buy one in the Fusebox</small></div></div>
     <div class="bb-namebar">
       <button class="bb-arrow" id="bbPrev" aria-label="Previous buddy">◀</button>
       <div class="bb-name"><b id="bbName">—</b><small id="bbNum">#1</small></div>

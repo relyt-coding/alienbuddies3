@@ -29,7 +29,7 @@
   function snd(fn,vol){if(!K||!K.mixer)return;const S=K.mixer(vol||.8);if(S)try{fn(S,S.t);}catch(e){console.warn('intro sound',e);}}
 
   // ══════════════════════ NEW-FILE INTRO ══════════════════════
-  const IDS={b:'bunkerView',h:'gameView',s:'storeView'},OFF={b:-1,h:0,s:1},NAMES={b:'BUNKER',h:'DRUM PADS',s:'SHOP'};
+  const IDS={b:'bunkerView',h:'gameView',s:'storeView'},OFF={b:-1,h:0,s:1},NAMES={b:'BUNKER',h:'DRUM PADS',s:'FUSEBOX'};
   // each intro: which pages take part, when they fly in (FLY) and build (BUILD), the camera path, the final zoom in,
   // when the page names show, and its length. `zout` = it starts zoomed in on the pads and pulls back first.
   const IMODES={
@@ -39,6 +39,14 @@
       CAM:[[0,'c',0],[2.15,'c',0],[3.0,'c',2]]},
     nav:{pages:['b','h','s'],FLY:{b:[.45,1.35],s:[.65,1.55]},BUILD:{b:1.65,s:2.85},ZOOM:[4.55,5.4],DUR:6,LBL:[1.3,1.6,4.25,4.55],zout:[0,1.05],
       CAM:[[0,'c',2],[1.05,'c',0],[1.45,'c',0],[1.85,'b',1],[2.65,'b',1],[3.2,'s',1],[3.9,'s',1],[4.3,'h',1],[4.55,'h',1],[5.4,'c',2]]},
+    // v0.2.205: the pages arrive one at a time. The first buddy brings the BUNKER (navB), the sequencer brings the
+    //   FUSEBOX (navS), and a file opened before the Fusebox is unlocked builds just the bunker + pads (allB).
+    navB:{pages:['b','h'],FLY:{b:[.45,1.35]},BUILD:{b:1.65},ZOOM:[3.4,4.25],DUR:4.8,LBL:[1.3,1.6,3.1,3.4],zout:[0,1.05],
+      CAM:[[0,'c',2],[1.05,'c',0],[1.45,'c',0],[1.85,'b',1],[2.65,'b',1],[3.05,'h',1],[3.4,'h',1],[4.25,'c',2]]},
+    navS:{pages:['h','s'],FLY:{s:[.45,1.35]},BUILD:{s:1.65},ZOOM:[3.4,4.25],DUR:4.8,LBL:[1.3,1.6,3.1,3.4],zout:[0,1.05],
+      CAM:[[0,'c',2],[1.05,'c',0],[1.45,'c',0],[1.85,'s',1],[2.65,'s',1],[3.05,'h',1],[3.4,'h',1],[4.25,'c',2]]},
+    allB:{pages:['b','h'],FLY:{b:[.25,1.25],h:[.45,1.45]},BUILD:{b:1.7,h:3.0},ZOOM:[4.3,5.5],DUR:6.5,LBL:[1.45,1.9,4.0,4.3],
+      CAM:[[0,'c',0],[1.55,'c',0],[2.05,'b',1],[2.85,'b',1],[3.45,'h',1],[4.3,'h',1],[5.5,'c',2]]},
   };
   let I=null,M=IMODES.all,FLY=M.FLY,BUILD=M.BUILD,ZOOM=M.ZOOM,DUR=M.DUR,CAM=M.CAM;
   function useMode(k){M=IMODES[k]||IMODES.all;FLY=M.FLY;BUILD=M.BUILD;ZOOM=M.ZOOM;DUR=M.DUR;CAM=M.CAM;}
@@ -115,7 +123,7 @@
     if(I)finishIntro(false);
     // before the first buddy (a new file) only the drum pads exist yet
     const noBuddy=BC.contains('nav-locked')||(typeof totalAliens!=='undefined'&&totalAliens<1);
-    useMode(opts.mode||(noBuddy?'pads':'all'));
+    useMode(opts.mode||(noBuddy?'pads':BC.contains('fuse-locked')?'allB':'all'));
     // start from the pads page with nothing open
     try{if(typeof closeSettings==='function')closeSettings();}catch(e){}
     try{if(typeof closeSkillTree==='function'&&document.querySelector('#skillTreeModal.open'))closeSkillTree();}catch(e){}
@@ -137,7 +145,7 @@
     // pages that sit this one out are parked out of sight (the intro styles would otherwise drop them on top)
     ['b','h','s'].forEach(k=>{if(!M.pages.includes(k))setView(k,'translate(-400vw,0)',0,0,0);});
     document.getElementById('introCatch').classList.add('on');
-    if(!opts.silent)introSound(opts.mode||(M===IMODES.pads?'pads':M===IMODES.nav?'nav':'all'));
+    if(!opts.silent)introSound(M===IMODES.pads?'pads':(M===IMODES.nav||M===IMODES.navB||M===IMODES.navS)?'nav':'all');
     I.raf=requestAnimationFrame(introFrame);
     return true;
   };

@@ -115,7 +115,7 @@
 
 <!-- Desktop sidebar collapse buttons -->
 <button class="desktop-collapse-btn" id="collapseBunkerBtn" title="Toggle Bunker">◀ BUNKER</button>
-<button class="desktop-collapse-btn" id="collapseShopBtn" title="Toggle Shop">SHOP ▶</button>
+<button class="desktop-collapse-btn" id="collapseShopBtn" title="Toggle Fusebox">FUSEBOX ▶</button>
 <button class="edit-mode-badge" id="editModeBadge" style="pointer-events:auto;">✏ EDIT MODE</button>
 
 <div id="tooSmallOverlay"><div class="ts-box"><div class="ts-emoji"><span class="bi" data-scale="1"></span></div><div class="ts-msg"></div><div class="ts-sub"></div></div></div>
@@ -164,7 +164,7 @@
           <div class="game-title" id="titleEl">ALIEN BUDDIES</div>
           <div class="subtitle" id="slotSubtitle">SLOT 1</div>
         </div>
-        <button class="nav-btn btn-right" id="openStoreBtn"><svg class="nb-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.4 7.6h14.1l-1.9 6.9a1.7 1.7 0 0 1-1.64 1.25H9.7a1.7 1.7 0 0 1-1.66-1.33z" fill="currentColor" opacity=".35"/><path d="M2.4 3.8h2.7l2.6 10.6a1.7 1.7 0 0 0 1.66 1.3h7.5a1.7 1.7 0 0 0 1.64-1.25l1.95-6.85H6.3" stroke="currentColor" stroke-width="1.9" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9.8" cy="19.7" r="1.8" fill="currentColor"/><circle cx="16.6" cy="19.7" r="1.8" fill="currentColor"/></svg><span class="nb-lbl">SHOP</span></button>
+        <button class="nav-btn btn-right" id="openStoreBtn"><svg class="nb-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.4 7.6h14.1l-1.9 6.9a1.7 1.7 0 0 1-1.64 1.25H9.7a1.7 1.7 0 0 1-1.66-1.33z" fill="currentColor" opacity=".35"/><path d="M2.4 3.8h2.7l2.6 10.6a1.7 1.7 0 0 0 1.66 1.3h7.5a1.7 1.7 0 0 0 1.64-1.25l1.95-6.85H6.3" stroke="currentColor" stroke-width="1.9" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9.8" cy="19.7" r="1.8" fill="currentColor"/><circle cx="16.6" cy="19.7" r="1.8" fill="currentColor"/></svg><span class="nb-lbl">FUSEBOX</span></button>
       </div>
 
       <!-- SCORE + TRACKERS (side by side on desktop once the sequencer is unlocked) -->
@@ -337,7 +337,7 @@
     <div class="page-header">
       <button class="back-btn" id="closeStoreBtn">BACK</button>
       <div class="page-title-wrap">
-        <div class="page-title">SHOP</div>
+        <div class="page-title">FUSEBOX</div>
         <div class="page-sub">balance: <span id="balanceEl">0</span></div>
         <div class="gem-counter" id="gemInfoShop" style="display:none;justify-content:flex-start;align-self:flex-start;flex-wrap:wrap;gap:.3rem;margin-top:.3rem;font-size:1.1rem;">
           <span class="gem-icon">💎</span><span id="gemCountShop">0</span>
@@ -869,7 +869,7 @@
     <svg width="36" height="48" viewBox="0 0 36 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="animation:arrowBounce .7s ease-in-out infinite alternate;filter:drop-shadow(0 0 6px rgba(232,255,0,.7));">
   <polygon points="18,0 36,26 26,26 26,48 10,48 10,26 0,26" fill="#e8ff00" stroke="#333300" stroke-width="2" stroke-linejoin="round"/>
 </svg>
-    <div style="font-family:'Bebas Neue',sans-serif;font-size:.65rem;letter-spacing:.1em;color:#e8ff00;text-shadow:0 0 8px rgba(232,255,0,.6);margin-top:4px;">SHOP</div>
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:.65rem;letter-spacing:.1em;color:#e8ff00;text-shadow:0 0 8px rgba(232,255,0,.6);margin-top:4px;">FUSEBOX</div>
   </div>
 
   <!-- ONE-TIME HINT MODAL -->
@@ -1048,5 +1048,6 @@
 <script src="js/86-polish-201.js"></script>
 <script src="js/87-ship.js"></script>
 <script src="js/88-gem-hold.js"></script>
+<script src="js/89-unlock-chunks.js"></script>
 </body>
 </html>

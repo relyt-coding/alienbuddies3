@@ -104,7 +104,7 @@ function mgBuy(k){
   if(mgBought[k])return true;
   if((typeof alienGems!=='undefined'?alienGems:0)<price){
     const need=price===1?'1 Alien Gem':price+' Alien Gems';
-    showToast(totalAliens>0?'💎 Need '+need+' (your aliens make gems every minute)':'💎 Need '+need+' · buy an Alien Buddy in the shop to start making gems');
+    showToast(totalAliens>0?'💎 Need '+need+' (your aliens make gems every minute)':'💎 Need '+need+' · buy an Alien Buddy in the Fusebox to start making gems');
     return false;
   }
   alienGems-=price;mgBought[k]=true;

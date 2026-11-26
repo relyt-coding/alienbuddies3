@@ -1147,8 +1147,8 @@ window.doSkillTreeUnlock=function(){
   autoSave();
   updateSkillTreeBtn();
   // a short hyperspace intro, then the tree opens underneath it as it fades
-  if(typeof playGalaxyIntro==='function')playGalaxyIntro(()=>openSkillTree(),()=>showToast('🌌 Explore the Galaxies unlocked! Find it at the top of the Shop.'));
-  else{showToast('🌌 Explore the Galaxies unlocked! Find it at the top of the Shop.');openSkillTree();}
+  if(typeof playGalaxyIntro==='function')playGalaxyIntro(()=>openSkillTree(),()=>showToast('🌌 Explore the Galaxies unlocked! Find it at the top of the Fusebox.'));
+  else{showToast('🌌 Explore the Galaxies unlocked! Find it at the top of the Fusebox.');openSkillTree();}
 };
 document.getElementById('skillTreeCloseBtn')&&document.getElementById('skillTreeCloseBtn').addEventListener('click', closeSkillTree);
 document.getElementById('stDetailBuyBtn')&&document.getElementById('stDetailBuyBtn').addEventListener('click',()=>{

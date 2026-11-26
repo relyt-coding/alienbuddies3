@@ -2,9 +2,9 @@
 // ══════════════════════════════════════════════
 //  SIDEWAYS PHONE + DESKTOP DAW LAYOUTS
 //  phone-land : phone held sideways — slim header (score + energy per second), sequencer fills the middle, pads in one row
-//  daw-wide   : desktop with the sequencer unlocked and both side panels closed — the game column spreads
-//               across the whole window. With exactly one panel open, an opt-in ⤢ FILL button stretches
-//               it into the empty side; opening or closing any panel resets that choice.
+//  daw-wide   : desktop with the sequencer unlocked and at least one empty side FILLed — the game column spreads
+//               into it. Two ⤢ FILL buttons sit in the window's top corners (v0.2.205): one press fills that side,
+//               both = full screen (daw-full), holding one for 2 s goes straight to full screen.
 // ══════════════════════════════════════════════
 (function(){
   const B=document.body,$=id=>document.getElementById(id);
@@ -81,36 +81,50 @@
 
   function syncNp(){const g=$('padGrid');if(g)g.style.setProperty('--np',Math.max(1,Math.min(8,parseInt(g.getAttribute('data-pads'))||1)));}
 
-  // ── desktop: DAW wide / FILL ──
-  const fillBtn=document.createElement('button');fillBtn.id='dawFillBtn';fillBtn.type='button';fillBtn.textContent='⤢ FILL';
-  fillBtn.title='Stretch the sequencer and pads into this empty space';
-  document.body.appendChild(fillBtn);
-  fillBtn.addEventListener('click',()=>{dawFill=fillBtn.dataset.side||null;update();});
-  ['collapseBunkerBtn','collapseShopBtn'].forEach(id=>{const b=$(id);b&&b.addEventListener('click',()=>{dawFill=null;setTimeout(update,0);});});
+  // ── desktop: DAW wide / FILL (v0.2.205) ──
+  // Closing both panels no longer goes full screen on its own: you get the skinny view. Each empty side has its own
+  // ⤢ FILL button in that top corner of the window: press one and the game stretches into that side (about 2/3 of the
+  // screen), press the other for full screen. HOLD either one for 2 s to go straight to full screen. A filled side's
+  // button turns into ⤡ SHRINK to give the space back. Opening a panel takes its side back.
+  const fill={bunker:false,shop:false};
+  const HOLD_MS=2000;
+  function mkFill(side){const b=document.createElement('button');b.className='daw-fill';b.id=side==='bunker'?'dawFillBtn':'dawFillBtnR';b.type='button';b.dataset.side=side;
+    b.innerHTML='<i></i><span>⤢ FILL</span>';b.title='Click: fill this side · Hold 2 s: full screen';document.body.appendChild(b);
+    let t0=0,raf=0,held=false;
+    const tick=now=>{const p=Math.min(1,(now-t0)/HOLD_MS);b.style.setProperty('--hp',p.toFixed(3));
+      if(p>=1){held=true;raf=0;b.style.setProperty('--hp','0');fill.bunker=fill.shop=true;update();return;}raf=requestAnimationFrame(tick);};
+    b.addEventListener('pointerdown',e=>{if(e.button>0)return;held=false;if(fill[side])return;t0=performance.now();cancelAnimationFrame(raf);raf=requestAnimationFrame(tick);});
+    const stop=()=>{cancelAnimationFrame(raf);raf=0;b.style.setProperty('--hp','0');};
+    ['pointerup','pointercancel','pointerleave'].forEach(ev=>b.addEventListener(ev,stop));
+    b.addEventListener('click',()=>{if(held){held=false;return;}fill[side]=!fill[side];update();});
+    return b;}
+  const fillBtn=mkFill('bunker'),fillBtnR=mkFill('shop');
+  ['collapseBunkerBtn','collapseShopBtn'].forEach(id=>{const b=$(id);b&&b.addEventListener('click',()=>{setTimeout(update,0);});});
 
   function updateDesktop(){
     const gs=$('gameScreen'),bv=$('bunkerView'),sv=$('storeView');
     const desk=B.classList.contains('desktop-mode')&&B.classList.contains('game-active')&&B.classList.contains('seq-on');
     const bc=!!(bv&&bv.classList.contains('sidebar-collapsed')),sc=!!(sv&&sv.classList.contains('sidebar-collapsed'));
-    if(!desk||bc===sc)dawFill=null;
-    const full=desk&&bc&&sc;
-    const wide=full||!!dawFill;
+    if(!desk){fill.bunker=fill.shop=false;}
+    if(!bc)fill.bunker=false;if(!sc)fill.shop=false;   // an open panel owns its side
+    const fb=desk&&bc&&fill.bunker,fs=desk&&sc&&fill.shop,wide=fb||fs;
+    dawFill=fb&&!fs?'bunker':fs&&!fb?'shop':null;
     B.classList.toggle('daw-wide',wide);
+    B.classList.toggle('daw-full',fb&&fs);
     if(gs){
       if(desk&&wide){
-        const l=(bc&&(full||dawFill==='bunker'))?'0px':'var(--bunker-w,360px)';
-        const r=(sc&&(full||dawFill==='shop'))?'0px':'var(--shop-w,380px)';
-        gs.style.gridTemplateColumns=l+' 1fr '+r;
+        // one side filled with the other side empty too: the game takes exactly 2/3, the last 1/3 stays blank
+        // (room for something alongside later: minigames, the Vault…). Next to an open panel it just takes the empty side.
+        let cols;
+        if(fb&&fs)cols='0px 1fr 0px';
+        else if(fb)cols=sc?'0px 2fr 1fr':'0px 1fr var(--shop-w,380px)';
+        else cols=bc?'1fr 2fr 0px':'var(--bunker-w,360px) 1fr 0px';
+        gs.style.gridTemplateColumns=cols;
       }else gs.style.gridTemplateColumns='';
     }
-    // FILL offer: exactly one panel open, nothing filled yet
-    const side=(desk&&bc!==sc&&!dawFill)?(bc?'bunker':'shop'):null;
-    fillBtn.classList.toggle('show',!!side);
-    if(side){
-      fillBtn.dataset.side=side;
-      if(side==='bunker'){fillBtn.style.left='calc(var(--bunker-w,360px) / 2)';fillBtn.style.right='auto';fillBtn.style.transform='translate(-50%,-50%)';}
-      else{fillBtn.style.left='auto';fillBtn.style.right='calc(var(--shop-w,380px) / 2)';fillBtn.style.transform='translate(50%,-50%)';}
-    }
+    [[fillBtn,bc,fill.bunker],[fillBtnR,sc,fill.shop]].forEach(([b,collapsed,on])=>{
+      const show=desk&&collapsed;b.classList.toggle('show',show);b.classList.toggle('on',!!on);
+      const sp=b.querySelector('span'),txt=on?'⤡ SHRINK':'⤢ FILL';if(sp.textContent!==txt)sp.textContent=txt;});
   }
 
   let lastKey='';

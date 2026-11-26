@@ -1785,9 +1785,12 @@ body.daw-wide .pad-area,body.daw-wide.seq-on .pad-area{flex:0 0 auto;max-width:n
 body.daw-wide .pad-grid[data-pads]{grid-template-columns:repeat(var(--np,1),minmax(0,1fr)) !important;grid-template-rows:none !important;grid-auto-rows:clamp(64px,12vh,120px);max-width:calc(var(--np,1) * 230px) !important;margin:0 auto !important;}
 body.daw-wide .pad{aspect-ratio:auto !important;}
 /* opt-in FILL button in an empty side column */
-#dawFillBtn{position:fixed;top:50%;z-index:52;display:none;transform:translate(-50%,-50%);font-family:'Bebas Neue',sans-serif;font-size:.95rem;letter-spacing:.12em;padding:.5rem .9rem;border-radius:50px;border:1px solid #2a2a4a;background:#0d0d1c;color:#a0a8ff;cursor:pointer;opacity:.75;transition:opacity .15s,border-color .15s,box-shadow .15s;}
-#dawFillBtn:hover{opacity:1;border-color:#a0a8ff;box-shadow:0 0 14px -3px rgba(160,168,255,.6);}
-#dawFillBtn.show{display:block;}
+.daw-fill{position:fixed;top:12px;z-index:52;display:none;font-family:'Bebas Neue',sans-serif;font-size:.95rem;letter-spacing:.12em;padding:.5rem .9rem;border-radius:50px;border:1px solid #2a2a4a;background:#0d0d1c;color:#a0a8ff;cursor:pointer;opacity:.75;transition:opacity .15s,border-color .15s,box-shadow .15s;overflow:hidden;-webkit-user-select:none;user-select:none;}
+#dawFillBtn{left:12px;}#dawFillBtnR{right:12px;}
+.daw-fill i{position:absolute;left:0;top:0;bottom:0;width:calc(var(--hp,0)*100%);background:rgba(160,168,255,.28);pointer-events:none;}
+.daw-fill span{position:relative;}
+.daw-fill:hover{opacity:1;border-color:#a0a8ff;box-shadow:0 0 14px -3px rgba(160,168,255,.6);}
+.daw-fill.show{display:block;}
 /* sideways phone: the bunker scrolls as one page instead of squeezing the alien grid into a sliver */
 body.phone-land .bunker-body{overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y;padding-bottom:1.5rem;}
 body.phone-land .bunker-grid-wrap{flex:none;overflow:visible;}
@@ -2513,7 +2516,7 @@ body:not(.desktop-mode) .st-link.next{animation:none;}
 html body.intro-run.intro-run #gameView,html body.intro-run.intro-run #storeView,html body.intro-run.intro-run #bunkerView{transform:var(--itf) !important;transition:none !important;will-change:transform,opacity;overflow:hidden;border-radius:var(--itr,0);box-shadow:0 0 0 6px rgba(140,160,255,var(--ita,0)),0 24px 70px rgba(0,0,0,.65);}
 html body.intro-run.intro-run #gameView{background:#0a0a0a;}
 html body.intro-run.intro-run #bunkerView{background:#0b0b10;}
-body.intro-run #soundboardBtn,body.intro-run #settingsOpenBtn,body.intro-run #padEditToggleBtn,body.intro-run #socialsBtn,body.intro-run #partyBtn,body.intro-run #pageDots,body.intro-run #collapseBunkerBtn,body.intro-run #collapseShopBtn,body.intro-run #dawFillBtn,body.intro-run #editModeBadge,body.intro-run #arrowActivate,body.intro-run #arrowShop,body.intro-run #zoomResetBtn{opacity:0 !important;pointer-events:none !important;}
+body.intro-run #soundboardBtn,body.intro-run #settingsOpenBtn,body.intro-run #padEditToggleBtn,body.intro-run #socialsBtn,body.intro-run #partyBtn,body.intro-run #pageDots,body.intro-run #collapseBunkerBtn,body.intro-run #collapseShopBtn,body.intro-run #dawFillBtn,body.intro-run #dawFillBtnR,body.intro-run #editModeBadge,body.intro-run #arrowActivate,body.intro-run #arrowShop,body.intro-run #zoomResetBtn{opacity:0 !important;pointer-events:none !important;}
 body.intro-run #alienLayer{visibility:hidden;}
 body.intro-ui-in #soundboardBtn,body.intro-ui-in #settingsOpenBtn,body.intro-ui-in #padEditToggleBtn,body.intro-ui-in #socialsBtn,body.intro-ui-in #pageDots,body.intro-ui-in #collapseBunkerBtn,body.intro-ui-in #collapseShopBtn{animation:introUiIn .7s ease-out both;}
 @keyframes introUiIn{from{opacity:0;transform:translateY(8px);}}

@@ -9,7 +9,7 @@
   // page ids: 0 home, 1 shop, 2 bunker, 3 galaxies, 6 KNOWLEDGE VAULT. Screen order left → right:
   // Cockpit · Vault · Best Buddy · Bunker · Home · Shop · Galaxies (v0.2.149)
   // (4 = the minigame COCKPIT, left of the bunker, once it's unlocked in the skill tree)
-  function pageOrder(){var o=(typeof skillTreeUnlocked!=='undefined'&&skillTreeUnlocked)?[2,0,1,3]:[2,0,1];if(typeof bbOn==='function'&&bbOn())o.unshift(5);if(document.getElementById('vaultView'))o.unshift(6);if(typeof mgCockpitOn==='function'&&mgCockpitOn())o.unshift(4);return o;}
+  function pageOrder(){var o=(typeof skillTreeUnlocked!=='undefined'&&skillTreeUnlocked)?[2,0,1,3]:[2,0,1];if(typeof bbOn==='function'&&bbOn())o.unshift(5);if(document.getElementById('vaultView'))o.unshift(6);if(typeof mgCockpitOn==='function'&&mgCockpitOn())o.unshift(4);if(typeof pageLocked==='function')o=o.filter(function(i){return !pageLocked(i);});return o;}
   function pageCount(){return pageOrder().length;}
   function cur(){
     var b=document.body.classList,m=document.getElementById('skillTreeModal');

@@ -44,6 +44,8 @@
     if(desk){   // computer: the top-left of the drum pad column, never over the Bunker / Shop panels
       const ap=gv.querySelector('.app'),r=(ap&&ap.getBoundingClientRect().width?ap:gv).getBoundingClientRect();
       if(r.width){x=Math.max(0,r.left)+16;y=Math.max(0,r.top)+14;}
+      {const fb=document.getElementById('dawFillBtn'),q=fb&&fb.classList.contains('show')&&fb.getBoundingClientRect();   // under the top-left FILL button
+        if(q&&q.width&&x<q.right+8)y=Math.max(y,q.bottom+8);}
       // (v0.2.204: in the wide layout too: the dot trackers now sit in towards the score, so the corner is free)
     }
     y+=safeTop();
@@ -122,7 +124,7 @@
   function shopNote(){
     try{if(localStorage.getItem(k_()))return;localStorage.setItem(k_(),'1');}catch(e){}
     clear();const n=document.createElement('div');n.id='eggShopNote';
-    n.innerHTML='<b>10 BUDDIES!</b><span>From now on, buy eggs in the SHOP</span>';
+    n.innerHTML='<b>10 BUDDIES!</b><span>From now on, buy eggs in the FUSEBOX</span>';
     const desk=B.contains('desktop-mode');(desk?document.body:$('gameView')).appendChild(n);if(desk)n.style.position='fixed';
     const o=desk?{left:0,top:0}:(n.offsetParent||$('gameView')).getBoundingClientRect(),xy=lastXY||[desk?18:10,(desk?16:12)+safeTop()];
     n.style.left=(xy[0]-o.left)+'px';n.style.top=(xy[1]-o.top)+'px';

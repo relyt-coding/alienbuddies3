@@ -127,7 +127,7 @@
     if(rn){list.appendChild($('div','fx-group','PIANO ROLL'));for(let i=0;i<rn;i++){if(typeof rollLayer==='function')rollLayer(i);listRow(FX_ROLL_BASE+i,list);}}
     if(voxN()){list.appendChild($('div','fx-group','VOCALS'));for(let i=0;i<voxN();i++)listRow(FX_VOX_BASE+i,list);}
     if(musicHas('mt_eq')||musicHas('mt_compression')){list.appendChild($('div','fx-group','MASTERING'));listRow(FX_MASTER,list);}
-    if(!list.children.length)b.appendChild($('div','more-foot','No tracks yet — buy a sequencer track in the shop first.'));
+    if(!list.children.length)b.appendChild($('div','more-foot','No tracks yet — buy a sequencer track in the Fusebox first.'));
     b.appendChild(list);
     const done=$('button','more-done','DONE');done.addEventListener('click',fm.close);b.appendChild(done);
   }

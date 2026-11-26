@@ -23,6 +23,11 @@
     try{if(typeof sfxOn!=='undefined'&&!sfxOn)return;const c=getCtx(),now=c.currentTime,out=masterGainNode;
       if(kind==='crack'){const n=c.createBufferSource(),L=Math.round(c.sampleRate*.08),b=c.createBuffer(1,L,c.sampleRate),d=b.getChannelData(0);for(let i=0;i<L;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/L,3);
         n.buffer=b;const f=c.createBiquadFilter();f.type='bandpass';f.frequency.value=2400+Math.random()*1200;f.Q.value=1.2;const gn=c.createGain();gn.gain.value=.35;n.connect(f);f.connect(gn);gn.connect(out);n.start(now);}
+      if(kind==='lamp'){   // the switch clicks, the filament hums up
+        const n=c.createBufferSource(),L=Math.round(c.sampleRate*.03),b=c.createBuffer(1,L,c.sampleRate),d=b.getChannelData(0);for(let i=0;i<L;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/L,4);
+        n.buffer=b;const f=c.createBiquadFilter();f.type='highpass';f.frequency.value=1800;const gn=c.createGain();gn.gain.value=.25;n.connect(f);f.connect(gn);gn.connect(out);n.start(now);
+        const o=c.createOscillator(),o2=c.createOscillator(),h=c.createGain();o.type='sine';o.frequency.value=120;o2.type='triangle';o2.frequency.value=240;
+        h.gain.setValueAtTime(0,now);h.gain.linearRampToValueAtTime(.05,now+.25);h.gain.exponentialRampToValueAtTime(.001,now+1.1);o.connect(h);o2.connect(h);h.connect(out);o.start(now);o2.start(now);o.stop(now+1.2);o2.stop(now+1.2);}
       if(kind==='hatch'||kind==='special'){
         const notes=kind==='special'?[523.25,659.25,783.99,1046.5,1318.5,1567.98]:[392,523.25,659.25,783.99];
         notes.forEach((fq,i)=>{const o=c.createOscillator(),gn=c.createGain();o.type='triangle';o.frequency.value=fq;const t=now+i*.07;
@@ -149,6 +154,46 @@
     [[0,0,0,mt,0,0,W,mt],[0,H,0,H-m,0,H-m,W,m],[0,0,m,0,0,0,m,H],[W,0,W-m,0,W-m,0,m,H]].forEach(([x0,y0,x1,y1,rx,ry,rw,rh])=>{
       const k=g.createLinearGradient(x0,y0,x1,y1);k.addColorStop(0,'rgba(0,0,0,1)');k.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=k;g.fillRect(rx,ry,rw,rh);});
     g.restore();}
+
+  // ── the heat lamp (v0.2.205): every egg is warmed by a lamp powered by your energy. It drops in on its wire, flickers
+  //    on and bathes the egg in warm light (1.5 s, before you can tap), then keeps hanging, swaying ±1.5°, and lights
+  //    the buddy like a spotlight when it hatches. Drawn as a shaded metal dome (lit from the left), an open rim showing
+  //    the bright inside, a glowing bulb and a braided cord. ──
+  const LAMP_T=1.5;
+  function lampState(W,H){const lt=(performance.now()-st.lampT0)/1000;
+    const dk=Math.min(1,Math.max(0,(lt-.25)/.6)),drop=1-Math.pow(1-dk,3),bounce=dk>=1?Math.sin(Math.min(1,(lt-.85)/.45)*Math.PI)*Math.max(0,1-(lt-.85)/.45)*6:0;
+    const on0=sstep(.95,1.3,lt),flick=lt<1.3&&lt>.95?(Math.sin(lt*90)>.2?1:.35):1,light=on0*flick;
+    const sway=1.5*Math.PI/180*Math.sin(lt*1.7)*sstep(.6,1.2,lt);
+    const ly=H*.095,y=-H*.35+(ly+H*.35)*drop+bounce;return{lt,y,light,sway};}
+  function drawLampCone(W,H,L,cx,floorY,spread){if(L.light<=0)return;
+    g.save();g.translate(cx,0);g.rotate(L.sway);
+    const mw=W*.075,top=L.y+W*.075,bw=spread;
+    const cg=g.createLinearGradient(0,top,0,floorY);cg.addColorStop(0,`rgba(255,226,160,${.38*L.light})`);cg.addColorStop(.7,`rgba(255,205,120,${.16*L.light})`);cg.addColorStop(1,`rgba(255,190,100,${.04*L.light})`);
+    g.globalCompositeOperation='lighter';g.fillStyle=cg;g.beginPath();g.moveTo(-mw,top);g.lineTo(mw,top);g.lineTo(bw,floorY);g.lineTo(-bw,floorY);g.closePath();g.fill();
+    const pg=g.createRadialGradient(0,floorY,0,0,floorY,bw*1.05);pg.addColorStop(0,`rgba(255,215,140,${.35*L.light})`);pg.addColorStop(1,'rgba(255,215,140,0)');
+    g.fillStyle=pg;g.beginPath();g.ellipse(0,floorY,bw*1.05,bw*.22,0,0,TAU);g.fill();g.restore();}
+  function drawLamp(W,H,L,cx){
+    g.save();g.translate(cx,0);g.rotate(L.sway);
+    const y=L.y,sw=W*.15,sh=W*.095;
+    // cord (with a little braid) and the metal cap it hangs from
+    g.strokeStyle='#2a2a30';g.lineWidth=2.5;g.beginPath();g.moveTo(0,-4);g.lineTo(0,y-sh*.55);g.stroke();
+    g.strokeStyle='rgba(255,255,255,.08)';g.lineWidth=1;g.setLineDash([3,3]);g.beginPath();g.moveTo(.6,-4);g.lineTo(.6,y-sh*.55);g.stroke();g.setLineDash([]);
+    const cap=g.createLinearGradient(-6,0,6,0);cap.addColorStop(0,'#9aa0ad');cap.addColorStop(.45,'#e9edf5');cap.addColorStop(1,'#4b505c');
+    g.fillStyle=cap;g.fillRect(-6,y-sh*.62,12,sh*.22);
+    // the dome: shaded like a lit metal bowl (bright on the left, dark on the right) + a hot rim when it's on
+    g.beginPath();g.moveTo(-sw*.16,y-sh*.42);g.bezierCurveTo(-sw*.6,y-sh*.36,-sw*.98,y+sh*.05,-sw,y+sh*.48);g.lineTo(sw,y+sh*.48);g.bezierCurveTo(sw*.98,y+sh*.05,sw*.6,y-sh*.36,sw*.16,y-sh*.42);g.closePath();
+    const dg=g.createLinearGradient(-sw,0,sw,0);dg.addColorStop(0,'#5a8f7a');dg.addColorStop(.28,'#b9f2da');dg.addColorStop(.42,'#78c7a6');dg.addColorStop(.8,'#21483b');dg.addColorStop(1,'#0f2620');
+    g.fillStyle=dg;g.fill();g.strokeStyle='#0b1a15';g.lineWidth=2;g.stroke();
+    // a soft specular streak
+    g.fillStyle='rgba(255,255,255,.35)';g.beginPath();g.ellipse(-sw*.42,y-sh*.02,sw*.07,sh*.32,-.5,0,TAU);g.fill();
+    // the open rim (an ellipse: we see a little inside) with the bright interior + bulb
+    const rimY=y+sh*.48;
+    g.fillStyle='#0a0f0d';g.beginPath();g.ellipse(0,rimY,sw,sh*.2,0,0,TAU);g.fill();
+    if(L.light>0){const ig=g.createRadialGradient(0,rimY,0,0,rimY,sw);ig.addColorStop(0,`rgba(255,250,220,${L.light})`);ig.addColorStop(.5,`rgba(255,200,110,${.85*L.light})`);ig.addColorStop(1,`rgba(255,150,60,${.25*L.light})`);
+      g.fillStyle=ig;g.beginPath();g.ellipse(0,rimY,sw*.94,sh*.17,0,0,TAU);g.fill();
+      g.fillStyle=`rgba(255,255,240,${L.light})`;g.beginPath();g.ellipse(0,rimY+sh*.06,sw*.24,sh*.14,0,0,TAU);g.fill();}
+    g.strokeStyle='#cfe9dd';g.lineWidth=1.6;g.beginPath();g.ellipse(0,rimY,sw,sh*.2,0,0,TAU);g.stroke();
+    g.restore();}
   function frame(now){
     raf=requestAnimationFrame(frame);if(!st)return;
     const t=(now-st.t0)/1000,W=S,H=S*1.12;
@@ -161,17 +206,24 @@
       // falls in (speeding up like it's dropped), one damped bounce, then a gentle wobble that eases in
       const drop=Math.min(1,t/.55),y=baseY-(1-drop*drop)*H*1.05,bs=(t-.55)/.3,bounce=bs>0&&bs<1?Math.sin(bs*Math.PI)*(1-bs)*-20:0;
       const wob=Math.sin(t*(sp?7:5))*.06*sstep(.85,1.35,t)+st.shake*Math.sin(t*60)*.18;st.shake*=.9;
+      const LS=lampState(W,H);if(LS.light>0&&!st.lampOn){st.lampOn=1;sfx('lamp');}drawLampCone(W,H,LS,cx,baseY+eh*1.02,ew*1.25);
       g.fillStyle='rgba(0,0,0,.35)';g.beginPath();g.ellipse(cx,baseY+eh*1.02,ew*.9,ew*.18,0,0,TAU);g.fill();
       g.save();g.translate(cx,y+bounce+eh);g.rotate(wob);g.translate(-cx,-(y+bounce+eh));
-      if(!(st.hideUntil&&now<st.hideUntil))drawEgg(cx,y+bounce,ew,eh,t,sp,st.taps/3,null,st.pal);g.restore();
+      if(!(st.hideUntil&&now<st.hideUntil)){drawEgg(cx,y+bounce,ew,eh,t,sp,st.taps/3,null,st.pal);
+        // warmed by the lamp: a soft orange glow on the top of the shell
+        if(LS.light>0){g.globalCompositeOperation='lighter';const wg=g.createRadialGradient(cx,y+bounce-eh*.55,0,cx,y+bounce-eh*.2,ew*1.2);
+          wg.addColorStop(0,`rgba(255,170,80,${.32*LS.light})`);wg.addColorStop(1,'rgba(255,170,80,0)');g.fillStyle=wg;g.beginPath();g.ellipse(cx,y+bounce-eh*.15,ew*1.05,eh*1.02,0,0,TAU);g.fill();g.globalCompositeOperation='source-over';}}
+      g.restore();
+      drawLamp(W,H,LS,cx);
       parts(t);edgeFade(W,H);
-      if(t>1.4&&st.taps===0)document.getElementById('erHint').classList.add('on');
+      if(LS.lt>LAMP_T&&t>1.4&&st.taps===0)document.getElementById('erHint').classList.add('on');
       return;
     }
     // ── open: flash, the top flies off, the buddy spins out to face you ──
     const o=(now-st.hatchT)/1000;
     const rays=document.querySelector('#eggReveal .er-rays');
     // bottom shell
+    const LS=lampState(W,H);drawLampCone(W,H,LS,cx,baseY+eh*1.02,ew*1.45);
     const P=hatchPose(o,W,H),shA=Math.max(0,Math.min(1,(2.6-o)/.8)),bobS=P.bob,shW=ew*(.62+.28*shA)*(1-bobS*.04);g.fillStyle=`rgba(0,0,0,${.3+.05*shA-bobS*.03})`;g.beginPath();g.ellipse(cx,baseY+eh*1.02,shW,shW*.2,0,0,TAU);g.fill();
     g.save();g.globalAlpha=shA;drawEgg(cx,baseY,ew,eh,t,sp,1,'bottom',st.pal);g.restore();
     // the buddy rises out of the egg, spinning, and lands facing you
@@ -181,6 +233,7 @@
       if(al>0){g.save();g.translate(cx+tx,pc+ty);g.rotate(rot);g.scale(sc,sc);g.translate(-cx,-pc);g.globalAlpha=al;drawEgg(cx,baseY,ew,eh,t,sp,1,'top',st.pal);g.restore();}}
     parts(t);
     // flash: a burst of light from the egg that fades to nothing before the edges (no lit rectangle)
+    drawLamp(W,H,LS,cx);
     if(o<.35){const a=(1-o/.35)*.9,fl=g.createRadialGradient(cx,baseY-eh*.3,0,cx,baseY-eh*.3,W*.49);fl.addColorStop(0,`rgba(255,255,255,${a})`);fl.addColorStop(.5,`rgba(255,255,255,${a*.7})`);fl.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=fl;g.fillRect(0,0,W,H);}
     edgeFade(W,H);
   }
@@ -191,7 +244,7 @@
       g.save();g.globalAlpha=Math.min(1,(p.life-a)*2);g.translate(p.x,p.y);g.rotate(p.r);g.fillStyle=p.c;if(p.conf)g.fillRect(-p.s,-p.s*.5,p.s*2,p.s);else{g.beginPath();g.moveTo(-p.s,-p.s);g.lineTo(p.s,-p.s*.4);g.lineTo(-p.s*.2,p.s);g.closePath();g.fill();}g.restore();return true;});}
   function tap(){
     if(!st||st.phase==='open')return;
-    const t=(performance.now()-st.t0)/1000;if(t<.6)return;   // let it land first
+    const t=(performance.now()-st.t0)/1000;if(t<.6||(performance.now()-st.lampT0)/1000<LAMP_T)return;   // let it land and the lamp warm it first
     st.taps++;st.shake=1;document.getElementById('erHint').classList.remove('on');sfx('crack');
     const W=S,cx=W/2,cy=W*1.12*.55;
     burst(6,cx+(Math.random()-.5)*W*.2,cy,st.special?['#ffd23f','#fff3a0','#e08a10']:['#f4ead8','#cdbfa6','#ffffff'],160,.7);
@@ -219,7 +272,7 @@
     const oo=window.__eggOpenOpts||{};window.__eggOpenOpts=null;
     const info0=typeof buddySpecialInfo==='function'?buddySpecialInfo(idx):null,special=!!info0;
     const L=typeof buddyLookSpec==='function'?buddyLookSpec(idx):{body:'#7fe3c0',tip:'#ff9ccf',eye:'#9fc5ff'};
-    st={idx,special,info:info0,pal:[L.body,L.tip,L.eye,L.foot||L.body],phase:'egg',t0:performance.now()-(oo.landed?1000:0),taps:0,shake:0,fx:[],hideUntil:oo.hideMs?performance.now()+oo.hideMs:0};
+    st={idx,special,info:info0,pal:[L.body,L.tip,L.eye,L.foot||L.body],phase:'egg',t0:performance.now()-(oo.landed?1000:0),taps:0,shake:0,fx:[],lampT0:performance.now(),hideUntil:oo.hideMs?performance.now()+oo.hideMs:0};
     dpr=Math.min(2,window.devicePixelRatio||1);S=Math.round(Math.min(340,window.innerWidth*.86,window.innerHeight*.5));
     cv.width=S*dpr;cv.height=Math.round(S*1.12)*dpr;cv.style.width=S+'px';cv.style.height=Math.round(S*1.12)+'px';
     root.className=special?'special':'';root.classList.add('on');

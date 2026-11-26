@@ -124,7 +124,7 @@ function updatePartyBtnPosition(){
 function updateCollapseBtn(side, collapsed){
   if(side==='shop'){
     const btn = document.getElementById('collapseShopBtn');
-    if(btn) btn.textContent = collapsed ? '◀ SHOP' : 'SHOP ▶';
+    if(btn) btn.textContent = collapsed ? '◀ FUSEBOX' : 'FUSEBOX ▶';
   } else {
     const btn = document.getElementById('collapseBunkerBtn');
     if(btn) btn.textContent = collapsed ? 'BUNKER ▶' : '◀ BUNKER';

@@ -141,7 +141,7 @@ function incAllowPrice(l){return incPriceBase()*8*Math.pow(100,l);}
   function place(e){
     if(!incHas()){toast('Eggs need the Egg Incubator from the skill tree.');return;}
     const L=incLamps();for(let i=0;i<L;i++)if(!incEggs.some(x=>x.slot===i)){e.slot=i;save();refresh(true);const c=cards[i];if(c)c.el.scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'});return;}
-    toast('Every lamp is busy. The Shop sells more lamps.');
+    toast('Every lamp is busy. The Fusebox sells more lamps.');
   }
   function tapCard(i){
     const egg=incEggs.find(e=>e.slot===i);

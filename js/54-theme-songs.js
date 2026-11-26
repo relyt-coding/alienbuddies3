@@ -21,7 +21,7 @@ function _edApply(s){
 }
 function themeStartEdit(idx){
   if(_themeEdit)return;
-  if(!drum.seqTracks){showToast('🎛 Unlock the sequencer in the shop first, then make a theme song!');return;}
+  if(!drum.seqTracks){showToast('🎛 Unlock the sequencer in the Fusebox first, then make a theme song!');return;}
   if(seqPlaying&&typeof stopSeq==='function')stopSeq();
   themeStop();
   const ad=alienData[idx];if(!ad)return;

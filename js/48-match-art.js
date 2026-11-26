@@ -238,8 +238,8 @@
     if(ed==='foil'){const q=g.createLinearGradient(0,0,w,h);q.addColorStop(0,'rgba(80,160,255,0)');q.addColorStop(.42,'rgba(120,200,255,.9)');q.addColorStop(.52,'rgba(255,255,255,.95)');q.addColorStop(.62,'rgba(80,160,255,0)');g.fillStyle=q;g.fillRect(0,0,w,h);}
     else{for(let k=-6;k<10;k++){g.fillStyle='hsla('+((k*45)%360)+',100%,60%,.55)';g.beginPath();g.moveTo(k*w*.2,0);g.lineTo(k*w*.2+w*.11,0);g.lineTo(k*w*.2+w*.11-w*.8,h);g.lineTo(k*w*.2-w*.8,h);g.fill();}}
     g.restore();const p=Math.max(2,Math.round(w*.03));g.fillStyle='#fff';[[.78,.18],[.22,.7]].forEach(([x,y])=>{g.fillRect(x*w-p/2,y*h-p*1.5,p,p*3);g.fillRect(x*w-p*1.5,y*h-p/2,p*3,p);});
-    g.font='bold '+Math.round(h*.085)+'px "Bebas Neue"';g.textAlign='center';g.textBaseline='middle';const lab=ed==='foil'?'FOIL':'HOLO',tw=g.measureText(lab).width+w*.12;
-    rrect(g,(w-tw)/2,h*.055,tw,h*.1,h*.04);g.fillStyle=ed==='foil'?'#4aa8ff':'#ff5fb8';g.fill();g.fillStyle=OUT;g.fillText(lab,w/2,h*.108);}
+    // (v0.2.209: no FOIL / HOLO word on the card: the shine says it)
+  }
   // v0.2.163: black & white versions of the card pictures, for menus that shouldn't use emoji (the WATTS breakdown).
   //   matchIconBW('bolt', 64) → a canvas: the pixel sprite in greyscale with a little extra contrast.
   const bwCache={};

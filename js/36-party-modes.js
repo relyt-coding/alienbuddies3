@@ -198,8 +198,12 @@ try{const v=localStorage.getItem('ab2_party_style');if(PARTY_STYLES.some(s=>s.id
   // sounding right now), so hops land on the real beat; otherwise a steady clock at the song's BPM. Switching between
   // the two eases over a moment instead of snapping.
   let syncOff=0,lastSrc=null;
+  // v0.2.209: if the audio clock stops moving (the audio engine stalled), dance to the steady clock instead of freezing
+  let ctLast=-1,ctWall=0;
   function seqBeatNow(){
     const m=window._seqMark;if(!m||typeof seqPlaying==='undefined'||!seqPlaying||typeof audioCtx==='undefined'||!audioCtx)return null;
+    const ct=audioCtx.currentTime,wn=performance.now();if(ct!==ctLast){ctLast=ct;ctWall=wn;}else if(wn-ctWall>150)return null;
+    if(audioCtx.state!=='running')return null;
     const sd=60/bpm()/4,frac=Math.max(-1.5,Math.min(1.5,(audioCtx.currentTime-m.at)/sd));
     return((m.st%16)+frac)/4;                      // beats into the bar (0..4), steps are 16ths
   }

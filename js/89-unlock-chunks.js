@@ -44,7 +44,7 @@
       if(which==='fuse'){if(typeof openStore==='function')openStore();}else if(typeof openBunker==='function')openBunker();
       if(typeof repositionCollapseButtons==='function')setTimeout(repositionCollapseButtons,380);
     };
-    setTimeout(go,desk?650:1600);
+    setTimeout(go,which==='vault'?60:desk?650:1600);
   }
   window.openNewlyUnlocked=openNew;
   setInterval(()=>syncFuse(false),300);
@@ -69,14 +69,45 @@
     if(vaultUnlocked)return;
     if(score<VAULT_COST){card.classList.remove('nope');void card.offsetWidth;card.classList.add('nope');return;}
     score-=VAULT_COST;vaultUnlocked=true;syncVault();
-    try{const k=window.US_KIT;if(k&&k.mixer){const S=k.mixer(.6);if(S){k.noise(S,S.t,{type:'lowpass',f0:600,f1:120,a:.12,d:.6});   // the heavy door
-      [523.25,659.25,783.99,1046.5,1318.5].forEach((f,i)=>k.tone(S,S.t+.35+i*.07,f,{type:'triangle',a:.045,d:1.1,rv:.7}));}}}catch(e){}
     const b=$('tipsBtn');if(b){b.classList.add('vault-new','vault-arrive');setTimeout(()=>b.classList.remove('vault-arrive'),2600);}
-    openNew('vault');
+    vaultScene(()=>openNew('vault'));
     if(typeof renderUI==='function')renderUI();if(typeof autoSave==='function')autoSave();
   });
 
+  // ── v0.2.209: the Vault's unlock cutscene (kept simple until the Vault itself is finished) ──
+  //   the round door drops in, its wheel spins, it swings open with golden light, then the Vault opens.
+  function vaultScene(done){
+    const o=document.createElement('div');o.id='vaultScene';
+    o.innerHTML='<div class="vs-light"></div><div class="vs-door"><div class="vs-wheel"><span></span><span></span><span></span></div></div><div class="vs-name">THE VAULT</div>';
+    document.body.appendChild(o);B.add('vault-scene');
+    try{const k=window.US_KIT;if(k&&k.mixer&&!(typeof sfxOn!=='undefined'&&!sfxOn)){const S=k.mixer(.6);if(S){
+      k.tone(S,S.t+.15,70,{f1:50,gl:.2,a:.1,d:.3});k.noise(S,S.t+.15,{type:'lowpass',f0:500,f1:120,a:.08,d:.2});               // lands
+      for(let i=0;i<5;i++)k.noise(S,S.t+.6+i*.11,{f0:2200,f1:1400,q:3,a:.03,d:.05});                                          // the wheel clicks round
+      k.noise(S,S.t+1.25,{type:'lowpass',f0:600,f1:120,a:.12,d:.6});                                                           // the heavy door
+      [523.25,659.25,783.99,1046.5,1318.5].forEach((f,i)=>k.tone(S,S.t+1.4+i*.07,f,{type:'triangle',a:.045,d:1.1,rv:.7}));}}}catch(e){}
+    requestAnimationFrame(()=>o.classList.add('go'));
+    setTimeout(()=>o.classList.add('open'),1250);
+    setTimeout(()=>{o.classList.add('out');},2350);
+    setTimeout(()=>{o.remove();B.remove('vault-scene');done&&done();},2800);
+  }
+  window.playVaultScene=vaultScene;
+
   const css=document.createElement('style');css.textContent=`
+#vaultScene{position:fixed;inset:0;z-index:9000;background:rgba(4,3,0,.96);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;opacity:0;transition:opacity .3s;perspective:900px;}
+#vaultScene.go{opacity:1;}#vaultScene.out{opacity:0;transition:opacity .45s;}
+#vaultScene .vs-light{position:absolute;left:50%;top:50%;width:260px;height:260px;margin:-150px 0 0 -130px;border-radius:50%;background:radial-gradient(circle,#fff6c8 0,#ffd65a 35%,rgba(255,180,40,0) 70%);opacity:0;transform:scale(.4);transition:opacity .5s,transform .9s;}
+#vaultScene.open .vs-light{opacity:.85;transform:scale(1.5);}
+#vaultScene .vs-door{position:relative;width:200px;height:200px;border-radius:50%;border:10px solid #c9a23a;background:radial-gradient(circle,#4a3a10 0 45%,#2a2006 46% 70%,#1a1404 71%);
+  box-shadow:0 0 0 6px #5a4512,0 0 40px rgba(255,214,90,.5);transform:translateY(-60vh);transform-origin:left center;transition:transform .45s cubic-bezier(.3,1.4,.5,1);}
+#vaultScene.go .vs-door{transform:none;}
+#vaultScene.open .vs-door{transform:rotateY(-105deg);transition:transform .8s cubic-bezier(.5,0,.3,1);}
+#vaultScene .vs-wheel{position:absolute;left:50%;top:50%;width:110px;height:110px;margin:-55px 0 0 -55px;border-radius:50%;border:6px solid #e8c45a;}
+#vaultScene.go .vs-wheel{animation:vsSpin .7s .5s ease-in-out both;}
+@keyframes vsSpin{to{transform:rotate(360deg);}}
+#vaultScene .vs-wheel span{position:absolute;left:50%;top:50%;width:120px;height:8px;margin:-4px 0 0 -60px;background:#e8c45a;border-radius:4px;}
+#vaultScene .vs-wheel span:nth-child(2){transform:rotate(60deg);}#vaultScene .vs-wheel span:nth-child(3){transform:rotate(120deg);}
+#vaultScene .vs-name{position:relative;font-family:'Bebas Neue',sans-serif;font-size:2.6rem;letter-spacing:.3em;color:#fff6d8;text-shadow:0 2px 0 #3a2a00,0 0 14px rgba(0,0,0,.9),0 0 26px rgba(255,214,90,.6);opacity:0;margin-top:40px;transform:translateY(12px);transition:opacity .4s .2s,transform .4s .2s;}
+#vaultScene.open .vs-name{opacity:1;transform:none;}
 body.fuse-locked #openStoreBtn{visibility:hidden;pointer-events:none;}
 body.thumb-nav.fuse-locked #openStoreBtn,body.fuse-locked #collapseShopBtn,body.fuse-locked #dawFillBtnR{display:none!important;}
 body.fuse-locked.desktop-mode:not(.intro-run) #storeView{width:0 !important;overflow:hidden;border:none;}
@@ -140,7 +171,7 @@ body.phone-land #partyTeaser .pt-string,body.phone-land #fuseTeaser .ft-wire{dis
   const tz=document.createElement('div');tz.id='fuseTeaser';tz.setAttribute('role','button');tz.setAttribute('aria-label','Fusebox');
   tz.innerHTML='<div class="ft-wire"></div><canvas></canvas><div class="ft-tag"><i class="ft-fill"></i><span></span></div>';
   const cv=tz.querySelector('canvas'),tag=tz.querySelector('.ft-tag span'),fill=tz.querySelector('.ft-fill');
-  let on=false,raf=0,frame=0,t0=0,flip=0,seqAt=0,tf=0,seqLoaded=false;
+  let on=false,raf=0,frame=0,t0=0,flip=0,seqAt=0,tf=0,seqLoaded=false,door=0,wasReady=true;
   const size=()=>B.contains('phone-land')?30:B.contains('desktop-mode')?50:44;
   function paint(now){
     raf=requestAnimationFrame(paint);if((++frame)%2)return;
@@ -166,6 +197,19 @@ body.phone-land #partyTeaser .pt-string,body.phone-land #fuseTeaser .ft-wire{dis
     g.save();g.translate(22*u,ly+1*u);g.rotate(a*.6);g.fillStyle=up>.5?'#5aff9a':'#c9ccd2';rr(-2.2*u,-7*u,4.4*u,8*u,1.5*u);g.fill();g.restore();
     // the little light
     g.beginPath();g.arc(34*u,40*u,2*u,0,7);g.fillStyle=up>.5?'#5aff9a':ready?`rgba(255,80,60,${.5+.5*Math.sin(t*6)})`:'#5a2a2a';g.fill();
+    // v0.2.209: the DOOR. Shut (with a warning sticker) while you save up; it swings open on its left hinge the moment
+    //   you can afford it, showing the breaker inside.
+    door+=((ready||flip?1:0)-door)*.18;if(Math.abs(door-(ready||flip?1:0))<.01)door=ready||flip?1:0;
+    if(door<.99){const op=door,dw=30*u*Math.max(.04,Math.cos(op*Math.PI*.5)),x0=7*u,y0=7*u,dh=38*u,skew=op*4*u;
+      g.beginPath();g.moveTo(x0,y0);g.lineTo(x0+dw,y0-skew);g.lineTo(x0+dw,y0+dh+skew);g.lineTo(x0,y0+dh);g.closePath();
+      const dg=g.createLinearGradient(x0,0,x0+30*u,0);dg.addColorStop(0,op>.05?'#5a606c':'#4a505c');dg.addColorStop(1,'#6e7480');g.fillStyle=dg;g.fill();
+      g.lineWidth=1.5*u;g.strokeStyle='#1c1f25';g.stroke();
+      if(dw>8*u){const sc=dw/(30*u),cx=x0+dw*.5,cy=y0+dh*.45;
+        g.save();g.translate(cx,cy);g.scale(sc,1);
+        g.beginPath();g.moveTo(0,-8*u);g.lineTo(8*u,6*u);g.lineTo(-8*u,6*u);g.closePath();g.fillStyle='#ffd23f';g.fill();g.lineWidth=1.2*u;g.strokeStyle='#2a2410';g.stroke();
+        g.beginPath();g.moveTo(1*u,-4*u);g.lineTo(-2.5*u,1.5*u);g.lineTo(0,1.5*u);g.lineTo(-1*u,5*u);g.lineTo(2.5*u,-.5*u);g.lineTo(0,-.5*u);g.closePath();g.fillStyle='#2a2410';g.fill();
+        g.restore();
+        g.fillStyle='#c9ccd2';g.fillRect(x0+dw-4*u,y0+dh*.5-3*u,2*u,6*u);}}
     if(flip&&flip<1.01)flip=Math.min(1.01,flip+.12);
   }
   function place(){
@@ -202,6 +246,8 @@ body.phone-land #partyTeaser .pt-string,body.phone-land #fuseTeaser .ft-wire{dis
     const want=performance.now()-seqAt>=4000&&!(typeof overlayUp==='function'&&overlayUp())&&!B.contains('intro-run')&&!(typeof unlockCutsceneRunning==='function'&&unlockCutsceneRunning());
     show(want);if(!want)return;
     const ready=score>=FUSE_COST;tz.classList.toggle('ready',ready);
+    if(ready&&!wasReady){try{const k=window.US_KIT;if(k&&k.mixer&&!(typeof sfxOn!=='undefined'&&!sfxOn)){const S=k.mixer(.45);if(S){k.noise(S,S.t,{f0:700,f1:1500,q:6,a:.025,d:.35});k.noise(S,S.t+.3,{type:'lowpass',f0:400,a:.04,d:.05});}}}catch(e){}}
+    wasReady=ready;
     const h=fmtJh(FUSE_COST);if(tag._h!==h){tag._h=h;tag.innerHTML=h;}fill.style.width=(Math.min(1,score/FUSE_COST)*100).toFixed(1)+'%';
     if((++tf)%4===0)place();
   }

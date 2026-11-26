@@ -532,7 +532,7 @@ const SKILL_TREE_NODES = [
   const BR={planets:10,aliens:8,points:5};
   SKILL_TREE_NODES.forEach(n=>{
     if(n.id==='core')return;
-    if(/^sun_/.test(n.id)){n.cost=500;return;}
+    if(/^sun_/.test(n.id)){n.cost=100;return;}   // v0.2.209: each Quad Sun is 100 Alien Gems
     if(MG[n.id]!=null){n.cost=MG[n.id];return;}
     if(!n.id.startsWith('mt_')&&BR[n.branch])n.cost=Math.round(n.cost*BR[n.branch]);
   });

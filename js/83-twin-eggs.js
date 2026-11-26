@@ -3,7 +3,8 @@
 //  10 seconds after the first buddy hatches (and the Bunker / Shop cutscene is over), ONE egg rolls into the TOP-LEFT
 //  corner of the drum pads screen. Its shell shows the buddy inside (a buddyPickFor pick) and its tag shows the price
 //  (alienCost(totalAliens): buddies 2 + 3 are 50 mJ each, js/01). Tap it with enough energy and THAT buddy hatches
-//  (its pick goes to alienData[n].base before buyAlien). Not enough yet: it wobbles and its tag pops; the wobble gets
+//  (its pick goes to alienData[n].base before buyAlien). v0.2.209: a heat lamp hangs over it, joined to the price tag by a
+//  cord that fills as you save up; tapping lights the lamp, then the hatch screen opens with its lamp on and the egg landed. Not enough yet: it wobbles and its tag pops; the wobble gets
 //  livelier as your energy gets close. After each hatch the next egg rolls in, until you have 10 buddies; then a small
 //  card says that from now on they're bought in the Shop (once per slot, localStorage ab2_eggShopNote_N).
 //  The Shop's green PET ALIEN BUDDY card shows the same egg wiggling (#shopEgg), and buying there hatches that same
@@ -26,7 +27,8 @@
     cv.width=Math.round(W*k);cv.height=Math.round(H*k);cv.style.width=W+'px';cv.style.height=H+'px';
     const g=cv.getContext('2d');g.setTransform(k,0,0,k,0,0);try{paintBuddyEgg(g,W/2,H/2,S.w/2,S.h/2,0,!!(p&&p.sp!=null),0,pal(p),k);}catch(e){}}
   function make(){const el=document.createElement('div');el.className='twinEgg cornerEgg rolling';
-    el.innerHTML='<div class="pe-glow"></div><div class="pe-body"><canvas></canvas></div><div class="pe-tag"></div>';
+    // v0.2.209: a heat lamp hangs above the egg; its cord runs from the price tag up to it and fills as you save up
+    el.innerHTML='<div class="pe-lamp"><i class="pl-cord"></i><b class="pl-shade"></b><i class="pl-bulb"></i><i class="pl-cone"></i></div><div class="pe-glow"></div><div class="pe-body"><canvas></canvas></div><div class="pe-tag"></div><div class="pe-wire"><i></i></div>';
     el.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();tap();});
     $('gameView').appendChild(el);setTimeout(()=>el.classList.remove('rolling'),1300);
     try{const k=window.US_KIT;if(k&&k.mixer&&!(typeof sfxOn!=='undefined'&&!sfxOn)){const S=k.mixer(.8);if(S){k.noise(S,S.t,{f0:300,f1:900,q:.8,a:.025,k:.9,d:.2});k.tone(S,S.t+.95,520,{f1:300,gl:.06,a:.08,d:.08});}}}catch(e){}
@@ -123,14 +125,19 @@
     if(!egg&&!shopOn){raf=0;return;}raf=requestAnimationFrame(frame);
     if(document.hidden)return;   // nothing to draw while the tab is in the background
     const c=cost(),ready=score>=c,p=Math.max(0,Math.min(1,score/c)),t=(now-t0)/1000;
-    if(egg){egg.classList.toggle('ready',ready);let sh=0;if(egg._shake>0){sh=Math.sin(t*55)*10*egg._shake;egg._shake=Math.max(0,egg._shake-.06);}
+    if(egg){egg.classList.toggle('ready',ready);const wi=egg.querySelector('.pe-wire i');if(wi)wi.style.clipPath='inset('+((1-p)*100).toFixed(1)+'% 0 0 0)';let sh=0;if(egg._shake>0){sh=Math.sin(t*55)*10*egg._shake;egg._shake=Math.max(0,egg._shake-.06);}
       wob(egg.querySelector('.pe-body'),t,ready,p,sh);}
     if(shopOn){shopEgg.classList.toggle('ready',ready);wob(shopEgg.firstChild,t+.4,ready,p,0);}
   }
   function tap(){
-    if(!egg)return;
+    if(!egg||egg._lit)return;
     if(score<cost()){egg._shake=1;const tg=egg.querySelector('.pe-tag');tg.classList.remove('bump');void tg.offsetWidth;tg.classList.add('bump');return;}
-    setBase();clear();buyAlien();sync();
+    // v0.2.209: the lamp clicks on and warms the egg first, so the hatch screen opens with its lamp already on (tap to hatch right away)
+    egg._lit=1;egg.classList.add('lit');
+    try{const k=window.US_KIT;if(k&&k.mixer&&!(typeof sfxOn!=='undefined'&&!sfxOn)){const S=k.mixer(.5);if(S){k.noise(S,S.t,{type:'highpass',f0:3000,a:.05,d:.03});
+      k.tone(S,S.t+.04,120,{a:.025,k:.15,hold:.5,d:.3});k.tone(S,S.t+.08,660,{type:'triangle',a:.03,d:.4,rv:.5});}}}catch(e){}
+    setTimeout(()=>{if(score<cost()){if(egg){egg._lit=0;egg.classList.remove('lit');}return;}
+      setBase();clear();window.__eggOpenOpts={landed:true,lampOn:true};buyAlien();if(window.__eggOpenOpts&&window.__eggOpenOpts.lampOn)window.__eggOpenOpts=null;sync();},750);
   }
   function setBase(){                           // the egg you see is the buddy you get
     const n=totalAliens;if(score<cost())return;
@@ -169,6 +176,21 @@
 body.phone-land #shopEgg{right:6px;bottom:4px;}
 #alienBuyBtn *{pointer-events:none;}   /* the whole green card is one button: taps never land on its text */
 .cornerEgg.fix{position:fixed;z-index:40;}
+.cornerEgg .pe-lamp{position:relative;width:34px;height:20px;margin-bottom:-4px;pointer-events:none;}
+.cornerEgg .pl-cord{position:absolute;left:50%;top:-6px;width:2px;height:9px;margin-left:-1px;background:#6a6450;}
+.cornerEgg .pl-shade{position:absolute;left:3px;right:3px;top:2px;height:13px;border-radius:14px 14px 3px 3px;background:linear-gradient(#8a8f9a,#4a4f5c);border:1.5px solid #1e2028;}
+.cornerEgg .pl-bulb{position:absolute;left:50%;top:13px;width:10px;height:6px;margin-left:-5px;border-radius:0 0 6px 6px;background:#5a5440;transition:background .25s,box-shadow .25s;}
+.cornerEgg.ready .pl-bulb{animation:plBlink 1.2s ease-in-out infinite;}
+@keyframes plBlink{50%{background:#ffd76a;box-shadow:0 0 8px 2px rgba(255,200,90,.7);}}
+.cornerEgg .pl-cone{position:absolute;left:50%;top:17px;width:84px;height:72px;margin-left:-42px;background:radial-gradient(ellipse at 50% 0,rgba(255,214,120,.55),rgba(255,180,60,0) 70%);
+  clip-path:polygon(40% 0,60% 0,100% 100%,0 100%);opacity:0;transition:opacity .3s;}
+.cornerEgg.lit .pl-bulb{animation:none;background:#fff3c0;box-shadow:0 0 12px 4px rgba(255,214,120,.95);}
+.cornerEgg.lit .pl-cone{opacity:1;}
+.cornerEgg.lit .pe-body canvas{filter:drop-shadow(0 0 10px rgba(255,190,90,.85));}
+.cornerEgg .pe-wire{position:absolute;left:-7px;top:10px;bottom:9px;width:14px;border:2.5px solid #3a3828;border-right:0;border-radius:6px 0 0 6px;pointer-events:none;}
+.cornerEgg .pe-wire i{position:absolute;left:-2.5px;top:-2.5px;bottom:-2.5px;width:16.5px;border:2.5px solid #ffd23f;border-right:0;border-radius:6px 0 0 6px;box-shadow:-2px 0 6px -2px rgba(255,210,63,.8);}
+.cornerEgg.ready .pe-wire i{border-color:#00ff88;box-shadow:-2px 0 6px -2px rgba(0,255,136,.8);}
+.cornerEgg.land .pe-lamp,.cornerEgg.land .pe-wire{display:none;}
 .cornerEgg.land{flex-direction:row;gap:4px;}
 .cornerEgg.land .pe-tag{margin-top:0;}
 body.desktop-mode.cockpit-open .cornerEgg,body.desktop-mode.stats-open .cornerEgg,body.desktop-mode.tree-open .cornerEgg{visibility:hidden;}

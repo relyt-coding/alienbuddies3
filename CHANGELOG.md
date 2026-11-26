@@ -2,6 +2,19 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.209 - 2026-11-26 13:40
+- Fixed: playing Buddy Keys really fast could overload the sound and cut the audio out for a while, which also froze the party dancers. Notes now share the load (the oldest note fades out when you play a lot at once), and the party keeps dancing even if the sound hiccups.
+- Eggs have a new look: wavy painted ribbons and little sparkles instead of dots.
+- Rare matching cards no longer have the FOIL / HOLO word on them; the shine says it.
+- Each Quad Sun now costs 100 Alien Gems.
+- Tapping your ship in the skill tree takes you back to your drum pads.
+- Your ship got a makeover, with a buddy flying it.
+- New drum pads come with a sound that isn't on any of your pads yet.
+- The corner egg has a heat lamp: its cord fills up as you save energy, and when it's full, tap to switch the lamp on. The hatch screen then opens warm and ready, so you can tap to hatch straight away.
+- The Fusebox teaser now has a door: it stays shut while you save up, then swings open to show the breaker when you can afford it.
+- Unlocking the Vault now plays a short cutscene: the vault door spins and swings open.
+- On computers in full screen, the SHRINK buttons are gone (press BUNKER or FUSEBOX to bring a side back).
+
 ## v0.2.208 - 2026-11-26 12:45
 - Sounds now come from your alien buddies! Every buddy brings one sound when it hatches (your first brings the Clap). It sings it twice when it hatches, and again whenever you tap it: on the hatch screen, floating across the screen (taps on a drum pad still play the pad), in its Bunker card and in the Alien Designer. The Fusebox no longer sells sounds.
 - The Fusebox is now something you earn: after the sequencer, a little fusebox appears next to your energy. Save up 15 J and tap it to flip the switch on.

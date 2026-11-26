@@ -4,7 +4,7 @@
 //  The node id stays 'core' (saves, `requires`, the Vault all point at it): it is simply owned for free as soon as the
 //  galaxies are open, so the four Quad Suns are the first things to buy.
 //  The ship flies: when something is unlocked or focused (stFocusNode, js/63) or you tap a node you own, it flies over and
-//  circles it (a Quad Sun keeps moving, so the ship chases it round the ring). Tap the ship to fly it home to the middle.
+//  circles it (a Quad Sun keeps moving, so the ship chases it round the ring). Tap the ship to go back to your drum pads (v0.2.209).
 //  It moves the core node with the CSS `translate` property (like js/35 does for the suns), so it stands up in 3D like every
 //  other bubble; el._mx/_my follow it so js/81's culling never hides it.
 // ══════════════════════════════════════════════
@@ -17,18 +17,37 @@
   const _open=openSkillTree;openSkillTree=function(){own();return _open.apply(this,arguments);};
   setInterval(()=>{if(own()&&document.getElementById('skillTreeModal')?.classList.contains('open')&&typeof renderSkillTree==='function')renderSkillTree();},1000);
 
-  const SHIP='<svg class="sh-svg" viewBox="0 0 120 70" width="96" height="56" aria-hidden="true">'+
-    '<defs><linearGradient id="shHull" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f4f7ff"/><stop offset=".55" stop-color="#aab4cc"/><stop offset="1" stop-color="#5b6582"/></linearGradient>'+
-    '<radialGradient id="shDome" cx=".4" cy=".35" r=".7"><stop offset="0" stop-color="#e9fdff"/><stop offset=".5" stop-color="#5fe0ff"/><stop offset="1" stop-color="#1a6c9a"/></radialGradient>'+
-    '<linearGradient id="shFlame" x1="1" y1="0" x2="0" y2="0"><stop offset="0" stop-color="#fff6b0"/><stop offset=".4" stop-color="#ffb02e"/><stop offset="1" stop-color="rgba(255,80,40,0)"/></linearGradient></defs>'+
-    '<path class="sh-flame" d="M22 31 L0 35 L22 39 Z" fill="url(#shFlame)"/>'+
-    '<path d="M40 20 L30 6 L50 8 L62 22 Z" fill="#00c878" stroke="#0b1a24" stroke-width="2.5" stroke-linejoin="round"/>'+
-    '<path d="M40 50 L30 64 L50 62 L62 48 Z" fill="#00c878" stroke="#0b1a24" stroke-width="2.5" stroke-linejoin="round"/>'+
-    '<path d="M20 28 Q22 22 34 21 L84 21 Q112 24 116 35 Q112 46 84 49 L34 49 Q22 48 20 42 Z" fill="url(#shHull)" stroke="#0b1a24" stroke-width="3" stroke-linejoin="round"/>'+
-    '<path d="M26 35 L104 35" stroke="#7c87a3" stroke-width="2" stroke-linecap="round" opacity=".7"/>'+
-    '<ellipse cx="76" cy="30" rx="14" ry="8" fill="url(#shDome)" stroke="#0b1a24" stroke-width="2.5"/>'+
-    '<ellipse cx="72" cy="27.5" rx="4" ry="2" fill="#fff" opacity=".85"/>'+
-    '<circle cx="46" cy="35" r="3" fill="#00ff88"/><circle cx="58" cy="35" r="3" fill="#ffe14d"/>'+
+  // v0.2.209: a nicer ship: sleek hull with panel lines, swept fins with a stripe, twin engine glow, blinking wing lights,
+  //   and a little alien buddy at the controls under the glass dome
+  const SHIP='<svg class="sh-svg" viewBox="0 0 140 80" width="104" height="60" aria-hidden="true">'+
+    '<defs><linearGradient id="shHull" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset=".35" stop-color="#dfe6f5"/><stop offset=".7" stop-color="#97a3c0"/><stop offset="1" stop-color="#4b5573"/></linearGradient>'+
+    '<linearGradient id="shFin" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3dffb0"/><stop offset="1" stop-color="#009a63"/></linearGradient>'+
+    '<radialGradient id="shDome" cx=".38" cy=".3" r=".75"><stop offset="0" stop-color="#f2feff" stop-opacity=".95"/><stop offset=".45" stop-color="#7ae8ff" stop-opacity=".55"/><stop offset="1" stop-color="#1b5f92" stop-opacity=".85"/></radialGradient>'+
+    '<radialGradient id="shGlow" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#fff"/><stop offset=".35" stop-color="#7ff6ff"/><stop offset="1" stop-color="#2a7dff" stop-opacity="0"/></radialGradient>'+
+    '<linearGradient id="shFlame" x1="1" y1="0" x2="0" y2="0"><stop offset="0" stop-color="#e6fcff"/><stop offset=".35" stop-color="#5fd8ff"/><stop offset="1" stop-color="#7a4dff" stop-opacity="0"/></linearGradient></defs>'+
+    '<path class="sh-flame" d="M24 33 L0 37 L24 41 Z M24 43 L4 46 L24 49 Z" fill="url(#shFlame)"/>'+
+    // back fin + top fin
+    '<path d="M44 22 L30 4 Q28 1 32 2 L58 10 L70 24 Z" fill="url(#shFin)" stroke="#0b1a24" stroke-width="2.5" stroke-linejoin="round"/>'+
+    '<path d="M38 12 L54 14" stroke="#fff" stroke-width="2.5" stroke-linecap="round" opacity=".75"/>'+
+    '<path d="M44 58 L30 76 Q28 79 32 78 L58 70 L70 56 Z" fill="url(#shFin)" stroke="#0b1a24" stroke-width="2.5" stroke-linejoin="round"/>'+
+    // hull
+    '<path d="M22 32 Q24 22 40 21 L92 21 Q128 25 136 40 Q128 55 92 59 L40 59 Q24 58 22 48 Z" fill="url(#shHull)" stroke="#0b1a24" stroke-width="3" stroke-linejoin="round"/>'+
+    '<path d="M30 46 Q80 52 130 42" fill="none" stroke="#6f7a98" stroke-width="2" opacity=".7"/>'+
+    '<path d="M60 22 L58 58 M100 23 L104 56" stroke="#8a95b2" stroke-width="1.5" opacity=".55"/>'+
+    // engines
+    '<rect x="18" y="31" width="8" height="10" rx="2" fill="#3a4360" stroke="#0b1a24" stroke-width="2"/>'+
+    '<rect x="18" y="42" width="8" height="8" rx="2" fill="#3a4360" stroke="#0b1a24" stroke-width="2"/>'+
+    '<circle class="sh-eng" cx="19" cy="36" r="5" fill="url(#shGlow)"/><circle class="sh-eng" cx="19" cy="46" r="4" fill="url(#shGlow)"/>'+
+    // the pilot: a buddy under the dome
+    '<g transform="translate(88 30)"><path d="M-5 -9 Q-9 -16 -12 -17" stroke="#2bdc8a" stroke-width="2" fill="none" stroke-linecap="round"/><circle cx="-12" cy="-17" r="2.4" fill="#ff7ad0"/>'+
+    '<path d="M5 -9 Q8 -16 11 -17" stroke="#2bdc8a" stroke-width="2" fill="none" stroke-linecap="round"/><circle cx="11" cy="-17" r="2.4" fill="#ff7ad0"/>'+
+    '<ellipse cx="0" cy="-1" rx="10" ry="9" fill="#38e598"/><ellipse cx="-3.5" cy="-2" rx="3" ry="3.6" fill="#fff"/><ellipse cx="3.5" cy="-2" rx="3" ry="3.6" fill="#fff"/>'+
+    '<circle cx="-3" cy="-1.5" r="1.7" fill="#14202e"/><circle cx="4" cy="-1.5" r="1.7" fill="#14202e"/><path d="M-3 4 Q0 6.5 3 4" stroke="#14202e" stroke-width="1.4" fill="none" stroke-linecap="round"/></g>'+
+    '<path d="M70 29 Q72 12 90 11 Q110 12 112 29 Z" fill="url(#shDome)" stroke="#0b1a24" stroke-width="2.5" stroke-linejoin="round"/>'+
+    '<path d="M78 21 Q82 15 90 14" stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round" opacity=".85"/>'+
+    // wing-tip lights
+    '<circle class="sh-blink" cx="33" cy="5" r="2.6" fill="#ff4f6a"/><circle class="sh-blink b2" cx="33" cy="75" r="2.6" fill="#3dffb0"/>'+
+    '<circle cx="128" cy="40" r="2.2" fill="#ffe14d"/>'+
     '</svg>';
 
   // ── where it is, where it's going (map coordinates) ──
@@ -48,10 +67,20 @@
     el=nodeEl('core');if(!el)return;
     if(!el._ship){el._ship=1;el.classList.add('st-ship');el.classList.remove('st-body','st-star');
       const c=el.querySelector('.st-node-circle');if(c){c.innerHTML='<div class="sh-bob">'+SHIP+'</div>';
-        c.addEventListener('click',e=>{e.stopPropagation();flyTo('core');});}
-      const l=el.querySelector('.st-node-label');if(l){l.textContent='YOUR SHIP';l.addEventListener('click',e=>{e.stopPropagation();flyTo('core');});}
+        c.addEventListener('click',e=>{e.stopPropagation();goHome();});}
+      const l=el.querySelector('.st-node-label');if(l){l.textContent='YOUR SHIP';l.addEventListener('click',e=>{e.stopPropagation();goHome();});}
       const k=el.querySelector('.st-node-cost');if(k)k.remove();}
     apply();
+  }
+  // v0.2.209: tapping the ship takes you back home: out of the tree, onto your drum pads
+  function goHome(){
+    if(el){el.classList.add('sh-leave');setTimeout(()=>el&&el.classList.remove('sh-leave'),600);}
+    try{const k=window.US_KIT;if(k&&k.mixer&&!(typeof sfxOn!=='undefined'&&!sfxOn)){const S=k.mixer(.5);if(S){k.tone(S,S.t,330,{f1:990,gl:.3,a:.04,d:.25,rv:.5});k.noise(S,S.t,{f0:600,f1:3000,q:1,a:.03,d:.3});}}}catch(e){}
+    setTimeout(()=>{const B=document.body.classList;
+      // phones: the tree is a swipe page, so slide back to the pads the normal way; computers: just close the map
+      if(!B.contains('desktop-mode')&&typeof swipeNavGo==='function')swipeNavGo(0,1);
+      else{try{if(typeof closeSkillTree==='function')closeSkillTree();}catch(e){}}
+    },380);
   }
   function apply(){
     if(!el)return;el.style.translate=pos.x.toFixed(1)+'px '+pos.y.toFixed(1)+'px';el._mx=pos.x;el._my=pos.y;
@@ -91,7 +120,13 @@
 .st-node.st-ship .st-node-label{color:#7fd8ff;letter-spacing:.14em;cursor:pointer;}
 .st-node.st-ship .sh-bob{animation:shBob 3.2s ease-in-out infinite;filter:drop-shadow(0 0 10px rgba(95,224,255,.45));}
 .st-node.st-ship .sh-svg{display:block;transition:transform .25s;}
-.st-node.st-ship .sh-flame{transform-origin:22px 35px;animation:shFlame .18s ease-in-out infinite alternate;opacity:.55;}
+.st-node.st-ship .sh-eng{animation:shEng 1.1s ease-in-out infinite alternate;}
+@keyframes shEng{from{opacity:.55;}to{opacity:1;}}
+.st-node.st-ship .sh-blink{animation:shBlink 1.6s steps(1) infinite;}.st-node.st-ship .sh-blink.b2{animation-delay:.8s;}
+@keyframes shBlink{0%{opacity:1;}50%{opacity:.25;}}
+.st-node.st-ship.sh-leave .sh-bob{animation:shLeave .45s ease-in forwards;}
+@keyframes shLeave{to{transform:translateX(60px) scale(1.4);opacity:0;}}
+.st-node.st-ship .sh-flame{transform-origin:24px 40px;animation:shFlame .18s ease-in-out infinite alternate;opacity:.55;}
 .st-node.st-ship.moving .sh-flame{opacity:1;}
 @keyframes shBob{0%,100%{transform:translateY(-3px);}50%{transform:translateY(3px);}}
 @keyframes shFlame{from{transform:scaleX(.7);}to{transform:scaleX(1.15);}}`;

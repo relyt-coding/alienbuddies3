@@ -12,11 +12,14 @@ function buyNextPad(){
   visiblePads=drum.pads; // always show new pad on unlock
   // Set default sound for this pad (null for pads 3+, since idx is 0-based and 3/4 = 4th/5th pad)
   padSounds[idx]=PAD_DEFAULT_SOUNDS[idx]||null;
+  // v0.2.209: a new pad comes filled with a sound that's on none of your pads yet (your buddies' sounds included)
+  if(!padSounds[idx]||padSounds.slice(0,idx).includes(padSounds[idx])){
+    const used=padSounds.slice(0,idx);padSounds[idx]=(typeof unlockedSounds==='function'?unlockedSounds():[]).find(id=>SOUND_MAP[id]&&!used.includes(id))||null;}
   if(!playUnlockPreview(padSounds[idx]))playSfxPurchase();flashBuy('#a0a8ff');
   rebuildPadGrid();
   updateSoundboardUnlocked();
   updateBouncerToggleVisibility();
-  if(idx>=3)showToast('🥁 New pad unlocked! Tap it to assign a sound.');
+  if(idx>=3&&!padSounds[idx])showToast('🥁 New pad unlocked! Tap it to assign a sound.');
   showToast('Pad unlocked — your Drum Multiplier increased by ×1.2!');
   renderUI();autoSave();
 }

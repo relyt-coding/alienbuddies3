@@ -35,14 +35,27 @@ function keysVoiceOwned(i){return i<(shop.keysLevel||0);}
   // then fade to 0 when the key lets go. The voice's own envelope is never cancelled or re-scheduled (old Safari has no
   // cancelAndHoldAtTime, so cancelling made the level jump = a click), and the oscillators stop only once it's silent.
   function release(g,oscs,t,r){const c=getCtx();t=Math.max(t,c.currentTime);const o=g._out;
-    if(o&&o._note){if(o._gone)return;o._gone=1;o.gain.setValueAtTime(1,t);o.gain.setTargetAtTime(0,t,r/3);}
+    if(KILL)r=.03;   // v0.2.209: voice limit (playNote) cutting the oldest note short
+    if(o)o._oscs=oscs;
+    if(o&&o._note){if(o._gone)return;o._end=t+r*3;o._gone=1;o.gain.setValueAtTime(1,t);o.gain.setTargetAtTime(0,t,r/3);}
     else{if(g.gain.cancelAndHoldAtTime)g.gain.cancelAndHoldAtTime(t);else g.gain.cancelScheduledValues(t);g.gain.setTargetAtTime(0,t,r/3);}
     const end=t+r*3;oscs.forEach(x=>{try{x.stop(end);}catch(e){}});
     setTimeout(()=>{try{g.disconnect();}catch(e){}try{o&&o.disconnect();}catch(e){}},(end-c.currentTime)*1000+120);}
   // one note: its own fade node into the music bus, plus a little of it into the built-in hall reverb
-  function playNote(id,t,f,vel){const c=getCtx(),o=c.createGain();o._note=1;o.gain.value=1;o.connect(drumMasterGain);
-    if(typeof rvbNode!=='undefined'&&rvbNode){const sg=c.createGain();sg.gain.value=REVERB_SEND[id]||.25;o.connect(sg);sg.connect(rvbNode);}
-    return SYN[id](t,f,vel,o);}
+  // v0.2.209 VOICE LIMIT: mashing the keys used to stack dozens of ringing notes (each several oscillators + filters) until
+  //   the audio engine ran out of time and dropped out. At most MAXV notes sound at once (held or fading); a new one quickly
+  //   fades the oldest (a 12 ms fade on its own kill gain, so nothing clicks) and stops its oscillators.
+  let KILL=0;const live=[],MAXV=(typeof MG_LITE!=='undefined'&&MG_LITE)?5:(typeof IS_MOBILE_DEVICE!=='undefined'&&IS_MOBILE_DEVICE)?7:10;
+  function hardKill(v){const c=getCtx(),now=c.currentTime;
+    KILL=1;try{v.s.stop(now);}catch(e){}KILL=0;
+    try{v.k.gain.setTargetAtTime(0,now,.012);}catch(e){}
+    (v.o._oscs||[]).forEach(x=>{try{x.stop(now+.08);}catch(e){}});
+    setTimeout(()=>{try{v.k.disconnect();}catch(e){}},200);}
+  function playNote(id,t,f,vel){const c=getCtx(),o=c.createGain(),k=c.createGain();o._note=1;o.gain.value=1;k.gain.value=1;o.connect(k);k.connect(drumMasterGain);
+    if(typeof rvbNode!=='undefined'&&rvbNode){const sg=c.createGain();sg.gain.value=REVERB_SEND[id]||.25;k.connect(sg);sg.connect(rvbNode);}
+    const now=c.currentTime;for(let i=live.length-1;i>=0;i--)if(live[i].o._end&&live[i].o._end<now)live.splice(i,1);
+    while(live.length>=MAXV)hardKill(live.shift());
+    const s=SYN[id](t,f,vel,o);live.push({s,o,k});return s;}
   const REVERB_SEND={stars:.55,ooh:.35,aah:.3,choir:.45,bell:.45,marimba:.3,whistle:.3,chip:.12,robot:.1,kazoo:.12,bass:.05};
   window._keysPlayNote=playNote;
   function vibrato(c,t,oscs,f,depth,delay){const l=c.createOscillator(),lg=c.createGain();l.frequency.value=5.3;lg.gain.setValueAtTime(0,t);lg.gain.setValueAtTime(0,t+delay);lg.gain.linearRampToValueAtTime(f*depth,t+delay+.35);

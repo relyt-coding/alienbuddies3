@@ -149,6 +149,14 @@ README.md covers the file layout, test mode and vocals in depth; this file is th
   `tzPlace` (js/89) places both teasers (desktop: hanging above the score). `openNewlyUnlocked('bunker'|'fuse'|'vault')` opens a page after its unlock;
   desktop file open leaves unlocked panels open. partyMult = 2×1.5^(lvl-1). js/18 phone pads: `body.pad-squeeze` shrinks the header when pads don't fit
   (Galaxy Fold / big system font); the grid is always clamped to the room left. audit.py now includes Fold / Flip sizes (Android UA).
+- v0.2.209: Buddy Keys VOICE LIMIT (js/60 playNote: each note has a kill gain `k`; over MAXV (10 desktop / 7 phone / 5 lite) the oldest is
+  `hardKill`ed: 12 ms fade + oscillators stopped; release() stores `o._oscs` / `o._end`). js/36 `seqBeatNow` returns null when audioCtx.currentTime
+  stalls >150 ms, so party styles fall back to the steady clock instead of freezing. Eggs (js/50) have wavy ribbons + `sparkles()` (no polka dots /
+  speckles: trypophobia). Match cards: no FOIL/HOLO label (js/48). Quad Suns cost 100 💎 (js/20 costBalance). Ship (js/87): new SVG with a buddy pilot;
+  tap = `goHome()` (phone swipeNavGo(0,1), desktop closeSkillTree). js/16 buyNextPad fills a new pad with the first unlockedSounds() entry not on a pad.
+  Corner egg (js/83): `.pe-lamp` + `.pe-wire` cord (clip-path fill = score/cost); tap lights it (`.lit`) then buyAlien with
+  `__eggOpenOpts={landed,lampOn}` (js/50 starts lampT0 1.7 s back). Fuse teaser door (`door` 0..1 in js/89 paint). Vault cutscene `playVaultScene`
+  (js/89, #vaultScene). daw-full hides both FILL/SHRINK buttons (js/34).
 - Skill-tree descriptions: `gemsOnly` (js/20) strips any written "×N Alien Gems" and appends the node's REAL `gemMult`, so never hand-write gem amounts.
 
 ## Testing without a phone

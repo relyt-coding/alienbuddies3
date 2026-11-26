@@ -123,7 +123,7 @@
       }else gs.style.gridTemplateColumns='';
     }
     [[fillBtn,bc,fill.bunker],[fillBtnR,sc,fill.shop]].forEach(([b,collapsed,on])=>{
-      const show=desk&&collapsed;b.classList.toggle('show',show);b.classList.toggle('on',!!on);
+      const show=desk&&collapsed&&!(fb&&fs);b.classList.toggle('show',show);   // v0.2.209: full screen has no SHRINK buttons (the BUNKER / FUSEBOX tabs take a side back)b.classList.toggle('on',!!on);
       const sp=b.querySelector('span'),txt=on?'⤡ SHRINK':'⤢ FILL';if(sp.textContent!==txt)sp.textContent=txt;});
   }
 

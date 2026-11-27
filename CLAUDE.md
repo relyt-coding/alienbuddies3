@@ -1,8 +1,8 @@
 # Alien Buddies: notes for building
 
 <!-- ship:auto:start -->
-- Version: 0.2.233 · shipped 2026-11-27
-- Last change: Fixed a stray sparkle that flashed in the top-left corner just before…
+- Version: 0.2.234 · shipped 2026-11-27
+- Last change: The PLANET HOP button in the Bunker now shows your Alien Gems against…
 <!-- ship:auto:end -->
 
 **In flight / next:** nothing half-finished right now.

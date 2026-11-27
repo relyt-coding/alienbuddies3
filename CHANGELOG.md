@@ -2,6 +2,9 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.234 - 2026-11-27 01:45
+- The PLANET HOP button in the Bunker now shows your Alien Gems against the price (3/5), so you can see how close you are to unlocking it.
+
 ## v0.2.233 - 2026-11-27 01:20
 - Fixed a stray sparkle that flashed in the top-left corner just before the egg hatch screen opened (it happened most when hatching with the space bar).
 

@@ -189,6 +189,7 @@ README.md covers the file layout, test mode and vocals in depth; this file is th
 - v0.2.224: default pad keys (js/05) by POSITION: top E R U I = pads 8 1 2 6, bottom D F J K = pads 7 3 4 5 (DEFAULT_KEYS by index R U F J K I D E;
   old untouched defaults migrate). daw-wide's one row uses CSS `order` (column by column: E D R F U J I K). Worm Whack CR_MAP matches. js/91 Space: big
   unlocks (seq/fuse/party teaser, Vault card) beat eggs when affordable; nothing while `.cornerEgg.lit` / `#fuseTeaser.flipped`.
+- v0.2.225: #planetHopBtn `.ph-glow` (js/44 mgRefresh: affordable while locked, or an open level not cleared; css end). js/41 open(): first ever open (`phProgress.seen` unset, no best) starts level 1 directly.
 - Skill-tree descriptions: `gemsOnly` (js/20) strips any written "×N Alien Gems" and appends the node's REAL `gemMult`, so never hand-write gem amounts.
 
 ## Testing without a phone

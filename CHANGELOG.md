@@ -2,6 +2,10 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.225 - 2026-11-26 22:55
+- Planet Hop now flashes in the Bunker, like the matching game, when you have enough Alien Gems to unlock it or there's a level you haven't cleared yet.
+- The first time you open Planet Hop it drops you straight into level 1 instead of the level list.
+
 ## v0.2.224 - 2026-11-26 22:45
 - Drum pad keys now match the shape of your keyboard: the top row of pads is E R U I and the bottom row is D F J K, so your fingers rest on the home row. (If you changed your keys yourself, they're kept.) Worm Whack's craters follow the same layout.
 - Space unlocks one thing per press, and the Fusebox (or another big unlock) goes before an egg when you can afford both.

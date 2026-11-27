@@ -3033,3 +3033,8 @@ body.desktop-mode .seq-teaser{width:calc(100% - 100px);margin-left:auto;margin-r
 #matchingGameBtn.match-glow::before,#planetHopBtn:not(.mg-locked)::before{animation:mgIconBob 2.4s ease-in-out infinite;}
 @keyframes mgIconBob{0%,100%{transform:translateY(0) rotate(0);}50%{transform:translateY(-2px) rotate(-4deg);}}
 .ck-list #matchingGameBtn,.ck-list #planetHopBtn{padding-left:3.6rem !important;}
+
+/* v0.2.225: Planet Hop flashes when it can be unlocked or has a level you haven't cleared */
+@keyframes phGlow{0%,100%{box-shadow:0 0 5px 0 rgba(0,229,255,.25);border-color:#1f8aa0;color:#7fe8ff;}50%{box-shadow:0 0 18px 3px rgba(0,229,255,.65);border-color:#7ff4ff;color:#d4fbff;}}
+#planetHopBtn.ph-glow{animation:phGlow 1.4s ease-in-out infinite;}
+#planetHopBtn.ph-glow::before{animation:mgIconBob 2.4s ease-in-out infinite;}

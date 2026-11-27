@@ -47,6 +47,8 @@ function phGemVal(b){return b&&b.cleared?((b.dust||0)>=.999?1:.5):0;}
     if(typeof partyMode!=='undefined'&&partyMode&&typeof stopParty==='function')stopParty();
     ov.classList.add('open');document.body.classList.add('ww-open');
     let l=1;for(let i=1;i<=15;i++)if(phLevelOpen(i))l=i;sel=l;showSelect();
+    // v0.2.225: the very first time, straight into level 1 (no level select yet)
+    if(typeof phProgress!=='undefined'&&!phProgress.seen&&!Object.keys(phProgress.best||{}).length&&!(typeof TEST_MODE!=='undefined'&&TEST_MODE)){phProgress.seen=1;sel=1;start(1);}
   }
   function close(){stop();ov.classList.remove('open');document.body.classList.remove('ww-open');if(typeof autoSave==='function')autoSave();}
   window.openPlanetHop=open;window.closePlanetHop=close;

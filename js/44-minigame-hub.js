@@ -131,7 +131,10 @@ function mgRefresh(){
   if(bd){const last=ww||ml;if(last&&last.nextElementSibling!==bd)last.after(bd);}
   if(ph){ph.style.display='';const on=mgPhOn()||_mgTest();ph.classList.toggle('mg-locked',!on);
     const h=on?'PLANET HOP <span class="mg-price">WIN ALIEN GEMS</span>':'PLANET HOP <span class="mg-price">UNLOCK · 💎 '+MG_PRICE.ph+'</span>';
-    if(ph._h!==h){ph._h=h;ph.innerHTML=h;}}
+    if(ph._h!==h){ph._h=h;ph.innerHTML=h;}
+    // v0.2.225: it flashes (like the matching game) when you can afford to unlock it, or a level is open that you haven't cleared yet
+    let fresh=false;if(on&&typeof phLevelOpen==='function'&&typeof phProgress!=='undefined')for(let L=1;L<=15;L++)if(phLevelOpen(L)&&!(phProgress.best[L]||{}).cleared){fresh=true;break;}
+    ph.classList.toggle('ph-glow',on?fresh:(typeof alienGems!=='undefined'&&alienGems>=MG_PRICE.ph));}
   if(typeof updateMatchingBtn==='function')updateMatchingBtn();
   // cockpit header + bonus + coming-soon cards
   const p=mgGemParts(),tot=1+p.ph+p.ww+p.bd;

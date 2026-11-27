@@ -168,12 +168,13 @@ function phBuild(L,songIn){
   const fl=objs.find(o=>o.k==='flag');lv.cp=fl?fl.s:null;lv.signs=objs.filter(o=>o.k==='sign');
   lv.pits=objs.filter(o=>o.k==='pit');lv.blocks=objs.filter(o=>o.k==='block');lv.spikes=objs.filter(o=>o.k==='spike');
   lv.pads=objs.filter(o=>o.k==='pad');lv.zones=objs.filter(o=>o.k==='zone');
-  // v0.2.227: no long stretches with nothing to press. Every main beat where you'd just be running on flat, open
-  //   ground (no obstacle from just before it to a beat and a bit after, nothing else pressed near it) gets a hop:
-  //   its stardust arc pays you for jumping on the beat. If the bot can't survive the result, the extra hops come out again.
+  // v0.2.229: no long empty stretches (v0.2.227 filled EVERY beat: too much). A hop is added only in the middle of a gap of
+  //   4+ beats with nothing to press, on open ground, so there's something to do about every other beat. Its stardust arc
+  //   pays you for jumping on the beat. If the bot can't survive the result, the hop before where it died comes out again.
   const fills=[];
   for(let b=5;b<end-4;b++){
-    if(acts.some(a=>Math.abs(a.t-b)<.9))continue;
+    let prev=-9,next=1e9;acts.concat(fills).forEach(a=>{if(a.t<=b+.01&&a.t>prev)prev=a.t;if(a.t>b+.01&&a.t<next)next=a.t;});
+    if(b-prev<1.9||next-b<1.9)continue;
     const busy=objs.some(o=>{
       if(o.k==='sign'||o.k==='flag')return false;
       if(o.k==='bell')return b>=o.s-2&&b<=o.s+2;

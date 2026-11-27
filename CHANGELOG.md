@@ -2,6 +2,9 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.230 - 2026-11-26 23:55
+- Planet Hop levels are back to their original design. The only change kept: long empty stretches get a stardust hop in the middle, so something happens about every other beat (not every beat).
+
 ## v0.2.229 - 2026-11-26 23:45
 - Space now always unlocks everything it can first (including hatching a buddy from the Fusebox card) and only starts the matching game when there's nothing else to buy.
 - The shooting star card's rainbow trail now tucks neatly behind the star (no more squared-off edge).

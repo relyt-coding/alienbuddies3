@@ -328,11 +328,22 @@ function phGemVal(b,L){return b&&b.cleared?(+L===1?1.5:((b.dust||0)>=.999?1:.5))
     R.gemGain=R.custom?0:phGemVal(st[K],K)-phGemVal(prev,K);   // +0.5× gems for a clear, +1× in total with all the stardust
     if(R.lv.bossS<Infinity){R.shake=16;for(let k=0;k<4;k++)burst(R.S.s-2.2,2.4,['#ffd166','#ff66ff','#7fe8ff','#ffffff'][k],30,2);}
     if(typeof autoSave==='function')autoSave();if(typeof renderUI==='function')renderUI();
-    R.finFx=0;setTimeout(()=>results(stars,dust,first),R.lv.bossS<Infinity?1900:1700);
+    R.finFx=0;
+    // v0.2.240: the last level of a world banks its crystal and shows the crystal room before the results card
+    const worldEnd=!R.custom&&(L===3||L===7||L===11);
+    const go=()=>results(stars,dust,first);
+    setTimeout(()=>{
+      if(!worldEnd||typeof showCrystalRoom!=='function'){go();return;}
+      const w=L<=3?0:L<=7?1:2;
+      const c=typeof recordPhCrystal==='function'?recordPhCrystal(w):null;
+      showCrystalRoom(w,c,go);
+    },R.lv.bossS<Infinity?1900:1700);
   }
   function results(stars,dust,first){
     if(!R)return;R.state='done';phLoopsOff();
     const L=R.L,P=R.lv.P;
+    const cInfo=(!R.custom&&(L===3||L===7||L===11)&&typeof phCrystalInfo==='function')?phCrystalInfo(L<=3?0:L<=7?1:2):null;
+    const crystalLine=cInfo?`<div class="ww-reward" style="color:${cInfo.col}">💎 ${cInfo.world} CRYSTAL · ${cInfo.name} · ×${(+cInfo.mult.toFixed(2))}</div>`:'';
     $('phResInner').innerHTML=`
       <div class="ww-big win">${P.boss?'BOSS CLEARED!':'LEVEL CLEAR!'}</div>
       <div class="ww-d-name">${R.custom?P.name+' · '+P.diff:L+'. '+P.name}</div>
@@ -340,6 +351,7 @@ function phGemVal(b,L){return b&&b.cleared?(+L===1?1.5:((b.dust||0)>=.999?1:.5))
       <div class="ww-res-acc">${Math.round(dust*100)}%<small>stardust collected (60% ★★ · 90% ★★★)</small></div>
       <div class="ww-res-grid"><div><b>${R.got.size} / ${R.lv.dust.length}</b><small>STARDUST</small></div><div><b>${R.attempt}</b><small>ATTEMPTS</small></div>
 </div>
+      ${crystalLine}
       ${R.gemGain>0?`<div class="ww-reward">💎 +${R.gemGain}× Alien Gems forever!${first&&L<11&&phLevelOpen(L+1)?' · Level '+(L+1)+' unlocked':''}</div>`:first&&L<11&&!phLevelOpen(L+1)?`<div class="ww-reward">🔒 Next: ${mgPhLockMsg(L+1)}</div>`:''}
       <div class="ww-res-btns"><button class="ww-btn" id="phRetry">RETRY</button>${!R.custom&&L<11?(phLevelOpen(L+1)?'<button class="ww-btn ww-play" id="phNext">NEXT LEVEL</button>':'<button class="ww-btn ww-play" id="phNext">FIND THE NEXT WORLD</button>'):''}<button class="ww-btn" id="phLevels">LEVELS</button></div>`;
     $('phResults').classList.add('open');

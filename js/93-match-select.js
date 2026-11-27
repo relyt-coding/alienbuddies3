@@ -31,6 +31,7 @@
 
   function tierFor(lvl,secs){const p=matchPar(lvl);if(secs<=p*.8)return 3;if(secs<=p*.9)return 2;if(secs<=p)return 1;return 0;}
   function crystalValue(lvl,tier){const base=Math.max(2,1+(matchRewardForLevel(lvl)-1)*.25);return base*TIER_FRAC[tier];}   // never below 1.1, like world 1 of Planet Hop
+  window.matchCrystalValue=crystalValue;
   window.matchTierFor=tierFor;
 
   // ── the player's crystals: add inside the matching game, then other games multiply in later ──
@@ -55,8 +56,8 @@
     return {tier:r.tier,mult:r.mult,html:`<span style="color:${col}">${nm} CRYSTAL · ×${(+r.mult.toFixed(2))}</span>`};
   };
 
-  // gems: the crystal multiplier rides on the minigame gem bonus
-  if(typeof mgGemBonus==='function'){const g=mgGemBonus;window.mgGemBonus=function(){return g.apply(this,arguments)*crystalMult();};}
+  // gems: the crystal multiplier rides on the minigame gem bonus (window.crystalMult, so Planet Hop's worlds are included too)
+  if(typeof mgGemBonus==='function'){const g=mgGemBonus;window.mgGemBonus=function(){return g.apply(this,arguments)*(typeof window.crystalMult==='function'?window.crystalMult():1);};}
 
   // ── the SELECT third beside the matching button ──
   const mb=$('matchingGameBtn');

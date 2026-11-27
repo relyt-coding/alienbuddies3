@@ -1,8 +1,8 @@
 # Alien Buddies: notes for building
 
 <!-- ship:auto:start -->
-- Version: 0.2.239 · shipped 2026-11-27
-- Last change: The Planet Hop level box now shows one world per line — LUNA 1–3…
+- Version: 0.2.240 · shipped 2026-11-27
+- Last change: Planet Hop crystals: finishing the last level of a world opens the…
 <!-- ship:auto:end -->
 
 **In flight / next:** nothing half-finished right now.

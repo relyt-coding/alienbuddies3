@@ -2,6 +2,11 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.240 - 2026-11-27 06:20
+- Planet Hop crystals: finishing the last level of a world opens the portal into a crystal room. Your stardust average decides the colour — 100% platinum, 90%+ blue, 75%+ green, below that dark — and the crystal boosts Alien Gems and energy for good (2× / 3× / 4× at platinum for Luna, Glacia and Magmora, with the lower colours stepping down).
+- Replay a world with more stardust and its crystal improves.
+- New CRYSTALS hall in the Cockpit: every planet trophy, plus a slot for every matching level, with silhouettes for the ones still waiting.
+
 ## v0.2.239 - 2026-11-27 05:45
 - The Planet Hop level box now shows one world per line — LUNA 1–3, GLACIA 4–7, MAGMORA 8–11 — so you can always see where you are.
 

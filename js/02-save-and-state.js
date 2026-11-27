@@ -59,7 +59,7 @@ function autoSave(){
     shop:{seqMultLevel:shop.seqMultLevel,multLevel:shop.multLevel,alienBoostLevel:shop.alienBoostLevel,multiClickLevel:shop.multiClickLevel,seqMultiClickLevel:shop.seqMultiClickLevel,seqMultiClickUnlocked:shop.seqMultiClickUnlocked,dismissed:shop.dismissed||[],alienBoostUnlocked:shop.alienBoostUnlocked,multiClickUnlocked:shop.multiClickUnlocked,drumDotsUnlocked:shop.drumDotsUnlocked,seqDotsUnlocked:shop.seqDotsUnlocked,seqStepsLevel:shop.seqStepsLevel||0,partyLevel:shop.partyLevel||0,partySeen:!!shop.partySeen,seqFeat:shop.seqFeat||0,keysLevel:shop.keysLevel||0,keysSeen:!!shop.keysSeen,keysOn:!!shop.keysOn,keysVoice:shop.keysVoice||0,keysOct:shop.keysOct||0,keysV2:true},
     totalAliens,alienData,
     drum:{pads:drum.pads,extraSounds:drum.extraSounds,seqTracks:drum.seqTracks},
-    matchLevelsCompleted,matchingMultiplier,matchSavedState,matchCrystals,wormMultiplier,wormProgress,phMultiplier,phProgress,
+    matchLevelsCompleted,matchingMultiplier,matchSavedState,matchCrystals,wormMultiplier,wormProgress,phMultiplier,phProgress,phCrystals,
     mgBought:(typeof mgBought!=='undefined')?mgBought:undefined,bdProgress:(typeof bdProgress!=='undefined')?bdProgress:undefined,tipsOwned,tipsSet,tipsMult,vaultSeen,vaultOwned,drumTrackerActive,seqTrackerActive,shopOpenCount,hasSeenSeqHint,
     savedPatterns,savedArrangements,songSlots,
     padSounds:[...padSounds],
@@ -101,6 +101,7 @@ let matchingLevel=0; // highest level unlocked (0=none, 1=level1 available, etc)
 let matchingMultiplier=1; // permanent multiplier from wins
 let matchLevelsCompleted=-1; // -1 = level 0 not yet seen
 let matchCrystals={};   // v0.2.237: best time-trial crystal per matching level {level:{t:0-3,s:seconds}}
+let phCrystals={};      // v0.2.240: Planet Hop world crystals {world:{t:0-3,a:average stardust}}
 let tipsOwned=0; // number of tips purchased
 let tipsSet=[];  // which tips (0-based) are bought: they can be bought in any order
 let tipsMult=1; // permanent ×1.5 per tip
@@ -253,7 +254,8 @@ function loadFromSave(data){
   if(typeof wormMultiplier!=='undefined'){wormMultiplier=data.wormMultiplier||1;wormProgress=(data.wormProgress&&data.wormProgress.best)?data.wormProgress:{best:{}};}
   if(typeof phMultiplier!=='undefined'){phMultiplier=data.phMultiplier||1;
     // v0.2.238: the 11-level restructure wipes old Planet Hop bests once (everything else is kept)
-    phProgress=(data.phProgress&&data.phProgress.best&&data.phProgress.v===2)?data.phProgress:{best:{},v:2};}
+    phProgress=(data.phProgress&&data.phProgress.best&&data.phProgress.v===2)?data.phProgress:{best:{},v:2};
+    phCrystals=(data.phCrystals&&typeof data.phCrystals==='object')?data.phCrystals:{};}
   matchSavedState=data.matchSavedState||null;
   if(typeof mgLoad==='function')mgLoad(data);   // minigame unlocks + v0.2.111 migration
   tipsOwned=data.tipsOwned||0;

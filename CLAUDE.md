@@ -190,6 +190,7 @@ README.md covers the file layout, test mode and vocals in depth; this file is th
   old untouched defaults migrate). daw-wide's one row uses CSS `order` (column by column: E D R F U J I K). Worm Whack CR_MAP matches. js/91 Space: big
   unlocks (seq/fuse/party teaser, Vault card) beat eggs when affordable; nothing while `.cornerEgg.lit` / `#fuseTeaser.flipped`.
 - v0.2.225: #planetHopBtn `.ph-glow` (js/44 mgRefresh: affordable while locked, or an open level not cleared; css end). js/41 open(): first ever open (`phProgress.seen` unset, no best) starts level 1 directly.
+- v0.2.226: Planet Hop select (js/41 showSelect) = tiles only: rules text / #phDetail hidden (css end), tabs hidden (`.ph-simple`) until mg_cockpit, bonus line only once >0, levels shown in rows of 5 up to the highest mgPhAccess level; tapping an open tile calls start(L).
 - Skill-tree descriptions: `gemsOnly` (js/20) strips any written "×N Alien Gems" and appends the node's REAL `gemMult`, so never hand-write gem amounts.
 
 ## Testing without a phone

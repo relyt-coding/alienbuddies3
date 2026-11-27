@@ -3038,3 +3038,7 @@ body.desktop-mode .seq-teaser{width:calc(100% - 100px);margin-left:auto;margin-r
 @keyframes phGlow{0%,100%{box-shadow:0 0 5px 0 rgba(0,229,255,.25);border-color:#1f8aa0;color:#7fe8ff;}50%{box-shadow:0 0 18px 3px rgba(0,229,255,.65);border-color:#7ff4ff;color:#d4fbff;}}
 #planetHopBtn.ph-glow{animation:phGlow 1.4s ease-in-out infinite;}
 #planetHopBtn.ph-glow::before{animation:mgIconBob 2.4s ease-in-out infinite;}
+/* v0.2.226: the simple Planet Hop level box */
+#phSelect .ww-sub,#phSelect #phDetail{display:none !important;}
+#phSelect.ph-simple .mg-tabs{display:none !important;}
+#phSelect .ph-grid{grid-template-columns:repeat(5,1fr);}

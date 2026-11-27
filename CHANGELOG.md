@@ -2,6 +2,9 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.226 - 2026-11-26 23:05
+- The Planet Hop level box is much simpler: just the levels you can reach (1 to 5 at first). Tap a level to play it. The long rules text and the info panel are gone, and YOUR BEATS waits until the Cockpit.
+
 ## v0.2.225 - 2026-11-26 22:55
 - Planet Hop now flashes in the Bunker, like the matching game, when you have enough Alien Gems to unlock it or there's a level you haven't cleared yet.
 - The first time you open Planet Hop it drops you straight into level 1 instead of the level list.

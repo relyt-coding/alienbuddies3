@@ -62,27 +62,28 @@ function phGemVal(b){return b&&b.cleared?((b.dust||0)>=.999?1:.5):0;}
   const mineOpts={id:'phMine',note:'obstacles land on your beat',playStyle:'border-color:#7fe8ff;color:#7fe8ff;background:#071420',onPlay:song=>{const d=Object.keys(MG_DIFFS).find(k=>song.P.custom.endsWith('|'+k))||'normal';song.P.planet=MG_DIFFS[d].planet;start({song,L:PH_DIFF_L[d]});}};
   function showTab(t){tab=t;$('phTabLv').classList.toggle('sel',t==='lv');$('phTabMine').classList.toggle('sel',t==='mine');$('phLvPane').style.display=t==='lv'?'':'none';$('phMinePane').style.display=t==='mine'?'':'none';
     if(t==='mine'){mineOpts.best=phProgress.custom||{};mgRenderCustom($('phMinePane'),mineOpts);}}
+  // v0.2.226: a simple level box: no rules text, no YOUR BEATS tab until the Cockpit, no detail panel (tap a level to play it),
+  //   and only the levels you can reach so far, in rows of five (1–5 at first)
   function showSelect(){
-    $('phResults').classList.remove('open');$('phSelect').classList.add('open');showTab(tab);
+    $('phResults').classList.remove('open');$('phSelect').classList.add('open');
+    const beats=(typeof _mgHas==='function'&&_mgHas('mg_cockpit'))||(typeof TEST_MODE!=='undefined'&&TEST_MODE);
+    $('phSelect').classList.toggle('ph-simple',!beats);if(!beats)tab='lv';showTab(tab);
     const stars=Object.values(phProgress.best).reduce((a,b)=>a+(b.stars||0),0);
     const gb=Object.values(phProgress.best).reduce((a,b)=>a+phGemVal(b),0);
-    $('phBonus').innerHTML=`Planet Hop gem bonus: <b>+${gb}×</b> Alien Gems · ${stars} / 45 ★`;
+    $('phBonus').innerHTML=gb>0?`Planet Hop gem bonus: <b>+${gb}×</b> Alien Gems · ${stars} ★`:'';$('phBonus').style.display=gb>0?'':'none';
+    let top=0;for(let L=1;L<=15;L++)if(typeof mgPhAccess!=='function'||mgPhAccess(L))top=L;
+    const shown=Math.min(15,Math.max(5,Math.ceil(top/5)*5));
     const gr=$('phGrid');gr.innerHTML='';
-    for(let L=1;L<=15;L++){
+    for(let L=1;L<=shown;L++){
       const b=document.createElement('button');b.className='ww-tile';const best=phProgress.best[L]||{},op=phLevelOpen(L);
-      if(!op)b.classList.add('locked');if(L===sel)b.classList.add('sel');if(L%5===0)b.classList.add('boss');
-      b.style.borderColor=L===sel?'':PH_PLANETS[phLevel(L).planet].glow+'55';
+      if(!op)b.classList.add('locked');if(L===sel&&op)b.classList.add('sel');if(L%5===0)b.classList.add('boss');
+      b.style.borderColor=L===sel&&op?'':PH_PLANETS[phLevel(L).planet].glow+'55';
+      if(op)b.title=L+'. '+phLevel(L).name;
       b.innerHTML=`<span class="n">${op?L:'🔒'}</span><span class="st">${best.cleared?'★'.repeat(best.stars||1)+'<i>'+'★'.repeat(3-(best.stars||1))+'</i>':best.pct?Math.round(best.pct*100)+'%':'<i>★★★</i>'}</span>`;
-      b.addEventListener('click',()=>{if(!op){showToast(typeof mgPhAccess==='function'&&!mgPhAccess(L)?'🔒 '+mgPhLockMsg(L):'Clear level '+(L-1)+' first');return;}sel=L;showSelect();});
+      b.addEventListener('click',()=>{if(!op){showToast(typeof mgPhAccess==='function'&&!mgPhAccess(L)?'🔒 '+mgPhLockMsg(L):'Clear level '+(L-1)+' first');return;}sel=L;start(L);});
       gr.appendChild(b);
     }
-    const P=phLevel(sel),best=phProgress.best[sel],pl=PH_PLANETS[P.planet];
-    $('phDetail').innerHTML=`<div class="ww-d-name">${sel}. ${P.name}</div>
-      <div class="ww-d-meta">${pl.name} · ${P.bpm} BPM · ${P.style.toUpperCase()}</div>
-      ${NEWS[sel]?`<div class="ww-d-new" style="color:${pl.glow}">${NEWS[sel]}</div>`:''}
-      <div class="ww-d-meta">${best&&best.cleared?`Best: ${'★'.repeat(best.stars)}${'☆'.repeat(3-best.stars)} · stardust ${Math.round(best.dust*100)}%`:best&&best.pct?`Best run: ${Math.round(best.pct*100)}% · clear it: <b>+0.5×</b> Alien Gems (+1× with all stardust)`:`Clear it: <b>+0.5×</b> Alien Gems · all stardust: <b>+1×</b>`}</div>
-      <button class="ww-play" id="phPlay" style="border-color:${pl.glow};color:${pl.glow};background:#071420">PLAY</button>`;
-    $('phPlay').addEventListener('click',()=>start(sel));
+    $('phDetail').innerHTML='';
   }
 
   // ── run ──

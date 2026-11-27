@@ -967,7 +967,8 @@ function phGemVal(b){return b&&b.cleared?((b.dust||0)>=.999?1:.5):0;}
   // ── entry button: first in the minigame list, bought for 1 Alien Gem ──
   const eb=document.createElement('button');eb.id='planetHopBtn';eb.type='button';eb.textContent='🪐 PLANET HOP';
   const mbtn=$('matchingGameBtn');if(mbtn)mbtn.before(eb);
-  eb.addEventListener('click',()=>{if(typeof mgPhOn==='function'&&!mgPhOn()&&!(typeof TEST_MODE!=='undefined'&&TEST_MODE)){showToast('🔒 Unlock the Minigame Cockpit in the skill tree to play Planet Hop');return;}open();});
+  // v0.2.219: not bought yet → this tap buys it for 💎 5 (js/44 mgBuy), then opens it
+  eb.addEventListener('click',()=>{if(typeof mgPhOn==='function'&&!mgPhOn()&&!(typeof TEST_MODE!=='undefined'&&TEST_MODE)){mgBuy('ph');if(!mgPhOn())return;}open();});
   document.addEventListener('visibilitychange',()=>{if(document.hidden&&R&&R.state==='play'){stop();showSelect();}});
   window._phDebug={state:()=>R,start,input,tau:()=>R?tau():0,kind:sp=>R&&obsKind(R.lv,sp)};
 })();

@@ -2,8 +2,9 @@
 //  MINIGAME HUB — how the minigames unlock, what they pay, and the COCKPIT page
 //  · In the bunker from the start: the MATCHING GAME, free (v0.2.146). The bunker itself only opens once your first
 //    buddy hatches, and the matching game's button glows until you've played level 1.
+//  · v0.2.219: PLANET HOP is bought in the bunker for 5 Alien Gems (levels 1–3), right under the matching game.
 //  · The skill tree's minigame path: Cockpit (a page left of the bunker that holds every minigame, and opens
-//    PLANET HOP levels 1–5) → Ice Planet (Planet Hop 6–10) → Worm Whack (levels 1–5) → Magmora (Planet Hop 11–15)
+//    PLANET HOP levels 4–5) → Ice Planet (Planet Hop 6–10) → Worm Whack (levels 1–5) → Magmora (Planet Hop 11–15)
 //    → Beat Defense, and a later planet,
 //    the Wyrm Moon, with a side trail that opens Worm Whack 5 levels at a time.
 //  · Rewards: the Matching Game gives point multipliers. Planet Hop, Worm Whack and Beat Defense boost ALIEN GEMS:
@@ -11,7 +12,7 @@
 // ══════════════════════════════════════════════
 let mgBought={ph:false,match:true,wwAll:false};   // bunker purchases (+ wwAll: saves from before v0.2.111 keep every Worm Whack level)
 let bdProgress={best:{}};                            // Beat Defense: best[L] = {cleared, flawless}
-const MG_PRICE={match:0};   // the matching game is free now (it used to cost 1 Alien Gem)
+const MG_PRICE={match:0,ph:5};   // the matching game is free; v0.2.219: PLANET HOP is bought in the bunker for 5 Alien Gems (levels 1–3)
 const MG_WW_NODES=[[5,'ww_moon'],[10,'ww_deep'],[15,'ww_t1'],[20,'ww_t2'],[25,'ww_t3'],[30,'ww_t4']];
 const _mgTest=()=>typeof TEST_MODE!=='undefined'&&TEST_MODE;
 const _mgHas=id=>typeof unlockedSkills!=='undefined'&&!!unlockedSkills[id];
@@ -20,8 +21,8 @@ const _mgHas=id=>typeof unlockedSkills!=='undefined'&&!!unlockedSkills[id];
 // Planet Hop arrives with the Cockpit (saves that bought it in the bunker before v0.2.114 keep it)
 function mgPhOn(){return !!mgBought.ph||_mgHas('mg_cockpit');}
 function mgPhAccess(L,real){if(!real&&_mgTest())return true;   // (real: the test-mode bot plays by the normal rules)
-  return L<=5?mgPhOn():L<=10?_mgHas('ph_ice'):_mgHas('ph_magma');}
-function mgPhLockMsg(L){return L<=5?'Unlock the Minigame Cockpit in the skill tree':L<=10?'Unlock the Ice Planet in the skill tree':'Unlock Magmora in the skill tree';}
+  return L<=3?mgPhOn():L<=5?_mgHas('mg_cockpit'):L<=10?_mgHas('ph_ice'):_mgHas('ph_magma');}   // v0.2.219: bunker buy = 1–3, Cockpit = 4–5
+function mgPhLockMsg(L){return L<=3?'Unlock Planet Hop in the Bunker for 5 Alien Gems':L<=5?'Unlock the Minigame Cockpit in the skill tree':L<=10?'Unlock the Ice Planet in the skill tree':'Unlock Magmora in the skill tree';}
 function mgWwAccess(L,real){if((!real&&_mgTest())||mgBought.wwAll)return true;const n=MG_WW_NODES.find(([top])=>L<=top);return !!n&&_mgHas(n[1]);}
 function mgWwLockMsg(L){const n=MG_WW_NODES.find(([top])=>L<=top);const nm={ww_moon:'Worm Whack',ww_deep:'the Wyrm Moon',ww_t1:'Wyrm Trail I',ww_t2:'Wyrm Trail II',ww_t3:'Wyrm Trail III',ww_t4:'Wyrm Trail IV'};return 'Unlock '+(n?nm[n[1]]:'it')+' in the skill tree';}
 function mgCockpitOn(){return _mgTest()||_mgHas('mg_cockpit');}
@@ -109,7 +110,7 @@ function mgBuy(k){
   }
   alienGems-=price;mgBought[k]=true;
   try{playSfxPurchase&&playSfxPurchase();}catch(e){}
-  showToast(k==='ph'?'🪐 PLANET HOP unlocked! Levels 1–5 · each win boosts your Alien Gems':'MATCHING GAME unlocked! Each level gives a permanent energy multiplier');
+  showToast(k==='ph'?'PLANET HOP unlocked! Levels 1–3 · every win boosts your Alien Gems for good':'MATCHING GAME unlocked! Each level gives a permanent energy multiplier');
   if(typeof autoSave==='function')autoSave();if(typeof renderUI==='function')renderUI();
   mgRefresh();return false;   // (the matching game then opens straight away: see openMatchingGame)
 }
@@ -124,10 +125,13 @@ function mgRefresh(){
   if(gb)gb.style.display=inCk?'':'none';
   // order: Planet Hop · Matching · Worm Whack · Beat Defense
   const ph=$('planetHopBtn'),mb=$('matchingGameBtn'),ml=$('matchingGameLock'),ww=$('wormGameBtn'),bd=$('beatDefenseBtn');
-  if(ph&&mb&&ph.nextElementSibling!==mb)mb.before(ph);
-  if(ww&&ml&&ml.nextElementSibling!==ww)ml.after(ww);
+  // v0.2.219: Planet Hop sits UNDER the matching game (it's the gem-grinding game, bought for 💎 5)
+  if(ph&&ml&&ml.nextElementSibling!==ph)ml.after(ph);
+  if(ww&&ph&&ph.nextElementSibling!==ww)ph.after(ww);
   if(bd){const last=ww||ml;if(last&&last.nextElementSibling!==bd)last.after(bd);}
-  if(ph){ph.style.display=(mgPhOn()||_mgTest())?'':'none';ph.classList.remove('mg-locked');ph.innerHTML='🪐 PLANET HOP';}
+  if(ph){ph.style.display='';const on=mgPhOn()||_mgTest();ph.classList.toggle('mg-locked',!on);
+    const h=on?'PLANET HOP <span class="mg-price">WIN ALIEN GEMS</span>':'PLANET HOP <span class="mg-price">UNLOCK · 💎 '+MG_PRICE.ph+'</span>';
+    if(ph._h!==h){ph._h=h;ph.innerHTML=h;}}
   if(typeof updateMatchingBtn==='function')updateMatchingBtn();
   // cockpit header + bonus + coming-soon cards
   const p=mgGemParts(),tot=1+p.ph+p.ww+p.bd;

@@ -3043,3 +3043,6 @@ body.desktop-mode .seq-teaser{width:calc(100% - 100px);margin-left:auto;margin-r
 #phSelect .ww-sub,#phSelect #phDetail{display:none !important;}
 #phSelect.ph-simple .mg-tabs{display:none !important;}
 #phSelect .ph-grid{grid-template-columns:repeat(5,1fr);}
+
+/* v0.2.236: the gem ring hides while ALIEN GEM MATH is open (kept after js/88 was removed) */
+body.stats-open #gemRing{display:none !important;}

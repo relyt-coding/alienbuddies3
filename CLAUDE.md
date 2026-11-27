@@ -1,8 +1,8 @@
 # Alien Buddies: notes for building
 
 <!-- ship:auto:start -->
-- Version: 0.2.235 · shipped 2026-11-27
-- Last change: Matching Game: the arrow keys now wrap — right from the last card goes…
+- Version: 0.2.236 · shipped 2026-11-27
+- Last change: Skill tree prices: Minigame Cockpit is 500 gems (was 3,000), Planet…
 <!-- ship:auto:end -->
 
 **In flight / next:** nothing half-finished right now.
@@ -69,7 +69,7 @@ Pushing is deploying. Never force-push, never reuse a version number, never dele
 68 Knowledge Vault · 69 thumb nav (bottom row on upright phones) + PARTY menu + level 3 disco-ball teaser ·
 70 Alien Gem look (Gem Buddy) · 71 level 4 gem ring + gems flying off buddies + MY ACCOUNT sheet ·
 73 Vault big batch (lessons + music words) · 74 Vault price table (generated) · 75 whole-bunker scroll + floating games dock ·
-76 Alien Awakening trails + speed · 77 Egg Incubator + racers · 78 DNA Splice · 79 Buddy Race + Gold Records · 80 extra bunkers · 81 memory diet (3D tree culling) · 82 name-your-file card · 83 corner egg (one at a time to 10 buddies) · 84 hand-picked Vault (editor at /vault) · 85 shop power bars · 86 v0.2.201 touches (free sequencer dots, tracker gap) · 87 YOUR SHIP (skill-tree middle) · 88 hold-to-buy with gems + gem ring opens the gem math · 89 one screen at a time (Fusebox lock + teaser, Vault card) · 90 buddy sounds · 91 space bar unlocks · 92 matching-game keys + controllers ·
+76 Alien Awakening trails + speed · 77 Egg Incubator + racers · 78 DNA Splice · 79 Buddy Race + Gold Records · 80 extra bunkers · 81 memory diet (3D tree culling) · 82 name-your-file card · 83 corner egg (one at a time to 10 buddies) · 84 hand-picked Vault (editor at /vault) · 85 shop power bars · 86 v0.2.201 touches (free sequencer dots, tracker gap) · 87 YOUR SHIP (skill-tree middle) · 88 (removed in v0.2.236: hold-to-buy reverted to a normal press) · 89 one screen at a time (Fusebox lock + teaser, Vault card) · 90 buddy sounds · 91 space bar unlocks · 92 matching-game keys + controllers ·
 72 energy/gem math/party corner + file-select hum (`titleHum`): `openGemStats()` (bunker + shop gem counters), PARTY pill top-left (`.pb-corner`), MY ACCOUNT in Settings only, sequencer tracker ACTIVATE (`seqTrackerActive`, `SEQ_TRACKER_COST`)
 
 - Bunker (v0.2.181, js/75): `.bunker-body` is the scroll box (the grid wrapper no longer scrolls; it only clips the grid's pinch-zoom).
@@ -139,8 +139,8 @@ Pushing is deploying. Never force-push, never reuse a version number, never dele
 - Sequencer dots (v0.2.201, js/86): owning a sequencer track sets `seqTrackerActive` and `shop.seqDotsUnlocked`; `#seqTrackerOverlay` is hidden.
 - First-press ring (v0.2.203, js/65 wake): `.pad.intro-hi` (infinite) only on the 'pads' intro of a fresh file (no buddies, score 0), removed on the first
   pointerdown/keydown. EDIT PADS is hidden (`body.edit-pads-off`, js/86) until drum.pads >= 3.
-- Hold to buy (v0.2.204, js/88): #stDetailBuyBtn whose text starts with UNLOCK becomes "HOLD TO UNLOCK" (1.4 s; a plain click is swallowed). The gem ring's
-  tap opens openGemStats (+ a hold tip). Party unlock song: js/65 `partySong(S,t)` locks to `window._seqMark` / seqBpm and stretches the light show to fit.
+- Hold to buy (v0.2.204, js/88) was REMOVED in v0.2.236: a normal press on `#stDetailBuyBtn` buys again (the gem ring's
+  tap opens openGemStats; the gem math no longer mentions holding). Party unlock song: js/65 `partySong(S,t)` locks to `window._seqMark` / seqBpm and stretches the light show to fit.
 - FUSEBOX (v0.2.205): the shop's player-facing name (ids/classes/code still say store/shop). js/89: `body.fuse-locked` until drum.seqTracks>=1; the
   first buddy plays js/65 'navB' (bunker only), the sequencer plays 'navS' (fusebox only) ~2.6 s later; files opened while locked use 'allB'.
   `pageLocked(id)` drops locked pages from js/22's swipe order; openStore is a no-op while locked. Vault: `vaultUnlocked` (js/02), `body.vault-locked`

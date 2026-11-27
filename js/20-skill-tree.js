@@ -528,12 +528,15 @@ const SKILL_TREE_NODES = [
 // Prices (v0.2.113): tuned with the test-mode bot so the tree is a long road, not a shopping spree.
 // Minigame path ≈ Cockpit + Planet Hop 1–5 ~45 min · Ice Planet ~1h15 · Worm Whack ~1h45 · Magmora ~2h30 · Beat Defense ~3h30 · Wyrm trail after.
 (function costBalance(){
-  const MG={mg_cockpit:3000,ph_ice:12000,ww_moon:45000,ph_magma:150000,beat_defense:500000,ww_deep:300000,ww_t1:600000,ww_t2:1e6,ww_t3:1.6e6,ww_t4:2.5e6,grand_tournament:5e6};
+  const MG={mg_cockpit:500,ph_ice:12000,ww_moon:45000,ph_magma:150000,beat_defense:500000,ww_deep:300000,ww_t1:600000,ww_t2:1e6,ww_t3:1.6e6,ww_t4:2.5e6,grand_tournament:5e6};
+  // v0.2.236: the first music planets were 3,000 / 5,000 gems; Tyler wanted 1,000 / 2,500
+  const FIRST={planet_mantra:1000,planet_hyphae:2500};
   const BR={planets:10,aliens:8,points:5};
   SKILL_TREE_NODES.forEach(n=>{
     if(n.id==='core')return;
     if(/^sun_/.test(n.id)){n.cost=100;return;}   // v0.2.209: each Quad Sun is 100 Alien Gems
     if(MG[n.id]!=null){n.cost=MG[n.id];return;}
+    if(FIRST[n.id]!=null){n.cost=FIRST[n.id];return;}
     if(!n.id.startsWith('mt_')&&BR[n.branch])n.cost=Math.round(n.cost*BR[n.branch]);
   });
 })();

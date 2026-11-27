@@ -2,6 +2,12 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.236 - 2026-11-27 02:40
+- Skill tree prices: Minigame Cockpit is 500 gems (was 3,000), Planet Mantra 1,000 (was 3,000) and Planet Hyphae 2,500 (was 5,000).
+- Skill tree buys are a normal press again — no more holding the button down.
+- Your ship now flies over to circle any node you tap, not just the ones you own.
+- iPhone: the 3D tree hides far bubbles before it draws them and keeps fewer on screen, which should stop the Safari reload when switching to 3D.
+
 ## v0.2.235 - 2026-11-27 02:10
 - Matching Game: the arrow keys now wrap — right from the last card goes to the first, and up / down go round the rows.
 - Your buddies float over the matching game again unless you turn them off (an old "off" setting no longer sticks).

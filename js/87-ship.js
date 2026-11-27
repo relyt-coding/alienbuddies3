@@ -111,7 +111,7 @@
   const _render=renderSkillTree;renderSkillTree=function(){const r=_render.apply(this,arguments);el=null;dress();kick();return r;};
   // fly to whatever gets unlocked / focused, and to nodes you tap that you already own
   const _focus=window.stFocusNode;if(_focus)window.stFocusNode=function(id){const r=_focus.apply(this,arguments);if(id&&id!=='core')flyTo(id);return r;};
-  const _det=openStDetail;openStDetail=function(id){const r=_det.apply(this,arguments);if(id!=='core'&&unlockedSkills[id])flyTo(id);return r;};
+  const _det=openStDetail;openStDetail=function(id){const r=_det.apply(this,arguments);if(id!=='core')flyTo(id);return r;};   // v0.2.236: any node you tap, owned or not
 
   const css=document.createElement('style');css.textContent=`
 .st-node.st-ship{animation:none !important;}

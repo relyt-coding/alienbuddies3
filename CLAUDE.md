@@ -185,6 +185,7 @@ README.md covers the file layout, test mode and vocals in depth; this file is th
   follow the score. Fusebox buy → `fuseUnlockNow()` (js/89) starts navS ~0.6 s after the tap. Corner egg (js/83) LAST=99 (first bundle; the next 99 come
   from planets), then `.full` = a BUNKER button (`openBunkerNow`); the 10-buddy shop note is gone. #gemRing: tap = nothing/nudge before space, map after
   (label SPACE); hold = unlock / replay (js/59). Gem math only from the bunker/shop gem counters + the score breakdown. Shop card says HATCH ALIEN BUDDY.
+- v0.2.223: js/91 won't start the matching game within 700 ms of `egg-reveal-closed` (js/50) or while `.cornerEgg.lit`: the press that closes a hatch never also opens a game.
 - Skill-tree descriptions: `gemsOnly` (js/20) strips any written "×N Alien Gems" and appends the node's REAL `gemMult`, so never hand-write gem amounts.
 
 ## Testing without a phone

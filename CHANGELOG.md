@@ -2,6 +2,9 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.223 - 2026-11-26 22:30
+- Pressing Space to close the hatch screen no longer jumps straight into the matching game. The next Space press starts it.
+
 ## v0.2.222 - 2026-11-26 22:15
 - The Fusebox now waits in its own spot in the top-right corner, across from the egg, instead of sliding around as your energy grows. Once you buy it, the disco ball takes that spot, and after the party the Alien Gem button moves in there too.
 - Unlocking the Fusebox goes straight into its cutscene (no more 2-second pause).

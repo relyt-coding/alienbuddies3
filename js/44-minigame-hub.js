@@ -30,7 +30,7 @@ function mgCockpitOn(){return _mgTest()||_mgHas('mg_cockpit');}
 // Alien Gem bonus from the minigames (added together, then multiplies the gem rate)
 function mgGemParts(){
   let ph=0,ww=0,bd=0;
-  if(typeof phProgress!=='undefined')Object.values(phProgress.best||{}).forEach(b=>{if(b&&b.cleared)ph+=(b.dust||0)>=.999?1:.5;});
+  if(typeof phProgress!=='undefined')Object.entries(phProgress.best||{}).forEach(([k,b])=>{ph+=typeof phGemVal==='function'?phGemVal(b,k):(b&&b.cleared?((b.dust||0)>=.999?1:.5):0);});
   if(typeof wormProgress!=='undefined')Object.values(wormProgress.best||{}).forEach(b=>{if(b&&(b.stars||0)>=1)ww+=b.stars>=3?1:.5;});
   Object.values(bdProgress.best||{}).forEach(b=>{if(b&&b.cleared)bd+=b.flawless?1:.5;});
   return{ph,ww,bd};

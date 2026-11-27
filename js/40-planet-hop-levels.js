@@ -168,6 +168,27 @@ function phBuild(L,songIn){
   const fl=objs.find(o=>o.k==='flag');lv.cp=fl?fl.s:null;lv.signs=objs.filter(o=>o.k==='sign');
   lv.pits=objs.filter(o=>o.k==='pit');lv.blocks=objs.filter(o=>o.k==='block');lv.spikes=objs.filter(o=>o.k==='spike');
   lv.pads=objs.filter(o=>o.k==='pad');lv.zones=objs.filter(o=>o.k==='zone');
+  // v0.2.227: no long stretches with nothing to press. Every main beat where you'd just be running on flat, open
+  //   ground (no obstacle from just before it to a beat and a bit after, nothing else pressed near it) gets a hop:
+  //   its stardust arc pays you for jumping on the beat. If the bot can't survive the result, the extra hops come out again.
+  const fills=[];
+  for(let b=5;b<end-4;b++){
+    if(acts.some(a=>Math.abs(a.t-b)<.9))continue;
+    const busy=objs.some(o=>{
+      if(o.k==='sign'||o.k==='flag')return false;
+      if(o.k==='bell')return b>=o.s-2&&b<=o.s+2;
+      if(o.k==='block')return o.a>b-.05&&o.a<b+1.2;            // only its side wall matters: hopping along the top is fine
+      const lo=o.k==='pit'||o.k==='zone'?o.a:o.k==='pad'?Math.min(o.s,o.next)-.5:o.s-.4,hi=o.k==='pit'||o.k==='zone'?o.b:o.k==='pad'?Math.max(o.s,o.next)+.5:o.s+.4;
+      return lo<b+1.1&&hi>b+.05;});
+    if(b>=bossS&&objs.some(o=>o.meteor&&Math.abs(o.s-b)<3))continue;
+    if(!busy)fills.push({t:b,w:'j',fill:true});
+  }
+  if(fills.length){acts.push(...fills);acts.sort((x,y)=>x.t-y.t);
+    // a hop that the bot dies after is taken back out (the closest one before where it died), until the run is clean
+    for(let tries=0;tries<40;tries++){const r=phRunBot(lv,false);if(r.ok)break;
+      let j=-1;acts.forEach((a,i)=>{if(a.fill&&a.t<=r.death.at+.05&&(j<0||a.t>acts[j].t))j=i;});
+      if(j<0){for(let i=acts.length-1;i>=0;i--)if(acts[i].fill)acts.splice(i,1);break;}
+      acts.splice(j,1);}}
   // run the perfect bot and lay stardust on its path
   const bot=phRunBot(lv,true);
   lv.botOk=bot.ok;lv.botDeath=bot.death;

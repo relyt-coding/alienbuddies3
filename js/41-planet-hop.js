@@ -9,7 +9,8 @@
 let phMultiplier=1;               // (old saves only: Planet Hop now boosts Alien Gems, see 44-minigame-hub.js)
 let phProgress={best:{}};         // best[L] = {stars, dust, pct, cleared}
 function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||((typeof mgPhAccess!=='function'||mgPhAccess(L))&&(L===1||!!(phProgress.best[L-1]||{}).cleared));}
-function phGemVal(b){return b&&b.cleared?((b.dust||0)>=.999?1:.5):0;}
+// v0.2.227: level 1 is worth +1.5× Alien Gems as soon as you clear it (a big first reward); the rest +0.5×, +1× with all stardust
+function phGemVal(b,L){return b&&b.cleared?(+L===1?1.5:((b.dust||0)>=.999?1:.5)):0;}
 
 (function(){
   const $=id=>document.getElementById(id);
@@ -69,7 +70,7 @@ function phGemVal(b){return b&&b.cleared?((b.dust||0)>=.999?1:.5):0;}
     const beats=(typeof _mgHas==='function'&&_mgHas('mg_cockpit'))||(typeof TEST_MODE!=='undefined'&&TEST_MODE);
     $('phSelect').classList.toggle('ph-simple',!beats);if(!beats)tab='lv';showTab(tab);
     const stars=Object.values(phProgress.best).reduce((a,b)=>a+(b.stars||0),0);
-    const gb=Object.values(phProgress.best).reduce((a,b)=>a+phGemVal(b),0);
+    const gb=Object.entries(phProgress.best).reduce((a,[k,b])=>a+phGemVal(b,k),0);
     $('phBonus').innerHTML=gb>0?`Planet Hop gem bonus: <b>+${gb}×</b> Alien Gems · ${stars} ★`:'';$('phBonus').style.display=gb>0?'':'none';
     let top=0;for(let L=1;L<=15;L++)if(typeof mgPhAccess!=='function'||mgPhAccess(L))top=L;
     const shown=Math.min(15,Math.max(5,Math.ceil(top/5)*5));
@@ -319,7 +320,7 @@ function phGemVal(b){return b&&b.cleared?((b.dust||0)>=.999?1:.5):0;}
     const st=R.custom?(phProgress.custom||(phProgress.custom={})):phProgress.best,K=R.custom?P.custom:L;
     const prev=st[K]||{},first=!R.custom&&!prev.cleared;
     st[K]={cleared:true,pct:1,stars:Math.max(stars,prev.stars||0),dust:Math.max(dust,prev.dust||0)};
-    R.gemGain=R.custom?0:phGemVal(st[K])-phGemVal(prev);   // +0.5× gems for a clear, +1× in total with all the stardust
+    R.gemGain=R.custom?0:phGemVal(st[K],K)-phGemVal(prev,K);   // +0.5× gems for a clear, +1× in total with all the stardust
     if(R.lv.bossS<Infinity){R.shake=16;for(let k=0;k<4;k++)burst(R.S.s-2.2,2.4,['#ffd166','#ff66ff','#7fe8ff','#ffffff'][k],30,2);}
     if(typeof autoSave==='function')autoSave();if(typeof renderUI==='function')renderUI();
     R.finFx=0;setTimeout(()=>results(stars,dust,first),R.lv.bossS<Infinity?1900:1700);
@@ -352,7 +353,8 @@ function phGemVal(b){return b&&b.cleared?((b.dust||0)>=.999?1:.5):0;}
   }
   addEventListener('resize',()=>{if(ov.classList.contains('open')&&R)resize();});
   let BP=120,UP=50,RP=1500,AX=0,GY=0;
-  function geo(){const tall=H>W*1.2;BP=Math.max(70,Math.min(170,Math.min(W*(tall?.21:.16),H*.32)));UP=BP*.46;RP=Math.max(W*1.25,H*(tall?1.6:2.2),700);AX=W*(tall?.26:.3);GY=H*(tall?.7:.68);}
+  function geo(){const tall=H>W*1.2,desk=!tall&&document.body.classList.contains('desktop-mode');   // v0.2.227: computers zoom out ~30% to show the sky and the ground like the phone does
+    BP=Math.max(64,Math.min(170,Math.min(W*(tall?.21:.16),H*(desk?.22:.32))));UP=BP*.46;RP=Math.max(W*1.25,H*(tall?1.6:2.2),700);AX=W*(tall?.26:.3);GY=H*(tall?.7:.68);}
   // a point on (or above) the planet: s in beats along the surface, h in jump-heights above it
   function P(s,h){const f=(s-R.S.s)*BP/RP,r=RP+h*UP;return[AX+r*Math.sin(f),GY+RP-r*Math.cos(f),f];}
 

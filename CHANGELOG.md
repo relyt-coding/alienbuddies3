@@ -2,6 +2,11 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.227 - 2026-11-26 23:20
+- Clearing Planet Hop level 1 now gives +1.5× Alien Gems (if you already cleared it, you get the extra automatically).
+- Planet Hop levels keep you busy: open stretches of ground now have a stardust hop on almost every beat, so there's always something to jump for. (Moon jumps and bounce pads still take two beats in the air.)
+- On computers, Planet Hop's camera pulls back so you can see more of the sky and the ground.
+
 ## v0.2.226 - 2026-11-26 23:05
 - The Planet Hop level box is much simpler: just the levels you can reach (1 to 5 at first). Tap a level to play it. The long rules text and the info panel are gone, and YOUR BEATS waits until the Cockpit.
 

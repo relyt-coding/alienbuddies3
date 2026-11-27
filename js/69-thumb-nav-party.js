@@ -117,7 +117,10 @@ body.phone-land #partyTeaser .pt-tag{font-size:12px;padding:2px 6px 1px;}
   const tz=document.createElement('div');tz.id='partyTeaser';tz.setAttribute('role','button');tz.setAttribute('aria-label','Alien Party');
   tz.innerHTML='<div class="pt-string"></div><canvas></canvas><div class="pt-tag"><i class="pt-fill"></i><span></span></div>';
   const cv=tz.querySelector('canvas'),tagTxt=tz.querySelector('.pt-tag span'),fill=tz.querySelector('.pt-fill');
-  let seqSeenAt=0,tzOn=false,raf=0,spin=0,lastT=0,frame=0,tf=0;
+  let readyAt=0,tzOn=false,raf=0,spin=0,lastT=0,frame=0,tf=0;
+  // v0.2.231: the ball used to wait 30 s from the moment the sequencer appeared, so it often landed in the middle of the
+  //   Fusebox cutscene. Now it waits for that cutscene to finish, then shows 3 s later.
+  const cutting=()=>B.contains('intro-run')||(typeof newFileIntroRunning==='function'&&newFileIntroRunning())||(typeof unlockCutsceneRunning==='function'&&unlockCutsceneRunning());
   const cost=()=>typeof PARTY_LADDER!=='undefined'?PARTY_LADDER[0].cost:1e6;
   function size(){return B.contains('phone-land')?30:B.contains('desktop-mode')?54:48;}
   function paint(now){
@@ -169,17 +172,17 @@ body.phone-land #partyTeaser .pt-tag{font-size:12px;padding:2px 6px 1px;}
   }
   function tick(){
     const active=B.contains('game-active'),seq=typeof drum!=='undefined'&&drum.seqTracks>=1&&!(typeof fuseboxOwned!=='undefined'&&!fuseboxOwned),owned=typeof shop!=='undefined'&&(shop.partyLevel||0)>=1;
-    if(!active||!seq){seqSeenAt=0;show(false);return;}
-    if(!seqSeenAt)seqSeenAt=performance.now()-(seqWasLoaded?60000:0);   // loaded with the sequencer already: no wait
-    seqWasLoaded=false;
-    const want=!owned&&performance.now()-seqSeenAt>=30000&&!(typeof overlayUp==='function'&&overlayUp())&&!B.contains('roll-full')&&!B.contains('vox-full');
+    if(!active||!seq){readyAt=0;show(false);return;}
+    if(cutting()){readyAt=0;show(false);return;}   // wait for the Fusebox cutscene
+    if(!readyAt){readyAt=performance.now()+(seqWasLoaded?0:3000);seqWasLoaded=false;}   // loaded with the sequencer already: no wait
+    const want=!owned&&performance.now()>=readyAt&&!(typeof overlayUp==='function'&&overlayUp())&&!B.contains('roll-full')&&!B.contains('vox-full');
     show(want);if(!want)return;
     const c=cost(),ready=score>=c;tz.classList.toggle('ready',ready);
     tagTxt.innerHTML=fmtJh(c);fill.style.width=(Math.min(1,score/c)*100).toFixed(1)+'%';
     if((++tf)%5===0)place();
   }
   let seqWasLoaded=false;
-  if(typeof startGame==='function'){const sg=window.startGame;window.startGame=function(){const r=sg.apply(this,arguments);seqSeenAt=0;seqWasLoaded=typeof drum!=='undefined'&&drum.seqTracks>=1&&!(typeof fuseboxOwned!=='undefined'&&!fuseboxOwned);show(false);thumbNav();return r;};}
+  if(typeof startGame==='function'){const sg=window.startGame;window.startGame=function(){const r=sg.apply(this,arguments);readyAt=0;seqWasLoaded=typeof drum!=='undefined'&&drum.seqTracks>=1&&!(typeof fuseboxOwned!=='undefined'&&!fuseboxOwned);show(false);thumbNav();return r;};}
   tz.addEventListener('click',e=>{e.stopPropagation();
     if(score>=cost()&&typeof buyPartyNext==='function'){show(false);buyPartyNext();return;}
     tz.classList.remove('nope');void tz.offsetWidth;tz.classList.add('nope');setTimeout(()=>tz.classList.remove('nope'),500);

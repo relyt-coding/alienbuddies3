@@ -2,6 +2,11 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.231 - 2026-11-26 23:20
+- ALIEN PARTY costs five times more, so it's something to save up for instead of a buy you can afford the moment the Fusebox shows it.
+- The disco ball now drops in 3 seconds after the Fusebox cutscene (it used to wait 30 seconds).
+- The DRUMPAD and SEQUENCER tracker dots have a little more room between them.
+
 ## v0.2.230 - 2026-11-26 23:55
 - Planet Hop levels are back to their original design. The only change kept: long empty stretches get a stardust hop in the middle, so something happens about every other beat (not every beat).
 

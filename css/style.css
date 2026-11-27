@@ -1316,7 +1316,8 @@ body.desktop-mode .seq-snd-pill{padding:.2rem .5rem;gap:6px;}
 body:not(.desktop-mode) .btn-left,body:not(.desktop-mode) .btn-right{top:calc(50% + 10px);}
 
 /* v0.2.53 desktop trackers: a bit smaller (dots were too big once the window scaling kicked in) */
-body.desktop-mode .tier-dots{gap:calc(6px*var(--ds,1));margin:0 calc(8px*var(--ds,1));}
+/* v0.2.231: a little more air between the tracker dots (were too close) */
+body.desktop-mode .tier-dots{gap:calc(9px*var(--ds,1));margin:0 calc(10px*var(--ds,1));}
 body.desktop-mode .tier-dot{width:calc(10px*var(--ds,1));height:calc(10px*var(--ds,1));}
 body.desktop-mode .tier-spacer,body.desktop-mode .tier-mult{width:calc(50px*var(--ds,1));}
 body.desktop-mode .tier-mult{font-size:1rem !important;}

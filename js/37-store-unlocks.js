@@ -7,7 +7,8 @@
 //                    → Arrangement tab → Song tab. (These used to be skill-tree nodes.)
 // ══════════════════════════════════════════════
 const PARTY_LADDER=[
-  {style:'glow',  cost:1e6,  main:'ALIEN PARTY',        sub:'Adds the ALIEN PARTY button: your aliens glow and bounce to the beat · ×2 energy'},
+  // v0.2.231: x5 (was 1e6) - players could afford it the moment the Fusebox showed it, so the disco ball had no job
+  {style:'glow',  cost:5e6,  main:'ALIEN PARTY',        sub:'Adds the ALIEN PARTY button: your aliens glow and bounce to the beat · ×2 energy'},
   {style:'orbit', cost:5e7,  main:'DISCO ORBIT',      sub:'New party style: aliens spin in a ring around your score · ×1.5 energy'},
   {style:'conga', cost:5e8,  main:'CONGA LINE',       sub:'New party style: a figure-8 conga line, hopping on the beat · ×1.5 energy'},
   {style:'eq',    cost:5e9,  main:'EQ BARS',          sub:'New party style: aliens line up as a live EQ meter for your music · ×1.5 energy'},

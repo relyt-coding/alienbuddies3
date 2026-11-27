@@ -41,6 +41,7 @@
       if(busy()&&tries++<40){setTimeout(go,250);return;}   // a cutscene / hatch is still on: wait for it
       if(which==='vault'){if(typeof openVault==='function')openVault();return;}
       if(!desk&&typeof swipeNavGo==='function'){swipeNavGo(which==='fuse'?1:2,which==='fuse'?-1:1);return;}
+      const pv=$(which==='fuse'?'storeView':'bunkerView');if(pv&&!pv.classList.contains('sidebar-collapsed')){if(typeof updateCollapseBtn==='function')updateCollapseBtn(which==='fuse'?'shop':'bunker',false);return;}   // already open (the cutscene left it open)
       if(which==='fuse'){if(typeof openStore==='function')openStore();}else if(typeof openBunker==='function')openBunker();
       if(typeof repositionCollapseButtons==='function')setTimeout(repositionCollapseButtons,380);
     };

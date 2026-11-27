@@ -2,6 +2,10 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.221 - 2026-11-26 22:00
+- On computers, the Bunker and Fusebox tabs no longer flicker after their unlock cutscene: the panel just stays open.
+- The corner egg's energy cord now runs behind its price, so it never covers the number.
+
 ## v0.2.220 - 2026-11-26 21:50
 - The space bar no longer starts the Matching Game before you've hatched your first buddy and the Bunker has opened.
 

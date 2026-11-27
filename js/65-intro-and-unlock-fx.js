@@ -132,7 +132,9 @@
     const desk=isDesk(),st=stage(),cv=st.querySelector('canvas'),g=cv.getContext('2d');
     const prev={bc:null,sc:null};
     if(desk){const bv=document.getElementById('bunkerView'),sv=document.getElementById('storeView');prev.bc=bv.classList.contains('sidebar-collapsed');prev.sc=sv.classList.contains('sidebar-collapsed');
-      if(M.pages.length>1){[bv,sv].forEach(v=>{v.style.transition='none';v.classList.remove('sidebar-collapsed');});void bv.offsetWidth;}}
+      if(M.pages.length>1){[bv,sv].forEach(v=>{v.style.transition='none';v.classList.remove('sidebar-collapsed');});void bv.offsetWidth;
+        // v0.2.221: a panel this cutscene unlocks stays open afterwards, so its tab gets its open label now (while hidden), not after
+        if(typeof updateCollapseBtn==='function'){if(M===IMODES.navB||M===IMODES.nav)updateCollapseBtn('bunker',false);if(M===IMODES.navS||M===IMODES.nav)updateCollapseBtn('shop',false);}}}
     BC.add('intro-run');
     const G=geometry();
     const dpr=Math.min(2,window.devicePixelRatio||1);cv.width=Math.round(G.W*dpr);cv.height=Math.round(G.H*dpr);cv.style.width=G.W+'px';cv.style.height=G.H+'px';
@@ -187,8 +189,10 @@
     const bv=document.getElementById('bunkerView'),sv=document.getElementById('storeView');if(!bv||!sv||!I)return;
     // a new file always starts with both tucked away; a replay puts them back how they were
     const p=I.prev,all=!!I.opts.tuck;
-    if(all||p.sc){sv.classList.add('sidebar-collapsed');if(typeof updateCollapseBtn==='function')updateCollapseBtn('shop',true);}
-    if(all||p.bc){bv.classList.add('sidebar-collapsed');if(typeof updateCollapseBtn==='function')updateCollapseBtn('bunker',true);}
+    // v0.2.221: the panel a cutscene just unlocked stays open (it used to tuck away, then js/89 opened it again: the tab flickered)
+    const keepB=I.M===IMODES.navB||I.M===IMODES.nav,keepS=I.M===IMODES.navS||I.M===IMODES.nav;
+    if((all||p.sc)&&!keepS){sv.classList.add('sidebar-collapsed');if(typeof updateCollapseBtn==='function')updateCollapseBtn('shop',true);}
+    if((all||p.bc)&&!keepB){bv.classList.add('sidebar-collapsed');if(typeof updateCollapseBtn==='function')updateCollapseBtn('bunker',true);}
     if(typeof updatePartyBtnPosition==='function')updatePartyBtnPosition();
     setTimeout(()=>{try{if(typeof repositionCollapseButtons==='function')repositionCollapseButtons();}catch(e){}},360);
   }

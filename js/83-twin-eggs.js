@@ -191,6 +191,7 @@ body.phone-land #shopEgg{right:6px;bottom:4px;}
 .cornerEgg .pe-wire i{position:absolute;left:-2.5px;top:-2.5px;bottom:-2.5px;width:16.5px;border:2.5px solid #ffd23f;border-right:0;border-radius:6px 0 0 6px;box-shadow:-2px 0 6px -2px rgba(255,210,63,.8);}
 .cornerEgg.ready .pe-wire i{border-color:#00ff88;box-shadow:-2px 0 6px -2px rgba(0,255,136,.8);}
 .cornerEgg.land .pe-lamp,.cornerEgg.land .pe-wire{display:none;}
+.cornerEgg .pe-wire{z-index:0;}.cornerEgg .pe-tag{position:relative;z-index:2;background:#0a120d;}   /* v0.2.221: the cord runs under the price pill, never across the number */
 .cornerEgg.land{flex-direction:row;gap:4px;}
 .cornerEgg.land .pe-tag{margin-top:0;}
 body.desktop-mode.cockpit-open .cornerEgg,body.desktop-mode.stats-open .cornerEgg,body.desktop-mode.tree-open .cornerEgg{visibility:hidden;}

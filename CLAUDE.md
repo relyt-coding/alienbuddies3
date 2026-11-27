@@ -179,6 +179,8 @@ README.md covers the file layout, test mode and vocals in depth; this file is th
   mg_cockpit opens 4–5 (mgPhAccess / mgPhLockMsg). mgRefresh shows #planetHopBtn always, right after #matchingGameLock. Both buttons get SVG icons
   as `::before` data-URIs (css end; survives updateMatchingBtn's inline styles). Once the Cockpit is owned they move into it (unchanged).
 - v0.2.220: js/91 Space starts the matching game only when #matchingGameBtn is visible on screen, no nav-locked / buddy-hold, and totalAliens ≥ 1.
+- v0.2.221: js/65 nav / navB / navS cutscenes leave the panel they unlock OPEN (tuckSidebars skips it, its tab label is set when the cutscene opens it);
+  js/89 openNew skips panels that are already open. Corner egg `.pe-tag` sits above `.pe-wire` with a solid background.
 - Skill-tree descriptions: `gemsOnly` (js/20) strips any written "×N Alien Gems" and appends the node's REAL `gemMult`, so never hand-write gem amounts.
 
 ## Testing without a phone

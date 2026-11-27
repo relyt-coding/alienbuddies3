@@ -21,6 +21,8 @@ let matchMatched=[];
 let matchLocked=false;
 let matchPairs=0;
 let matchCurrentLevel=1;
+let matchTrial=false,matchTrialT0=0,matchTrialSecs=0;   // v0.2.237: time-trial replay (js/93)
+window.__matchTrialInfo=()=>({on:matchTrial,t0:matchTrialT0,lvl:matchCurrentLevel,secs:matchTrial&&matchTrialT0?(performance.now()-matchTrialT0)/1000:0});
 // Reward multiplier per level: intro=2, lvl1=2, lvl2=2, lvl3=3, lvl4=5, lvl5+=continues scaling
 function matchRewardForLevel(lvl){
   if(lvl<=2)return 2;
@@ -80,6 +82,7 @@ function updateMatchingBtn(){
 }
 
 function openMatchingGame(){
+  matchTrial=false;
   const nextLvl=matchLevelsCompleted+1;
   if(nextLvl>25){showToast('All 26 levels complete!');return;}
   const needed=aliensNeededForLevel(nextLvl);
@@ -108,6 +111,23 @@ function openMatchingGame(){
     buildMatchGrid();
   }
 }
+
+// v0.2.237: open one specific level (the level select's time trials, js/93)
+window.openMatchingLevel=function(lvl,trial){
+  const modal=document.getElementById('matchingModal');
+  if(!modal)return;
+  matchTrial=!!trial;matchTrialT0=0;matchTrialSecs=0;
+  matchSavedState=null;matchIntroInfoStage=false;
+  modal.style.display='flex';
+  document.getElementById('matchTitle').textContent=matchTrial?'TIME TRIAL':'MATCHING GAME';
+  document.getElementById('matchVictory').style.display='none';
+  initMatchStars();
+  matchCurrentLevel=lvl;matchTotalPairs=matchPairsForLevel(lvl);
+  const lbl='LEVEL '+(matchCurrentLevel+1);
+  document.getElementById('matchSubtitle').textContent=lbl+' · FIND '+matchTotalPairs+' PAIRS ('+matchTotalPairs*2+' CARDS)'+(matchTrial?' · TIME TRIAL':'');
+  document.getElementById('matchVictoryReward').textContent=matchTrial?'':'PERMANENT ×'+matchRewardForLevel(matchCurrentLevel)+' MULTIPLIER EARNED';
+  buildMatchGrid();
+};
 
 function buildLevel0Grid(){
   matchIntroInfoStage=true;
@@ -312,6 +332,7 @@ function onMatchCardClick(idx){
   if(matchWrongPending)matchSettleWrong();
   if(matchLocked)return;
   if(matchFlipped[idx]||matchMatched[idx])return;
+  if(matchTrial&&!matchTrialT0)matchTrialT0=performance.now();   // the clock starts on the first flip
   // cards currently face-up and not yet matched
   const up=[];
   for(let i=0;i<matchFlipped.length;i++)if(matchFlipped[i]&&!matchMatched[i])up.push(i);
@@ -334,7 +355,7 @@ function onMatchCardClick(idx){
         document.getElementById('matchPairsDisplay').textContent=matchPairs+' / '+matchTotalPairs+' PAIRS';
         document.getElementById('matchProgressBar').style.width=(matchPairs/matchTotalPairs*100)+'%';
         matchLocked=false;
-        if(matchPairs>=matchTotalPairs)setTimeout(showMatchVictory,400);
+        if(matchPairs>=matchTotalPairs){if(matchTrial&&matchTrialT0)matchTrialSecs=(performance.now()-matchTrialT0)/1000;setTimeout(showMatchVictory,400);}
       },260);
     } else {
       matchCardEls[a].classList.add('wrong');
@@ -345,14 +366,29 @@ function onMatchCardClick(idx){
 }
 
 function showMatchVictory(){
-  const rewardMult=matchRewardForLevel(matchCurrentLevel);
-  document.getElementById('matchVictoryReward').textContent='PERMANENT ×'+rewardMult+' MULTIPLIER EARNED!';
+  const el=document.getElementById('matchVictoryReward');
+  if(matchTrial){
+    const r=typeof matchTrialResult==='function'?matchTrialResult(matchCurrentLevel,matchTrialSecs):null;
+    const par=typeof matchPar==='function'?matchPar(matchCurrentLevel).toFixed(1)+'s':'';
+    el.innerHTML=(r?r.html:'TIME '+matchTrialSecs.toFixed(1)+'s')+'<br><span style="font-size:.78em;opacity:.75">'+matchTrialSecs.toFixed(1)+'s · PAR '+par+'</span>';
+  }else{
+    const rewardMult=matchRewardForLevel(matchCurrentLevel);
+    el.textContent='PERMANENT ×'+rewardMult+' MULTIPLIER EARNED!';
+  }
   document.getElementById('matchVictory').style.display='flex';
   matchSavedState=null; // clear saved progress on win
   playMatchFanfare();
 }
 
 document.getElementById('matchVictoryClose')&&document.getElementById('matchVictoryClose').addEventListener('click',()=>{
+  // v0.2.237: a time trial only saves the crystal; it never re-awards the level's multiplier
+  if(matchTrial){
+    matchTrial=false;matchTrialT0=0;
+    document.getElementById('matchingModal').style.display='none';
+    updateMatchingBtn();renderUI();autoSave();
+    showToast('Crystal saved! Beat your time for a better one.');
+    return;
+  }
   // Apply reward
   matchingMultiplier*=matchRewardForLevel(matchCurrentLevel);
   matchLevelsCompleted=matchCurrentLevel;
@@ -365,6 +401,8 @@ document.getElementById('matchVictoryClose')&&document.getElementById('matchVict
 });
 
 document.getElementById('matchCloseBtn')&&document.getElementById('matchCloseBtn').addEventListener('click',()=>{
+  // v0.2.237: leaving a time trial just closes it (no mid-game save, no progress change)
+  if(matchTrial){matchTrial=false;matchTrialT0=0;document.getElementById('matchingModal').style.display='none';return;}
   // Save mid-game progress
   if(matchIntroInfoStage){
     matchSavedState={level:0,totalPairs:matchPairsForLevel(0),pairs:matchPairsForLevel(0),infoStage:true,cards:[]};

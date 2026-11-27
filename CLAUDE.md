@@ -1,8 +1,8 @@
 # Alien Buddies: notes for building
 
 <!-- ship:auto:start -->
-- Version: 0.2.236 · shipped 2026-11-27
-- Last change: Skill tree prices: Minigame Cockpit is 500 gems (was 3,000), Planet…
+- Version: 0.2.237 · shipped 2026-11-27
+- Last change: New in the skill tree: LEVEL SELECT (400 gems) puts a SELECT third…
 <!-- ship:auto:end -->
 
 **In flight / next:** nothing half-finished right now.

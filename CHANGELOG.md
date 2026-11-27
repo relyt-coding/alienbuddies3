@@ -2,6 +2,11 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.237 - 2026-11-27 04:10
+- New in the skill tree: LEVEL SELECT (400 gems) puts a SELECT third beside the MATCHING GAME. It lists the levels you have cleared, plus one card showing what still stands in the way of the next level.
+- Replay any cleared level as a TIME TRIAL: the clock starts on your first flip. Beat the par time and you earn a crystal — the faster you are, the better the crystal.
+- Crystals boost your Alien Gems and your energy for good, and they add up as you collect more.
+
 ## v0.2.236 - 2026-11-27 02:40
 - Skill tree prices: Minigame Cockpit is 500 gems (was 3,000), Planet Mantra 1,000 (was 3,000) and Planet Hyphae 2,500 (was 5,000).
 - Skill tree buys are a normal press again — no more holding the button down.

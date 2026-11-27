@@ -59,7 +59,7 @@ function autoSave(){
     shop:{seqMultLevel:shop.seqMultLevel,multLevel:shop.multLevel,alienBoostLevel:shop.alienBoostLevel,multiClickLevel:shop.multiClickLevel,seqMultiClickLevel:shop.seqMultiClickLevel,seqMultiClickUnlocked:shop.seqMultiClickUnlocked,dismissed:shop.dismissed||[],alienBoostUnlocked:shop.alienBoostUnlocked,multiClickUnlocked:shop.multiClickUnlocked,drumDotsUnlocked:shop.drumDotsUnlocked,seqDotsUnlocked:shop.seqDotsUnlocked,seqStepsLevel:shop.seqStepsLevel||0,partyLevel:shop.partyLevel||0,partySeen:!!shop.partySeen,seqFeat:shop.seqFeat||0,keysLevel:shop.keysLevel||0,keysSeen:!!shop.keysSeen,keysOn:!!shop.keysOn,keysVoice:shop.keysVoice||0,keysOct:shop.keysOct||0,keysV2:true},
     totalAliens,alienData,
     drum:{pads:drum.pads,extraSounds:drum.extraSounds,seqTracks:drum.seqTracks},
-    matchLevelsCompleted,matchingMultiplier,matchSavedState,wormMultiplier,wormProgress,phMultiplier,phProgress,
+    matchLevelsCompleted,matchingMultiplier,matchSavedState,matchCrystals,wormMultiplier,wormProgress,phMultiplier,phProgress,
     mgBought:(typeof mgBought!=='undefined')?mgBought:undefined,bdProgress:(typeof bdProgress!=='undefined')?bdProgress:undefined,tipsOwned,tipsSet,tipsMult,vaultSeen,vaultOwned,drumTrackerActive,seqTrackerActive,shopOpenCount,hasSeenSeqHint,
     savedPatterns,savedArrangements,songSlots,
     padSounds:[...padSounds],
@@ -100,6 +100,7 @@ let totalAliens=0,viewingBunker=0;
 let matchingLevel=0; // highest level unlocked (0=none, 1=level1 available, etc)
 let matchingMultiplier=1; // permanent multiplier from wins
 let matchLevelsCompleted=-1; // -1 = level 0 not yet seen
+let matchCrystals={};   // v0.2.237: best time-trial crystal per matching level {level:{t:0-3,s:seconds}}
 let tipsOwned=0; // number of tips purchased
 let tipsSet=[];  // which tips (0-based) are bought: they can be bought in any order
 let tipsMult=1; // permanent ×1.5 per tip
@@ -160,8 +161,8 @@ function drumMultiplier(){
 // Shared boosts (aliens, drum upgrades, matching game, tips) apply to BOTH earning sources.
 // (The skill tree only boosts Alien Gems, not points.)
 function sharedMultiplier(){
-  // (Planet Hop / Worm Whack / Beat Defense boost Alien Gems instead; only the Matching Game gives point multipliers)
-  return alienMultiplier()*drumMultiplier()*matchingMultiplier*tipsMult*vaultMult*shopLadderMult();
+  // (Planet Hop / Worm Whack / Beat Defense boost Alien Gems instead; the Matching Game and its crystals give point multipliers)
+  return alienMultiplier()*drumMultiplier()*matchingMultiplier*tipsMult*vaultMult*shopLadderMult()*(typeof crystalMult==='function'?crystalMult():1);
 }
 // v0.2.175: every ALIEN PARTY level (unlock + each style) and the BPM / 32 STEPS / 64 STEPS upgrades are each ×1.5
 // v0.2.208: the ALIEN PARTY itself is ×2 energy; each party style after it adds ×1.5 on top
@@ -248,6 +249,7 @@ function loadFromSave(data){
   if(typeof SKILL_TREE_NODES!=='undefined')SKILL_TREE_NODES.forEach(n=>{if(n.soundUnlock&&unlockedSkills[n.id]&&typeof unlockPlanetSound==='function')unlockPlanetSound(n.soundUnlock);});
   if(matchLevelsCompleted>=0){shownHints.matchingIntro=true;shownHints.matchingGame=true;}
   matchingMultiplier=data.matchingMultiplier||1;
+  matchCrystals=(data.matchCrystals&&typeof data.matchCrystals==='object')?data.matchCrystals:{};
   if(typeof wormMultiplier!=='undefined'){wormMultiplier=data.wormMultiplier||1;wormProgress=(data.wormProgress&&data.wormProgress.best)?data.wormProgress:{best:{}};}
   if(typeof phMultiplier!=='undefined'){phMultiplier=data.phMultiplier||1;phProgress=(data.phProgress&&data.phProgress.best)?data.phProgress:{best:{}};}
   matchSavedState=data.matchSavedState||null;

@@ -9,23 +9,26 @@
 //  pattern the bot can't survive would be caught by the tests.
 // ══════════════════════════════════════════════
 const PH_G=8,PH_V0=4,PH_DT=1/240;
-const PH_NAMES=['First Steps on Luna','Under the Crater','Moonbeam Bounce','Lunar Leap','Comet Over Luna',
-  'Glacia Glide','Frostbite Funk','Ice Spire Hop','Crystal Grotto','Frozen Comet Escape',
-  'Magmora Dash','Lava Lamp Groove','Ember Leap','Volcano Two-Step','Supernova Sprint'];
-const PH_STYLES=['house','reggaeton','afro','twostep','breakbeat','synthwave','funk','afro','twostep','halftime','breakbeat','reggaeton','dnb','twostep','dnb'];
+const PH_NAMES=['First Steps on Luna','Under the Crater','Moonbeam Bounce',
+  'Glacia Glide','Frostbite Funk','Ice Spire Hop','Crystal Grotto',
+  'Magmora Dash','Lava Lamp Groove','Ember Leap','Volcano Two-Step'];
+const PH_STYLES=['house','reggaeton','afro','synthwave','funk','afro','twostep','breakbeat','reggaeton','dnb','twostep'];
 const PH_PLANETS=[{name:'LUNA',ground:['#9a9aa8','#5b5b68'],pit:'#07070c',spike:'#c9ccd6',block:'#7c7c8c',sky:['#05061a','#1a1240'],glow:'#a0a8ff'},
                   {name:'GLACIA',ground:['#bfe6ff','#5b8fb8'],pit:'#06142a',spike:'#e8fbff',block:'#8cc4e8',sky:['#020c1c','#0b3a52'],glow:'#7fe8ff'},
                   {name:'MAGMORA',ground:['#6a3a2a','#2a1410'],pit:'#ff5a1a',spike:'#ffb066',block:'#4a2a20',sky:['#120404','#3a0a14'],glow:'#ff7a33'}];
 
 // the journey: each surface level ends by diving into a crater (the next level is underground),
-// each cave level ends at a cave mouth back out into daylight, and each boss ends at a warp portal to the next world
-const PH_SCENE=[0,1,0,1,0, 0,1,0,1,0, 0,1,0,1,0];
-function phFinish(L){return L%5===0?'portal':PH_SCENE[L-1]?'exit':'dive';}
+// each cave level ends at a cave mouth back out into daylight, and the last level of each world ends at a warp portal.
+// v0.2.238: 11 levels — Luna 1-3, Glacia 4-7, Magmora 8-11 (3 + 4 + 4). World 1 has no boss; worlds 2 and 3 do.
+const PH_SCENE=[0,1,0, 0,1,0,0, 0,1,0,0];
+const PH_BPM=[80,94,106, 112,120,128,136, 142,148,153,158];
+function phFinish(L){return (L===3||L===7||L===11)?'portal':PH_SCENE[L-1]?'exit':'dive';}
+function phBoss(L){return L===7||L===11;}
 function phLevel(L){
-  L=Math.max(1,Math.min(15,L));
+  L=Math.max(1,Math.min(11,L));
   return{lvl:L,seed:500+L*13,name:PH_NAMES[L-1],style:PH_STYLES[L-1],
-    bpm:L===1?80:Math.round(88+(L-1)*4.3),bodyBars:phCourseBars(L),boss:L%5===0,planet:L<=5?0:L<=10?1:2,cave:!!PH_SCENE[L-1],finish:phFinish(L),
-    reward:Math.round((1.6+(L-1)*.1)*(L%5===0?1.25:1)*100)/100,
+    bpm:PH_BPM[L-1],bodyBars:phCourseBars(L),boss:phBoss(L),planet:L<=3?0:L<=7?1:2,cave:!!PH_SCENE[L-1],finish:phFinish(L),
+    reward:Math.round((1.6+(L-1)*.1)*(phBoss(L)?1.25:1)*100)/100,
     late:L===3?{cowbell:[.75,.6]}:null};   // level 3: the cowbell waits for the last quarter of the song, and sits a little lower
 }
 
@@ -110,28 +113,24 @@ function phTokens(){
     Lg:{len:8,o:[Z(4),PIT(.3,1.7),PIT(2.3,3.7),PIT(4.3,5.7)],a:[[0,'j'],[2,'j'],[4,'j']]},   // moon leaps over craters
   };
 }
-// where each idea debuts (first two of each get press markers)
-const PH_DEBUT={s:[1,''],p:[1,''],st:[1,''],k:[2,''],rE:[3,''],P:[3,''],
-  Bf:[6,''],B2:[6,''],kk:[5,''],Lr:[4,'LOW GRAVITY'],Lg:[4,''],
-  B1:[7,''],f:[8,''],s3:[9,''],Pm:[9,''],d:[11,''],
-  rO:[12,''],so:[12,''],dk:[5,''],D2:[3,''],DD:[4,''],i:[7,''],i2:[7,''],Bb:[7,'']};   // only low gravity gets a sign; every new idea still gets glowing press markers
-// the 15 courses (| marks the song's 8-bar sections; boss levels end with an 8-bar comet chase)
+// where each idea debuts (only low gravity gets a sign; the marker hints are off)
+const PH_DEBUT={s:[1,''],p:[1,''],st:[1,''],k:[2,''],rE:[1,''],P:[2,''],
+  Bf:[4,''],B2:[4,''],kk:[6,''],Lr:[3,'LOW GRAVITY'],Lg:[3,''],
+  B1:[5,''],f:[6,''],s3:[6,''],Pm:[6,''],d:[8,''],
+  rO:[9,''],so:[9,''],dk:[10,''],D2:[3,''],DD:[3,''],i:[5,''],i2:[5,''],Bb:[5,'']};
+// the 11 courses (| marks the song's 8-bar sections; the two boss levels end with an 8-bar meteor chase)
 const PH_COURSE=[
   /* 1 First Steps   */ 'rA rE s rE | C p st',
-  /* 2 Crater Skipper*/ 'rE k s2 k | C p2 k rE',
-  /* 3 Moonbeam      */ 'rA rE rA P rF P D2 rE | C P k D2 p2 rF D2 rA',
-  /* 4 Lunar Leap    */ 'rA s Lr D2 p2 L | C k Lg DD P L | rE D2 P rA',
-  /* 5 Comet (boss)  */ 'rA s2 dk P Lg D2 rE | kk rF kk P C DD Lg | s2 p2 s2 P s s2 Lg',
-  /* 6 Glacia Glide  */ 'rA s Bf rF p2 B2 | C D2 B2 k Lg rA',
-  /* 7 Frostbite Funk*/ 'rB i2 B2 rD P B1 | Bb C k i B1 D2 Lg | rE P i2 rA',
-  /* 8 Ice Spire Hop */ 'rA k f DD f s2 B2 | C f kk f Bb P f | D2 f p2 rA',
-  /* 9 Aurora Drift  */ 'rB s2 i2 rF s3 P Lg | Pm rE Pm i C f B1 | Bb s3 kk Pm i2 DD s3 rA',
-  /*10 Frozen Comet  */ 'rA s3 f Pm B1 dk rE | s3 P Lg C DD B2 | s3 p2 Pm D2 s3 P B1',
-  /*11 Magmora Dash  */ 'rA rE d rD d s3 B2 | C d Pm d B1 f d | s3 kk d rA',
-  /*12 Lava Lamp     */ 'rB rO so rD so s3 Lg | so d Pm so C f B1 | so s3 d so L so rA',
-  /*13 Ember Leap    */ 'rA rE dk rD dk s3 B2 | kk dk so d C Pm B1 | dk s3 f dk Lg d rA',
-  /*14 Volcano 2-Step*/ 'rB so d Pm B1 dk rE | so s3 f d C kk B2 | so d dk s3 B1 so rA',
-  /*15 Supernova     */ 'rA s3 d so B1 dk rE | Pm so f d Lg kk rD | C s3 so dk B2 d rE | s3 so d Pm s3 so B1'];
+  /* 2 Under the Crater*/ 'rE k s2 k | C p2 k rE',
+  /* 3 Moonbeam Bounce*/ 'rA rE rA P rF P D2 rE | C P k Lr D2 Lg rF D2 rA',
+  /* 4 Glacia Glide  */ 'rA s Bf rF p2 B2 | C D2 B2 k Lg rA',
+  /* 5 Frostbite Funk*/ 'rB i2 B2 rD P B1 | Bb C k i B1 D2 Lg | rE P i2 rA',
+  /* 6 Ice Spire Hop */ 'rA k f DD f s3 B2 | C f kk s3 Bb P f | D2 f p2 s3 rA',
+  /* 7 Crystal Grotto*/ 'rB i2 s3 Pm Lg | C f B1 Bb s3 | s3 p2 Pm D2 s3 P B1',
+  /* 8 Magmora Dash  */ 'rA rE d rD d s3 B2 | C d Pm d B1 f d | s3 kk d rA',
+  /* 9 Lava Lamp     */ 'rB rO so rD so s3 Lg | so d Pm so C f B1 | so s3 d so L so rA',
+  /*10 Ember Leap    */ 'rA rE dk rD dk s3 B2 | kk dk so d C Pm B1 | dk s3 f dk Lg d rA',
+  /*11 Volcano 2-Step*/ 'rB so d Pm B1 dk rE | so s3 f d C kk B2 | so d dk s3 B1 so rA'];
 function phCourseBars(L){const T=phTokens();return PH_COURSE[L-1].split(/\s+/).filter(x=>x&&x!=='|').reduce((n,t)=>n+T[t].len/4,0);}
 
 // ── build a level: song + objects + perfect actions + stardust ──
@@ -202,7 +201,7 @@ function phBuild(L,songIn){
 // the tunes the crystal bells play (scale steps; 7 = an octave up): each level has its own, and a level with two bell
 // sections plays a second phrase that answers the first
 const PH_BELL_TUNE=[0,2,4,7,4,2,4];
-const PH_BELL_TUNES={7:[[0,2,4,7,4,2,4]],8:[[4,2,0,2,4,5,7],[7,5,4,2,1,2,0]],9:[[0,4,7,9,7,4,5],[9,7,5,4,2,4,0]],10:[[7,4,5,2,4,0,2]]};
+const PH_BELL_TUNES={5:[[0,2,4,7,4,2,4]],6:[[4,2,0,2,4,5,7],[7,5,4,2,1,2,0]],7:[[0,4,7,9,7,4,5]]};
 function phDegMidi(song,d){const sc=WW_SCALES[song.scaleName]||WW_SCALES.minor;return song.root+sc[((d%7)+7)%7]+12*Math.floor(d/7);}
 function phDress(lv,bot,custom){
   const P=lv.P,song=lv.song,beat=60/P.bpm;

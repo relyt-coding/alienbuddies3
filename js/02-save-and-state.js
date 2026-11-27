@@ -251,7 +251,9 @@ function loadFromSave(data){
   matchingMultiplier=data.matchingMultiplier||1;
   matchCrystals=(data.matchCrystals&&typeof data.matchCrystals==='object')?data.matchCrystals:{};
   if(typeof wormMultiplier!=='undefined'){wormMultiplier=data.wormMultiplier||1;wormProgress=(data.wormProgress&&data.wormProgress.best)?data.wormProgress:{best:{}};}
-  if(typeof phMultiplier!=='undefined'){phMultiplier=data.phMultiplier||1;phProgress=(data.phProgress&&data.phProgress.best)?data.phProgress:{best:{}};}
+  if(typeof phMultiplier!=='undefined'){phMultiplier=data.phMultiplier||1;
+    // v0.2.238: the 11-level restructure wipes old Planet Hop bests once (everything else is kept)
+    phProgress=(data.phProgress&&data.phProgress.best&&data.phProgress.v===2)?data.phProgress:{best:{},v:2};}
   matchSavedState=data.matchSavedState||null;
   if(typeof mgLoad==='function')mgLoad(data);   // minigame unlocks + v0.2.111 migration
   tipsOwned=data.tipsOwned||0;

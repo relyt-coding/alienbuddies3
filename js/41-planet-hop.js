@@ -7,7 +7,7 @@
 //  Levels 1–5 Luna · 6–10 Glacia (ice) · 11–15 Magmora (lava). Levels 5 / 10 / 15 end in a comet chase.
 // ══════════════════════════════════════════════
 let phMultiplier=1;               // (old saves only: Planet Hop now boosts Alien Gems, see 44-minigame-hub.js)
-let phProgress={best:{}};         // best[L] = {stars, dust, pct, cleared}
+let phProgress={best:{},v:2};         // best[L] = {stars, dust, pct, cleared}
 function phLevelOpen(L){return (typeof TEST_MODE!=='undefined'&&TEST_MODE)||((typeof mgPhAccess!=='function'||mgPhAccess(L))&&(L===1||!!(phProgress.best[L-1]||{}).cleared));}
 // v0.2.227: level 1 is worth +1.5× Alien Gems as soon as you clear it (a big first reward); the rest +0.5×, +1× with all stardust
 function phGemVal(b,L){return b&&b.cleared?(+L===1?1.5:((b.dust||0)>=.999?1:.5)):0;}
@@ -47,7 +47,7 @@ function phGemVal(b,L){return b&&b.cleared?(+L===1?1.5:((b.dust||0)>=.999?1:.5))
     if(typeof seqPlaying!=='undefined'&&seqPlaying&&typeof stopSeq==='function')stopSeq();
     if(typeof partyMode!=='undefined'&&partyMode&&typeof stopParty==='function')stopParty();
     ov.classList.add('open');document.body.classList.add('ww-open');
-    let l=1;for(let i=1;i<=15;i++)if(phLevelOpen(i))l=i;sel=l;showSelect();
+    let l=1;for(let i=1;i<=11;i++)if(phLevelOpen(i))l=i;sel=l;showSelect();
     // v0.2.225: the very first time, straight into level 1 (no level select yet)
     if(typeof phProgress!=='undefined'&&!phProgress.seen&&!Object.keys(phProgress.best||{}).length&&!(typeof TEST_MODE!=='undefined'&&TEST_MODE)){phProgress.seen=1;sel=1;start(1);}
   }
@@ -58,7 +58,7 @@ function phGemVal(b,L){return b&&b.cleared?(+L===1?1.5:((b.dust||0)>=.999?1:.5))
   $('phSync').addEventListener('click',()=>{if(typeof mgOpenSync==='function')mgOpenSync(()=>{});});
   $('phQuit').addEventListener('click',()=>{if(R&&R.state!=='done'){stop();showSelect();}else close();});
 
-  const NEWS={1:'Jump on the beat — follow the glowing markers · then dive into the crater!',2:'Underground! NEW: rocks — land on top, then find the way out',3:'NEW: double jump — practise on flat ground, then clear wide pits',4:'NEW: low gravity on the moon — floaty two-beat jumps',5:'BOSS: a comet chases you round Luna · NEW: climbing rocks',6:'NEW BUTTON: BOUNCE — press it as you land on each glowing pad',7:'NEW: fast bounce chains · falling icicles · crystal bells you ring with BOUNCE',8:'NEW: floating ice platforms',9:'NEW: spike runs — jump on every beat',10:'BOSS: the frozen comet',11:'NEW: triple spikes — jump, then double jump on the "and"',12:'NEW: off-beat spikes — jump on the "and"',13:'NEW: tall rocks — double jump up onto them',14:'REMIX: everything you know, at speed',15:'FINAL BOSS: the supernova comet'};
+  const NEWS={1:'Jump on the beat — follow the glowing markers · then dive into the crater!',2:'Underground! NEW: rocks — land on top, then find the way out',3:'NEW: double jump and low gravity — practise, then fly over the craters',4:'NEW BUTTON: BOUNCE — press it as you land on each glowing pad',5:'NEW: falling icicles · crystal bells you ring with BOUNCE',6:'NEW: floating ice platforms · spike runs — jump on every beat',7:'BOSS: a frozen comet chases you round Glacia — the portal waits at the end',8:'NEW: triple spikes — jump, then double jump on the "and"',9:'NEW: off-beat spikes and low gravity',10:'NEW: tall rocks — double jump up onto them',11:'FINAL BOSS: the volcano itself — survive the chase and reach the portal'};
   let tab='lv';const PH_DIFF_L={easy:3,normal:8,hard:13};
   const mineOpts={id:'phMine',note:'obstacles land on your beat',playStyle:'border-color:#7fe8ff;color:#7fe8ff;background:#071420',onPlay:song=>{const d=Object.keys(MG_DIFFS).find(k=>song.P.custom.endsWith('|'+k))||'normal';song.P.planet=MG_DIFFS[d].planet;start({song,L:PH_DIFF_L[d]});}};
   function showTab(t){tab=t;$('phTabLv').classList.toggle('sel',t==='lv');$('phTabMine').classList.toggle('sel',t==='mine');$('phLvPane').style.display=t==='lv'?'':'none';$('phMinePane').style.display=t==='mine'?'':'none';
@@ -72,12 +72,12 @@ function phGemVal(b,L){return b&&b.cleared?(+L===1?1.5:((b.dust||0)>=.999?1:.5))
     const stars=Object.values(phProgress.best).reduce((a,b)=>a+(b.stars||0),0);
     const gb=Object.entries(phProgress.best).reduce((a,[k,b])=>a+phGemVal(b,k),0);
     $('phBonus').innerHTML=gb>0?`Planet Hop gem bonus: <b>+${gb}×</b> Alien Gems · ${stars} ★`:'';$('phBonus').style.display=gb>0?'':'none';
-    let top=0;for(let L=1;L<=15;L++)if(typeof mgPhAccess!=='function'||mgPhAccess(L))top=L;
-    const shown=Math.min(15,Math.max(5,Math.ceil(top/5)*5));
+    let top=0;for(let L=1;L<=11;L++)if(typeof mgPhAccess!=='function'||mgPhAccess(L))top=L;
+    const shown=top<=3?3:top<=7?7:11;
     const gr=$('phGrid');gr.innerHTML='';
     for(let L=1;L<=shown;L++){
       const b=document.createElement('button');b.className='ww-tile';const best=phProgress.best[L]||{},op=phLevelOpen(L);
-      if(!op)b.classList.add('locked');if(L===sel&&op)b.classList.add('sel');if(L%5===0)b.classList.add('boss');
+      if(!op)b.classList.add('locked');if(L===sel&&op)b.classList.add('sel');if(phBoss(L))b.classList.add('boss');
       b.style.borderColor=L===sel&&op?'':PH_PLANETS[phLevel(L).planet].glow+'55';
       if(op)b.title=L+'. '+phLevel(L).name;
       b.innerHTML=`<span class="n">${op?L:'🔒'}</span><span class="st">${best.cleared?'★'.repeat(best.stars||1)+'<i>'+'★'.repeat(3-(best.stars||1))+'</i>':best.pct?Math.round(best.pct*100)+'%':'<i>★★★</i>'}</span>`;
@@ -329,20 +329,34 @@ function phGemVal(b,L){return b&&b.cleared?(+L===1?1.5:((b.dust||0)>=.999?1:.5))
     if(!R)return;R.state='done';phLoopsOff();
     const L=R.L,P=R.lv.P;
     $('phResInner').innerHTML=`
-      <div class="ww-big win">${P.boss?'COMET ESCAPED!':'LEVEL CLEAR!'}</div>
+      <div class="ww-big win">${P.boss?'BOSS CLEARED!':'LEVEL CLEAR!'}</div>
       <div class="ww-d-name">${R.custom?P.name+' · '+P.diff:L+'. '+P.name}</div>
       <div class="ww-stars">${[1,2,3].map(k=>`<span class="${k<=stars?'on':''}">★</span>`).join('')}</div>
       <div class="ww-res-acc">${Math.round(dust*100)}%<small>stardust collected (60% ★★ · 90% ★★★)</small></div>
       <div class="ww-res-grid"><div><b>${R.got.size} / ${R.lv.dust.length}</b><small>STARDUST</small></div><div><b>${R.attempt}</b><small>ATTEMPTS</small></div>
 </div>
-      ${R.gemGain>0?`<div class="ww-reward">💎 +${R.gemGain}× Alien Gems forever!${first&&L<15&&phLevelOpen(L+1)?' · Level '+(L+1)+' unlocked':''}</div>`:first&&L<15&&!phLevelOpen(L+1)?`<div class="ww-reward">🔒 Next: ${mgPhLockMsg(L+1)}</div>`:''}
-      <div class="ww-res-btns"><button class="ww-btn" id="phRetry">RETRY</button>${!R.custom&&L<15?'<button class="ww-btn ww-play" id="phNext">NEXT LEVEL</button>':''}<button class="ww-btn" id="phLevels">LEVELS</button></div>`;
+      ${R.gemGain>0?`<div class="ww-reward">💎 +${R.gemGain}× Alien Gems forever!${first&&L<11&&phLevelOpen(L+1)?' · Level '+(L+1)+' unlocked':''}</div>`:first&&L<11&&!phLevelOpen(L+1)?`<div class="ww-reward">🔒 Next: ${mgPhLockMsg(L+1)}</div>`:''}
+      <div class="ww-res-btns"><button class="ww-btn" id="phRetry">RETRY</button>${!R.custom&&L<11?(phLevelOpen(L+1)?'<button class="ww-btn ww-play" id="phNext">NEXT LEVEL</button>':'<button class="ww-btn ww-play" id="phNext">FIND THE NEXT WORLD</button>'):''}<button class="ww-btn" id="phLevels">LEVELS</button></div>`;
     $('phResults').classList.add('open');
     const again=R.custom;$('phRetry').addEventListener('click',()=>start(again||L));
-    const nx=$('phNext');if(nx)nx.addEventListener('click',()=>{sel=L+1;start(L+1);});
-    $('phLevels').addEventListener('click',()=>{if(!again)sel=L<15?L+1:L;stop();showSelect();});
+    const nx=$('phNext');if(nx)nx.addEventListener('click',()=>{if(!phLevelOpen(L+1)){findNextWorld();return;}sel=L+1;start(L+1);});
+    $('phLevels').addEventListener('click',()=>{if(!again)sel=L<11?L+1:L;stop();showSelect();});
+  }
+  // v0.2.238: the last level of a world points at the skill tree instead of starting a locked level
+  function findNextWorld(){
+    let o=document.getElementById('phWorldHint');
+    if(!o){
+      o=document.createElement('div');o.id='phWorldHint';
+      o.innerHTML='<div class="pwh-box"><div class="pwh-kicker">PLANET HOP</div><div class="pwh-big">THE NEXT WORLD IS OUT THERE</div><div class="pwh-sub">Explore the Galaxies in the skill tree to find more planets to hop on.</div><div class="pwh-btns"><button class="ww-btn ww-play" id="pwhGo">OPEN THE GALAXY MAP</button><button class="ww-btn" id="pwhStay">STAY HERE</button></div></div>';
+      document.body.appendChild(o);
+      o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open');});
+      document.getElementById('pwhStay').addEventListener('click',()=>o.classList.remove('open'));
+      document.getElementById('pwhGo').addEventListener('click',()=>{o.classList.remove('open');try{if(typeof closePlanetHop==='function')closePlanetHop();}catch(e){}if(typeof openSkillTree==='function')openSkillTree();else if(typeof showToast==='function')showToast('Explore the Galaxies in the skill tree finds the next world.');});
+    }
+    o.classList.add('open');
   }
 
+  window.findNextWorld=findNextWorld;
   // ── effects ──
   function burst(s,h,col,n,spd){for(let k=0;k<n;k++){const a=Math.random()*Math.PI*2,v=(1.2+Math.random()*3)*(spd||1);R.fx.push({s,h,vs:Math.cos(a)*v*.5,vh:Math.sin(a)*v,life:1,col,z:2+Math.random()*3});}}
 
@@ -923,15 +937,7 @@ function phGemVal(b,L){return b&&b.cleared?(+L===1?1.5:((b.dust||0)>=.999?1:.5))
     lv.dust.forEach((d,i)=>{if(!d.bell)return;if(d.s<s0-1||d.s>s1+1)return;drawBell(d,R.got.has(i),t,pulse,S);});
     lv.dust.forEach((d,i)=>{if(d.bell||R.got.has(i)||d.s<s0||d.s>s1)return;const [x,y]=P(d.s,d.h),z=BP*.06*(1+.3*Math.sin(t*6+i));
       g.fillStyle='#ffe680';g.shadowColor='#ffd23a';g.shadowBlur=8;g.beginPath();for(let k=0;k<8;k++){const r=k%2?z*.4:z,a=k/8*Math.PI*2+t;g.lineTo(x+Math.cos(a)*r,y+Math.sin(a)*r);}g.closePath();g.fill();g.shadowBlur=0;});
-    // comet chasing you
-    if(lv.bossS<Infinity&&S.s>lv.bossS-3){
-      const k=Math.min(1,(S.s-(lv.bossS-3))/3),won=R.won?Math.min(1,(performance.now()-R.won)/900):0;
-      const cx=AX-BP*(3.4-1.2*k)-won*BP*0,cy=GY-UP*(2.8-won*2.8)+Math.sin(t*3)*UP*.15,cr=BP*.32;
-      if(won<1){const tg=g.createLinearGradient(cx,cy,cx-BP*3,cy-UP*.7);tg.addColorStop(0,'rgba(255,220,140,.8)');tg.addColorStop(1,'rgba(255,80,40,0)');
-        g.fillStyle=tg;g.beginPath();g.moveTo(cx,cy-cr);g.lineTo(cx-BP*3,cy-UP*.7+Math.sin(t*5)*UP*.12);g.lineTo(cx,cy+cr);g.fill();
-        const cg=g.createRadialGradient(cx-cr*.3,cy-cr*.3,1,cx,cy,cr);cg.addColorStop(0,'#fff');cg.addColorStop(.4,lv.P.planet===1?'#9ff':'#ffd166');cg.addColorStop(1,lv.P.planet===2?'#ff3a1a':'#ff8a3a');
-        g.fillStyle=cg;g.shadowColor='#ff8a3a';g.shadowBlur=30;g.beginPath();g.arc(cx,cy,cr,0,Math.PI*2);g.fill();g.shadowBlur=0;}
-    }
+    // v0.2.238: the giant comet that chased you is gone — only the small meteors that fall onto the path remain
     // trail + alien
     let es=S.s,eh=S.h,ea=1,esc=1;
     if(R.won){const u=(performance.now()-R.won)/1000/R.beat,e=lv.end,f=lv.P.finish;

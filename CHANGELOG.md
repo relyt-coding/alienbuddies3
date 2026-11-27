@@ -2,6 +2,12 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.238 - 2026-11-27 05:20
+- Planet Hop is now 11 levels: Luna 1–3, Glacia 4–7, Magmora 8–11. Old Planet Hop stars are cleared once; everything else you own stays.
+- The last level of each world now ends at a warp portal, and the results screen points you to the Galaxies for the next world.
+- The giant comet that chased you is gone — only the small meteors that fall onto the path remain.
+- The old levels' ideas are folded together, so each world teaches more per level instead of stretching it out.
+
 ## v0.2.237 - 2026-11-27 04:10
 - New in the skill tree: LEVEL SELECT (400 gems) puts a SELECT third beside the MATCHING GAME. It lists the levels you have cleared, plus one card showing what still stands in the way of the next level.
 - Replay any cleared level as a TIME TRIAL: the clock starts on your first flip. Beat the par time and you earn a crystal — the faster you are, the better the crystal.

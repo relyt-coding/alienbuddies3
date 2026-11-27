@@ -3046,3 +3046,12 @@ body.desktop-mode .seq-teaser{width:calc(100% - 100px);margin-left:auto;margin-r
 
 /* v0.2.236: the gem ring hides while ALIEN GEM MATH is open (kept after js/88 was removed) */
 body.stats-open #gemRing{display:none !important;}
+
+/* v0.2.238: the next-world card after the last level of a Planet Hop world */
+#phWorldHint{position:fixed;inset:0;z-index:1200;display:none;align-items:center;justify-content:center;background:rgba(2,4,10,.84);padding:16px;}
+#phWorldHint.open{display:flex;}
+#phWorldHint .pwh-box{width:100%;max-width:420px;border-radius:18px;border:1px solid #2a4a6a;background:linear-gradient(160deg,#04101c,#02060c);padding:22px 20px;text-align:center;font-family:'Bebas Neue',sans-serif;}
+#phWorldHint .pwh-kicker{font-size:.9rem;letter-spacing:.3em;color:#4a7a9a;}
+#phWorldHint .pwh-big{font-size:1.7rem;letter-spacing:.14em;color:#7fe8ff;margin:.3rem 0 .5rem;}
+#phWorldHint .pwh-sub{font-size:1rem;letter-spacing:.08em;color:#a8c6d8;line-height:1.35;}
+#phWorldHint .pwh-btns{display:flex;gap:8px;justify-content:center;margin-top:16px;flex-wrap:wrap;}

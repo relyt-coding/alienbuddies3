@@ -1,8 +1,8 @@
 # Alien Buddies: notes for building
 
 <!-- ship:auto:start -->
-- Version: 0.2.237 · shipped 2026-11-27
-- Last change: New in the skill tree: LEVEL SELECT (400 gems) puts a SELECT third…
+- Version: 0.2.238 · shipped 2026-11-27
+- Last change: Planet Hop is now 11 levels: Luna 1–3, Glacia 4–7, Magmora 8–11. Old…
 <!-- ship:auto:end -->
 
 **In flight / next:** nothing half-finished right now.

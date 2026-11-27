@@ -21,8 +21,8 @@ const _mgHas=id=>typeof unlockedSkills!=='undefined'&&!!unlockedSkills[id];
 // Planet Hop arrives with the Cockpit (saves that bought it in the bunker before v0.2.114 keep it)
 function mgPhOn(){return !!mgBought.ph||_mgHas('mg_cockpit');}
 function mgPhAccess(L,real){if(!real&&_mgTest())return true;   // (real: the test-mode bot plays by the normal rules)
-  return L<=3?mgPhOn():L<=5?_mgHas('mg_cockpit'):L<=10?_mgHas('ph_ice'):_mgHas('ph_magma');}   // v0.2.219: bunker buy = 1–3, Cockpit = 4–5
-function mgPhLockMsg(L){return L<=3?'Unlock Planet Hop in the Bunker for 5 Alien Gems':L<=5?'Unlock the Minigame Cockpit in the skill tree':L<=10?'Unlock the Ice Planet in the skill tree':'Unlock Magmora in the skill tree';}
+  return L<=3?mgPhOn():L<=7?_mgHas('ph_ice'):_mgHas('ph_magma');}   // v0.2.238: Bunker = 1–3, Ice Planet = 4–7, Magmora = 8–11
+function mgPhLockMsg(L){return L<=3?'Unlock Planet Hop in the Bunker for 5 Alien Gems':L<=7?'Unlock the Ice Planet in the skill tree':'Unlock Magmora in the skill tree';}
 function mgWwAccess(L,real){if((!real&&_mgTest())||mgBought.wwAll)return true;const n=MG_WW_NODES.find(([top])=>L<=top);return !!n&&_mgHas(n[1]);}
 function mgWwLockMsg(L){const n=MG_WW_NODES.find(([top])=>L<=top);const nm={ww_moon:'Worm Whack',ww_deep:'the Wyrm Moon',ww_t1:'Wyrm Trail I',ww_t2:'Wyrm Trail II',ww_t3:'Wyrm Trail III',ww_t4:'Wyrm Trail IV'};return 'Unlock '+(n?nm[n[1]]:'it')+' in the skill tree';}
 function mgCockpitOn(){return _mgTest()||_mgHas('mg_cockpit');}
@@ -135,14 +135,15 @@ function mgRefresh(){
     const h=on?'PLANET HOP <span class="mg-price">WIN ALIEN GEMS</span>':'PLANET HOP <span class="mg-price">UNLOCK · 💎 '+Math.min(have,MG_PRICE.ph)+'/'+MG_PRICE.ph+'</span>';
     if(ph._h!==h){ph._h=h;ph.innerHTML=h;}
     // v0.2.225: it flashes (like the matching game) when you can afford to unlock it, or a level is open that you haven't cleared yet
-    let fresh=false;if(on&&typeof phLevelOpen==='function'&&typeof phProgress!=='undefined')for(let L=1;L<=15;L++)if(phLevelOpen(L)&&!(phProgress.best[L]||{}).cleared){fresh=true;break;}
+    let fresh=false;if(on&&typeof phLevelOpen==='function'&&typeof phProgress!=='undefined')for(let L=1;L<=11;L++)if(phLevelOpen(L)&&!(phProgress.best[L]||{}).cleared){fresh=true;break;}
     ph.classList.toggle('ph-glow',on?fresh:(typeof alienGems!=='undefined'&&alienGems>=MG_PRICE.ph));}
   if(typeof updateMatchingBtn==='function')updateMatchingBtn();
   // cockpit header + bonus + coming-soon cards
   const p=mgGemParts(),tot=1+p.ph+p.ww+p.bd;
   const cb=$('ckBonus');if(cb)cb.innerHTML=`Minigame gem bonus: <b>${mgFmtX(tot)}</b> Alien Gems`+(p.ph||p.ww||p.bd?` <small>(Planet Hop +${p.ph} · Worm Whack +${p.ww} · Beat Defense +${p.bd})</small>`:'');
   const soon=$('ckSoon');if(soon){const locked=[];
-    if(!_mgHas('ph_ice')&&!_mgTest())locked.push(['❄️','PLANET HOP 6–10','next in the skill tree: the Ice Planet']);
+    if(!_mgHas('ph_ice')&&!_mgTest())locked.push(['❄️','PLANET HOP 4–7','next in the skill tree: the Ice Planet']);
+    if(!_mgHas('ph_magma')&&!_mgTest())locked.push(['🌋','PLANET HOP 8–11','deeper in the skill tree: Magmora']);
     if(!_mgHas('ww_moon')&&!mgBought.wwAll&&!_mgTest())locked.push(['🪱','WORM WHACK',_mgHas('ph_ice')?'next in the skill tree':'after the Ice Planet']);
     if(!_mgHas('beat_defense')&&!_mgTest())locked.push(['🛸','BEAT DEFENSE','deeper in the skill tree']);
     soon.innerHTML=locked.map(([i,n,w])=>`<div class="ck-soon-card"><span>${i}</span><b>${n}</b><small>🔒 ${w}</small></div>`).join('');}

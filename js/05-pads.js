@@ -575,6 +575,10 @@ document.addEventListener('touchstart',e=>{
   if(!padGridEl||padGridEl.contains(e.target))return;const t=e.target;
   if(t.closest&&t.closest('button,a,input,select,textarea,[role=button],.modal,[id$="Modal"],.view:not(#gameView),.bouncer,#seqPanel,.seq-panel'))return;
   const b=document.body.classList;if(b.contains('store-open')||b.contains('bunker-open')||b.contains('cockpit-open')||b.contains('bestbuddy-open'))return;
+  // v0.2.216: only touches that land on the game screen itself: full-screen layers on top (the egg hatch, cutscenes,
+  //   the Vault door, minigames…) live outside #gameView, so tapping them never reaches a pad underneath
+  const gv=document.getElementById('gameView');if(!gv||!gv.contains(t))return;
+  if(typeof overlayUp==='function'&&overlayUp())return;
   const r=padGridEl.getBoundingClientRect();
   for(const tch of e.changedTouches){if(tch.clientX<r.left-PAD_REACH||tch.clientX>r.right+PAD_REACH||tch.clientY<r.top-PAD_REACH||tch.clientY>r.bottom+PAD_REACH)continue;
     const idx=padAt(tch.clientX,tch.clientY,null);if(idx>=0&&padSounds[idx])padTouchFire(idx,e,'touch');}

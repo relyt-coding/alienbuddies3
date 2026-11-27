@@ -171,6 +171,8 @@ README.md covers the file layout, test mode and vocals in depth; this file is th
 - v0.2.215: PAD_COSTS[4] = 750 (75 mJ, after the first buddy). VAULT_COST = 1.5M (150 J). js/91 Space also buys #vaultBuyCard, starts the matching game
   (`#matchingGameBtn.match-glow`) when nothing is affordable, and clicks #matchVictoryClose on the win screen. js/83 setEggPad pads #scoreRow on BOTH sides.
   The Fusebox arrow (js/07 arrowShop) is off. Sequencer step toggles (js/06) no longer preview the sound.
+- v0.2.216: js/05's document-level touchstart (the PAD_REACH "just outside the grid" helper) only counts touches whose target is inside #gameView and
+  only when overlayUp() is false: full-screen layers appended to body (egg hatch, cutscenes, Vault door, minigames) never fire pads under them.
 - Skill-tree descriptions: `gemsOnly` (js/20) strips any written "×N Alien Gems" and appends the node's REAL `gemMult`, so never hand-write gem amounts.
 
 ## Testing without a phone

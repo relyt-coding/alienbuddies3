@@ -2,6 +2,9 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.216 - 2026-11-26 21:20
+- Fixed: on phones, tapping your new buddy on the hatch screen could also play the drum pads hidden underneath. Screens on top of the game now keep your taps to themselves.
+
 ## v0.2.215 - 2026-11-26 21:20
 - The 5th drum pad now costs 75 mJ, so you'll have hatched your first buddy before it, and the new pad comes filled with that buddy's sound.
 - The Vault now costs 150 J.

@@ -508,9 +508,35 @@ let _mfT=0;addEventListener('resize',()=>{clearTimeout(_mfT);_mfT=setTimeout(()=
 // while you play (the cards' own buddy art is unaffected). Remembered on this device.
 (function(){
   const btn=document.getElementById('matchBuddyBtn');if(!btn)return;
-  let off=false;try{off=localStorage.getItem('ab2_matchBuddiesOff')==='1';}catch(e){}
-  function paint(){document.body.classList.toggle('match-hide-buddies',off);btn.textContent=off?'BUDDIES OFF':'BUDDIES ON';
-    btn.setAttribute('aria-pressed',off?'false':'true');btn.style.color=off?'#664444':'#33aa66';btn.style.borderColor=off?'#3a1a1a':'#1a3a2a';}
-  btn.addEventListener('click',()=>{off=!off;try{localStorage.setItem('ab2_matchBuddiesOff',off?'1':'0');}catch(e){}paint();});
+  // v0.2.235: buddies are ON by default again. A new key is used, so an old "hide" from a past session no longer sticks.
+  let on=true;try{on=localStorage.getItem('ab2_matchBuddiesOn')!=='0';}catch(e){}
+  function paint(){document.body.classList.toggle('match-hide-buddies',!on);btn.textContent=on?'BUDDIES ON':'BUDDIES OFF';
+    btn.setAttribute('aria-pressed',on?'true':'false');btn.style.color=on?'#33aa66':'#664444';btn.style.borderColor=on?'#1a3a2a':'#3a1a1a';}
+  btn.addEventListener('click',()=>{on=!on;try{localStorage.setItem('ab2_matchBuddiesOn',on?'1':'0');}catch(e){}paint();});
   paint();
+
+  // ── music: pause the sequencer while you play (v0.2.235) ──
+  // (the sequencer loop keeps going under the matching game; this turns it off until you press PLAY)
+  const music=document.createElement('button');music.id='matchMusicBtn';music.type='button';
+  music.style.cssText="font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:.1em;padding:.45rem .6rem;border-radius:10px;border:1px solid #1a3a2a;background:transparent;color:#33aa66;cursor:pointer;touch-action:manipulation;";
+  btn.parentElement.insertBefore(music,btn.nextSibling);
+  const hasSeq=()=>typeof drum!=='undefined'&&drum.seqTracks>=1;
+  function paintMusic(){
+    if(!hasSeq()){music.style.display='none';return;}
+    music.style.display='';
+    const playing=typeof seqPlaying!=='undefined'&&seqPlaying;
+    music.textContent=playing?'PAUSE':'PLAY';
+    music.title=playing?'Pause the sequencer music while you play':'Start the sequencer music again';
+    music.setAttribute('aria-pressed',playing?'true':'false');
+    music.style.color=playing?'#33aa66':'#335533';
+  }
+  music.addEventListener('click',()=>{
+    if(!hasSeq())return;
+    try{if(typeof seqPlaying!=='undefined'&&seqPlaying){stopSeq();}else{if(typeof getCtx==='function')getCtx();startSeq();}}catch(e){}
+    setTimeout(paintMusic,30);
+  });
+  paintMusic();
+  const modal=document.getElementById('matchingModal');
+  if(modal)new MutationObserver(()=>{if(getComputedStyle(modal).display!=='none')paintMusic();}).observe(modal,{attributes:true,attributeFilter:['style']});
+  const pp=document.getElementById('seqPlayPauseBtn');if(pp)pp.addEventListener('click',()=>setTimeout(paintMusic,30));
 })();

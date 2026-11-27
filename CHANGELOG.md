@@ -2,6 +2,11 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.235 - 2026-11-27 02:10
+- Matching Game: the arrow keys now wrap — right from the last card goes to the first, and up / down go round the rows.
+- Your buddies float over the matching game again unless you turn them off (an old "off" setting no longer sticks).
+- New PAUSE button in the matching game stops the sequencer loop while you play; PLAY starts it again.
+
 ## v0.2.234 - 2026-11-27 01:45
 - The PLANET HOP button in the Bunker now shows your Alien Gems against the price (3/5), so you can see how close you are to unlocking it.
 

@@ -2,8 +2,9 @@
 //  KEYBOARD CARDS + GAME CONTROLLERS (v0.2.228)
 //
 //  1) MATCHING GAME ON THE KEYBOARD: the arrow keys move a glowing cursor between the cards (it jumps to the nearest
-//     card in that direction, so any grid shape works) and Space / Enter flips the card under it, through the card's own
-//     click handler. The first arrow (or Space) only shows the cursor. On the intro card, Space after the flip presses DONE.
+//     card in that direction, so any grid shape works, and wraps round to the far side at each edge) and Space / Enter
+//     flips the card under it, through the card's own click handler. The first arrow (or Space) only shows the cursor.
+//     On the intro card, Space after the flip presses DONE.
 //     The win screen is still js/91's (Space claims the prize). A mouse click or a tap hides the cursor again.
 //
 //  2) CONTROLLERS: one small layer turns a gamepad into the keys the game already understands, so every keyboard
@@ -23,6 +24,21 @@
   const cards=()=>[...document.querySelectorAll('#matchGrid .match-card')];
   function paint(){cards().forEach((c,i)=>c.classList.toggle('mk-cur',shown&&i===cur));}
   function firstFree(L){const i=L.findIndex(c=>!c.classList.contains('flipped')&&!c.classList.contains('matched'));return i<0?0:i;}
+  // v0.2.235: at an edge the cursor wraps to the far side of the same row / column (right → leftmost, up → bottom row)
+  function wrap(dx,dy,L,cur,cx,cy){
+    let best=-1,bv=-Infinity;
+    L.forEach((c,i)=>{if(i===cur)return;const r=c.getBoundingClientRect(),x=r.left+r.width/2-cx,y=r.top+r.height/2-cy;
+      if(dx){
+        if(Math.abs(y)>r.height*.5)return;                       // same row
+        if(dx<0?x<=0:x>=0)return;                                // on the far side of the board
+        const v=dx<0?x:-x;if(v>bv){bv=v;best=i;}
+      }else{
+        if(Math.abs(x)>r.width*.5)return;                        // same column
+        if(dy<0?y<=0:y>=0)return;
+        const v=dy<0?y:-y;if(v>bv){bv=v;best=i;}
+      }});
+    return best;
+  }
   function move(dx,dy){
     const L=cards();if(!L.length)return;
     if(!shown||cur<0||cur>=L.length){shown=true;cur=firstFree(L);paint();return;}
@@ -32,6 +48,7 @@
       const along=dx?x*dx:y*dy,side=dx?Math.abs(y):Math.abs(x);
       if(along<4)return;                                   // has to be in that direction
       const d=along+side*2.2;if(d<bd){bd=d;best=i;}});     // prefer cards straight ahead over diagonal ones
+    if(best<0)best=wrap(dx,dy,L,cur,cx,cy);                // edge: wrap round to the other side
     if(best>=0){cur=best;paint();try{if(typeof playMatchTick==='function')playMatchTick();}catch(e){}}
     else{const c=L[cur];c.classList.remove('mk-bump');void c.offsetWidth;c.classList.add('mk-bump');}
   }

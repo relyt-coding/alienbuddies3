@@ -1,8 +1,8 @@
 # Alien Buddies: notes for building
 
 <!-- ship:auto:start -->
-- Version: 0.2.234 · shipped 2026-11-27
-- Last change: The PLANET HOP button in the Bunker now shows your Alien Gems against…
+- Version: 0.2.235 · shipped 2026-11-27
+- Last change: Matching Game: the arrow keys now wrap — right from the last card goes…
 <!-- ship:auto:end -->
 
 **In flight / next:** nothing half-finished right now.

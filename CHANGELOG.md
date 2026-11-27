@@ -2,6 +2,11 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.241 - 2026-11-27 07:10
+- Planet Hop boss fights: the second half of the last level in Glacia and Magmora is now an arena. You stand at the checkpoint crystal and hop the boss's attacks as they come in on the beat.
+- Beat the Glacia scorpion to unlock the antenna shot: dodge on the beat to fill the energy bar, then press ZAP (or E / F) to fire. Magmora's lava plant has to be shot down.
+- A hit sends you back to the crystal at the arena entrance.
+
 ## v0.2.240 - 2026-11-27 06:20
 - Planet Hop crystals: finishing the last level of a world opens the portal into a crystal room. Your stardust average decides the colour — 100% platinum, 90%+ blue, 75%+ green, below that dark — and the crystal boosts Alien Gems and energy for good (2× / 3× / 4× at platinum for Luna, Glacia and Magmora, with the lower colours stepping down).
 - Replay a world with more stardust and its crystal improves.

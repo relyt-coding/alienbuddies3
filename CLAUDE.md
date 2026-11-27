@@ -1,8 +1,8 @@
 # Alien Buddies: notes for building
 
 <!-- ship:auto:start -->
-- Version: 0.2.240 · shipped 2026-11-27
-- Last change: Planet Hop crystals: finishing the last level of a world opens the…
+- Version: 0.2.241 · shipped 2026-11-27
+- Last change: Planet Hop boss fights: the second half of the last level in Glacia and…
 <!-- ship:auto:end -->
 
 **In flight / next:** nothing half-finished right now.

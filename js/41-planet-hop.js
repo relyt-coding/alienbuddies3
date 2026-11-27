@@ -39,6 +39,11 @@ function phGemVal(b,L){return b&&b.cleared?(+L===1?1.5:((b.dust||0)>=.999?1:.5))
     </div></div>
     <div class="ww-panel" id="phResults"><div class="ww-panel-inner ww-res" id="phResInner" style="box-shadow:0 0 40px -10px #7fe8ff"></div></div>`;
   document.body.appendChild(ov);
+  // v0.2.241: the boss arena's energy bar + ZAP button (hidden outside a fight)
+  const bossHud=document.createElement('div');bossHud.id='phBossHud';
+  bossHud.innerHTML='<div class="pbh-energy"><i id="phEnergyFill"></i></div><button class="ww-btn pbh-zap" id="phZap" type="button">ZAP</button><div class="pbh-hp" id="phBossHp"></div>';
+  ov.appendChild(bossHud);
+  bossHud.querySelector('#phZap').addEventListener('pointerdown',e=>{e.preventDefault();input('z',e);});
   const cv=$('phCanvas'),g=mgLiteCtx(cv.getContext('2d'));
   let W=0,H=0,DPR=1,bg=null,bgKey='',sel=1,R=null;
 
@@ -53,6 +58,7 @@ function phGemVal(b,L){return b&&b.cleared?(+L===1?1.5:((b.dust||0)>=.999?1:.5))
   }
   function close(){stop();ov.classList.remove('open');document.body.classList.remove('ww-open');if(typeof autoSave==='function')autoSave();}
   window.openPlanetHop=open;window.closePlanetHop=close;
+  window.__phStart=start;window.__phR=()=>R;   // test hooks
   $('phClose').addEventListener('click',close);
   $('phTabLv').addEventListener('click',()=>showTab('lv'));$('phTabMine').addEventListener('click',()=>showTab('mine'));
   $('phSync').addEventListener('click',()=>{if(typeof mgOpenSync==='function')mgOpenSync(()=>{});});
@@ -209,6 +215,7 @@ function phGemVal(b,L){return b&&b.cleared?(+L===1?1.5:((b.dust||0)>=.999?1:.5))
     const c=getCtx(),cp=fromCp?R.lv.cp:0;
     clearInterval(R.sched);
     R.attempt++;R.S=phNewState();R.idleS=null;R.ei=0;R.inputs=[];R.dead=null;R.won=0;R.trail=[];R.rings=[];
+    R.arena=R.lv.arena!=null?{at:R.lv.arena,energy:0,hp:R.lv.P.lvl===11?3:null,attacks:[],shots:[],nextAt:4,lastClick:-9,hitT:0,won:false}:null;
     if(fromCp){const k=R.cpSnap;R.S.s=cp;R.got=new Set(k.got);R.graded=new Set(k.graded);R.combo=0;R.maxCombo=k.maxCombo;R.timing=R.timing.slice(0,k.timing);R.onBeat=Object.assign({},k.onBeat);
       // restart the music from the checkpoint crystal, with a two-click count-in
       R.T0=c.currentTime+.25+2*R.beat-cp*R.beat;const at=cp*R.beat-1e-6;while(R.ei<R.lv.song.events.length&&R.lv.song.events[R.ei].t<at)R.ei++;
@@ -238,17 +245,20 @@ function phGemVal(b,L){return b&&b.cleared?(+L===1?1.5:((b.dust||0)>=.999?1:.5))
   // ── input (timestamped, applied inside the physics at the exact beat it happened) ──
   function input(w,ev){
     if(!R||R.state!=='play'||R.dead)return;
+    if(w==='z'){arenaZap();return;}
     let t=tau();if(ev&&ev.timeStamp){const lag=(performance.now()-ev.timeStamp)/1000;if(lag>0&&lag<.25)t-=lag/R.beat;}
     // during the count-in (or the checkpoint count-in) you can hop on the spot for fun: nothing is judged
     if(t<R.S.s-.15){const I=R.idleS||(R.idleS={h:0,vy:0,air:1});if(I.h<=0&&I.vy<=0){I.vy=PH_V0;I.air=1;}else if(I.air>0){I.vy=PH_V0;I.air=0;}const pd=$(w==='j'||R.solo?'phJump':'phBounce');pd.classList.remove('lit');void pd.offsetWidth;pd.classList.add('lit');try{phSnd(phPadSound(R.solo?'j':w),.55);}catch(e){}return;}
     R.inputs.push({t:Math.max(R.S.s,t),w});
-    // how close was that press to the beat it was meant for? (the level's planned presses)
+    // how close was that press to the beat it was meant for? (the level's planned presses — not in a boss arena)
+    if(!(R.arena&&t>=R.arena.at-.5)){
     let best=-1,bd=.32;R.lv.acts.forEach((a,i)=>{if(a.w!==w||R.graded.has(i))return;const d=Math.abs(t-a.t);if(d<bd){bd=d;best=i;}});
     if(best>=0){
       R.graded.add(best);const ds=(t-R.lv.acts[best].t)*R.beat,ad=Math.abs(ds);
       const gr=ad<=.06?'perfect':ad<=.12?'good':'off';R.onBeat[gr]++;R.timing.push({d:ds,at:performance.now()});
       if(gr==='off')R.combo=0;else{R.combo++;R.maxCombo=Math.max(R.maxCombo,R.combo);}
       // (judged quietly for the stats only: no PERFECT / EARLY / LATE text, your ears are the judge)
+    }
     }
     // a crystal bell nearby? BOUNCE rings it, snapped onto its beat like any instrument
     if(w==='b'&&!R.solo)R.lv.dust.forEach((d,i)=>{if(!d.bell||R.got.has(i)||Math.abs(t-d.s)>.4)return;R.got.add(i);d.bell.rung=performance.now();
@@ -267,6 +277,7 @@ function phGemVal(b,L){return b&&b.cleared?(+L===1?1.5:((b.dust||0)>=.999?1:.5))
     if(!R||R.state!=='play')return;
     let w=null;
     if(['Space','ArrowUp','KeyW'].includes(e.code))w='j';else if(['ShiftLeft','ShiftRight','ArrowDown','KeyS'].includes(e.code))w='b';
+    else if(e.code==='KeyE'||e.code==='KeyF')w='z';
     else for(const [idx,b] of Object.entries(typeof padBindings!=='undefined'?padBindings:{}))if(b.key&&e.code===b.key){w=(+idx)%4<2?'j':'b';break;}
     if(w){e.preventDefault();e.stopImmediatePropagation();if(!e.repeat)input(w,e);}
   },true);
@@ -282,10 +293,20 @@ function phGemVal(b,L){return b&&b.cleared?(+L===1?1.5:((b.dust||0)>=.999?1:.5))
       phFx(lowG,lv.P.cave&&!outside?(phCaveH(lv,S.s)-3.6)/3.6:false);}catch(e){}
     if(R.state==='play'&&!R.dead&&!R.won){
       try{padHud(tau());}catch(e){}
+      bossHud.classList.toggle('on',!!(R.arena&&!R.dead&&!R.won&&tau()>=R.arena.at-.001));
       // count-in hops (with double jump) run on their own little physics; if you're still in the air when the
       // music starts, the real run carries on from that height instead of snapping you to the ground
       if(R.idleS){const I=R.idleS;if(tau()<S.s){const db=dt/R.beat;I.vy-=PH_G*db;I.h+=I.vy*db;if(I.h<=0){R.idleS=null;S.landT=S.s;}}
         else{if(I.h>0){S.h=I.h;S.vy=I.vy;S.grounded=false;S.air=I.air;}R.idleS=null;}}
+      if(R.arena&&tau()>=R.arena.at-.001){
+        if(!R.arena.hitT){
+          if(!R.cpHit){R.cpHit=true;R.cpSnap={got:new Set(R.got),graded:new Set([...R.graded].filter(i=>lv.acts[i]&&lv.acts[i].t<lv.cp)),maxCombo:R.maxCombo,timing:R.timing.length,onBeat:Object.assign({},R.onBeat)};
+            try{sCheckpoint();}catch(e){}
+            R.texts.push({s:lv.cp+.6,h:2.4,txt:'CHECKPOINT!',col:'#bfe9ff',life:1.5,sz:1.2});burst(lv.cp,1.1,'#ffffff',14,1.1);burst(lv.cp,1.1,'#7cc8ff',22,1.3);}
+          arenaUpdate(dt);
+        }
+      }
+      else{
       const target=Math.min(tau(),lv.end+.01);
       R.inputs.sort((a,b)=>a.t-b.t);
       let guard=0;
@@ -306,6 +327,7 @@ function phGemVal(b,L){return b&&b.cleared?(+L===1?1.5:((b.dust||0)>=.999?1:.5))
       const pct=Math.max(0,Math.min(1,S.s/lv.end));$('phPct').textContent=Math.floor(pct*100)+'%';$('phProg').style.width=(pct*100)+'%';
       if(S.dead)die();
       else if(S.s>=lv.end)win();
+      }
     }
     draw(dt);
   }
@@ -339,8 +361,48 @@ function phGemVal(b,L){return b&&b.cleared?(+L===1?1.5:((b.dust||0)>=.999?1:.5))
       showCrystalRoom(w,c,go);
     },R.lv.bossS<Infinity?1900:1700);
   }
+  // ── BOSS ARENA (v0.2.241): you stand at the checkpoint crystal, the boss attacks on the beat, jump over it ──
+  function arenaZap(){
+    const A=R&&R.arena;if(!A||A.hitT||A.won||R.state!=='play'||R.won)return;
+    if(!(R.lv.P.lvl===11||(R.lv.P.lvl===7&&bossShot)))return;   // world 2's boss is where the shot is unlocked
+    if(A.energy<.999||(A.hp!=null&&A.hp<=0))return;
+    A.energy=0;A.shots.push({t:tau(),hit:tau()+.45,res:false});
+    try{phSnd('zap',.5);}catch(e){}
+    const b=$('phZap');if(b){b.classList.remove('lit');void b.offsetWidth;b.classList.add('lit');}
+  }
+  function arenaHit(){
+    const A=R.arena;if(!A||A.hitT)return;A.hitT=performance.now();
+    R.shake=16;burst(R.S.s,R.S.h+.5,'#ff5a4a',26,1.4);burst(R.S.s,R.S.h+.5,'#ffffff',10,1);
+    try{phSnd('zap',.7);}catch(e){}
+    R.texts.push({s:R.S.s+.6,h:2.8,txt:'BACK TO THE CRYSTAL',col:'#ff9a8a',life:1.6,sz:1.1});
+    setTimeout(()=>{if(R&&R.state==='play')attempt(false,true);},900);
+  }
+  function arenaWin(){
+    if(!R||R.won)return;const A=R.arena;if(A){if(A.won)return;A.won=true;}
+    const lv=R.lv,S=R.S;S.s=lv.end-.25;S.h=0;S.vy=0;S.grounded=true;S.dead=null;
+    R.shake=18;for(let k=0;k<5;k++)burst(lv.end-1,1+Math.random()*2,['#ffd166','#ff66ff','#7fe8ff','#ffffff'][k],26,1.6);
+    if(lv.P.lvl===7&&typeof bossShot!=='undefined'&&!bossShot){bossShot=true;try{autoSave();}catch(e){}showToast('NEW ABILITY: the antenna shot! Press ZAP in a boss fight.');}
+    win();
+  }
+  function arenaUpdate(dt){
+    const A=R.arena,lv=R.lv,S=R.S;if(!A||A.won||R.won)return;
+    S.s=A.at;
+    while(R.inputs.length){const i=R.inputs.shift();if(i.w==='j'){const r=phJump(lv,S);if(r==='double')burst(S.s,S.h,'#00e5ff',10,.7);}}
+    const s0=S.s;phStep(lv,S,dt);S.s=s0;
+    const ab=tau()-A.at;
+    while(A.nextAt<=ab+1){A.attacks.push({t:A.at+A.nextAt,hit:A.at+A.nextAt+.5,res:false});A.nextAt+=2;}
+    A.attacks.forEach(a=>{if(a.res||tau()<a.hit)return;a.res=true;
+      if(S.h>.22)A.energy=Math.min(1,A.energy+.34);else arenaHit();});
+    A.shots.forEach(sh=>{if(sh.res||tau()<sh.hit)return;sh.res=true;
+      if(A.hp!=null){A.hp--;R.shake=8;burst(A.at+2.4,1.6,'#bff6ff',18,1.2);if(A.hp<=0)arenaWin();}});
+    if(A.hp==null&&tau()>=lv.end)arenaWin();
+    if(A.hp!=null&&tau()>lv.end){const b=Math.floor(tau());if(b!==A.lastClick){A.lastClick=b;try{phSnd('rimshot',.5);}catch(e){}}}
+    const fill=$('phEnergyFill');if(fill)fill.style.width=(A.energy*100).toFixed(0)+'%';
+    const hp=$('phBossHp');if(hp)hp.textContent=A.hp!=null?'♥'.repeat(Math.max(0,A.hp)):'';
+    $('phDust').textContent=R.got.size;
+  }
   function results(stars,dust,first){
-    if(!R)return;R.state='done';phLoopsOff();
+    if(!R)return;R.state='done';phLoopsOff();bossHud.classList.remove('on');
     const L=R.L,P=R.lv.P;
     const cInfo=(!R.custom&&(L===3||L===7||L===11)&&typeof phCrystalInfo==='function')?phCrystalInfo(L<=3?0:L<=7?1:2):null;
     const crystalLine=cInfo?`<div class="ww-reward" style="color:${cInfo.col}">💎 ${cInfo.world} CRYSTAL · ${cInfo.name} · ×${(+cInfo.mult.toFixed(2))}</div>`:'';
@@ -852,6 +914,51 @@ function phGemVal(b,L){return b&&b.cleared?(+L===1?1.5:((b.dust||0)>=.999?1:.5))
   }
 
   // ── draw ──
+  // ── the boss and its attacks (v0.2.241) ──
+  function drawScorpion(sc,t,pulse){
+    g.strokeStyle='#9fd8f0';g.lineWidth=sc*.06;g.lineCap='round';
+    for(let i=0;i<4;i++){const x=-sc*.8+i*sc*.5;g.beginPath();g.moveTo(x,-sc*.15);g.lineTo(x-sc*.25,sc*.35);g.stroke();}
+    const bg=g.createLinearGradient(0,-sc,0,0);bg.addColorStop(0,'#dff6ff');bg.addColorStop(1,'#4a8ab0');
+    g.fillStyle=bg;g.beginPath();g.ellipse(0,-sc*.45,sc*.95,sc*.55,0,0,Math.PI*2);g.fill();
+    [-1,1].forEach(k=>{g.save();g.translate(k*sc*.95,-sc*.55);g.rotate(k*.3);g.fillStyle='#bfeaf8';g.beginPath();g.ellipse(0,0,sc*.32,sc*.18,0,0,Math.PI*2);g.fill();g.fillStyle='#8fd0e8';g.beginPath();g.moveTo(k*sc*.2,0);g.lineTo(k*sc*.5,-sc*.15);g.lineTo(k*sc*.5,sc*.15);g.fill();g.restore();});
+    g.strokeStyle='#bfeaf8';g.lineWidth=sc*.16;g.beginPath();g.moveTo(-sc*.8,-sc*.5);g.quadraticCurveTo(-sc*1.3,-sc*1.2,-sc*.9,-sc*1.7);g.stroke();
+    g.fillStyle='#ff5a6a';g.beginPath();g.arc(-sc*.9,-sc*1.75,sc*.14,0,Math.PI*2);g.fill();
+    g.fillStyle='#ff3a5a';g.beginPath();g.arc(sc*.55,-sc*.62,sc*.07,0,Math.PI*2);g.arc(sc*.75,-sc*.55,sc*.06,0,Math.PI*2);g.fill();
+  }
+  function drawLavaPlant(sc,t,pulse){
+    g.strokeStyle='#7a2a18';g.lineWidth=sc*.22;g.beginPath();g.moveTo(0,0);g.quadraticCurveTo(sc*.2,-sc*.8,0,-sc*1.4);g.stroke();
+    const cols=['#ff5a1a','#ff8a3a','#ffb066'];
+    for(let i=0;i<7;i++){const a=-Math.PI/2+(i-3)*.35+Math.sin(t*.8+i)*.04;
+      g.save();g.translate(0,-sc*1.5);g.rotate(a+Math.PI/2);
+      g.fillStyle=cols[i%3];g.beginPath();g.ellipse(0,-sc*.55,sc*.22,sc*.6,0,0,Math.PI*2);g.fill();g.restore();}
+    const cg=g.createRadialGradient(0,-sc*1.5,1,0,-sc*1.5,sc*.45);cg.addColorStop(0,'#fff3a0');cg.addColorStop(.5,'#ffb020');cg.addColorStop(1,'#ff3a1a');
+    g.fillStyle=cg;g.shadowColor='#ff6a1a';g.shadowBlur=24+12*pulse;g.beginPath();g.arc(0,-sc*1.5,sc*.35,0,Math.PI*2);g.fill();g.shadowBlur=0;
+    g.fillStyle='#1a0a06';g.beginPath();g.ellipse(0,-sc*1.5,sc*.1,sc*.16,0,0,Math.PI*2);g.fill();
+    g.strokeStyle='#4a1a10';g.lineWidth=sc*.08;g.beginPath();g.moveTo(0,0);g.quadraticCurveTo(-sc*.9,-sc*.3,-sc*1.1,sc*.2);g.moveTo(0,0);g.quadraticCurveTo(sc*.9,-sc*.3,sc*1.1,sc*.2);g.stroke();
+  }
+  function drawBossArena(lv,S,t,pulse){
+    const A=R.arena;if(!A)return;
+    const [bx,by,bf]=P(A.at+2.5,0);
+    const sc=BP*.34;
+    g.save();g.translate(bx,by);g.rotate(bf);
+    g.fillStyle='rgba(0,0,0,.35)';g.beginPath();g.ellipse(0,0,sc*1.5,sc*.3,0,0,Math.PI*2);g.fill();
+    if(lv.P.planet===1)drawScorpion(sc,t,pulse);else drawLavaPlant(sc,t,pulse);
+    g.restore();
+    A.attacks.forEach(a=>{const u=tau();if(u<a.t-.5||u>a.hit+.45)return;
+      const p=Math.max(0,Math.min(1,(u-a.t)/.5));
+      const s=A.at+2.5-2.5*p;
+      const [ax,ay]=P(s,0.15+Math.sin(p*Math.PI)*.55);
+      g.save();g.translate(ax,ay);g.rotate(bf*.3);
+      g.shadowColor=lv.P.planet===1?'#7fe8ff':'#ff6a1a';g.shadowBlur=16;
+      g.fillStyle=lv.P.planet===1?'rgba(150,235,255,.9)':'rgba(255,140,60,.9)';
+      g.beginPath();g.ellipse(0,0,BP*.24,BP*.11,0,0,Math.PI*2);g.fill();
+      g.restore();});
+    A.shots.forEach(sh=>{const u=tau();if(u<sh.t-.1||u>sh.hit+.3)return;
+      const p=Math.max(0,Math.min(1,(u-sh.t)/.45));
+      const [sx,sy]=P(A.at+2.5*p,0.9+Math.sin(p*Math.PI)*.6);
+      g.fillStyle='#dffcff';g.shadowColor='#4ae0ff';g.shadowBlur=18;g.beginPath();g.arc(sx,sy,BP*.1,0,Math.PI*2);g.fill();g.shadowBlur=0;});
+    if(A.hp!=null){g.save();g.font=`${Math.round(UP*.55)}px 'Bebas Neue',sans-serif`;g.fillStyle='#ff9a8a';g.textAlign='center';g.fillText('♥'.repeat(Math.max(0,A.hp)),bx,by-UP*3.4);g.restore();}
+  }
   function draw(dt){
     if(!R)return;geo();makeBg();
     const lv=R.lv,S=R.S,pl=PH_PLANETS[lv.P.planet],t=performance.now()/1000;
@@ -955,6 +1062,7 @@ function phGemVal(b,L){return b&&b.cleared?(+L===1?1.5:((b.dust||0)>=.999?1:.5))
     lv.dust.forEach((d,i)=>{if(d.bell||R.got.has(i)||d.s<s0||d.s>s1)return;const [x,y]=P(d.s,d.h),z=BP*.06*(1+.3*Math.sin(t*6+i));
       g.fillStyle='#ffe680';g.shadowColor='#ffd23a';g.shadowBlur=8;g.beginPath();for(let k=0;k<8;k++){const r=k%2?z*.4:z,a=k/8*Math.PI*2+t;g.lineTo(x+Math.cos(a)*r,y+Math.sin(a)*r);}g.closePath();g.fill();g.shadowBlur=0;});
     // v0.2.238: the giant comet that chased you is gone — only the small meteors that fall onto the path remain
+    if(R.arena&&S.s>=R.arena.at-.01&&!R.won)drawBossArena(lv,S,t,pulse);
     // trail + alien
     let es=S.s,eh=S.h,ea=1,esc=1;
     if(R.won){const u=(performance.now()-R.won)/1000/R.beat,e=lv.end,f=lv.P.finish;

@@ -3062,3 +3062,12 @@ body.stats-open #gemRing{display:none !important;}
 .ph-world-name{font-family:'Bebas Neue',sans-serif;font-size:.78rem;letter-spacing:.22em;margin:0 0 4px 2px;}
 .ph-world-row{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;}
 .ph-world:last-child{margin-bottom:0;}
+
+/* v0.2.241: boss arena HUD — energy bar, ZAP, boss hearts */
+#phBossHud{display:none;position:fixed;left:50%;bottom:17%;transform:translateX(-50%);width:min(360px,78vw);z-index:6;align-items:center;gap:8px;}
+#phBossHud.on{display:flex;}
+#phBossHud .pbh-energy{flex:1;height:13px;border-radius:8px;border:1px solid #2a5a7a;background:#08131c;overflow:hidden;}
+#phBossHud .pbh-energy i{display:block;height:100%;width:0;background:linear-gradient(90deg,#2a7dff,#7ff6ff);box-shadow:0 0 10px #4ae0ff;transition:width .12s;}
+#phBossHud .pbh-zap{flex-shrink:0;font-size:1rem;padding:.45rem .9rem;border-color:#4ae0ff;color:#bff6ff;}
+#phBossHud .pbh-zap.lit{background:#0a2a3a;box-shadow:0 0 14px #4ae0ff;}
+#phBossHud .pbh-hp{font-family:'Bebas Neue',sans-serif;color:#ff9a8a;font-size:1.15rem;letter-spacing:.08em;min-width:3ch;text-align:center;}

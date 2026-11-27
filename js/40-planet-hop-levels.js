@@ -126,11 +126,11 @@ const PH_COURSE=[
   /* 4 Glacia Glide  */ 'rA s Bf rF p2 B2 | C D2 B2 k Lg rA',
   /* 5 Frostbite Funk*/ 'rB i2 B2 rD P B1 | Bb C k i B1 D2 Lg | rE P i2 rA',
   /* 6 Ice Spire Hop */ 'rA k f DD f s3 B2 | C f kk s3 Bb P f | D2 f p2 s3 rA',
-  /* 7 Crystal Grotto*/ 'rB i2 s3 Pm Lg | C f B1 Bb s3 | s3 p2 Pm D2 s3 P B1',
+  /* 7 Crystal Grotto*/ 'rB i2 s3 Pm Lg | f B1 Bb s3 | C rA rA rA rA | rA rA rA rA | rA rA rA rA | rA rA rA rA',
   /* 8 Magmora Dash  */ 'rA rE d rD d s3 B2 | C d Pm d B1 f d | s3 kk d rA',
   /* 9 Lava Lamp     */ 'rB rO so rD so s3 Lg | so d Pm so C f B1 | so s3 d so L so rA',
   /*10 Ember Leap    */ 'rA rE dk rD dk s3 B2 | kk dk so d C Pm B1 | dk s3 f dk Lg d rA',
-  /*11 Volcano 2-Step*/ 'rB so d Pm B1 dk rE | so s3 f d C kk B2 | so d dk s3 B1 so rA'];
+  /*11 Volcano 2-Step*/ 'rB rO so d Pm B1 dk rE | C rA rA rA rA | rA rA rA rA | rA rA rA rA | rA rA rA rA'];
 function phCourseBars(L){const T=phTokens();return PH_COURSE[L-1].split(/\s+/).filter(x=>x&&x!=='|').reduce((n,t)=>n+T[t].len/4,0);}
 
 // ── build a level: song + objects + perfect actions + stardust ──
@@ -165,6 +165,10 @@ function phBuild(L,songIn){
   }
   const lv={P,song,end,bossS,objs,acts,dust:[]};
   const fl=objs.find(o=>o.k==='flag');lv.cp=fl?fl.s:null;lv.signs=objs.filter(o=>o.k==='sign');
+  if(P.boss&&!songIn){   // v0.2.241: the boss fight happens where the checkpoint crystal is
+    lv.arena=lv.cp!=null?lv.cp:Math.max(8,end-48);
+    lv.falls=[];   // no meteor / icicle cues during the arena
+  }
   lv.pits=objs.filter(o=>o.k==='pit');lv.blocks=objs.filter(o=>o.k==='block');lv.spikes=objs.filter(o=>o.k==='spike');
   lv.pads=objs.filter(o=>o.k==='pad');lv.zones=objs.filter(o=>o.k==='zone');
   // v0.2.229: no long empty stretches (v0.2.227 filled EVERY beat: too much). A hop is added only in the middle of a gap of
@@ -194,6 +198,11 @@ function phBuild(L,songIn){
   lv.botOk=bot.ok;lv.botDeath=bot.death;
   lv.dust=bot.path.filter(p=>p.air).filter((p,i,a)=>i===0||p.s-a[i-1].s>=.24).map(p=>({s:p.s,h:p.h+.5}));
   phDress(lv,bot,!!songIn);
+  if(lv.arena!=null){   // the arena replaces the second half: nothing beyond it can be collected or pressed
+    lv.dust=lv.dust.filter(d=>d.s<lv.arena-.5);
+    lv.bells=(lv.bells||[]).filter(b=>b.s<lv.arena-.5);
+    lv.acts=lv.acts.filter(a=>a.t<lv.arena);
+  }
   return lv;
 }
 

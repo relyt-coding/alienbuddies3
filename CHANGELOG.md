@@ -2,6 +2,9 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.233 - 2026-11-27 01:20
+- Fixed a stray sparkle that flashed in the top-left corner just before the egg hatch screen opened (it happened most when hatching with the space bar).
+
 ## v0.2.232 - 2026-11-27 00:45
 - Nothing changes in the game itself. Behind the scenes: every build now gets a version tag and a safety check before it goes live, so any build can be undone quickly.
 

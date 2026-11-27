@@ -1,8 +1,8 @@
 # Alien Buddies: notes for building
 
 <!-- ship:auto:start -->
-- Version: 0.2.232 · shipped 2026-11-27
-- Last change: Nothing changes in the game itself. Behind the scenes: every build now…
+- Version: 0.2.233 · shipped 2026-11-27
+- Last change: Fixed a stray sparkle that flashed in the top-left corner just before…
 <!-- ship:auto:end -->
 
 **In flight / next:** nothing half-finished right now.

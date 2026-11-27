@@ -12,7 +12,10 @@
   const B=document.body.classList,$=id=>document.getElementById(id);
   const vis=e=>{if(!e||!e.isConnected)return false;const s=getComputedStyle(e);if(s.display==='none'||s.visibility==='hidden'||+s.opacity<.2)return false;
     const r=e.getBoundingClientRect();return r.width>4&&r.height>4&&r.bottom>0&&r.right>0&&r.top<innerHeight&&r.left<innerWidth;};
-  const press=(e,how)=>{if(how==='down')e.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,cancelable:true,pointerType:'mouse',button:0}));else e.click();};
+  // v0.2.233: the fake press carries the element's real centre. Without it clientX/clientY were 0, so the
+  //   purchase sparkle (js/25 reads the last pointer position) burst in the top-left corner before a hatch.
+  const press=(e,how)=>{if(!e)return;const r=e.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2;
+    if(how==='down')e.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,cancelable:true,pointerType:'mouse',button:0,clientX:x,clientY:y}));else e.click();};
   // [element, cost, how it's pressed]
   function candidates(){
     const L=[],n=typeof totalAliens==='number'?totalAliens:0,aCost=typeof alienCost==='function'?alienCost(n):Infinity;

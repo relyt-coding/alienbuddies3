@@ -137,7 +137,10 @@ function buyAlien(){
   if(typeof bunkerAssign==='function')bunkerAssign(_ni);
   const _hatch=typeof alienHatches==='function'&&alienHatches(_ni);if(_hatch)window._hatchingIdx=_ni;
   bouncerOnNewAlien();window._hatchingIdx=null;
-  if(_hatch&&typeof openEggReveal==='function')setTimeout(()=>openEggReveal(_ni),120);updateMatchingBtn();viewingBunker=typeof bunkerOf==='function'?bunkerOf(_ni):Math.max(0,Math.floor((totalAliens-1)/BUNKER_SIZE));playSfxAlienBuy();flashBuy(totalAliens%BUNKER_SIZE===0?'#00ff88':'#00cc66');renderUI();
+  if(_hatch&&typeof openEggReveal==='function')setTimeout(()=>openEggReveal(_ni),120);updateMatchingBtn();viewingBunker=typeof bunkerOf==='function'?bunkerOf(_ni):Math.max(0,Math.floor((totalAliens-1)/BUNKER_SIZE));playSfxAlienBuy();
+  // v0.2.233: no purchase flash / sparkle under a hatching egg: the hatch screen opens 120 ms later and covers it,
+  //   which read as a stray particle flash in the corner
+  if(!_hatch)flashBuy(totalAliens%BUNKER_SIZE===0?'#00ff88':'#00cc66');renderUI();
   // Always update bunker sidebar on desktop
   if(document.body.classList.contains('desktop-mode'))renderBunkerView();
   autoSave();}

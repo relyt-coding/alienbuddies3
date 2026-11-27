@@ -21,7 +21,8 @@
     if(typeof seqTrackerActive!=='undefined'&&!seqTrackerActive)add($('seqTrackerActivateBtn'),typeof SEQ_TRACKER_COST!=='undefined'?SEQ_TRACKER_COST:Infinity,'click');
     // (v0.2.218: drum pads are NOT on Space: each new pad is bought with its own hotkey, so it's a choice)
     add($('padEgg'),aCost,'down');
-    add(document.querySelector('.cornerEgg'),aCost,'down');
+    add(document.querySelector('.cornerEgg:not(.full)'),aCost,'down');
+    add($('alienBuyBtn'),aCost,'click');   // v0.2.228: the Fusebox's HATCH ALIEN BUDDY card counts too when it's on screen
     if(typeof drum!=='undefined'&&drum.seqTracks===0)add($('seqTeaser'),typeof seqTrackCost==='function'?seqTrackCost(0):Infinity,'down');
     add($('fuseTeaser'),typeof FUSE_COST!=='undefined'?FUSE_COST:Infinity,'click');
     add($('partyTeaser'),typeof PARTY_LADDER!=='undefined'?PARTY_LADDER[0].cost:Infinity,'click');
@@ -61,7 +62,9 @@
     const mg=$('matchingGameBtn');
     // v0.2.220: only once the Bunker is unlocked AND showing (its button visible on screen, the first-buddy cutscene over)
     const mgReady=mg&&vis(mg)&&!B.contains('nav-locked')&&!B.contains('buddy-hold')&&typeof totalAliens==='number'&&totalAliens>=1;
-    if(!afford&&mgReady&&performance.now()-hatchClosedAt>700&&!document.querySelector('.cornerEgg.lit')&&mg.classList.contains('match-glow')&&typeof openMatchingGame==='function'){e.preventDefault();openMatchingGame();return;}
+    // v0.2.228: the matching game is Space's LAST choice: never while a buddy can be hatched (even if its egg isn't on screen yet)
+    const buddyCan=typeof totalAliens==='number'&&totalAliens<99&&typeof alienCost==='function'&&typeof score==='number'&&score>=alienCost(totalAliens);
+    if(!afford&&mgReady&&!buddyCan&&performance.now()-hatchClosedAt>700&&!document.querySelector('.cornerEgg.lit')&&mg.classList.contains('match-glow')&&typeof openMatchingGame==='function'){e.preventDefault();openMatchingGame();return;}
     if(!L.length)return;
     e.preventDefault();   // (also stops Space from pressing whatever button has focus)
     const pick=afford||L[0];   // nothing affordable: the cheapest shakes "not yet"

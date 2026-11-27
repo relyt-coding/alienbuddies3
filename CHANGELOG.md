@@ -2,6 +2,10 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.229 - 2026-11-26 23:45
+- Space now always unlocks everything it can first (including hatching a buddy from the Fusebox card) and only starts the matching game when there's nothing else to buy.
+- The shooting star card's rainbow trail now tucks neatly behind the star (no more squared-off edge).
+
 ## v0.2.228 - 2026-11-26 23:35
 - Matching game on the keyboard: the arrow keys move a glowing cursor between the cards, and Space (or Enter) flips the card under it.
 - Game controllers work: the D-pad or left stick acts like the arrow keys, A acts like Space (unlock the next thing, jump, flip a card) and B acts like Escape.

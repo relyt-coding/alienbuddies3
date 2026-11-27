@@ -18,7 +18,11 @@
     cols.forEach((col,ci)=>{const ww=w*(1-ci/cols.length)*.5,L=[],R=[];
       for(let i=0;i<=20;i++){const t=i/20,p=pt(t),q=pt(Math.min(1,t+.01)),o=pt(Math.max(0,t-.01)),dx=q[0]-o[0],dy=q[1]-o[1],d=Math.hypot(dx,dy)||1,k=ww*prof(t);
         L.push([p[0]-dy/d*k,p[1]+dx/d*k]);R.push([p[0]+dy/d*k,p[1]-dx/d*k]);}
-      g.beginPath();L.forEach(([x,y],i)=>i?g.lineTo(x,y):g.moveTo(x,y));R.reverse().forEach(([x,y])=>g.lineTo(x,y));g.closePath();g.fillStyle=col;g.fill();if(!ci)ink(g,3);});}
+      const p0=pt(0),q0=pt(.01),td=Math.hypot(q0[0]-p0[0],q0[1]-p0[1])||1,fx=(p0[0]-q0[0])/td,fy=(p0[1]-q0[1])/td,k0=ww*prof(0),l0=L[0],r0=R[0];
+      g.beginPath();L.forEach(([x,y],i)=>i?g.lineTo(x,y):g.moveTo(x,y));R.reverse().forEach(([x,y])=>g.lineTo(x,y));
+      // v0.2.228: a rounded nose at the head end (it used to be cut off square where the trail starts)
+      g.quadraticCurveTo(r0[0]+fx*k0,r0[1]+fy*k0,p0[0]+fx*k0,p0[1]+fy*k0);g.quadraticCurveTo(l0[0]+fx*k0,l0[1]+fy*k0,l0[0],l0[1]);
+      g.closePath();g.fillStyle=col;g.fill();if(!ci)ink(g,3);});}
   function rr(g,x,y,w,h,r){g.beginPath();if(g.roundRect)g.roundRect(x,y,w,h,r);else g.rect(x,y,w,h);}
 
   const ICONS={
@@ -179,7 +183,7 @@
       g.fillStyle='#fff';[[16,20],[84,80]].forEach(([x,y])=>{star(g,x,y,4.5,1.6,4,0);g.fill();});},
     // v0.2.145 redraw: a chunky rainbow swoosh that tapers to a point, sparkles in its wake, a big glinting star up front
     shootingstar(g){glow(g,66,34,36,'rgb(255,220,80)',.4);
-      ribbon(g,[66,34],[36,50],[8,88],40,['#ff4fa8','#ffb02e','#ffe14d','#3fe6ff'],t=>Math.pow(1-t,.55));
+      ribbon(g,[66,34],[36,50],[8,88],40,['#ff4fa8','#ffb02e','#ffe14d','#3fe6ff'],t=>Math.min(1,.45+t*3.2)*Math.pow(1-t,.55));   // v0.2.228: starts narrow, hidden inside the star, so no squared-off edge shows between its points
       g.fillStyle='#fff';[[44,78,7],[22,56,5.5],[60,66,4.5]].forEach(([x,y,r])=>{star(g,x,y,r,r*.3,4,0);g.fill();});
       star(g,66,34,25,11,5,-Math.PI/2+.2);g.fillStyle=rg(g,66,34,25,['#fffbe0','#ffd23f','#e07a10']);g.fill();ink(g,3.6);
       g.fillStyle='rgba(255,255,255,.9)';g.beginPath();g.ellipse(60,27,4.5,2.6,-.6,0,TAU);g.fill();g.beginPath();g.arc(70,24,1.6,0,TAU);g.fill();},

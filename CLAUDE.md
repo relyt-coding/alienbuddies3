@@ -193,6 +193,7 @@ README.md covers the file layout, test mode and vocals in depth; this file is th
 - v0.2.226: Planet Hop select (js/41 showSelect) = tiles only: rules text / #phDetail hidden (css end), tabs hidden (`.ph-simple`) until mg_cockpit, bonus line only once >0, levels shown in rows of 5 up to the highest mgPhAccess level; tapping an open tile calls start(L).
 - v0.2.227: `phGemVal(b,L)`: level 1 clear = +1.5× (others .5 / 1). js/40 phBuild adds `fill` hops on every integer beat with open ground ahead (no act within .9, nothing in (b, b+1.1); block = only its side wall); bot-checked, the fill before a death is removed. js/41 geo(): desktop BP uses H*.22 (was .32) = zoomed out.
 - v0.2.228 (js/92): matching-game cursor (`.mk-cur`; arrows move to the nearest card in that direction, Space/Enter clicks it; capture listener, skips the win screen so js/91 still claims). CONTROLLERS: gamepad polling turns D-pad/stick → arrow keys (repeat), A/Y → Space, X → Enter, B → Escape as synthetic KeyboardEvents (`fromPad`), so any keyboard feature works on a controller. `__padSend(type,code)` test hook.
+- v0.2.229: js/91 candidates add #alienBuyBtn and skip `.cornerEgg.full`; the matching game never starts while a buddy is affordable (totalAliens<99, score>=alienCost). js/48 `ribbon` has a rounded nose; the shooting star's profile starts narrow inside the star.
 - Skill-tree descriptions: `gemsOnly` (js/20) strips any written "×N Alien Gems" and appends the node's REAL `gemMult`, so never hand-write gem amounts.
 
 ## Testing without a phone

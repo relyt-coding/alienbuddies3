@@ -1,13 +1,27 @@
 # Alien Buddies: notes for building
 
+<!-- ship:auto:start -->
+- Version: 0.2.232 · shipped 2026-11-27
+- Last change: Nothing changes in the game itself. Behind the scenes: every build now…
+<!-- ship:auto:end -->
+
+**In flight / next:** nothing half-finished right now.
+**Off limits:** (none)
+
 Live at **alienbuddies.space** (Netlify deploys `main` of `relyt-coding/alienbuddies3`). Plain HTML/CSS/JS, no build step.
 README.md covers the file layout, test mode and vocals in depth; this file is the quick working guide.
 
 ## Shipping a build
-1. Bump `GAME_VERSION` in `js/01-constants.js` by exactly one patch (0.2.147 → 0.2.148). Only when shipping or exporting a zip, not for in-progress edits.
-2. Add a `## v0.2.x - YYYY-MM-DD HH:MM` entry at the top of `CHANGELOG.md`, written for players (plain words, no code names).
-3. Commit as `v0.2.x: short summary`, push to `main`.
-4. Send `alienbuddies-v0.2.x.zip` (`git archive --format=zip HEAD`) as a backup. Always put the version in the file name and the message.
+`tools/ship.mjs` does the whole ritual — do not push by hand.
+1. Finish the change and play it in a browser.
+2. Bump `GAME_VERSION` in `js/01-constants.js` by exactly one patch (0.2.231 → 0.2.232). Only when shipping, not for in-progress edits.
+3. Add a `## v0.2.x - YYYY-MM-DD HH:MM` entry at the top of `CHANGELOG.md`, written for players (plain words, no code names), with at least one line under it.
+4. Run `node tools/ship.mjs`. It checks the tree, version step, changelog entry, JS syntax and `index.html` load order; rewrites the CURRENT STATE block above; commits `v<version>: <first changelog line>`; tags `v<version>`; pushes `main` and the tag; then waits for alienbuddies.space to serve the new version.
+   `--dry` checks only · `--no-live` skips the wait · `--zip <path>` writes a backup zip.
+5. Report the version, commit, tag and live status.
+
+Pushing is deploying. Never force-push, never reuse a version number, never delete a release tag.
+`AGENTS.md` holds the two-assistant handshake (pull before you start, push before you stop, one editor at a time, branches for big work, rollback).
 
 ## How the code is put together
 - `js/NN-name.js` load in number order as plain `<script>` tags (all globals, no modules). Top-level code may only use things from

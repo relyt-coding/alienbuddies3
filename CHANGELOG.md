@@ -2,6 +2,9 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.232 - 2026-11-27 00:45
+- Nothing changes in the game itself. Behind the scenes: every build now gets a version tag and a safety check before it goes live, so any build can be undone quickly.
+
 ## v0.2.231 - 2026-11-26 23:20
 - ALIEN PARTY costs five times more, so it's something to save up for instead of a buy you can afford the moment the Fusebox shows it.
 - The disco ball now drops in 3 seconds after the Fusebox cutscene (it used to wait 30 seconds).

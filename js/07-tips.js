@@ -169,7 +169,8 @@ function updateOnboardingArrows(){
   const isDesktop=document.body.classList.contains('desktop-mode');
   const shopBtn=isDesktop?document.getElementById('collapseShopBtn'):document.getElementById('openStoreBtn');
   if(arrowShop){
-    if(shopOpenCount===0&&score>=50000&&shopBtn&&!document.body.classList.contains('nav-locked')&&arrowTargetSeen(shopBtn)){
+    // v0.2.215: off for good: the Fusebox opens by itself the moment it's unlocked (js/89)
+    if(false&&shopOpenCount===0&&score>=50000&&shopBtn&&!document.body.classList.contains('nav-locked')&&arrowTargetSeen(shopBtn)){
       const rect=shopBtn.getBoundingClientRect();
       arrowShop.style.display='flex';
       if(isDesktop){

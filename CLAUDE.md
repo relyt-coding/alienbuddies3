@@ -130,7 +130,7 @@ README.md covers the file layout, test mode and vocals in depth; this file is th
 - FUSEBOX (v0.2.205): the shop's player-facing name (ids/classes/code still say store/shop). js/89: `body.fuse-locked` until drum.seqTracks>=1; the
   first buddy plays js/65 'navB' (bunker only), the sequencer plays 'navS' (fusebox only) ~2.6 s later; files opened while locked use 'allB'.
   `pageLocked(id)` drops locked pages from js/22's swipe order; openStore is a no-op while locked. Vault: `vaultUnlocked` (js/02), `body.vault-locked`
-  hides #tipsBtn + the swipe page; `#vaultBuyCard` sits before the DRUM PAD section, VAULT_COST = 100 J.
+  hides #tipsBtn + the swipe page; `#vaultBuyCard` sits before the DRUM PAD section, VAULT_COST = 150 J (v0.2.215).
 - FILL (v0.2.205, js/34): `#dawFillBtn` (top-left) / `#dawFillBtnR` (top-right) per empty side; one side filled with the other empty = '0px 2fr 1fr'
   (game 2/3, a blank 1/3 kept for future side-by-side views), both = `daw-full`; hold 2 s = both. Closing both panels never auto-fills.
 - Heat lamp (v0.2.205, js/50): `lampState/drawLampCone/drawLamp` in the egg reveal; taps wait LAMP_T (1.5 s) from `st.lampT0`; sways ±1.5°.
@@ -168,6 +168,9 @@ README.md covers the file layout, test mode and vocals in depth; this file is th
   the pad's pointerdown opens openPadPicker(idx) when the target is the badge.
 - v0.2.214: alienCost(3/4/5) = 10,000 / 50,000 / 250,000 (0.5 / 2.5 / 12.5 J on sale); n≥6 = `_alienCurve(n-3)` (the old curve, shifted 3 buddies later),
   so alienCost(98) = the old alienCost(95) (incubator lamps, extra bunkers and 100+ buddies are cheaper). Rerun tools/vault_prices.py if the Vault pace feels off.
+- v0.2.215: PAD_COSTS[4] = 750 (75 mJ, after the first buddy). VAULT_COST = 1.5M (150 J). js/91 Space also buys #vaultBuyCard, starts the matching game
+  (`#matchingGameBtn.match-glow`) when nothing is affordable, and clicks #matchVictoryClose on the win screen. js/83 setEggPad pads #scoreRow on BOTH sides.
+  The Fusebox arrow (js/07 arrowShop) is off. Sequencer step toggles (js/06) no longer preview the sound.
 - Skill-tree descriptions: `gemsOnly` (js/20) strips any written "×N Alien Gems" and appends the node's REAL `gemMult`, so never hand-write gem amounts.
 
 ## Testing without a phone

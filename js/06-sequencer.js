@@ -270,7 +270,7 @@ function addFullLayerRow(layer){
       btn.style.opacity=layer.steps[si]?String(0.3+0.7*(layer.vols[si]/100)):'';
       // Sync small grid
       if(layer.stepEls[si]){layer.stepEls[si].classList.toggle('on',layer.steps[si]);layer.stepEls[si].style.opacity=layer.steps[si]?String(0.3+0.7*(layer.vols[si]/100)):'';}
-      if(layer.steps[si]&&layerAudible(layer)){getCtx();playSound(layer.soundId,undefined,undefined,seqLayers.indexOf(layer));}
+      // v0.2.215: toggling a step is silent (a preview hit landed off the beat and was confusing)
     });
     stepsEl.appendChild(btn);layer.fullStepEls.push(btn);
   }
@@ -423,7 +423,7 @@ function addSeqLayer(soundId,stepsInit){
       btn.classList.toggle('on',layer.steps[si]);
       btn.style.opacity=layer.steps[si]?String(0.3+0.7*(layer.vols[si]/100)):'';
       if(layer.fullStepEls[si]){layer.fullStepEls[si].classList.toggle('on',layer.steps[si]);layer.fullStepEls[si].style.opacity=layer.steps[si]?String(0.3+0.7*(layer.vols[si]/100)):'';}
-      if(layer.steps[si]&&layerAudible(layer)){getCtx();playSound(layer.soundId,undefined,undefined,seqLayers.indexOf(layer));}
+      // v0.2.215: toggling a step is silent (a preview hit landed off the beat and was confusing)
     });
     stepsEl.appendChild(btn);layer.stepEls.push(btn);
   }

@@ -100,7 +100,7 @@
   // the egg out of its corner, the score row makes room: it gets extra left padding until they no longer touch.
   let eggPad=0,padKey='';
   let eggDrop=0;
-  function setEggPad(v){v=Math.max(0,Math.min(320,Math.round(v)));if(v!==eggPad){eggPad=v;const sr=$('scoreRow');if(sr)sr.style.paddingLeft=v?v+'px':'';}
+  function setEggPad(v){v=Math.max(0,Math.min(320,Math.round(v)));if(v!==eggPad){eggPad=v;const sr=$('scoreRow');if(sr){sr.style.paddingLeft=v?v+'px':'';sr.style.paddingRight=v?v+'px':'';}}   // v0.2.215: both sides, so the score stays centred
     if(!v&&eggDrop){eggDrop=0;const sa=$('seqArea');if(sa)sa.style.marginTop='';}}
   function setEggDrop(v){v=Math.max(0,Math.min(140,Math.round(v)));if(v===eggDrop)return;eggDrop=v;const sa=$('seqArea');if(sa)sa.style.setProperty('margin-top',v?v+'px':'','important');}
   function nudgeTrackers(){

@@ -3,7 +3,8 @@
 //  Press the space bar and the game presses the cheapest thing on screen you can afford right now: the dot trackers'
 //  ACTIVATE, the next drum pad, the egg (level-1 egg / corner egg), the sequencer teaser, the fusebox, the disco ball.
 //  Nothing affordable yet: the cheapest one on screen gives its usual "not yet" shake.
-//  On the hatch screen Space taps the egg (and once it's out, presses AWESOME!).
+//  On the hatch screen Space taps the egg (and once it's out, presses AWESOME!). v0.2.215: the Vault card counts too;
+//  with nothing affordable and a matching-game level ready, Space starts it; on its win screen Space claims the prize.
 //  Each thing is pressed through its own normal handler (pointerdown or click), so it behaves exactly like a tap.
 //  Minigames that use Space themselves (Buddy Race, Planet Hop) are left alone, and so are text boxes.
 // ══════════════════════════════════════════════
@@ -24,6 +25,9 @@
     if(typeof drum!=='undefined'&&drum.seqTracks===0)add($('seqTeaser'),typeof seqTrackCost==='function'?seqTrackCost(0):Infinity,'down');
     add($('fuseTeaser'),typeof FUSE_COST!=='undefined'?FUSE_COST:Infinity,'click');
     add($('partyTeaser'),typeof PARTY_LADDER!=='undefined'?PARTY_LADDER[0].cost:Infinity,'click');
+    // v0.2.215: the Vault card in the Fusebox counts even when it's scrolled out of view
+    const vc=$('vaultBuyCard');
+    if(vc&&vc.offsetParent!==null&&typeof vaultUnlocked!=='undefined'&&!vaultUnlocked&&typeof VAULT_COST!=='undefined')L.push({el:vc,cost:VAULT_COST,how:'click'});
     return L.sort((a,b)=>a.cost-b.cost);
   }
   document.addEventListener('keydown',e=>{
@@ -36,10 +40,21 @@
     if(er&&er.classList.contains('on')){e.preventDefault();
       if(er.classList.contains('show-btns')){const ok=$('erOk');ok&&ok.click();}else{const cv=$('erCanvas');cv&&press(cv,'down');}
       return;}
+    // v0.2.215: the matching game: on the win screen Space claims the prize (during a round it does nothing)
+    const mm=$('matchingModal');
+    if(mm&&getComputedStyle(mm).display!=='none'){e.preventDefault();
+      const mv=$('matchVictory'),cl=$('matchVictoryClose');
+      if(mv&&getComputedStyle(mv).display!=='none'&&cl)cl.click();
+      return;}
     if(B.contains('intro-run')||(typeof overlayUp==='function'&&overlayUp()))return;
-    const L=candidates();if(!L.length)return;
+    const L=candidates();
+    const afford=L.find(c=>typeof score==='number'&&score>=c.cost);
+    // nothing to unlock right now, but a matching-game level is ready: play it
+    const mg=$('matchingGameBtn');
+    if(!afford&&mg&&mg.classList.contains('match-glow')&&typeof openMatchingGame==='function'){e.preventDefault();openMatchingGame();return;}
+    if(!L.length)return;
     e.preventDefault();   // (also stops Space from pressing whatever button has focus)
-    const pick=L.find(c=>typeof score==='number'&&score>=c.cost)||L[0];   // nothing affordable: the cheapest shakes "not yet"
+    const pick=afford||L[0];   // nothing affordable: the cheapest shakes "not yet"
     press(pick.el,pick.how);
   });
 })();

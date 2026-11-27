@@ -2,6 +2,14 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.215 - 2026-11-26 21:20
+- The 5th drum pad now costs 75 mJ, so you'll have hatched your first buddy before it, and the new pad comes filled with that buddy's sound.
+- The Vault now costs 150 J.
+- Space bar (computers): it can now unlock the Vault; if there's nothing you can afford and a matching-game level is ready, it starts the level; and on the win screen it claims your prize.
+- The score and its energy bar stay centred when the corner egg is showing.
+- Removed the arrow pointing at the Fusebox (it opens by itself when you unlock it now).
+- Turning sequencer steps on or off is silent now, so it never throws off the beat.
+
 ## v0.2.214 - 2026-11-26 13:45
 - Smoother early buddies: after the 3rd (100 mJ), buddies cost 0.5 J, 2.5 J and 12.5 J before reaching 125 J, instead of jumping straight from 100 mJ to 125 J. The corner egg's energy cord now fills up at a steady pace. Every buddy after that costs a bit less than before.
 

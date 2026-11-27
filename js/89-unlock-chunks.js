@@ -10,7 +10,7 @@
 // ══════════════════════════════════════════════
 (function(){
   const B=document.body.classList,$=id=>document.getElementById(id);
-  const VAULT_COST=1000000;   // 100 J (internal units are 0.1 mJ)
+  const VAULT_COST=1500000;   // 150 J (v0.2.215, was 100 J; internal units are 0.1 mJ)
   window.VAULT_COST=VAULT_COST;
 
   // ── FUSEBOX lock ──

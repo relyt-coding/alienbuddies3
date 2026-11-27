@@ -1,8 +1,8 @@
 # Alien Buddies: notes for building
 
 <!-- ship:auto:start -->
-- Version: 0.2.241 · shipped 2026-11-27
-- Last change: Planet Hop boss fights: the second half of the last level in Glacia and…
+- Version: 0.2.242 · shipped 2026-11-27
+- Last change: Your ship is now a real little 3D model: it turns to face where it is…
 <!-- ship:auto:end -->
 
 **In flight / next:** nothing half-finished right now.

@@ -51,7 +51,7 @@
     '</svg>';
 
   // ── where it is, where it's going (map coordinates) ──
-  let pos={x:0,y:0},vel={x:0,y:0},goal=null,ang=0,face=1,raf=0,last=0,el=null;
+  let pos={x:0,y:0},vel={x:0,y:0},goal=null,ang=0,face=1,raf=0,last=0,el=null,heading=0,bank=0;
   const modal=document.getElementById('skillTreeModal');
   function nodeEl(id){return document.querySelector('#skillTreeInner .st-node[data-node="'+id+'"]');}
   function nodePos(id){   // a sun's real spot includes its orbit offset (js/35 sets `translate`)
@@ -66,7 +66,7 @@
   function dress(){
     el=nodeEl('core');if(!el)return;
     if(!el._ship){el._ship=1;el.classList.add('st-ship');el.classList.remove('st-body','st-star');
-      const c=el.querySelector('.st-node-circle');if(c){c.innerHTML='<div class="sh-bob">'+SHIP+'</div>';
+      const c=el.querySelector('.st-node-circle');if(c){c.innerHTML=window.ship3D?'<div class="sh-bob"><canvas class="sh-3d"></canvas></div>':'<div class="sh-bob">'+SHIP+'</div>';
         c.addEventListener('click',e=>{e.stopPropagation();goHome();});}
       const l=el.querySelector('.st-node-label');if(l){l.textContent='YOUR SHIP';l.addEventListener('click',e=>{e.stopPropagation();goHome();});}
       const k=el.querySelector('.st-node-cost');if(k)k.remove();}
@@ -84,7 +84,9 @@
   }
   function apply(){
     if(!el)return;el.style.translate=pos.x.toFixed(1)+'px '+pos.y.toFixed(1)+'px';el._mx=pos.x;el._my=pos.y;
-    const s=el.querySelector('.sh-svg');if(s)s.style.transform='scaleX('+face+') rotate('+(ang*face).toFixed(1)+'deg)';
+    const cv=el.querySelector('.sh-3d');
+    if(cv&&window.ship3D)window.ship3D.paint(cv,heading,bank);
+    else{const s=el.querySelector('.sh-svg');if(s)s.style.transform='scaleX('+face+') rotate('+(ang*face).toFixed(1)+'deg)';}
     el.classList.toggle('moving',Math.hypot(vel.x,vel.y)>40);
   }
   function step(t){
@@ -101,6 +103,11 @@
     const sp=Math.hypot(vel.x,vel.y),hx=sp>30?vel.x:(goal?tx:1),hy=sp>30?vel.y:(goal?ty:0);
     if(Math.abs(hx)>.01)face=hx<0?-1:1;
     const tilt=Math.max(-28,Math.min(28,Math.atan2(hy,Math.abs(hx)||1e-3)*180/Math.PI*.6));ang+=(tilt-ang)*Math.min(1,dt*6);
+    // the 3D ship turns towards where it is going (and banks into the turn) instead of mirroring
+    const whead=Math.atan2(hy,hx||1e-4);
+    let dd=((whead-heading+Math.PI*3)%(Math.PI*2))-Math.PI;
+    heading+=dd*Math.min(1,dt*4.5);
+    bank+=((-Math.max(-.32,Math.min(.32,dd*1.5)))-bank)*Math.min(1,dt*6);
     apply();raf=requestAnimationFrame(step);
   }
   function kick(){if(!raf&&modal&&modal.classList.contains('open')){last=0;raf=requestAnimationFrame(step);}}
@@ -120,6 +127,7 @@
 .st-node.st-ship .st-node-label{color:#7fd8ff;letter-spacing:.14em;cursor:pointer;}
 .st-node.st-ship .sh-bob{animation:shBob 3.2s ease-in-out infinite;filter:drop-shadow(0 0 10px rgba(95,224,255,.45));}
 .st-node.st-ship .sh-svg{display:block;transition:transform .25s;}
+.st-node.st-ship .sh-3d{display:block;filter:drop-shadow(0 0 10px rgba(95,224,255,.45));}
 .st-node.st-ship .sh-eng{animation:shEng 1.1s ease-in-out infinite alternate;}
 @keyframes shEng{from{opacity:.55;}to{opacity:1;}}
 .st-node.st-ship .sh-blink{animation:shBlink 1.6s steps(1) infinite;}.st-node.st-ship .sh-blink.b2{animation-delay:.8s;}

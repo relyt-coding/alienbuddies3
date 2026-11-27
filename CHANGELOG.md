@@ -2,6 +2,9 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.242 - 2026-11-27 08:10
+- Your ship is now a real little 3D model: it turns to face where it is flying, banks into its turns, and shows its tail when it flies away — no more flat picture flipping left and right. Same ship, same fins, dome and flame, just solid from every side.
+
 ## v0.2.241 - 2026-11-27 07:10
 - Planet Hop boss fights: the second half of the last level in Glacia and Magmora is now an arena. You stand at the checkpoint crystal and hop the boss's attacks as they come in on the beat.
 - Beat the Glacia scorpion to unlock the antenna shot: dodge on the beat to fill the energy bar, then press ZAP (or E / F) to fire. Magmora's lava plant has to be shot down.

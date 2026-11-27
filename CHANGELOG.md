@@ -2,6 +2,9 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.217 - 2026-11-26 21:30
+- On computers, the sequencer's dashed outline (before you unlock it) is a little narrower, so it no longer runs under the BUNKER and FUSEBOX tabs.
+
 ## v0.2.216 - 2026-11-26 21:20
 - Fixed: on phones, tapping your new buddy on the hatch screen could also play the drum pads hidden underneath. Screens on top of the game now keep your taps to themselves.
 

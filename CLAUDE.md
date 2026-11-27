@@ -173,6 +173,7 @@ README.md covers the file layout, test mode and vocals in depth; this file is th
   The Fusebox arrow (js/07 arrowShop) is off. Sequencer step toggles (js/06) no longer preview the sound.
 - v0.2.216: js/05's document-level touchstart (the PAD_REACH "just outside the grid" helper) only counts touches whose target is inside #gameView and
   only when overlayUp() is false: full-screen layers appended to body (egg hatch, cutscenes, Vault door, minigames) never fire pads under them.
+- v0.2.217: desktop `.seq-teaser` is calc(100% - 100px) wide, centred (clear of the edge tabs).
 - Skill-tree descriptions: `gemsOnly` (js/20) strips any written "×N Alien Gems" and appends the node's REAL `gemMult`, so never hand-write gem amounts.
 
 ## Testing without a phone

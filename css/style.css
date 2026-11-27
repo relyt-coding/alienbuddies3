@@ -3020,3 +3020,6 @@ body.phone-land #drumTrackerActivateBtn.act-btn.can{animation:abPulse 1.4s ease-
 /* v0.2.213: a pad's hotkey badge opens that pad's edit window (js/05) */
 body.desktop-mode .pad .pad-key:not(.ghost-key){pointer-events:auto;cursor:pointer;transition:background .15s,border-color .15s,color .15s,transform .15s;}
 body.desktop-mode .pad .pad-key:not(.ghost-key):hover{background:rgba(255,255,255,.16);border-color:rgba(255,255,255,.55);color:#fff;transform:scale(1.12);}
+
+/* v0.2.217: on desktop the sequencer teaser stays clear of the BUNKER / FUSEBOX edge tabs */
+body.desktop-mode .seq-teaser{width:calc(100% - 100px);margin-left:auto;margin-right:auto;}

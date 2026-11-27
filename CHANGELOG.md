@@ -2,6 +2,9 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.243 - 2026-11-27 08:40
+- The ship got its detail pass: a two-tone hull with panel seams, a teal racing stripe, a row of windows, a glass dome with a little pilot inside, engine glow behind the flame, plus fin tips and wing lights.
+
 ## v0.2.242 - 2026-11-27 08:10
 - Your ship is now a real little 3D model: it turns to face where it is flying, banks into its turns, and shows its tail when it flies away — no more flat picture flipping left and right. Same ship, same fins, dome and flame, just solid from every side.
 

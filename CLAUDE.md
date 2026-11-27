@@ -1,8 +1,8 @@
 # Alien Buddies: notes for building
 
 <!-- ship:auto:start -->
-- Version: 0.2.242 · shipped 2026-11-27
-- Last change: Your ship is now a real little 3D model: it turns to face where it is…
+- Version: 0.2.243 · shipped 2026-11-27
+- Last change: The ship got its detail pass: a two-tone hull with panel seams, a teal…
 <!-- ship:auto:end -->
 
 **In flight / next:** nothing half-finished right now.

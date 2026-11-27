@@ -1,8 +1,8 @@
 # Alien Buddies: notes for building
 
 <!-- ship:auto:start -->
-- Version: 0.2.238 · shipped 2026-11-27
-- Last change: Planet Hop is now 11 levels: Luna 1–3, Glacia 4–7, Magmora 8–11. Old…
+- Version: 0.2.239 · shipped 2026-11-27
+- Last change: The Planet Hop level box now shows one world per line — LUNA 1–3…
 <!-- ship:auto:end -->
 
 **In flight / next:** nothing half-finished right now.

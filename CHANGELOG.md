@@ -2,6 +2,9 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.239 - 2026-11-27 05:45
+- The Planet Hop level box now shows one world per line — LUNA 1–3, GLACIA 4–7, MAGMORA 8–11 — so you can always see where you are.
+
 ## v0.2.238 - 2026-11-27 05:20
 - Planet Hop is now 11 levels: Luna 1–3, Glacia 4–7, Magmora 8–11. Old Planet Hop stars are cleared once; everything else you own stays.
 - The last level of each world now ends at a warp portal, and the results screen points you to the Galaxies for the next world.

@@ -72,18 +72,23 @@ function phGemVal(b,L){return b&&b.cleared?(+L===1?1.5:((b.dust||0)>=.999?1:.5))
     const stars=Object.values(phProgress.best).reduce((a,b)=>a+(b.stars||0),0);
     const gb=Object.entries(phProgress.best).reduce((a,[k,b])=>a+phGemVal(b,k),0);
     $('phBonus').innerHTML=gb>0?`Planet Hop gem bonus: <b>+${gb}×</b> Alien Gems · ${stars} ★`:'';$('phBonus').style.display=gb>0?'':'none';
-    let top=0;for(let L=1;L<=11;L++)if(typeof mgPhAccess!=='function'||mgPhAccess(L))top=L;
-    const shown=top<=3?3:top<=7?7:11;
-    const gr=$('phGrid');gr.innerHTML='';
-    for(let L=1;L<=shown;L++){
-      const b=document.createElement('button');b.className='ww-tile';const best=phProgress.best[L]||{},op=phLevelOpen(L);
-      if(!op)b.classList.add('locked');if(L===sel&&op)b.classList.add('sel');if(phBoss(L))b.classList.add('boss');
-      b.style.borderColor=L===sel&&op?'':PH_PLANETS[phLevel(L).planet].glow+'55';
-      if(op)b.title=L+'. '+phLevel(L).name;
-      b.innerHTML=`<span class="n">${op?L:'🔒'}</span><span class="st">${best.cleared?'★'.repeat(best.stars||1)+'<i>'+'★'.repeat(3-(best.stars||1))+'</i>':best.pct?Math.round(best.pct*100)+'%':'<i>★★★</i>'}</span>`;
-      b.addEventListener('click',()=>{if(!op){showToast(typeof mgPhAccess==='function'&&!mgPhAccess(L)?'🔒 '+mgPhLockMsg(L):'Clear level '+(L-1)+' first');return;}sel=L;start(L);});
-      gr.appendChild(b);
-    }
+    const gr=$('phGrid');gr.innerHTML='';gr.classList.add('ph-worlds');
+    // v0.2.239: one world per line — Luna 1–3, Glacia 4–7, Magmora 8–11
+    [[0,1,3],[1,4,7],[2,8,11]].forEach(([pi,a,hi])=>{
+      const block=document.createElement('div');block.className='ph-world';
+      const nm=document.createElement('div');nm.className='ph-world-name';nm.textContent=PH_PLANETS[pi].name;nm.style.color=PH_PLANETS[pi].glow;
+      const row=document.createElement('div');row.className='ph-world-row';
+      for(let L=a;L<=hi;L++){
+        const b=document.createElement('button');b.className='ww-tile';const best=phProgress.best[L]||{},op=phLevelOpen(L);
+        if(!op)b.classList.add('locked');if(L===sel&&op)b.classList.add('sel');if(phBoss(L))b.classList.add('boss');
+        b.style.borderColor=L===sel&&op?'':PH_PLANETS[pi].glow+'55';
+        if(op)b.title=L+'. '+phLevel(L).name;
+        b.innerHTML=`<span class="n">${op?L:'🔒'}</span><span class="st">${best.cleared?'★'.repeat(best.stars||1)+'<i>'+'★'.repeat(3-(best.stars||1))+'</i>':best.pct?Math.round(best.pct*100)+'%':'<i>★★★</i>'}</span>`;
+        b.addEventListener('click',()=>{if(!op){showToast(typeof mgPhAccess==='function'&&!mgPhAccess(L)?'🔒 '+mgPhLockMsg(L):'Clear level '+(L-1)+' first');return;}sel=L;start(L);});
+        row.appendChild(b);
+      }
+      block.appendChild(nm);block.appendChild(row);gr.appendChild(block);
+    });
     $('phDetail').innerHTML='';
   }
 

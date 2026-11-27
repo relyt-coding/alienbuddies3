@@ -3055,3 +3055,10 @@ body.stats-open #gemRing{display:none !important;}
 #phWorldHint .pwh-big{font-size:1.7rem;letter-spacing:.14em;color:#7fe8ff;margin:.3rem 0 .5rem;}
 #phWorldHint .pwh-sub{font-size:1rem;letter-spacing:.08em;color:#a8c6d8;line-height:1.35;}
 #phWorldHint .pwh-btns{display:flex;gap:8px;justify-content:center;margin-top:16px;flex-wrap:wrap;}
+
+/* v0.2.239: Planet Hop level box — one world per line */
+#phGrid.ph-worlds{display:block !important;}
+.ph-world{margin-bottom:10px;}
+.ph-world-name{font-family:'Bebas Neue',sans-serif;font-size:.78rem;letter-spacing:.22em;margin:0 0 4px 2px;}
+.ph-world-row{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;}
+.ph-world:last-child{margin-bottom:0;}

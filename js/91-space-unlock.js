@@ -1,7 +1,7 @@
 // ══════════════════════════════════════════════
 //  SPACE = UNLOCK THE NEXT THING (v0.2.210, computers)
 //  Press the space bar and the game presses the cheapest thing on screen you can afford right now: the dot trackers'
-//  ACTIVATE, the next drum pad, the egg (level-1 egg / corner egg), the sequencer teaser, the fusebox, the disco ball.
+//  ACTIVATE, the egg (level-1 egg / corner egg), the sequencer teaser, the fusebox, the disco ball.
 //  Nothing affordable yet: the cheapest one on screen gives its usual "not yet" shake.
 //  On the hatch screen Space taps the egg (and once it's out, presses AWESOME!). v0.2.215: the Vault card counts too;
 //  with nothing affordable and a matching-game level ready, Space starts it; on its win screen Space claims the prize.
@@ -19,7 +19,7 @@
     const add=(el,cost,how)=>{if(vis(el)&&isFinite(cost))L.push({el,cost,how});};
     if(typeof drumTrackerActive!=='undefined'&&!drumTrackerActive)add($('drumTrackerActivateBtn'),DRUM_TRACKER_COST,'click');
     if(typeof seqTrackerActive!=='undefined'&&!seqTrackerActive)add($('seqTrackerActivateBtn'),typeof SEQ_TRACKER_COST!=='undefined'?SEQ_TRACKER_COST:Infinity,'click');
-    if(typeof drum!=='undefined'&&drum.pads<8)add($('ghostPad'),PAD_COSTS[drum.pads],'down');
+    // (v0.2.218: drum pads are NOT on Space: each new pad is bought with its own hotkey, so it's a choice)
     add($('padEgg'),aCost,'down');
     add(document.querySelector('.cornerEgg'),aCost,'down');
     if(typeof drum!=='undefined'&&drum.seqTracks===0)add($('seqTeaser'),typeof seqTrackCost==='function'?seqTrackCost(0):Infinity,'down');

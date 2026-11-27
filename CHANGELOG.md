@@ -2,6 +2,9 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.218 - 2026-11-26 21:35
+- The space bar no longer buys drum pads: each new pad is unlocked with its own hotkey, so adding a pad is your choice. Space still unlocks everything else.
+
 ## v0.2.217 - 2026-11-26 21:30
 - On computers, the sequencer's dashed outline (before you unlock it) is a little narrower, so it no longer runs under the BUNKER and FUSEBOX tabs.
 

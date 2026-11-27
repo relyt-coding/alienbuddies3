@@ -2,6 +2,10 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.228 - 2026-11-26 23:35
+- Matching game on the keyboard: the arrow keys move a glowing cursor between the cards, and Space (or Enter) flips the card under it.
+- Game controllers work: the D-pad or left stick acts like the arrow keys, A acts like Space (unlock the next thing, jump, flip a card) and B acts like Escape.
+
 ## v0.2.227 - 2026-11-26 23:20
 - Clearing Planet Hop level 1 now gives +1.5× Alien Gems (if you already cleared it, you get the extra automatically).
 - Planet Hop levels keep you busy: open stretches of ground now have a stardust hop on almost every beat, so there's always something to jump for. (Moon jumps and bounce pads still take two beats in the air.)

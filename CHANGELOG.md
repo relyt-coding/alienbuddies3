@@ -2,6 +2,10 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.224 - 2026-11-26 22:45
+- Drum pad keys now match the shape of your keyboard: the top row of pads is E R U I and the bottom row is D F J K, so your fingers rest on the home row. (If you changed your keys yourself, they're kept.) Worm Whack's craters follow the same layout.
+- Space unlocks one thing per press, and the Fusebox (or another big unlock) goes before an egg when you can afford both.
+
 ## v0.2.223 - 2026-11-26 22:30
 - Pressing Space to close the hatch screen no longer jumps straight into the matching game. The next Space press starts it.
 

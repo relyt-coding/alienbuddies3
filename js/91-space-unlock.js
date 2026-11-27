@@ -28,6 +28,8 @@
     // v0.2.215: the Vault card in the Fusebox counts even when it's scrolled out of view
     const vc=$('vaultBuyCard');
     if(vc&&vc.offsetParent!==null&&typeof vaultUnlocked!=='undefined'&&!vaultUnlocked&&typeof VAULT_COST!=='undefined')L.push({el:vc,cost:VAULT_COST,how:'click'});
+    // v0.2.224: one unlock per press, and a big unlock (sequencer, Fusebox, disco ball, Vault) goes before an egg
+    L.forEach(c=>{c.big=/^(seqTeaser|fuseTeaser|partyTeaser|vaultBuyCard)$/.test(c.el.id||'');});
     return L.sort((a,b)=>a.cost-b.cost);
   }
   // v0.2.223: the press that closes the hatch screen never also starts the matching game: it waits for the NEXT press
@@ -50,8 +52,11 @@
       if(mv&&getComputedStyle(mv).display!=='none'&&cl)cl.click();
       return;}
     if(B.contains('intro-run')||(typeof overlayUp==='function'&&overlayUp()))return;
+    // something is already unlocking (the egg lamp warming up, the Fusebox switch flipping): wait for it
+    if(document.querySelector('.cornerEgg.lit,#fuseTeaser.flipped')){e.preventDefault();return;}
     const L=candidates();
-    const afford=L.find(c=>typeof score==='number'&&score>=c.cost);
+    const can=L.filter(c=>typeof score==='number'&&score>=c.cost);
+    const afford=can.find(c=>c.big)||can[0];
     // nothing to unlock right now, but a matching-game level is ready: play it
     const mg=$('matchingGameBtn');
     // v0.2.220: only once the Bunker is unlocked AND showing (its button visible on screen, the first-buddy cutscene over)

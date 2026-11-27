@@ -186,6 +186,9 @@ README.md covers the file layout, test mode and vocals in depth; this file is th
   from planets), then `.full` = a BUNKER button (`openBunkerNow`); the 10-buddy shop note is gone. #gemRing: tap = nothing/nudge before space, map after
   (label SPACE); hold = unlock / replay (js/59). Gem math only from the bunker/shop gem counters + the score breakdown. Shop card says HATCH ALIEN BUDDY.
 - v0.2.223: js/91 won't start the matching game within 700 ms of `egg-reveal-closed` (js/50) or while `.cornerEgg.lit`: the press that closes a hatch never also opens a game.
+- v0.2.224: default pad keys (js/05) by POSITION: top E R U I = pads 8 1 2 6, bottom D F J K = pads 7 3 4 5 (DEFAULT_KEYS by index R U F J K I D E;
+  old untouched defaults migrate). daw-wide's one row uses CSS `order` (column by column: E D R F U J I K). Worm Whack CR_MAP matches. js/91 Space: big
+  unlocks (seq/fuse/party teaser, Vault card) beat eggs when affordable; nothing while `.cornerEgg.lit` / `#fuseTeaser.flipped`.
 - Skill-tree descriptions: `gemsOnly` (js/20) strips any written "×N Alien Gems" and appends the node's REAL `gemMult`, so never hand-write gem amounts.
 
 ## Testing without a phone

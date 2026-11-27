@@ -150,6 +150,10 @@ function rebuildPadGrid(){
     const c0=_tot>=7?1:0,POS=[[1,1+c0],[1,2+c0],[2,1+c0],[2,2+c0],[2,3+c0],[1,3+c0],[2,1],[1,1]];
     [...padGridEl.children].forEach((el,i)=>{const p=POS[i];if(p){el.style.gridRow=String(p[0]);el.style.gridColumn=String(p[1]);}});
   }
+  // v0.2.224: in the one-row DAW layout the pads go column by column of that same shape (8 7 1 3 2 4 6 5),
+  //   so their keys read E D R F U J I K left to right, like the keyboard
+  const WIDE_ORDER=[2,4,3,5,7,6,1,0];
+  [...padGridEl.children].forEach((el,i)=>{el.style.order=i<8?String(WIDE_ORDER[i]):'';});
   if(_ghostN)updateGhostPad();
   if(typeof fitPadAreaSoon==='function')fitPadAreaSoon(); // keep the grid inside the free vertical space
   updatePadClickHint();
@@ -366,15 +370,16 @@ let bindingForPad = null;
 function loadPadBindings(){
   let saved=null;
   try{ saved=localStorage.getItem('ab2_pad_bindings'); if(saved) padBindings=JSON.parse(saved); }catch(e){}
-  // Defaults (all changeable) follow the pad grid's shape (4 across × 2 rows):
-  //   top row    D F J K   (pads 1-4)
-  //   bottom row C V N M   (pads 5-8)   → left hand D F C V, right hand J K N M
-  const DEFAULT_KEYS=['D','F','J','K','C','V','N','M'];
+  // Defaults (all changeable) follow the keyboard's shape (v0.2.224). With all 8 pads the grid is 4 across × 2 rows
+  //   (js/05 rebuildPadGrid: pads 1–4 the middle 2×2, 5 BR, 6 TR, 7 BL, 8 TL), so by position on screen:
+  //     top row    E R U I        → pads 8 1 2 6
+  //     bottom row D F J K        → pads 7 3 4 5   (fingers rest on the home row, reach up for the top row)
+  //   4 pads = R U / F J (both index fingers); 6 pads add I / K; 8 add E / D.
+  const DEFAULT_KEYS=['R','U','F','J','K','I','D','E'];
   const defaults={};DEFAULT_KEYS.forEach((k,i)=>defaults[i]={key:'Key'+k,label:k});
   const mk=keys=>{const o={};keys.forEach((k,i)=>o[i]={key:'Key'+k,label:k});return JSON.stringify(o);};
-  const OLD3=mk(['J','F','D']),OLD8=mk(['J','F','D','K','R','E','U','I']);
-  // First run, or still on an earlier default set (never customised) -> use the current defaults
-  if(!saved||[OLD3,OLD8].includes(JSON.stringify(padBindings))){padBindings=defaults;savePadBindings();}
+  const OLD3=mk(['J','F','D']),OLD8=mk(['J','F','D','K','R','E','U','I']),OLD8B=mk(['D','F','J','K','C','V','N','M']);
+  if(!saved||[OLD3,OLD8,OLD8B].includes(JSON.stringify(padBindings))){padBindings=defaults;savePadBindings();}
 }
 function savePadBindings(){
   try{ localStorage.setItem('ab2_pad_bindings',JSON.stringify(padBindings)); }catch(e){}

@@ -32,6 +32,7 @@ body.edit-pads-off #padEditToggleBtn{display:none !important;}
 body.desktop-mode.pads-wide:not(.daw-wide) #gameView .app{justify-content:flex-start;gap:clamp(14px,3.2vh,34px);}
 /* the wide DAW row keeps pads in one line, in order (js/05 places 5–8 around the 2×2 everywhere else) */
 body.daw-wide .pad-grid>*{grid-row:auto !important;grid-column:auto !important;}
+body:not(.daw-wide) .pad-grid>*{order:0 !important;}
 /* the sequencer dots never need their own unlock now */
 #seqTrackerOverlay{display:none !important;}`;
   document.head.appendChild(css);

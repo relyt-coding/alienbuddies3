@@ -19,8 +19,8 @@ function wwGemVal(b){return b&&(b.stars||0)>=1?(b.stars>=3?1:.5):0;}
   const WW_BONKS=['BONK!','WHAP!','POW!','BOP!','THWACK!','BAM!'];   // just a fun noise word, the same for every hit in time
   const FALLBACK_KIT=['kick','snare','hihat','clap','rimshot','floortom','shaker','cowbell'];
   // which drum pad each crater uses, so craters sit where their pads (and keys) sit:
-  //   8 craters = all pads (D F J K / C V N M) · 6 = D F J / C V N · 4 = F J / V N
-  const CR_MAP={4:[1,2,5,6],6:[0,1,2,4,5,6],8:[0,1,2,3,4,5,6,7]};
+  //   (v0.2.224: same shape as the pad grid) 8 craters = E R U I / D F J K · 6 = R U I / F J K · 4 = R U / F J
+  const CR_MAP={4:[0,1,2,3],6:[0,1,5,2,3,4],8:[7,0,1,5,6,2,3,4]};
   const padOf=i=>G&&G.map?G.map[i]:i;
   const craterOf=pi=>G&&G.map?G.map.indexOf(pi):pi;
   const keyLbl=i=>(typeof padBindings!=='undefined'&&padBindings[padOf(i)]&&padBindings[padOf(i)].label)||'';

@@ -2,6 +2,9 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.220 - 2026-11-26 21:50
+- The space bar no longer starts the Matching Game before you've hatched your first buddy and the Bunker has opened.
+
 ## v0.2.219 - 2026-11-26 21:45
 - PLANET HOP is now in your Bunker, right under the Matching Game: unlock it for 5 Alien Gems and play levels 1–3 straight away. Every win boosts your Alien Gems for good, so it's the place to grind gems. The Minigame Cockpit in the skill tree now opens levels 4–5.
 - The Matching Game and Planet Hop buttons are bigger and easier to spot, each with its own drawn icon.

@@ -178,6 +178,7 @@ README.md covers the file layout, test mode and vocals in depth; this file is th
 - v0.2.219: PLANET HOP is bought in the bunker for MG_PRICE.ph = 5 💎 (js/44 mgBuy('ph'), via #planetHopBtn's click in js/41) → levels 1–3;
   mg_cockpit opens 4–5 (mgPhAccess / mgPhLockMsg). mgRefresh shows #planetHopBtn always, right after #matchingGameLock. Both buttons get SVG icons
   as `::before` data-URIs (css end; survives updateMatchingBtn's inline styles). Once the Cockpit is owned they move into it (unchanged).
+- v0.2.220: js/91 Space starts the matching game only when #matchingGameBtn is visible on screen, no nav-locked / buddy-hold, and totalAliens ≥ 1.
 - Skill-tree descriptions: `gemsOnly` (js/20) strips any written "×N Alien Gems" and appends the node's REAL `gemMult`, so never hand-write gem amounts.
 
 ## Testing without a phone

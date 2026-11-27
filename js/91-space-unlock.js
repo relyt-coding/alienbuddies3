@@ -51,7 +51,9 @@
     const afford=L.find(c=>typeof score==='number'&&score>=c.cost);
     // nothing to unlock right now, but a matching-game level is ready: play it
     const mg=$('matchingGameBtn');
-    if(!afford&&mg&&mg.classList.contains('match-glow')&&typeof openMatchingGame==='function'){e.preventDefault();openMatchingGame();return;}
+    // v0.2.220: only once the Bunker is unlocked AND showing (its button visible on screen, the first-buddy cutscene over)
+    const mgReady=mg&&vis(mg)&&!B.contains('nav-locked')&&!B.contains('buddy-hold')&&typeof totalAliens==='number'&&totalAliens>=1;
+    if(!afford&&mgReady&&mg.classList.contains('match-glow')&&typeof openMatchingGame==='function'){e.preventDefault();openMatchingGame();return;}
     if(!L.length)return;
     e.preventDefault();   // (also stops Space from pressing whatever button has focus)
     const pick=afford||L[0];   // nothing affordable: the cheapest shakes "not yet"

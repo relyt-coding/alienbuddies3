@@ -2,6 +2,13 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.222 - 2026-11-26 22:15
+- The Fusebox now waits in its own spot in the top-right corner, across from the egg, instead of sliding around as your energy grows. Once you buy it, the disco ball takes that spot, and after the party the Alien Gem button moves in there too.
+- Unlocking the Fusebox goes straight into its cutscene (no more 2-second pause).
+- The egg in the top-left now stays for your whole first 99 buddies, so it's always clear there are more to hatch. After 99 it becomes a BUNKER button, where the incubator is.
+- Once space is open, the Alien Gem button turns into the SPACE button: tap it to open the map, hold it to watch the launch again. The Alien Gem math now lives on the gem counters in the Bunker and Fusebox, and in the score breakdown.
+- The Fusebox card now says HATCH ALIEN BUDDY.
+
 ## v0.2.221 - 2026-11-26 22:00
 - On computers, the Bunker and Fusebox tabs no longer flicker after their unlock cutscene: the panel just stays open.
 - The corner egg's energy cord now runs behind its price, so it never covers the number.

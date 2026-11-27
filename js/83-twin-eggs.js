@@ -5,15 +5,15 @@
 //  (alienCost(totalAliens): buddies 2 + 3 are 50 mJ each, js/01). Tap it with enough energy and THAT buddy hatches
 //  (its pick goes to alienData[n].base before buyAlien). v0.2.209: a heat lamp hangs over it, joined to the price tag by a
 //  cord that fills as you save up; tapping lights the lamp, then the hatch screen opens with its lamp on and the egg landed. Not enough yet: it wobbles and its tag pops; the wobble gets
-//  livelier as your energy gets close. After each hatch the next egg rolls in, until you have 10 buddies; then a small
-//  card says that from now on they're bought in the Shop (once per slot, localStorage ab2_eggShopNote_N).
+//  livelier as your energy gets close. After each hatch the next egg rolls in. v0.2.222: it stays for the whole first
+//  bundle of 99 buddies (the next 99 come from planets); after that it's a BUNKER button (the incubator lives there).
 //  The Shop's green PET ALIEN BUDDY card shows the same egg wiggling (#shopEgg), and buying there hatches that same
 //  pick too (a capture listener sets the base just before js/16's buyAlien runs).
 //  If the PARTY pill sits in the corner (js/72) the egg waits just under it. On computers it's the top-left of the drum pad column.
 // ══════════════════════════════════════════════
 (function(){
   const B=document.body.classList,$=id=>document.getElementById(id);
-  const LAST=10;                                // eggs keep coming until you have this many buddies
+  const LAST=99;                                // v0.2.222: eggs keep coming for the whole first bundle (99); after that the egg is a door to the Bunker (its incubator)
   let lastXY=null,egg=null,pick=null,pickFor=-1,sawZero=false,readyAt=0,raf=0,t0=0,lastN=-1,shopEgg=null;
   const cost=()=>alienCost(totalAliens);
   const k_=()=>(typeof TEST_MODE!=='undefined'&&TEST_MODE?'ab2t_':'ab2_')+'eggShopNote_'+(typeof activeSlot!=='undefined'?activeSlot:0);
@@ -59,11 +59,15 @@
         // row instead, just left of the gem ring / FUSEBOX, and if that's taken too, just under the BUNKER button
         const ew=egg.offsetWidth||80,eh=egg.offsetHeight||40,vis=e=>{if(!e)return null;const q=e.getBoundingClientRect();return q.width>2&&getComputedStyle(e).visibility!=='hidden'?q:null;};
         const txt=e=>{if(!e)return null;try{const rg=document.createRange();rg.selectNodeContents(e);const q=rg.getBoundingClientRect();return q.width?q:null;}catch(_){return null;}};
-        const busy=[txt($('scoreEl')),vis($('landRateEl')),vis($('drumTrackerActivateBtn')),vis($('gemRing')),vis($('openStoreBtn')),vis($('partyBtn')),vis($('partyTeaser'))].filter(Boolean);
+        const busy=[txt($('scoreEl')),vis($('landRateEl')),vis($('drumTrackerActivateBtn')),vis($('gemRing')),vis($('openStoreBtn')),vis($('partyBtn')),vis($('partyTeaser')),vis($('fuseTeaser'))].filter(Boolean);
         const hits=(x0,y0)=>busy.some(q=>x0<q.right+6&&x0+ew>q.left-6&&y0<q.bottom&&y0+eh>q.top);
-        if(hits(x,y)){const right=Math.min(innerWidth-8,...[vis($('gemRing')),vis($('openStoreBtn'))].filter(Boolean).map(q=>q.left-10));
+        if(hits(x,y)){const right=Math.min(innerWidth-8,...[vis($('gemRing')),vis($('openStoreBtn')),vis($('partyTeaser')),vis($('fuseTeaser'))].filter(Boolean).map(q=>q.left-10));
           const x2=right-ew;if(!hits(x2,y)&&x2>r.right)x=x2;
-          else{const bb=vis($('openBunkerBtn'));x=bb?bb.left:10;y=(bb?bb.bottom:r.bottom)+6;}}}
+          else{   // v0.2.222: next try = under the top-right corner item (left of the sequencer's full-screen button), then under BUNKER
+            const cq=[vis($('gemRing')),vis($('openStoreBtn')),vis($('partyTeaser')),vis($('fuseTeaser'))].filter(Boolean),fs=vis($('seqExpandBtn'));
+            const x3=Math.min(innerWidth-8,fs?fs.left-8:innerWidth-8)-ew,y3=cq.length?Math.max(...cq.map(q=>q.bottom))+4:r.bottom+6;
+            if(cq.length&&!hits(x3,y3)){x=x3;y=y3;}
+            else{const bb=vis($('openBunkerBtn'));x=bb?bb.left:10;y=(bb?bb.bottom:r.bottom)+6;}}}}
     }
     const pb=$('partyBtn');
     if(pb&&pb.classList.contains('pb-corner')&&getComputedStyle(pb).display!=='none'){   // (fixed: no offsetParent, v0.2.207)
@@ -72,15 +76,14 @@
     if(desk)nudgeTrackers();
   }
   function want(){
-    return B.contains('game-active')&&typeof totalAliens==='number'&&totalAliens>=1&&totalAliens<LAST&&
-      totalAliens<(typeof bunkerCapacity==='function'?bunkerCapacity():99)&&
+    return B.contains('game-active')&&typeof totalAliens==='number'&&totalAliens>=1&&
       !B.contains('nav-locked')&&!B.contains('buddy-hold')&&!B.contains('intro-run')&&!(typeof newFileIntroRunning==='function'&&newFileIntroRunning());
   }
   function sync(){
     if(typeof totalAliens!=='number')return;
     if(totalAliens<1&&B.contains('game-active'))sawZero=true;
     // the 10th buddy just arrived while playing: tell them where eggs come from now
-    if(lastN>=1&&lastN<LAST&&totalAliens>=LAST&&B.contains('game-active'))shopNote();
+    
     if(B.contains('game-active'))lastN=totalAliens;
     syncShopEgg();
     const er=$('eggReveal'),revealOn=!!(er&&er.classList.contains('on'));
@@ -92,7 +95,8 @@
     const p=curPick();
     egg.style.visibility='';
     if(egg._n!==totalAliens||egg._sz!==size().w){egg._n=totalAliens;egg._sz=size().w;paintTo(egg.querySelector('canvas'),p,size());}
-    const tg=egg.querySelector('.pe-tag'),h=fmtJh(cost());if(tg._h!==h){tg._h=h;tg.innerHTML=h;}
+    const full=totalAliens>=LAST;egg.classList.toggle('full',full);
+    const tg=egg.querySelector('.pe-tag'),h=full?'BUNKER':fmtJh(cost());if(tg._h!==h){tg._h=h;tg.innerHTML=h;}
     place();if(!raf){t0=performance.now();raf=requestAnimationFrame(frame);}
   }
   function clear(){if(egg){egg.remove();egg=null;}setEggPad(0);}
@@ -124,13 +128,14 @@
     const shopOn=shopEgg&&shopEgg.offsetParent;
     if(!egg&&!shopOn){raf=0;return;}raf=requestAnimationFrame(frame);
     if(document.hidden)return;   // nothing to draw while the tab is in the background
-    const c=cost(),ready=score>=c,p=Math.max(0,Math.min(1,score/c)),t=(now-t0)/1000;
+    const full=totalAliens>=LAST,c=cost(),ready=!full&&score>=c,p=full?1:Math.max(0,Math.min(1,score/c)),t=(now-t0)/1000;
     if(egg){egg.classList.toggle('ready',ready);const wi=egg.querySelector('.pe-wire i');if(wi)wi.style.clipPath='inset('+((1-p)*100).toFixed(1)+'% 0 0 0)';let sh=0;if(egg._shake>0){sh=Math.sin(t*55)*10*egg._shake;egg._shake=Math.max(0,egg._shake-.06);}
       wob(egg.querySelector('.pe-body'),t,ready,p,sh);}
     if(shopOn){shopEgg.classList.toggle('ready',ready);wob(shopEgg.firstChild,t+.4,ready,p,0);}
   }
   function tap(){
     if(!egg||egg._lit)return;
+    if(totalAliens>=LAST){openBunkerNow();return;}   // first 99 hatched: the next eggs come from the incubator in the Bunker
     if(score<cost()){egg._shake=1;const tg=egg.querySelector('.pe-tag');tg.classList.remove('bump');void tg.offsetWidth;tg.classList.add('bump');return;}
     // v0.2.209: the lamp clicks on and warms the egg first, so the hatch screen opens with its lamp already on (tap to hatch right away)
     egg._lit=1;egg.classList.add('lit');
@@ -138,6 +143,11 @@
       k.tone(S,S.t+.04,120,{a:.025,k:.15,hold:.5,d:.3});k.tone(S,S.t+.08,660,{type:'triangle',a:.03,d:.4,rv:.5});}}}catch(e){}
     setTimeout(()=>{if(score<cost()){if(egg){egg._lit=0;egg.classList.remove('lit');}return;}
       setBase();clear();window.__eggOpenOpts={landed:true,lampOn:true};buyAlien();if(window.__eggOpenOpts&&window.__eggOpenOpts.lampOn)window.__eggOpenOpts=null;sync();},750);
+  }
+  function openBunkerNow(){
+    if(!B.contains('desktop-mode')&&typeof swipeNavGo==='function'){swipeNavGo(2,1);return;}
+    const bv=$('bunkerView');if(bv&&!bv.classList.contains('sidebar-collapsed'))return;
+    if(typeof openBunker==='function')openBunker();if(typeof repositionCollapseButtons==='function')setTimeout(repositionCollapseButtons,380);
   }
   function setBase(){                           // the egg you see is the buddy you get
     const n=totalAliens;if(score<cost())return;
@@ -176,6 +186,9 @@
 body.phone-land #shopEgg{right:6px;bottom:4px;}
 #alienBuyBtn *{pointer-events:none;}   /* the whole green card is one button: taps never land on its text */
 .cornerEgg.fix{position:fixed;z-index:40;}
+.cornerEgg.full .pe-wire{display:none;}
+.cornerEgg.full .pl-bulb{background:#ffe9a8;box-shadow:0 0 8px 2px rgba(255,214,120,.6);}
+.cornerEgg.full .pe-tag{letter-spacing:.12em;color:#9fffd0;}
 .cornerEgg .pe-lamp{position:relative;width:34px;height:20px;margin-bottom:-4px;pointer-events:none;}
 .cornerEgg .pl-cord{position:absolute;left:50%;top:-6px;width:2px;height:9px;margin-left:-1px;background:#6a6450;}
 .cornerEgg .pl-shade{position:absolute;left:3px;right:3px;top:2px;height:13px;border-radius:14px 14px 3px 3px;background:linear-gradient(#8a8f9a,#4a4f5c);border:1.5px solid #1e2028;}

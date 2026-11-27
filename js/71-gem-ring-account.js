@@ -91,10 +91,7 @@ body.desktop-mode #accountBox{border-radius:20px;}
   const fmt=v=>typeof fmtGems==='function'?fmtGems(v):String(Math.floor(v));
   function goal(){
     if(typeof skillTreeUnlocked==='undefined'||!skillTreeUnlocked)return{cost:typeof GEM_UNLOCK_COST!=='undefined'?GEM_UNLOCK_COST:25,label:'GALAXIES'};
-    let best=null;
-    if(typeof SKILL_TREE_NODES!=='undefined'&&typeof skillAvailable==='function'&&typeof skillCost==='function')
-      SKILL_TREE_NODES.forEach(n=>{if(!skillAvailable(n.id))return;const c=skillCost(n);if(!best||c<best.cost)best={cost:c,label:String(n.name||'').replace(/^Continent:\s*/,'').toUpperCase()};});
-    return best||{cost:0,label:'GALAXY MAP'};
+    return {cost:0,label:'SPACE'};   // v0.2.222: once space is open it's the SPACE button (tap = map, hold = the launch again)
   }
   function wantShown(){
     if(!B.contains('game-active')||B.contains('nav-locked'))return false;
@@ -109,25 +106,9 @@ body.desktop-mode #accountBox{border-radius:20px;}
     const land=B.contains('phone-land'),desk=B.contains('desktop-mode');
     ring.classList.toggle('gr-h',land||desk);ring.classList.toggle('gr-v',!land&&!desk);
     ring.style.setProperty('--gr',land?'34px':desk?'50px':'58px');
-    const W=innerWidth;
-    if(land){   // next to SHOP in the header row
-      const sb=$('openStoreBtn'),r=sb&&sb.getBoundingClientRect();const w=ring.offsetWidth||90,h=ring.offsetHeight||34;
-      const right=r&&r.width?r.left-10:W-12;ring.style.left=(right-w)+'px';ring.style.top=Math.max(2,(r&&r.width?r.top+r.height/2:22)-h/2)+'px';ring.style.right='auto';return;}
-    if(desk){   // beside the score
-      const se=$('scoreEl');let r=null;try{const rg=document.createRange();rg.selectNodeContents(se);r=rg.getBoundingClientRect();}catch(e){}
-      if(!r||!r.width)r=se?se.getBoundingClientRect():null;
-      const h=ring.offsetHeight||50;const em=$('energyMeter'),emr=em&&em.offsetParent?em.getBoundingClientRect():null;   // (v0.2.207: clear of the energy bar under the score too)
-      if(r){const w=ring.offsetWidth||150,lx=Math.max(r.right,emr&&emr.width?emr.right:0)+26,ty=r.top+r.height/2-h/2;
-        // v0.2.207: if that runs into the SEQUENCER tracker (narrow column, a panel open), it goes to the column's top-right corner instead
-        const at=$('autoTiersCol'),q=at&&at.offsetParent?at.getBoundingClientRect():null;
-        const hit=q&&q.width&&lx<q.right&&lx+w>q.left-8&&ty<q.bottom&&ty+h>q.top;
-        if(!hit){ring.style.left=lx+'px';ring.style.top=ty+'px';}
-        else{const ap=document.querySelector('#gameView .app'),cr=ap?ap.getBoundingClientRect():{right:innerWidth,top:0};
-          let right=cr.right-14;const fr=$('dawFillBtnR'),fq=fr&&fr.classList.contains('show')?fr.getBoundingClientRect():null;
-          if(fq&&fq.width&&right>fq.left-8)right=fq.left-10;
-          ring.style.left=(right-w)+'px';ring.style.top=(Math.max(0,cr.top)+10)+'px';}
-        ring.style.right='auto';}return;}
-    // upright phone: top-right corner
+    // v0.2.222: the top-right "next unlock" spot (js/89 cornerSpotR), after the Fusebox teaser and the disco ball
+    const w=ring.offsetWidth||90,h=ring.offsetHeight||50;
+    if(typeof cornerSpotR==='function'){const p=cornerSpotR(w,h);ring.style.left=p.x+'px';ring.style.top=p.y+'px';ring.style.right='auto';return;}
     ring.style.left='auto';ring.style.right='10px';ring.style.top='calc(env(safe-area-inset-top,0px) + 8px)';
   }
   function paint(){

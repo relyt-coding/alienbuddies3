@@ -44,11 +44,8 @@
     window.openStDetail=wrap;try{openStDetail=wrap;}catch(e){}
   }
 
-  // ── the gem ring: a tap shows the gem math ──
-  const ring=document.getElementById('gemRing');
-  if(ring)ring.addEventListener('click',e=>{
-    if(document.body.classList.contains('galaxy-intro')||ring._skipOpen)return;
-    e.stopImmediatePropagation();if(typeof openGemStats==='function')openGemStats();},true);
+  // v0.2.222: the gem ring no longer opens the gem math (that's the gem counters in the Bunker / Fusebox, and the score breakdown);
+  //   once space is open it's the SPACE button (js/71: tap = map, hold = the launch again)
   if(typeof openGemStats==='function'){const og=openGemStats;window.openGemStats=function(){const r=og.apply(this,arguments);
     const L=document.getElementById('scoreStatsList');
     if(L&&!L.querySelector('.gh-tip')){const d=document.createElement('div');d.className='gh-tip';d.textContent='HOLD ALIEN GEM BUTTONS DOWN TO UNLOCK THEM';L.appendChild(d);}

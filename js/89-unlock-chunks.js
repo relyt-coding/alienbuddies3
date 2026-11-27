@@ -26,7 +26,7 @@
     if(!B.contains('fuse-locked'))return;
     if(quiet){B.remove('fuse-locked');return;}
     // v0.2.208: the Fusebox is bought from its teaser (below): the switch flips, then its cutscene plays and it opens
-    if(!fusePending)fusePending=performance.now()+900;
+    if(!fusePending)fusePending=performance.now()+150;
     if(performance.now()<fusePending||busy())return;
     fusePending=0;B.remove('fuse-locked');
     if(typeof playNewFileIntro!=='function'||!playNewFileIntro({mode:'navS',onDone:()=>{if(typeof repositionCollapseButtons==='function')repositionCollapseButtons();openNew('fuse');}}))
@@ -49,6 +49,7 @@
   }
   window.openNewlyUnlocked=openNew;
   setInterval(()=>syncFuse(false),300);
+  window.fuseUnlockNow=()=>{fusePending=performance.now()-1;syncFuse(false);};
   if(typeof startGame==='function'){const sg=window.startGame;window.startGame=function(){const r=sg.apply(this,arguments);loadedAt=performance.now();syncFuse(true);syncVault();return r;};}
   // swipes skip a locked Fusebox / Vault (js/22 reads this)
   window.pageLocked=function(id){return id===1?B.contains('fuse-locked'):id===6?B.contains('vault-locked'):false;};
@@ -155,6 +156,26 @@ window.tzPlace=function(side,x,y,w,h,score){
   return {x,y};
 };
 window.tzRelease=function(){};
+// ══════════════════════════════════════════════
+//  TOP-RIGHT "NEXT BIG UNLOCK" SPOT (v0.2.222). The corner egg owns the top-left; its mirror on the right holds one
+//  thing at a time: the Fusebox teaser, then (once that's bought) the disco ball, then (after the party) the Alien Gem /
+//  SPACE ring (js/71). It never moves with the score. cornerSpotR(w,h) = viewport x/y for something w×h.
+// ══════════════════════════════════════════════
+window.cornerSpotR=function(w,h){
+  const B=document.body.classList,$=id=>document.getElementById(id);
+  const vis=e=>{if(!e)return null;const q=e.getBoundingClientRect();return q.width>2&&getComputedStyle(e).display!=='none'&&getComputedStyle(e).visibility!=='hidden'?q:null;};
+  if(B.contains('phone-land')){   // sideways phone: the end of the header row, just left of SHOP (if it's there)
+    const sb=vis($('openStoreBtn')),right=sb?sb.left-10:innerWidth-12;
+    return {x:right-w,y:Math.max(2,(sb?sb.top+sb.height/2:22)-h/2)};}
+  if(B.contains('desktop-mode')){   // computer: the top-right of the drum pad column (the egg is top-left)
+    const gv=$('gameView'),ap=gv&&gv.querySelector('.app'),el=ap&&ap.getBoundingClientRect().width?ap:gv,r=el?el.getBoundingClientRect():{left:0,top:0,right:innerWidth};
+    let x=Math.min(innerWidth,r.right)-16-w,y=Math.max(0,r.top)+14;
+    const fq=vis($('dawFillBtnR'));if(fq&&$('dawFillBtnR').classList.contains('show')&&x+w>fq.left-8)y=Math.max(y,fq.bottom+8);
+    return {x,y};}
+  // upright phone: the top-right corner, level with the egg
+  let st=0;try{const d=document.createElement('div');d.style.cssText='position:fixed;visibility:hidden;padding-top:env(safe-area-inset-top,0px)';document.body.appendChild(d);st=parseFloat(getComputedStyle(d).paddingTop)||0;d.remove();}catch(e){}
+  return {x:innerWidth-10-w,y:12+st};
+};
 (function(){const c=document.createElement('style');c.textContent=`
 body.phone-land #partyTeaser,body.phone-land #fuseTeaser{flex-direction:row;gap:4px;}
 body.phone-land #partyTeaser .pt-string,body.phone-land #fuseTeaser .ft-wire{display:none;}`;document.head.appendChild(c);})();
@@ -213,23 +234,10 @@ body.phone-land #partyTeaser .pt-string,body.phone-land #fuseTeaser .ft-wire{dis
         g.fillStyle='#c9ccd2';g.fillRect(x0+dw-4*u,y0+dh*.5-3*u,2*u,6*u);}}
     if(flip&&flip<1.01)flip=Math.min(1.01,flip+.12);
   }
-  function place(){
-    const se=$('scoreEl'),gv=$('gameView');if(!se||!gv)return;
+  function place(){   // v0.2.222: a fixed spot, top-right (js/89 cornerSpotR), mirroring the corner egg: it no longer slides as the score grows
+    const gv=$('gameView');if(!gv)return;
     if(tz.parentElement!==gv)gv.appendChild(tz);
-    let r;try{const rg=document.createRange();rg.selectNodeContents(se);r=rg.getBoundingClientRect();}catch(e){}
-    if(!r||!r.width)r=se.getBoundingClientRect();
-    const o=gv.getBoundingClientRect(),w=tz.offsetWidth||56,h=tz.offsetHeight||80,land=B.contains('phone-land');
-    // clear everything under the score too (energy bar, exact line, ×N per tap), mirroring the disco ball on the left
-    let right=r.right;['energyMeter','scoreSubEl','multEl'].forEach(id=>{const e=$(id);if(!e||!e.offsetParent)return;
-      let q=e.getBoundingClientRect();if(id!=='energyMeter'){try{const rg=document.createRange();rg.selectNodeContents(e);q=rg.getBoundingClientRect();}catch(_){}}
-      if(q.width&&q.top<r.bottom+h)right=Math.max(right,q.right);});
-    const desk=B.contains('desktop-mode');
-    if(land){const sr=$('scoreRow');if(sr){const q=sr.getBoundingClientRect();if(q.width)right=Math.max(right,q.right);}}
-    let x=right+(land?10:18);
-    // upright phone: beside the score text, its bottom level with the number (keeps clear of the tracker row below)
-    let y=desk||land?r.top+r.height/2-h*.5:r.bottom-h+4;
-    if(x+w>o.right-4)x=o.right-w-4;
-    const p=typeof tzPlace==='function'?tzPlace('R',x,y,w,h,r):{x,y};
+    const o=gv.getBoundingClientRect(),w=tz.offsetWidth||56,h=tz.offsetHeight||80,p=cornerSpotR(w,h);
     tz.style.left=(p.x-o.left).toFixed(1)+'px';tz.style.top=(p.y-o.top).toFixed(1)+'px';
   }
   function show(v){
@@ -262,8 +270,10 @@ body.phone-land #partyTeaser .pt-string,body.phone-land #fuseTeaser .ft-wire{dis
       k.tone(S,S.t+.12,60,{a:.03,k:.25,hold:.5,d:.4});k.tone(S,S.t+.12,120,{a:.02,k:.25,hold:.5,d:.4});
       [523.25,783.99,1046.5].forEach((f,i)=>k.tone(S,S.t+.35+i*.08,f,{type:'triangle',a:.04,d:.6,rv:.6}));}}}catch(e){}
     if(typeof renderUI==='function')renderUI();
+    // v0.2.222: the cutscene follows almost straight away (was ~2 s)
     setTimeout(()=>{tz.classList.add('gone');
-      setTimeout(()=>{fuseboxOwned=true;flip=0;tz.classList.remove('flipped','gone');show(false);if(typeof autoSave==='function')autoSave();},450);},700);
+      setTimeout(()=>{fuseboxOwned=true;flip=0;tz.classList.remove('flipped','gone');show(false);if(typeof autoSave==='function')autoSave();
+        try{fuseUnlockNow();}catch(e){}},200);},280);
   });
   if(typeof startGame==='function'){const sg=window.startGame;window.startGame=function(){const r=sg.apply(this,arguments);seqAt=0;flip=0;seqLoaded=typeof drum!=='undefined'&&drum.seqTracks>=1;show(false);return r;};}
   setInterval(()=>{try{tick();}catch(e){console.warn('fuse teaser',e);}},250);

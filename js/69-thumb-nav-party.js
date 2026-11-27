@@ -152,26 +152,11 @@ body.phone-land #partyTeaser .pt-tag{font-size:12px;padding:2px 6px 1px;}
     g.beginPath();g.arc(cx,cy,R,0,Math.PI*2);g.strokeStyle='#1a1028';g.lineWidth=2;g.stroke();
     g.fillStyle='#8a7a9a';g.fillRect(cx-3,0,6,3);   // the cap the string ties to
   }
-  function place(){
-    const se=$('scoreEl'),gv=$('gameView');if(!se||!gv)return;
+  function place(){   // v0.2.222: the Fusebox teaser's old spot, top-right (js/89 cornerSpotR), fixed (doesn't follow the score)
+    const gv=$('gameView');if(!gv)return;
     if(tz.parentElement!==gv)gv.appendChild(tz);
-    let r;try{const rg=document.createRange();rg.selectNodeContents(se);r=rg.getBoundingClientRect();}catch(e){}
-    if(!r||!r.width)r=se.getBoundingClientRect();
-    const o=gv.getBoundingClientRect(),w=tz.offsetWidth||60,h=tz.offsetHeight||90,land=B.contains('phone-land');
-    // v0.2.166: the disco ball hangs on the LEFT of the score, where the PARTY button will appear once it's bought
-    //   (only if there's no room there does it go to the right)
-    // v0.2.204: clear everything under the score too (the energy bar, the exact line, ×N per tap), not just the number
-    let left=r.left;['energyMeter','scoreSubEl','multEl'].forEach(id=>{const e=$(id);if(!e||!e.offsetParent)return;
-      let q=e.getBoundingClientRect();if(id!=='energyMeter'){try{const rg=document.createRange();rg.selectNodeContents(e);q=rg.getBoundingClientRect();}catch(_){}}
-      if(q.width&&q.top<r.bottom+h)left=Math.min(left,q.left);});
-    // v0.2.208: sideways phone = a flat row left of the whole score row; upright phone = bottom level with the number;
-    //   desktop = js/89 tzPlace hangs it above the score (left of its middle), clear of the drum tracker
-    const desk=B.contains('desktop-mode');
-    if(land){const sr=$('scoreRow');if(sr){const q=sr.getBoundingClientRect();if(q.width)left=Math.min(left,q.left);}}
-    let x=left-w-(land?10:18);
-    if(x<o.left+4)x=land||desk?r.right+Math.max(16,Math.min(36,r.height*.45)):o.left+4;
-    const y0=desk||land?r.top+r.height/2-h*.55:r.bottom-h+4;
-    const p=typeof tzPlace==='function'?tzPlace('L',x,y0,w,h,r):{x,y:y0};
+    const o=gv.getBoundingClientRect(),w=tz.offsetWidth||60,h=tz.offsetHeight||90;
+    const p=typeof cornerSpotR==='function'?cornerSpotR(w,h):{x:o.right-w-10,y:o.top+12};
     tz.style.left=(p.x-o.left).toFixed(1)+'px';tz.style.top=(p.y-o.top).toFixed(1)+'px';
   }
   function show(on){

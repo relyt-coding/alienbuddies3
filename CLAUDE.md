@@ -110,7 +110,7 @@ README.md covers the file layout, test mode and vocals in depth; this file is th
   (vault/index.html: library = vault/library.json, the old content; PUBLISH commits entries.json via the GitHub API with the creator's token; PREVIEW
   makes the game on that browser use the draft, localStorage ab2_vaultPreview / ab2_vaultDraft). js/84 overrides vaultEntries / vaultTipsIn /
   vaultEntryCost / vaultCounts; ids are 'c_'+id. js/68 / 73 / 74 content is no longer read.
-- Corner egg (v0.2.199, js/83, replaces the two eggs and v0.2.198's always-on egg): after the first hatch (+10 s) ONE egg sits top-left (`.cornerEgg`; fixed on desktop at the top-left of `#gameView .app`, after EDIT PADS on
+- Corner egg (v0.2.199, js/83, replaces the two eggs and v0.2.198's always-on egg): after the first hatch (+10 s) ONE egg sits top-left (`.cornerEgg`, until 99 buddies since v0.2.222; fixed on desktop at the top-left of `#gameView .app`, after EDIT PADS on
   sideways phones, under the PARTY pill if that's in the corner) until 10 buddies (`LAST`); then `#eggShopNote` once per slot (`ab2_eggShopNote_N`).
   `#shopEgg` wiggles on the Shop's PET ALIEN BUDDY card; both eggs share one pick per buddy number and a capture listener on #alienBuyBtn sets `alienData[n].base`.
 - Shop power bars (v0.2.199, js/85): jHtml / fmtJh are wrapped to tag the unit span with `data-u` (raw units). Any visible price with a class in its `SEL`
@@ -181,6 +181,10 @@ README.md covers the file layout, test mode and vocals in depth; this file is th
 - v0.2.220: js/91 Space starts the matching game only when #matchingGameBtn is visible on screen, no nav-locked / buddy-hold, and totalAliens ≥ 1.
 - v0.2.221: js/65 nav / navB / navS cutscenes leave the panel they unlock OPEN (tuckSidebars skips it, its tab label is set when the cutscene opens it);
   js/89 openNew skips panels that are already open. Corner egg `.pe-tag` sits above `.pe-wire` with a solid background.
+- v0.2.222: TOP-RIGHT SPOT: js/89 `cornerSpotR(w,h)` (viewport x/y) mirrors the corner egg; #fuseTeaser → #partyTeaser → #gemRing take it in turn and never
+  follow the score. Fusebox buy → `fuseUnlockNow()` (js/89) starts navS ~0.6 s after the tap. Corner egg (js/83) LAST=99 (first bundle; the next 99 come
+  from planets), then `.full` = a BUNKER button (`openBunkerNow`); the 10-buddy shop note is gone. #gemRing: tap = nothing/nudge before space, map after
+  (label SPACE); hold = unlock / replay (js/59). Gem math only from the bunker/shop gem counters + the score breakdown. Shop card says HATCH ALIEN BUDDY.
 - Skill-tree descriptions: `gemsOnly` (js/20) strips any written "×N Alien Gems" and appends the node's REAL `gemMult`, so never hand-write gem amounts.
 
 ## Testing without a phone

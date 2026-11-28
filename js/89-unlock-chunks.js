@@ -32,7 +32,21 @@
     if(typeof playNewFileIntro!=='function'||!playNewFileIntro({mode:'navS',onDone:()=>{if(typeof repositionCollapseButtons==='function')repositionCollapseButtons();openNew('fuse');}}))
       {if(typeof repositionCollapseButtons==='function')repositionCollapseButtons();openNew('fuse');}
   }
-  // v0.2.208: a screen that just unlocked opens by itself (desktop: its side panel slides open; phone: the page slides in)
+  // v0.2.244: stand on a page the moment its cutscene hands the game back. The cutscene's last move zooms into that page, so this
+  //   swap has to be instant (transitions off for the frame) — otherwise the pads flash up and then the page slides in after.
+  function landOnUnlocked(which){
+    if(!B.contains('game-active')||B.contains('desktop-mode'))return;
+    if(B.contains(which==='fuse'?'store-open':'bunker-open'))return;
+    const els=['gameView','storeView','bunkerView'].map($).filter(Boolean);
+    els.forEach(e=>{e.style.transition='none';});
+    if(which==='fuse'){if(typeof openStore==='function')openStore();}
+    else if(typeof openBunker==='function')openBunker();
+    void document.body.offsetWidth;
+    els.forEach(e=>{e.style.transition='';});
+    if(typeof refreshPageDots==='function')refreshPageDots();
+  }
+  window.landOnUnlocked=landOnUnlocked;
+  // v0.2.208: a screen that just unlocked opens by itself (desktop: its side panel slides open; phone: the page is already there)
   function openNew(which){
     const desk=B.contains('desktop-mode');
     let tries=0;
@@ -40,7 +54,7 @@
       if(!B.contains('game-active'))return;
       if(busy()&&tries++<40){setTimeout(go,250);return;}   // a cutscene / hatch is still on: wait for it
       if(which==='vault'){if(typeof openVault==='function')openVault();return;}
-      if(!desk&&typeof swipeNavGo==='function'){swipeNavGo(which==='fuse'?1:2,which==='fuse'?-1:1);return;}
+      if(!desk){landOnUnlocked(which);return;}
       const pv=$(which==='fuse'?'storeView':'bunkerView');if(pv&&!pv.classList.contains('sidebar-collapsed')){if(typeof updateCollapseBtn==='function')updateCollapseBtn(which==='fuse'?'shop':'bunker',false);return;}   // already open (the cutscene left it open)
       if(which==='fuse'){if(typeof openStore==='function')openStore();}else if(typeof openBunker==='function')openBunker();
       if(typeof repositionCollapseButtons==='function')setTimeout(repositionCollapseButtons,380);

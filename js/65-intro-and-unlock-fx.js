@@ -41,9 +41,11 @@
       CAM:[[0,'c',2],[1.05,'c',0],[1.45,'c',0],[1.85,'b',1],[2.65,'b',1],[3.2,'s',1],[3.9,'s',1],[4.3,'h',1],[4.55,'h',1],[5.4,'c',2]]},
     // v0.2.205: the pages arrive one at a time. The first buddy brings the BUNKER (navB), the sequencer brings the
     //   FUSEBOX (navS), and a file opened before the Fusebox is unlocked builds just the bunker + pads (allB).
-    navB:{pages:['b','h'],FLY:{b:[.45,1.35]},BUILD:{b:1.65},ZOOM:[3.4,4.25],DUR:4.8,LBL:[1.3,1.6,3.1,3.4],zout:[0,1.05],
+    // v0.2.244: on a phone these two end INSIDE the page they unlock (`LAND`): the camera stays on it for the final zoom
+    //   and the game is handed back with that page already open, so nothing slides over afterwards (see camPath / assemble).
+    navB:{pages:['b','h'],FLY:{b:[.45,1.35]},BUILD:{b:1.65},ZOOM:[3.4,4.25],DUR:4.8,LBL:[1.3,1.6,3.1,3.4],zout:[0,1.05],LAND:'b',
       CAM:[[0,'c',2],[1.05,'c',0],[1.45,'c',0],[1.85,'b',1],[2.65,'b',1],[3.05,'h',1],[3.4,'h',1],[4.25,'c',2]]},
-    navS:{pages:['h','s'],FLY:{s:[.45,1.35]},BUILD:{s:1.65},ZOOM:[3.4,4.25],DUR:4.8,LBL:[1.3,1.6,3.1,3.4],zout:[0,1.05],
+    navS:{pages:['h','s'],FLY:{s:[.45,1.35]},BUILD:{s:1.65},ZOOM:[3.4,4.25],DUR:4.8,LBL:[1.3,1.6,3.1,3.4],zout:[0,1.05],LAND:'s',
       CAM:[[0,'c',2],[1.05,'c',0],[1.45,'c',0],[1.85,'s',1],[2.65,'s',1],[3.05,'h',1],[3.4,'h',1],[4.25,'c',2]]},
     allB:{pages:['b','h'],FLY:{b:[.25,1.25],h:[.45,1.45]},BUILD:{b:1.7,h:3.0},ZOOM:[4.3,5.5],DUR:6.5,LBL:[1.45,1.9,4.0,4.3],
       CAM:[[0,'c',0],[1.55,'c',0],[2.05,'b',1],[2.85,'b',1],[3.45,'h',1],[4.3,'h',1],[5.5,'c',2]]},
@@ -107,10 +109,20 @@
     return G;
   }
   // camera path (per mode, see IMODES): overview → over to the bunker as it builds → across to the shop → back to the pads → zoom in
-  function camAt(G,t){
-    const X=n=>n==='c'?G.xc:lerp(G.xc,G.v[n].X+OFF[n]*G.gw,G.pan),Z=n=>n===0?G.z0:n===1?G.zf:1;
-    let i=0;while(i<CAM.length-2&&t>=CAM[i+1][0])i++;
-    const A=CAM[i],B=CAM[i+1],k=eIO(cl((t-A[0])/(B[0]-A[0]),0,1));
+  // v0.2.244: on a phone a `LAND` mode (the bunker / fusebox cutscene) never drifts back to the pads: its last three beats stay on the
+  //   page it unlocks and the last one zooms from the row straight into it. (Desktop keeps the pads ending: there the panel just opens.)
+  function camPath(G){
+    if(G.desk||!M.LAND)return CAM;
+    return CAM.map((e,i)=>i<CAM.length-3?e:[e[0],M.LAND,e[2]]);
+  }
+  function camAt(G,t,zp){
+    const P=camPath(G);
+    // the pages' side gaps collapse as the camera zooms in (gw shrinks), so the camera has to look between the same spots or
+    //   the page it lands on ends up a gap-width off screen at the very end (the last frame would jump into place)
+    const gap=G.gw*(1-(zp||0));
+    const X=n=>n==='c'?G.xc:lerp(G.xc,G.v[n].X+OFF[n]*gap,G.pan),Z=n=>n===0?G.z0:n===1?G.zf:1;
+    let i=0;while(i<P.length-2&&t>=P[i+1][0])i++;
+    const A=P[i],B=P[i+1],k=eIO(cl((t-A[0])/(B[0]-A[0]),0,1));
     let z=Z(A[2])*Math.pow(Z(B[2])/Z(A[2]),k);
     if(!G.desk&&A[2]===B[2]&&A[1]!==B[1])z*=1-.2*Math.sin(Math.PI*k);   // a little hop back while panning across
     return{x:lerp(X(A[1]),X(B[1]),k),z};
@@ -161,7 +173,7 @@
       g.fillStyle=`rgba(210,235,255,${Math.min(1,(1-s.z)*1.3)*(.6+.4*Math.sin(t*2+s.ph))})`;g.fillRect(x,y,s.r,s.r);});
     // the camera: zoomed out on the row of pages, visiting each as it builds, then into the drum pads
     if(!I.assembled){
-      const cam=camAt(G,t),z=cam.z,gw=G.gw*(1-zp),cy=lerp(G.cy0,H/2,zp),rad=G.rad*(1-zp);
+      const cam=camAt(G,t,zp),z=cam.z,gw=G.gw*(1-zp),cy=lerp(G.cy0,H/2,zp),rad=G.rad*(1-zp);
       M.pages.forEach(k=>{const v=G.v[k],[f0,f1]=FLY[k]||[-2,-1],fp=eOut(ss(f0,f1,t));
         // fly-in: bunker from the left, shop from the right, pads up from below, each settling from a little tilt
         const fx=k==='b'?-W*.9:k==='s'?W*.9:0,fy=k==='h'?H*.75:0,tilt=(k==='b'?-6:k==='s'?6:0)*(1-fp),fs=k==='h'?lerp(.7,1,fp):1;
@@ -177,6 +189,10 @@
   }
   // the pages are in place: hand the real layout back (desktop: the sidebars tuck away, as on every new file)
   function assemble(){
+    // v0.2.244: a bunker / fusebox cutscene hands the game back already standing on the page it unlocked (phone: the camera
+    //   just zoomed into it, so opening it here is invisible; no pads flash and no slide afterwards). See js/89 landOnUnlocked.
+    const lk=I&&I.M&&I.M.LAND;
+    if(lk&&!isDesk()&&typeof window.landOnUnlocked==='function'){try{window.landOnUnlocked(lk==='s'?'fuse':'bunker');}catch(e){}}
     BC.remove('intro-run');
     if(typeof floatBuddiesIn==='function')try{floatBuddiesIn();}catch(e){}   // buddies drift in from off screen
     ['b','h','s'].forEach(k=>{const e=document.getElementById(IDS[k]);if(!e)return;e.style.removeProperty('--itf');e.style.removeProperty('--itr');e.style.removeProperty('--ita');e.style.opacity='';e.style.transition='none';});

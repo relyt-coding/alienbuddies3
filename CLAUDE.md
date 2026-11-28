@@ -1,8 +1,8 @@
 # Alien Buddies: notes for building
 
 <!-- ship:auto:start -->
-- Version: 0.2.243 · shipped 2026-11-27
-- Last change: The ship got its detail pass: a two-tone hull with panel seams, a teal…
+- Version: 0.2.244 · shipped 2026-11-27
+- Last change: Unlocking the Bunker or the Fusebox on a phone no longer flashes the…
 <!-- ship:auto:end -->
 
 **In flight / next:** nothing half-finished right now.

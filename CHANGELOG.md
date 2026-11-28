@@ -2,6 +2,9 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.244 - 2026-11-27 17:48
+- Unlocking the Bunker or the Fusebox on a phone no longer flashes the drum pads and then slides over: the cutscene now zooms straight into the new screen and leaves you standing on it.
+
 ## v0.2.243 - 2026-11-27 08:40
 - The ship got its detail pass: a two-tone hull with panel seams, a teal racing stripe, a row of windows, a glass dome with a little pilot inside, engine glow behind the flame, plus fin tips and wing lights.
 

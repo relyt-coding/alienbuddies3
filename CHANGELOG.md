@@ -2,6 +2,10 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.254 - 2026-11-28 08:00
+- On the hatch screen, SPACE or ENTER is AWESOME and SHIFT is NAME IT, just like before — and any arrow key now brings up a glowing choice between the two, so you can step onto NAME IT and press SPACE.
+- A controller can type a buddy's name now: with a pad connected, the name card grows a letter grid you can walk with the d-pad (A types, B deletes, DONE saves), so no phone keyboard is needed.
+
 ## v0.2.253 - 2026-11-28 07:48
 - The corner egg no longer waits 10 seconds: it rolls in the moment the Bunker unlocks and the cutscene hands the game back. On a phone that means it is already sitting there when you swipe back to the drum pads.
 - Toast messages are bigger and easier to read, with room to wrap.

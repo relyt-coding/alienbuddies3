@@ -1,8 +1,8 @@
 # Alien Buddies: notes for building
 
 <!-- ship:auto:start -->
-- Version: 0.2.253 · shipped 2026-11-28
-- Last change: The corner egg no longer waits 10 seconds: it rolls in the moment the…
+- Version: 0.2.254 · shipped 2026-11-28
+- Last change: On the hatch screen, SPACE or ENTER is AWESOME and SHIFT is NAME IT…
 <!-- ship:auto:end -->
 
 **In flight / next:** nothing half-finished right now.
@@ -208,6 +208,11 @@ Pushing is deploying. Never force-push, never reuse a version number, never dele
 - v0.2.253: the corner egg (js/83) has **no delay** — `want()` (game-active, a buddy exists, no nav-locked / buddy-hold / intro-run) is the only
   gate, so it rolls in as the Bunker cutscene ends; on a phone it is already there when you swipe back to the pads. `.toast` font is
   `clamp(1rem,…,1.18rem)` with a 360px cap.
+- v0.2.254: js/92 section 5 = the **hatch screen**: any arrow shows a ring over AWESOME / NAME IT (first arrow puts it on AWESOME, then
+  it swaps), Space/Enter presses the ring or AWESOME when there is none, Shift = NAME IT — the ring is cleared by the `eWatch` observer
+  whenever the reveal element (re)appears, since js/50 rebuilds it. Section 6 = **typing with a controller**: `#padKeys` (A-Z, 0-9, space,
+  ⌫, DONE) is built into `#anmEditSection` and shown only when `navigator.getGamepads()` reports a connected pad; it types into
+  `#bdyTagField`, blurs the real field so no OS keyboard covers it, and DONE clicks SAVE.
 - v0.2.213: showToast (js/04) also clears the ACTIVATE button's own rect (it's taller than #drumTrackerOverlay). Desktop `.pad-key` (not `.ghost-key`) is clickable:
   the pad's pointerdown opens openPadPicker(idx) when the target is the badge.
 - v0.2.214: alienCost(3/4/5) = 10,000 / 50,000 / 250,000 (0.5 / 2.5 / 12.5 J on sale); n≥6 = `_alienCurve(n-3)` (the old curve, shifted 3 buddies later),

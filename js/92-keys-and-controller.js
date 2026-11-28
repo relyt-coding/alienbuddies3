@@ -203,6 +203,137 @@
    if(l)new MutationObserver(()=>{if(pModal()&&pShown)pPaint();}).observe(l,{childList:true});}
   document.addEventListener('pointerdown',e=>{if(e.pointerType&&pShown&&pModal()){pShown=false;pPaint();}},true);
 
+  // ── 5) THE HATCH SCREEN (v0.2.254) ──
+  //  Once NAME IT / AWESOME! are up: SPACE or ENTER is AWESOME! (the old default), SHIFT is NAME IT, and any arrow key
+  //  brings up a ring over the two buttons so you can pick the other one (SPACE / ENTER then presses whatever the ring is
+  //  on). A controller's A button is Space and its d-pad is the arrows, so it all works from a pad too.
+  let eSel='ok',eShown=false,eWasReady=false;
+  function ePaint(){
+    const ok=$('erOk'),nm=$('erName');
+    if(ok)ok.classList.toggle('er-cur',eShown&&eSel==='ok');
+    if(nm)nm.classList.toggle('er-cur',eShown&&eSel==='name');
+  }
+  // the first arrow brings the ring up ON AWESOME (the default choice); each arrow after it swaps
+  function eArrow(){
+    if(!eShown){eShown=true;eSel='ok';ePaint();return;}
+    eSel=eSel==='ok'?'name':'ok';ePaint();
+  }
+  function ePress(which){const b=$(which==='name'?'erName':'erOk');if(b)b.click();}
+  document.addEventListener('keydown',e=>{
+    const root=$('eggReveal');
+    if(!root||!root.classList.contains('on')||!root.classList.contains('show-btns'))return;
+    if(e.ctrlKey||e.metaKey||e.altKey)return;
+    const t=e.target;if(t&&(t.isContentEditable||/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)))return;
+    const k=e.code||e.key;
+    if(k==='ShiftLeft'||k==='ShiftRight'){e.preventDefault();e.stopImmediatePropagation();ePress('name');return;}
+    if(/^Arrow/.test(k)){e.preventDefault();e.stopImmediatePropagation();if(!e.repeat)eArrow();return;}
+    if(k==='Space'||k==='Enter'||k==='NumpadEnter'||e.key===' '){
+      e.preventDefault();e.stopImmediatePropagation();
+      if(e.shiftKey){if(!e.repeat)ePress('name');return;}
+      if(!e.repeat)ePress(eShown?eSel:'ok');
+    }
+  },true);
+
+  // the ring belongs to one appearance of the buttons: watch the reveal node (js/50 rebuilds it) and start clean each time
+  let eObs=null,eObsNode=null;
+  function eWatch(){
+    const r=$('eggReveal');
+    if(r===eObsNode)return;
+    eObsNode=r;
+    if(eObs)try{eObs.disconnect();}catch(e){}
+    eObs=null;
+    if(!r)return;
+    eObs=new MutationObserver(()=>{
+      const ready=r.classList.contains('on')&&r.classList.contains('show-btns');
+      if(ready&&!eWasReady){eWasReady=true;eShown=false;eSel='ok';ePaint();}
+      else if(!ready&&eWasReady){eWasReady=false;eShown=false;eSel='ok';ePaint();}
+    });
+    eObs.observe(r,{attributes:true,attributeFilter:['class']});
+  }
+  eWatch();setInterval(eWatch,700);
+
+  // ── 6) TYPING A BUDDY'S NAME WITH A CONTROLLER (v0.2.254) ──
+  //  A gamepad can't use the phone/computer keyboard, so when one is connected the name card grows a letter grid:
+  //  d-pad / stick walks it, A (Space) types, B (Escape) deletes and DONE saves. Touch and mouse players never see it.
+  const PAD_ROWS=[
+    ['A','B','C','D','E','F','G'],
+    ['H','I','J','K','L','M','N'],
+    ['O','P','Q','R','S','T','U'],
+    ['V','W','X','Y','Z','0','1'],
+    ['2','3','4','5','6','7','8'],
+    ['9',' ','⌫','DONE']
+  ];
+  let pkPanel=null,pkCur=null,pShown2=false;
+  const nmModal=()=>{const m=$('alienNameModal');return !!m&&m.classList.contains('open');};
+  const nmInput=()=>$('bdyTagField');
+  function padHas(){try{return [...(navigator.getGamepads?navigator.getGamepads():[])].some(p=>p&&p.connected);}catch(e){return false;}}
+  function pkBuild(){
+    if(pkPanel)return pkPanel;
+    const host=$('anmEditSection');if(!host)return null;
+    pkPanel=document.createElement('div');pkPanel.id='padKeys';
+    PAD_ROWS.forEach(row=>row.forEach(ch=>{
+      const b=document.createElement('button');b.type='button';b.textContent=ch;b.dataset.ch=ch;
+      b.addEventListener('click',()=>pkType(ch));
+      pkPanel.appendChild(b);
+    }));
+    host.appendChild(pkPanel);
+    return pkPanel;
+  }
+  function pkType(ch){
+    const inp=nmInput();if(!inp)return;
+    if(ch==='DONE'){const s=$('alienNameSave');if(s)s.click();return;}
+    if(ch==='⌫'){inp.value=(inp.value||'').slice(0,-1);}
+    else if((inp.value||'').length<+inp.maxLength)inp.value=(inp.value||'')+ch;
+    inp.dispatchEvent(new Event('input',{bubbles:true}));
+    try{if(typeof bdyTagRender==='function')bdyTagRender();}catch(e){}
+    try{const k=window.US_KIT;if(k&&k.mixer&&!(typeof sfxOn!=='undefined'&&!sfxOn)){const S=k.mixer(.25);if(S)k.tone(S,S.t,880,{type:'square',a:.004,d:.045});}}catch(e){}
+  }
+  function pkCells(){return pkPanel?[...pkPanel.querySelectorAll('button')]:[];}
+  function pkPaint(){pkCells().forEach(b=>b.classList.toggle('pk-cur',pShown2&&b===pkCur));}
+  function pkFocus(b,scroll){pkCur=b;pShown2=true;pkPaint();if(scroll&&b)try{b.scrollIntoView({block:'nearest'});}catch(e){}}
+  function pkStart(){const L=pkCells();if(!L.length)return;pkFocus(L[0]);}
+  function pkMove(dx,dy){
+    const L=pkCells();if(!L.length)return;
+    if(!pShown2||!pkCur||!L.includes(pkCur)){pkFocus(L[0]);return;}
+    const r0=pkCur.getBoundingClientRect(),cx=r0.left+r0.width/2,cy=r0.top+r0.height/2;
+    let best=null,bd=Infinity;
+    L.forEach(b=>{if(b===pkCur)return;const r=b.getBoundingClientRect(),x=r.left+r.width/2-cx,y=r.top+r.height/2-cy;
+      const along=dx?x*dx:y*dy,side=dx?Math.abs(y):Math.abs(x);
+      if(along<4)return;const d=along+Math.max(0,side-r.height*.5)*2.2;
+      if(d<bd){bd=d;best=b;}});
+    if(best)pkFocus(best,true);
+  }
+  function pkPress(){const L=pkCells();if(!L.length)return;if(!pShown2||!pkCur){pkFocus(L[0]);return;}pkType(pkCur.dataset.ch);}
+  document.addEventListener('keydown',e=>{
+    if(!nmModal()||!pkPanel||pkPanel.offsetParent===null)return;
+    const t=e.target;if(t&&(t.isContentEditable||/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)))return;
+    const k=e.code||e.key;
+    if(/^Arrow/.test(k)){e.preventDefault();e.stopImmediatePropagation();
+      const d={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,-1],ArrowDown:[0,1]}[k];pkMove(d[0],d[1]);return;}
+    if(k==='Escape'){e.preventDefault();e.stopImmediatePropagation();pkType('⌫');return;}
+    if(k==='Space'||k==='Enter'||k==='NumpadEnter'||e.key===' '){e.preventDefault();e.stopImmediatePropagation();if(!e.repeat)pkPress();}
+  },true);
+  {const m=$('alienNameModal');
+   if(m)new MutationObserver(()=>{
+     const open=m.classList.contains('open');
+     if(open&&padHas()){
+       const p=pkBuild();if(p){p.style.display='grid';pShown2=false;pkCur=null;setTimeout(pkStart,30);
+         try{const inp=nmInput();if(inp)inp.blur();}catch(e){}}   // no OS keyboard over the grid
+     }else if(pkPanel){pkPanel.style.display='none';pShown2=false;pkCur=null;pkPaint();}
+   }).observe(m,{attributes:true,attributeFilter:['class']});}
+  document.addEventListener('pointerdown',e=>{if(e.pointerType&&pShown2){pShown2=false;pkPaint();}},true);
+
+  const ecss=document.createElement('style');ecss.textContent=`
+#eggReveal .er-cur{outline:3px solid #f7ffb0;outline-offset:-3px;box-shadow:inset 0 0 22px 4px rgba(247,255,176,.35);border-radius:12px;}
+#padKeys{display:none;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:.55rem;width:100%;}
+#padKeys button{font-family:'Bebas Neue',sans-serif;font-size:.95rem;letter-spacing:.02em;padding:.45rem 0;border-radius:8px;
+  border:1px solid #234;background:#0b141a;color:#9fe8c8;cursor:pointer;touch-action:manipulation;}
+#padKeys button:nth-last-child(2){border-color:#4a2a2a;color:#ff9f9f;}
+#padKeys button:last-child{border-color:#2a5a3a;color:#66ffb0;grid-column:span 2;}
+#padKeys button.pk-cur{outline:0;box-shadow:inset 0 0 0 2px #7fffd0,inset 0 0 14px 2px rgba(0,255,170,.35);color:#fff;}
+`;
+  document.head.appendChild(ecss);
+
   const pcss=document.createElement('style');pcss.textContent=`
 #padAssignList{padding:2px 6px;}
 #padAssignList .pa-item.pa-cur{outline:0;box-shadow:inset 0 0 0 3px #7fffd0,inset 0 0 20px 3px rgba(0,255,170,.34);position:relative;z-index:2;}

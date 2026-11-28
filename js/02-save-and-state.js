@@ -39,6 +39,26 @@ const OFFICIAL_RUN=1;
   }
   if(moved){try{localStorage.setItem('ab2_runNotice','1');}catch(e){}}
 })();
+// ── THE 0.2 WIPE (v0.2.246) ──
+// 0.2 was never fully released, so every 0.2 file is retired as the New Game+ era starts: the three slots are copied to
+// the hidden recovery keys (ab2_prerun_slotN, never shown) and then cleared. 0.1 saves (ab_slot0..2 — where the founder
+// egg and any 0.1 bunker come from) are never touched, and neither are device settings. Older recovery copies are
+// dropped first, so the archive left behind is the file being retired now.
+const SAVE_ERA='0.2.246';
+(function wipeGameTwo(){
+  if(TEST_MODE)return;
+  try{if(localStorage.getItem('ab2_saveEra')===SAVE_ERA)return;}catch(e){return;}
+  try{
+    for(let i=0;i<3;i++){localStorage.removeItem('ab2_prerun_slot'+i);localStorage.removeItem('ab2_prerun_slot'+i+'_name');}
+    for(let i=0;i<3;i++){
+      const raw=localStorage.getItem('ab2_slot'+i);if(!raw)continue;
+      localStorage.setItem('ab2_prerun_slot'+i,raw);
+      const nm=localStorage.getItem('ab2_slot_name_'+i);if(nm!=null)localStorage.setItem('ab2_prerun_slot'+i+'_name',nm);
+      localStorage.removeItem('ab2_slot'+i);localStorage.removeItem('ab2_slot_name_'+i);
+    }
+    localStorage.setItem('ab2_saveEra',SAVE_ERA);
+  }catch(e){}
+})();
 function getSlotName(i){try{return localStorage.getItem(SLOT_NAME_PREFIX+i)||'';}catch(e){return'';}}
 function setSlotName(i,name){try{localStorage.setItem(SLOT_NAME_PREFIX+i,name);}catch(e){}}
 function deleteSlot(i){try{localStorage.removeItem(SAVE_KEYS[i]);localStorage.removeItem(SLOT_NAME_PREFIX+i);}catch(e){}}
@@ -118,7 +138,8 @@ let bunkersOwned=1,bunkerMeta=[];   // v0.2.188 extra bunkers (js/80): how many 
 let vaultUnlocked=false;   // v0.2.205: the Vault is bought in the Fusebox (js/89)
 let fuseboxOwned=false;    // v0.2.208: the Fusebox is earned after the sequencer (js/89 teaser); older saves with the sequencer keep it
 let goldRecords=0,raceStats={races:0,wins:0};   // v0.2.187 Buddy Race (js/79): GOLD RECORDS = the rare money, 1 per race won   // v0.2.186 DNA Splice (js/78): splices made on this file (each one costs more gems)  // v0.2.183: floating-buddy speed ×0.5 … ×3 (looks only, js/76 + js/11)
-let drumTrackerActive=false; // paid 25pts to activate drum dot tracker
+let drumTrackerActive=false; // normal games: always on (v0.2.246, see the loader); a New Game+ run buys it again
+let runFile=false;           // v0.2.246: true while a New Game+ / NG++ run is loaded (its own file inside a file)
 let seqTrackerActive=false; // v0.2.162: the sequencer's dot tracker is its own 1 MW ACTIVATE (js/72)
 let shopOpenCount=0;
 let hasSeenSeqHint=false;
@@ -269,7 +290,10 @@ function loadFromSave(data){
   incEggs=Array.isArray(data.incEggs)?data.incEggs.filter(e=>e&&typeof e==='object'):[];incRacers=Array.isArray(data.incRacers)?data.incRacers.filter(e=>e&&typeof e==='object'):[];
   incLampsBought=Math.max(0,Math.min(6,+data.incLampsBought||0));incAllow=Math.max(0,Math.min(3,+data.incAllow||0));founderEggGiven=!!data.founderEggGiven;spliceCount=Math.max(0,+data.spliceCount||0);goldRecords=Math.max(0,Math.floor(+data.goldRecords||0));vaultUnlocked=!!data.vaultUnlocked;fuseboxOwned=data.fuseboxOwned!==undefined?!!data.fuseboxOwned:!!(data.drum&&data.drum.seqTracks>=1);bunkersOwned=Math.max(1,Math.min(10,Math.floor(+data.bunkersOwned||1)));bunkerMeta=Array.isArray(data.bunkerMeta)?data.bunkerMeta.slice(0,10).map(m=>m&&typeof m==='object'?{name:String(m.name||'').slice(0,14),theme:String(m.theme||'')}:{}):[];raceStats=data.raceStats&&typeof data.raceStats==='object'?{races:+data.raceStats.races||0,wins:+data.raceStats.wins||0}:{races:0,wins:0};
   trailsOn=data.trailsOn!==false;alienSpeedMult=Math.min(3,Math.max(.5,+data.alienSpeed||1));
-  drumTrackerActive=data.drumTrackerActive||false;
+  // v0.2.246: the DRUMPAD dot tracker is simply ON in a normal game — dots start climbing with the very first tap and the
+  //   player never faces a 1 mJ gate in front of the whole multiplier ladder. A New Game+ / NG++ run (runFile) is the
+  //   exception: there the ACTIVATE button is back and its saved value is honoured.
+  drumTrackerActive = runFile ? !!data.drumTrackerActive : true;
   seqTrackerActive=data.seqTrackerActive!==undefined?!!data.seqTrackerActive:((data.drum&&data.drum.seqTracks)||0)>=1;   // old saves that had it keep it
   shopOpenCount=data.shopOpenCount||0;
   hasSeenSeqHint=data.hasSeenSeqHint||false;

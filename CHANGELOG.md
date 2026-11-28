@@ -2,6 +2,10 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.246 - 2026-11-28 05:44
+- The DRUMPAD dots now start climbing on your very first tap: no ACTIVATE button, no 1 mJ gate before your energy can grow. Multipliers come to you instead of being something you have to find.
+- Every 0.2 save file starts fresh from this version (0.1 files and their founder eggs are untouched). Your pad keys, layout and sound settings stay exactly as they are.
+
 ## v0.2.245 - 2026-11-28 04:06
 - Your ship's wings are swept back with squared-off tips instead of long spikes, the glass dome is a touch bigger, and the hull has one soft panel break and a sheen on the nose.
 - The galaxy map is lighter to open on phones: the ship draws each angle the first time it needs it instead of all 32 at once, only redraws when it actually turns, and quietly falls back to its drawn picture if the 3D one ever fails.

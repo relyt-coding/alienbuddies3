@@ -1,8 +1,8 @@
 # Alien Buddies: notes for building
 
 <!-- ship:auto:start -->
-- Version: 0.2.245 · shipped 2026-11-28
-- Last change: Your ship's wings are swept back with squared-off tips instead of long…
+- Version: 0.2.246 · shipped 2026-11-28
+- Last change: The DRUMPAD dots now start climbing on your very first tap: no ACTIVATE…
 <!-- ship:auto:end -->
 
 **In flight / next:** nothing half-finished right now.
@@ -178,6 +178,10 @@ Pushing is deploying. Never force-push, never reuse a version number, never dele
   Calls without an idx pass `o.sing` themselves (js/47 designer).
 - v0.2.212: drum ACTIVATE is `.act-btn` (index.html: dots / ACTIVATE / #drumActPrice / `.spb.ab-bar`); js/07 updateDrumTrackerOverlay toggles `.can`
   and fills the bar (every 250 ms); styles at the end of css/style.css. alienCost(2) = 1000 (100 mJ): first eggs 25 → 50 → 100 mJ, then 125 J.
+- v0.2.246: **NO drum ACTIVATE in a normal game** — the loader forces `drumTrackerActive=true` (js/02), so dots climb from the first tap and
+  `#drumTrackerOverlay` / `#arrowActivate` never show. The button, its overlay, the arrow and the old `#seqTrackerOverlay` stay in the DOM for
+  New Game+ (`runFile` in js/02 is the switch — a run file honours the save and buys the tracker again). `SAVE_ERA` in js/02 wipes 0.2 slots
+  once per era (0.1 `ab_slotN` + device settings never touched; the retired file is kept in `ab2_prerun_slotN`).
 - v0.2.213: showToast (js/04) also clears the ACTIVATE button's own rect (it's taller than #drumTrackerOverlay). Desktop `.pad-key` (not `.ghost-key`) is clickable:
   the pad's pointerdown opens openPadPicker(idx) when the target is the badge.
 - v0.2.214: alienCost(3/4/5) = 10,000 / 50,000 / 250,000 (0.5 / 2.5 / 12.5 J on sale); n≥6 = `_alienCurve(n-3)` (the old curve, shifted 3 buddies later),

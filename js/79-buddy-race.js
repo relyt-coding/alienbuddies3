@@ -123,7 +123,7 @@
   const beatNow=()=>(getCtx().currentTime-R.t0)/SPB;
   $('rrCanvas').addEventListener('pointerdown',e=>{e.preventDefault();jump();});
   $('rrTap').addEventListener('pointerdown',e=>{e.preventDefault();jump();});
-  document.addEventListener('keydown',e=>{if(!R||!ov.classList.contains('on'))return;if(e.code==='Space'||e.key==='ArrowUp'||e.key==='w'){e.preventDefault();jump();}});
+  document.addEventListener('keydown',e=>{if(!R||!ov.classList.contains('on'))return;if(e.code==='Space'||e.code==='Enter'||e.code==='NumpadEnter'||e.key==='ArrowUp'||e.key==='w'){e.preventDefault();jump();}});
 
   // ── simulation (on the audio clock, so it stays on the beat even if frames drop) ──
   function step(b){

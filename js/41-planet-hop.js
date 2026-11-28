@@ -276,7 +276,7 @@ function phGemVal(b,L){return b&&b.cleared?(+L===1?1.5:((b.dust||0)>=.999?1:.5))
     if(e.code==='Escape'){e.preventDefault();e.stopImmediatePropagation();if(R&&R.state==='play'){stop();showSelect();}else close();return;}
     if(!R||R.state!=='play')return;
     let w=null;
-    if(['Space','ArrowUp','KeyW'].includes(e.code))w='j';else if(['ShiftLeft','ShiftRight','ArrowDown','KeyS'].includes(e.code))w='b';
+    if(['Space','Enter','NumpadEnter','ArrowUp','KeyW'].includes(e.code))w='j';else if(['ShiftLeft','ShiftRight','ArrowDown','KeyS'].includes(e.code))w='b';
     else if(e.code==='KeyE'||e.code==='KeyF')w='z';
     else for(const [idx,b] of Object.entries(typeof padBindings!=='undefined'?padBindings:{}))if(b.key&&e.code===b.key){w=(+idx)%4<2?'j':'b';break;}
     if(w){e.preventDefault();e.stopImmediatePropagation();if(!e.repeat)input(w,e);}

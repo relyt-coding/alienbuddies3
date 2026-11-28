@@ -2,6 +2,10 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.252 - 2026-11-28 07:41
+- ENTER now does everything SPACE does: unlocking the next thing, tapping an egg, claiming a Matching Game win, and jumping in Planet Hop and Buddy Race.
+- The selection ring in the pad sound list has no outer halo any more — that halo was what got sliced off at the edge of the list. The glow sits inside the row now.
+
 ## v0.2.251 - 2026-11-28 07:36
 - The glowing selection ring in the pad sound list no longer gets cut off at the edges of the list — it now sits inside the row and rounds off properly. The Vault's ring got the same treatment.
 

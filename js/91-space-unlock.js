@@ -40,7 +40,9 @@
   let hatchClosedAt=-1e9;
   document.addEventListener('egg-reveal-closed',()=>{hatchClosedAt=performance.now();});
   document.addEventListener('keydown',e=>{
-    if(e.code!=='Space'||e.repeat||e.ctrlKey||e.metaKey||e.altKey)return;
+    // v0.2.252: ENTER does everything Space does (keyboard and controller players expect either)
+    const _kc=e.code||e.key;
+    if(!(_kc==='Space'||_kc==='Enter'||_kc==='NumpadEnter')||e.repeat||e.ctrlKey||e.metaKey||e.altKey)return;
     const t=e.target;if(t&&(t.isContentEditable||/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)))return;
     if(!B.contains('game-active'))return;
     if(document.querySelector('#raceOverlay.on')||B.contains('cockpit-open'))return;   // minigames use Space themselves

@@ -1,8 +1,8 @@
 # Alien Buddies: notes for building
 
 <!-- ship:auto:start -->
-- Version: 0.2.251 · shipped 2026-11-28
-- Last change: The glowing selection ring in the pad sound list no longer gets cut off…
+- Version: 0.2.252 · shipped 2026-11-28
+- Last change: ENTER now does everything SPACE does: unlocking the next thing, tapping…
 <!-- ship:auto:end -->
 
 **In flight / next:** nothing half-finished right now.
@@ -202,6 +202,9 @@ Pushing is deploying. Never force-push, never reuse a version number, never dele
 - v0.2.251: the keyboard rings (`.pa-cur` in `#padAssignList`, `.vk-cur` in `#vaultBox`) are **inset** (`inset` box-shadow, no `outline`)
   because both lists are `overflow:auto` and an outside ring got cropped; the lists also carry a few px of padding for the soft glow.
   Keep new rings inset for the same reason.
+- v0.2.252: **ENTER = SPACE everywhere**. js/91 accepts Space/Enter/NumpadEnter (unlocks, eggs, matching claim); js/79 Buddy Race and
+  js/41 Planet Hop jumps accept it too; js/92's three layers already did. New Space features must accept Enter as well.
+  The ring's outer halo is gone: only `inset` shadows, so nothing can reach a scrolling list's edge.
 - v0.2.213: showToast (js/04) also clears the ACTIVATE button's own rect (it's taller than #drumTrackerOverlay). Desktop `.pad-key` (not `.ghost-key`) is clickable:
   the pad's pointerdown opens openPadPicker(idx) when the target is the badge.
 - v0.2.214: alienCost(3/4/5) = 10,000 / 50,000 / 250,000 (0.5 / 2.5 / 12.5 J on sale); n≥6 = `_alienCurve(n-3)` (the old curve, shifted 3 buddies later),

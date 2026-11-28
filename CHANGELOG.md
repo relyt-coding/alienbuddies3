@@ -2,6 +2,10 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.248 - 2026-11-28 06:38
+- NEW GAME++ is in: finish a New Game+ run and its own door appears in the Cockpit. Same climb from zero, but timed, and it hands out 3 time-trial crystals graded by how fast you got there — a faster replay upgrades them instead of adding more.
+- Your main file now keeps what a run earned you (its eggs and time-trial result) instead of losing it on the next save.
+
 ## v0.2.247 - 2026-11-28 06:20
 - NEW GAME+ is here: a whole second climb of the game from zero, with the ACTIVATE buttons back as the difficulty and 99 buddies to find again. Your main game is parked and never touched while you play it — step between the two whenever you like.
 - It lives in the Cockpit, once you have bought the NEW GAME+ node in the skill tree (after Beat Defense). Fill the bunker with 99 buddies in a run and a special egg lands in your main game's Incubator.

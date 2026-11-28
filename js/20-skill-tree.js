@@ -738,6 +738,29 @@ function stPanBy(dx, dy){
   if(typeof stCamStop==='function') stCamStop();
   const v = typeof stScreenToPan==='function' ? stScreenToPan(dx, dy) : {x:dx, y:dy};
   stPanX += v.x; stPanY += v.y;
+  stClampPan();
+}
+// v0.2.245: you can't fly off the galaxy. The world point under the camera's target has to stay inside the map's own
+// bounds plus about half a screen, so a long drag (or a phone turned sideways) can never leave you staring at empty space.
+let _stBoxN=-1,_stBox=null;
+function stBox(){
+  if(_stBoxN===(typeof SKILL_TREE_NODES!=='undefined'?SKILL_TREE_NODES.length:0)) return _stBox;
+  let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;
+  if(typeof SKILL_TREE_NODES!=='undefined') SKILL_TREE_NODES.forEach(n=>{x0=Math.min(x0,n.x);y0=Math.min(y0,n.y);x1=Math.max(x1,n.x);y1=Math.max(y1,n.y);});
+  if(x0>x1){x0=-800;y0=-800;x1=800;y1=800;}
+  _stBoxN=typeof SKILL_TREE_NODES!=='undefined'?SKILL_TREE_NODES.length:0;
+  _stBox={x0:x0,y0:y0,x1:x1,y1:y1};
+  return _stBox;
+}
+function stClampPan(){
+  const canvas=document.getElementById('skillTreeCanvas'); if(!canvas) return;
+  const a=typeof stAnchor==='function'?stAnchor(canvas):{x:canvas.clientWidth/2,y:canvas.clientHeight/2};
+  const b=stBox(), s=stScale||1;
+  if(!(s>0)||!isFinite(stPanX)||!isFinite(stPanY)){ stPanX=a.x; stPanY=a.y; return; }
+  const m=Math.max(canvas.clientWidth,canvas.clientHeight)*.55/s;   // half a screen of slack, whatever the zoom
+  const wx=(a.x-stPanX)/s, wy=(a.y-stPanY)/s;
+  const cx=Math.min(b.x1+m,Math.max(b.x0-m,wx)), cy=Math.min(b.y1+m,Math.max(b.y0-m,wy));
+  if(cx!==wx||cy!==wy){ stPanX=a.x-cx*s; stPanY=a.y-cy*s; }
 }
 // zoom around the middle of the map (used by the slider, the +/- buttons and the keyboard)
 function stZoomTo(newScale){
@@ -749,6 +772,7 @@ function stZoomTo(newScale){
   stPanX = mx - (mx - stPanX) * (newScale / stScale);
   stPanY = my - (my - stPanY) * (newScale / stScale);
   stScale = newScale;
+  stClampPan();
   applyStTransform();
 }
 

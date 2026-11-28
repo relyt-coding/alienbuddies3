@@ -66,10 +66,11 @@
   function dress(){
     el=nodeEl('core');if(!el)return;
     if(!el._ship){el._ship=1;el.classList.add('st-ship');el.classList.remove('st-body','st-star');
-      const c=el.querySelector('.st-node-circle');if(c){c.innerHTML=window.ship3D?'<div class="sh-bob"><canvas class="sh-3d"></canvas></div>':'<div class="sh-bob">'+SHIP+'</div>';
+      const c=el.querySelector('.st-node-circle');if(c){c.innerHTML=(window.ship3D&&window.ship3D.ok)?'<div class="sh-bob"><canvas class="sh-3d"></canvas></div>':'<div class="sh-bob">'+SHIP+'</div>';
         c.addEventListener('click',e=>{e.stopPropagation();goHome();});}
       const l=el.querySelector('.st-node-label');if(l){l.textContent='YOUR SHIP';l.addEventListener('click',e=>{e.stopPropagation();goHome();});}
       const k=el.querySelector('.st-node-cost');if(k)k.remove();}
+    lastH=99;lastB=99;lastX=1e9;lastY=1e9;lastMoving=null;   // a fresh canvas: force the next frame to be drawn
     apply();
   }
   // v0.2.209: tapping the ship takes you back home: out of the tree, onto your drum pads
@@ -82,15 +83,30 @@
       else{try{if(typeof closeSkillTree==='function')closeSkillTree();}catch(e){}}
     },380);
   }
+  function toSvg(){
+    // v0.2.245: if the 3D model ever fails, put the drawn ship back and stop trying (a canvas quirk can't kill the game)
+    const bob=el&&el.querySelector('.sh-bob');
+    if(!bob||bob.querySelector('.sh-svg'))return;
+    bob.innerHTML=SHIP;
+  }
+  let lastH=99,lastB=99,lastX=1e9,lastY=1e9,lastMoving=null;
   function apply(){
-    if(!el)return;el.style.translate=pos.x.toFixed(1)+'px '+pos.y.toFixed(1)+'px';el._mx=pos.x;el._my=pos.y;
+    if(!el)return;
+    if(Math.abs(pos.x-lastX)>.05||Math.abs(pos.y-lastY)>.05){el.style.translate=pos.x.toFixed(1)+'px '+pos.y.toFixed(1)+'px';el._mx=pos.x;el._my=pos.y;lastX=pos.x;lastY=pos.y;}
     const cv=el.querySelector('.sh-3d');
-    if(cv&&window.ship3D)window.ship3D.paint(cv,heading,bank);
-    else{const s=el.querySelector('.sh-svg');if(s)s.style.transform='scaleX('+face+') rotate('+(ang*face).toFixed(1)+'deg)';}
-    el.classList.toggle('moving',Math.hypot(vel.x,vel.y)>40);
+    if(cv){
+      // only redraw when it really turned, and never while js/81 has the bubble hidden (it is display:none then)
+      if(window.ship3D&&window.ship3D.ok&&!el.classList.contains('st-cull')&&(Math.abs(heading-lastH)>.015||Math.abs(bank-lastB)>.01||lastH>9)){
+        if(window.ship3D.paint(cv,heading,bank)){lastH=heading;lastB=bank;}else toSvg();
+      }
+    }else{const s=el.querySelector('.sh-svg');if(s)s.style.transform='scaleX('+face+') rotate('+(ang*face).toFixed(1)+'deg)';}
+    const mv=Math.hypot(vel.x,vel.y)>40;
+    if(mv!==lastMoving){el.classList.toggle('moving',mv);lastMoving=mv;}
   }
   function step(t){
     raf=0;if(!modal||!modal.classList.contains('open')||document.hidden)return;
+    // v0.2.245: a bad frame must never stop the loop dead or throw into the console — the ship just skips that frame
+    try{
     const dt=Math.min(.05,(t-(last||t))/1000);last=t;
     if(!el||!el.isConnected)dress();
     let gx=0,gy=0,tx=0,ty=0;
@@ -108,7 +124,9 @@
     let dd=((whead-heading+Math.PI*3)%(Math.PI*2))-Math.PI;
     heading+=dd*Math.min(1,dt*4.5);
     bank+=((-Math.max(-.32,Math.min(.32,dd*1.5)))-bank)*Math.min(1,dt*6);
-    apply();raf=requestAnimationFrame(step);
+    apply();
+    }catch(e){}
+    raf=requestAnimationFrame(step);
   }
   function kick(){if(!raf&&modal&&modal.classList.contains('open')){last=0;raf=requestAnimationFrame(step);}}
   if(modal)new MutationObserver(kick).observe(modal,{attributes:true,attributeFilter:['class']});

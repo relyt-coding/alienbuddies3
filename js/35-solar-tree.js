@@ -187,7 +187,7 @@ function stTurn(dYaw, dTilt){
     if(e.key === 'q' || e.key === 'Q'){ window.stCamStop(); stTurn(-6); applyStTransform(); }
     else if(e.key === 'e' || e.key === 'E'){ window.stCamStop(); stTurn(6); applyStTransform(); }
   });
-  window.addEventListener('resize', ()=>{ if(modal.classList.contains('open')) applyStTransform(); });
+  window.addEventListener('resize', ()=>{ if(modal.classList.contains('open')){ if(typeof stClampPan==='function') stClampPan(); applyStTransform(); } });
 
   // ── ground: faint orbit rings round the core, drawn into the link layer (no extra layers to composite) ──
   window.stDrawGround = function(svg){
@@ -278,7 +278,7 @@ function stTurn(dYaw, dTilt){
   function loop(t){
     raf = 0;
     if(!modal.classList.contains('open') || document.hidden){ return; }
-    place(t);
+    try{ place(t); }catch(e){}   // v0.2.245: one bad frame must never stop the orbit or throw every frame
     raf = requestAnimationFrame(loop);
   }
   function kick(){ if(!raf && modal.classList.contains('open')){ last = performance.now(); raf = requestAnimationFrame(loop); } }

@@ -1,8 +1,8 @@
 # Alien Buddies: notes for building
 
 <!-- ship:auto:start -->
-- Version: 0.2.244 · shipped 2026-11-27
-- Last change: Unlocking the Bunker or the Fusebox on a phone no longer flashes the…
+- Version: 0.2.245 · shipped 2026-11-28
+- Last change: Your ship's wings are swept back with squared-off tips instead of long…
 <!-- ship:auto:end -->
 
 **In flight / next:** nothing half-finished right now.

@@ -2,6 +2,11 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.245 - 2026-11-28 04:06
+- Your ship's wings are swept back with squared-off tips instead of long spikes, the glass dome is a touch bigger, and the hull has one soft panel break and a sheen on the nose.
+- The galaxy map is lighter to open on phones: the ship draws each angle the first time it needs it instead of all 32 at once, only redraws when it actually turns, and quietly falls back to its drawn picture if the 3D one ever fails.
+- You can't fly off the edge of the galaxy any more — dragging stops at the map, and turning your phone sideways keeps you looking at the same spot.
+
 ## v0.2.244 - 2026-11-27 17:48
 - Unlocking the Bunker or the Fusebox on a phone no longer flashes the drum pads and then slides over: the cutscene now zooms straight into the new screen and leaves you standing on it.
 

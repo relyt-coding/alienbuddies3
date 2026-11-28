@@ -2,6 +2,9 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.250 - 2026-11-28 07:29
+- SHIFT + a drum pad's key now opens that pad's sound list, even when it already has a sound — handy for swapping a sound or nudging its volume without leaving the keyboard. The plain key still just plays the pad.
+
 ## v0.2.249 - 2026-11-28 07:24
 - The Vault costs 3× more to open: 450 J instead of 150 J.
 - The Vault works on a keyboard or controller now. Arrow keys walk it and Space presses: it opens with the ring already on BACK, so backing out is one press, then DOWN takes you into the tabs and the lessons.

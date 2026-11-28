@@ -493,7 +493,8 @@ window.addEventListener('keydown',e=>{
       if(i===drum.pads&&i<visiblePads+1){const g=document.getElementById('ghostPad');
         if(g){if(score>=PAD_COSTS[i])unlockGhostPad();else{g.classList.remove('nope');void g.offsetWidth;g.classList.add('nope');}}return;}
       // v0.2.249: a pad with no sound yet: its key opens the sound list so you can pick one (arrow keys + Space)
-      if(!padSounds[i]){openPadPicker(i);return;}
+      // v0.2.250: SHIFT + the pad's key opens that pad's sound list even when it already has a sound
+      if(e.shiftKey||!padSounds[i]){openPadPicker(i);return;}
       firePad(i,e);
     }
   });

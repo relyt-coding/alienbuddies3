@@ -484,6 +484,7 @@ window.addEventListener('keydown',e=>{
   if(bindingListenActive) return;
   if(['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) return;
   if(!document.body.classList.contains('game-active')) return;
+  if(padAssignModal&&padAssignModal.classList.contains('open')) return;   // the sound list has the keyboard while it is open
   Object.entries(padBindings).forEach(([idx,b])=>{
     if(b.key&&e.code===b.key){
       e.preventDefault();
@@ -491,6 +492,8 @@ window.addEventListener('keydown',e=>{
       // the next pad's key buys it (v0.2.206); not enough energy yet: the outline shakes
       if(i===drum.pads&&i<visiblePads+1){const g=document.getElementById('ghostPad');
         if(g){if(score>=PAD_COSTS[i])unlockGhostPad();else{g.classList.remove('nope');void g.offsetWidth;g.classList.add('nope');}}return;}
+      // v0.2.249: a pad with no sound yet: its key opens the sound list so you can pick one (arrow keys + Space)
+      if(!padSounds[i]){openPadPicker(i);return;}
       firePad(i,e);
     }
   });

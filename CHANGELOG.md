@@ -2,6 +2,11 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.249 - 2026-11-28 07:24
+- The Vault costs 3× more to open: 450 J instead of 150 J.
+- The Vault works on a keyboard or controller now. Arrow keys walk it and Space presses: it opens with the ring already on BACK, so backing out is one press, then DOWN takes you into the tabs and the lessons.
+- Pressing a drum pad's hotkey when that pad has no sound opens its sound list instead of doing nothing — arrows walk the list, Left/Right nudges the volume, Space picks the sound.
+
 ## v0.2.248 - 2026-11-28 06:38
 - NEW GAME++ is in: finish a New Game+ run and its own door appears in the Cockpit. Same climb from zero, but timed, and it hands out 3 time-trial crystals graded by how fast you got there — a faster replay upgrades them instead of adding more.
 - Your main file now keeps what a run earned you (its eggs and time-trial result) instead of losing it on the next save.

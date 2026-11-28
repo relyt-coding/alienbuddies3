@@ -1,8 +1,8 @@
 # Alien Buddies: notes for building
 
 <!-- ship:auto:start -->
-- Version: 0.2.248 · shipped 2026-11-28
-- Last change: NEW GAME++ is in: finish a New Game+ run and its own door appears in…
+- Version: 0.2.249 · shipped 2026-11-28
+- Last change: The Vault costs 3× more to open: 450 J instead of 150 J.
 <!-- ship:auto:end -->
 
 **In flight / next:** nothing half-finished right now.
@@ -193,6 +193,11 @@ Pushing is deploying. Never force-push, never reuse a version number, never dele
   `ngppCrystals:{t,ms}`, awarded once and re-graded by a faster replay (never re-awarded); the trophy hall gets a NEW GAME++ row (js/97 wraps
   `openCrystalHall`) and `crystalMult` adds `NGPP_BASE` (0 today = trophies only). The **MAIN_FLAGS** list in js/97 keeps the main file's
   run bookkeeping across autosaves — anything a run awards the main file must be added there and to `autoSave`'s known fields if it belongs there.
+- v0.2.249: VAULT_COST = 450 J (3× v0.2.215's 150 J; js/89). Keyboard layer (js/92) now covers **the Vault** (arrows walk BACK → tabs → tiles,
+  Space/Enter presses, ring starts on BACK when it opens, ring hidden by a tap; pop-ups take Space for their button) and **the pad sound list**
+  (`#padAssignModal`: Up/Down walk `.pa-item`, Left/Right nudge that sound's volume, Space picks, Escape closes, ring starts on the pad's current
+  sound). js/05: a pad hotkey on a pad with no sound calls `openPadPicker(i)` instead of a silent `firePad`, and pad keys are ignored while the
+  list is open.
 - v0.2.213: showToast (js/04) also clears the ACTIVATE button's own rect (it's taller than #drumTrackerOverlay). Desktop `.pad-key` (not `.ghost-key`) is clickable:
   the pad's pointerdown opens openPadPicker(idx) when the target is the badge.
 - v0.2.214: alienCost(3/4/5) = 10,000 / 50,000 / 250,000 (0.5 / 2.5 / 12.5 J on sale); n≥6 = `_alienCurve(n-3)` (the old curve, shifted 3 buddies later),

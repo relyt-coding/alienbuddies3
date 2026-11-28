@@ -5,12 +5,12 @@
 //    'navB'); buying the sequencer brings the FUSEBOX with its own one-screen cutscene ('navS'), once the sequencer's
 //    own unlock flourish has played. Files opened before then build just the bunker + pads ('allB').
 //  • The VAULT is locked (body.vault-locked, no VAULT button, no swipe page) until you buy it from the Fusebox: its
-//    card sits under the Alien Buddies row and costs VAULT_COST (100 J), a price meant to feel special.
+//    card sits under the Alien Buddies row and costs VAULT_COST (450 J since v0.2.249), a price meant to feel special.
 //    Saved as `vaultUnlocked` (js/02).
 // ══════════════════════════════════════════════
 (function(){
   const B=document.body.classList,$=id=>document.getElementById(id);
-  const VAULT_COST=1500000;   // 150 J (v0.2.215, was 100 J; internal units are 0.1 mJ)
+  const VAULT_COST=4500000;   // 450 J (v0.2.249: 3× the old 150 J; internal units are 0.1 mJ)
   window.VAULT_COST=VAULT_COST;
 
   // ── FUSEBOX lock ──

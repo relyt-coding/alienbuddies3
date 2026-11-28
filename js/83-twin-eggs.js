@@ -1,6 +1,8 @@
 // ══════════════════════════════════════════════
 //  CORNER EGG (v0.2.199; was "two more eggs" v0.2.193 and "one egg by the score until the bunker is full" v0.2.198)
-//  10 seconds after the first buddy hatches (and the Bunker / Shop cutscene is over), ONE egg rolls into the TOP-LEFT
+//  v0.2.253: it rolls in as soon as the Bunker is open — the moment the Bunker / Shop cutscene hands the game back (no
+//  more 10-second wait). On a phone that means it is already waiting when you swipe back to the drum pads.
+//  ONE egg rolls into the TOP-LEFT
 //  corner of the drum pads screen. Its shell shows the buddy inside (a buddyPickFor pick) and its tag shows the price
 //  (alienCost(totalAliens): buddies 2 + 3 are 50 mJ each, js/01). Tap it with enough energy and THAT buddy hatches
 //  (its pick goes to alienData[n].base before buyAlien). v0.2.209: a heat lamp hangs over it, joined to the price tag by a
@@ -14,7 +16,7 @@
 (function(){
   const B=document.body.classList,$=id=>document.getElementById(id);
   const LAST=99;                                // v0.2.222: eggs keep coming for the whole first bundle (99); after that the egg is a door to the Bunker (its incubator)
-  let lastXY=null,egg=null,pick=null,pickFor=-1,sawZero=false,readyAt=0,raf=0,t0=0,lastN=-1,shopEgg=null;
+  let lastXY=null,egg=null,pick=null,pickFor=-1,raf=0,t0=0,lastN=-1,shopEgg=null;
   const cost=()=>alienCost(totalAliens);
   const k_=()=>(typeof TEST_MODE!=='undefined'&&TEST_MODE?'ab2t_':'ab2_')+'eggShopNote_'+(typeof activeSlot!=='undefined'?activeSlot:0);
   function size(){return B.contains('phone-land')?{w:30,h:38}:B.contains('desktop-mode')?{w:52,h:64}:{w:44,h:54};}
@@ -81,15 +83,10 @@
   }
   function sync(){
     if(typeof totalAliens!=='number')return;
-    if(totalAliens<1&&B.contains('game-active'))sawZero=true;
-    // the 10th buddy just arrived while playing: tell them where eggs come from now
-    
     if(B.contains('game-active'))lastN=totalAliens;
     syncShopEgg();
     const er=$('eggReveal'),revealOn=!!(er&&er.classList.contains('on'));
-    if(!want()){clear();if(totalAliens>=1&&sawZero&&!readyAt&&!B.contains('nav-locked')&&!B.contains('buddy-hold'))readyAt=performance.now()+10000;return;}
-    if(sawZero&&!readyAt)readyAt=performance.now()+10000;   // just hatched the first one this session: give it 10 s
-    if(readyAt&&performance.now()<readyAt)return;
+    if(!want()){clear();return;}
     if(revealOn){if(egg)egg.style.visibility='hidden';return;}
     if(!egg){egg=make();egg._n=-1;}
     const p=curPick();
@@ -219,5 +216,5 @@ body.desktop-mode.cockpit-open .cornerEgg,body.desktop-mode.stats-open .cornerEg
 body.store-open:not(.desktop-mode) #eggShopNote,body.bunker-open:not(.desktop-mode) #eggShopNote{visibility:hidden;}`;
   document.head.appendChild(css);
   setInterval(sync,300);addEventListener('resize',()=>setTimeout(place,100));
-  window.__twin={sync,get eggs(){return egg?[egg]:[];},get egg(){return egg;},skipWait(){readyAt=1;},shopNote};
+  window.__twin={sync,get eggs(){return egg?[egg]:[];},get egg(){return egg;},skipWait(){},shopNote};
 })();

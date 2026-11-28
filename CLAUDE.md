@@ -1,8 +1,8 @@
 # Alien Buddies: notes for building
 
 <!-- ship:auto:start -->
-- Version: 0.2.252 · shipped 2026-11-28
-- Last change: ENTER now does everything SPACE does: unlocking the next thing, tapping…
+- Version: 0.2.253 · shipped 2026-11-28
+- Last change: The corner egg no longer waits 10 seconds: it rolls in the moment the…
 <!-- ship:auto:end -->
 
 **In flight / next:** nothing half-finished right now.
@@ -205,6 +205,9 @@ Pushing is deploying. Never force-push, never reuse a version number, never dele
 - v0.2.252: **ENTER = SPACE everywhere**. js/91 accepts Space/Enter/NumpadEnter (unlocks, eggs, matching claim); js/79 Buddy Race and
   js/41 Planet Hop jumps accept it too; js/92's three layers already did. New Space features must accept Enter as well.
   The ring's outer halo is gone: only `inset` shadows, so nothing can reach a scrolling list's edge.
+- v0.2.253: the corner egg (js/83) has **no delay** — `want()` (game-active, a buddy exists, no nav-locked / buddy-hold / intro-run) is the only
+  gate, so it rolls in as the Bunker cutscene ends; on a phone it is already there when you swipe back to the pads. `.toast` font is
+  `clamp(1rem,…,1.18rem)` with a 360px cap.
 - v0.2.213: showToast (js/04) also clears the ACTIVATE button's own rect (it's taller than #drumTrackerOverlay). Desktop `.pad-key` (not `.ghost-key`) is clickable:
   the pad's pointerdown opens openPadPicker(idx) when the target is the badge.
 - v0.2.214: alienCost(3/4/5) = 10,000 / 50,000 / 250,000 (0.5 / 2.5 / 12.5 J on sale); n≥6 = `_alienCurve(n-3)` (the old curve, shifted 3 buddies later),

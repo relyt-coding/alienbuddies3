@@ -2,6 +2,10 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.253 - 2026-11-28 07:48
+- The corner egg no longer waits 10 seconds: it rolls in the moment the Bunker unlocks and the cutscene hands the game back. On a phone that means it is already sitting there when you swipe back to the drum pads.
+- Toast messages are bigger and easier to read, with room to wrap.
+
 ## v0.2.252 - 2026-11-28 07:41
 - ENTER now does everything SPACE does: unlocking the next thing, tapping an egg, claiming a Matching Game win, and jumping in Planet Hop and Buddy Race.
 - The selection ring in the pad sound list has no outer halo any more — that halo was what got sliced off at the edge of the list. The glow sits inside the row now.

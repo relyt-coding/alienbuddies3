@@ -8,6 +8,7 @@
 // ══════════════════════════════════════════════
 (function(){
   function freeSeqDots(){
+    if(typeof runFile!=='undefined'&&runFile)return;   // v0.2.247: a New Game+ run buys this ACTIVATE again
     if(typeof drum==='undefined'||!(drum.seqTracks>=1))return;
     let ch=false;
     if(typeof seqTrackerActive!=='undefined'&&!seqTrackerActive){seqTrackerActive=true;ch=true;}

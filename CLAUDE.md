@@ -1,8 +1,8 @@
 # Alien Buddies: notes for building
 
 <!-- ship:auto:start -->
-- Version: 0.2.246 · shipped 2026-11-28
-- Last change: The DRUMPAD dots now start climbing on your very first tap: no ACTIVATE…
+- Version: 0.2.247 · shipped 2026-11-28
+- Last change: NEW GAME+ is here: a whole second climb of the game from zero, with the…
 <!-- ship:auto:end -->
 
 **In flight / next:** nothing half-finished right now.
@@ -182,6 +182,12 @@ Pushing is deploying. Never force-push, never reuse a version number, never dele
   `#drumTrackerOverlay` / `#arrowActivate` never show. The button, its overlay, the arrow and the old `#seqTrackerOverlay` stay in the DOM for
   New Game+ (`runFile` in js/02 is the switch — a run file honours the save and buys the tracker again). `SAVE_ERA` in js/02 wipes 0.2 slots
   once per era (0.1 `ab_slotN` + device settings never touched; the retired file is kept in `ab2_prerun_slotN`).
+- v0.2.247: **NEW GAME+ (js/97)** — a run is a normal save with `ngp:1` (or `2` for NG++). Keys per slot n: `ab2_slotN` = what you are
+  playing · `ab2_mainN` = the main game parked during a run · `ab2_runN` = the saved run while back in the main game. `js/02` sets
+  `runFile`/`runKind` and honours the save's ACTIVATE flags; js/86's freeSeqDots is off in a run. `js/97` owns the node `ngp` (after
+  beat_defense, 1.2M gems), the Cockpit card (`#ngpBtn` / `#ngpRestart`), start/resume/leave, the 99-buddy goal, the egg written into the
+  parked save (`EGG_KINDS.ngp` / `ngpp`, `ngppReady` on the main save) and `window.__ngp`. Run extras must be added to `writeSlot`
+  (js/97 wraps it) — `autoSave` only writes js/02's known fields. A run's buddies are cloned from a shuffled `ngpPool` of the main save.
 - v0.2.213: showToast (js/04) also clears the ACTIVATE button's own rect (it's taller than #drumTrackerOverlay). Desktop `.pad-key` (not `.ghost-key`) is clickable:
   the pad's pointerdown opens openPadPicker(idx) when the target is the badge.
 - v0.2.214: alienCost(3/4/5) = 10,000 / 50,000 / 250,000 (0.5 / 2.5 / 12.5 J on sale); n≥6 = `_alienCurve(n-3)` (the old curve, shifted 3 buddies later),

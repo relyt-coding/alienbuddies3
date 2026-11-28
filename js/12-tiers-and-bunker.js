@@ -150,8 +150,9 @@ function renderBunkerView(){
   if(inThis>=BUNKER_SIZE){
     banner.classList.add('show');
     document.getElementById('bunkerFullSub').textContent=hasReceivedEgg?'Check your Incubator below!':'Your Bunker is full — claim your egg!';
-    // Trigger egg reward if not yet received
-    if(!hasReceivedEgg&&!hasShownEggReward){
+    // Trigger egg reward if not yet received (v0.2.247: a New Game+ run has its own reward — the egg goes to the main
+    //   game's incubator — so the "bunker full" light-egg card stays out of the way there)
+    if(!hasReceivedEgg&&!hasShownEggReward&&!(typeof runFile!=='undefined'&&runFile)){
       hasShownEggReward=true;
       setTimeout(()=>{
         const m=document.getElementById('eggRewardModal');

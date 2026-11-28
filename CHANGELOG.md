@@ -2,6 +2,10 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.247 - 2026-11-28 06:20
+- NEW GAME+ is here: a whole second climb of the game from zero, with the ACTIVATE buttons back as the difficulty and 99 buddies to find again. Your main game is parked and never touched while you play it — step between the two whenever you like.
+- It lives in the Cockpit, once you have bought the NEW GAME+ node in the skill tree (after Beat Defense). Fill the bunker with 99 buddies in a run and a special egg lands in your main game's Incubator.
+
 ## v0.2.246 - 2026-11-28 05:44
 - The DRUMPAD dots now start climbing on your very first tap: no ACTIVATE button, no 1 mJ gate before your energy can grow. Multipliers come to you instead of being something you have to find.
 - Every 0.2 save file starts fresh from this version (0.1 files and their founder eggs are untouched). Your pad keys, layout and sound settings stay exactly as they are.

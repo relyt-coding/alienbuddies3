@@ -140,6 +140,7 @@ let fuseboxOwned=false;    // v0.2.208: the Fusebox is earned after the sequence
 let goldRecords=0,raceStats={races:0,wins:0};   // v0.2.187 Buddy Race (js/79): GOLD RECORDS = the rare money, 1 per race won   // v0.2.186 DNA Splice (js/78): splices made on this file (each one costs more gems)  // v0.2.183: floating-buddy speed ×0.5 … ×3 (looks only, js/76 + js/11)
 let drumTrackerActive=false; // normal games: always on (v0.2.246, see the loader); a New Game+ run buys it again
 let runFile=false;           // v0.2.246: true while a New Game+ / NG++ run is loaded (its own file inside a file)
+let runKind=1;               // v0.2.247: 1 = New Game+, 2 = New Game++ (a run that is timed)
 let seqTrackerActive=false; // v0.2.162: the sequencer's dot tracker is its own 1 MW ACTIVATE (js/72)
 let shopOpenCount=0;
 let hasSeenSeqHint=false;
@@ -228,6 +229,11 @@ function unlockedSounds(){
 }
 
 function loadFromSave(data){
+  // v0.2.247: a New Game+ / NG++ run is a normal save with a flag: it gets the ACTIVATE gate back (see the loader below)
+  //   and everything else (the goal, the buddy pool, the parked main file) lives in js/97.
+  //   data.ngp is 1 (New Game+) or 2 (New Game++); the main save uses ngpDone / ngppReady, never ngp itself.
+  runFile=!!(data&&(data.ngp===1||data.ngp===2));
+  runKind=data&&data.ngp===2?2:1;
   score=data.score||0;
   shop.seqMultLevel=data.shop?.seqMultLevel??-1;
   shop.multLevel=data.shop?.multLevel??-1;

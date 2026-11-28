@@ -1,8 +1,8 @@
 # Alien Buddies: notes for building
 
 <!-- ship:auto:start -->
-- Version: 0.2.250 · shipped 2026-11-28
-- Last change: SHIFT + a drum pad's key now opens that pad's sound list, even when it…
+- Version: 0.2.251 · shipped 2026-11-28
+- Last change: The glowing selection ring in the pad sound list no longer gets cut off…
 <!-- ship:auto:end -->
 
 **In flight / next:** nothing half-finished right now.
@@ -199,6 +199,9 @@ Pushing is deploying. Never force-push, never reuse a version number, never dele
   sound). js/05: a pad hotkey on a pad with no sound calls `openPadPicker(i)` instead of a silent `firePad`, and pad keys are ignored while the
   list is open.
 - v0.2.250: SHIFT + a pad's bound key opens that pad's sound list even when the pad already has a sound (plain key = play, empty pad = list).
+- v0.2.251: the keyboard rings (`.pa-cur` in `#padAssignList`, `.vk-cur` in `#vaultBox`) are **inset** (`inset` box-shadow, no `outline`)
+  because both lists are `overflow:auto` and an outside ring got cropped; the lists also carry a few px of padding for the soft glow.
+  Keep new rings inset for the same reason.
 - v0.2.213: showToast (js/04) also clears the ACTIVATE button's own rect (it's taller than #drumTrackerOverlay). Desktop `.pad-key` (not `.ghost-key`) is clickable:
   the pad's pointerdown opens openPadPicker(idx) when the target is the badge.
 - v0.2.214: alienCost(3/4/5) = 10,000 / 50,000 / 250,000 (0.5 / 2.5 / 12.5 J on sale); n≥6 = `_alienCurve(n-3)` (the old curve, shifted 3 buddies later),

@@ -2,6 +2,9 @@
 
 Newest first. Maintained by sync-alienbuddies.ps1.
 
+## v0.2.251 - 2026-11-28 07:36
+- The glowing selection ring in the pad sound list no longer gets cut off at the edges of the list — it now sits inside the row and rounds off properly. The Vault's ring got the same treatment.
+
 ## v0.2.250 - 2026-11-28 07:29
 - SHIFT + a drum pad's key now opens that pad's sound list, even when it already has a sound — handy for swapping a sound or nudging its volume without leaving the keyboard. The plain key still just plays the pad.
 

@@ -144,9 +144,10 @@
   document.addEventListener('pointerdown',e=>{if(e.pointerType&&vShown&&vOpen()){vShown=false;vPaint();}},true);
 
   const vcss=document.createElement('style');vcss.textContent=`
-#vaultBox .vk-cur{outline:3px solid #e0e055;outline-offset:3px;border-radius:12px;box-shadow:0 0 20px 3px rgba(224,224,85,.45);z-index:4;}
+#vaultBody{padding-left:4px;padding-right:4px;}
+#vaultBox .vk-cur{outline:0;border-radius:12px;box-shadow:inset 0 0 0 3px #e0e055,inset 0 0 16px 2px rgba(224,224,85,.3),0 0 14px rgba(224,224,85,.2);position:relative;z-index:4;}
 #vaultBox .vk-cur:not(.own){animation:vkPulse 1.2s ease-in-out infinite;}
-@keyframes vkPulse{50%{outline-color:#ffffff;box-shadow:0 0 26px 7px rgba(224,224,85,.7);}}
+@keyframes vkPulse{50%{box-shadow:inset 0 0 0 3px #ffffff,inset 0 0 22px 5px rgba(224,224,85,.45),0 0 18px rgba(224,224,85,.3);}}
 #vaultBox .vk-bump{animation:vkBump .25s ease-in-out;}
 @keyframes vkBump{30%{transform:translateX(-4px);}70%{transform:translateX(4px);}}`;
   document.head.appendChild(vcss);
@@ -203,9 +204,10 @@
   document.addEventListener('pointerdown',e=>{if(e.pointerType&&pShown&&pModal()){pShown=false;pPaint();}},true);
 
   const pcss=document.createElement('style');pcss.textContent=`
-#padAssignList .pa-item.pa-cur{outline:3px solid #7fffd0;outline-offset:3px;border-radius:12px;box-shadow:0 0 20px 3px rgba(0,255,170,.4);position:relative;z-index:2;}
+#padAssignList{padding:2px 6px;}
+#padAssignList .pa-item.pa-cur{outline:0;border-radius:12px;box-shadow:inset 0 0 0 3px #7fffd0,inset 0 0 18px 2px rgba(0,255,170,.32),0 0 14px rgba(0,255,170,.22);position:relative;z-index:2;}
 #padAssignList .pa-item.pa-cur:not(.active){animation:paPulse 1.2s ease-in-out infinite;}
-@keyframes paPulse{50%{outline-color:#ffffff;box-shadow:0 0 26px 7px rgba(0,255,170,.6);}}
+@keyframes paPulse{50%{box-shadow:inset 0 0 0 3px #ffffff,inset 0 0 24px 5px rgba(0,255,170,.5),0 0 18px rgba(0,255,170,.35);}}
 #padAssignList .pa-item.pa-bump{animation:paBump .25s ease-in-out;}
 @keyframes paBump{30%{transform:translateY(-3px);}70%{transform:translateY(3px);}}`;
   document.head.appendChild(pcss);
